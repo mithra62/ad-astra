@@ -1,0 +1,36 @@
+<?php
+
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class CategoryGroup extends Model
+{
+    protected $fillable = [
+        'name',
+        'slug',
+        'sort_order',
+    ];
+
+    protected $casts = [
+        'sort_order' => 'integer',
+    ];
+
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class)->orderBy('sort_order')->orderBy('name');
+    }
+
+    public function rootCategories(): HasMany
+    {
+        return $this->categories()->whereNull('parent_id');
+    }
+
+    public function scopeOrdered(Builder $query): Builder
+    {
+        return $query->orderBy('sort_order')->orderBy('name');
+    }
+}
