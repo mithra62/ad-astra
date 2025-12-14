@@ -2,32 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Submission;
+use Laravel\Socialite\Socialite;
+use Laravel\Socialite\Two\InvalidStateException;
+
 class Login extends Controller
 {
-    public function index()
+    public function redirectToProvider($provider)
     {
+        return Socialite::driver($provider)->redirect();
+    }
 
-        //call service provider object
-        //echo get_class(app('craft-client'));
-        //exit;
-        $id = 4490;
-        $submission = Submission::find($id);
-        foreach($submission->usstate As $state) {
-            print_r($state->title);
-            echo '<br>';
-            //exit;
+    public function handleProviderCallback($provider)
+    {
+        try {
+            $user = Socialite::driver($provider)->user();
+        } catch (InvalidStateException $e) {
+            echo "broken";
+            exit;
         }
 
-        foreach($submission->organization As $organization) {
-            print_r($organization->title);
-            echo '<br>';
-            //exit;
-        }
-
-        echo 'fdsa';
+        print_r($user);
         exit;
-        return view('login');
+
+
+        // Find user by email or create a new user
+        $localUser = User::firstOrCreate(
+            ['email' => $user->getEmail()],
+            ['name' => $user->getName()]
+        );
+
+        Auth::login($localUser, true); // Login the user
+
+        return redirect($this->redirectTo); // Redirect the user after successful login
     }
 }

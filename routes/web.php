@@ -9,8 +9,12 @@ use App\Http\Controllers\Account;
 use App\Http\Controllers\Role;
 use App\Http\Controllers\Playground;
 use App\Http\Controllers\Dashboard;
+use App\Http\Controllers\Login;
 
 Route::get('/', [Index::class, 'index'])->name('home');
+
+Route::get('login/{provider}', [Login::class, 'redirectToProvider'])->name('social.login.provider');
+Route::get('login/{provider}/callback', [Login::class,  'handleProviderCallback'])->name('social.login.callback');
 
 Route::middleware(['auth'])->group(function () {
 

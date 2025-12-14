@@ -41,20 +41,22 @@
                 Forgot your password?
             </a>
         </div>
-        {{--
         <div class="app-divider-v justify-content-center">
             <p>OR</p>
         </div>
         <div class="mb-3">
             <div class="text-center">
-                <button class="btn btn-primary icon-btn b-r-5 m-1" type="button"><i
-                        class="ti ti-brand-facebook text-white"></i></button>
-                <button class="btn btn-danger icon-btn b-r-5 m-1" type="button"><i
-                        class="ti ti-brand-google text-white"></i></button>
-                <button class="btn btn-dark icon-btn b-r-5 m-1" type="button"><i
-                        class="ti ti-brand-github text-white"></i></button>
+                <a class="btn btn-facebook icon-btn b-r-5 m-1" type="button" href="{{ route('social.login.provider', 'facebook') }}"><i
+                        class="ti ti-brand-facebook text-white" ></i></a>
+                <a class="btn btn-danger icon-btn b-r-5 m-1" type="button" href="{{ route('social.login.provider', 'google') }}"><i
+                        class="ti ti-brand-google text-white" ></i></a>
+                <a class="btn btn-github icon-btn b-r-5 m-1" type="button" href="{{ route('social.login.provider', 'github') }}"><i
+                        class="ti ti-brand-github text-white"></i></a>
+                <a class="btn btn-linkedin icon-btn b-r-5 m-1" type="button" href="{{ route('social.login.provider', 'linkedin') }}"><i
+                        class="ti ti-brand-linkedin text-white"></i></a>
             </div>
         </div>
+        {{--
         <div class="text-center">
             <a class="text-secondary text-decoration-underline"
                href="./terms_condition.html">Terms of use &amp;
