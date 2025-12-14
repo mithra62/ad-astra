@@ -1,13 +1,14 @@
 <?php
 
 
-namespace App\Models;
+namespace App\Models\Category;
 
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class CategoryGroup extends Model
+class Group extends Model
 {
     protected $fillable = [
         'name',

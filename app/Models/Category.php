@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Category\Group;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,7 +26,7 @@ class Category extends Model
 
     public function group(): BelongsTo
     {
-        return $this->belongsTo(CategoryGroup::class, 'category_group_id');
+        return $this->belongsTo(Group::class, 'category_group_id');
     }
 
     public function parent(): BelongsTo
@@ -50,9 +51,9 @@ class Category extends Model
         return $query->whereNull('parent_id');
     }
 
-    public function scopeInGroup(Builder $query, int|CategoryGroup $group): Builder
+    public function scopeInGroup(Builder $query, int|Group $group): Builder
     {
-        $groupId = $group instanceof CategoryGroup ? $group->getKey() : $group;
+        $groupId = $group instanceof Group ? $group->getKey() : $group;
 
         return $query->where('category_group_id', $groupId);
     }
