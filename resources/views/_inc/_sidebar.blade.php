@@ -34,6 +34,21 @@
             <li class="no-sub">
                 <a href="/dashboard">dashboard</a>
             </li>
+            <li class="menu-title">
+                <span>Content</span>
+            </li>
+            <li class="no-sub">
+                <a href="/posts">Posts</a>
+            </li>
+            <li class="no-sub">
+                <a href="/categories">Categories</a>
+            </li>
+            <li class="no-sub">
+                <a href="/files">Files</a>
+            </li>
+            <li class="no-sub">
+                <a href="/fields">Fields</a>
+            </li>
             @can('api')
             <li class="menu-title">
                 <span>API</span>
