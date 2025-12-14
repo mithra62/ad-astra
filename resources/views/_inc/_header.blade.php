@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Multipurpose, super Feb, powerful, clean modern responsive bootstrap 5 admin template"
+          name="description">
+    <meta content="la-themes" name="author">
+    <link href="/assets/favicon.png" rel="icon" type="image/x-icon">
+    <link href="/assets/favicon.png" rel="shortcut icon" type="image/x-icon">
+    <title>{{ $title }} - {{ config('app.name', 'Laravel') }}</title>
+    <!-- Animation css -->
+    <link href="/assets/vendor/animation/animate.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+          rel="stylesheet">
+    <link href="/assets/vendor/tabler-icons/tabler-icons.css" rel="stylesheet" type="text/css">
+    <!--flag Icon css-->
+    <link href="/assets/vendor/flag-icons-master/flag-icon.css" rel="stylesheet" type="text/css">
+
+    <link href="/assets/vendor/apexcharts/apexcharts.css" rel="stylesheet" type="text/css">
+
+    <!-- tabler icons-->
+    <link href="/assets/vendor/tabler-icons/tabler-icons.css" rel="stylesheet" type="text/css">
+
+    <link href="/assets/vendor/datepikar/flatpickr.min.css" rel="stylesheet" type="text/css">
+
+    <!-- slick css -->
+    <link href="/assets/vendor/slick/slick.css" rel="stylesheet">
+    <link href="/assets/vendor/slick/slick-theme.css" rel="stylesheet">
+
+    <!-- Bootstrap css-->
+    <link href="/assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Data Table css-->
+    <link href="/assets/vendor/datatable/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
+    <link href="/assets/vendor/datatable/datatable2/buttons.dataTables.min.css" rel="stylesheet" type="text/css">
+
+    <!-- simplebar css-->
+    <link href="/assets/vendor/simplebar/simplebar.css" rel="stylesheet" type="text/css">
+    <!-- Selecrt css -->
+    <link href="/assets/vendor/select/select2.min.css" rel="stylesheet" type="text/css">
+
+    <!-- App css-->
+    <link href="/assets/css/style.css" rel="stylesheet" type="text/css">
+
+    <!-- Responsive css-->
+    <link href="/assets/css/responsive.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<div class="app-wrapper">
+
+    <div class="loader-wrapper">
+        <div class="loader_24"></div>
+    </div>
+
+    <!-- Menu Navigation starts -->
+    @include('_inc._sidebar', ['title' => 'Login'])
+    <!-- Menu Navigation ends -->
+
+    <div class="app-content">
+        <div class="">
+            @include('_inc._header_bar', ['title' => 'Login'])
