@@ -25,21 +25,5 @@ class UsersSeeder extends Seeder
         ]);
 
         $user->assignRole('super admin');
-
-        $user = User::factory()->create([
-            'name' => 'Ben Fjare',
-            'email' => 'ben@checkoffpro.com',
-            'password' => Hash::make('password'),
-        ]);
-
-        $user->assignRole('super admin');
-
-        $user = User::factory()->create([
-            'name' => 'Easton Kuboushek',
-            'email' => 'easton@checkoffpro.com',
-            'password' => Hash::make('password'),
-        ]);
-
-        $user->assignRole('super admin');
     }
 }

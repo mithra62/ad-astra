@@ -7,12 +7,12 @@ use App\Http\Middleware\LogRequestResponse;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('remittances/corn', Corn::class)
-        ->middleware(LogRequestResponse::class);
-
-    Route::apiResource('remittances/soybean', Soybean::class)
-        ->middleware(LogRequestResponse::class);
-
-    Route::apiResource('submissions', Submission::class)
-        ->middleware(LogRequestResponse::class);
+//    Route::apiResource('remittances/corn', Corn::class)
+//        ->middleware(LogRequestResponse::class);
+//
+//    Route::apiResource('remittances/soybean', Soybean::class)
+//        ->middleware(LogRequestResponse::class);
+//
+//    Route::apiResource('submissions', Submission::class)
+//        ->middleware(LogRequestResponse::class);
 });
