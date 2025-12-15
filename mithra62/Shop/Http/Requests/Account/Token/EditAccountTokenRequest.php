@@ -1,0 +1,26 @@
+<?php
+namespace mithra62\Shop\Http\Requests\Account\Token;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+
+class EditAccountTokenRequest extends FormRequest
+{
+    /**
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return Auth::user()->can('api');;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:255'
+        ];
+    }
+}

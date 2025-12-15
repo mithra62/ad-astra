@@ -1,15 +1,15 @@
 <?php
 
-use App\Http\Controllers\Index;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\User;
-use App\Http\Controllers\User\Token AS UserTokens;
-use App\Http\Controllers\Account\Token AS AccountTokens;
-use App\Http\Controllers\Account;
-use App\Http\Controllers\Role;
-use App\Http\Controllers\Playground;
-use App\Http\Controllers\Dashboard;
-use App\Http\Controllers\Login;
+use mithra62\Shop\Http\Controllers\Admin\Account;
+use mithra62\Shop\Http\Controllers\Admin\Account\Token as AccountTokens;
+use mithra62\Shop\Http\Controllers\Admin\Dashboard;
+use mithra62\Shop\Http\Controllers\Admin\Index;
+use mithra62\Shop\Http\Controllers\Admin\Login;
+use mithra62\Shop\Http\Controllers\Admin\Playground;
+use mithra62\Shop\Http\Controllers\Admin\Role;
+use mithra62\Shop\Http\Controllers\Admin\User;
+use mithra62\Shop\Http\Controllers\Admin\User\Token as UserTokens;
 
 Route::get('/', [Index::class, 'index'])->name('home');
 

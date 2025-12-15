@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\Remittance\Corn;
 use App\Http\Controllers\Api\Remittance\Soybean;
 use App\Http\Controllers\Api\Submission;
-use App\Http\Middleware\LogRequestResponse;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {

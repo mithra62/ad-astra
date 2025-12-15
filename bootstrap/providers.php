@@ -1,7 +1,7 @@
 <?php
 
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\BotBlockServiceProvider::class,
-    App\Providers\FortifyServiceProvider::class,
+    \mithra62\Shop\Providers\AppServiceProvider::class,
+    \mithra62\Shop\Providers\BotBlockServiceProvider::class,
+    \mithra62\Shop\Providers\FortifyServiceProvider::class,
 ];

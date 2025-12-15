@@ -103,7 +103,7 @@ return [
 
     'middleware' => [
         'web',
-        App\Http\Middleware\BotBlockRequest::class
+        \mithra62\Shop\Http\Middleware\BotBlockRequest::class
 
     ],
 
