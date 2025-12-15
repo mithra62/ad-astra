@@ -1,0 +1,95 @@
+<nav>
+    <div class="app-logo">
+        <a class="logo d-inline-block" href="{{ route('dashboard') }}">
+            <img alt="#" src="/assets/checkoff-logo-horizontal-black.svg">
+        </a>
+
+        <span class="bg-light-primary toggle-semi-nav d-flex-center">
+                        <i class="ti ti-chevron-right"></i>
+                    </span>
+
+        <div class="d-flex align-items-center nav-profile p-3">
+
+                                <span class="h-45 w-45 d-flex-center b-r-10 position-relative bg-danger m-auto">
+                                    <img alt="avatar" class="img-fluid b-r-10"
+                                         src="{{ Avatar::create( Auth::user()->email )->toGravatar() }}">
+                                    <span
+                                        class="position-absolute top-0 end-0 p-1 bg-success border border-light rounded-circle"></span>
+                                </span>
+            <div class="flex-grow-1 ps-2">
+                <h6 class="text-primary mb-0">{{ Auth::user()->name }}</h6>
+                <p class="text-muted f-s-12 mb-0">{{ Auth::user()->title }}</p>
+            </div>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST">
+                @csrf
+            </form>
+        </div>
+
+    </div>
+    <div class="app-nav" id="app-simple-bar">
+        <ul class="main-nav p-0 mt-2">
+            <li class="menu-title">
+                <span>Dashboard</span>
+            </li>
+            <li class="no-sub">
+                <a href="{{ route('dashboard') }}">dashboard</a>
+            </li>
+            <li class="menu-title">
+                <span>Content</span>
+            </li>
+            <li class="no-sub">
+                <a href="/posts">Posts</a>
+            </li>
+            <li class="no-sub">
+                <a href="/categories">Categories</a>
+            </li>
+            <li class="no-sub">
+                <a href="/files">Files</a>
+            </li>
+            <li class="no-sub">
+                <a href="/fields">Fields</a>
+            </li>
+            @can('api')
+            <li class="menu-title">
+                <span>API</span>
+            </li>
+            <li class="no-sub">
+                <a href="/api/documentation" target="_blank">Playground</a>
+            </li>
+            <li class="no-sub">
+                <a href="{{ route('account.tokens.index') }}">API Keys</a>
+            </li>
+            @endcan
+            @can('create user')
+                <li class="menu-title"><span>Members</span></li>
+                <li class="no-sub">
+                    <a href="{{ route('users.index') }}">
+                        Users
+                    </a>
+                </li>
+                <li class="no-sub">
+                    <a href="{{ route('roles.index') }}">
+                        Roles
+                    </a>
+                </li>
+            @endcan
+            <li class="menu-title">
+                 <span>Account</span>
+            </li>
+            <li class="no-sub">
+                <a href="{{ route('account.settings') }}">Settings</a>
+            </li>
+            <li class="no-sub">
+                <a class="mb-0 text-danger" href="{{ route('logout') }}"
+                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <i class="ph-duotone  ph-sign-out pe-1 f-s-20"></i> Log Out</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="menu-navs">
+        <span class="menu-previous"><i class="ti ti-chevron-left"></i></span>
+        <span class="menu-next"><i class="ti ti-chevron-right"></i></span>
+    </div>
+
+</nav>

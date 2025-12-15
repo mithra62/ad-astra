@@ -62,7 +62,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', \mithra62\Shop\Models\User::class),
+            'model' => env('AUTH_MODEL', \App\Models\User::class),
         ],
 
         // 'users' => [
