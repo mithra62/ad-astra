@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\User\OauthToken;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -48,5 +50,19 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function oauthTokens(): HasMany
+    {
+        return $this->hasMany(OauthToken::class);
+    }
+
+    public function oauthTokenFor(string $provider): ?OauthToken
+    {
+        return $this->oauthTokens()
+            ->provider($provider)
+            ->active()
+            ->orderByDesc('expires_at')
+            ->first();
     }
 }
