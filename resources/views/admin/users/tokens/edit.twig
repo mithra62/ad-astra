@@ -1,5 +1,4 @@
-@include('admin._inc._header', ['title' => 'Edit User Token'])
-
+{{ include('admin._inc._header', {title: 'Edit User Token'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
@@ -19,10 +18,10 @@
                             <a class="f-s-14 f-w-500" href="{{ route('users.index') }}">Users</a>
                         </li>
                         <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('users.edit', $user) }}">{{ $user->name }}</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('users.edit', user) }}">{{ user.name }}</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('users.token.create', $user) }}">Edit User Token</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('users.token.create', user) }}">Edit User Token</a>
                         </li>
                     </ul>
                 </div>
@@ -37,22 +36,22 @@
                     <h5>Edit User Token</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('users.token.update', ['id' => $user->id , 'token_id' => $token]) }}" class="row g-3 needs-validation" novalidate>
-                        @csrf
+                    <form method="POST" action="{{ route('users.token.update', {id: user.id, token_id: token.id}) }}" class="row g-3 needs-validation" novalidate>
+                        {{ csrf_field() }}
                         {{ method_field('PUT') }}
                         <div class="col-md-12">
                             <label class="form-label" for="name">Name</label>
-                            <input class="form-control" id="name" required type="text" value="{{ old('name', $token->name) }}" name="name">
-                            @error('name')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            <input class="form-control" id="name" required type="text" value="{{ old('name', token.name) }}" name="name">
+                            {% if errors.has('name') %}
+                                <p class="text-danger">{{ errors.first('name') }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-md-12 dates">
                             <label class="form-label" for="expires_at">Expires</label>
-                            <input class="form-control basic-date" id="expires_at" required type="text" value="{{ old('expires_at', $token->expires_at) }}" name="expires_at" placeholder="YYYY-MM-DD">
-                            @error('expires_at')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            <input class="form-control basic-date" id="expires_at" required type="text" value="{{ old('expires_at', token.expires_at) }}" name="expires_at" placeholder="YYYY-MM-DD">
+                            {% if errors.has('expires_at') %}
+                                <p class="text-danger">{{ errors.first('expires_at') }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-12">
                             <button class="btn btn-primary float-end" type="submit">Edit User Token</button>
@@ -67,4 +66,4 @@
     </div>
 </main>
 
-@include('admin._inc._footer')
+{{ include('admin._inc._footer') }}

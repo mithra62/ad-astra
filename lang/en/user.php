@@ -7,4 +7,5 @@ return [
     'updated' => 'User was updated.',
     'token_created' => 'User token was created.',
     'token_deleted' => 'User token was deleted.',
+    'token_updated' => 'User token was updated.',
 ];
