@@ -1,5 +1,4 @@
-@include('admin._inc._header', ['title' => 'Delete Role'])
-
+{{ include('admin._inc._header', {title: 'Delete Role'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
@@ -19,19 +18,20 @@
                             <a class="f-s-14 f-w-500" href="{{ route('roles.index') }}">Roles</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('roles.confirm', $role) }}">Delete Role</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('roles.confirm', role) }}">Delete Role</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
         <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
 
         <!-- Blank start -->
         <div class="row">
             <!-- Default Card start -->
-            <form method="POST" action="{{ route('roles.destroy', $role) }}" class="row g-3 needs-validation" novalidate>
-                @csrf
+            <form method="POST" action="{{ route('roles.destroy', role) }}" class="row g-3 needs-validation" novalidate>
+                {{ csrf_field() }}
                 {{ method_field('DELETE') }}
                 <div class="col-md-12">
                     <div class="card">
@@ -47,9 +47,9 @@
                                 <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal"
                                        type="checkbox">
                                 <label for="confirm_removal">Confirm Removal</label>
-                                @error('confirm_removal')
-                                <p class="text-danger">{{ $message }}</p>
-                                @enderror
+                                {% if errors.has('confirm_removal') %}
+                                    <p class="text-danger">{{ errors.first('confirm_removal') }}</p>
+                                {% endif %}
                             </div>
 
                             <div class="col-12 float-end">
@@ -67,4 +67,4 @@
     </div>
 </main>
 
-@include('admin._inc._footer', ['status' => 'complete'])
+{{ include('admin._inc._footer') }}

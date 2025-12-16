@@ -1,4 +1,4 @@
-@include('admin._inc._header', ['title' => 'Roles'])
+{{ include('admin._inc._header', {title: 'Roles'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
@@ -22,7 +22,7 @@
             </div>
         </div>
         <!-- Breadcrumb end -->
-        @include('admin._inc._message')
+        {{ include('admin._inc._message') }}
 
         <div class="row table-section">
             <div class="col-xl-12">
@@ -54,34 +54,34 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @foreach ($roles as $role)
+                                {% for role in roles %}
                                     <tr>
-                                        <td><a href="{{ route('roles.edit', $role) }}">{{ $role->id }}</a></td>
-                                        <td>{{ $role->name }}</td>
-                                        <td class="f-w-500">{{ $role->guard_name }}</td>
-                                        <td class="text-secondary f-w-600">{{ $role->updated_at->format('F j, Y') }}</td>
-                                        <td>{{ $role->created_at->format('F j, Y') }}</td>
+                                        <td><a href="{{ route('roles.edit', role) }}">{{ role.id }}</a></td>
+                                        <td>{{ role.name }}</td>
+                                        <td class="f-w-500">{{ role.guard_name }}</td>
+                                        <td class="text-secondary f-w-600">{{ role.updated_at.format('F j, Y') }}</td>
+                                        <td>{{ role.created_at.format('F j, Y') }}</td>
                                         <td>
-                                            <a class="btn btn-danger icon-btn b-r-4" href="{{ route('roles.confirm', $role) }}">
+                                            <a class="btn btn-danger icon-btn b-r-4" href="{{ route('roles.confirm', role) }}">
                                                 <i class="ti ti-trash"></i>
                                             </a>
-                                            <a class="btn btn-success icon-btn b-r-4" href="{{ route('roles.edit', $role) }}">
+                                            <a class="btn btn-success icon-btn b-r-4" href="{{ route('roles.edit', role) }}">
                                                 <i class="ti ti-edit"></i>
                                             </a>
                                         </td>
                                     </tr>
-                                @endforeach
+                                {% endfor %}
                                 </tbody>
                             </table>
                         </div>
 
                     </div>
                 </div>
-                {{ $roles->links() }}
+                {{ roles.links() }}
             </div>
         </div>
 
     </div>
 </main>
 
-@include('admin._inc._footer')
+{{ include('admin._inc._footer') }}

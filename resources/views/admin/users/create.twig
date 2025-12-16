@@ -1,5 +1,4 @@
-@include('admin._inc._header', ['title' => 'Create User'])
-
+{{ include('admin._inc._header', {title: 'Create User'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
@@ -26,6 +25,7 @@
             </div>
         </div>
         <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
 
         <!-- Custom Styles start -->
         <div class="col-12">
@@ -35,13 +35,13 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ route('users.store') }}" class="row g-3 needs-validation" novalidate>
-                        @csrf
+                        {{ csrf_field() }}
                         <div class="col-md-12">
                             <label class="form-label" for="validationCustom01">Name</label>
                             <input class="form-control" id="validationCustom01" required type="text" value="{{ old('name') }}" name="name">
-                            @error('name')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            {% if errors.has('name') %}
+                                <p class="text-danger">{{ errors.first('name') }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-md-12">
                             <label class="form-label" for="validationCustomUsername">Email</label>
@@ -51,56 +51,58 @@
                                        id="validationCustomUsername"
                                        required type="text" name="email" value="{{ old('email') }}">
                             </div>
-                            @error('email')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            {% if errors.has('email') %}
+                                <p class="text-danger">{{ errors.first('email') }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-md-12">
                             <label class="form-label" for="validationCustom02">Title</label>
                             <input class="form-control" id="validationCustom02" required type="text" value="{{ old('title') }}" name="title">
-                            @error('title')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            {% if errors.has('title') %}
+                                <p class="text-danger">{{ errors.first('title') }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-md-12">
                             <label class="form-label" for="phone">Phone Number</label>
                             <input class="form-control" id="phone" required type="text" value="{{ old('phone') }}" name="phone">
-                            @error('phone')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            {% if errors.has('phone') %}
+                                <p class="text-danger">{{ errors.first('phone') }}</p>
+                            {% endif %}
                         </div>
                         <h4>Password</h4>
                         <div class="col-md-12">
                             <label class="form-label" for="password">Password</label>
                             <input class="form-control" id="password" required type="password" value="" name="password">
-                            @error('password')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            {% if errors.has('password') %}
+                                <p class="text-danger">{{ errors.first('password') }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-md-12">
                             <label class="form-label" for="password_confirmation">Confirm Password</label>
                             <input class="form-control" id="password_confirmation" required type="password" value="" name="password_confirmation">
-                            @error('password_confirmation')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            {% if errors.has('password_confirmation') %}
+                                <p class="text-danger">{{ errors.first('password_confirmation') }}</p>
+                            {% endif %}
                         </div>
 
                         <div class="col-md-12">
                             <label class="form-label" for="roles">Roles</label>
                             <select class="select-basic-multiple-four w-100 select_primary" multiple="multiple" name="roles[]">
-                                @foreach ($roles as $role)
-                                <option
-                                    @if(old('roles'))
-                                    @foreach(old('roles') as $key => $field)
-                                        @if(old('roles.' . $key) == $role->name) selected @endif
-                                    @endforeach
-                                    @endif
-                                    value="{{ $role->name }}">{{ $role->name }}</option>
-                                @endforeach
+                                {% for role in roles %}
+                                    <option
+                                        {% if old('roles') %}
+                                            {% for key, field in old('roles') %}
+                                                {% if old('roles.' ~ key) == role.name %}selected{% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                        value="{{ role.name }}"
+                                    >{{ role.name }}</option>
+                                {% endfor %}
+
                             </select>
-                            @error('roles')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            {% if errors.has('roles') %}
+                                <p class="text-danger">{{ errors.first('roles') }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-12">
                             <button class="btn btn-primary float-end" type="submit">Create User</button>
@@ -115,4 +117,4 @@
     </div>
 </main>
 
-@include('admin._inc._footer')
+{{ include('admin._inc._footer') }}

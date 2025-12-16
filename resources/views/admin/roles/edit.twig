@@ -1,6 +1,4 @@
-@include('admin._inc._header', ['title' => 'Edit Role'])
-
-
+{{ include('admin._inc._header', {title: 'Edit Role'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
@@ -20,17 +18,17 @@
                             <a class="f-s-14 f-w-500" href="{{ route('roles.index') }}">Roles</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('roles.edit', $role) }}">Edit Role</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('roles.edit', role) }}">Edit Role</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
         <!-- Breadcrumb end -->
-
+        {{ include('admin._inc._message') }}
         <!-- Custom Styles start -->
-        <form method="POST" action="{{ route('roles.update', $role) }}" class="row g-3 needs-validation" novalidate>
-            @csrf
+        <form method="POST" action="{{ route('roles.update', role) }}" class="row g-3 needs-validation" novalidate>
+            {{ csrf_field() }}
             {{ method_field('PUT') }}
             <div class="col-12">
                 <div class="card">
@@ -40,58 +38,63 @@
                     <div class="card-body">
                         <div class="col-md-12">
                             <label class="form-label" for="name">Name</label>
-                            <input class="form-control" id="name" required type="text" value="{{ old('name', $role->name) }}"
+                            <input class="form-control" id="name" required type="text" value="{{ old('name', role.name) }}"
                                    name="name">
-                            @error('name')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            {% if errors.has('name') %}
+                                <p class="text-danger">{{ errors.first('name') }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-md-12">
                             <label class="form-label" for="highlight">Highlight Color</label>
                             <input class="form-control" id="highlight" required type="color"
-                                   value="{{ old('highlight', $role->highlight) }}" name="highlight"
+                                   value="{{ old('highlight', role.highlight) }}" name="highlight"
                                    placeholder="Color for this role badge. Accepts HEX codes.">
-                            @error('title')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            {% if errors.has('highlight') %}
+                                <p class="text-danger">{{ errors.first('highlight') }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-md-12">
                             <label class="form-label" for="description">Description</label>
                             <textarea class="form-control" id="description" placeholder="Some text..."
-                                      rows="4">{{ old('description', $role->description) }}</textarea>
+                                      rows="4">{{ old('description', role.description) }}</textarea>
                         </div>
                         <div class="col-md-12 mt-3">
                             <h6>Permissions</h6>
-                            @error('permissions')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            {% if errors.has('permissions') %}
+                                <p class="text-danger">{{ errors.first('permissions') }}</p>
+                            {% endif %}
 
-                            @foreach ($permissions as $permission)
+                            {% for permission in permissions %}
                                 <div class="col-md-6">
                                     <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
-                                        <input class="toggle switch-border-primary" name="permissions[]"
-                                               id="permission_{{ $permission->id }}"
+                                        <input
+                                            class="toggle switch-border-primary"
+                                            name="permissions[]"
+                                            id="permission_{{ permission.id }}"
 
-                                               @if(old('permissions'))
-                                                   @foreach(old('permissions') as $key => $field)
-                                                       @if(old('permissions.' . $key) == $permission->name) checked @endif
-                                                   @endforeach
-                                               @else
-                                                   @foreach($role->getPermissionNames() as $perm)
-                                                       @if($perm == $permission->name) checked @endif
-                                                   @endforeach
-                                               @endif
+                                            {% if old('permissions') %}
+                                                {% for key, field in old('permissions') %}
+                                                    {% if old('permissions.' ~ key) == permission.name %}checked{% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                {% for perm in role.getPermissionNames() %}
+                                                    {% if perm == permission.name %}checked{% endif %}
+                                                {% endfor %}
+                                            {% endif %}
 
-                                               value="{{ $permission->name }}"
-                                               type="checkbox">
-                                        <label for="permission_{{ $permission->id }}">{{ $permission->name }}
-                                            - {{ $permission->description }}</label>
+                                            value="{{ permission.name }}"
+                                            type="checkbox"
+                                        >
+                                        <label for="permission_{{ permission.id }}">
+                                            {{ permission.name }} - {{ permission.description }}
+                                        </label>
                                     </div>
                                 </div>
-                            @endforeach
-                            @error('permissions')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
+                            {% endfor %}
+
+                            {% if errors.has('permissions') %}
+                                <p class="text-danger">{{ errors.first('permissions') }}</p>
+                            {% endif %}
 
                         </div>
                         <div class="col-12 mt-3">
@@ -103,10 +106,6 @@
             </div>
         </form>
         <!-- Custom Styles end -->
-
-
     </div>
 </main>
-
-
-@include('admin._inc._footer')
+{{ include('admin._inc._footer') }}

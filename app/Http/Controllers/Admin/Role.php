@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\Actions\Role\CreateNewRole;
 use App\Actions\Actions\Role\EditRole;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Role\DeleteRoleRequest;
 use App\Http\Requests\Role\EditRoleRequest;
 use App\Http\Requests\Role\StoreRoleRequest;
@@ -19,7 +18,7 @@ class Role extends Controller
     public function index()
     {
         $roles = RoleModel::paginate(20);
-        return view('admin.roles.index', ['roles' => $roles]);
+        return $this->view('roles.index', ['roles' => $roles]);
     }
 
     /**
@@ -28,7 +27,7 @@ class Role extends Controller
     public function create()
     {
         $permissions = Permission::all();
-        return view('admin.roles.create', ['permissions' => $permissions]);
+        return $this->view('roles.create', ['permissions' => $permissions]);
     }
 
     /**
@@ -39,7 +38,7 @@ class Role extends Controller
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         $creator = app(CreateNewRole::class);
         $role = $creator->create($request->all());
-        return redirect()->route('admin.roles.show', $role->id)->with('status', trans('role.created'));
+        return redirect()->route('roles.show', $role->id)->with('status', trans('role.created'));
     }
 
     /**
@@ -61,7 +60,7 @@ class Role extends Controller
         }
 
         $permissions = Permission::all();
-        return view('admin.roles.edit', ['role' => $role, 'permissions' => $permissions]);
+        return $this->view('roles.edit', ['role' => $role, 'permissions' => $permissions]);
     }
 
     /**
@@ -73,7 +72,7 @@ class Role extends Controller
         if ($role instanceof RoleModel) {
             $editor = app(EditRole::class);
             $editor->edit($role, $request->all());
-            return redirect()->route('admin.roles.index')->with('success', trans('role.updated'));
+            return redirect()->route('roles.index')->with('success', trans('role.updated'));
         }
 
         abort(404);
@@ -87,7 +86,7 @@ class Role extends Controller
         $role = RoleModel::find($id);
         if ($role instanceof RoleModel && $role->canDelete()) {
             $role->delete();
-            return redirect()->route('admin.roles.index')->with('success', trans('role.deleted'));
+            return redirect()->route('roles.index')->with('success', trans('role.deleted'));
         }
 
         return redirect()->route('roles.index')->with('failure', trans('role.not_found'));
@@ -97,9 +96,9 @@ class Role extends Controller
     {
         $user = RoleModel::find($id);
         if (!$user instanceof RoleModel) {
-            return redirect()->route('admin.roles.index')->with('failure', 'role.not_found');
+            return redirect()->route('roles.index')->with('failure', 'role.not_found');
         }
 
-        return view('admin.roles.delete', ['role' => $user]);
+        return $this->view('roles.delete', ['role' => $user]);
     }
 }
