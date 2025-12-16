@@ -18,7 +18,9 @@
         "laravel/socialite": "^5.24",
         "laravel/tinker": "^2.10.1",
         "laravolt/avatar": "^6.3",
-        "spatie/laravel-permission": "^6.21"
+        "rcrowe/twigbridge": "^0.14.6",
+        "spatie/laravel-permission": "^6.21",
+        "twig/twig": "^3.22"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",
