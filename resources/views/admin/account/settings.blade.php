@@ -1,4 +1,4 @@
-@include('_inc._header', ['title' => 'Account Settings'])
+@include('admin._inc._header', ['title' => 'Account Settings'])
 
 <main>
     <div class="container-fluid">
@@ -21,10 +21,10 @@
             </div>
         </div>
         <!-- Breadcrumb end -->
-        @include('_inc._message')
+        @include('admin._inc._message')
         <!-- setting-app start -->
         <div class="row">
-            @include('account._sidebar', ['active' => 'settings'])
+            @include('admin.account._sidebar', ['active' => 'settings'])
             <div class="col-lg-8 col-xxl-9">
                 <div class="tab-content">
                     <div aria-labelledby="profile-tab" class="tab-pane fade active show"
@@ -439,4 +439,4 @@
         <!--setting app end -->
     </div>
 </main>
-@include('_inc._footer', ['status' => 'complete'])
+@include('admin._inc._footer', ['status' => 'complete'])

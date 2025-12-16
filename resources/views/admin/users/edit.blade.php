@@ -1,4 +1,4 @@
-@include('_inc._header', ['title' => 'Edit User'])
+@include('admin._inc._header', ['title' => 'Edit User'])
 
 <main>
     <div class="container-fluid">
@@ -26,7 +26,7 @@
             </div>
         </div>
         <!-- Breadcrumb end -->
-        @include('_inc._message')
+        @include('admin._inc._message')
 
         <!-- Edit User start -->
         <div class="col-12">
@@ -229,4 +229,4 @@
     </div>
 </main>
 
-@include('_inc._footer')
+@include('admin._inc._footer')

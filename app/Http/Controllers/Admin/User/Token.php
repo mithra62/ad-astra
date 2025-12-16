@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Admin\User;
 
 use App\Actions\Actions\User\Token\CreateNewUserToken;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Controller AS AdminController;
 use App\Http\Requests\User\Token\DeleteUserTokenRequest;
 use App\Http\Requests\User\Token\EditUserTokenRequest;
 use App\Http\Requests\User\Token\StoreUserTokenRequest;
 use App\Models\User as UserModel;
 use Laravel\Sanctum\PersonalAccessToken;
 
-class Token extends Controller
+class Token extends AdminController
 {
     /**
      * Display a listing of the resource.

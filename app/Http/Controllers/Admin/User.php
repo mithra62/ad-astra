@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\Actions\User\CreateNewUser;
 use App\Actions\Actions\User\UpdateUserPassword;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\User\DeleteUserRequest;
 use App\Http\Requests\User\EditUserRequest;
 use App\Http\Requests\User\PasswordUserRequest;
@@ -21,7 +20,7 @@ class User extends Controller
     public function index()
     {
         $users = UserModel::paginate(20);
-        return view('admin.users.index', ['users' => $users]);
+        return $this->view('users.index', ['users' => $users]);
     }
 
     /**
@@ -30,7 +29,7 @@ class User extends Controller
     public function create()
     {
         $roles = RoleModel::all();
-        return view('admin.users.create', ['roles' => $roles]);
+        return $this->view('users.create', ['roles' => $roles]);
     }
 
     /**
@@ -82,7 +81,7 @@ class User extends Controller
 //        print_r($user);
 //        exit;
 
-        return view('admin.users.edit', ['user' => $user, 'roles' => $roles]);
+        return $this->view('users.edit', ['user' => $user, 'roles' => $roles]);
     }
 
     /**
@@ -95,7 +94,7 @@ class User extends Controller
             $post = $request->all();
             $user->update($post);
             $user->syncRoles($post['roles']);
-            return redirect()->route('admin.users.edit', $user)->with('success', trans('user.updated'));
+            return redirect()->route('users.edit', $user)->with('success', trans('user.updated'));
         }
 
         return redirect()->route('users.edit', $user)->with('failure', trans('user.not_found'));
@@ -126,7 +125,7 @@ class User extends Controller
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
-        return view('users.delete', ['user' => $user]);
+        return $this->view('users.delete', ['user' => $user]);
     }
 
     /**

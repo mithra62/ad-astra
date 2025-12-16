@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Controller AS AdminController;
 use App\Http\Requests\Account\EditPasswordRequest;
 use App\Http\Requests\Account\EditUserRequest;
 use Illuminate\Contracts\View\View;
@@ -10,14 +10,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-class Account extends Controller
+class Account extends AdminController
 {
     /**
      * @return View
      */
     public function index(): View
     {
-        return view('account.index');
+        return $this->view('account.index');
     }
 
     /**

@@ -1,4 +1,4 @@
-@include('_inc._header', ['title' => 'Create User'])
+@include('admin._inc._header', ['title' => 'Create User'])
 
 <main>
     <div class="container-fluid">
@@ -115,4 +115,4 @@
     </div>
 </main>
 
-@include('_inc._footer')
+@include('admin._inc._footer')

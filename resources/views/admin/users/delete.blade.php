@@ -1,4 +1,4 @@
-@include('_inc._header', ['title' => 'Delete User'])
+@include('admin._inc._header', ['title' => 'Delete User'])
 
 <main>
     <div class="container-fluid">
@@ -67,4 +67,4 @@
     </div>
 </main>
 
-@include('_inc._footer', ['status' => 'complete'])
+@include('admin._inc._footer', ['status' => 'complete'])

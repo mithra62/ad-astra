@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\Account;
 
 use App\Actions\Actions\User\Token\CreateNewUserToken;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Controller AS AdminController;
 use App\Http\Requests\Account\Token\DeleteAccountTokenRequest;
 use App\Http\Requests\Account\Token\EditAccountTokenRequest;
 use App\Http\Requests\Account\Token\StoreAccountTokenRequest;
@@ -11,14 +11,14 @@ use App\Models\User as UserModel;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\PersonalAccessToken;
 
-class Token extends Controller
+class Token extends AdminController
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('account.tokens.index');
+        return $this->view('account.tokens.index');
     }
 
     /**
@@ -31,7 +31,7 @@ class Token extends Controller
             abort(404);
         }
 
-        return view('account.tokens.create', ['user' => $user]);
+        return $this->view('account.tokens.create', ['user' => $user]);
     }
 
     public function store(StoreAccountTokenRequest $request)
@@ -66,7 +66,7 @@ class Token extends Controller
             abort(404);
         }
 
-        return view('account.tokens.edit', ['user' => $user, 'token' => $token]);
+        return $this->view('account.tokens.edit', ['user' => $user, 'token' => $token]);
     }
 
     /**
@@ -106,6 +106,6 @@ class Token extends Controller
             abort(404);
         }
 
-        return view('account.tokens.delete', ['token' => $token_id]);
+        return $this->view('account.tokens.delete', ['token' => $token_id]);
     }
 }

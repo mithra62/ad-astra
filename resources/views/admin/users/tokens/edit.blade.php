@@ -1,4 +1,4 @@
-@include('_inc._header', ['title' => 'Edit User Token'])
+@include('admin._inc._header', ['title' => 'Edit User Token'])
 
 <main>
     <div class="container-fluid">
@@ -67,4 +67,4 @@
     </div>
 </main>
 
-@include('_inc._footer')
+@include('admin._inc._footer')

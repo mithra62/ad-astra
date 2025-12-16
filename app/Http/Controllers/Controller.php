@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UsState;
 use App\Settings;
 use Illuminate\Support\Facades\Auth;
 

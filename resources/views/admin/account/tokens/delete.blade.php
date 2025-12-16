@@ -1,4 +1,4 @@
-@include('_inc._header', ['title' => 'Delete API Token'])
+@include('admin._inc._header', ['title' => 'Delete API Token'])
 
 <main>
     <div class="container-fluid">
@@ -27,10 +27,10 @@
             </div>
         </div>
         <!-- Breadcrumb end -->
-        @include('_inc._message')
+        @include('admin._inc._message')
         <!-- setting-app start -->
         <div class="row">
-            @include('account._sidebar', ['active' => 'tokens'])
+            @include('admin.account._sidebar', ['active' => 'tokens'])
 
             <div class="col-lg-8 col-xxl-9">
                 <div class="tab-content">
@@ -87,4 +87,4 @@
         <!--setting app end -->
     </div>
 </main>
-@include('_inc._footer', ['status' => 'complete'])
+@include('admin._inc._footer', ['status' => 'complete'])
