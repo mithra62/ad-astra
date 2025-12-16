@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin\Category;
 use App\Http\Controllers\Admin\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category\Group AS CategoryGroup;
+use App\Http\Requests\Category\Group\StoreCategoryGroupRequest;
+use App\Http\Requests\Category\Group\DeleteCategoryGroupRequest;
+use App\Http\Requests\Category\Group\EditCategoryGroupRequest;
 
 class Group extends Controller
 {
@@ -22,14 +25,13 @@ class Group extends Controller
      */
     public function create()
     {
-        echo __FILE__ . ': '. __LINE__;
-        exit;
+        return $this->view('categories.groups.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCategoryGroupRequest $request)
     {
         echo __FILE__ . ': '. __LINE__;
         exit;

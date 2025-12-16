@@ -43,7 +43,8 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     Route::resource('categories/groups', CategoryGroup::class)
         ->name('index', 'categories.groups')
-        ->name('create', 'categories.groups.create');
+        ->name('create', 'categories.groups.create')
+        ->name('store', 'categories.groups.store');
     Route::resource('categories', Category::class);
 
     //dashboard
