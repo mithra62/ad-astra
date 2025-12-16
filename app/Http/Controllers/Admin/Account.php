@@ -25,7 +25,7 @@ class Account extends AdminController
      */
     public function settings(): View
     {
-        return view('admin.account.settings');
+        return $this->view('account.settings');
     }
 
     /**
@@ -39,12 +39,12 @@ class Account extends AdminController
             'password' => Hash::make($input['password']),
         ])->save();
 
-        return redirect()->route('admin.account.settings')->with('success', trans('account.password_changed'));
+        return redirect()->route('account.settings')->with('success', trans('account.password_changed'));
     }
 
     public function password()
     {
-        return view('admin.account.password');
+        return $this->view('account.password');
     }
 
     public function update(EditUserRequest $request)
@@ -52,6 +52,6 @@ class Account extends AdminController
         $user = Auth::user();
         $post = $request->all();
         $user->update($post);
-        return redirect()->route('admin.account.settings')->with('success', trans('account.updated'));
+        return redirect()->route('account.settings')->with('success', trans('account.updated'));
     }
 }

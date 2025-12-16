@@ -1,5 +1,4 @@
-@include('admin._inc._header', ['title' => 'Delete API Token'])
-
+{{ include('admin._inc._header', {title: 'Delete API Token'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
@@ -21,16 +20,16 @@
                         <a class="f-s-14 f-w-500" href="{{ route('account.tokens.index') }}">API Tokens</a>
                     </li>
                     <li class="active">
-                        <a class="f-s-14 f-w-500" href="{{ route('account.tokens.confirm', ['token_id' => $token]) }}">Delete API Token</a>
+                        <a class="f-s-14 f-w-500" href="{{ route('account.tokens.confirm', {token_id: token}) }}">Delete API Token</a>
                     </li>
                 </ul>
             </div>
         </div>
         <!-- Breadcrumb end -->
-        @include('admin._inc._message')
+        {{ include('admin._inc._message') }}
         <!-- setting-app start -->
         <div class="row">
-            @include('admin.account._sidebar', ['active' => 'tokens'])
+            {{ include('admin.account._sidebar', {active: 'tokens'}) }}
 
             <div class="col-lg-8 col-xxl-9">
                 <div class="tab-content">
@@ -44,8 +43,8 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <form method="POST" action="{{ route('account.tokens.destroy', ['token_id' => $token]) }}" class="row g-3 needs-validation" novalidate>
-                                    @csrf
+                                <form method="POST" action="{{ route('account.tokens.destroy', {token_id: token}) }}" class="row g-3 needs-validation" novalidate>
+                                    {{ csrf_field() }}
                                     {{ method_field('DELETE') }}
                                     <div class="col-md-12">
                                         <div class="card">
@@ -61,9 +60,9 @@
                                                     <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal"
                                                            type="checkbox">
                                                     <label for="confirm_removal">Confirm Removal</label>
-                                                    @error('confirm_removal')
-                                                    <p class="text-danger">{{ $message }}</p>
-                                                    @enderror
+                                                    {% if errors.has('confirm_removal') %}
+                                                        <p class="text-danger">{{ errors.first('confirm_removal') }}</p>
+                                                    {% endif %}
                                                 </div>
 
                                                 <div class="col-12 float-end">
@@ -87,4 +86,4 @@
         <!--setting app end -->
     </div>
 </main>
-@include('admin._inc._footer', ['status' => 'complete'])
+{{ include('admin._inc._footer') }}

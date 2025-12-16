@@ -195,6 +195,8 @@ return [
             'app',
             'public_path',
             'file_exists',
+            '__',
+            'session',
         ],
 
         /*

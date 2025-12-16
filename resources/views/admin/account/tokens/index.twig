@@ -1,5 +1,4 @@
-@include('admin._inc._header', ['title' => 'API Tokens'])
-
+{{ include('admin._inc._header', {title: 'API Tokens'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
@@ -24,10 +23,10 @@
             </div>
         </div>
         <!-- Breadcrumb end -->
-        @include('admin._inc._message')
+        {{ include('admin._inc._message') }}
         <!-- setting-app start -->
         <div class="row">
-            @include('admin.account._sidebar', ['active' => 'tokens'])
+            {{ include('admin.account._sidebar', {active: 'tokens'}) }}
 
             <div class="col-lg-8 col-xxl-9">
                 <div class="tab-content">
@@ -61,39 +60,43 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            @if(Auth::user()->tokens->count() >= 1)
-                                                @foreach (Auth::user()->tokens as $token)
+                                            {% if auth_user().tokens.count >= 1 %}
+                                                {% for token in auth_user().tokens %}
                                                     <tr>
-                                                        <td>{{ $token->name }}</td>
+                                                        <td>{{ token.name }}</td>
+
                                                         <td class="f-w-500">
-                                                            @if($token->expires_at)
-                                                                {{ $token->expires_at->format('F j, Y') }}
-                                                            @else
+                                                            {% if token.expires_at %}
+                                                                {{ token.expires_at.format('F j, Y') }}
+                                                            {% else %}
                                                                 Never
-                                                            @endif
+                                                            {% endif %}
                                                         </td>
+
                                                         <td class="text-secondary f-w-600">
-                                                            @if($token->last_used_at)
-                                                                {{ $token->last_used_at->format('F j, Y') }}
-                                                            @else
+                                                            {% if token.last_used_at %}
+                                                                {{ token.last_used_at.format('F j, Y') }}
+                                                            {% else %}
                                                                 Never
-                                                            @endif
+                                                            {% endif %}
                                                         </td>
-                                                        <td class="text-secondary f-w-600">{{ $token->updated_at->format('F j, Y') }}</td>
-                                                        <td>{{ $token->created_at->format('F j, Y') }}</td>
+
+                                                        <td class="text-secondary f-w-600">{{ token.updated_at.format('F j, Y') }}</td>
+                                                        <td>{{ token.created_at.format('F j, Y') }}</td>
+
                                                         <td>
                                                             <a class="btn btn-danger icon-btn b-r-4"
-                                                               href="{{ route('account.tokens.confirm', ['token_id' => $token->id]) }}">
+                                                               href="{{ route('account.tokens.confirm', {'token_id': token.id}) }}">
                                                                 <i class="ti ti-trash"></i>
                                                             </a>
                                                             <a class="btn btn-success icon-btn b-r-4"
-                                                               href="{{ route('account.tokens.edit', ['token_id' => $token->id]) }}">
+                                                               href="{{ route('account.tokens.edit', {'token_id': token.id}) }}">
                                                                 <i class="ti ti-edit"></i>
                                                             </a>
                                                         </td>
                                                     </tr>
-                                                @endforeach
-                                            @else
+                                                {% endfor %}
+                                            {% else %}
                                                 <tr>
                                                     <td colspan="6">
                                                         <p class="text-center">
@@ -102,7 +105,7 @@
                                                         </p>
                                                     </td>
                                                 </tr>
-                                            @endif
+                                            {% endif %}
                                             </tbody>
                                         </table>
                                     </div>
@@ -119,4 +122,4 @@
         <!--setting app end -->
     </div>
 </main>
-@include('admin._inc._footer', ['status' => 'complete'])
+{{ include('admin._inc._footer') }}
