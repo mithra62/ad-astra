@@ -10,6 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Laravolt\Avatar\Avatar;
 
 class User extends Authenticatable
 {
@@ -64,5 +65,20 @@ class User extends Authenticatable
             ->active()
             ->orderByDesc('expires_at')
             ->first();
+    }
+
+    /**
+     * Generates an avatar for the user based on their email using Gravatar service.
+     *
+     * @return string
+     */
+    public function avatar(): string
+    {
+        $return = '';
+        if($this->email) {
+            $return = app(Avatar::class)->create($this->email)->toGravatar();
+        }
+
+        return $return;
     }
 }

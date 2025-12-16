@@ -12,7 +12,7 @@
 
                                 <span class="h-45 w-45 d-flex-center b-r-10 position-relative bg-danger m-auto">
                                     <img alt="avatar" class="img-fluid b-r-10"
-                                         src="{{ Avatar.create(app.auth.user.email).toGravatar() }}">
+                                         src="{{ auth_user().avatar() }}">
                                     <span
                                         class="position-absolute top-0 end-0 p-1 bg-success border border-light rounded-circle"></span>
                                 </span>
