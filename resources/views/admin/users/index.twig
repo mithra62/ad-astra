@@ -1,5 +1,4 @@
-@include('admin._inc._header', ['title' => 'Users'])
-
+{{ include('admin._inc._header', {title: 'Users'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
@@ -23,7 +22,7 @@
             </div>
         </div>
         <!-- Breadcrumb end -->
-        @include('admin._inc._message')
+        {{ include('admin._inc._message') }}
 
         <div class="row table-section">
             <div class="col-xl-12">
@@ -54,33 +53,42 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @foreach ($users as $user)
+                                {% for user in users %}
                                     <tr>
-                                        <td>{{ $user->name }}</td>
-                                        <td class="f-w-500"><a href="mailto:{{ $user->email }}">{{ $user->email }}</a></td>
-                                        <td class="text-secondary f-w-600">{{ $user->updated_at->format('F j, Y') }}</td>
-                                        <td>{{ $user->created_at->format('F j, Y') }}</td>
+                                        <td>{{ user.name }}</td>
+                                        <td class="f-w-500">
+                                            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                                        </td>
+                                        <td class="text-secondary f-w-600">
+                                            {{ user.updated_at.format('F j, Y') }}
+                                        </td>
                                         <td>
-                                            <a class="btn btn-danger icon-btn b-r-4" href="{{ route('users.confirm', $user) }}">
+                                            {{ user.created_at.format('F j, Y') }}
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-danger icon-btn b-r-4"
+                                               href="{{ route('users.confirm', user) }}">
                                                 <i class="ti ti-trash"></i>
                                             </a>
-                                            <a class="btn btn-success icon-btn b-r-4" href="{{ route('users.edit', $user) }}">
+                                            <a class="btn btn-success icon-btn b-r-4"
+                                               href="{{ route('users.edit', user) }}">
                                                 <i class="ti ti-edit"></i>
                                             </a>
                                         </td>
                                     </tr>
-                                @endforeach
+                                {% endfor %}
+
                                 </tbody>
                             </table>
                         </div>
 
                     </div>
                 </div>
-                {{ $users->links() }}
+                {{ users.links() }}
             </div>
         </div>
 
     </div>
 </main>
 
-@include('admin._inc._footer')
+{{ include('admin._inc._footer') }}
