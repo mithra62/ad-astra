@@ -12,16 +12,16 @@
 
                                 <span class="h-45 w-45 d-flex-center b-r-10 position-relative bg-danger m-auto">
                                     <img alt="avatar" class="img-fluid b-r-10"
-                                         src="{{ Avatar::create( Auth::user()->email )->toGravatar() }}">
+                                         src="{{ Avatar.create(app.user.email).toGravatar() }}">
                                     <span
                                         class="position-absolute top-0 end-0 p-1 bg-success border border-light rounded-circle"></span>
                                 </span>
             <div class="flex-grow-1 ps-2">
-                <h6 class="text-primary mb-0">{{ Auth::user()->name }}</h6>
-                <p class="text-muted f-s-12 mb-0">{{ Auth::user()->title }}</p>
+                <h6 class="text-primary mb-0">{{ app.auth.user.name }}</h6>
+                <p class="text-muted f-s-12 mb-0">{{ app.auth.user.title }}</p>
             </div>
             <form id="logout-form" action="{{ route('logout') }}" method="POST">
-                @csrf
+                {{ csrf_field() }}
             </form>
         </div>
 
@@ -49,7 +49,7 @@
             <li class="no-sub">
                 <a href="/fields">Fields</a>
             </li>
-            @can('api')
+            {% if can('api') %}
             <li class="menu-title">
                 <span>API</span>
             </li>
@@ -59,8 +59,8 @@
             <li class="no-sub">
                 <a href="{{ route('account.tokens.index') }}">API Keys</a>
             </li>
-            @endcan
-            @can('create user')
+            {% endif %}
+            {% if can('create user') %}
                 <li class="menu-title"><span>Members</span></li>
                 <li class="no-sub">
                     <a href="{{ route('users.index') }}">
@@ -72,7 +72,7 @@
                         Roles
                     </a>
                 </li>
-            @endcan
+            {% endif %}
             <li class="menu-title">
                  <span>Account</span>
             </li>

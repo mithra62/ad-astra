@@ -1,4 +1,4 @@
-@include('admin._inc._header', ['title' => 'Dashboard'])
+{{ include('admin._inc._header', {title: 'Dashboard'}) }}
 
 <!-- Body main section starts -->
 
@@ -48,9 +48,9 @@
                                         <i class="ph ph-user-circle-gear f-s-20"></i>
                                     </div>
                                 </div>
-                                <h3>{{ $total_corn_remittances }}</h3>
+                                <h3>{{ total_corn_remittances }}</h3>
                                 <p class="text-success mt-3 f-s-16 f-w-500 mb-0"><i
-                                        class="ph-bold  ph-arrow-up-right text-success f-s-20"></i>{{ $sum_corn_remittance_totals }}
+                                        class="ph-bold  ph-arrow-up-right text-success f-s-20"></i>{{ sum_corn_remittance_totals }}
                                     <span class="text-secondary f-s-16 f-w-200">total </span></p>
                             </div>
                         </div>
@@ -64,9 +64,9 @@
                                         <i class="ph ph-users-three f-s-20"></i>
                                     </div>
                                 </div>
-                                <h3>{{ $total_soybean_remittances }}</h3>
+                                <h3>{{ total_soybean_remittances }}</h3>
                                 <p class="text-success mt-3 f-s-16 f-w-500 mb-0"><i
-                                        class="ph-bold  ph-arrow-up-right text-success f-s-20"></i>{{ $sum_soybean_remittance_totals }}
+                                        class="ph-bold  ph-arrow-up-right text-success f-s-20"></i>{{ sum_soybean_remittance_totals }}
                                     <span class="text-secondary f-s-16 f-w-200">total </span></p>
 
                             </div>
@@ -81,7 +81,7 @@
                                         <i class="ph ph-users-three f-s-20"></i>
                                     </div>
                                 </div>
-                                <h3>{{ $total_submissions }}</h3>
+                                <h3>{{ total_submissions }}</h3>
 
                             </div>
                         </div>
@@ -95,7 +95,7 @@
                                         <i class="ph ph-users-three f-s-20"></i>
                                     </div>
                                 </div>
-                                <h3>{{ $total_remittances }}</h3>
+                                <h3>{{ total_remittances }}</h3>
 
                             </div>
                         </div>
@@ -109,7 +109,7 @@
                                         <i class="ph ph-check-circle f-s-20"></i>
                                     </div>
                                 </div>
-                                <h3 class="mb-3">{{ $total_users }}</h3>
+                                <h3 class="mb-3">{{ total_users }}</h3>
 
                             </div>
                         </div>
@@ -123,7 +123,7 @@
                                         <i class="ph ph-file-arrow-down f-s-20"></i>
                                     </div>
                                 </div>
-                                <h3 class="mb-3">{{ $total_api_requests }}</h3>
+                                <h3 class="mb-3">{{ total_api_requests }}</h3>
                             </div>
                         </div>
                     </div>
@@ -146,32 +146,32 @@
                                 </tr>
                                 </thead>
                                 <tbody id="api_key_body">
-                                @foreach($api_logs AS $log)
+                                {% for log in api_logs %}
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div
                                                     class="h-30 w-30 d-flex-center b-r-50 overflow-hidden text-bg-primary me-2">
                                                     <img alt="" class="img-fluid"
-                                                         src="{{ Avatar::create( $log->user->email )->toGravatar() }}">
+                                                         src="{{ Avatar.create(log.user.email).toGravatar() }}">
                                                 </div>
-                                                {{ $log->user->name }}
+                                                {{ log.user.name }}
                                             </div>
                                         </td>
-                                        <td>{{ $log->request_route }}</td>
-                                        <td data-order="{{ $log->response_status_code }}">
+                                        <td>{{ log.request_route }}</td>
+                                        <td data-order="{{ log.response_status_code }}">
                                             @if($log->response_status_code == 200)
-                                                <span class="badge text-bg-success">{{ $log->response_status_code }} </span>
+                                                <span class="badge text-bg-success">{{ log.response_status_code }} </span>
                                             @elseif($log->response_status_code == 404)
-                                                <span class="badge text-bg-warning">{{ $log->response_status_code }}</span>
+                                                <span class="badge text-bg-warning">{{ log.response_status_code }}</span>
                                             @else
-                                                <span class="badge text-bg-danger">{{ $log->response_status_code }}</span>
+                                                <span class="badge text-bg-danger">{{ log.response_status_code }}</span>
                                             @endif
                                         </td>
-                                        <td>{{ $log->method }}</td>
-                                        <td data-order="{{ $log->created_at }}">{{ $log->created_at->format('M j, Y h:i:s A') }}</td>
+                                        <td>{{ log.method }}</td>
+                                        <td data-order="{{ log.created_at }}">{{ log.created_at.format('M j, Y h:i:s A') }}</td>
                                     </tr>
-                                @endforeach
+                                {% endfor %}
 
                                 </tbody>
 
@@ -186,7 +186,7 @@
 
 </main>
 
-{{--
+{#
 <!-- Body main section ends --><p>Welcome, {{ Auth::user()->name }}!</p>
 
 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -204,5 +204,5 @@
 @can('edit articles')
     //
 @endcan
---}}
-@include('admin._inc._footer', ['include_apex' => true])
+#}
+{{ include('admin._inc._footer', {include_apex: 'true'}) }}

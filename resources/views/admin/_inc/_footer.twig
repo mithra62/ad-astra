@@ -33,9 +33,9 @@
 
 
 <!--customizer-->
-{{--
+{#
 <div id="customizer"></div>
---}}
+#}
 
 <!-- latest jquery-->
 <script src="/assets/js/jquery-3.6.3.min.js"></script>
@@ -46,11 +46,11 @@
 <!-- latest jquery-->
 <script src="/assets/vendor/datatable/jquery.dataTables.min.js"></script>
 
-@if(isset($include_apex) and $include_apex === true)
-<!-- apexcharts-->
-<script src="/assets/vendor/apexcharts/apexcharts.min.js"></script>
-<script src="/assets/js/api.js"></script>
-@endif
+{% if include_apex is defined and include_apex == true %}
+    <!-- apexcharts-->
+    <script src="/assets/vendor/apexcharts/apexcharts.min.js"></script>
+    <script src="/assets/js/api.js"></script>
+{% endif %}
 
 <!-- Bootstrap js-->
 <script src="/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
@@ -66,10 +66,10 @@
 <script src="/assets/vendor/select/select2.min.js"></script>
 <script src="/assets/js/select.js"></script>
 
-{{--
+{#
 <!--js-->
 <script src="/assets/js/formvalidation.js"></script>
---}}
+#}
 <!-- Customizer js-->
 <script src="/assets/js/customizer.js"></script>
 
