@@ -33,7 +33,7 @@ class Token extends AdminController
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
-        return view('users.tokens.create', ['user' => $user]);
+        return $this->view('users.tokens.create', ['user' => $user]);
     }
 
     public function store(StoreUserTokenRequest $request, string $id)
@@ -71,7 +71,7 @@ class Token extends AdminController
             abort(404);
         }
 
-        return view('users.tokens.edit', ['user' => $user, 'token' => $token]);
+        return $this->view('users.tokens.edit', ['user' => $user, 'token' => $token]);
     }
 
     /**
@@ -125,6 +125,6 @@ class Token extends AdminController
             abort(404);
         }
 
-        return view('users.tokens.delete', ['user' => $user, 'token' => $token_id]);
+        return $this->view('users.tokens.delete', ['user' => $user, 'token' => $token_id]);
     }
 }
