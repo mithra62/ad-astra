@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\Account\Token as AccountTokens;
 use App\Http\Controllers\Admin\Dashboard;
 use App\Http\Controllers\Admin\Role;
 use App\Http\Controllers\Admin\User;
+use App\Http\Controllers\Admin\Category;
+use App\Http\Controllers\Admin\Category\Group AS CategoryGroup;
 use App\Http\Controllers\Admin\User\Token as UserTokens;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +40,11 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::delete('account/tokens/{token_id}', [AccountTokens::class, 'destroy'])->name('account.tokens.destroy');
     Route::get('account/tokens/{token_id}/edit', [AccountTokens::class, 'edit'])->name('account.tokens.edit');
     Route::put('account/tokens/{token_id}', [AccountTokens::class, 'update'])->name('account.tokens.update');
+
+    Route::resource('categories/groups', CategoryGroup::class)
+        ->name('index', 'categories.groups')
+        ->name('create', 'categories.groups.create');
+    Route::resource('categories', Category::class);
 
     //dashboard
     Route::get('/dashboard', [Dashboard::class, 'index'])->name('dashboard');

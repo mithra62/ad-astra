@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Group extends Model
 {
+    protected $table = 'category_groups';
     protected $fillable = [
         'name',
         'slug',

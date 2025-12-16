@@ -1,0 +1,94 @@
+{{ include('admin._inc._header', {title: 'Category Groups'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12 ">
+                <h5>Category Groups</h5>
+                <div class="col-6 ">
+                    <ul class="app-line-breadcrumbs mb-3">
+                        <li class="">
+                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                                <span>
+                                    <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
+                                </span>
+                            </a>
+                        </li>
+                        <li class="active">
+                            <a class="f-s-14 f-w-500" href="{{ route('users.index') }}">Categories</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
+
+        <div class="row table-section">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-6">
+                                <h5>Manage Category Groups</h5>
+                                <p>You can manage all Category Groups from here.</p>
+                            </div>
+                            <div class="col-6">
+                                <p class="float-right text-end">
+                                    <a href="{{ route('categories.groups.create') }}" class="btn btn-primary">Add Category Group</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Last Modified</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for groups in group %}
+                                    <tr>
+                                        <td>{{ group.name }}</td>
+                                        <td class="f-w-500">
+                                            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                                        </td>
+                                        <td class="text-secondary f-w-600">
+                                            {{ user.updated_at.format('F j, Y') }}
+                                        </td>
+                                        <td>
+                                            {{ user.created_at.format('F j, Y') }}
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-danger icon-btn b-r-4"
+                                               href="{{ route('users.confirm', user) }}">
+                                                <i class="ti ti-trash"></i>
+                                            </a>
+                                            <a class="btn btn-success icon-btn b-r-4"
+                                               href="{{ route('users.edit', user) }}">
+                                                <i class="ti ti-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                {{ groups.links() }}
+            </div>
+        </div>
+
+    </div>
+</main>
+
+{{ include('admin._inc._footer') }}

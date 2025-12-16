@@ -17,8 +17,8 @@
                                         class="position-absolute top-0 end-0 p-1 bg-success border border-light rounded-circle"></span>
                                 </span>
             <div class="flex-grow-1 ps-2">
-                <h6 class="text-primary mb-0">{{ app.auth.user.name }}</h6>
-                <p class="text-muted f-s-12 mb-0">{{ app.auth.user.title }}</p>
+                <h6 class="text-primary mb-0">{{ auth_user().name }}</h6>
+                <p class="text-muted f-s-12 mb-0">{{ auth_user().title }}</p>
             </div>
             <form id="logout-form" action="{{ route('logout') }}" method="POST">
                 {{ csrf_field() }}
@@ -41,7 +41,7 @@
                 <a href="/posts">Posts</a>
             </li>
             <li class="no-sub">
-                <a href="/categories">Categories</a>
+                <a href="{{ route('categories.groups') }}">Categories</a>
             </li>
             <li class="no-sub">
                 <a href="/files">Files</a>
