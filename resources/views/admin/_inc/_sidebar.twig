@@ -12,7 +12,7 @@
 
                                 <span class="h-45 w-45 d-flex-center b-r-10 position-relative bg-danger m-auto">
                                     <img alt="avatar" class="img-fluid b-r-10"
-                                         src="{{ Avatar.create(app.user.email).toGravatar() }}">
+                                         src="{{ Avatar.create(app.auth.user.email).toGravatar() }}">
                                     <span
                                         class="position-absolute top-0 end-0 p-1 bg-success border border-light rounded-circle"></span>
                                 </span>
@@ -50,15 +50,15 @@
                 <a href="/fields">Fields</a>
             </li>
             {% if can('api') %}
-            <li class="menu-title">
-                <span>API</span>
-            </li>
-            <li class="no-sub">
-                <a href="/api/documentation" target="_blank">Playground</a>
-            </li>
-            <li class="no-sub">
-                <a href="{{ route('account.tokens.index') }}">API Keys</a>
-            </li>
+                <li class="menu-title">
+                    <span>API</span>
+                </li>
+                <li class="no-sub">
+                    <a href="/api/documentation" target="_blank">Playground</a>
+                </li>
+                <li class="no-sub">
+                    <a href="{{ route('account.tokens.index') }}">API Keys</a>
+                </li>
             {% endif %}
             {% if can('create user') %}
                 <li class="menu-title"><span>Members</span></li>
@@ -74,7 +74,7 @@
                 </li>
             {% endif %}
             <li class="menu-title">
-                 <span>Account</span>
+                <span>Account</span>
             </li>
             <li class="no-sub">
                 <a href="{{ route('account.settings') }}">Settings</a>

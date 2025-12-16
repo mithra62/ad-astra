@@ -9,7 +9,7 @@
                     <li class="nav-item" role="presentation">
                         <a aria-controls="profile-tab-pane" aria-selected="true"
                            href="{{ route('account.settings') }}"
-                           class="nav-link @if($active == 'settings') active @endif"
+                           class="nav-link {% if active == 'settings' %} active {% endif %}"
                            id="profile-tab">
                             <i class="ph-bold  ph-user-circle-gear pe-2"></i>
                             Details
@@ -17,26 +17,26 @@
                     </li>
                     <li class="nav-item" role="">
                         <a href="{{ route('account.password') }}"
-                           class="nav-link @if($active == 'password') active @endif"
+                           class="nav-link {% if active == 'password' %} active {% endif %}"
                            id="password-tab">
                             <i class="ph-bold  ph-lock-open pe-2"></i>Password
                         </a>
                     </li>
-                    @can('api')
+                    {% if can('api') %}
                         <li class="nav-item" role="presentation">
                             <a href="{{ route('account.tokens.index') }}"
-                               class="nav-link @if($active == 'tokens') active @endif"
+                               class="nav-link {% if active == 'tokens' %} active {% endif %}"
                                id="tokens-tab">
                                 <i class="ph-bold  ph-shield-check pe-2"></i>API Tokens
                             </a>
                         </li>
-                    @endcan
+                    {% endif %}
                 </ul>
             </div>
 
         </div>
     </div>
-    {{--
+    {#
     <div class="card">
         <div class="card-header">
             <h5>Time Spent</h5>
@@ -70,5 +70,5 @@
             </div>
         </div>
     </div>
-    --}}
+    #}
 </div>

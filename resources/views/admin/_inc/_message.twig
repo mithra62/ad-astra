@@ -1,17 +1,17 @@
-@if (session('failure'))
+{% if session('failure') %}
     <div class="alert alert-warning">
-        {{ __(session('failure')) }}
+        {{ trans(session('failure')) }}
     </div>
-@endif
+{% endif %}
 
-@if (session('success'))
+{% if session('success') %}
     <div class="alert alert-success">
-        {{ __(session('success')) }}
+        {{ trans(session('success')) }}
     </div>
-@endif
+{% endif %}
 
-@if ($errors && count($errors))
+{% if errors and errors.count() %}
     <div class="alert alert-danger">
         Please correct the below errors
     </div>
-@endif
+{% endif %}
