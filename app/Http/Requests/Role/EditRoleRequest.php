@@ -21,7 +21,12 @@ class EditRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255|unique:roles,name,' . (int)self::segment(2),
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                ''
+            ], // 'required|string|max:255|unique:roles,name,' . (int)self::segment(2),
             'permissions' => 'required|array'
         ];
     }

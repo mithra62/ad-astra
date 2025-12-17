@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin\User;
 
-use App\Actions\Actions\User\Token\CreateNewUserToken;
-use App\Http\Controllers\Admin\Controller AS AdminController;
+use App\Actions\User\Token\CreateNewUserToken;
+use App\Http\Controllers\Admin\Controller as AdminController;
 use App\Http\Requests\User\Token\DeleteUserTokenRequest;
 use App\Http\Requests\User\Token\EditUserTokenRequest;
 use App\Http\Requests\User\Token\StoreUserTokenRequest;

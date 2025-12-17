@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use App\Actions\Actions\User\CreateNewUser;
-use App\Actions\Actions\User\ResetUserPassword;
-use App\Actions\Actions\User\UpdateUserPassword;
-use App\Actions\Actions\User\UpdateUserProfileInformation;
+use App\Actions\User\CreateNewUser;
+use App\Actions\User\ResetUserPassword;
+use App\Actions\User\UpdateUserPassword;
+use App\Actions\User\UpdateUserProfileInformation;
 use App\Http\Responses\SuccessfulPasswordResetLinkRequestResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;

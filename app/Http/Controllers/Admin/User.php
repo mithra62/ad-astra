@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Actions\Actions\User\CreateNewUser;
-use App\Actions\Actions\User\UpdateUserPassword;
+use App\Actions\User\CreateNewUser;
+use App\Actions\User\UpdateUserPassword;
 use App\Http\Requests\User\DeleteUserRequest;
 use App\Http\Requests\User\EditUserRequest;
 use App\Http\Requests\User\PasswordUserRequest;

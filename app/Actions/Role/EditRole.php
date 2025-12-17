@@ -1,5 +1,5 @@
 <?php
-namespace App\Actions\Actions\Role;
+namespace App\Actions\Role;
 
 use App\Models\Role as RoleModel;
 

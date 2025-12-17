@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Admin\Category;
 
+use App\Actions\Category\Group\CreateNewCategoryGroup;
 use App\Http\Controllers\Admin\Controller;
-use Illuminate\Http\Request;
-use App\Models\Category\Group AS CategoryGroup;
-use App\Http\Requests\Category\Group\StoreCategoryGroupRequest;
 use App\Http\Requests\Category\Group\DeleteCategoryGroupRequest;
 use App\Http\Requests\Category\Group\EditCategoryGroupRequest;
+use App\Http\Requests\Category\Group\StoreCategoryGroupRequest;
+use App\Models\Category\Group as CategoryGroup;
 
 class Group extends Controller
 {
@@ -35,6 +35,10 @@ class Group extends Controller
     {
         echo __FILE__ . ': '. __LINE__;
         exit;
+
+        $creator = app(CreateNewCategoryGroup::class);
+        $user = $creator->create($request->all());
+        return redirect()->route('users.show', $user->id)->with('status', trans('user.created'));
     }
 
     /**
@@ -58,7 +62,7 @@ class Group extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(EditCategoryGroupRequest $request, string $id)
     {
         echo __FILE__ . ': '. __LINE__;
         exit;
@@ -67,7 +71,7 @@ class Group extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(DeleteCategoryGroupRequest $request, string $id)
     {
         echo __FILE__ . ': '. __LINE__;
         exit;

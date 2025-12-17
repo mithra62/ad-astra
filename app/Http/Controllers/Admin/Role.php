@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Actions\Actions\Role\CreateNewRole;
-use App\Actions\Actions\Role\EditRole;
+use App\Actions\Role\CreateNewRole;
+use App\Actions\Role\EditRole;
 use App\Http\Requests\Role\DeleteRoleRequest;
 use App\Http\Requests\Role\EditRoleRequest;
 use App\Http\Requests\Role\StoreRoleRequest;

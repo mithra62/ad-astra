@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Actions\User\Token;
+namespace App\Actions\User\Token;
 
 use App\Models\User;
 use Carbon\Carbon;
