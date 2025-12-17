@@ -41,13 +41,15 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('account/tokens/{token_id}/edit', [AccountTokens::class, 'edit'])->name('account.tokens.edit');
     Route::put('account/tokens/{token_id}', [AccountTokens::class, 'update'])->name('account.tokens.update');
 
+    Route::get('categories/groups/{id}/confirm', [CategoryGroup::class, 'confirm'])->name('categories.groups.confirm');
     Route::resource('categories/groups', CategoryGroup::class)
         ->name('index', 'categories.groups')
         ->name('create', 'categories.groups.create')
         ->name('store', 'categories.groups.store')
         ->name('show', 'categories.groups.show')
         ->name('edit', 'categories.groups.edit')
-        ->name('update', 'categories.groups.update');
+        ->name('update', 'categories.groups.update')
+        ->name('destroy', 'categories.groups.destroy');
     Route::resource('categories', Category::class);
 
     //dashboard

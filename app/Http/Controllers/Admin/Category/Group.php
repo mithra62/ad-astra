@@ -44,7 +44,7 @@ class Group extends Controller
      */
     public function show(string $id)
     {
-        echo __FILE__ . ': '. __LINE__;
+        echo __FILE__ . ': ' . __LINE__;
         exit;
     }
 
@@ -81,7 +81,22 @@ class Group extends Controller
      */
     public function destroy(DeleteCategoryGroupRequest $request, string $id)
     {
-        echo __FILE__ . ': '. __LINE__;
-        exit;
+        $group = CategoryGroup::find($id);
+        if ($group instanceof CategoryGroup) {
+            $group->delete();
+            return redirect()->route('categories.groups')->with('success', trans('category.group.deleted'));
+        }
+
+        return redirect()->route('categories.groups')->with('failure', trans('category.group.not_found'));
+    }
+
+    public function confirm(string $id)
+    {
+        $group = CategoryGroup::find($id);
+        if (!$group instanceof CategoryGroup) {
+            return redirect()->route('categories.groups')->with('failure', 'category.group.not_found');
+        }
+
+        return $this->view('categories.groups.delete', ['group' => $group]);
     }
 }
