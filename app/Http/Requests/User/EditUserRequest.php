@@ -4,6 +4,7 @@ namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class EditUserRequest extends FormRequest
 {
@@ -22,8 +23,12 @@ class EditUserRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . (int)request()->post('user_id'),
-            'roles' => 'required|array'
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users')->ignore($this->data('id')),
+            ],
+            'roles' => 'required|array',
         ];
     }
 
@@ -31,11 +36,10 @@ class EditUserRequest extends FormRequest
      * @return string[]
      */
     public function messages(): array
-
     {
         return [
             'terms.accepted' => 'You must accept the Terms of Service and Privacy Policy.',
-            'email.unique' => 'This email is already registered. Try logging in instead.',
+            'email.unique' => 'This email is already registered.',
             'roles.required' => 'You must select at least one role.',
         ];
     }

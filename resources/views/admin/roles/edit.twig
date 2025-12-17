@@ -29,6 +29,7 @@
         <!-- Custom Styles start -->
         <form method="POST" action="{{ route('roles.update', role) }}" class="row g-3 needs-validation" novalidate>
             {{ csrf_field() }}
+            <input type="hidden" name="id" value="{{ role.id }}" />
             {{ method_field('PUT') }}
             <div class="col-12">
                 <div class="card">
@@ -45,11 +46,10 @@
                             {% endif %}
                         </div>
 
-                        <div class="col-md-12">
+                        <div class="col-md-12 pt-1">
                             <label class="form-label" for="highlight">Highlight Color</label>
                             <input class="form-control" id="highlight" required type="color"
-                                   value="{{ old('highlight', role.highlight) }}" name="highlight"
-                                   placeholder="Color for this role badge. Accepts HEX codes.">
+                                   value="{{ old('highlight', role.highlight) }}" name="highlight">
                             {% if errors.has('highlight') %}
                                 <p class="text-danger">{{ errors.first('highlight') }}</p>
                             {% endif %}
