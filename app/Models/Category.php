@@ -26,7 +26,7 @@ class Category extends Model
 
     public function group(): BelongsTo
     {
-        return $this->belongsTo(Group::class, 'category_group_id');
+        return $this->belongsTo(Group::class, 'group_id');
     }
 
     public function parent(): BelongsTo
@@ -55,6 +55,6 @@ class Category extends Model
     {
         $groupId = $group instanceof Group ? $group->getKey() : $group;
 
-        return $query->where('category_group_id', $groupId);
+        return $query->where('group_id', $groupId);
     }
 }

@@ -15,7 +15,7 @@
                             </a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('users.index') }}">Categories</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Categories</a>
                         </li>
                     </ul>
                 </div>
@@ -46,33 +46,37 @@
                                 <thead>
                                 <tr>
                                     <th scope="col">Name</th>
-                                    <th scope="col">Email</th>
+                                    <th scope="col">Categories</th>
                                     <th scope="col">Last Modified</th>
                                     <th scope="col">Created</th>
                                     <th scope="col"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for groups in group %}
+                                {% for group in groups %}
                                     <tr>
                                         <td>{{ group.name }}</td>
                                         <td class="f-w-500">
-                                            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                                            {{ group.categories.count() }}
                                         </td>
                                         <td class="text-secondary f-w-600">
-                                            {{ user.updated_at.format('F j, Y') }}
+                                            {{ group.updated_at.format('F j, Y') }}
                                         </td>
                                         <td>
-                                            {{ user.created_at.format('F j, Y') }}
+                                            {{ group.created_at.format('F j, Y') }}
                                         </td>
                                         <td>
-                                            <a class="btn btn-danger icon-btn b-r-4"
-                                               href="{{ route('users.confirm', user) }}">
-                                                <i class="ti ti-trash"></i>
+                                            <a class="btn btn-primary icon-btn b-r-4"
+                                               href="{{ route('categories.groups.show', group) }}">
+                                                <i class="ti ti-activity"></i>
                                             </a>
                                             <a class="btn btn-success icon-btn b-r-4"
-                                               href="{{ route('users.edit', user) }}">
+                                               href="{{ route('categories.groups.edit', group) }}">
                                                 <i class="ti ti-edit"></i>
+                                            </a>
+                                            <a class="btn btn-danger icon-btn b-r-4"
+                                               href="{{ route('categories.groups.show', group) }}">
+                                                <i class="ti ti-trash"></i>
                                             </a>
                                         </td>
                                     </tr>

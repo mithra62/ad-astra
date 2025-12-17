@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('category_group_id')
+            $table->foreignId('group_id')
                 ->constrained('category_groups')
                 ->cascadeOnDelete();
 
@@ -30,9 +30,9 @@ return new class extends Migration
             $table->timestamps();
 
             // Slug uniqueness per group (lets you reuse "news" across groups)
-            $table->unique(['category_group_id', 'slug'], 'cat_group_slug_unique');
+            $table->unique(['group_id', 'slug'], 'cat_group_slug_unique');
 
-            $table->index(['category_group_id', 'parent_id', 'sort_order'], 'cat_group_parent_sort_idx');
+            $table->index(['group_id', 'parent_id', 'sort_order'], 'cat_group_parent_sort_idx');
         });
     }
 

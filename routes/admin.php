@@ -44,7 +44,10 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::resource('categories/groups', CategoryGroup::class)
         ->name('index', 'categories.groups')
         ->name('create', 'categories.groups.create')
-        ->name('store', 'categories.groups.store');
+        ->name('store', 'categories.groups.store')
+        ->name('show', 'categories.groups.show')
+        ->name('edit', 'categories.groups.edit')
+        ->name('update', 'categories.groups.update');
     Route::resource('categories', Category::class);
 
     //dashboard

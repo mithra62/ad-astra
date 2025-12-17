@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Category;
 
 use App\Actions\Category\Group\CreateNewCategoryGroup;
+use App\Actions\Category\Group\EditCategoryGroup;
 use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\Category\Group\DeleteCategoryGroupRequest;
 use App\Http\Requests\Category\Group\EditCategoryGroupRequest;
@@ -16,7 +17,7 @@ class Group extends Controller
      */
     public function index()
     {
-        $groups = CategoryGroup::paginate(20);
+        $groups = CategoryGroup::with('categories')->paginate(20);
         return $this->view('categories.groups.index', ['groups' => $groups]);
     }
 
@@ -52,8 +53,12 @@ class Group extends Controller
      */
     public function edit(string $id)
     {
-        echo __FILE__ . ': '. __LINE__;
-        exit;
+        $group = CategoryGroup::find($id);
+        if (!$group instanceof CategoryGroup) {
+            abort(404);
+        }
+
+        return $this->view('categories.groups.edit', ['group' => $group]);
     }
 
     /**
@@ -61,8 +66,14 @@ class Group extends Controller
      */
     public function update(EditCategoryGroupRequest $request, string $id)
     {
-        echo __FILE__ . ': '. __LINE__;
-        exit;
+        $group = CategoryGroup::find($id);
+        if ($group instanceof CategoryGroup) {
+            $editor = app(EditCategoryGroup::class);
+            $editor->edit($group, $request->all());
+            return redirect()->route('categories.groups')->with('success', trans('category.group.updated'));
+        }
+
+        abort(404);
     }
 
     /**
