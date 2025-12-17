@@ -33,12 +33,9 @@ class Group extends Controller
      */
     public function store(StoreCategoryGroupRequest $request)
     {
-        echo __FILE__ . ': '. __LINE__;
-        exit;
-
         $creator = app(CreateNewCategoryGroup::class);
-        $user = $creator->create($request->all());
-        return redirect()->route('users.show', $user->id)->with('status', trans('user.created'));
+        $group = $creator->create($request->all());
+        return redirect()->route('categories.groups.show', $group->id)->with('status', trans('category.group.created'));
     }
 
     /**
