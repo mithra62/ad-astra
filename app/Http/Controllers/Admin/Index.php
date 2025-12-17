@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Rest\Rest\Client;
+use App\Rest\Client;
 
 class Index extends Controller
 {

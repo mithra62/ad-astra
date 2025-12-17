@@ -9,7 +9,7 @@ use App\Http\Requests\User\EditUserRequest;
 use App\Http\Requests\User\PasswordUserRequest;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Models\User as UserModel;
-use App\Rest\Rest\Client;
+use App\Rest\Client;
 use Spatie\Permission\Models\Role as RoleModel;
 
 class User extends Controller

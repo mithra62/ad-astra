@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Rest\Rest\Api;
+use App\Rest\Api;
 use App\Settings;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;

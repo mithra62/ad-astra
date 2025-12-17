@@ -1,5 +1,5 @@
 <?php
-namespace App\Rest\Rest;
+namespace App\Rest;
 
 use App\Models\ApiLog;
 
