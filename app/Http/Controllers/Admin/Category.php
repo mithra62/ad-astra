@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\Category\DeleteCategoryRequest;
+use App\Http\Requests\Category\EditCategoryRequest;
+use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Models\Category\Group as CategoryGroup;
 use Illuminate\Http\Request;
 
@@ -26,13 +29,13 @@ class Category extends Controller
             abort(404);
         }
 
-        return $this->view('categories.create');
+        return $this->view('categories.create', ['group' => $group]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
         echo __FILE__ . ': '. __LINE__;
         exit;
@@ -59,7 +62,7 @@ class Category extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(EditCategoryRequest $request, string $id)
     {
         echo __FILE__ . ': '. __LINE__;
         exit;

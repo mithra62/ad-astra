@@ -1,17 +1,17 @@
 <?php
-namespace App\Http\Requests\Role;
+namespace App\Http\Requests\Category;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
-class DeleteRoleRequest extends FormRequest
+class DeleteCategoryRequest extends FormRequest
 {
     /**
      * @return bool
      */
     public function authorize(): bool
     {
-        return Auth::user()->can('delete roles');
+        return Auth::user()->can('delete category');
     }
 
     /**
@@ -28,20 +28,10 @@ class DeleteRoleRequest extends FormRequest
      * @return string[]
      */
     public function messages(): array
+
     {
         return [
             'confirm_removal.required' => 'You must confirm the removal',
-        ];
-    }
-
-    /**
-     * @return string[]
-     */
-    public function attributes(): array
-    {
-        return [
-            'name' => 'full name',
-            'email' => 'email address',
         ];
     }
 }
