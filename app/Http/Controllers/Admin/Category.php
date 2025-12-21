@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\Category\CreateNewCategory;
+use App\Actions\Category\EditCategory;
 use App\Http\Requests\Category\DeleteCategoryRequest;
 use App\Http\Requests\Category\EditCategoryRequest;
 use App\Http\Requests\Category\StoreCategoryRequest;
-use App\Models\Category AS CategoryModel;
+use App\Models\Category as CategoryModel;
 use App\Models\Category\Group as CategoryGroup;
-use App\Actions\Category\CreateNewCategory;
 
 class Category extends Controller
 {
@@ -16,7 +17,7 @@ class Category extends Controller
      */
     public function index()
     {
-        echo __FILE__ . ': '. __LINE__;
+        echo __FILE__ . ': ' . __LINE__;
         exit;
     }
 
@@ -50,7 +51,7 @@ class Category extends Controller
      */
     public function show(string $id)
     {
-        echo __FILE__ . ': '. __LINE__;
+        echo __FILE__ . ': ' . __LINE__;
         exit;
     }
 
@@ -73,16 +74,39 @@ class Category extends Controller
      */
     public function update(EditCategoryRequest $request, string $id)
     {
-        echo __FILE__ . ': '. __LINE__;
-        exit;
+        $category = CategoryModel::find($id);
+        if ($category instanceof CategoryModel) {
+            $editor = app(EditCategory::class);
+            $editor->edit($category, $request->all());
+            return redirect()->route('categories.groups.show', $category->group)->with('success', trans('category.updated'));
+        }
+
+        abort(404);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(DeleteCategoryRequest $request, string $id)
     {
-        echo __FILE__ . ': '. __LINE__;
-        exit;
+        $category = CategoryModel::find($id);
+        if ($category instanceof CategoryModel) {
+            $group = $category->group;
+            $category->delete();
+            return redirect()->route('categories.groups.show', $group)->with('success', trans('category.deleted'));
+        }
+
+        abort(404);
+    }
+
+    public function confirm(string $id)
+    {
+        $category = CategoryModel::find($id);
+        if (!$category instanceof CategoryModel) {
+            abort(404);
+        }
+
+        $groups = CategoryGroup::with('categories')->get();
+        return $this->view('categories.delete', ['category' => $category]);
     }
 }
