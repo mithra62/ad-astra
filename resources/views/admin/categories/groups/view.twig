@@ -45,12 +45,52 @@
                             <div class="card-body">
                                 <div class="profile-tab profile-container">
                                     {% if group.categories.count >= 1 %}
-                                    <form method="POST" action="{{ route('account.edit') }}"
-                                          class="row g-3 needs-validation"
-                                          novalidate>
-                                        {{ csrf_field() }}
-                                        {{ method_field('PUT') }}
-                                    </form>
+                                        <div class="table-responsive">
+                                            <table class="table align-middle mb-0">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">Name</th>
+                                                    <th scope="col">Slug</th>
+                                                    <th scope="col">Last Modified</th>
+                                                    <th scope="col">Created</th>
+                                                    <th scope="col"></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for category in group.categories %}
+                                                    <tr>
+                                                        <td>{{ category.name }}</td>
+                                                        <td class="f-w-500">
+                                                            {{ category.slug }}
+                                                        </td>
+                                                        <td class="text-secondary f-w-600">
+                                                            {{ category.updated_at.format('F j, Y') }}
+                                                        </td>
+                                                        <td>
+                                                            {{ category.created_at.format('F j, Y') }}
+                                                        </td>
+                                                        <td>
+                                                            <a class="btn btn-primary icon-btn b-r-4"
+                                                               href="{{ route('categories.show', category) }}">
+                                                                <i class="ti ti-activity"></i>
+                                                            </a>
+                                                            <a class="btn btn-success icon-btn b-r-4"
+                                                               href="{{ route('categories.edit', category) }}">
+                                                                <i class="ti ti-edit"></i>
+                                                            </a>
+                                                            <a class="btn btn-danger icon-btn b-r-4"
+                                                               href="{{ route('categories.confirm', category) }}">
+                                                                <i class="ti ti-trash"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+
                                     {% else %}
                                         <p class="text-center">
                                             No Categories Created. <br />

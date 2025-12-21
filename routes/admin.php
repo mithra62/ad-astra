@@ -53,6 +53,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     Route::get('categories/{group_id}/create', [Category::class, 'create'])->name('categories.create');
     Route::post('categories/{group_id}/create', [Category::class, 'store'])->name('categories.store');
+    Route::get('categories/{id}/confirm', [Category::class, 'confirm'])->name('categories.confirm');
     Route::resource('categories', Category::class);
 
     //dashboard

@@ -1,0 +1,74 @@
+{{ include('admin._inc._header', {title: 'View Category Group'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12 ">
+                <h4 class="main-title">Category Group</h4>
+                <ul class="app-line-breadcrumbs mb-3">
+                    <li class="">
+                        <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                                <span>
+                                    <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
+                                </span>
+                        </a>
+                    </li>
+                    <li class="">
+                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Categories</a>
+                    </li>
+                    <li class="active">
+                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups.show', category.group) }}">Category Group</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
+        <!-- setting-app start -->
+        <div class="row">
+            {{ include('admin.categories._sidebar', {active: category.group.id}) }}
+            <div class="col-lg-8 col-xxl-9">
+                <div class="tab-content">
+                    <div aria-labelledby="profile-tab" class="tab-pane fade active show"
+                         id="profile-tab-pane"
+                         role="tabpanel" tabindex="0">
+                        <div class="card setting-profile-tab">
+                            <div class="card-header">
+                                <h5>Categories</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="profile-tab profile-container">
+
+                                    <form method="POST" action="{{ route('categories.update', category.id) }}" class="row g-3 needs-validation" novalidate>
+                                        {{ csrf_field() }}
+                                        <input type="hidden" name="id" value="{{ category.id }}" />
+                                        {{ method_field('PUT') }}
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="name">Name</label>
+                                            <input class="form-control" id="name" required type="text" value="{{ old('name', category.name) }}" name="name">
+                                            {% if errors.has('name') %}
+                                                <p class="text-danger">{{ errors.first('name') }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="slug">Slug</label>
+                                            <input class="form-control" id="slug" required type="text" value="{{ old('slug', category.slug) }}" name="slug">
+                                            {% if errors.has('slug') %}
+                                                <p class="text-danger">{{ errors.first('slug') }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-12">
+                                            <button class="btn btn-primary float-end" type="submit">Edit Category</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--setting app end -->
+    </div>
+</main>
+{{ include('admin._inc._footer') }}

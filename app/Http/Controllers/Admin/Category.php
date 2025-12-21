@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\Category\DeleteCategoryRequest;
 use App\Http\Requests\Category\EditCategoryRequest;
 use App\Http\Requests\Category\StoreCategoryRequest;
+use App\Models\Category AS CategoryModel;
 use App\Models\Category\Group as CategoryGroup;
-use Illuminate\Http\Request;
+use App\Actions\Category\CreateNewCategory;
 
 class Category extends Controller
 {
@@ -38,8 +39,10 @@ class Category extends Controller
     public function store(StoreCategoryRequest $request)
     {
         $creator = app(CreateNewCategory::class);
-        $group = $creator->create($request->all());
-        return redirect()->route('categories.groups.show', $group->id)->with('status', trans('category.group.created'));
+        $data = $request->all();
+        $data['group_id'] = $request->group_id;
+        $group = $creator->create($data);
+        return redirect()->route('categories.show', $group->id)->with('status', trans('category.created'));
     }
 
     /**
@@ -56,8 +59,13 @@ class Category extends Controller
      */
     public function edit(string $id)
     {
-        echo __FILE__ . ': '. __LINE__;
-        exit;
+        $category = CategoryModel::find($id);
+        if (!$category instanceof CategoryModel) {
+            abort(404);
+        }
+
+        $groups = CategoryGroup::with('categories')->get();
+        return $this->view('categories.edit', ['category' => $category, 'groups' => $groups]);
     }
 
     /**

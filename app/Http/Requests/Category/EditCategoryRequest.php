@@ -26,13 +26,13 @@ class EditCategoryRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('category_groups')->ignore($this->data('id')),
+                Rule::unique('categories')->ignore($this->data('id')),
             ],
             'slug' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('category_groups')->ignore($this->data('id')),
+                Rule::unique('categories')->ignore($this->data('id')),
             ],
         ];
     }
