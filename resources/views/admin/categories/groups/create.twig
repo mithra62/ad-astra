@@ -15,10 +15,10 @@
                             </a>
                         </li>
                         <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('users.index') }}">Categories</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Categories</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('users.create') }}">Create Category Group</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('categories.groups.create') }}">Create Category Group</a>
                         </li>
                     </ul>
                 </div>
@@ -41,6 +41,13 @@
                             <input class="form-control" id="name" required type="text" value="{{ old('name') }}" name="name">
                             {% if errors.has('name') %}
                                 <p class="text-danger">{{ errors.first('name') }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label" for="slug">Slug</label>
+                            <input class="form-control" id="slug" required type="text" value="{{ old('slug') }}" name="slug">
+                            {% if errors.has('slug') %}
+                                <p class="text-danger">{{ errors.first('slug') }}</p>
                             {% endif %}
                         </div>
                         <div class="col-12">

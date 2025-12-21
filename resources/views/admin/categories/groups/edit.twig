@@ -45,6 +45,13 @@
                                 <p class="text-danger">{{ errors.first('name') }}</p>
                             {% endif %}
                         </div>
+                        <div class="col-md-12">
+                            <label class="form-label" for="slug">Slug</label>
+                            <input class="form-control" id="slug" required type="text" value="{{ old('slug', group.slug) }}" name="slug">
+                            {% if errors.has('slug') %}
+                                <p class="text-danger">{{ errors.first('slug') }}</p>
+                            {% endif %}
+                        </div>
                         <div class="col-12">
                             <button class="btn btn-primary float-end" type="submit">Edit Category Group</button>
                         </div>

@@ -44,12 +44,21 @@
                             </div>
                             <div class="card-body">
                                 <div class="profile-tab profile-container">
+                                    {% if group.categories.count >= 1 %}
                                     <form method="POST" action="{{ route('account.edit') }}"
                                           class="row g-3 needs-validation"
                                           novalidate>
                                         {{ csrf_field() }}
                                         {{ method_field('PUT') }}
                                     </form>
+                                    {% else %}
+
+                                        <p class="text-center">
+                                            No Categories Created. <br />
+                                            <a href="{{ route('categories.create', {group_id: group.id}) }}" class="btn btn-outline-primary">Create Category</a>
+                                        </p>
+                                    {% endif %}
+
                                 </div>
                             </div>
                         </div>
