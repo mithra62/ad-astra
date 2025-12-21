@@ -49,7 +49,8 @@ class Group extends Controller
             abort(404);
         }
 
-        return $this->view('categories.groups.view', ['group' => $group]);
+        $groups = CategoryGroup::with('categories')->get();
+        return $this->view('categories.groups.view', ['group' => $group, 'groups' => $groups]);
     }
 
     /**

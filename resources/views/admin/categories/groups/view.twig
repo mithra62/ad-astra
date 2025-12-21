@@ -8,13 +8,16 @@
                 <ul class="app-line-breadcrumbs mb-3">
                     <li class="">
                         <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                            <span>
-                                <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
-                            </span>
+                                <span>
+                                    <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
+                                </span>
                         </a>
                     </li>
+                    <li class="">
+                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Categories</a>
+                    </li>
                     <li class="active">
-                        <a class="f-s-14 f-w-500" href="{{ route('account.settings') }}">Account Settings</a>
+                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups.show', group) }}">Category Group</a>
                     </li>
                 </ul>
             </div>

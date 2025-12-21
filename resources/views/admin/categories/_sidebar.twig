@@ -6,31 +6,17 @@
         <div class="card-body">
             <div class="vertical-tab setting-tab">
                 <ul class="nav nav-tabs app-tabs-primary " id="v-bg" role="tablist">
+                    {% for group in groups %}
                     <li class="nav-item" role="presentation">
                         <a aria-controls="profile-tab-pane" aria-selected="true"
-                           href="{{ route('account.settings') }}"
-                           class="nav-link {% if active == 'settings' %} active {% endif %}"
+                           href="{{ route('categories.groups.show', group) }}"
+                           class="nav-link {% if active == group.id %} active {% endif %}"
                            id="profile-tab">
                             <i class="ph-bold  ph-user-circle-gear pe-2"></i>
-                            Details
+                            {{ group.name }}
                         </a>
                     </li>
-                    <li class="nav-item" role="">
-                        <a href="{{ route('account.password') }}"
-                           class="nav-link {% if active == 'password' %} active {% endif %}"
-                           id="password-tab">
-                            <i class="ph-bold  ph-lock-open pe-2"></i>Password
-                        </a>
-                    </li>
-                    {% if can('api') %}
-                        <li class="nav-item" role="presentation">
-                            <a href="{{ route('account.tokens.index') }}"
-                               class="nav-link {% if active == 'tokens' %} active {% endif %}"
-                               id="tokens-tab">
-                                <i class="ph-bold  ph-shield-check pe-2"></i>API Tokens
-                            </a>
-                        </li>
-                    {% endif %}
+                    {% endfor %}
                 </ul>
             </div>
 
