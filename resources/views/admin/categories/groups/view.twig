@@ -1,0 +1,102 @@
+{{ include('admin._inc._header', {title: 'View Category Group'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12 ">
+                <h4 class="main-title">Category Group</h4>
+                <ul class="app-line-breadcrumbs mb-3">
+                    <li class="">
+                        <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                            <span>
+                                <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
+                            </span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a class="f-s-14 f-w-500" href="{{ route('account.settings') }}">Account Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
+        <!-- setting-app start -->
+        <div class="row">
+            {{ include('admin.categories._sidebar', {active: group.id}) }}
+            <div class="col-lg-8 col-xxl-9">
+                <div class="tab-content">
+                    <div aria-labelledby="profile-tab" class="tab-pane fade active show"
+                         id="profile-tab-pane"
+                         role="tabpanel" tabindex="0">
+                        <div class="card setting-profile-tab">
+                            <div class="card-header">
+                                <h5>Categories</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="profile-tab profile-container">
+                                    <form method="POST" action="{{ route('account.edit') }}"
+                                          class="row g-3 needs-validation"
+                                          novalidate>
+                                        {{ csrf_field() }}
+                                        {{ method_field('PUT') }}
+                                        <h5 class="mb-2 text-dark f-w-600">User Info</h5>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Name</label>
+                                                    <input class="form-control" placeholder="" name="name" type="text"
+                                                           value="{{ old('name', app.auth.user.name) }}">
+                                                </div>
+                                                {% if errors.has('name') %}
+                                                    <p class="text-danger">{{ errors.first('name') }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Email address</label>
+                                                    <input class="form-control" name="email" placeholder="" type="email"
+                                                           value="{{ old('email', app.auth.user.email) }}">
+                                                </div>
+                                                {% if errors.has('email') %}
+                                                    <p class="text-danger">{{ errors.first('email') }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Phone Number</label>
+                                                    <input class="form-control" name="phone" placeholder="" type="text"
+                                                           value="{{ old('phone', app.auth.user.phone) }}">
+                                                </div>
+                                                {% if errors.has('phone') %}
+                                                    <p class="text-danger">{{ errors.first('phone') }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Title</label>
+                                                    <input class="form-control" name="title" placeholder="" type="text"
+                                                           value="{{ old('title', app.auth.user.title) }}">
+                                                </div>
+                                                {% if errors.has('title') %}
+                                                    <p class="text-danger">{{ errors.first('title') }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="text-end">
+                                                    <button class="btn btn-primary" type="submit">Submit</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--setting app end -->
+    </div>
+</main>
+{{ include('admin._inc._footer') }}

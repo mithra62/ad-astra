@@ -44,8 +44,12 @@ class Group extends Controller
      */
     public function show(string $id)
     {
-        echo __FILE__ . ': ' . __LINE__;
-        exit;
+        $group = CategoryGroup::find($id);
+        if (!$group instanceof CategoryGroup) {
+            abort(404);
+        }
+
+        return $this->view('categories.groups.view', ['group' => $group]);
     }
 
     /**
