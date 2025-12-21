@@ -6,8 +6,8 @@ use App\Actions\Category\Group\CreateNewCategoryGroup;
 use App\Actions\Category\Group\EditCategoryGroup;
 use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\Category\Group\DeleteCategoryGroupRequest;
-use App\Http\Requests\Category\Group\EditCategoryRequest;
-use App\Http\Requests\Category\Group\StoreCategoryRequest;
+use App\Http\Requests\Category\Group\EditCategoryGroupRequest;
+use App\Http\Requests\Category\Group\StoreCategoryGroupRequest;
 use App\Models\Category\Group as CategoryGroup;
 
 class Group extends Controller
@@ -32,7 +32,7 @@ class Group extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCategoryRequest $request)
+    public function store(StoreCategoryGroupRequest $request)
     {
         $creator = app(CreateNewCategoryGroup::class);
         $group = $creator->create($request->all());
@@ -69,7 +69,7 @@ class Group extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(EditCategoryRequest $request, string $id)
+    public function update(EditCategoryGroupRequest $request, string $id)
     {
         $group = CategoryGroup::find($id);
         if ($group instanceof CategoryGroup) {
