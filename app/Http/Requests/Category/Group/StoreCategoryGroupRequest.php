@@ -21,9 +21,14 @@ class StoreCategoryGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-
         return [
             'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('category_groups')->ignore($this->data('id')),
+            ],
+            'slug' => [
                 'required',
                 'string',
                 'max:255',
