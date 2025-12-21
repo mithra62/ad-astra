@@ -21,7 +21,7 @@ class Category extends Model
     ];
 
     protected $casts = [
-        'category_group_id' => 'integer',
+        'group_id' => 'integer',
         'parent_id' => 'integer',
         'sort_order' => 'integer',
     ];
