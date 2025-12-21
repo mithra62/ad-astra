@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Models\Category\Group as CategoryGroup;
 use Illuminate\Http\Request;
 
 class Category extends Controller
@@ -21,10 +21,12 @@ class Category extends Controller
      */
     public function create($group_id)
     {
-        echo $group_id;
-        exit;
-        echo __FILE__ . ': '. __LINE__;
-        exit;
+        $group = CategoryGroup::find($group_id);
+        if (!$group instanceof CategoryGroup) {
+            abort(404);
+        }
+
+        return $this->view('categories.create');
     }
 
     /**

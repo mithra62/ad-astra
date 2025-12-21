@@ -52,13 +52,11 @@
                                         {{ method_field('PUT') }}
                                     </form>
                                     {% else %}
-
                                         <p class="text-center">
                                             No Categories Created. <br />
                                             <a href="{{ route('categories.create', {group_id: group.id}) }}" class="btn btn-outline-primary">Create Category</a>
                                         </p>
                                     {% endif %}
-
                                 </div>
                             </div>
                         </div>
