@@ -50,6 +50,8 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('edit', 'categories.groups.edit')
         ->name('update', 'categories.groups.update')
         ->name('destroy', 'categories.groups.destroy');
+
+    Route::get('categories/{group_id}/create', [Category::class, 'create'])->name('categories.create');
     Route::resource('categories', Category::class);
 
     //dashboard

@@ -35,6 +35,12 @@
                         <div class="card setting-profile-tab">
                             <div class="card-header">
                                 <h5>Categories</h5>
+                                <div class="col-12">
+                                    <p class="float-right text-end">
+                                        <a href="{{ route('categories.create', {group_id: group.id}) }}" class="btn btn-primary">Create
+                                            Category</a>
+                                    </p>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div class="profile-tab profile-container">
@@ -43,54 +49,6 @@
                                           novalidate>
                                         {{ csrf_field() }}
                                         {{ method_field('PUT') }}
-                                        <h5 class="mb-2 text-dark f-w-600">User Info</h5>
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Name</label>
-                                                    <input class="form-control" placeholder="" name="name" type="text"
-                                                           value="{{ old('name', app.auth.user.name) }}">
-                                                </div>
-                                                {% if errors.has('name') %}
-                                                    <p class="text-danger">{{ errors.first('name') }}</p>
-                                                {% endif %}
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Email address</label>
-                                                    <input class="form-control" name="email" placeholder="" type="email"
-                                                           value="{{ old('email', app.auth.user.email) }}">
-                                                </div>
-                                                {% if errors.has('email') %}
-                                                    <p class="text-danger">{{ errors.first('email') }}</p>
-                                                {% endif %}
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Phone Number</label>
-                                                    <input class="form-control" name="phone" placeholder="" type="text"
-                                                           value="{{ old('phone', app.auth.user.phone) }}">
-                                                </div>
-                                                {% if errors.has('phone') %}
-                                                    <p class="text-danger">{{ errors.first('phone') }}</p>
-                                                {% endif %}
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Title</label>
-                                                    <input class="form-control" name="title" placeholder="" type="text"
-                                                           value="{{ old('title', app.auth.user.title) }}">
-                                                </div>
-                                                {% if errors.has('title') %}
-                                                    <p class="text-danger">{{ errors.first('title') }}</p>
-                                                {% endif %}
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="text-end">
-                                                    <button class="btn btn-primary" type="submit">Submit</button>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </form>
                                 </div>
                             </div>

@@ -19,8 +19,10 @@ class Category extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create($group_id)
     {
+        echo $group_id;
+        exit;
         echo __FILE__ . ': '. __LINE__;
         exit;
     }
