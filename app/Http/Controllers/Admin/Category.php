@@ -51,6 +51,14 @@ class Category extends Controller
      */
     public function show(string $id)
     {
+        $category = CategoryModel::with(['group', 'children'])->find($id);
+        if (!$category instanceof CategoryModel) {
+            abort(404);
+        }
+
+        //$category->with('group');
+        print_r($category);
+        exit;
         echo __FILE__ . ': ' . __LINE__;
         exit;
     }

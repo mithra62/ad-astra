@@ -44,7 +44,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="profile-tab profile-container">
-                                    {% if group.categories.count >= 1 %}
+                                    {% if categories.count >= 1 %}
                                         <div class="table-responsive">
                                             <table class="table align-middle mb-0">
                                                 <thead>
@@ -57,7 +57,7 @@
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                {% for category in group.categories %}
+                                                {% for category in categories %}
                                                     <tr>
                                                         <td>{{ category.name }}</td>
                                                         <td class="f-w-500">
@@ -85,12 +85,9 @@
                                                         </td>
                                                     </tr>
                                                 {% endfor %}
-
                                                 </tbody>
                                             </table>
                                         </div>
-
-
                                     {% else %}
                                         <p class="text-center">
                                             No Categories Created. <br />

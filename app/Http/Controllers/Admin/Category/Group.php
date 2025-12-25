@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\Category\Group\DeleteCategoryGroupRequest;
 use App\Http\Requests\Category\Group\EditCategoryGroupRequest;
 use App\Http\Requests\Category\Group\StoreCategoryGroupRequest;
+use App\Models\Category as CategoryModel;
 use App\Models\Category\Group as CategoryGroup;
 
 class Group extends Controller
@@ -49,8 +50,15 @@ class Group extends Controller
             abort(404);
         }
 
-        $groups = CategoryGroup::with('categories')->get();
-        return $this->view('categories.groups.view', ['group' => $group, 'groups' => $groups]);
+        $groups = CategoryGroup::all();
+        $categories = CategoryModel::where(['group_id' => $group->id])->whereNull('parent_id')->get();
+        $data = [
+            'group' => $group,
+            'groups' => $groups,
+            'categories' => $categories,
+        ];
+
+        return $this->view('categories.groups.view', $data);
     }
 
     /**
