@@ -5,11 +5,13 @@ namespace App\Models\User;
 
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OauthToken extends Model
 {
+    use HasFactory;
     protected $table = 'user_oauth_tokens';
 
     protected $fillable = [
