@@ -19,6 +19,7 @@
         "laravel/tinker": "^2.10.1",
         "laravolt/avatar": "^6.3",
         "rcrowe/twigbridge": "^0.14.6",
+        "spatie/laravel-medialibrary": "^11.17",
         "spatie/laravel-permission": "^6.21",
         "spatie/laravel-webhook-client": "^3.4",
         "twig/twig": "^3.22"
