@@ -70,9 +70,15 @@ class TokenRefreshService
 
         $request = $this->httpClientFor($provider);
 
-        $response = $request
-            ->asForm() // most token endpoints expect x-www-form-urlencoded
-            ->post($tokenUrl, $payload);
+        try {
+            $response = $request
+                ->asForm() // most token endpoints expect x-www-form-urlencoded
+                ->post($tokenUrl, $payload);
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            throw TokenRefreshException::httpFailed($provider, $e->getCode() ?: $e->response->status(), (string) $e->response->body());
+        } catch (\Exception $e) {
+            throw TokenRefreshException::httpFailed($provider, 0, $e->getMessage());
+        }
 
         if (! $response->successful()) {
             throw TokenRefreshException::httpFailed($provider, $response->status(), (string) $response->body());
