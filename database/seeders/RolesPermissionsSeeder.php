@@ -34,10 +34,15 @@ class RolesPermissionsSeeder extends Seeder
         Permission::create(['name' => 'create category group', 'description' => 'Allow users to create category groups']);
         Permission::create(['name' => 'reorder category group', 'description' => 'Allow users to reorder category groups']);
 
-        Permission::create(['name' => 'delete categories', 'description' => 'Allow users to delete categories']);
-        Permission::create(['name' => 'edit categories', 'description' => 'Allow users to edit categories']);
-        Permission::create(['name' => 'create categories', 'description' => 'Allow users to create categories']);
-        Permission::create(['name' => 'reorder categories', 'description' => 'Allow users to reorder categories']);
+        Permission::create(['name' => 'delete category', 'description' => 'Allow users to delete categories']);
+        Permission::create(['name' => 'edit category', 'description' => 'Allow users to edit categories']);
+        Permission::create(['name' => 'create category', 'description' => 'Allow users to create categories']);
+        Permission::create(['name' => 'reorder category', 'description' => 'Allow users to reorder categories']);
+
+        Permission::create(['name' => 'delete media library', 'description' => 'Allow users to delete media libraries']);
+        Permission::create(['name' => 'edit media library', 'description' => 'Allow users to edit media libraries']);
+        Permission::create(['name' => 'create media library', 'description' => 'Allow users to create media libraries']);
+        Permission::create(['name' => 'reorder media library', 'description' => 'Allow users to reorder media libraries']);
 
         // update cache to know about the newly created permissions (required if using WithoutModelEvents in seeders)
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
@@ -50,12 +55,28 @@ class RolesPermissionsSeeder extends Seeder
         $role = Role::create(['name' => 'admin']);
         $role->givePermissionTo('access admin');
         $role->givePermissionTo('api');
+        $role->givePermissionTo('view user');
         $role->givePermissionTo('create user');
         $role->givePermissionTo('delete user');
         $role->givePermissionTo('edit user');
-        $role->givePermissionTo('delete user');
-        $role->givePermissionTo('create token');
-        $role->givePermissionTo('delete token');
-        $role->givePermissionTo('edit token');
+        $role->givePermissionTo('view user token');
+        $role->givePermissionTo('create user token');
+        $role->givePermissionTo('delete user token');
+        $role->givePermissionTo('edit user token');
+
+        $role->givePermissionTo('delete category group');
+        $role->givePermissionTo('edit category group');
+        $role->givePermissionTo('create category group');
+        $role->givePermissionTo('reorder category group');
+
+        $role->givePermissionTo('delete category');
+        $role->givePermissionTo('edit category');
+        $role->givePermissionTo('create category');
+        $role->givePermissionTo('reorder category');
+
+        $role->givePermissionTo('delete media library');
+        $role->givePermissionTo('edit media library');
+        $role->givePermissionTo('create media library');
+        $role->givePermissionTo('reorder media library');
     }
 }

@@ -11,7 +11,7 @@ class StoreUserTokenRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->can('create token');
+        return Auth::user()->can('create user token');
     }
 
     /**

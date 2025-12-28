@@ -11,7 +11,7 @@ class DeleteUserTokenRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->can('delete token');
+        return Auth::user()->can('delete user token');
     }
 
     /**

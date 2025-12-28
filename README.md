@@ -27,8 +27,23 @@ Within the project directory, execute the below Commands (in order)
 Execute the below in the order provided
 
 1. `php artisan migrate`
-2. `php artisan db:seed --class=RolesPermissionsSeeder`
-3. `php artisan db:seed --class=UsersSeeder`
+2. `php artisan db:seed --class=DatabaseSeeder`
+
+### Helpful Commands
+
+`php artisan config:clear`
+`php artisan optimize:clear`
+`php artisan cache:clear`
+`php artisan route:clear`
+`php artisan view:clear`
+`php artisan storage:link`
+`php artisan key:generate`
+`php artisan jwt:secret`
+`php artisan jwt:generate`
+`php artisan jwt:refresh`
+`php artisan jwt:check`
+`php artisan jwt:blacklist`
+
 
 ### Log In
 

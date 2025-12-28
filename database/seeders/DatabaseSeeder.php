@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
             UsersSeeder::class
         ]);
 
-        if ($this->app->environment(['local', 'testing'])) {
+        if (app()->environment(['local', 'testing'])) {
 
         }
     }
