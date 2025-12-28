@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('media_library', function (Blueprint $table) {
+        Schema::create('media_libraries', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('slug')->index();
@@ -31,7 +31,7 @@ return new class extends Migration
 
         Schema::table('media', function (Blueprint $table) {
             $table->foreignId('library_id')->nullable()->after('collection_name')
-                ->constrained('media_library')->nullOnDelete();
+                ->constrained('media_libraries')->nullOnDelete();
         });
     }
 
@@ -40,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('media_library');
+        Schema::dropIfExists('media_libraries');
     }
 };
