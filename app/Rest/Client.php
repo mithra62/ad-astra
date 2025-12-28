@@ -2,7 +2,7 @@
 
 namespace App\Rest;
 
-use App\Traits\Traits\Errors;
+use App\Traits\Errors;
 
 class Client
 {
