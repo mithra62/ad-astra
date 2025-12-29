@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Admin\Media;
 
+use App\Http\Controllers\Admin\Controller;
 use Illuminate\Http\Request;
 
-class MediaLibrary extends Controller
+class Library extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        echo 'fdsa';
+        exit;
     }
 
     /**

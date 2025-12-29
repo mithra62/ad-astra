@@ -2,11 +2,12 @@
 
 use App\Http\Controllers\Admin\Account;
 use App\Http\Controllers\Admin\Account\Token as AccountTokens;
+use App\Http\Controllers\Admin\Category;
+use App\Http\Controllers\Admin\Category\Group as CategoryGroup;
 use App\Http\Controllers\Admin\Dashboard;
+use App\Http\Controllers\Admin\Media\Library;
 use App\Http\Controllers\Admin\Role;
 use App\Http\Controllers\Admin\User;
-use App\Http\Controllers\Admin\Category;
-use App\Http\Controllers\Admin\Category\Group AS CategoryGroup;
 use App\Http\Controllers\Admin\User\Token as UserTokens;
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +51,15 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('edit', 'categories.groups.edit')
         ->name('update', 'categories.groups.update')
         ->name('destroy', 'categories.groups.destroy');
+
+    Route::resource('media/library', Library::class)
+        ->name('index', 'media.library')
+        ->name('create', 'media.library.create')
+        ->name('store', 'media.library.store')
+        ->name('show', 'media.library.show')
+        ->name('edit', 'media.library.edit')
+        ->name('update', 'media.library.update')
+        ->name('destroy', 'media.library.destroy');
 
     Route::get('categories/{group_id}/create', [Category::class, 'create'])->name('categories.create');
     Route::post('categories/{group_id}/create', [Category::class, 'store'])->name('categories.store');
