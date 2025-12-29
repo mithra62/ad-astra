@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Role extends RoleModel
 {
     use HasFactory;
+
     /**
      * @var array|int[]
      */

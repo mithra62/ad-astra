@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 
-class MediaLibraries extends Controller
+class MediaLibrary extends Controller
 {
     /**
      * Display a listing of the resource.

@@ -15,7 +15,6 @@ use Spatie\Tags\HasTags;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, HasRoles, HasTags;
 
     /**
