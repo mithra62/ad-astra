@@ -53,6 +53,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                                {% if groups.count >= 1 %}
                                 {% for group in groups %}
                                     <tr>
                                         <td>{{ group.name }}</td>
@@ -81,6 +82,16 @@
                                         </td>
                                     </tr>
                                 {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6">
+                                            <p class="text-center">
+                                                No Category Groups Created. <br />
+                                                <a href="{{ route('categories.groups.create') }}" class="btn btn-outline-primary">Create Category Group</a>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
 
                                 </tbody>
                             </table>
