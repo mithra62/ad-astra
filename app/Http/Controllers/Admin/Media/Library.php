@@ -14,7 +14,7 @@ class Library extends Controller
     public function index()
     {
         $libraries = LibraryModel::paginate(20);
-        return $this->view('media.library.index', ['libraries' => $libraries]);
+        return $this->view('media.libraries.index', ['libraries' => $libraries]);
     }
 
     /**
@@ -22,7 +22,7 @@ class Library extends Controller
      */
     public function create()
     {
-        return $this->view('media.library.create');
+        return $this->view('media.libraries.create');
     }
 
     /**
