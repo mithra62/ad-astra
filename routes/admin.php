@@ -52,6 +52,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('update', 'categories.groups.update')
         ->name('destroy', 'categories.groups.destroy');
 
+    Route::get('media/library/{id}/confirm', [Library::class, 'confirm'])->name('categories.groups.confirm');
     Route::resource('media/library', Library::class)
         ->name('index', 'media.library')
         ->name('create', 'media.library.create')

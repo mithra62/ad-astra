@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Media;
 
 use App\Http\Controllers\Admin\Controller;
 use Illuminate\Http\Request;
+use App\Models\Media\Library as LibraryModel;
 
 class Library extends Controller
 {
@@ -12,8 +13,8 @@ class Library extends Controller
      */
     public function index()
     {
-        echo 'fdsa';
-        exit;
+        $libraries = LibraryModel::paginate(20);
+        return $this->view('media.library.index', ['libraries' => $libraries]);
     }
 
     /**
@@ -21,7 +22,7 @@ class Library extends Controller
      */
     public function create()
     {
-        //
+        return $this->view('media.library.create');
     }
 
     /**
@@ -29,7 +30,9 @@ class Library extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $creator = app(CreateNewCategoryGroup::class);
+        $group = $creator->create($request->all());
+        return redirect()->route('categories.groups.show', $group->id)->with('status', trans('category.group.created'));
     }
 
     /**
@@ -54,6 +57,11 @@ class Library extends Controller
     public function update(Request $request, string $id)
     {
         //
+    }
+
+    public function confirm()
+    {
+
     }
 
     /**
