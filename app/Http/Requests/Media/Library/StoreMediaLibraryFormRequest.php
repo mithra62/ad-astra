@@ -18,19 +18,53 @@ class StoreMediaLibraryFormRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('category_groups')->ignore($this->data('id')),
+                Rule::unique('media_libraries')->ignore($this->data('id')),
             ],
             'slug' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('category_groups')->ignore($this->data('id')),
+                Rule::unique('media_libraries')->ignore($this->data('id')),
+            ],
+            'storage' => [
+                'required',
+                'string',
+            ],
+            'adapter_settings' => [
+                'required',
+                'array',
+            ],
+            'max_size' => [
+                'required',
+                'numeric',
+            ],
+            'category_groups' => [
+                'array',
             ],
         ];
+
+        if ($this->data('storage') == 'local') {
+            $adaptor_rules = [
+                'adapter_settings.local.url' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+                'adapter_settings.local.path' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+            ];
+
+            $rules = array_merge($rules, $adaptor_rules);
+        }
+
+        return $rules;
     }
 }

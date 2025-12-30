@@ -20,8 +20,8 @@ return new class extends Migration
             $table->json('adapter_settings')->nullable();
             $table->string('server_path', 255)->default('');
             $table->string('url', 100);
-            $table->string('allowed_types', 100)->default('img');
-            $table->string('max_size', 16)->nullable();
+            $table->json('allowed_types')->nullable();
+            $table->unsignedInteger('max_size')->default(10);
 
             $table->unsignedInteger('sort_order')->default(0);
 

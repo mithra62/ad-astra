@@ -26,7 +26,8 @@ class Library extends Controller
      */
     public function create()
     {
-        return $this->view('media.libraries.create');
+        $category_groups = CategoryGroup::all();
+        return $this->view('media.libraries.create', ['category_groups' => $category_groups]);
     }
 
     /**
