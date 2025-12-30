@@ -52,15 +52,15 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('update', 'categories.groups.update')
         ->name('destroy', 'categories.groups.destroy');
 
-    Route::get('media/library/{id}/confirm', [Library::class, 'confirm'])->name('categories.groups.confirm');
-    Route::resource('media/library', Library::class)
-        ->name('index', 'media.library')
-        ->name('create', 'media.library.create')
-        ->name('store', 'media.library.store')
-        ->name('show', 'media.library.show')
-        ->name('edit', 'media.library.edit')
-        ->name('update', 'media.library.update')
-        ->name('destroy', 'media.library.destroy');
+    Route::get('media/libraries/{id}/confirm', [Library::class, 'confirm'])->name('media.libraries.confirm');
+    Route::resource('media/libraries', Library::class)
+        ->name('index', 'media.libraries')
+        ->name('create', 'media.libraries.create')
+        ->name('store', 'media.libraries.store')
+        ->name('show', 'media.libraries.show')
+        ->name('edit', 'media.libraries.edit')
+        ->name('update', 'media.libraries.update')
+        ->name('destroy', 'media.libraries.destroy');
 
     Route::get('categories/{group_id}/create', [Category::class, 'create'])->name('categories.create');
     Route::post('categories/{group_id}/create', [Category::class, 'store'])->name('categories.store');

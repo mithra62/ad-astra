@@ -4,7 +4,7 @@
         <!-- Breadcrumb start -->
         <div class="row m-1">
             <div class="col-12 ">
-                <h5>Media Library</h5>
+                <h5>Media Libraries</h5>
                 <div class="col-6 ">
                     <ul class="app-line-breadcrumbs mb-3">
                         <li class="">
@@ -15,7 +15,7 @@
                             </a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Categories</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries') }}">Media Libraries</a>
                         </li>
                     </ul>
                 </div>
@@ -30,12 +30,12 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-6">
-                                <h5>Manage Category Groups</h5>
-                                <p>You can manage all Category Groups from here.</p>
+                                <h5>Manage Media Libraries</h5>
+                                <p>You can manage all Media Libraries from here.</p>
                             </div>
                             <div class="col-6">
                                 <p class="float-right text-end">
-                                    <a href="{{ route('categories.groups.create') }}" class="btn btn-primary">Add Category Group</a>
+                                    <a href="{{ route('media.libraries.create') }}" class="btn btn-primary">Add Media Libraries</a>
                                 </p>
                             </div>
                         </div>
@@ -53,10 +53,10 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% if groups.count >= 1 %}
-                                    {% for group in groups %}
+                                {% if libraries.count >= 1 %}
+                                    {% for library in libraries %}
                                         <tr>
-                                            <td>{{ group.name }}</td>
+                                            <td>{{ library.name }}</td>
                                             <td class="f-w-500">
                                                 {{ group.categories.count() }}
                                             </td>
@@ -84,10 +84,10 @@
                                     {% endfor %}
                                 {% else %}
                                     <tr>
-                                        <td colspan="6">
+                                        <td colspan="5">
                                             <p class="text-center">
-                                                No Category Groups Created. <br />
-                                                <a href="{{ route('categories.groups.create') }}" class="btn btn-outline-primary">Create Category Group</a>
+                                                No Media Libraries Created. <br />
+                                                <a href="{{ route('media.libraries.create') }}" class="btn btn-outline-primary">Create Media Libraries</a>
                                             </p>
                                         </td>
                                     </tr>
