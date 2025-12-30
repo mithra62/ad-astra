@@ -7,8 +7,9 @@ use App\Traits\PasswordValidationRules;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\UpdatesUserPasswords;
+use App\Actions\AbstractAction;
 
-class UpdateUserPassword implements UpdatesUserPasswords
+class UpdateUserPassword extends AbstractAction implements UpdatesUserPasswords
 {
     use PasswordValidationRules;
 

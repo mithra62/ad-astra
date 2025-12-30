@@ -6,8 +6,9 @@ use App\Models\User;
 use App\Traits\PasswordValidationRules;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use App\Actions\AbstractAction;
 
-class CreateNewUser implements CreatesNewUsers
+class CreateNewUser extends AbstractAction implements CreatesNewUsers
 {
     use PasswordValidationRules;
 

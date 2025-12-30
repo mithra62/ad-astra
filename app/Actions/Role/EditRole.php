@@ -2,8 +2,9 @@
 namespace App\Actions\Role;
 
 use App\Models\Role as RoleModel;
+use App\Actions\AbstractAction;
 
-class EditRole
+class EditRole extends AbstractAction
 {
     public function edit(RoleModel $role, array $input)
     {

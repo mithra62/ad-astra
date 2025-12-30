@@ -4,8 +4,9 @@ namespace App\Actions\User\Token;
 
 use App\Models\User;
 use Carbon\Carbon;
+use App\Actions\AbstractAction;
 
-class CreateNewUserToken
+class CreateNewUserToken extends AbstractAction
 {
     public function create(User $user, array $input)
     {

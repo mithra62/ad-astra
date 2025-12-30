@@ -2,8 +2,9 @@
 namespace App\Actions\Category\Group;
 
 use App\Models\Category\Group;
+use App\Actions\AbstractAction;
 
-class CreateNewCategoryGroup
+class CreateNewCategoryGroup extends AbstractAction
 {
     public function create(array $input): Group
     {

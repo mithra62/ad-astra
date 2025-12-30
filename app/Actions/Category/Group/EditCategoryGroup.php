@@ -2,8 +2,9 @@
 namespace App\Actions\Category\Group;
 
 use App\Models\Category\Group;
+use App\Actions\AbstractAction;
 
-class EditCategoryGroup
+class EditCategoryGroup extends AbstractAction
 {
     /**
      * Edit a specific group record in the database.

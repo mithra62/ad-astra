@@ -2,8 +2,9 @@
 namespace App\Actions\Category;
 
 use App\Models\Category;
+use App\Actions\AbstractAction;
 
-class CreateNewCategory
+class CreateNewCategory extends AbstractAction
 {
     public function create(array $input): Category
     {

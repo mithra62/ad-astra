@@ -2,8 +2,9 @@
 namespace App\Actions\Role;
 
 use Spatie\Permission\Models\Role as RoleModel;
+use App\Actions\AbstractAction;
 
-class CreateNewRole
+class CreateNewRole extends AbstractAction
 {
     public function create(array $input): RoleModel
     {
