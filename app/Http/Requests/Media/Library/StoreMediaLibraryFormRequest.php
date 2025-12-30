@@ -1,19 +1,16 @@
 <?php
 
-namespace App\Http\Requests\Category\Group;
+namespace App\Http\Requests\Media\Library;
 
 use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-class StoreCategoryGroupRequest extends FormRequest
+class StoreMediaLibraryFormRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
-        return Auth::user()->can('create category group');
+        return Auth::user()->can('create media library');
     }
 
     /**
