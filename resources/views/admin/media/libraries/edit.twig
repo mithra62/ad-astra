@@ -39,6 +39,7 @@
                           novalidate>
                         {{ csrf_field() }}
                         {{ method_field('PUT') }}
+                        <input type="hidden" name="id" value="{{ library.id }}" />
                         <div class="col-md-12">
                             <label class="form-label" for="name">Name</label>
                             <input class="form-control" id="name" required type="text" value="{{ old('name', library.name) }}"
@@ -133,7 +134,7 @@
                         {% endif %}
 
                         <div class="col-12">
-                            <button class="btn btn-primary float-end" type="submit">Create Media Library</button>
+                            <button class="btn btn-primary float-end" type="submit">Edit Media Library</button>
                         </div>
                     </form>
                 </div>

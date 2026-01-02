@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Media\Library as LibraryModel;
 use App\Http\Requests\Media\Library\StoreMediaLibraryFormRequest;
 use App\Http\Requests\Media\Library\DeleteMediaLibraryRequest;
+use App\Http\Requests\Media\Library\EditMediaLibraryRequest;
 use App\Actions\Media\Library\CreateNewMediaLibrary;
 use App\Actions\Media\Library\EditMediaLibrary;
 use App\Actions\Media\Library\DeleteMediaLibrary;
@@ -76,7 +77,7 @@ class Library extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(EditMediaLibraryRequest $request, string $id)
     {
         $library = LibraryModel::find($id);
         if ($library instanceof LibraryModel) {
