@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Admin\Media;
 
 use App\Actions\Category\Group\EditCategoryGroup;
 use App\Http\Controllers\Admin\Controller;
-use App\Http\Requests\Category\Group\DeleteCategoryGroupRequest;
 use App\Models\Category\Group as CategoryGroup;
 use Illuminate\Http\Request;
 use App\Models\Media\Library as LibraryModel;
 use App\Http\Requests\Media\Library\StoreMediaLibraryFormRequest;
+use App\Actions\Media\Library\CreateNewMediaLibrary;
 
 class Library extends Controller
 {
@@ -35,9 +35,9 @@ class Library extends Controller
      */
     public function store(StoreMediaLibraryFormRequest $request)
     {
-        $creator = app(CreateNewCategoryGroup::class);
-        $group = $creator->create($request->all());
-        return redirect()->route('categories.groups.show', $group->id)->with('status', trans('category.group.created'));
+        $creator = app(CreateNewMediaLibrary::class);
+        $library = $creator->create($request->all());
+        return redirect()->route('categories.groups.show', $library->id)->with('status', trans('category.group.created'));
     }
 
     /**

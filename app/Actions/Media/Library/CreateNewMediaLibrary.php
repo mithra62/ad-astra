@@ -9,8 +9,13 @@ class CreateNewMediaLibrary extends AbstractAction
 {
     public function create(array $input): Library
     {
-        $cat_group = Library::create($input);
+        $library = Library::create($input);
+        if(!empty($input['category_groups'])) {
+            foreach($input['category_groups'] AS $group) {
+                $library->category_groups()->attach($group);
+            }
+        }
 
-        return $cat_group;
+        return $library;
     }
 }

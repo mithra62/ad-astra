@@ -57,7 +57,8 @@
                         <div class="mb-12">
                             <label class="form-label" for="storage">Storage</label>
                             <select class="form-select" id="storage" name="storage">
-                                <option value="local">Local</option>
+                                <option value="local" {% if old('storage') == 'local' %}selected{% endif %}>Local</option>
+                                <option value="aws" {% if old('storage') == 'aws' %}selected{% endif %}>AWS</option>
                             </select>
                             {% if errors.has('storage') %}
                                 <p class="text-danger">{{ errors.first('storage') }}</p>
@@ -66,7 +67,7 @@
                         <div class="col-md-12">
                             <label class="form-label" for="adapter_settings[local][url]">Base URL</label>
                             <input class="form-control" id="adapter_settings[local][url]" required type="text"
-                                   value="{{ old('adapter_settings.url') }}" name="adapter_settings[local][url]">
+                                   value="{{ old('adapter_settings.local.url') }}" name="adapter_settings[local][url]">
                             {% if errors.has('adapter_settings.local.url') %}
                                 <p class="text-danger">{{ errors.first('adapter_settings.local.url') }}</p>
                             {% endif %}
@@ -74,7 +75,8 @@
                         <div class="col-md-12">
                             <label class="form-label" for="adapter_settings[local][path]">Base Path</label>
                             <input class="form-control" id="adapter_settings[local][path]" required type="text"
-                                   value="{{ old('adapter_settings.path') }}" name="adapter_settings[local][path]">
+                                   value="{{ old('adapter_settings.local.path') }}"
+                                   name="adapter_settings[local][path]">
                             {% if errors.has('adapter_settings.local.path') %}
                                 <p class="text-danger">{{ errors.first('adapter_settings.local.path') }}</p>
                             {% endif %}
@@ -96,10 +98,20 @@
 
                         {% if category_groups.count >= 1 %}
                             <div class="mb-12">
-                                <label class="form-label" for="category_groups">Categories</label>
+                                <label class="form-label" for="category_groups">Category Groups</label>
                                 {% for group in category_groups %}
                                     <div class="form-check d-flex">
-                                        <input class="form-check-input mg-2" id="library.{{ group.slug }}" type="checkbox" name="category_groups[]" value="{{ group.id }}">
+                                        <input class="form-check-input mg-2"
+                                               id="library.{{ group.slug }}"
+                                               type="checkbox"
+                                               name="category_groups[]"
+                                               value="{{ group.id }}"
+                                            {% if old('category_groups') %}
+                                                {% for key, field in old('category_groups') %}
+                                                    {% if old('category_groups.' ~ key) == group.id %}checked{% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        >
                                         <label class="form-check-label ms-2" for="library.{{ group.slug }}">
                                             {{ group.name }}
                                         </label>
