@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Admin\Media;
 
-use App\Actions\Category\Group\EditCategoryGroup;
 use App\Http\Controllers\Admin\Controller;
 use App\Models\Category\Group as CategoryGroup;
 use Illuminate\Http\Request;
 use App\Models\Media\Library as LibraryModel;
 use App\Http\Requests\Media\Library\StoreMediaLibraryFormRequest;
+use App\Http\Requests\Media\Library\DeleteMediaLibraryRequest;
 use App\Actions\Media\Library\CreateNewMediaLibrary;
+use App\Actions\Media\Library\EditMediaLibrary;
+use App\Actions\Media\Library\DeleteMediaLibrary;
 
 class Library extends Controller
 {
@@ -78,7 +80,7 @@ class Library extends Controller
     {
         $library = LibraryModel::find($id);
         if ($library instanceof LibraryModel) {
-            $editor = app(EditCategoryGroup::class);
+            $editor = app(EditMediaLibrary::class);
             $editor->edit($library, $request->all());
             return redirect()->route('media.libraries')->with('success', trans('media.library.updated'));
         }
@@ -86,11 +88,12 @@ class Library extends Controller
         abort(404);
     }
 
-    public function destroy(DeleteCategoryGroupRequest $request, string $id)
+    public function destroy(DeleteMediaLibraryRequest $request, string $id)
     {
         $library = LibraryModel::find($id);
-        if ($library instanceof CategoryGroup) {
-            $library->delete();
+        if ($library instanceof LibraryModel) {
+            $deleter = app(DeleteMediaLibrary::class);
+            $deleter->delete($library);
             return redirect()->route('media.libraries')->with('success', trans('media.library.deleted'));
         }
 
@@ -104,6 +107,6 @@ class Library extends Controller
             return redirect()->route('media.libraries')->with('failure', 'media.library.not_found');
         }
 
-        return $this->view('media.libraries.delete', ['group' => $library]);
+        return $this->view('media.libraries.delete', ['library' => $library]);
     }
 }

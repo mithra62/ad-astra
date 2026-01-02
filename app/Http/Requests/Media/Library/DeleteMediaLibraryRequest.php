@@ -1,22 +1,17 @@
 <?php
-namespace App\Http\Requests\Category;
+namespace App\Http\Requests\Media\Library;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
-class DeleteCategoryRequest extends FormRequest
+class DeleteMediaLibraryRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
-        return Auth::user()->can('delete category');
+        return Auth::user()->can('delete media library');
     }
 
-    /**
-     * @return string[]
-     */
     public function rules(): array
     {
         return [
@@ -24,9 +19,6 @@ class DeleteCategoryRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return string[]
-     */
     public function messages(): array
     {
         return [
