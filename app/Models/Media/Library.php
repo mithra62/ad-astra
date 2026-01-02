@@ -30,7 +30,7 @@ class Library extends Model
 
     public function media(): HasMany
     {
-        return $this->hasMany(Media::class)->orderBy('sort_order')->orderBy('name');
+        return $this->hasMany(Media::class);
     }
 
     public function category_groups(): BelongsToMany

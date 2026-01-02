@@ -37,7 +37,7 @@ class Library extends Controller
     {
         $creator = app(CreateNewMediaLibrary::class);
         $library = $creator->create($request->all());
-        return redirect()->route('categories.groups.show', $library->id)->with('status', trans('category.group.created'));
+        return redirect()->route('media.libraries.show', $library->id)->with('status', trans('category.group.created'));
     }
 
     /**
@@ -45,20 +45,16 @@ class Library extends Controller
      */
     public function show(string $id)
     {
-        $group = LibraryModel::find($id);
-        if (!$group instanceof LibraryModel) {
+        $library = LibraryModel::find($id);
+        if (!$library instanceof LibraryModel) {
             abort(404);
         }
 
-        $groups = LibraryModel::all();
-        $categories = CategoryModel::where(['group_id' => $group->id])->whereNull('parent_id')->get();
         $data = [
-            'group' => $group,
-            'groups' => $groups,
-            'categories' => $categories,
+            'library' => $library,
         ];
 
-        return $this->view('categories.groups.view', $data);
+        return $this->view('media.libraries.view', $data);
     }
 
     /**
@@ -66,12 +62,13 @@ class Library extends Controller
      */
     public function edit(string $id)
     {
-        $group = CategoryGroup::find($id);
-        if (!$group instanceof CategoryGroup) {
+        $library = LibraryModel::find($id);
+        if (!$library instanceof LibraryModel) {
             abort(404);
         }
 
-        return $this->view('categories.groups.edit', ['group' => $group]);
+        $category_groups = CategoryGroup::all();
+        return $this->view('media.libraries.edit', ['library' => $library, 'category_groups' => $category_groups]);
     }
 
     /**
@@ -79,11 +76,11 @@ class Library extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $group = CategoryGroup::find($id);
-        if ($group instanceof CategoryGroup) {
+        $library = LibraryModel::find($id);
+        if ($library instanceof LibraryModel) {
             $editor = app(EditCategoryGroup::class);
-            $editor->edit($group, $request->all());
-            return redirect()->route('categories.groups')->with('success', trans('category.group.updated'));
+            $editor->edit($library, $request->all());
+            return redirect()->route('media.libraries')->with('success', trans('media.library.updated'));
         }
 
         abort(404);
@@ -91,22 +88,22 @@ class Library extends Controller
 
     public function destroy(DeleteCategoryGroupRequest $request, string $id)
     {
-        $group = CategoryGroup::find($id);
-        if ($group instanceof CategoryGroup) {
-            $group->delete();
-            return redirect()->route('categories.groups')->with('success', trans('category.group.deleted'));
+        $library = LibraryModel::find($id);
+        if ($library instanceof CategoryGroup) {
+            $library->delete();
+            return redirect()->route('media.libraries')->with('success', trans('media.library.deleted'));
         }
 
-        return redirect()->route('categories.groups')->with('failure', trans('category.group.not_found'));
+        return redirect()->route('media.libraries')->with('failure', trans('media.library.not_found'));
     }
 
     public function confirm(string $id)
     {
-        $group = CategoryGroup::find($id);
-        if (!$group instanceof CategoryGroup) {
-            return redirect()->route('categories.groups')->with('failure', 'category.group.not_found');
+        $library = LibraryModel::find($id);
+        if (!$library instanceof LibraryModel) {
+            return redirect()->route('media.libraries')->with('failure', 'media.library.not_found');
         }
 
-        return $this->view('categories.groups.delete', ['group' => $group]);
+        return $this->view('media.libraries.delete', ['group' => $library]);
     }
 }

@@ -46,7 +46,7 @@
                                 <thead>
                                 <tr>
                                     <th scope="col">Name</th>
-                                    <th scope="col">Categories</th>
+                                    <th scope="col">Files</th>
                                     <th scope="col">Last Modified</th>
                                     <th scope="col">Created</th>
                                     <th scope="col"></th>
@@ -58,25 +58,25 @@
                                         <tr>
                                             <td>{{ library.name }}</td>
                                             <td class="f-w-500">
-                                                {{ group.categories.count() }}
+                                                {{ library.media.count() }}
                                             </td>
                                             <td class="text-secondary f-w-600">
-                                                {{ group.updated_at.format('F j, Y') }}
+                                                {{ library.updated_at.format('F j, Y') }}
                                             </td>
                                             <td>
-                                                {{ group.created_at.format('F j, Y') }}
+                                                {{ library.created_at.format('F j, Y') }}
                                             </td>
                                             <td>
                                                 <a class="btn btn-primary icon-btn b-r-4"
-                                                   href="{{ route('categories.groups.show', group) }}">
+                                                   href="{{ route('media.libraries.show', library) }}">
                                                     <i class="ti ti-activity"></i>
                                                 </a>
                                                 <a class="btn btn-success icon-btn b-r-4"
-                                                   href="{{ route('categories.groups.edit', group) }}">
+                                                   href="{{ route('media.libraries.edit', library) }}">
                                                     <i class="ti ti-edit"></i>
                                                 </a>
                                                 <a class="btn btn-danger icon-btn b-r-4"
-                                                   href="{{ route('categories.groups.confirm', group) }}">
+                                                   href="{{ route('media.libraries.confirm', library) }}">
                                                     <i class="ti ti-trash"></i>
                                                 </a>
                                             </td>
