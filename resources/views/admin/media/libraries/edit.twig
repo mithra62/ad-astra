@@ -1,0 +1,146 @@
+{{ include('admin._inc._header', {title: 'Create Category Group'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12 ">
+                <h5>Media</h5>
+                <div class="col-6 ">
+                    <ul class="app-line-breadcrumbs mb-3">
+                        <li class="">
+                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                                <span>
+                                    <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
+                                </span>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries') }}">Media</a>
+                        </li>
+                        <li class="active">
+                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries.create') }}">Edit Media
+                                Library</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
+
+        <!-- Custom Styles start -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex flex-column gap-2">
+                    <h5>Edit Media Library</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ route('media.libraries.update', library) }}" class="row g-3 needs-validation"
+                          novalidate>
+                        {{ csrf_field() }}
+                        {{ method_field('PUT') }}
+                        <div class="col-md-12">
+                            <label class="form-label" for="name">Name</label>
+                            <input class="form-control" id="name" required type="text" value="{{ old('name', library.name) }}"
+                                   name="name">
+                            {% if errors.has('name') %}
+                                <p class="text-danger">{{ errors.first('name') }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label" for="slug">Slug</label>
+                            <input class="form-control" id="slug" required type="text" value="{{ old('slug', library.slug) }}"
+                                   name="slug">
+                            {% if errors.has('slug') %}
+                                <p class="text-danger">{{ errors.first('slug') }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="mb-12">
+                            <label class="form-label" for="storage">Storage</label>
+                            <select class="form-select" id="storage" name="storage">
+                                <option value="local" {% if old('storage', library.storage) == 'local' %}selected{% endif %}>Local</option>
+                                <option value="aws" {% if old('storage', library.storage) == 'aws' %}selected{% endif %}>AWS</option>
+                            </select>
+                            {% if errors.has('storage') %}
+                                <p class="text-danger">{{ errors.first('storage') }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label" for="adapter_settings[local][url]">Base URL</label>
+                            <input class="form-control" id="adapter_settings[local][url]" required type="text"
+                                   value="{{ old('adapter_settings.local.url', library.adapter_settings.local.url) }}" name="adapter_settings[local][url]">
+                            {% if errors.has('adapter_settings.local.url') %}
+                                <p class="text-danger">{{ errors.first('adapter_settings.local.url') }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label" for="adapter_settings[local][path]">Base Path</label>
+                            <input class="form-control" id="adapter_settings[local][path]" required type="text"
+                                   value="{{ old('adapter_settings.local.path', library.adapter_settings.local.path) }}"
+                                   name="adapter_settings[local][path]">
+                            {% if errors.has('adapter_settings.local.path') %}
+                                <p class="text-danger">{{ errors.first('adapter_settings.local.path') }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="mb-12">
+                            <label class="form-label" for="max_size">Max File Size</label>
+                            <div class="input-group ">
+                                <input aria-describedby="basic-addon2fd"
+                                       aria-label="Recipient's username"
+                                       class="form-control b-r-left"
+                                       type="text" name="max_size" id="max_size" value="{{ old('max_size', library.max_size) }}">
+                                <span class="input-group-text b-r-right text-bg-secondary" id="basic-addon2">MBs</span>
+                            </div>
+                            {% if errors.has('max_size') %}
+                                <p class="text-danger">{{ errors.first('max_size') }}</p>
+                            {% endif %}
+                        </div>
+
+
+                        {% if category_groups.count >= 1 %}
+
+                            <div class="mb-12">
+                                <label class="form-label" for="category_groups">Category Groups</label>
+                                {% for group in category_groups %}
+                                    <div class="form-check d-flex">
+                                        <input class="form-check-input mg-2"
+                                               id="library.{{ group.slug }}"
+                                               type="checkbox"
+                                               name="category_groups[]"
+                                               value="{{ group.id }}"
+                                            {% if old('category_groups') %}
+                                                {% for key, field in old('category_groups') %}
+                                                    {% if old('category_groups.' ~ key) == group.id %}checked{% endif %}
+                                                {% endfor %}
+
+                                            {% else %}
+                                                {% for key, field in library.category_groups %}
+                                                    {% if field.id == group.id %}checked{% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        >
+                                        <label class="form-check-label ms-2" for="library.{{ group.slug }}">
+                                            {{ group.name }}
+                                        </label>
+                                    </div>
+                                    {% if errors.has('category_groups') %}
+                                        <p class="text-danger">{{ errors.first('category_groups') }}</p>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+
+                        {% endif %}
+
+                        <div class="col-12">
+                            <button class="btn btn-primary float-end" type="submit">Create Media Library</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Custom Styles end -->
+    </div>
+</main>
+
+{{ include('admin._inc._footer') }}
