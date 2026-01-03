@@ -126,6 +126,33 @@
 
                         {% endif %}
 
+
+
+                        <div class="mb-12">
+                            <label class="form-label" for="allowed_types">Allowed File Types</label>
+                            {% for name,type in allowed_types %}
+                                <div class="form-check d-flex">
+                                    <input class="form-check-input mg-2"
+                                           id="library.allowed_types.{{ name }}"
+                                           type="checkbox"
+                                           name="allowed_types[]"
+                                           value="{{ name }}"
+                                        {% if old('allowed_types') %}
+                                            {% for key, field in old('allowed_types') %}
+                                                {% if old('allowed_types.' ~ key) == name %}checked{% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    >
+                                    <label class="form-check-label ms-2" for="library.allowed_types.{{ name }}">
+                                        {{ name }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                            {% if errors.has('category_groups') %}
+                                <p class="text-danger">{{ errors.first('category_groups') }}</p>
+                            {% endif %}
+                        </div>
+
                         <div class="col-12">
                             <button class="btn btn-primary float-end" type="submit">Create Media Library</button>
                         </div>

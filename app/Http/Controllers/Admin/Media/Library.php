@@ -16,6 +16,18 @@ use App\Actions\Media\Library\DeleteMediaLibrary;
 class Library extends Controller
 {
     /**
+     * @var array
+     */
+    protected array $_allowed_types = [
+        'image' => 'image/*',
+        'video' => 'video/*',
+        'audio' => 'audio/*',
+        'document' => 'application/pdf',
+        'other' => '*/*',
+        'archive' => 'application/zip',
+    ];
+
+    /**
      * Display a listing of the resource.
      */
     public function index()
@@ -32,7 +44,8 @@ class Library extends Controller
         $category_groups = CategoryGroup::all();
         $data = [
             'category_groups' => $category_groups,
-            'disks' => config('filesystems.disks')
+            'disks' => config('filesystems.disks'),
+            'allowed_types' => $this->_allowed_types,
         ];
         return $this->view('media.libraries.create', $data);
     }
@@ -75,7 +88,13 @@ class Library extends Controller
         }
 
         $category_groups = CategoryGroup::all();
-        return $this->view('media.libraries.edit', ['library' => $library, 'category_groups' => $category_groups]);
+        $data = [
+            'library' => $library,
+            'category_groups' => $category_groups,
+            'allowed_types' => $this->_allowed_types,
+        ];
+
+        return $this->view('media.libraries.edit', $data);
     }
 
     /**

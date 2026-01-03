@@ -29,7 +29,9 @@ class Library extends Model implements HasMedia
 
     protected $casts = [
         'sort_order' => 'integer',
-        'adapter_settings' => 'array'
+        'adapter_settings' => 'array',
+        'allowed_types' => 'array',
+        'max_size' => 'integer',
     ];
 
     public function category_groups(): BelongsToMany
