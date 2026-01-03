@@ -30,7 +30,11 @@ class Library extends Controller
     public function create()
     {
         $category_groups = CategoryGroup::all();
-        return $this->view('media.libraries.create', ['category_groups' => $category_groups]);
+        $data = [
+            'category_groups' => $category_groups,
+            'disks' => config('filesystems.disks')
+        ];
+        return $this->view('media.libraries.create', $data);
     }
 
     /**

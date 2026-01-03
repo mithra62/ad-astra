@@ -2,7 +2,6 @@
 namespace App\Http\Requests\Media\Library;
 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 
 class EditMediaLibraryRequest extends StoreMediaLibraryFormRequest

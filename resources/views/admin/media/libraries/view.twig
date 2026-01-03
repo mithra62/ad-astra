@@ -1,0 +1,42 @@
+{{ include('admin._inc._header', {title: 'Media Library'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12 ">
+                <h5>Media Libraries</h5>
+                <div class="col-6 ">
+                    <ul class="app-line-breadcrumbs mb-3">
+                        <li class="">
+                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                                <span>
+                                    <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
+                                </span>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries') }}">Media Libraries</a>
+                        </li>
+                        <li class="active">
+                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries.create') }}">Create Media
+                                Library</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
+
+<form method="POST" action="{{ route('media.upload', library) }}" class="row g-3 needs-validation" enctype="multipart/form-data"
+      novalidate>
+    {{ csrf_field() }}
+
+    <input type="file" name="file" class="form-control">
+    <button class="btn btn-primary" type="submit">Upload</button>
+
+</form>
+
+    </div>
+</main>
+{{ include('admin._inc._footer') }}

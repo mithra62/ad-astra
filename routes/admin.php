@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Category;
 use App\Http\Controllers\Admin\Category\Group as CategoryGroup;
 use App\Http\Controllers\Admin\Dashboard;
 use App\Http\Controllers\Admin\Media\Library;
+use App\Http\Controllers\Admin\Media;
 use App\Http\Controllers\Admin\Role;
 use App\Http\Controllers\Admin\User;
 use App\Http\Controllers\Admin\User\Token as UserTokens;
@@ -52,6 +53,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('update', 'categories.groups.update')
         ->name('destroy', 'categories.groups.destroy');
 
+    Route::post('media/{library_id}/upload', [Media::class, 'upload'])->name('media.upload');
     Route::get('media/libraries/{id}/confirm', [Library::class, 'confirm'])->name('media.libraries.confirm');
     Route::resource('media/libraries', Library::class)
         ->name('index', 'media.libraries')

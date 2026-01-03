@@ -57,8 +57,9 @@
                         <div class="mb-12">
                             <label class="form-label" for="storage">Storage</label>
                             <select class="form-select" id="storage" name="storage">
-                                <option value="local" {% if old('storage') == 'local' %}selected{% endif %}>Local</option>
-                                <option value="aws" {% if old('storage') == 'aws' %}selected{% endif %}>AWS</option>
+                                {% for key, disk in disks %}
+                                <option value="{{ key }}" {% if old('storage') == key %}selected{% endif %}>{{ disk.title }}</option>
+                                {% endfor %}
                             </select>
                             {% if errors.has('storage') %}
                                 <p class="text-danger">{{ errors.first('storage') }}</p>
@@ -87,7 +88,7 @@
                                 <input aria-describedby="basic-addon2fd"
                                        aria-label="Recipient's username"
                                        class="form-control b-r-left"
-                                       type="text" name="max_size" id="max_size" value="{{ old('max_size') }}">
+                                       type="text" name="max_size" id="max_size" value="{{ old('max_size', 20) }}">
                                 <span class="input-group-text b-r-right text-bg-secondary" id="basic-addon2">MBs</span>
                             </div>
                             {% if errors.has('max_size') %}

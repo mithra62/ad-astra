@@ -6,9 +6,13 @@ use App\Models\Media;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Library extends Model
+class Library extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+
     protected $fillable = [
         'name',
         'slug',
@@ -27,11 +31,6 @@ class Library extends Model
         'sort_order' => 'integer',
         'adapter_settings' => 'array'
     ];
-
-    public function media(): HasMany
-    {
-        return $this->hasMany(Media::class);
-    }
 
     public function category_groups(): BelongsToMany
     {
