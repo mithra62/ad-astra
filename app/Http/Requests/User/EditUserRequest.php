@@ -26,7 +26,7 @@ class EditUserRequest extends FormRequest
             'email' => [
                 'required',
                 'email',
-                Rule::unique('users')->ignore($this->data('id')),
+                Rule::unique('users')->ignore($this->route()->parameter('user')),
             ],
             'roles' => 'required|array',
         ];

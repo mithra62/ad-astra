@@ -27,7 +27,7 @@ class EditRoleRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('roles')->ignore($this->data('id')),
+                Rule::unique('roles')->ignore($this->route()->parameter('role')),
             ],
             'permissions' => 'required|array'
         ];

@@ -11,7 +11,7 @@ class EditAccountTokenRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->can('api');;
+        return Auth::user()->can('api');
     }
 
     /**

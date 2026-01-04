@@ -23,13 +23,13 @@ class StoreMediaLibraryFormRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('media_libraries')->ignore($this->data('id')),
+                Rule::unique('media_libraries')->ignore($this->route()->parameter('library')),
             ],
             'slug' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('media_libraries')->ignore($this->data('id')),
+                Rule::unique('media_libraries')->ignore($this->route()->parameter('library')),
             ],
             'storage' => [
                 'required',
