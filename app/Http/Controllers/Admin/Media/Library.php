@@ -41,11 +41,12 @@ class Library extends Controller
      */
     public function create()
     {
+        $files = app('files-service');
         $category_groups = CategoryGroup::all();
         $data = [
             'category_groups' => $category_groups,
             'disks' => config('filesystems.disks'),
-            'allowed_types' => $this->_allowed_types,
+            'allowed_types' => $files->getAllowedMimeTypes(),
         ];
         return $this->view('media.libraries.create', $data);
     }
@@ -87,11 +88,12 @@ class Library extends Controller
             abort(404);
         }
 
+        $files = app('files-service');
         $category_groups = CategoryGroup::all();
         $data = [
             'library' => $library,
             'category_groups' => $category_groups,
-            'allowed_types' => $this->_allowed_types,
+            'allowed_types' => $files->getAllowedMimeTypes(),
         ];
 
         return $this->view('media.libraries.edit', $data);
