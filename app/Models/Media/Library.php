@@ -1,6 +1,7 @@
 <?php
 namespace App\Models\Media;
 
+use App\Models\Category;
 use App\Models\Category\Group;
 use App\Models\Media;
 use Illuminate\Database\Eloquent\Model;
@@ -37,5 +38,15 @@ class Library extends Model implements HasMedia
     public function category_groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class, 'category_groups_media_library')->withPivot('group_id', 'library_id');
+    }
+
+    public function categories()
+    {
+        $ids = [];
+        foreach($this->category_groups As $group) {
+            $ids[] = $group->id;
+        }
+
+        return Category::whereIn('id', $ids)->get();
     }
 }

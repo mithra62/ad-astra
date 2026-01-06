@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Media;
 use App\Actions\Media\Library\CreateNewMediaLibrary;
 use App\Actions\Media\Library\DeleteMediaLibrary;
 use App\Actions\Media\Library\EditMediaLibrary;
+use App\Actions\Media\Library\UploadMedia;
 use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\Media\Library\DeleteMediaLibraryRequest;
 use App\Http\Requests\Media\Library\EditMediaLibraryRequest;
@@ -140,10 +141,13 @@ class Library extends Controller
             abort(404);
         }
 
-        $path = $request->file('file', $library->adapter);
-        $media = $library->addMedia($path)->toMediaCollection($library->slug);
-        $media->library_id = $library->id;
-        $media->save();
-        exit;
+        $uploader = app(UploadMedia::class);
+        $media = $uploader->upload($request, $library);
+
+        if($media) {
+            return redirect()->route('media.show', $media, )->with('success', 'media.uploaded');
+        }
+
+        return redirect()->route('media.libraries.show', $library)->with('failure', 'media.upload_failed');
     }
 }

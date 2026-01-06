@@ -14,4 +14,9 @@ class Media extends BaseMedia
     {
         return $this->belongsTo(Media\Library::class);
     }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
 }

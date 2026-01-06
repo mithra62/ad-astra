@@ -17,15 +17,21 @@ class UploadMediaRequest extends FormRequest
         $library_id = $this->route()->parameter('library_id');
         $library = LibraryModel::find($library_id);
         $rules = [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
             'categories' => [
                 'array',
             ],
             'file' => [
                 'file',
-            ]
+                'required',
+            ],
         ];
 
-        if($library instanceof LibraryModel) {
+        if ($library instanceof LibraryModel) {
             $rules['file'][] = 'mimetypes:' . app('files-service')->compileMimeTypes($library->allowed_types);
             $rules['file'][] = 'max:' . app('files-service')->convertMbToBytes($library->max_size);
         }
