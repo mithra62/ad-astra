@@ -39,7 +39,7 @@
                                 <h5>Uploaded Media</h5>
                                 <div class="col-12">
                                     <p class="float-right text-end">
-                                        <a href="{{ route('media.upload', library) }}" class="btn btn-primary">Upload
+                                        <a href="{{ route('media.create', library) }}" class="btn btn-primary">Upload
                                             Media</a>
                                     </p>
                                 </div>
@@ -97,7 +97,7 @@
                                     {% else %}
                                         <p class="text-center">
                                             No Media Uploaded yet <br />
-                                            <a href="" class="btn btn-outline-primary">Upload Media</a>
+                                            <a href="{{ route('media.create', library) }}" class="btn btn-outline-primary">Upload Media</a>
                                         </p>
                                     {% endif %}
                                 </div>

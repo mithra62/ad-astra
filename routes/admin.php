@@ -65,7 +65,8 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('destroy', 'media.libraries.destroy');
 
     Route::get('media/{id}/confirm', [Media::class, 'confirm'])->name('media.confirm');
-    Route::get('media/{id}/upload', [Media::class, 'upload'])->name('media.upload');
+    Route::get('media/{library_id}/create', [Media::class, 'create'])->name('media.create');
+    Route::post('media/{library_id}/create', [Media::class, 'store'])->name('media.store');
     Route::resource('media', Media::class);
 
     Route::get('categories/{group_id}/create', [Category::class, 'create'])->name('categories.create');
