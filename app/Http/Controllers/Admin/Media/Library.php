@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Media;
 
 use App\Http\Controllers\Admin\Controller;
 use App\Models\Category\Group as CategoryGroup;
-use Illuminate\Http\Request;
+use App\Http\Requests\Media\Library\UploadMediaRequest;
 use App\Models\Media\Library as LibraryModel;
 use App\Http\Requests\Media\Library\StoreMediaLibraryFormRequest;
 use App\Http\Requests\Media\Library\DeleteMediaLibraryRequest;
@@ -134,5 +134,11 @@ class Library extends Controller
         }
 
         return $this->view('media.libraries.delete', ['library' => $library]);
+    }
+
+    public function upload(UploadMediaRequest $request, string $library_id)
+    {
+        echo __FILE__ . ':' . __LINE__;
+        exit;
     }
 }

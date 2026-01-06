@@ -46,6 +46,10 @@ class StoreMediaLibraryFormRequest extends FormRequest
             'category_groups' => [
                 'array',
             ],
+            'allowed_types'=> [
+                'required',
+                'array',
+            ]
         ];
 
         if ($this->data('storage') == 'local') {

@@ -16,4 +16,20 @@ class FilesService
     {
         return $this->mime_map;
     }
+
+    public function compileMimeTypes(array $mime_types): string
+    {
+        $return = '';
+        foreach($mime_types AS $type) {
+            $return .= $this->mime_map[$type] . ',';
+        }
+
+        return $return;
+    }
+
+    public function convertMbToBytes(float $mb_value): float
+    {
+        return $mb_value * 1024 * 1024;
+    }
+
 }

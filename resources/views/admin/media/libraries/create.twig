@@ -1,4 +1,4 @@
-{{ include('admin._inc._header', {title: 'Create Category Group'}) }}
+{{ include('admin._inc._header', {title: 'Create Media Library'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
@@ -15,7 +15,7 @@
                             </a>
                         </li>
                         <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries') }}">Media Libraries</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries') }}">Media</a>
                         </li>
                         <li class="active">
                             <a class="f-s-14 f-w-500" href="{{ route('media.libraries.create') }}">Create Media
@@ -148,8 +148,8 @@
                                     </label>
                                 </div>
                             {% endfor %}
-                            {% if errors.has('category_groups') %}
-                                <p class="text-danger">{{ errors.first('category_groups') }}</p>
+                            {% if errors.has('allowed_types') %}
+                                <p class="text-danger">{{ errors.first('allowed_types') }}</p>
                             {% endif %}
                         </div>
 

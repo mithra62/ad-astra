@@ -53,7 +53,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('update', 'categories.groups.update')
         ->name('destroy', 'categories.groups.destroy');
 
-    Route::post('media/{library_id}/upload', [Media::class, 'upload'])->name('media.upload');
+    Route::post('media/libraries/{library_id}/upload', [Library::class, 'upload'])->name('media.libraries.upload');
     Route::get('media/libraries/{id}/confirm', [Library::class, 'confirm'])->name('media.libraries.confirm');
     Route::resource('media/libraries', Library::class)
         ->name('index', 'media.libraries')

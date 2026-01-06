@@ -28,14 +28,22 @@
         <!-- Breadcrumb end -->
         {{ include('admin._inc._message') }}
 
-<form method="POST" action="{{ route('media.upload', library) }}" class="row g-3 needs-validation" enctype="multipart/form-data"
-      novalidate>
-    {{ csrf_field() }}
+        <form method="POST" action="{{ route('media.libraries.upload', library) }}" class="row g-3 needs-validation"
+              enctype="multipart/form-data"
+              novalidate>
+            {{ csrf_field() }}
 
-    <input type="file" name="file" class="form-control">
-    <button class="btn btn-primary" type="submit">Upload</button>
+            <input type="file" name="file" class="form-control">
+            {% if errors.has('file') %}
+                <p class="text-danger">{{ errors.first('file') }}</p>
+            {% endif %}
 
-</form>
+            {% for category_group in library.category_groups %}
+                {{ category_group.id }}
+            {% endfor %}
+
+            <button class="btn btn-primary" type="submit">Upload</button>
+        </form>
 
     </div>
 </main>
