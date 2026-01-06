@@ -58,7 +58,7 @@ class Library extends Controller
     {
         $creator = app(CreateNewMediaLibrary::class);
         $library = $creator->create($request->all());
-        return redirect()->route('media.libraries.show', $library->id)->with('status', trans('category.group.created'));
+        return redirect()->route('media.libraries.show', $library->id)->with('status', trans('media.library.created'));
     }
 
     /**

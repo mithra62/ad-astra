@@ -71,4 +71,13 @@ class StoreMediaLibraryFormRequest extends FormRequest
 
         return $rules;
     }
+
+    public function attributes(): array
+    {
+        return [
+            'adapter_settings.local.url' => 'Base URL',
+            'adapter_settings.local.path' => 'Base Path',
+            'allowed_types' => 'Allowed File Types',
+        ];
+    }
 }
