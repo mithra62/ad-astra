@@ -2,28 +2,58 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\Media\Library\UploadMediaRequest;
+use App\Http\Requests\Media\EditMediaRequest;
+use App\Http\Requests\Media\DeleteMediaRequest;
+use App\Http\Requests\Media\StoreMediaFormRequest;
 use App\Models\Media\Library as LibraryModel;
+use App\Models\Media as MediaModel;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
 class Media extends Controller
 {
-    /**
-     * @throws FileDoesNotExist
-     * @throws FileIsTooBig
-     */
-    public function upload(UploadMediaRequest $request, string $id)
+    public function index()
     {
-        $library = LibraryModel::find($id);
-        if (!$library instanceof LibraryModel) {
-            abort(404);
-        }
 
-        $path = $request->file('file', $library->adapter);
-        $media = $library->addMedia($path)->toMediaCollection($library->slug);
-        $media->library_id = $library->id;
-        $media->save();
-        exit;
+    }
+
+    public function create()
+    {
+
+    }
+
+    public function store(StoreMediaFormRequest $request)
+    {
+
+    }
+
+    public function show(string $id)
+    {
+
+    }
+
+    public function edit(string $id)
+    {
+
+    }
+
+    public function update(EditMediaRequest $request, string $id)
+    {
+
+    }
+
+    public function destroy(DeleteMediaRequest $request, string $id)
+    {
+
+    }
+
+    public function confirm()
+    {
+
+    }
+
+    public function upload()
+    {
+
     }
 }

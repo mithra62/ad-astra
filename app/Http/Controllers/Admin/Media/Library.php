@@ -2,31 +2,20 @@
 
 namespace App\Http\Controllers\Admin\Media;
 
+use App\Actions\Media\Library\CreateNewMediaLibrary;
+use App\Actions\Media\Library\DeleteMediaLibrary;
+use App\Actions\Media\Library\EditMediaLibrary;
 use App\Http\Controllers\Admin\Controller;
-use App\Models\Category\Group as CategoryGroup;
-use App\Http\Requests\Media\Library\UploadMediaRequest;
-use App\Models\Media\Library as LibraryModel;
-use App\Http\Requests\Media\Library\StoreMediaLibraryFormRequest;
 use App\Http\Requests\Media\Library\DeleteMediaLibraryRequest;
 use App\Http\Requests\Media\Library\EditMediaLibraryRequest;
-use App\Actions\Media\Library\CreateNewMediaLibrary;
-use App\Actions\Media\Library\EditMediaLibrary;
-use App\Actions\Media\Library\DeleteMediaLibrary;
+use App\Http\Requests\Media\Library\StoreMediaLibraryFormRequest;
+use App\Http\Requests\Media\Library\UploadMediaRequest;
+use App\Models\Category\Group as CategoryGroup;
+use App\Models\Media\Library as LibraryModel;
+use App\Models\Media as MediaModel;
 
 class Library extends Controller
 {
-    /**
-     * @var array
-     */
-    protected array $_allowed_types = [
-        'image' => 'image/*',
-        'video' => 'video/*',
-        'audio' => 'audio/*',
-        'document' => 'application/pdf',
-        'other' => '*/*',
-        'archive' => 'application/zip',
-    ];
-
     /**
      * Display a listing of the resource.
      */
@@ -71,8 +60,16 @@ class Library extends Controller
             abort(404);
         }
 
+        $query = MediaModel::query();
+        $where = [
+            'library_id' => $id
+        ];
+        $media = $query->where($where)->paginate(20);
+
         $data = [
             'library' => $library,
+            'libraries' => LibraryModel::all(),
+            'media' => $media,
         ];
 
         return $this->view('media.libraries.view', $data);
@@ -136,9 +133,17 @@ class Library extends Controller
         return $this->view('media.libraries.delete', ['library' => $library]);
     }
 
-    public function upload(UploadMediaRequest $request, string $library_id)
+    public function upload(UploadMediaRequest $request, string $id)
     {
-        echo __FILE__ . ':' . __LINE__;
+        $library = LibraryModel::find($id);
+        if (!$library instanceof LibraryModel) {
+            abort(404);
+        }
+
+        $path = $request->file('file', $library->adapter);
+        $media = $library->addMedia($path)->toMediaCollection($library->slug);
+        $media->library_id = $library->id;
+        $media->save();
         exit;
     }
 }
