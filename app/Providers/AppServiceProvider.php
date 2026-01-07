@@ -8,6 +8,7 @@ use App\Services\FilesService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -42,6 +43,8 @@ class AppServiceProvider extends ServiceProvider
 //            $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
 //        });
 
+        //setup template routing
+        View::addNamespace('templates', resource_path('templates'));
         Paginator::useBootstrapFive();
         Gate::before(function ($user, $ability) {
             return $user->hasRole('super admin') ? true : null;
