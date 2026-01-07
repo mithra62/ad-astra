@@ -22,7 +22,7 @@ class Dashboard extends Controller
             'sum_soybean_remittance_totals' => Number::currency(0),
         ];
 
-        return view('admin.dashboard', $params);
+        return $this->view('dashboard', $params);
     }
 
     public function chart()

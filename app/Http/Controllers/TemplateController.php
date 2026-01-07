@@ -16,6 +16,12 @@ class TemplateController extends Controller
         'password', 'sanctum', 'storage', 'assets', 'vendor',
     ];
 
+    public function __construct()
+    {
+        View::replaceNamespace('admin', []);
+        parent::__construct();
+    }
+
     public function render(Request $request, string $group, string $template)
     {
         $this->guard($group, $template);
@@ -80,12 +86,16 @@ class TemplateController extends Controller
      */
     public function renderWithTail(Request $request, string $group, string $template, ?string $tail = null)
     {
+        return $this->renderGroupSecond($request, $group, $template);
         $this->guard($group, $template);
 
         $view = $this->viewName($group, $template);
         if (!View::exists($view)) {
             throw new NotFoundHttpException();
         }
+
+        print_r($tail);
+        exit;
 
         return $this->renderView($request, $view, [
             'tail' => $tail,

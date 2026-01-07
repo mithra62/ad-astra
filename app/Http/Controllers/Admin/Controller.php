@@ -12,6 +12,6 @@ abstract class Controller extends DefaultController
      */
     protected function view(string $path, array $data = [])
     {
-        return view('admin.' . $path, $data);
+        return view('admin::' . $path, $data);
     }
 }
