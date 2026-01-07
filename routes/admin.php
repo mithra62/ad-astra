@@ -64,6 +64,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('update', 'media.libraries.update')
         ->name('destroy', 'media.libraries.destroy');
 
+    Route::get('media/{id}/download', [Media::class, 'download'])->name('media.download');
     Route::get('media/{id}/confirm', [Media::class, 'confirm'])->name('media.confirm');
     Route::get('media/{library_id}/create', [Media::class, 'create'])->name('media.create');
     Route::post('media/{library_id}/create', [Media::class, 'store'])->name('media.store');

@@ -48,4 +48,14 @@ class Media extends Controller
     {
 
     }
+
+    public function download(string $id)
+    {
+        $media = MediaModel::find($id);
+        if(!$media instanceof MediaModel) {
+            abort(404);
+        }
+
+        return $media;
+    }
 }
