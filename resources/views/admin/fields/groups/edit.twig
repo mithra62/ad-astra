@@ -4,7 +4,7 @@
         <!-- Breadcrumb start -->
         <div class="row m-1">
             <div class="col-12 ">
-                <h5>Category Groups</h5>
+                <h5>Field Groups</h5>
                 <div class="col-6 ">
                     <ul class="app-line-breadcrumbs mb-3">
                         <li class="">
@@ -15,10 +15,10 @@
                             </a>
                         </li>
                         <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Categories</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Fields</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('categories.groups.edit', group) }}">Edit Category Group</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups.edit', group) }}">Edit Field Group</a>
                         </li>
                     </ul>
                 </div>
@@ -31,10 +31,10 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex flex-column gap-2">
-                    <h5>Edit Category Group</h5>
+                    <h5>Edit Field Group</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('categories.groups.update', group) }}" class="row g-3 needs-validation" novalidate>
+                    <form method="POST" action="{{ route('fields.groups.update', group) }}" class="row g-3 needs-validation" novalidate>
                         {{ csrf_field() }}
                         <input type="hidden" name="id" value="{{ group.id }}" />
                         {{ method_field('PUT') }}
@@ -53,7 +53,7 @@
                             {% endif %}
                         </div>
                         <div class="col-12">
-                            <button class="btn btn-primary float-end" type="submit">Edit Category Group</button>
+                            <button class="btn btn-primary float-end" type="submit">Edit Field Group</button>
                         </div>
                     </form>
                 </div>

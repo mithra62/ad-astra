@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Requests\Category\Group;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class DeleteCategoryGroupRequest extends FormRequest
@@ -11,7 +11,7 @@ class DeleteCategoryGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->can('delete category group');
+        return Auth::user()->can('delete field group');
     }
 
     /**
@@ -28,7 +28,6 @@ class DeleteCategoryGroupRequest extends FormRequest
      * @return string[]
      */
     public function messages(): array
-
     {
         return [
             'confirm_removal.required' => 'You must confirm the removal',

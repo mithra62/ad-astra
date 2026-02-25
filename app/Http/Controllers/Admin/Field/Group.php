@@ -94,6 +94,8 @@ class Group extends Controller
      */
     public function destroy(DeleteFieldGroupRequest $request, string $id)
     {
+        echo 'fdsa';
+        exit;
         $group = FieldGroup::find($id);
         if ($group instanceof FieldGroup) {
             $group->delete();
