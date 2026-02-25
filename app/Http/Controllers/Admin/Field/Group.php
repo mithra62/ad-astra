@@ -27,7 +27,7 @@ class Group extends Controller
      */
     public function create()
     {
-        return $this->view('categories.groups.create');
+        return $this->view('fields.groups.create');
     }
 
     /**
@@ -37,7 +37,7 @@ class Group extends Controller
     {
         $creator = app(CreateNewCategoryGroup::class);
         $group = $creator->create($request->all());
-        return redirect()->route('categories.groups.show', $group->id)->with('status', trans('category.group.created'));
+        return redirect()->route('fields.groups.show', $group->id)->with('status', trans('field.group.created'));
     }
 
     /**
@@ -58,7 +58,7 @@ class Group extends Controller
             'categories' => $categories,
         ];
 
-        return $this->view('categories.groups.view', $data);
+        return $this->view('fields.groups.view', $data);
     }
 
     /**
@@ -71,7 +71,7 @@ class Group extends Controller
             abort(404);
         }
 
-        return $this->view('categories.groups.edit', ['group' => $group]);
+        return $this->view('fields.groups.edit', ['group' => $group]);
     }
 
     /**
@@ -83,7 +83,7 @@ class Group extends Controller
         if ($group instanceof CategoryGroup) {
             $editor = app(EditCategoryGroup::class);
             $editor->edit($group, $request->all());
-            return redirect()->route('categories.groups')->with('success', trans('category.group.updated'));
+            return redirect()->route('fields.groups')->with('success', trans('field.group.updated'));
         }
 
         abort(404);
@@ -97,19 +97,19 @@ class Group extends Controller
         $group = CategoryGroup::find($id);
         if ($group instanceof CategoryGroup) {
             $group->delete();
-            return redirect()->route('categories.groups')->with('success', trans('category.group.deleted'));
+            return redirect()->route('fields.groups')->with('success', trans('field.group.deleted'));
         }
 
-        return redirect()->route('categories.groups')->with('failure', trans('category.group.not_found'));
+        return redirect()->route('fields.groups')->with('failure', trans('field.group.not_found'));
     }
 
     public function confirm(string $id)
     {
         $group = CategoryGroup::find($id);
         if (!$group instanceof CategoryGroup) {
-            return redirect()->route('categories.groups')->with('failure', 'category.group.not_found');
+            return redirect()->route('fields.groups')->with('failure', 'field.group.not_found');
         }
 
-        return $this->view('categories.groups.delete', ['group' => $group]);
+        return $this->view('fields.groups.delete', ['group' => $group]);
     }
 }
