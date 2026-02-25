@@ -1,0 +1,115 @@
+<?php
+
+namespace App\Http\Controllers\Admin\Field;
+
+use App\Actions\Field\Group\CreateNewFieldGroup;
+use App\Actions\Field\Group\EditFieldGroup;
+use App\Http\Controllers\Admin\Controller;
+use App\Http\Requests\Field\Group\DeleteFieldGroupRequest;
+use App\Http\Requests\Field\Group\EditFieldGroupRequest;
+use App\Http\Requests\Field\Group\StoreFieldGroupRequest;
+use App\Models\Field as FieldModel;
+use App\Models\Field\Group as FieldGroup;
+
+class Group extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $groups = FieldGroup::with('fields')->paginate(20);
+        return $this->view('fields.groups.index', ['groups' => $groups]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return $this->view('categories.groups.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreCategoryGroupRequest $request)
+    {
+        $creator = app(CreateNewCategoryGroup::class);
+        $group = $creator->create($request->all());
+        return redirect()->route('categories.groups.show', $group->id)->with('status', trans('category.group.created'));
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        $group = CategoryGroup::find($id);
+        if (!$group instanceof CategoryGroup) {
+            abort(404);
+        }
+
+        $groups = CategoryGroup::all();
+        $categories = CategoryModel::where(['group_id' => $group->id])->whereNull('parent_id')->get();
+        $data = [
+            'group' => $group,
+            'groups' => $groups,
+            'categories' => $categories,
+        ];
+
+        return $this->view('categories.groups.view', $data);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $group = CategoryGroup::find($id);
+        if (!$group instanceof CategoryGroup) {
+            abort(404);
+        }
+
+        return $this->view('categories.groups.edit', ['group' => $group]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(EditCategoryGroupRequest $request, string $id)
+    {
+        $group = CategoryGroup::find($id);
+        if ($group instanceof CategoryGroup) {
+            $editor = app(EditCategoryGroup::class);
+            $editor->edit($group, $request->all());
+            return redirect()->route('categories.groups')->with('success', trans('category.group.updated'));
+        }
+
+        abort(404);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(DeleteCategoryGroupRequest $request, string $id)
+    {
+        $group = CategoryGroup::find($id);
+        if ($group instanceof CategoryGroup) {
+            $group->delete();
+            return redirect()->route('categories.groups')->with('success', trans('category.group.deleted'));
+        }
+
+        return redirect()->route('categories.groups')->with('failure', trans('category.group.not_found'));
+    }
+
+    public function confirm(string $id)
+    {
+        $group = CategoryGroup::find($id);
+        if (!$group instanceof CategoryGroup) {
+            return redirect()->route('categories.groups')->with('failure', 'category.group.not_found');
+        }
+
+        return $this->view('categories.groups.delete', ['group' => $group]);
+    }
+}

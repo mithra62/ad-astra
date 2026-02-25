@@ -29,7 +29,8 @@ class Account extends AdminController
     }
 
     /**
-     * @return View
+     * @param EditPasswordRequest $request
+     * @return RedirectResponse
      */
     public function change_password(EditPasswordRequest $request): RedirectResponse
     {
