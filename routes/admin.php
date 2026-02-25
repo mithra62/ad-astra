@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\Account\Token as AccountTokens;
 use App\Http\Controllers\Admin\Category;
 use App\Http\Controllers\Admin\Category\Group as CategoryGroup;
 use App\Http\Controllers\Admin\Dashboard;
+use App\Http\Controllers\Admin\Field;
+use App\Http\Controllers\Admin\Field\Group as FieldGroup;
 use App\Http\Controllers\Admin\Media\Library;
 use App\Http\Controllers\Admin\Media;
 use App\Http\Controllers\Admin\Role;
@@ -74,6 +76,16 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::post('categories/{group_id}/create', [Category::class, 'store'])->name('categories.store');
     Route::get('categories/{id}/confirm', [Category::class, 'confirm'])->name('categories.confirm');
     Route::resource('categories', Category::class);
+
+    Route::get('fields/groups/{id}/confirm', [FieldGroup::class, 'confirm'])->name('fields.groups.confirm');
+    Route::resource('fields/groups', FieldGroup::class)
+        ->name('index', 'fields.groups')
+        ->name('create', 'fields.groups.create')
+        ->name('store', 'fields.groups.store')
+        ->name('show', 'fields.groups.show')
+        ->name('edit', 'fields.groups.edit')
+        ->name('update', 'fields.groups.update')
+        ->name('destroy', 'fields.groups.destroy');
 
     //dashboard
     Route::get('/dashboard', [Dashboard::class, 'index'])->name('dashboard');
