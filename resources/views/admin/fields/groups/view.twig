@@ -1,10 +1,10 @@
-{{ include('admin._inc._header', {title: 'View Category Group'}) }}
+{{ include('admin._inc._header', {title: 'View Field Group'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
         <div class="row m-1">
             <div class="col-12 ">
-                <h4 class="main-title">Category Group</h4>
+                <h4 class="main-title">Field Group</h4>
                 <ul class="app-line-breadcrumbs mb-3">
                     <li class="">
                         <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
@@ -14,10 +14,10 @@
                         </a>
                     </li>
                     <li class="">
-                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Categories</a>
+                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Fields</a>
                     </li>
                     <li class="active">
-                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups.show', group) }}">Category Group</a>
+                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups.show', group) }}">Field Group</a>
                     </li>
                 </ul>
             </div>
@@ -26,7 +26,7 @@
         {{ include('admin._inc._message') }}
         <!-- setting-app start -->
         <div class="row">
-            {{ include('admin.categories._sidebar', {active: group.id}) }}
+            {{ include('admin.fields._sidebar', {active: group.id}) }}
             <div class="col-lg-8 col-xxl-9">
                 <div class="tab-content">
                     <div aria-labelledby="profile-tab" class="tab-pane fade active show"
@@ -34,17 +34,17 @@
                          role="tabpanel" tabindex="0">
                         <div class="card setting-profile-tab">
                             <div class="card-header">
-                                <h5>Categories</h5>
+                                <h5>Fields</h5>
                                 <div class="col-12">
                                     <p class="float-right text-end">
                                         <a href="{{ route('categories.create', {group_id: group.id}) }}" class="btn btn-primary">Create
-                                            Category</a>
+                                            Field</a>
                                     </p>
                                 </div>
                             </div>
                             <div class="card-body">
                                 <div class="profile-tab profile-container">
-                                    {% if categories.count >= 1 %}
+                                    {% if fields.count >= 1 %}
                                         <div class="table-responsive">
                                             <table class="table align-middle mb-0">
                                                 <thead>
@@ -57,29 +57,29 @@
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                {% for category in categories %}
+                                                {% for field in fields %}
                                                     <tr>
-                                                        <td>{{ category.name }}</td>
+                                                        <td>{{ field.name }}</td>
                                                         <td class="f-w-500">
-                                                            {{ category.slug }}
+                                                            {{ field.slug }}
                                                         </td>
                                                         <td class="text-secondary f-w-600">
-                                                            {{ category.updated_at.format('F j, Y') }}
+                                                            {{ field.updated_at.format('F j, Y') }}
                                                         </td>
                                                         <td>
-                                                            {{ category.created_at.format('F j, Y') }}
+                                                            {{ field.created_at.format('F j, Y') }}
                                                         </td>
                                                         <td>
                                                             <a class="btn btn-primary icon-btn b-r-4"
-                                                               href="{{ route('categories.show', category) }}">
+                                                               href="{{ route('fields.show', field) }}">
                                                                 <i class="ti ti-activity"></i>
                                                             </a>
-                                                            <a class="btn btn-success icon-btn b-r-4"
-                                                               href="{{ route('categories.edit', category) }}">
+                                                            <a class="btn btn-success icon-btn field-r-4"
+                                                               href="{{ route('fields.edit', category) }}">
                                                                 <i class="ti ti-edit"></i>
                                                             </a>
                                                             <a class="btn btn-danger icon-btn b-r-4"
-                                                               href="{{ route('categories.confirm', category) }}">
+                                                               href="{{ route('fields.confirm', field) }}">
                                                                 <i class="ti ti-trash"></i>
                                                             </a>
                                                         </td>
@@ -90,8 +90,8 @@
                                         </div>
                                     {% else %}
                                         <p class="text-center">
-                                            No Categories Created. <br />
-                                            <a href="{{ route('categories.create', {group_id: group.id}) }}" class="btn btn-outline-primary">Create Category</a>
+                                            No Fields Created. <br />
+                                            <a href="{{ route('fields.create', {group_id: group.id}) }}" class="btn btn-outline-primary">Create Field</a>
                                         </p>
                                     {% endif %}
                                 </div>

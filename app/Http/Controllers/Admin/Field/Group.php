@@ -8,7 +8,7 @@ use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\Field\Group\DeleteFieldGroupRequest;
 use App\Http\Requests\Field\Group\EditFieldGroupRequest;
 use App\Http\Requests\Field\Group\StoreFieldGroupRequest;
-use App\Models\Field as FieldModel;
+use App\Models\Field;
 use App\Models\Field\Group as FieldGroup;
 
 class Group extends Controller
@@ -51,11 +51,11 @@ class Group extends Controller
         }
 
         $groups = FieldGroup::all();
-        $categories = FieldGroup::where(['group_id' => $group->id])->whereNull('parent_id')->get();
+        //$fields = Field::where(['group_id' => $group->id])->get();
         $data = [
             'group' => $group,
             'groups' => $groups,
-            'categories' => $categories,
+            //'fields' => $fields,
         ];
 
         return $this->view('fields.groups.view', $data);
