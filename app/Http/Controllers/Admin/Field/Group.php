@@ -33,9 +33,9 @@ class Group extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCategoryGroupRequest $request)
+    public function store(StoreFieldGroupRequest $request)
     {
-        $creator = app(CreateNewCategoryGroup::class);
+        $creator = app(CreateNewFieldGroup::class);
         $group = $creator->create($request->all());
         return redirect()->route('fields.groups.show', $group->id)->with('status', trans('field.group.created'));
     }
@@ -45,13 +45,13 @@ class Group extends Controller
      */
     public function show(string $id)
     {
-        $group = CategoryGroup::find($id);
-        if (!$group instanceof CategoryGroup) {
+        $group = FieldGroup::find($id);
+        if (!$group instanceof FieldGroup) {
             abort(404);
         }
 
-        $groups = CategoryGroup::all();
-        $categories = CategoryModel::where(['group_id' => $group->id])->whereNull('parent_id')->get();
+        $groups = FieldGroup::all();
+        $categories = FieldGroup::where(['group_id' => $group->id])->whereNull('parent_id')->get();
         $data = [
             'group' => $group,
             'groups' => $groups,
@@ -66,8 +66,8 @@ class Group extends Controller
      */
     public function edit(string $id)
     {
-        $group = CategoryGroup::find($id);
-        if (!$group instanceof CategoryGroup) {
+        $group = FieldGroup::find($id);
+        if (!$group instanceof FieldGroup) {
             abort(404);
         }
 
@@ -77,11 +77,11 @@ class Group extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(EditCategoryGroupRequest $request, string $id)
+    public function update(EditFieldGroupRequest $request, string $id)
     {
-        $group = CategoryGroup::find($id);
-        if ($group instanceof CategoryGroup) {
-            $editor = app(EditCategoryGroup::class);
+        $group = FieldGroup::find($id);
+        if ($group instanceof FieldGroup) {
+            $editor = app(EditFieldGroup::class);
             $editor->edit($group, $request->all());
             return redirect()->route('fields.groups')->with('success', trans('field.group.updated'));
         }
@@ -92,10 +92,10 @@ class Group extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DeleteCategoryGroupRequest $request, string $id)
+    public function destroy(DeleteFieldGroupRequest $request, string $id)
     {
-        $group = CategoryGroup::find($id);
-        if ($group instanceof CategoryGroup) {
+        $group = FieldGroup::find($id);
+        if ($group instanceof FieldGroup) {
             $group->delete();
             return redirect()->route('fields.groups')->with('success', trans('field.group.deleted'));
         }
@@ -105,8 +105,8 @@ class Group extends Controller
 
     public function confirm(string $id)
     {
-        $group = CategoryGroup::find($id);
-        if (!$group instanceof CategoryGroup) {
+        $group = FieldGroup::find($id);
+        if (!$group instanceof FieldGroup) {
             return redirect()->route('fields.groups')->with('failure', 'field.group.not_found');
         }
 
