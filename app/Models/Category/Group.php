@@ -25,6 +25,14 @@ class Group extends Model
         'sort_order' => 'integer',
     ];
 
+    public function category_groupable()
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * @return MorphToMany
+     */
     public function categories(): MorphToMany
     {
         return $this->morphToMany(Category::class, 'categorizable')

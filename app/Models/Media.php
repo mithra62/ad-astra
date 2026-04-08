@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
 use Spatie\Tags\HasTags;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 
 class Media extends BaseMedia
@@ -17,8 +18,9 @@ class Media extends BaseMedia
         return $this->belongsTo(Media\Library::class);
     }
 
-    public function categories(): BelongsToMany
+    public function categories(): MorphToMany
     {
-        return $this->belongsToMany(Category::class, 'category_media')->withPivot('category_id', 'media_id');
+        return $this->morphToMany(Category::class, 'categorizable')
+            ->withTimestamps();
     }
 }
