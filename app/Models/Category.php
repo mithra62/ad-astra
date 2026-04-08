@@ -30,7 +30,12 @@ class Category extends Model
         'sort_order' => 'integer',
     ];
 
-    public function group(): MorphMany
+    public function categorizable()
+    {
+        return $this->morphTo();
+    }
+
+    public function groups(): MorphMany
     {
         return $this->morphMany(Group::class, 'categorizable')
             ->withTimestamps();

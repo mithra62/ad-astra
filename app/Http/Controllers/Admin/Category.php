@@ -42,8 +42,8 @@ class Category extends Controller
         $creator = app(CreateNewCategory::class);
         $data = $request->all();
         $data['group_id'] = $request->group_id;
-        $group = $creator->create($data);
-        return redirect()->route('categories.show', $group->id)->with('status', trans('category.created'));
+        $cat = $creator->createByGroup($data);
+        return redirect()->route('categories.show', $cat->id)->with('status', trans('category.created'));
     }
 
     /**
@@ -51,7 +51,7 @@ class Category extends Controller
      */
     public function show(string $id)
     {
-        $category = CategoryModel::with(['group', 'children'])->find($id);
+        $category = CategoryModel::with(['children'])->find($id);
         if (!$category instanceof CategoryModel) {
             abort(404);
         }
