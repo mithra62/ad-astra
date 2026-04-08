@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Category extends Model
 {
@@ -29,9 +30,10 @@ class Category extends Model
         'sort_order' => 'integer',
     ];
 
-    public function group(): BelongsTo
+    public function group(): MorphMany
     {
-        return $this->belongsTo(Group::class, 'group_id');
+        return $this->morphMany(Group::class, 'categorizable')
+            ->withTimestamps();
     }
 
     public function parent(): BelongsTo
