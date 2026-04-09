@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('category_groupables', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_group_id')
+            $table->foreignId('group_id')
                 ->constrained('category_groups')
                 ->cascadeOnDelete();
             $table->unsignedBigInteger('category_groupable_id');
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamps();
             $table->index(['category_groupable_id', 'category_groupable_type'], 'cg_type_index');
             $table->unique([
-                'category_group_id',
+                'group_id',
                 'category_groupable_id',
                 'category_groupable_type',
             ], 'cg_unique');

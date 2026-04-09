@@ -18,8 +18,8 @@ return new class extends Migration
 
             $table->string('adapter', 50)->default('local');
             $table->json('adapter_settings')->nullable();
-            $table->string('server_path', 255)->default('');
-            $table->string('url', 100);
+            //$table->string('server_path', 255)->default('');
+            //$table->string('url', 100);
             $table->json('allowed_types')->nullable();
             $table->unsignedInteger('max_size')->default(10);
 

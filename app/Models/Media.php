@@ -1,9 +1,7 @@
 <?php
 namespace App\Models;
 
-use App\Models\Category\Group;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
 use Spatie\Tags\HasTags;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;

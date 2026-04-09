@@ -7,6 +7,7 @@ use App\Models\Media;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -35,9 +36,10 @@ class Library extends Model implements HasMedia
         'max_size' => 'integer',
     ];
 
-    public function category_groups(): BelongsToMany
+    public function category_groups(): MorphToMany
     {
-        return $this->belongsToMany(Group::class, 'category_groups_media_library')->withPivot('group_id', 'library_id');
+        return $this->morphToMany(Group::class, 'category_groupable')
+            ->withTimestamps();
     }
 
     public function categories()
