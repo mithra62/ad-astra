@@ -1,4 +1,4 @@
-{{ include('admin._inc._header', {title: 'Delete Category'}) }}
+{{ include('admin._inc._header', {title: 'Delete Field'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
@@ -15,10 +15,10 @@
                             </a>
                         </li>
                         <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Categories</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Fields</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('categories.confirm', category) }}">Delete Category</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('fields.confirm', field) }}">Delete Category</a>
                         </li>
                     </ul>
                 </div>
@@ -30,7 +30,7 @@
         <!-- Blank start -->
         <div class="row">
             <!-- Default Card start -->
-            <form method="POST" action="{{ route('categories.destroy', category) }}" class="row g-3 needs-validation" novalidate>
+            <form method="POST" action="{{ route('fields.destroy', field) }}" class="row g-3 needs-validation" novalidate>
                 {{ csrf_field() }}
                 {{ method_field('DELETE') }}
                 <div class="col-md-12">
@@ -39,8 +39,8 @@
                             <h5>Delete Category</h5>
                         </div>
                         <div class="card-body">
-                            <h6>Are you sure you want to remove this Category?</h6>
-                            <p class="text-secondary"> Are you sure you want to remove this Category?</p>
+                            <h6>Are you sure you want to remove this Field?</h6>
+                            <p class="text-secondary"> Are you sure you want to remove this Field?</p>
                         </div>
                         <div class="card-footer">
                             <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
@@ -53,7 +53,7 @@
                             </div>
 
                             <div class="col-12 float-end">
-                                <button class="btn btn-primary float-end" type="submit">Delete Category</button>
+                                <button class="btn btn-primary float-end" type="submit">Delete Field</button>
                             </div>
                         </div>
 

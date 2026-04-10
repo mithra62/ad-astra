@@ -7,7 +7,7 @@ use App\Actions\Field\EditField;
 use App\Http\Requests\Field\DeleteFieldRequest;
 use App\Http\Requests\Field\EditFieldRequest;
 use App\Http\Requests\Field\StoreFieldRequest;
-use App\Models\Category as FieldModel;
+use App\Models\Field as FieldModel;
 use App\Models\Field\Group as FieldGroup;
 
 class Field extends Controller
@@ -82,11 +82,11 @@ class Field extends Controller
      */
     public function update(EditFieldRequest $request, string $id)
     {
-        $category = FieldModel::find($id);
-        if ($category instanceof FieldModel) {
+        $field = FieldModel::find($id);
+        if ($field instanceof FieldModel) {
             $editor = app(EditField::class);
-            $editor->edit($category, $request->all());
-            return redirect()->route('fields.groups.show', $category->group)->with('success', trans('field.updated'));
+            $editor->edit($field, $request->all());
+            return redirect()->route('fields.groups.show', $id)->with('success', trans('field.updated'));
         }
 
         abort(404);
@@ -97,11 +97,10 @@ class Field extends Controller
      */
     public function destroy(DeleteFieldRequest $request, string $id)
     {
-        $category = FieldModel::find($id);
-        if ($category instanceof FieldModel) {
-            $group = $category->group;
-            $category->delete();
-            return redirect()->route('fields.groups.show', $group)->with('success', trans('category.deleted'));
+        $field = FieldModel::find($id);
+        if ($field instanceof FieldModel) {
+            $field->delete();
+            return redirect()->route('fields.groups.show', $id)->with('success', trans('field.deleted'));
         }
 
         abort(404);
@@ -109,12 +108,12 @@ class Field extends Controller
 
     public function confirm(string $id)
     {
-        $category = FieldModel::find($id);
-        if (!$category instanceof FieldModel) {
+        $field = FieldModel::find($id);
+        if (!$field instanceof FieldModel) {
             abort(404);
         }
 
         $groups = FieldGroup::with('fields')->get();
-        return $this->view('fields.delete', ['category' => $category]);
+        return $this->view('fields.delete', ['field' => $field]);
     }
 }

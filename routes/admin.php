@@ -90,6 +90,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('fields/{group_id}/create', [Field::class, 'create'])->name('fields.create');
     Route::post('fields/{group_id}/create', [Field::class, 'store'])->name('fields.store');
     Route::get('fields/{id}/confirm', [Field::class, 'confirm'])->name('fields.confirm');
+
     Route::resource('fields', Field::class);
 
     //dashboard
