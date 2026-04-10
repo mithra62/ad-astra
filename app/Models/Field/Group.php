@@ -4,8 +4,7 @@ namespace App\Models\Field;
 
 use App\Models\Field;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Group extends Model
 {
@@ -20,8 +19,17 @@ class Group extends Model
      */
     protected $table = 'field_groups';
 
-    public function fields(): BelongsToMany
+    public function field_groupable()
     {
-        return $this->belongsToMany(Field::class, 'field_groups_fields')->withPivot('group_id', 'field_id');
+        return $this->morphTo();
+    }
+
+    /**
+     * @return MorphToMany
+     */
+    public function fields(): MorphToMany
+    {
+        return $this->morphToMany(Field::class, 'fieldable')
+            ->withTimestamps();
     }
 }

@@ -60,6 +60,7 @@
                             <div class="mb-12">
                                 <label class="form-label" for="categories">Categories</label>
 
+                                {{ library.categories().count }}
                                 {% for cat in library.categories() %}
                                     <div class="form-check d-flex">
                                         <input class="form-check-input mg-2"

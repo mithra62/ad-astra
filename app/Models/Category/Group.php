@@ -4,6 +4,8 @@
 namespace App\Models\Category;
 
 use App\Models\Category;
+use App\Models\Field;
+use App\Models\Field\Group AS FieldGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -36,6 +38,24 @@ class Group extends Model
     public function categories(): MorphToMany
     {
         return $this->morphToMany(Category::class, 'categorizable')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return MorphToMany
+     */
+    public function field_groups(): MorphToMany
+    {
+        return $this->morphToMany(FieldGroup::class, 'field_groupable')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return MorphToMany
+     */
+    public function fields(): MorphToMany
+    {
+        return $this->morphToMany(Field::class, 'fieldable')
             ->withTimestamps();
     }
 
