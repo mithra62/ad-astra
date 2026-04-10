@@ -4,7 +4,7 @@
         <!-- Breadcrumb start -->
         <div class="row m-1">
             <div class="col-12 ">
-                <h5>Category</h5>
+                <h5>Category Groups</h5>
                 <div class="col-6 ">
                     <ul class="app-line-breadcrumbs mb-3">
                         <li class="">
@@ -15,10 +15,13 @@
                             </a>
                         </li>
                         <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Categories</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Category Groups</a>
+                        </li>
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('categories.groups.show', group) }}">{{ group.name }}</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('categories.groups.create') }}">Create Category</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('categories.create', group) }}">Create Category</a>
                         </li>
                     </ul>
                 </div>
@@ -31,7 +34,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex flex-column gap-2">
-                    <h5>Create Category Group</h5>
+                    <h5>Create Category</h5>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ route('categories.store', {group_id: group.id}) }}" class="row g-3 needs-validation" novalidate>
@@ -51,7 +54,7 @@
                             {% endif %}
                         </div>
                         <div class="col-12">
-                            <button class="btn btn-primary float-end" type="submit">Create Category Group</button>
+                            <button class="btn btn-primary float-end" type="submit">Create Category</button>
                         </div>
                     </form>
                 </div>

@@ -73,8 +73,14 @@ class Category extends Controller
             abort(404);
         }
 
-        $groups = CategoryGroup::with('categories')->get();
-        return $this->view('categories.edit', ['category' => $category, 'groups' => $groups]);
+        $groups = CategoryGroup::get();
+        $active_group = $category->groups->first();
+        $data = [
+            'category' => $category,
+            'groups' => $groups,
+            'active_group' => $active_group
+        ];
+        return $this->view('categories.edit', $data);
     }
 
     /**
@@ -114,7 +120,8 @@ class Category extends Controller
             abort(404);
         }
 
-        $groups = CategoryGroup::with('categories')->get();
-        return $this->view('categories.delete', ['category' => $category]);
+        $groups = CategoryGroup::get();
+        $active_group = $category->groups->first();
+        return $this->view('categories.delete', ['category' => $category, 'groups' => $groups, 'active_group' => $active_group]);
     }
 }

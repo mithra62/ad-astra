@@ -15,7 +15,7 @@
                             </a>
                         </li>
                         <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries') }}">Media</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries') }}">Media Libraries</a>
                         </li>
                         <li class="active">
                             <a class="f-s-14 f-w-500" href="{{ route('media.libraries.create') }}">Create Media
@@ -126,7 +126,40 @@
 
                         {% endif %}
 
+                        {% if field_groups.count >= 1 %}
 
+                            <div class="mb-12">
+                                <label class="form-label" for="category_groups">Field Groups</label>
+                                {% for group in field_groups %}
+                                    <div class="form-check d-flex">
+                                        <input class="form-check-input mg-2"
+                                               id="library.{{ group.slug }}"
+                                               type="checkbox"
+                                               name="field_groups[]"
+                                               value="{{ group.id }}"
+                                            {% if old('field_groups') %}
+                                                {% for key, field in old('field_groups') %}
+                                                    {% if old('field_groups.' ~ key) == group.id %}checked{% endif %}
+                                                {% endfor %}
+
+                                            {% else %}
+                                                {% for key, field in library.field_groups %}
+                                                    {% if field.id == group.id %}checked{% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        >
+                                        <label class="form-check-label ms-2" for="library.{{ group.slug }}">
+                                            {{ group.name }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                                {% if errors.has('category_groups') %}
+                                    <p class="text-danger">{{ errors.first('category_groups') }}</p>
+                                {% endif %}
+                            </div>
+                        {% else %}
+
+                        {% endif %}
 
                         <div class="mb-12">
                             <label class="form-label" for="allowed_types">Allowed File Types</label>
