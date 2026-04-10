@@ -14,10 +14,10 @@
                         </a>
                     </li>
                     <li class="">
-                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Fields</a>
+                        <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Fields</a>
                     </li>
                     <li class="active">
-                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups.show', group) }}">Field Group</a>
+                        <a class="f-s-14 f-w-500" href="{{ route('fields.groups.show', group) }}">Field Group</a>
                     </li>
                 </ul>
             </div>
@@ -37,7 +37,7 @@
                                 <h5>Fields</h5>
                                 <div class="col-12">
                                     <p class="float-right text-end">
-                                        <a href="{{ route('categories.create', {group_id: group.id}) }}" class="btn btn-primary">Create
+                                        <a href="{{ route('fields.create', {group_id: group.id}) }}" class="btn btn-primary">Create
                                             Field</a>
                                     </p>
                                 </div>
@@ -75,7 +75,7 @@
                                                                 <i class="ti ti-activity"></i>
                                                             </a>
                                                             <a class="btn btn-success icon-btn field-r-4"
-                                                               href="{{ route('fields.edit', category) }}">
+                                                               href="{{ route('fields.edit', field) }}">
                                                                 <i class="ti ti-edit"></i>
                                                             </a>
                                                             <a class="btn btn-danger icon-btn b-r-4"

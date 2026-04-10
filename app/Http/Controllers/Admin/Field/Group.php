@@ -51,11 +51,11 @@ class Group extends Controller
         }
 
         $groups = FieldGroup::all();
-        //$fields = Field::where(['group_id' => $group->id])->get();
+        $fields = $group->fields()->get();
         $data = [
             'group' => $group,
             'groups' => $groups,
-            //'fields' => $fields,
+            'fields' => $fields,
         ];
 
         return $this->view('fields.groups.view', $data);
