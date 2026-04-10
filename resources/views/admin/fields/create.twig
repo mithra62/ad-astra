@@ -1,4 +1,4 @@
-{{ include('admin._inc._header', {title: 'Create Category'}) }}
+{{ include('admin._inc._header', {title: 'Create Field'}) }}
 <main>
     <div class="container-fluid">
         <!-- Breadcrumb start -->
@@ -34,7 +34,7 @@
                     <h5>Create Field</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('categories.store', {group_id: group.id}) }}" class="row g-3 needs-validation" novalidate>
+                    <form method="POST" action="{{ route('fields.store', {group_id: group.id}) }}" class="row g-3 needs-validation" novalidate>
                         {{ csrf_field() }}
                         <div class="col-md-12">
                             <label class="form-label" for="name">Name</label>
@@ -51,7 +51,7 @@
                             {% endif %}
                         </div>
                         <div class="col-12">
-                            <button class="btn btn-primary float-end" type="submit">Create Category Group</button>
+                            <button class="btn btn-primary float-end" type="submit">Create Field</button>
                         </div>
                     </form>
                 </div>

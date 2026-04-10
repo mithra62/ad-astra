@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Field extends Model
 {
+    protected $fillable = [
+        'name',
+        'slug',
+        'type',
+        'description'
+    ];
+
     public function fieldable()
     {
         return $this->morphTo();

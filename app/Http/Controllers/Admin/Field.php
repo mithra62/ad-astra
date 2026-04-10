@@ -37,13 +37,13 @@ class Field extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCategoryRequest $request)
+    public function store(StoreFieldRequest $request)
     {
-        $creator = app(CreateNewCategory::class);
+        $creator = app(CreateNewField::class);
         $data = $request->all();
         $data['group_id'] = $request->group_id;
-        $group = $creator->create($data);
-        return redirect()->route('categories.show', $group->id)->with('status', trans('category.created'));
+        $group = $creator->createByGroup($data);
+        return redirect()->route('fields.show', $group->id)->with('status', trans('field.created'));
     }
 
     /**
@@ -51,13 +51,13 @@ class Field extends Controller
      */
     public function show(string $id)
     {
-        $category = CategoryModel::with(['group', 'children'])->find($id);
-        if (!$category instanceof CategoryModel) {
+        $field = FieldModel::find($id);
+        if (!$field instanceof FieldModel) {
             abort(404);
         }
 
         //$category->with('group');
-        print_r($category);
+        print_r($field);
         exit;
         echo __FILE__ . ': ' . __LINE__;
         exit;
@@ -68,25 +68,25 @@ class Field extends Controller
      */
     public function edit(string $id)
     {
-        $category = CategoryModel::find($id);
-        if (!$category instanceof CategoryModel) {
+        $field = FieldModel::find($id);
+        if (!$field instanceof FieldModel) {
             abort(404);
         }
 
-        $groups = CategoryGroup::with('categories')->get();
-        return $this->view('categories.edit', ['category' => $category, 'groups' => $groups]);
+        $groups = FieldGroup::with('fields')->get();
+        return $this->view('fields.edit', ['field' => $field, 'groups' => $groups]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(EditCategoryRequest $request, string $id)
+    public function update(EditFieldRequest $request, string $id)
     {
-        $category = CategoryModel::find($id);
-        if ($category instanceof CategoryModel) {
-            $editor = app(EditCategory::class);
+        $category = FieldModel::find($id);
+        if ($category instanceof FieldModel) {
+            $editor = app(EditField::class);
             $editor->edit($category, $request->all());
-            return redirect()->route('categories.groups.show', $category->group)->with('success', trans('category.updated'));
+            return redirect()->route('fields.groups.show', $category->group)->with('success', trans('field.updated'));
         }
 
         abort(404);
@@ -95,13 +95,13 @@ class Field extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DeleteCategoryRequest $request, string $id)
+    public function destroy(DeleteFieldRequest $request, string $id)
     {
-        $category = CategoryModel::find($id);
-        if ($category instanceof CategoryModel) {
+        $category = FieldModel::find($id);
+        if ($category instanceof FieldModel) {
             $group = $category->group;
             $category->delete();
-            return redirect()->route('categories.groups.show', $group)->with('success', trans('category.deleted'));
+            return redirect()->route('fields.groups.show', $group)->with('success', trans('category.deleted'));
         }
 
         abort(404);
@@ -109,12 +109,12 @@ class Field extends Controller
 
     public function confirm(string $id)
     {
-        $category = CategoryModel::find($id);
-        if (!$category instanceof CategoryModel) {
+        $category = FieldModel::find($id);
+        if (!$category instanceof FieldModel) {
             abort(404);
         }
 
-        $groups = CategoryGroup::with('categories')->get();
-        return $this->view('categories.delete', ['category' => $category]);
+        $groups = FieldGroup::with('fields')->get();
+        return $this->view('fields.delete', ['category' => $category]);
     }
 }
