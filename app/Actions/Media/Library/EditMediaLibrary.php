@@ -16,6 +16,13 @@ class EditMediaLibrary extends AbstractAction
             }
         }
 
+        $library->field_groups()->detach();
+        if (!empty($input['field_groups'])) {
+            foreach ($input['field_groups'] as $field_group) {
+                $library->field_groups()->attach($field_group);
+            }
+        }
+
         return $library->update($input);
     }
 }

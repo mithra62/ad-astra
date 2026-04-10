@@ -53,7 +53,6 @@ class Library extends Model implements HasMedia
             foreach($group->categories AS $cat) {
                 $ids[] = $cat->id;
             }
-            $ids[] = $group->id;
         }
 
         return Category::whereIn('id', $ids)->get();

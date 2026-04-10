@@ -10,6 +10,7 @@ use App\Http\Requests\Category\Group\EditCategoryGroupRequest;
 use App\Http\Requests\Category\Group\StoreCategoryGroupRequest;
 use App\Models\Category as CategoryModel;
 use App\Models\Category\Group as CategoryGroup;
+use App\Models\Field\Group as FieldGroup;
 
 class Group extends Controller
 {
@@ -27,7 +28,11 @@ class Group extends Controller
      */
     public function create()
     {
-        return $this->view('categories.groups.create');
+        $field_groups = FieldGroup::all();
+        $data = [
+            'field_groups' => $field_groups,
+        ];
+        return $this->view('categories.groups.create', $data);
     }
 
     /**
@@ -71,7 +76,12 @@ class Group extends Controller
             abort(404);
         }
 
-        return $this->view('categories.groups.edit', ['group' => $group]);
+        $field_groups = FieldGroup::all();
+        $data = [
+            'group' => $group,
+            'field_groups' => $field_groups,
+        ];
+        return $this->view('categories.groups.edit', $data);
     }
 
     /**

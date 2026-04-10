@@ -62,8 +62,9 @@
                         <div class="mb-12">
                             <label class="form-label" for="storage">Storage</label>
                             <select class="form-select" id="storage" name="storage">
-                                <option value="local" {% if old('storage', library.storage) == 'local' %}selected{% endif %}>Local</option>
-                                <option value="aws" {% if old('storage', library.storage) == 'aws' %}selected{% endif %}>AWS</option>
+                                {% for key, disk in disks %}
+                                    <option value="{{ key }}" {% if old('storage') == key %}selected{% endif %}>{{ disk.title }}</option>
+                                {% endfor %}
                             </select>
                             {% if errors.has('storage') %}
                                 <p class="text-danger">{{ errors.first('storage') }}</p>
@@ -119,6 +120,44 @@
 
                                             {% else %}
                                                 {% for key, field in library.category_groups %}
+                                                    {% if field.id == group.id %}checked{% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        >
+                                        <label class="form-check-label ms-2" for="library.{{ group.slug }}">
+                                            {{ group.name }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                                {% if errors.has('category_groups') %}
+                                    <p class="text-danger">{{ errors.first('category_groups') }}</p>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            No Category Groups Created
+                        {% endif %}
+
+
+
+
+                        {% if field_groups.count >= 1 %}
+
+                            <div class="mb-12">
+                                <label class="form-label" for="category_groups">Category Groups</label>
+                                {% for group in field_groups %}
+                                    <div class="form-check d-flex">
+                                        <input class="form-check-input mg-2"
+                                               id="library.{{ group.slug }}"
+                                               type="checkbox"
+                                               name="field_groups[]"
+                                               value="{{ group.id }}"
+                                            {% if old('field_groups') %}
+                                                {% for key, field in old('field_groups') %}
+                                                    {% if old('field_groups.' ~ key) == group.id %}checked{% endif %}
+                                                {% endfor %}
+
+                                            {% else %}
+                                                {% for key, field in library.field_groups %}
                                                     {% if field.id == group.id %}checked{% endif %}
                                                 {% endfor %}
                                             {% endif %}
