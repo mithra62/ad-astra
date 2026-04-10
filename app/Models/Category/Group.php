@@ -41,9 +41,6 @@ class Group extends Model
             ->withTimestamps();
     }
 
-    /**
-     * @return MorphToMany
-     */
     public function field_groups(): MorphToMany
     {
         return $this->morphToMany(FieldGroup::class, 'field_groupable')
