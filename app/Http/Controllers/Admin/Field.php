@@ -31,7 +31,14 @@ class Field extends Controller
             abort(404);
         }
 
-        return $this->view('fields.create', ['group' => $group]);
+        $groups = FieldGroup::all();
+        $data = [
+            'group' => $group,
+            'groups' => $groups,
+            'field_types' => app('fields-service')->getFieldTypes()
+        ];
+
+        return $this->view('fields.create', $data);
     }
 
     /**
@@ -73,8 +80,16 @@ class Field extends Controller
             abort(404);
         }
 
-        $groups = FieldGroup::with('fields')->get();
-        return $this->view('fields.edit', ['field' => $field, 'groups' => $groups]);
+        $groups = FieldGroup::all();
+        $active_group = $field->groups->first();
+        $data = [
+            'field' => $field,
+            'groups' => $groups,
+            'field_types' => app('fields-service')->getFieldTypes(),
+            'active_group' => $active_group
+        ];
+
+        return $this->view('fields.edit', $data);
     }
 
     /**
@@ -86,7 +101,7 @@ class Field extends Controller
         if ($field instanceof FieldModel) {
             $editor = app(EditField::class);
             $editor->edit($field, $request->all());
-            return redirect()->route('fields.groups.show', $id)->with('success', trans('field.updated'));
+            return redirect()->route('fields.show', $id)->with('success', trans('field.updated'));
         }
 
         abort(404);
@@ -114,6 +129,12 @@ class Field extends Controller
         }
 
         $groups = FieldGroup::with('fields')->get();
-        return $this->view('fields.delete', ['field' => $field]);
+        $active_group = $field->groups->first();
+        $data = [
+            'field' => $field,
+            'active_group' => $active_group,
+            'groups' => $groups,
+        ];
+        return $this->view('fields.delete', $data);
     }
 }

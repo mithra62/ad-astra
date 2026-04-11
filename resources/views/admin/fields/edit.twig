@@ -4,7 +4,7 @@
         <!-- Breadcrumb start -->
         <div class="row m-1">
             <div class="col-12 ">
-                <h4 class="main-title">Fields</h4>
+                <h4 class="main-title">Field Groups</h4>
                 <ul class="app-line-breadcrumbs mb-3">
                     <li class="">
                         <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
@@ -14,10 +14,16 @@
                         </a>
                     </li>
                     <li class="">
-                        <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Fields</a>
+                        <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Field Groups</a>
+                    </li>
+                    <li>
+                        <a class="f-s-14 f-w-500" href="{{ route('fields.groups.show', active_group) }}">{{ active_group.name }}</a>
+                    </li>
+                    <li>
+                        <a class="f-s-14 f-w-500" href="{{ route('fields.show', field) }}">{{ field.name }}</a>
                     </li>
                     <li class="active">
-{#                        <a class="f-s-14 f-w-500" href="{{ route('fields.groups.show', fields.group) }}">Field Group</a>#}
+                        <a class="f-s-14 f-w-500" href="{{ route('fields.edit', field) }}">Edit Field</a>
                     </li>
                 </ul>
             </div>
@@ -26,7 +32,7 @@
         {{ include('admin._inc._message') }}
         <!-- setting-app start -->
         <div class="row">
-            {{ include('admin.fields._sidebar', {active: fields.group.id}) }}
+            {{ include('admin.fields._sidebar', {active: active_group.id}) }}
             <div class="col-lg-8 col-xxl-9">
                 <div class="tab-content">
                     <div aria-labelledby="profile-tab" class="tab-pane fade active show"
@@ -34,7 +40,7 @@
                          role="tabpanel" tabindex="0">
                         <div class="card setting-profile-tab">
                             <div class="card-header">
-                                <h5>Fields</h5>
+                                <h5>Edit Field</h5>
                             </div>
                             <div class="card-body">
                                 <div class="profile-tab profile-container">
@@ -42,6 +48,17 @@
                                     <form method="POST" action="{{ route('fields.update', field.id) }}" class="row g-3 needs-validation" novalidate>
                                         {{ csrf_field() }}
                                         {{ method_field('PUT') }}
+                                        <div class="mb-12">
+                                            <label class="form-label" for="type">Type</label>
+                                            <select class="form-select" id="type" name="type">
+                                                {% for type, name in field_types %}
+                                                    <option value="{{ type }}" {% if old('type') == type %}selected{% elseif type == 'text' %}selected{% endif %}>{{ name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            {% if errors.has('storage') %}
+                                                <p class="text-danger">{{ errors.first('storage') }}</p>
+                                            {% endif %}
+                                        </div>
                                         <div class="col-md-12">
                                             <label class="form-label" for="name">Name</label>
                                             <input class="form-control" id="name" required type="text" value="{{ old('name', field.name) }}" name="name">
@@ -54,6 +71,13 @@
                                             <input class="form-control" id="slug" required type="text" value="{{ old('slug', field.slug) }}" name="slug">
                                             {% if errors.has('slug') %}
                                                 <p class="text-danger">{{ errors.first('slug') }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="instructions">Instructions</label>
+                                            <textarea class="form-control" id="instructions" name="instructions" placeholder="Field instructions that appear in the publish form." rows="3"></textarea>
+                                            {% if errors.has('instructions') %}
+                                                <p class="text-danger">{{ errors.first('instructions') }}</p>
                                             {% endif %}
                                         </div>
                                         <div class="col-12">

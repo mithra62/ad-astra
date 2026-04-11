@@ -22,17 +22,22 @@ class StoreFieldRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'type' => [
+                'required',
+                'string',
+                'max:255'
+            ],
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('fields')->ignore($this->data('id')),
+                Rule::unique('fields')->ignore($this->route()->parameter('field')),
             ],
             'slug' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('fields')->ignore($this->data('id')),
+                Rule::unique('fields')->ignore($this->route()->parameter('field')),
             ],
         ];
     }

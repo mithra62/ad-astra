@@ -4,7 +4,7 @@
         <!-- Breadcrumb start -->
         <div class="row m-1">
             <div class="col-12 ">
-                <h5>Category Group</h5>
+                <h5>Field Groups</h5>
                 <div class="col-6 ">
                     <ul class="app-line-breadcrumbs mb-3">
                         <li class="">
@@ -15,10 +15,17 @@
                             </a>
                         </li>
                         <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Fields</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Field Groups</a>
+                        </li>
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups.show', active_group) }}">{{ active_group.name }}</a>
+                        </li>
+
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('fields.show', field) }}">{{ field.name }}</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('fields.confirm', field) }}">Delete Category</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('fields.confirm', field) }}">Delete Field</a>
                         </li>
                     </ul>
                 </div>
@@ -29,6 +36,8 @@
 
         <!-- Blank start -->
         <div class="row">
+            {{ include('admin.fields._sidebar', {active: active_group.id}) }}
+            <div class="col-lg-8 col-xxl-9">
             <!-- Default Card start -->
             <form method="POST" action="{{ route('fields.destroy', field) }}" class="row g-3 needs-validation" novalidate>
                 {{ csrf_field() }}
@@ -36,7 +45,7 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
-                            <h5>Delete Category</h5>
+                            <h5>Delete Field</h5>
                         </div>
                         <div class="card-body">
                             <h6>Are you sure you want to remove this Field?</h6>
@@ -62,7 +71,8 @@
             </form>
 
             <!-- Default Card end -->
-        </div>
+            </div></div>
+
         <!-- Blank end -->
     </div>
 </main>

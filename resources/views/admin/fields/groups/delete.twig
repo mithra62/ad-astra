@@ -4,7 +4,7 @@
         <!-- Breadcrumb start -->
         <div class="row m-1">
             <div class="col-12 ">
-                <h5>Category Group</h5>
+                <h5>Field Groups</h5>
                 <div class="col-6 ">
                     <ul class="app-line-breadcrumbs mb-3">
                         <li class="">
@@ -15,7 +15,11 @@
                             </a>
                         </li>
                         <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Fields</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Field Groups</a>
+                        </li>
+
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups.show', active_group) }}">{{ active_group.name }}</a>
                         </li>
                         <li class="active">
                             <a class="f-s-14 f-w-500" href="{{ route('fields.groups.confirm', group) }}">Delete Field Group</a>

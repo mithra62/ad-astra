@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Models\Field\Group;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Field extends Model
 {
@@ -12,7 +12,9 @@ class Field extends Model
         'name',
         'slug',
         'type',
-        'description'
+        'instructions',
+        'settings',
+        'hidden',
     ];
 
     public function fieldable()
@@ -20,9 +22,9 @@ class Field extends Model
         return $this->morphTo();
     }
 
-    public function groups(): MorphMany
+    public function groups(): MorphToMany
     {
-        return $this->morphMany(Group::class, 'fieldable')
+        return $this->morphedByMany(Group::class, 'fieldable')
             ->withTimestamps();
     }
 }
