@@ -27,4 +27,10 @@ class Field extends Model
         return $this->morphedByMany(Group::class, 'fieldable')
             ->withTimestamps();
     }
+
+    public function render()
+    {
+        return '<input class="form-control" id="' . $this->slug . '" required type="text" value=""
+                                   name="' . $this->slug . '">';
+    }
 }

@@ -31,7 +31,13 @@ class Category extends Controller
             abort(404);
         }
 
-        return $this->view('categories.create', ['group' => $group]);
+        $groups = CategoryGroup::get();
+        $data = [
+            'group' => $group,
+            'groups' => $groups,
+        ];
+
+        return $this->view('categories.create', $data);
     }
 
     /**
@@ -68,7 +74,7 @@ class Category extends Controller
      */
     public function edit(string $id)
     {
-        $category = CategoryModel::find($id);
+        $category = CategoryModel::with('groups')->find($id);
         if (!$category instanceof CategoryModel) {
             abort(404);
         }

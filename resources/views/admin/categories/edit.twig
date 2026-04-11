@@ -63,6 +63,24 @@
                                                 <p class="text-danger">{{ errors.first('slug') }}</p>
                                             {% endif %}
                                         </div>
+
+                                        {% if category.groups().count >= 1 %}
+                                            {% for cat_group in category.groups %}
+                                                {% for field_group in cat_group.field_groups %}
+                                                    {% for field in field_group.fields %}
+                                                    <div class="col-md-12">
+                                                        <label class="form-label" for="{{ field.slug }}">{{ field.name }}</label>
+                                                        {{ field.render()|raw }}
+                                                        {% if errors.has(field.slug) %}
+                                                            <p class="text-danger">{{ errors.first(field.slug) }}</p>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% endfor %}
+                                                {% endfor %}
+                                            {% endfor %}
+                                        {% else %}
+
+                                        {% endif %}
                                         <div class="col-12">
                                             <button class="btn btn-primary float-end" type="submit">Edit Category</button>
                                         </div>
