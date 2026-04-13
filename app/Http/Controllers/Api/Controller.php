@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller as DefaultController;
+use App\Models\Submission as SubmissionModel;
 use Illuminate\Http\Request;
 
 /**
  * @OA\Info(
  *      version="1.0.0",
- *      title="Checkoff Pro",
- *      description="API documentation for Checkoff Pro",
+ *      title="Magic Program",
+ *      description="API documentation for Magic Program",
  * )
  * @OA\SecurityScheme(
  *      securityScheme="sanctum",
@@ -68,5 +69,93 @@ abstract class Controller extends DefaultController
         }
 
         return $limit;
+    }
+
+    /**
+     * @param Request $request
+     * @return int
+     */
+    protected function page(Request $request): int
+    {
+        return (int)$request->input('page', 1);
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    protected function sort(Request $request): string
+    {
+        return $request->input('sort', 'id');
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    protected function sortDir(Request $request): string
+    {
+        return $request->input('direction', 'asc');
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    protected function createdBefore(Request $request): string
+    {
+        return $request->input('created_before', '');
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    protected function createdAfter(Request $request): string
+    {
+        return $request->input('created_after', '');
+    }
+
+    /**
+     * @param array $where
+     * @param Request $request
+     * @return array
+     */
+    protected function buildWhere(array $where, Request $request): array
+    {
+        if($this->createdBefore($request)) {
+            $where[] = [
+                'created_at', '<=', $this->createdBefore($request)
+            ];
+        }
+
+        if($this->createdAfter($request)) {
+            $where[] = [
+                'created_at', '>=', $this->createdAfter($request)
+            ];
+        }
+
+        return $where;
+    }
+
+    public function store(Request $request)
+    {
+        return response()->json(['error' => 'Not Implemented'], 501);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, SubmissionModel $submission)
+    {
+        return response()->json(['error' => 'Not Implemented'], 501);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(SubmissionModel $submission)
+    {
+        return response()->json(['error' => 'Not Implemented'], 501);
     }
 }
