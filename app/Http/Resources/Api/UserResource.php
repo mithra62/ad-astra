@@ -13,14 +13,10 @@ use OpenApi\Annotations as OA;
  *     title="User Details",
  *     description="user model",
  *     @OA\Property(property="id", type="integer", format="int64", description=""),
- *     @OA\Property(property="title", type="string", description=""),
- *     @OA\Property(property="start_date", type="string", format="date-time", description=""),
- *     @OA\Property(property="end_date", type="string", format="date-time", description=""),
- *     @OA\Property(property="total_remittance", type="number", format="float", description=""),
- *     @OA\Property(property="submitted", type="boolean", description=""),
- *     @OA\Property(property="paid_by_check", type="boolean", description=""),
- *     @OA\Property(property="payment_date", type="string", format="date", description=""),
- *     @OA\Property(property="total", type="number", format="float", description="")
+ *     @OA\Property(property="name", type="string", description=""),
+ *     @OA\Property(property="email", type="string", description=""),
+ *     @OA\Property(property="created_at", type="string", format="date-time", description=""),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", description="")
  * )
  */
 class UserResource extends JsonResource

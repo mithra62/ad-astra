@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller as DefaultController;
-use App\Models\Submission as SubmissionModel;
 use Illuminate\Http\Request;
-use OpenApi\Annotations as OA;
 
 /**
  * @OA\Info(
@@ -137,26 +135,5 @@ abstract class Controller extends DefaultController
         }
 
         return $where;
-    }
-
-    public function store(Request $request)
-    {
-        return response()->json(['error' => 'Not Implemented'], 501);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, SubmissionModel $submission)
-    {
-        return response()->json(['error' => 'Not Implemented'], 501);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(SubmissionModel $submission)
-    {
-        return response()->json(['error' => 'Not Implemented'], 501);
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Resources\Api\UserCollection;
 use App\Http\Resources\Api\UserResource;
 use App\Http\Controllers\Api\Controller;
 use OpenApi\Annotations as OA;
+use App\Models\User as UserModel;
 
 class User extends Controller
 {
@@ -77,9 +78,45 @@ class User extends Controller
      */
     public function index(Request $request)
     {
-        return ['fdsa'];
+        if (!$this->can('read users')) {
+            return response()->json(['error' => 'Not Found'], 404);
+        }
+
+        $query = UserModel::with('roles');
+        if($this->sortDir($request) && $this->sort($request)) {
+            $query->orderBy($this->sort($request), $this->sortDir($request));
+        }
+
+        $submissions = $query->paginate($this->limit($request));
+        return new UserCollection($submissions);
     }
 
+
+    /**
+     * @OA\Get(
+     *     path="/api/users/v1/{id}",
+     *      operationId="getUser",
+     *      tags={"Users"},
+     *      summary="Get details on a specific User",
+     *      security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the user to retrieve",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found"
+     *     )
+     * )
+     */
     public function show($id)
     {
 
