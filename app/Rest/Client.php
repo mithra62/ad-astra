@@ -11,12 +11,12 @@ class Client
     /**
      * @var string
      */
-    protected string $token = '1|5DeaDbVE4XF6At8STvoQ5TXPHbNXOtTIHBno8Ol86b28bccb';
+    protected string $token = '1|S88c33R0D4eisqQ5ffhTkPBdxg8iYAbWcNcS4Pc6207bc902';
 
     /**
      * @var string
      */
-    protected string $end_point = 'http://eric.checkoff-pro-api.com/api';
+    protected string $end_point = 'http://eric.laravel-dev.com/api';
 
     /**
      * @param string $token

@@ -4,11 +4,17 @@ namespace App\Http\Controllers\Admin;
 use App\Models\ApiLog;
 use App\Models\User;
 use Illuminate\Support\Number;
+use App\Rest\Client;
 
 class Dashboard extends Controller
 {
     public function index()
     {
+//        $client = new Client();
+//        $data = $client->get('v1/users');
+//
+//        print_r($data);
+//        exit;
         $params = [
             'total_users' => User::count(),
             'total_api_requests' => ApiLog::count(),

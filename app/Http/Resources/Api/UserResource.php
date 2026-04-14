@@ -19,11 +19,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="submitted", type="boolean", description=""),
  *     @OA\Property(property="paid_by_check", type="boolean", description=""),
  *     @OA\Property(property="payment_date", type="date", description=""),
- *     @OA\Property(property="total", type="number", format="float", description=""),
- *     @OA\Property(property="first_purchased_submission_id", type="number", format="float", description=""),
- *     @OA\Property(property="organization",type="array",description="Organization",@OA\Items(ref="#/components/schemas/RelatedItem")),
- *     @OA\Property(property="commodity",type="array",description="Commodity",@OA\Items(ref="#/components/schemas/RelatedItem")),
- *     @OA\Property(property="state",type="array",description="State",@OA\Items(ref="#/components/schemas/RelatedItem"))
+ *     @OA\Property(property="total", type="number", format="float", description="")
  * )
  */
 class UserResource extends JsonResource

@@ -26,42 +26,42 @@ class User extends Controller
      *              @OA\Property(property="pagination_info",type="array",description="",@OA\Items(ref="#/components/schemas/PaginationInfo")),
      *          )
      *      ),
-     *     @OA\Parameter(
+     *      @OA\Parameter(
      *          name="limit",
      *          in="query",
      *          description="Number of items per page",
      *          required=false,
      *          @OA\Schema(type="integer", default=10)
      *      ),
-     *     @OA\Parameter(
+     *      @OA\Parameter(
      *          name="page",
      *          in="query",
      *          description="Starting page number",
      *          required=false,
      *          @OA\Schema(type="integer", default=1)
      *      ),
-     *       @OA\Parameter(
+     *      @OA\Parameter(
      *            name="created_after",
      *            in="query",
      *            description="Retrieve submissions that were created after a specific date",
      *            required=false,
      *            @OA\Schema(type="date", format="YYYY-MM-DD")
-     *        ),
-     *        @OA\Parameter(
+     *      ),
+     *      @OA\Parameter(
      *             name="created_before",
      *             in="query",
      *             description="Retrieve submissions that were before after a specific date",
      *             required=false,
      *             @OA\Schema(type="date", format="YYYY-MM-DD")
-     *         ),
-     *         @OA\Parameter(
+     *      ),
+     *      @OA\Parameter(
      *              name="sort",
      *              in="query",
      *              description="How you want to order results",
      *              required=false,
      *              @OA\Schema(type="string", default="created_at")
-     *          ),
-     *         @OA\Parameter(
+     *      ),
+     *      @OA\Parameter(
      *              name="direction",
      *              in="query",
      *              description="The direction for sorted orders (asc, desc)",
@@ -76,7 +76,7 @@ class User extends Controller
      */
     public function index(Request $request)
     {
-        return [];
+        return ['fdsa'];
     }
 
     public function show($id)
