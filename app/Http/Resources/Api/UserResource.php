@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use OpenApi\Annotations as OA;
 
 
 /**
@@ -18,7 +19,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="total_remittance", type="number", format="float", description=""),
  *     @OA\Property(property="submitted", type="boolean", description=""),
  *     @OA\Property(property="paid_by_check", type="boolean", description=""),
- *     @OA\Property(property="payment_date", type="date", description=""),
+ *     @OA\Property(property="payment_date", type="string", format="date", description=""),
  *     @OA\Property(property="total", type="number", format="float", description="")
  * )
  */

@@ -1,18 +1,18 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Checkoff Pro",
-        "description": "API documentation for Checkoff Pro",
+        "title": "Magic Program",
+        "description": "API documentation for Magic Program",
         "version": "1.0.0"
     },
     "paths": {
-        "/api/remittances/corn": {
+        "/api/v1/users": {
             "get": {
                 "tags": [
-                    "Remittances"
+                    "Users"
                 ],
-                "summary": "Get details on Corn Remittances",
-                "operationId": "getAllCornRemittances",
+                "summary": "Get a paginated list of Users",
+                "operationId": "getAllUsers",
                 "parameters": [
                     {
                         "name": "limit",
@@ -33,126 +33,45 @@
                             "type": "integer",
                             "default": 1
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "description": "Remittances",
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/CornRemittance"
-                                            }
-                                        },
-                                        "meta": {
-                                            "description": "Remittances",
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Meta"
-                                            }
-                                        },
-                                        "links": {
-                                            "description": "Remittances",
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Links"
-                                            }
-                                        },
-                                        "pagination_info": {
-                                            "description": "Remittances",
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/PaginationInfo"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
                     },
-                    "401": {
-                        "description": "Unauthenticated"
-                    }
-                },
-                "security": [
                     {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/remittances/corn/{id}": {
-            "get": {
-                "tags": [
-                    "Remittances"
-                ],
-                "summary": "Get details on a Corn Remittance",
-                "operationId": "getCorn",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the product to retrieve",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CornRemittance"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Product not found"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/remittances/soybean": {
-            "get": {
-                "tags": [
-                    "Remittances"
-                ],
-                "summary": "Get details on Soybean Remittances",
-                "operationId": "getAllSoybeanRemittances",
-                "parameters": [
-                    {
-                        "name": "limit",
+                        "name": "created_after",
                         "in": "query",
-                        "description": "Number of items per page",
+                        "description": "Retrieve submissions that were created after a specific date",
                         "required": false,
                         "schema": {
-                            "type": "integer",
-                            "default": 10
+                            "type": "string",
+                            "format": "date"
                         }
                     },
                     {
-                        "name": "page",
+                        "name": "created_before",
                         "in": "query",
-                        "description": "Starting page number",
+                        "description": "Retrieve submissions that were before after a specific date",
                         "required": false,
                         "schema": {
-                            "type": "integer",
-                            "default": 1
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "How you want to order results",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "The direction for sorted orders (asc, desc)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc"
                         }
                     }
                 ],
@@ -164,131 +83,10 @@
                                 "schema": {
                                     "properties": {
                                         "data": {
-                                            "description": "Remittances",
+                                            "description": "Users",
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/SoybeanRemittance"
-                                            }
-                                        },
-                                        "meta": {
-                                            "description": "Remittances",
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Meta"
-                                            }
-                                        },
-                                        "links": {
-                                            "description": "Remittances",
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Links"
-                                            }
-                                        },
-                                        "pagination_info": {
-                                            "description": "Remittances",
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/PaginationInfo"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/remittances/soybean/{id}": {
-            "get": {
-                "tags": [
-                    "Remittances"
-                ],
-                "summary": "Get details on a Soybean Remittance",
-                "operationId": "getSoybeanRemittance",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the product to retrieve",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CornRemittance"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Product not found"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/submissions": {
-            "get": {
-                "tags": [
-                    "Submissions"
-                ],
-                "summary": "Get a paginated list of Submissions",
-                "operationId": "getAllSubmissions",
-                "parameters": [
-                    {
-                        "name": "limit",
-                        "in": "query",
-                        "description": "Number of items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 10
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Starting page number",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "description": "Submissions",
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Submission"
+                                                "$ref": "#/components/schemas/User"
                                             }
                                         },
                                         "meta": {
@@ -320,46 +118,6 @@
                     },
                     "401": {
                         "description": "Unauthenticated"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/submissions/{id}": {
-            "get": {
-                "tags": [
-                    "Submissions"
-                ],
-                "summary": "Get details on a specific Submission",
-                "operationId": "getSubmission",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the product to retrieve",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Submission"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Submission not found"
                     }
                 },
                 "security": [
@@ -469,138 +227,9 @@
                 },
                 "type": "object"
             },
-            "CornRemittance": {
-                "title": "Corn Remittance",
-                "description": "corn remittance model",
-                "properties": {
-                    "id": {
-                        "description": "",
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "title": {
-                        "description": "",
-                        "type": "string"
-                    },
-                    "num_bushels_purchased": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "bushels_purchased_as_second_purchaser": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "bushels_sweet_corn_popcorn_seed_corn": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "total_bushels_subject_to_checkoff": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "total": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "first_purchased_submission_id": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "organization": {
-                        "description": "Organization",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
-                    },
-                    "commodity": {
-                        "description": "Commodity",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
-                    },
-                    "state": {
-                        "description": "State",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
-                    }
-                },
-                "type": "object"
-            },
-            "SoybeanRemittance": {
-                "title": "Soybean Remittance",
-                "description": "corn remittance model",
-                "properties": {
-                    "id": {
-                        "description": "",
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "title": {
-                        "description": "",
-                        "type": "string"
-                    },
-                    "num_bushels_purchased": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "num_bushels_assessed": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "net_market_value_assessed_bushels": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "total": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "first_purchased_submission_id": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "organization": {
-                        "description": "Organization",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
-                    },
-                    "commodity": {
-                        "description": "Commodity",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
-                    },
-                    "state": {
-                        "description": "State",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
-                    }
-                },
-                "type": "object"
-            },
-            "Submission": {
-                "title": "Submission Details",
-                "description": "submission model",
+            "User": {
+                "title": "User Details",
+                "description": "user model",
                 "properties": {
                     "id": {
                         "description": "",
@@ -643,32 +272,6 @@
                         "description": "",
                         "type": "number",
                         "format": "float"
-                    },
-                    "first_purchased_submission_id": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "organization": {
-                        "description": "Organization",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
-                    },
-                    "commodity": {
-                        "description": "Commodity",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
-                    },
-                    "state": {
-                        "description": "State",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
                     }
                 },
                 "type": "object"
@@ -685,12 +288,8 @@
     },
     "tags": [
         {
-            "name": "Remittances",
-            "description": "Remittances"
-        },
-        {
-            "name": "Submissions",
-            "description": "Submissions"
+            "name": "Users",
+            "description": "Users"
         }
     ]
 }

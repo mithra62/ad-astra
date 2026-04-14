@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller as DefaultController;
 use App\Models\Submission as SubmissionModel;
 use Illuminate\Http\Request;
+use OpenApi\Annotations as OA;
 
 /**
  * @OA\Info(

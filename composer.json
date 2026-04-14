@@ -12,6 +12,7 @@
         "php": "^8.2",
         "ext-curl": "*",
         "darkaonline/l5-swagger": "^9.0",
+        "doctrine/annotations": "^2.0",
         "laravel/fortify": "^1.31",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",

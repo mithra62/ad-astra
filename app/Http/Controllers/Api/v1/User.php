@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\Api\UserCollection;
 use App\Http\Resources\Api\UserResource;
 use App\Http\Controllers\Api\Controller;
+use OpenApi\Annotations as OA;
 
 class User extends Controller
 {
@@ -45,14 +46,14 @@ class User extends Controller
      *            in="query",
      *            description="Retrieve submissions that were created after a specific date",
      *            required=false,
-     *            @OA\Schema(type="date", format="YYYY-MM-DD")
+     *            @OA\Schema(type="string", format="date")
      *      ),
      *      @OA\Parameter(
      *             name="created_before",
      *             in="query",
      *             description="Retrieve submissions that were before after a specific date",
      *             required=false,
-     *             @OA\Schema(type="date", format="YYYY-MM-DD")
+     *             @OA\Schema(type="string", format="date")
      *      ),
      *      @OA\Parameter(
      *              name="sort",
