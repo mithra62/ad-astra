@@ -1,5 +1,5 @@
 <?php
-namespace App\Fieldtypes;
+namespace App\Field;
 abstract class AbstractField
 {
     protected array $settings = [];

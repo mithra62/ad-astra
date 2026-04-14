@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Fieldtypes;
+namespace App\Field\Types;
 
-use App\Fieldtypes\AbstractField;
+use App\Field\AbstractField;
 
 class Text extends AbstractField
 {
