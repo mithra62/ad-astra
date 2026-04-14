@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Requests\User;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class DeleteUserRequest extends FormRequest
@@ -11,7 +11,7 @@ class DeleteUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return (Auth::user()->id != self::segment(2)) &&
+        return (Auth::user()->id != $this->route()->parameter('user')) &&
             Auth::user()->can('delete user');
     }
 
@@ -29,7 +29,6 @@ class DeleteUserRequest extends FormRequest
      * @return string[]
      */
     public function messages(): array
-
     {
         return [
             'confirm_removal.required' => 'You must select at least one role.',

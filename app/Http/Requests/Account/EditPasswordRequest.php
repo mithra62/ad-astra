@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Account;
 
 use App\Rules\MatchCurrentPassword;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 
 class EditPasswordRequest extends FormRequest
 {

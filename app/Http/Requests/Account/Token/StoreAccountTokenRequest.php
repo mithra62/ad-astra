@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Requests\Account\Token;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class StoreAccountTokenRequest extends FormRequest
