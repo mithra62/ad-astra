@@ -127,7 +127,7 @@
                 ]
             }
         },
-        "/api/users/v1/{id}": {
+        "/api/v1/users/{id}": {
             "get": {
                 "tags": [
                     "Users"

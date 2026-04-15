@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\Api\UserCollection;
 use App\Http\Resources\Api\UserResource;
 use App\Http\Controllers\Api\Controller;
+use Illuminate\Support\Facades\Auth;
 use OpenApi\Annotations as OA;
 use App\Models\User as UserModel;
 
@@ -94,7 +95,7 @@ class User extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/users/v1/{id}",
+     *     path="/api/v1/users/{id}",
      *      operationId="getUser",
      *      tags={"Users"},
      *      summary="Get details on a specific User",
@@ -119,6 +120,15 @@ class User extends Controller
      */
     public function show($id)
     {
+        if (!$this->can('read users') || Auth::user()->id === $id) {
+            return response()->json(['error' => 'Not Found'], 404);
+        }
 
+        $user = UserModel::find($id);
+        if (!$user instanceof UserModel) {
+            return response()->json(['error' => 'Not Found'], 404);
+        }
+
+        return new UserResource($user);
     }
 }
