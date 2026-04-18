@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep:*)",
+      "Bash(grep -r interface /d/Projects/mithra62/laravel-base/develop/app/Models /d/Projects/mithra62/laravel-base/develop/app/Field --include=*.php)"
+    ]
+  }
+}
