@@ -4,8 +4,9 @@ namespace App\Providers;
 
 use App\Rest\Api;
 use App\Settings;
-use App\Services\FilesService;
 use App\Services\FieldService;
+use App\Services\FilesService;
+use App\Services\UserService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -33,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('fields-service', function ($app) {
             return new FieldService($app);
         });
+
+        $this->app->singleton(UserService::class, fn() => new UserService());
     }
 
     /**

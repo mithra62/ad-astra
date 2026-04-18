@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Laravolt\Avatar\Avatar;
@@ -16,7 +17,7 @@ use Spatie\Tags\HasTags;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens, HasRoles, HasTags, Fieldable;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, HasTags, Fieldable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.

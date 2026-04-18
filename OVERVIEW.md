@@ -954,10 +954,201 @@ public function update(Request $request, User $user): void
 
 | | Entries | Users |
 |---|---|---|
-| Write API | `Content::create()` / `Content::update()` | `FieldValue::updateOrCreate()` directly |
+| Write API | `Content::create()` / `Content::update()` | `Users::create()` / `Users::update()` |
 | Read API | `$entry->field('slug')` | `$user->field('slug')` (same trait) |
 | Schema | Per-group FieldLayout + per-type FieldLayout | Single `UserSchema` singleton |
 | Lifecycle hooks | `beforeCreate`, `afterCreate`, etc. | None — plain Eloquent |
+
+---
+
+## UserService and the Users Facade
+
+All user operations go through `UserService`, exposed via the `Users` facade (`App\Facades\Users`). Each method on the service is backed by a dedicated invokable Action class under `app/Actions/User/`, which can also be used standalone via dependency injection.
+
+### CRUD
+
+```php
+use App\Facades\Users;
+
+// Create — accepts core attributes plus optional roles and fields in one call
+$user = Users::create([
+    'name'     => 'Jane Doe',
+    'email'    => 'jane@example.com',
+    'password' => 'secret',
+    'roles'    => ['admin'],
+    'fields'   => [
+        'first_name' => 'Jane',
+        'last_name'  => 'Doe',
+        'gender'     => 'female',
+    ],
+]);
+
+// Update — only keys present in $data are touched
+$user = Users::update($user, [
+    'name'   => 'Jane Smith',
+    'roles'  => ['user'],           // replaces all existing roles
+    'fields' => ['gender' => 'non-binary'],
+]);
+
+// Delete
+Users::delete($user);
+```
+
+### Roles
+
+```php
+Users::assignRoles($user, 'editor');              // additive — keeps existing roles
+Users::assignRoles($user, ['editor', 'writer']);
+
+Users::syncRoles($user, ['admin']);               // replaces all roles
+
+Users::revokeRole($user, 'editor');               // removes one role
+```
+
+### Custom Fields
+
+```php
+// Single field
+Users::setField($user, 'bio', 'Staff engineer at Acme.');
+
+// Multiple fields — batched in one query
+Users::setFields($user, [
+    'first_name' => 'Jane',
+    'last_name'  => 'Smith',
+    'gender'     => 'female',
+]);
+
+// Reading (via Fieldable trait — eager-load to avoid N+1)
+$user->load('fieldValues.field.fieldType');
+echo $user->field('first_name'); // 'Jane'
+echo $user->field('bio');        // 'Staff engineer at Acme.'
+```
+
+### Passwords
+
+```php
+// Admin force-set — no current-password verification
+Users::setPassword($user, 'newpassword123');
+
+// User-initiated change (verifies current password, uses Fortify's UpdateUserPassword action)
+app(\App\Actions\User\UpdateUserPassword::class)->update($user, [
+    'current_password'      => 'oldpassword',
+    'password'              => 'newpassword123',
+    'password_confirmation' => 'newpassword123',
+]);
+```
+
+### Two-Factor Authentication
+
+2FA is provided by Laravel Fortify. The `User` model uses the `TwoFactorAuthenticatable` trait.
+
+```php
+// Step 1 — enable 2FA; returns QR code SVG and plain-text secret for display
+$setup = Users::enableTwoFactor($user);
+// $setup['qr_code_svg'] — embed in the UI for the user to scan
+// $setup['secret']      — display as a fallback manual entry code
+
+// Step 2 — user scans QR code in their authenticator app, then submits a TOTP code
+// Throws ValidationException if the code is wrong
+Users::confirmTwoFactor($user, '123456');
+
+// Check whether 2FA is active (confirmed)
+Users::hasTwoFactor($user); // true after confirmation
+
+// Recovery codes — one-time use codes for account recovery
+$codes = Users::getRecoveryCodes($user);  // array of strings
+
+// Invalidate existing codes and issue fresh ones
+$newCodes = Users::regenerateRecoveryCodes($user);
+
+// Disable 2FA entirely — clears secret and recovery codes
+Users::disableTwoFactor($user);
+```
+
+### OAuth Token Management
+
+```php
+// Store a new token, revoking any existing active token for the same provider
+$token = Users::upsertOauthToken($user, 'google', [
+    'access_token'  => 'ya29.xxx',
+    'refresh_token' => '1//xxx',
+    'expires_at'    => now()->addHour(),
+    'scopes'        => ['email', 'profile'],
+    'provider_user_id' => '1234567890',
+]);
+
+// Get the current active token for a provider (null if expired/revoked/missing)
+$token = Users::getActiveOauthToken($user, 'google');
+
+if ($token?->isExpired()) {
+    // refresh via your OAuth client and upsert again
+}
+
+// Revoke a single token
+Users::revokeOauthToken($token);
+
+// Revoke all tokens for a specific provider
+Users::revokeAllOauthTokens($user, 'google');
+
+// Revoke all tokens across all providers
+Users::revokeAllOauthTokens($user);
+
+// List active tokens (optionally filtered by provider)
+$tokens = Users::listOauthTokens($user);
+$googleTokens = Users::listOauthTokens($user, 'google');
+```
+
+### Using Actions Directly
+
+Every operation is a standalone invokable action that can be injected into controllers or jobs:
+
+```php
+use App\Actions\User\CreateUser;
+use App\Actions\User\SetUserFields;
+use App\Actions\User\EnableTwoFactor;
+
+// Via the container
+app(CreateUser::class)(['name' => 'Jane', 'email' => 'jane@example.com', ...]);
+
+// Via constructor injection
+class UserController extends Controller
+{
+    public function __construct(
+        private readonly CreateUser    $createUser,
+        private readonly SetUserFields $setUserFields,
+    ) {}
+
+    public function store(Request $request): JsonResponse
+    {
+        $user = ($this->createUser)($request->validated());
+        return response()->json($user);
+    }
+}
+```
+
+**Full action inventory:**
+
+| Action class | Purpose |
+|---|---|
+| `CreateUser` | Create user with roles + fields |
+| `UpdateUser` | Update core attrs, roles, and/or fields |
+| `DeleteUser` | Delete a user |
+| `AssignRoles` | Add roles (additive) |
+| `SyncRoles` | Replace all roles |
+| `RevokeRole` | Remove one role |
+| `SetUserField` | Write a single custom field value |
+| `SetUserFields` | Write multiple custom field values (batched) |
+| `SetPassword` | Admin force-set password |
+| `EnableTwoFactor` | Begin 2FA setup, return QR + secret |
+| `ConfirmTwoFactor` | Confirm 2FA with TOTP code |
+| `DisableTwoFactor` | Disable 2FA and clear secret |
+| `GetRecoveryCodes` | Get current recovery codes |
+| `RegenerateRecoveryCodes` | Invalidate and re-issue recovery codes |
+| `UpsertOauthToken` | Store a new OAuth token (revokes old) |
+| `GetActiveOauthToken` | Get current active token for a provider |
+| `RevokeOauthToken` | Revoke a single token |
+| `RevokeAllOauthTokens` | Revoke all tokens (optionally by provider) |
+| `ListOauthTokens` | List active tokens (optionally by provider) |
 
 ---
 
