@@ -9,7 +9,7 @@ trait HasCategoryGroups
 {
     public function categoryGroups(): MorphToMany
     {
-        return $this->morphToMany(CategoryGroup::class, 'category_groupable')
+        return $this->morphToMany(CategoryGroup::class, 'category_groupable', 'category_groupables', null, 'group_id')
             ->withTimestamps();
     }
 }

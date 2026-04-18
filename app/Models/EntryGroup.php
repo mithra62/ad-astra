@@ -5,18 +5,36 @@ namespace App\Models;
 use App\Traits\HasCategoryGroups;
 use App\Traits\HasFieldGroups;
 use App\Traits\HasFieldLayout;
-use App\Traits\HasStatusGroups;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class EntryGroup extends Model
 {
-    use HasFieldLayout, HasFieldGroups, HasCategoryGroups, HasStatusGroups;
+    use HasFieldLayout, HasFieldGroups, HasCategoryGroups;
 
-    protected $fillable = ['field_layout_id', 'name', 'handle', 'description', 'sort_order'];
+    protected $fillable = [
+        'field_layout_id',
+        'status_group_id',
+        'name',
+        'handle',
+        'description',
+        'sort_order',
+    ];
 
     protected $casts = ['sort_order' => 'integer'];
+
+    public function statusGroup(): BelongsTo
+    {
+        return $this->belongsTo(StatusGroup::class);
+    }
+
+    public function statuses(): HasManyThrough
+    {
+        return $this->hasManyThrough(Status::class, StatusGroup::class, 'id', 'status_group_id', 'status_group_id', 'id');
+    }
 
     public function entryTypes(): HasMany
     {

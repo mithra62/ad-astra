@@ -9,7 +9,7 @@ trait HasFieldGroups
 {
     public function fieldGroups(): MorphToMany
     {
-        return $this->morphToMany(FieldGroup::class, 'field_groupable')
+        return $this->morphToMany(FieldGroup::class, 'field_groupable', 'field_groupables', null, 'group_id')
             ->withTimestamps();
     }
 }

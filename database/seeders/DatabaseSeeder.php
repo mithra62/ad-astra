@@ -31,7 +31,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         if (app()->environment(['local', 'testing'])) {
-            // Add dev/test-only seeders here
+            $this->call([
+                EntrySeeder::class,
+            ]);
         }
     }
 }

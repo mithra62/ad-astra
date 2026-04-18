@@ -4,11 +4,8 @@ namespace App\Repositories;
 
 use App\EntryTypes\AbstractEntryType;
 use App\Models\Entry;
-use App\Models\EntryStatus;
 use App\Models\EntryType as EntryTypeRecord;
-use App\Models\Field;
 use App\Models\FieldValue;
-use App\Models\Status;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -19,7 +16,7 @@ class EntryRepository
         $entryType->beforeCreate($data);
 
         $record = $entryType->getRecord();
-        $record->loadMissing(['entryGroup.statusGroups.statuses', 'entryGroup.fieldLayout', 'fieldLayout']);
+        $record->loadMissing(['entryGroup.statusGroup.statuses', 'entryGroup.fieldLayout', 'fieldLayout']);
 
         $entry = new Entry();
         $entry->entry_group_id     = $record->entry_group_id;
@@ -27,11 +24,11 @@ class EntryRepository
         $entry->created_by_user_id = Auth::id();
 
         $this->applyCoreAttributes($entry, $data);
+        $this->applyStatus($entry, $data['status'] ?? null, applyDefault: true);
         $entry->save();
 
         $this->syncAuthors($entry, $data['authors'] ?? []);
         $this->syncCategories($entry, $data['categories'] ?? []);
-        $this->applyStatuses($entry, $data['statuses'] ?? [], applyDefaults: true);
         $this->applyFieldValues($entry, $data['fields'] ?? []);
 
         $entryType->afterCreate($entry, $data);
@@ -51,13 +48,19 @@ class EntryRepository
 
     public function applyData(Entry $entry, array $data): Entry
     {
-        $entryType = $entry->entryType->loadMissing(['entryGroup.statusGroups.statuses']);
+        $entryType = $entry->entryType;
 
         /** @var AbstractEntryType $typeObject */
         $typeObject = app(\App\EntryTypes\EntryTypeRegistry::class)->resolveByRecord($entryType);
         $typeObject->beforeUpdate($entry, $data);
 
         $this->applyCoreAttributes($entry, $data);
+
+        if (array_key_exists('status', $data)) {
+            $entry->loadMissing('entryGroup.statusGroup.statuses');
+            $this->applyStatus($entry, $data['status'], applyDefault: false);
+        }
+
         $entry->save();
 
         if (array_key_exists('authors', $data)) {
@@ -66,10 +69,6 @@ class EntryRepository
 
         if (array_key_exists('categories', $data)) {
             $this->syncCategories($entry, $data['categories']);
-        }
-
-        if (array_key_exists('statuses', $data)) {
-            $this->applyStatuses($entry, $data['statuses'], applyDefaults: false);
         }
 
         if (array_key_exists('fields', $data)) {
@@ -99,6 +98,25 @@ class EntryRepository
         }
     }
 
+    private function applyStatus(Entry $entry, ?string $handle, bool $applyDefault): void
+    {
+        if ($handle) {
+            $entry->status = $handle;
+            return;
+        }
+
+        if ($applyDefault) {
+            $statusGroup = $entry->entryGroup?->statusGroup;
+            if ($statusGroup) {
+                $statusGroup->loadMissing('statuses');
+                $default = $statusGroup->statuses->firstWhere('is_default', true);
+                if ($default) {
+                    $entry->status = $default->handle;
+                }
+            }
+        }
+    }
+
     private function syncAuthors(Entry $entry, array $userIds): void
     {
         $sync = [];
@@ -112,32 +130,6 @@ class EntryRepository
     private function syncCategories(Entry $entry, array $categoryIds): void
     {
         $entry->categories()->sync($categoryIds);
-    }
-
-    private function applyStatuses(Entry $entry, array $statuses, bool $applyDefaults): void
-    {
-        $statusGroups = $entry->entryGroup->statusGroups->loadMissing('statuses');
-
-        foreach ($statusGroups as $group) {
-            $handle = $statuses[$group->handle] ?? null;
-
-            if ($handle) {
-                $status = $group->statuses->firstWhere('handle', $handle);
-            } elseif ($applyDefaults) {
-                $status = $group->statuses->firstWhere('is_default', true);
-            } else {
-                continue;
-            }
-
-            if (! $status) {
-                continue;
-            }
-
-            EntryStatus::updateOrCreate(
-                ['entry_id' => $entry->getKey(), 'status_group_id' => $group->getKey()],
-                ['status_id' => $status->getKey()]
-            );
-        }
     }
 
     private function applyFieldValues(Entry $entry, array $fields): void
@@ -189,8 +181,6 @@ class EntryRepository
             'creator',
             'authors',
             'categories',
-            'entryStatuses.statusGroup',
-            'entryStatuses.status',
             'fieldValues.field.fieldType',
         ];
     }

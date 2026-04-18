@@ -40,12 +40,9 @@ class EntryQueryBuilder
         return $this;
     }
 
-    public function withStatus(string $groupHandle, string $statusHandle): static
+    public function withStatus(string $statusHandle): static
     {
-        $this->query->whereHas('entryStatuses', function (Builder $q) use ($groupHandle, $statusHandle) {
-            $q->whereHas('statusGroup', fn($q) => $q->where('handle', $groupHandle))
-              ->whereHas('status', fn($q) => $q->where('handle', $statusHandle));
-        });
+        $this->query->withStatus($statusHandle);
 
         return $this;
     }
@@ -104,8 +101,6 @@ class EntryQueryBuilder
             'creator',
             'authors',
             'categories',
-            'entryStatuses.statusGroup',
-            'entryStatuses.status',
             'fieldValues.field.fieldType',
         ];
     }

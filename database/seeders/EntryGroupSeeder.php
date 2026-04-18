@@ -44,15 +44,15 @@ class EntryGroupSeeder extends Seeder
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'blog'],
             [
-                'name'            => 'Blog',
-                'description'     => 'Blog posts and articles.',
-                'field_layout_id' => $layout->id,
-                'sort_order'      => 1,
+                'name'             => 'Blog',
+                'description'      => 'Blog posts and articles.',
+                'field_layout_id'  => $layout->id,
+                'status_group_id'  => $publication->id,
+                'sort_order'       => 1,
             ]
         );
 
         $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id]);
-        $group->statusGroups()->syncWithoutDetaching([$publication->id]);
         $group->categoryGroups()->syncWithoutDetaching([$topics->id]);
 
         EntryType::firstOrCreate(
@@ -82,12 +82,12 @@ class EntryGroupSeeder extends Seeder
                 'name'            => 'Products',
                 'description'     => 'Product catalogue entries.',
                 'field_layout_id' => $layout->id,
+                'status_group_id' => $publication->id,
                 'sort_order'      => 2,
             ]
         );
 
         $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id]);
-        $group->statusGroups()->syncWithoutDetaching([$publication->id]);
         $group->categoryGroups()->syncWithoutDetaching([$productCategories->id]);
 
         EntryType::firstOrCreate(

@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Entry extends Model
 {
@@ -18,6 +17,7 @@ class Entry extends Model
     protected $fillable = [
         'entry_group_id',
         'entry_type_id',
+        'status',
         'created_by_user_id',
         'title',
         'slug',
@@ -49,23 +49,9 @@ class Entry extends Model
             ->withTimestamps();
     }
 
-    public function entryStatuses(): HasMany
-    {
-        return $this->hasMany(EntryStatus::class);
-    }
-
-    public function statusFor(StatusGroup|int $group): ?Status
-    {
-        $groupId = $group instanceof StatusGroup ? $group->getKey() : $group;
-
-        return $this->entryStatuses
-            ->first(fn($es) => $es->status_group_id === $groupId)
-            ?->status;
-    }
-
     public function getFieldLayout(): FieldLayout
     {
-        $typeLayout = $this->entryType?->fieldLayout;
+        $typeLayout  = $this->entryType?->fieldLayout;
         $groupLayout = $this->entryGroup?->fieldLayout;
 
         return $typeLayout ?? $groupLayout;
@@ -75,6 +61,11 @@ class Entry extends Model
     {
         return $query->whereNotNull('published_at')
             ->where('published_at', '<=', now());
+    }
+
+    public function scopeWithStatus(Builder $query, string $handle): Builder
+    {
+        return $query->where('status', $handle);
     }
 
     public function scopeInGroup(Builder $query, string|int|EntryGroup $group): Builder
