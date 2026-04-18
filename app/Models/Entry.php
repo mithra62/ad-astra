@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Entry extends Model
 {
@@ -47,6 +48,38 @@ class Entry extends Model
             ->withPivot('sort_order')
             ->orderByPivot('sort_order')
             ->withTimestamps();
+    }
+
+    public function entryRelationships(): HasMany
+    {
+        return $this->hasMany(EntryRelationship::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Resolve a field value by handle.
+     *
+     * For scalar field types this reads from fieldValues (morphMany).
+     * For relational field types this reads from entryRelationships and returns
+     * a Collection of related Entry models, ordered by sort_order.
+     *
+     * Both relations should be eager-loaded to avoid N+1 queries.
+     */
+    public function field(string $handle): mixed
+    {
+        // Scalar field values (text, number, date, etc.)
+        $fv = $this->fieldValues->first(fn($v) => $v->field?->slug === $handle);
+        if ($fv) {
+            return $fv->resolvedValue();
+        }
+
+        // Relational field values stored in entry_relationships
+        $related = $this->entryRelationships
+            ->filter(fn($r) => $r->field?->slug === $handle)
+            ->sortBy('sort_order')
+            ->pluck('relatedEntry')
+            ->filter(); // remove any null entries from broken FKs
+
+        return $related->isNotEmpty() ? $related->values() : null;
     }
 
     public function getFieldLayout(): FieldLayout

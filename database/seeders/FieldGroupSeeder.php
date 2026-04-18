@@ -14,11 +14,13 @@ class FieldGroupSeeder extends Seeder
 
     public function run(): void
     {
-        $text     = FieldType::where('object', \App\Field\Types\Text::class)->firstOrFail();
-        $textarea = FieldType::where('object', \App\Field\Types\Textarea::class)->firstOrFail();
+        $text         = FieldType::where('object', \App\Field\Types\Text::class)->firstOrFail();
+        $textarea     = FieldType::where('object', \App\Field\Types\Textarea::class)->firstOrFail();
+        $relationship = FieldType::where('object', \App\Field\Types\Relationship::class)->firstOrFail();
 
         $this->seedContentFields($text, $textarea);
         $this->seedSeoFields($text, $textarea);
+        $this->seedRelationshipFields($relationship);
     }
 
     private function seedContentFields(FieldType $text, FieldType $textarea): void
@@ -81,5 +83,27 @@ class FieldGroupSeeder extends Seeder
             $field = Field::firstOrCreate(['slug' => $fieldData['slug']], $fieldData);
             $group->fields()->syncWithoutDetaching([$field->id]);
         }
+    }
+
+    private function seedRelationshipFields(FieldType $relationship): void
+    {
+        $group = FieldGroup::firstOrCreate(
+            ['slug' => 'relationship-fields'],
+            ['name' => 'Relationship Fields', 'description' => 'Fields for linking related entries.']
+        );
+
+        $field = Field::firstOrCreate(
+            ['slug' => 'related_entries'],
+            [
+                'field_type_id' => $relationship->id,
+                'name'          => 'Related Entries',
+                'slug'          => 'related_entries',
+                'label'         => 'Related Entries',
+                'instructions'  => 'Link related entries from the same section.',
+                'settings'      => ['limit' => 5],
+            ]
+        );
+
+        $group->fields()->syncWithoutDetaching([$field->id]);
     }
 }

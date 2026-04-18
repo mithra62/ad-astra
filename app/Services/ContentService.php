@@ -21,6 +21,11 @@ class ContentService
         return $this->repository->create($entryType, $data);
     }
 
+    public function update(Entry $entry, array $data = []): Entry
+    {
+        return $this->repository->applyData($entry, $data);
+    }
+
     public function get(int $id): Entry
     {
         return $this->repository->findOrFail($id);

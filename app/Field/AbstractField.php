@@ -15,8 +15,20 @@ abstract class AbstractField
      * The field_values column this type reads and writes.
      * Must return one of: value_text, value_integer, value_float,
      *                     value_date, value_boolean, value_json
+     *
+     * Not called for relational field types — see isRelational().
      */
     abstract public function storageColumn(): string;
+
+    /**
+     * Relational field types store data in entry_relationships rather than
+     * field_values. EntryRepository routes them to a pivot sync instead of
+     * a FieldValue upsert.
+     */
+    public function isRelational(): bool
+    {
+        return false;
+    }
 
     /**
      * Validate the given raw value for this field type.

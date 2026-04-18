@@ -20,13 +20,14 @@ class EntryGroupSeeder extends Seeder
 
     public function run(): void
     {
-        $publication     = StatusGroup::where('handle', 'publication')->firstOrFail();
-        $contentFields   = FieldGroup::where('slug', 'content-fields')->firstOrFail();
-        $seoFields       = FieldGroup::where('slug', 'seo-fields')->firstOrFail();
-        $topics          = CategoryGroup::where('slug', 'topics')->firstOrFail();
-        $productCategories = CategoryGroup::where('slug', 'product-categories')->firstOrFail();
+        $publication          = StatusGroup::where('handle', 'publication')->firstOrFail();
+        $contentFields        = FieldGroup::where('slug', 'content-fields')->firstOrFail();
+        $seoFields            = FieldGroup::where('slug', 'seo-fields')->firstOrFail();
+        $relationshipFields   = FieldGroup::where('slug', 'relationship-fields')->firstOrFail();
+        $topics               = CategoryGroup::where('slug', 'topics')->firstOrFail();
+        $productCategories    = CategoryGroup::where('slug', 'product-categories')->firstOrFail();
 
-        $this->seedBlogGroup($publication, $contentFields, $seoFields, $topics);
+        $this->seedBlogGroup($publication, $contentFields, $seoFields, $relationshipFields, $topics);
         $this->seedProductsGroup($publication, $contentFields, $seoFields, $productCategories);
     }
 
@@ -34,11 +35,13 @@ class EntryGroupSeeder extends Seeder
         StatusGroup $publication,
         FieldGroup $contentFields,
         FieldGroup $seoFields,
+        FieldGroup $relationshipFields,
         CategoryGroup $topics,
     ): void {
         $layout = $this->createLayout('Blog Layout', [
             'Content' => ['body', 'excerpt'],
             'SEO'     => ['meta_title', 'meta_description'],
+            'Related' => ['related_entries'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
@@ -52,7 +55,7 @@ class EntryGroupSeeder extends Seeder
             ]
         );
 
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id]);
+        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id, $relationshipFields->id]);
         $group->categoryGroups()->syncWithoutDetaching([$topics->id]);
 
         EntryType::firstOrCreate(

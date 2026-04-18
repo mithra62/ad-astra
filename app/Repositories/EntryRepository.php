@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\EntryTypes\AbstractEntryType;
 use App\Models\Entry;
+use App\Models\EntryRelationship;
 use App\Models\EntryType as EntryTypeRecord;
 use App\Models\FieldValue;
 use Illuminate\Support\Facades\Auth;
@@ -147,16 +148,43 @@ class EntryRepository
                 continue;
             }
 
-            $column = $field->fieldType->instance()->storageColumn();
+            $instance = $field->fieldType->instance();
 
-            FieldValue::updateOrCreate(
-                [
-                    'field_id'       => $field->getKey(),
-                    'fieldable_id'   => $entry->getKey(),
-                    'fieldable_type' => Entry::class,
-                ],
-                [$column => $value]
-            );
+            if ($instance->isRelational()) {
+                $this->syncRelationshipField($entry, $field, (array) $value);
+            } else {
+                FieldValue::updateOrCreate(
+                    [
+                        'field_id'       => $field->getKey(),
+                        'fieldable_id'   => $entry->getKey(),
+                        'fieldable_type' => Entry::class,
+                    ],
+                    [$instance->storageColumn() => $value]
+                );
+            }
+        }
+    }
+
+    private function syncRelationshipField(Entry $entry, \App\Models\Field $field, array $relatedIds): void
+    {
+        // Remove IDs that would create a self-reference.
+        $relatedIds = array_values(array_filter(
+            $relatedIds,
+            fn($id) => (int) $id !== $entry->getKey()
+        ));
+
+        // Delete existing pivots for this field on this entry.
+        EntryRelationship::where('entry_id', $entry->getKey())
+            ->where('field_id', $field->getKey())
+            ->delete();
+
+        foreach ($relatedIds as $order => $relatedId) {
+            EntryRelationship::create([
+                'entry_id'         => $entry->getKey(),
+                'related_entry_id' => (int) $relatedId,
+                'field_id'         => $field->getKey(),
+                'sort_order'       => $order,
+            ]);
         }
     }
 
@@ -182,6 +210,8 @@ class EntryRepository
             'authors',
             'categories',
             'fieldValues.field.fieldType',
+            'entryRelationships.field',
+            'entryRelationships.relatedEntry',
         ];
     }
 }
