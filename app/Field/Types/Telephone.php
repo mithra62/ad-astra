@@ -6,5 +6,8 @@ use App\Field\AbstractField;
 
 class Telephone extends AbstractField
 {
-    protected string $type = 'string';
+    public function storageColumn(): string
+    {
+        return 'value_text';
+    }
 }

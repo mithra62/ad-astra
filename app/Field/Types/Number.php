@@ -6,6 +6,10 @@ use App\Field\AbstractField;
 
 class Number extends AbstractField
 {
-    protected string $type = 'int';
-
+    public function storageColumn(): string
+    {
+        return $this->getSetting('decimals', 0) > 0
+            ? 'value_float'
+            : 'value_integer';
+    }
 }

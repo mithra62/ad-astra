@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\User\OauthToken;
+use App\Traits\Fieldable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -15,7 +16,7 @@ use Spatie\Tags\HasTags;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens, HasRoles, HasTags;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, HasTags, Fieldable;
 
     /**
      * The attributes that are mass assignable.

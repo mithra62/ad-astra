@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Builders;
+
+use App\Models\Entry;
+use App\Models\EntryGroup;
+use App\Models\EntryType;
+use App\Repositories\EntryRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+
+class EntryQueryBuilder
+{
+    private Builder $query;
+
+    public function __construct(private readonly EntryRepository $repository)
+    {
+        $this->query = Entry::query();
+    }
+
+    public function inGroup(string|int|EntryGroup $group): static
+    {
+        $this->query->inGroup($group);
+
+        return $this;
+    }
+
+    public function ofType(string|int|EntryType $type): static
+    {
+        $this->query->ofType($type);
+
+        return $this;
+    }
+
+    public function published(): static
+    {
+        $this->query->published();
+
+        return $this;
+    }
+
+    public function withStatus(string $groupHandle, string $statusHandle): static
+    {
+        $this->query->whereHas('entryStatuses', function (Builder $q) use ($groupHandle, $statusHandle) {
+            $q->whereHas('statusGroup', fn($q) => $q->where('handle', $groupHandle))
+              ->whereHas('status', fn($q) => $q->where('handle', $statusHandle));
+        });
+
+        return $this;
+    }
+
+    public function withAuthor(int $userId): static
+    {
+        $this->query->whereHas('authors', fn($q) => $q->where('users.id', $userId));
+
+        return $this;
+    }
+
+    public function withCategory(int $categoryId): static
+    {
+        $this->query->whereHas('categories', fn($q) => $q->where('categories.id', $categoryId));
+
+        return $this;
+    }
+
+    public function orderBy(string $column, string $direction = 'asc'): static
+    {
+        $this->query->orderBy($column, $direction);
+
+        return $this;
+    }
+
+    public function latest(): static
+    {
+        return $this->orderBy('created_at', 'desc');
+    }
+
+    public function get(): Collection
+    {
+        return $this->query->with($this->eagerLoad())->get();
+    }
+
+    public function paginate(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->query->with($this->eagerLoad())->paginate($perPage);
+    }
+
+    public function first(): ?Entry
+    {
+        return $this->query->with($this->eagerLoad())->first();
+    }
+
+    public function count(): int
+    {
+        return $this->query->count();
+    }
+
+    private function eagerLoad(): array
+    {
+        return [
+            'entryGroup',
+            'entryType',
+            'creator',
+            'authors',
+            'categories',
+            'entryStatuses.statusGroup',
+            'entryStatuses.status',
+            'fieldValues.field.fieldType',
+        ];
+    }
+}

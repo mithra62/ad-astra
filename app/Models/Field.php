@@ -3,19 +3,32 @@
 namespace App\Models;
 
 use App\Models\Field\Group;
+use App\Models\Field\Type;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Field extends Model
 {
     protected $fillable = [
+        'field_type_id',
         'name',
         'slug',
-        'type',
+        'label',
         'instructions',
         'settings',
         'hidden',
     ];
+
+    protected $casts = [
+        'settings' => 'array',
+        'hidden'   => 'boolean',
+    ];
+
+    public function fieldType(): BelongsTo
+    {
+        return $this->belongsTo(Type::class, 'field_type_id');
+    }
 
     public function fieldable()
     {
@@ -26,11 +39,5 @@ class Field extends Model
     {
         return $this->morphedByMany(Group::class, 'fieldable')
             ->withTimestamps();
-    }
-
-    public function render()
-    {
-        return '<input class="form-control" id="' . $this->slug . '" required type="text" value=""
-                                   name="' . $this->slug . '">';
     }
 }

@@ -6,5 +6,8 @@ use App\Field\AbstractField;
 
 class Date extends AbstractField
 {
-    protected string $type = 'date';
+    public function storageColumn(): string
+    {
+        return 'value_date';
+    }
 }
