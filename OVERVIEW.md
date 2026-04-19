@@ -1,5 +1,70 @@
 # Laravel CMS — Project Overview
 
+## Table of Contents
+
+- [Architecture at a Glance](#architecture-at-a-glance)
+- [Setup](#setup)
+- [Users, Roles, and Permissions](#users-roles-and-permissions)
+  - [Built-in Roles](#built-in-roles)
+  - [Built-in Permissions](#built-in-permissions)
+  - [Creating Users Programmatically](#creating-users-programmatically)
+  - [Checking Permissions](#checking-permissions)
+  - [Creating a New Permission and Role](#creating-a-new-permission-and-role)
+- [Field Types](#field-types)
+  - [Built-in Types](#built-in-types)
+  - [Creating a Custom Field Type](#creating-a-custom-field-type)
+- [Field Groups and Fields](#field-groups-and-fields)
+  - [Creating a Field Group with Fields](#creating-a-field-group-with-fields)
+- [Status Groups and Statuses](#status-groups-and-statuses)
+  - [Creating a Status Group](#creating-a-status-group)
+- [Category Groups and Categories](#category-groups-and-categories)
+  - [Creating a Category Group and Categories](#creating-a-category-group-and-categories)
+  - [Fetching Categories](#fetching-categories)
+- [Field Layouts](#field-layouts)
+  - [Building a Layout Programmatically](#building-a-layout-programmatically)
+  - [Getting All Fields from a Layout](#getting-all-fields-from-a-layout)
+- [Entry Groups and Entry Types](#entry-groups-and-entry-types)
+  - [Multiple Entry Types per Group](#multiple-entry-types-per-group)
+  - [Field Layering: Group Fields + Type Fields](#field-layering-group-fields--type-fields)
+  - [Setting Up Multiple Entry Types in One Group](#setting-up-multiple-entry-types-in-one-group)
+  - [Entry Type Classes Can Share Logic via a Base Class](#entry-type-classes-can-share-logic-via-a-base-class)
+  - [Creating Entries of Each Type](#creating-entries-of-each-type)
+  - [Multiple Groups Sharing the Same Entry Type Class](#multiple-groups-sharing-the-same-entry-type-class)
+  - [Creating an Entry Group](#creating-an-entry-group)
+  - [Creating an Entry Type Class](#creating-an-entry-type-class)
+  - [Registering the Entry Type in the Database](#registering-the-entry-type-in-the-database)
+- [Creating and Updating Entries](#creating-and-updating-entries)
+  - [Creating an Entry](#creating-an-entry)
+  - [Updating an Entry](#updating-an-entry)
+  - [Using the Relationship Field](#using-the-relationship-field)
+- [Querying Entries](#querying-entries)
+  - [Reading Field Values](#reading-field-values)
+- [Deleting Entries](#deleting-entries)
+- [User Extended Profile (UserSchema)](#user-extended-profile-userschema)
+  - [Setting Up the User Schema](#setting-up-the-user-schema)
+  - [Writing Field Values to a User](#writing-field-values-to-a-user)
+  - [Reading Field Values from a User](#reading-field-values-from-a-user)
+  - [Typical Controller Pattern](#typical-controller-pattern)
+  - [Comparison: Users vs Entries](#comparison-users-vs-entries)
+- [UserService and the Users Facade](#userservice-and-the-users-facade)
+  - [CRUD](#crud)
+  - [Roles](#roles)
+  - [Custom Fields](#custom-fields)
+  - [Passwords](#passwords)
+  - [Two-Factor Authentication](#two-factor-authentication)
+  - [OAuth Token Management](#oauth-token-management)
+  - [Using Actions Directly](#using-actions-directly)
+- [Custom Field Groups on Category Groups](#custom-field-groups-on-category-groups)
+  - [Step 1 — Create Fields and attach them to the CategoryGroup](#step-1--create-fields-and-attach-them-to-the-categorygroup)
+  - [Step 2 — Write field values to a Category](#step-2--write-field-values-to-a-category)
+  - [Step 3 — Read field values back](#step-3--read-field-values-back)
+  - [Writing multiple fields at once](#writing-multiple-fields-at-once)
+- [Adding New Permissions](#adding-new-permissions)
+- [Adding a New Entry Type End-to-End](#adding-a-new-entry-type-end-to-end)
+- [Key Data Flow Summary](#key-data-flow-summary)
+
+---
+
 ## Architecture at a Glance
 
 This is an **ExpressionEngine-inspired headless CMS** built on Laravel. The core philosophy: all content structure is admin-defined at runtime. Entry types are concrete PHP classes; everything else (fields, layouts, statuses, categories) is database-driven.
@@ -1154,16 +1219,109 @@ class UserController extends Controller
 
 ## Custom Field Groups on Category Groups
 
-CategoryGroups support the `HasFieldGroups` and `HasFieldLayout` traits, so you can attach extra fields to categories themselves.
+CategoryGroups support the `HasFieldGroups` and `HasFieldLayout` traits, so you can attach extra fields to categories themselves. The `Category` model uses the `Fieldable` trait, giving each category record its own field value storage.
+
+There are two layers:
+
+| Layer | Model | Purpose |
+|---|---|---|
+| Schema definition | `CategoryGroup` (`HasFieldGroups`, `HasFieldLayout`) | Defines *which* fields exist for categories in that group |
+| Value storage | `Category` (`Fieldable`) | Stores actual field values per category record |
+
+### Step 1 — Create Fields and attach them to the CategoryGroup
 
 ```php
 use App\Models\Category\Group as CategoryGroup;
+use App\Models\Field;
 use App\Models\Field\Group as FieldGroup;
+use App\Models\FieldLayout;
 
 $categoryGroup = CategoryGroup::where('slug', 'topics')->firstOrFail();
-$fieldGroup    = FieldGroup::where('slug', 'seo-fields')->firstOrFail();
 
+// Create the fields
+$descField  = Field::create(['name' => 'Description',   'slug' => 'cat_description',   'field_type_id' => $textareaTypeId]);
+$imageField = Field::create(['name' => 'Banner Image',  'slug' => 'cat_banner_image',  'field_type_id' => $fileTypeId]);
+
+// Bundle them into a FieldGroup
+$fieldGroup = FieldGroup::create(['name' => 'Category Details']);
+$fieldGroup->fields()->attach([$descField->id, $imageField->id]);
+
+// Attach the FieldGroup to the CategoryGroup
 $categoryGroup->fieldGroups()->syncWithoutDetaching([$fieldGroup->id]);
+```
+
+You can also attach a pre-existing FieldGroup (e.g. shared SEO fields):
+
+```php
+$seoGroup = FieldGroup::where('slug', 'seo-fields')->firstOrFail();
+$categoryGroup->fieldGroups()->syncWithoutDetaching([$seoGroup->id]);
+```
+
+### Step 2 — Write field values to a Category
+
+```php
+use App\Models\Category;
+use App\Models\Field;
+use App\Models\FieldValue;
+
+$category = Category::where('slug', 'php')->firstOrFail();
+
+$field  = Field::where('slug', 'cat_description')->firstOrFail();
+$column = $field->fieldType->instance()->storageColumn(); // e.g. 'text_value'
+
+FieldValue::updateOrCreate(
+    [
+        'field_id'       => $field->id,
+        'fieldable_id'   => $category->id,
+        'fieldable_type' => Category::class,
+    ],
+    [$column => 'All things PHP — tutorials, packages, and news.']
+);
+```
+
+### Step 3 — Read field values back
+
+```php
+// Load field values eagerly to avoid N+1
+$category->load('fieldValues.field');
+
+$description = $category->field('cat_description');
+$banner      = $category->field('cat_banner_image');
+```
+
+### Writing multiple fields at once
+
+For bulk writes, pre-load all fields to avoid N+1 queries:
+
+```php
+use App\Models\Field;
+use App\Models\FieldValue;
+
+$category = Category::where('slug', 'php')->firstOrFail();
+
+$fieldData = [
+    'cat_description'  => 'All things PHP.',
+    'cat_banner_image' => '/images/php-banner.jpg',
+];
+
+$fieldModels = Field::whereIn('slug', array_keys($fieldData))
+    ->with('fieldType')
+    ->get()
+    ->keyBy('slug');
+
+foreach ($fieldData as $slug => $value) {
+    $field  = $fieldModels->get($slug);
+    $column = $field->fieldType->instance()->storageColumn();
+
+    FieldValue::updateOrCreate(
+        [
+            'field_id'       => $field->id,
+            'fieldable_id'   => $category->id,
+            'fieldable_type' => Category::class,
+        ],
+        [$column => $value]
+    );
+}
 ```
 
 ---
