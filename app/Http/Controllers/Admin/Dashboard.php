@@ -6,10 +6,20 @@ use App\Models\User;
 use Illuminate\Support\Number;
 use App\Rest\Client;
 
+use App\Facades\Content;
+
+
 class Dashboard extends Controller
 {
     public function index()
     {
+        $content = Content::query()->inGroup('products')->published()->first();
+        //print_r($content);
+
+        $entry = Content::find(1);
+        echo $entry->field('body');
+        print_r($entry);
+        exit;
 //        $client = new Client();
 //        $data = $client->get('v1/users');
 //

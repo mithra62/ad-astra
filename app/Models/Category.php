@@ -36,10 +36,9 @@ class Category extends Model
         return $this->morphTo();
     }
 
-    public function groups(): MorphToMany
+    public function group(): BelongsTo
     {
-        return $this->morphedByMany(Group::class, 'categorizable')
-            ->withTimestamps();
+        return $this->belongsTo(Group::class, 'group_id');
     }
 
     public function parent(): BelongsTo

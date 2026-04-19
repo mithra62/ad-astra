@@ -102,6 +102,8 @@ class EntryQueryBuilder
             'authors',
             'categories',
             'fieldValues.field.fieldType',
+            'entryRelationships.field',
+            'entryRelationships.relatedEntry',
         ];
     }
 }

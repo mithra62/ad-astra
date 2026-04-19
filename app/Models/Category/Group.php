@@ -32,10 +32,9 @@ class Group extends Model
         return $this->morphTo();
     }
 
-    public function categories(): MorphToMany
+    public function categories(): HasMany
     {
-        return $this->morphToMany(Category::class, 'categorizable')
-            ->withTimestamps();
+        return $this->hasMany(Category::class, 'group_id');
     }
 
     public function rootCategories(): HasMany

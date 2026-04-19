@@ -355,6 +355,96 @@ Category::inGroup($group)->roots()->with('childrenRecursive')->get();
 
 ---
 
+## Accessing Entry Categories via the Content Facade
+
+Entries carry a `categories()` morphToMany relationship via the `HasCategories` trait. Use eager loading to avoid N+1 queries.
+
+### Eager loading on a query
+
+```php
+use App\Facades\Content;
+
+$entries = Content::query()
+    ->inGroup('blog')
+    ->published()
+    ->with('categories')
+    ->get();
+
+foreach ($entries as $entry) {
+    foreach ($entry->categories as $category) {
+        echo $category->name;
+        echo $category->slug;
+    }
+}
+```
+
+### Loading categories with their group
+
+```php
+$entries = Content::query()
+    ->inGroup('blog')
+    ->published()
+    ->with('categories.group')   // also load each category's CategoryGroup
+    ->get();
+
+foreach ($entries as $entry) {
+    foreach ($entry->categories as $category) {
+        echo $category->group->name; // e.g. "Topics"
+        echo $category->name;
+    }
+}
+```
+
+### Single entry
+
+```php
+$entry = Content::query()
+    ->inGroup('blog')
+    ->where('slug', 'my-post')
+    ->with('categories')
+    ->firstOrFail();
+
+// All categories
+$entry->categories;                              // Collection<Category>
+
+// Filter to a specific group's categories
+$topics = $entry->categories->filter(
+    fn($c) => $c->group->slug === 'topics'
+);
+
+// Check membership
+$entry->categories->contains('slug', 'php');    // bool
+```
+
+### Filtering entries by category
+
+```php
+use App\Models\Category;
+
+$php = Category::where('slug', 'php')->firstOrFail();
+
+$entries = Content::query()
+    ->inGroup('blog')
+    ->withCategory($php->id)
+    ->published()
+    ->with('categories')
+    ->get();
+```
+
+### Accessing category field values on an entry's categories
+
+`Category` implements `Fieldable`, so custom field values are readable directly:
+
+```php
+$entry->load('categories');
+
+foreach ($entry->categories as $category) {
+    $category->field('meta_description'); // custom field value
+}
+```
+
+---
+
 ## Field Layouts
 
 A `FieldLayout` organises fields into named tabs. Layouts are attached to EntryGroups, EntryTypes, CategoryGroups, and UserSchema.
@@ -435,7 +525,7 @@ Fields are defined at two levels and **merged** when reading or writing:
 | Group-level layout | `EntryGroup.field_layout_id` | All entry types in the group |
 | Type-level layout | `EntryType.field_layout_id` (nullable) | Only entries of that specific type |
 
-`EntryRepository` merges both layouts transparently:
+`EntryRepository` merges both layouts transparently. Note that `Entry::update()` returns the model instance (`static`) rather than a boolean.
 
 ```php
 // Group fields (shared)     + Type fields (specific) = all available fields for this entry
@@ -752,26 +842,85 @@ $entry->update(['status' => 'archived']);
 
 ### Using the Relationship Field
 
-The `related_entries` field stores related entry IDs in the `entry_relationships` pivot table:
+Relationship fields store related entry IDs in the dedicated `entry_relationships` table — **not** in `field_values`. The field type's `isRelational()` returns `true`, which routes writes through `syncRelationshipField()` and reads through `entryRelationships`.
+
+#### Writing — create or update
+
+Pass an array of related Entry IDs under the field slug. Array order is preserved as `sort_order`:
 
 ```php
-$postA = Content::create('blog_post', ['title' => 'Post A', ...]);
-$postB = Content::create('blog_post', ['title' => 'Post B', ...]);
-$postC = Content::create('blog_post', ['title' => 'Post C', ...]);
+$relatedA = Content::query()->inGroup('products')->where('slug', 'widget-a')->value('id');
+$relatedB = Content::query()->inGroup('products')->where('slug', 'widget-b')->value('id');
 
-// Link related posts (array order determines sort_order)
-Content::update($postA, [
-    'fields' => ['related_entries' => [$postB->id, $postC->id]],
+// On create
+$post = Content::create('blog_post', [
+    'title'            => 'My Post',
+    'slug'             => 'my-post',
+    'related_products' => [$relatedA, $relatedB],
 ]);
 
-// Reading — returns Collection<Entry>
-$postA->load('entryRelationships.field', 'entryRelationships.relatedEntry');
-$related = $postA->field('related_entries');
+// On update — replaces all existing pivots for that field
+Content::update($post, [
+    'related_products' => [$relatedB], // removes $relatedA, keeps $relatedB
+]);
+```
 
-foreach ($related as $rel) {
-    echo $rel->title;
+#### Reading — returns `Collection<Entry>`
+
+`Entry::field('slug')` detects a relationship field and returns a `Collection` of `Entry` models instead of a scalar value:
+
+```php
+$post = Content::query()
+    ->inGroup('blog')
+    ->where('slug', 'my-post')
+    ->firstOrFail();
+
+$relatedProducts = $post->field('related_products'); // Collection<Entry>
+
+foreach ($relatedProducts as $product) {
+    echo $product->title;
+    echo $product->field('price'); // scalar field on the related entry
 }
 ```
+
+#### Eager loading (N+1 prevention)
+
+`defaultEagerLoad()` in `EntryRepository` already includes `entryRelationships.field` and `entryRelationships.relatedEntry`, so relationship data is loaded automatically on standard queries. To also load scalar fields on the related entries:
+
+```php
+$posts = Content::query()
+    ->inGroup('blog')
+    ->published()
+    ->with([
+        'entryRelationships.field',
+        'entryRelationships.relatedEntry.fieldValues.field',
+    ])
+    ->get();
+```
+
+#### Accessing the raw pivot (sort order, field metadata)
+
+```php
+$post->entryRelationships
+    ->where('field.slug', 'related_products')
+    ->sortBy('sort_order')
+    ->each(function ($pivot) {
+        echo $pivot->sort_order;
+        echo $pivot->relatedEntry->title;
+    });
+```
+
+#### Checking emptiness
+
+```php
+$related = $post->field('related_products'); // Collection or null
+
+if ($related && $related->isNotEmpty()) {
+    // has related entries
+}
+```
+
+> **Scalar vs relationship fields:** `field('slug')` returns a single value for scalar fields (text, integer, date, etc.) and a `Collection<Entry>` for relationship fields. The distinction is determined by the field type's `isRelational()` flag.
 
 ---
 
@@ -839,15 +988,8 @@ foreach ($related as $rel) {
 > **Performance note:** `fieldValues.field.fieldType` and `entryRelationships.field` +
 > `entryRelationships.relatedEntry` are included in `EntryRepository::defaultEagerLoad()`,
 > so `Content::get()` and `Content::find()` never produce N+1 queries. The query builder's
-> `get()`/`paginate()`/`first()` also eager-load `fieldValues.field.fieldType` but not
-> `entryRelationships` — add that manually when needed:
->
-> ```php
-> Content::query()->inGroup('blog')->get()->load(
->     'entryRelationships.field',
->     'entryRelationships.relatedEntry'
-> );
-> ```
+> `get()`/`paginate()`/`first()` also eager-load both scalar and relational field data
+> by default.
 
 ---
 
@@ -1023,6 +1165,7 @@ public function update(Request $request, User $user): void
 | Read API | `$entry->field('slug')` | `$user->field('slug')` (same trait) |
 | Schema | Per-group FieldLayout + per-type FieldLayout | Single `UserSchema` singleton |
 | Lifecycle hooks | `beforeCreate`, `afterCreate`, etc. | None — plain Eloquent |
+| Custom Fields | Scalar + Relational | **Scalar only** (relational fields return `null`) |
 
 ---
 
@@ -1259,24 +1402,28 @@ $categoryGroup->fieldGroups()->syncWithoutDetaching([$seoGroup->id]);
 
 ### Step 2 — Write field values to a Category
 
+Category custom fields are written directly to the `field_values` table (polymorphic to `Category`).
+
 ```php
 use App\Models\Category;
 use App\Models\Field;
 use App\Models\FieldValue;
 
 $category = Category::where('slug', 'php')->firstOrFail();
+$field    = Field::where('slug', 'cat_description')->firstOrFail();
+$instance = $field->fieldType->instance();
 
-$field  = Field::where('slug', 'cat_description')->firstOrFail();
-$column = $field->fieldType->instance()->storageColumn(); // e.g. 'text_value'
-
-FieldValue::updateOrCreate(
-    [
-        'field_id'       => $field->id,
-        'fieldable_id'   => $category->id,
-        'fieldable_type' => Category::class,
-    ],
-    [$column => 'All things PHP — tutorials, packages, and news.']
-);
+// Category custom fields currently only support scalar types
+if (!$instance->isRelational()) {
+    FieldValue::updateOrCreate(
+        [
+            'field_id'       => $field->id,
+            'fieldable_id'   => $category->id,
+            'fieldable_type' => Category::class,
+        ],
+        [$instance->storageColumn() => 'All things PHP — tutorials, packages, and news.']
+    );
+}
 ```
 
 ### Step 3 — Read field values back
@@ -1291,7 +1438,7 @@ $banner      = $category->field('cat_banner_image');
 
 ### Writing multiple fields at once
 
-For bulk writes, pre-load all fields to avoid N+1 queries:
+For bulk writes, pre-load all fields to avoid N+1 queries. Remember that Categories (like Users) only support scalar field types.
 
 ```php
 use App\Models\Field;
@@ -1310,17 +1457,19 @@ $fieldModels = Field::whereIn('slug', array_keys($fieldData))
     ->keyBy('slug');
 
 foreach ($fieldData as $slug => $value) {
-    $field  = $fieldModels->get($slug);
-    $column = $field->fieldType->instance()->storageColumn();
+    $field    = $fieldModels->get($slug);
+    $instance = $field->fieldType->instance();
 
-    FieldValue::updateOrCreate(
-        [
-            'field_id'       => $field->id,
-            'fieldable_id'   => $category->id,
-            'fieldable_type' => Category::class,
-        ],
-        [$column => $value]
-    );
+    if (!$instance->isRelational()) {
+        FieldValue::updateOrCreate(
+            [
+                'field_id'       => $field->id,
+                'fieldable_id'   => $category->id,
+                'fieldable_type' => Category::class,
+            ],
+            [$instance->storageColumn() => $value]
+        );
+    }
 }
 ```
 
