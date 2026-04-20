@@ -2,27 +2,26 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use Illuminate\Http\Request;
-use App\Http\Resources\Api\UserCollection;
-use App\Http\Resources\Api\UserResource;
 use App\Http\Controllers\Api\Controller;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User as UserModel;
+use Illuminate\Http\Request;
+use App\Http\Resources\Api\EntryCollection;
+use App\Http\Resources\Api\EntryResource;
+use App\Facades\Content;
 
-class User extends Controller
+class Entries extends Controller
 {
     /**
      * @OA\Get(
-     *      path="/api/v1/users",
-     *      operationId="getAllUsers",
-     *      tags={"Users"},
-     *      summary="Get a paginated list of Users",
+     *      path="/api/v1/entries",
+     *      operationId="getAllEntries",
+     *      tags={"Entries"},
+     *      summary="Get a paginated list of Entries",
      *      security={{"sanctum": {}}},
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
      *          @OA\JsonContent(
-     *              @OA\Property(property="data",type="array",description="Users",@OA\Items(ref="#/components/schemas/User")),
+     *              @OA\Property(property="data",type="array",description="Users",@OA\Items(ref="#/components/schemas/Entry")),
      *              @OA\Property(property="meta",type="array",description="",@OA\Items(ref="#/components/schemas/Meta")),
      *              @OA\Property(property="links",type="array",description="",@OA\Items(ref="#/components/schemas/Links")),
      *              @OA\Property(property="pagination_info",type="array",description="",@OA\Items(ref="#/components/schemas/PaginationInfo")),
@@ -78,38 +77,27 @@ class User extends Controller
      */
     public function index(Request $request)
     {
-        if (!$this->can('read users')) {
-            return response()->json(['error' => 'Not Found'], 404);
-        }
-
-        $query = UserModel::with('roles');
-        if($this->sortDir($request) && $this->sort($request)) {
-            $query->orderBy($this->sort($request), $this->sortDir($request));
-        }
-
-        $submissions = $query->paginate($this->limit($request));
-        return new UserCollection($submissions);
+        return response()->json(['message' => 'Content index endpoint']);
     }
-
 
     /**
      * @OA\Get(
-     *     path="/api/v1/users/{id}",
-     *      operationId="getUser",
-     *      tags={"Users"},
-     *      summary="Get details on a specific User",
+     *     path="/api/v1/entries/{id}",
+     *      operationId="getEntry",
+     *      tags={"Entries"},
+     *      summary="Get details on a specific Entry",
      *      security={{"sanctum": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="ID of the user to retrieve",
+     *         description="ID of the entry to retrieve",
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
-     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *         @OA\JsonContent(ref="#/components/schemas/Entry")
      *     ),
      *     @OA\Response(
      *         response=404,
@@ -117,17 +105,29 @@ class User extends Controller
      *     )
      * )
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        if (!$this->can('read users') || Auth::user()->id === $id) {
-            return response()->json(['error' => 'Not Found'], 404);
-        }
+        $entry = Content::find($id);
+        return new EntryResource($entry);
+    }
 
-        $user = UserModel::find($id);
-        if (!$user instanceof UserModel) {
-            return response()->json(['error' => 'Not Found'], 404);
-        }
+    public function store(Request $request)
+    {
+        return response()->json(['message' => 'Content store endpoint']);
+    }
 
-        return new UserResource($user);
+    public function update(Request $request, $slug)
+    {
+        return response()->json(['message' => 'Content update endpoint']);
+    }
+
+    public function destroy(Request $request, $slug)
+    {
+        return response()->json(['message' => 'Content destroy endpoint']);
+    }
+
+    public function search(Request $request)
+    {
+        return response()->json(['message' => 'Content search endpoint']);
     }
 }

@@ -61,6 +61,15 @@ class EntryQueryBuilder
         return $this;
     }
 
+    public function where(string $column, mixed $operator, mixed $value = null): static
+    {
+        $value === null
+            ? $this->query->where($column, $operator)
+            : $this->query->where($column, $operator, $value);
+
+        return $this;
+    }
+
     public function orderBy(string $column, string $direction = 'asc'): static
     {
         $this->query->orderBy($column, $direction);
@@ -86,6 +95,11 @@ class EntryQueryBuilder
     public function first(): ?Entry
     {
         return $this->query->with($this->eagerLoad())->first();
+    }
+
+    public function firstOrFail(): Entry
+    {
+        return $this->query->with($this->eagerLoad())->firstOrFail();
     }
 
     public function count(): int

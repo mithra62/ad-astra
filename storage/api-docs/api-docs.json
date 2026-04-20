@@ -6,6 +6,167 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/v1/entries": {
+            "get": {
+                "tags": [
+                    "Entries"
+                ],
+                "summary": "Get a paginated list of Entries",
+                "operationId": "getAllEntries",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Starting page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "created_after",
+                        "in": "query",
+                        "description": "Retrieve submissions that were created after a specific date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "created_before",
+                        "in": "query",
+                        "description": "Retrieve submissions that were before after a specific date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "How you want to order results",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "The direction for sorted orders (asc, desc)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "description": "Users",
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Entry"
+                                            }
+                                        },
+                                        "meta": {
+                                            "description": "",
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Meta"
+                                            }
+                                        },
+                                        "links": {
+                                            "description": "",
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Links"
+                                            }
+                                        },
+                                        "pagination_info": {
+                                            "description": "",
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PaginationInfo"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/entries/{id}": {
+            "get": {
+                "tags": [
+                    "Entries"
+                ],
+                "summary": "Get details on a specific Entry",
+                "operationId": "getEntry",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the entry to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Entry"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/users": {
             "get": {
                 "tags": [
@@ -267,6 +428,36 @@
                 },
                 "type": "object"
             },
+            "Entry": {
+                "title": "Entry Details",
+                "description": "entry model",
+                "properties": {
+                    "id": {
+                        "description": "",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "email": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "description": "",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "User": {
                 "title": "User Details",
                 "description": "user model",
@@ -308,6 +499,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Entries",
+            "description": "Entries"
+        },
         {
             "name": "Users",
             "description": "Users"

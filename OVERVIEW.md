@@ -928,6 +928,8 @@ if ($related && $related->isNotEmpty()) {
 
 Use `Content::query()` for a fluent, chainable query builder.
 
+> **`inGroup()` vs entry type handles:** `inGroup('blog')` matches the **EntryGroup handle** (set on the `EntryGroup` model, e.g. `'blog'`, `'products'`). This is distinct from the **EntryType handle** (e.g. `'blog_post'`, `'product'`), which is used with `ofType()`. Passing an entry type handle to `inGroup()` will silently return no results.
+
 ```php
 use App\Facades\Content;
 use App\Models\Category;

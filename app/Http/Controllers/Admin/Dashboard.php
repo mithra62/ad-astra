@@ -5,6 +5,7 @@ use App\Models\ApiLog;
 use App\Models\User;
 use Illuminate\Support\Number;
 use App\Rest\Client;
+use App\Models\Entry;
 
 use App\Facades\Content;
 
@@ -16,10 +17,28 @@ class Dashboard extends Controller
         $content = Content::query()->inGroup('products')->published()->first();
         //print_r($content);
 
-        $entry = Content::find(1);
-        echo $entry->field('body');
-        print_r($entry);
-        exit;
+        $entry = Entry::where('slug', 'the-pragmatic-programmer')->first();;
+
+//        $entry = Entry::where('slug', 'the-pragmatic-programmer')
+//            ->with('entryGroup')
+//            ->first()
+//            ?->entryGroup
+//            ?->handle; // e.g. "blog_posts" not "blog"
+//        print_r($entry);
+//        exit;
+
+//        $post = Content::query()
+//            ->inGroup(2)
+//            ->where('slug', 'the-pragmatic-programmer')
+//            ->firstOrFail();
+//
+//        print_r($post);
+//        exit;
+
+//        $entry = Content::find(1);
+//        echo $entry->field('body');
+//        print_r($entry);
+//        exit;
 //        $client = new Client();
 //        $data = $client->get('v1/users');
 //
