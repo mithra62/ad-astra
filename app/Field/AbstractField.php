@@ -8,6 +8,7 @@ abstract class AbstractField
 {
     protected array $settings = [];
     protected ?Field $field;
+    protected array $rules = [];
 
     public function __construct(array $settings, Field $field = null)
     {
@@ -47,6 +48,14 @@ abstract class AbstractField
     public function validate(mixed $value): bool|string
     {
         return true;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRules(): array
+    {
+        return $this->rules;
     }
 
     /**

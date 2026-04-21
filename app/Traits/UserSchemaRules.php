@@ -2,14 +2,14 @@
 
 namespace App\Traits;
 
+use App\Models\UserSchema;
+
 trait UserSchemaRules
 {
-
-
     protected function schemaFieldRules(): array
     {
         $rules = [];
-        $schema = \App\Models\UserSchema::instance()->load('fieldLayout.tabs.elements.field.fieldType');
+        $schema = UserSchema::instance()->load('fieldLayout.tabs.elements.field.fieldType');
 
         if (!$schema->fieldLayout) {
             return $rules;
@@ -21,29 +21,10 @@ trait UserSchemaRules
                 $key = "fields.{$field->slug}";
                 $fieldRules = $element->required ? ['required'] : ['nullable'];
 
-                $fieldRules = array_merge($fieldRules, $this->rulesForFieldType(
-                    $field->fieldType->object,
-                    $field->settings ?? []
-                ));
-
-                $rules[$key] = $fieldRules;
+                $rules[$key] = array_merge($fieldRules, $field->fieldType->instance()->getRules());
             }
         }
 
         return $rules;
-    }
-
-    protected function rulesForFieldType(string $class, array $settings): array
-    {
-        $map = [
-            \App\Field\Types\Text::class => ['string', 'max:' . ($settings['maxLength'] ?? 255)],
-            \App\Field\Types\Textarea::class => ['string', 'max:' . ($settings['maxLength'] ?? 65535)],
-            \App\Field\Types\Checkbox::class => ['boolean'],
-            \App\Field\Types\Date::class => ['date'],
-            \App\Field\Types\Number::class => ['numeric'],
-            \App\Field\Types\Relationship::class => ['array'],
-        ];
-
-        return $map[$class] ?? ['string'];
     }
 }

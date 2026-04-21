@@ -6,6 +6,11 @@ use App\Field\AbstractField;
 
 class Text extends AbstractField
 {
+    protected array $rules = [
+        'min:255',
+        'string',
+    ];
+
     public function storageColumn(): string
     {
         return 'value_text';

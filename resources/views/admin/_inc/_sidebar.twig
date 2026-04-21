@@ -49,6 +49,9 @@
             <li class="no-sub">
                 <a href="{{ route('fields.groups') }}">Fields</a>
             </li>
+            <li class="no-sub">
+                <a href="{{ route('fields.groups') }}">Statuses</a>
+            </li>
             {% if can('api') %}
                 <li class="menu-title">
                     <span>API</span>
@@ -70,6 +73,11 @@
                 <li class="no-sub">
                     <a href="{{ route('roles.index') }}">
                         Roles
+                    </a>
+                </li>
+                <li class="no-sub">
+                    <a href="{{ route('roles.index') }}">
+                        Fields
                     </a>
                 </li>
             {% endif %}
