@@ -9,7 +9,7 @@ trait UserSchemaRules
     protected function schemaFieldRules(): array
     {
         $rules = [];
-        $schema = UserSchema::instance()->load('fieldLayout.tabs.elements.field.fieldType');
+        $schema = UserSchema::resolved();
 
         if (!$schema->fieldLayout) {
             return $rules;

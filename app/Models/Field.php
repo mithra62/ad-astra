@@ -25,6 +25,9 @@ class Field extends Model
         'hidden'   => 'boolean',
     ];
 
+    // fieldType is needed on virtually every Field access; always load it.
+    protected $with = ['fieldType'];
+
     public function fieldType(): BelongsTo
     {
         return $this->belongsTo(Type::class, 'field_type_id');
