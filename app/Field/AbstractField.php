@@ -2,13 +2,23 @@
 
 namespace App\Field;
 
+use App\Models\Field;
+
 abstract class AbstractField
 {
     protected array $settings = [];
+    protected ?Field $field;
 
-    public function __construct(array $settings)
+    public function __construct(array $settings, Field $field = null)
     {
         $this->settings = $settings;
+        $this->field = $field;
+    }
+
+    public function setField(Field $field): AbstractField
+    {
+        $this->field = $field;
+        return $this;
     }
 
     /**
@@ -50,5 +60,10 @@ abstract class AbstractField
     public function getSetting(string $key, mixed $default = null): mixed
     {
         return $this->settings[$key] ?? $default;
+    }
+
+    public function render(array $params): string
+    {
+        return '';
     }
 }

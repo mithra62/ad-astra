@@ -969,6 +969,54 @@ $entry = Content::get(42);   // throws ModelNotFoundException if missing
 $entry = Content::find(42);  // returns null if missing
 ```
 
+### Accessing Entry Authors
+
+Entries have two distinct author concepts, both eager loaded by default on every `Content::query()` call.
+
+| Relationship | Type | Description |
+|---|---|---|
+| `creator` | `BelongsTo User` | The user who created the entry record |
+| `authors` | `BelongsToMany User` | Editorial byline, ordered by `sort_order` |
+
+```php
+$post = Content::query()
+    ->inGroup('blog')
+    ->where('slug', 'the-pragmatic-programmer')
+    ->firstOrFail();
+
+// User who created the record
+$post->creator->name;
+$post->creator->email;
+
+// Editorial authors (ordered by sort_order)
+foreach ($post->authors as $author) {
+    echo $author->name;
+    echo $author->email;
+    echo $author->pivot->sort_order;
+}
+
+// Check if a specific user is an author
+$post->authors->contains('id', $userId); // bool
+
+// Just the names
+$post->authors->pluck('name'); // Collection ["Alice", "Bob"]
+
+// Primary author (first by sort_order)
+$post->authors->first()?->name;
+```
+
+Filter entries by author using `withAuthor()`:
+
+```php
+$myPosts = Content::query()
+    ->inGroup('blog')
+    ->withAuthor(Auth::id())
+    ->published()
+    ->get();
+```
+
+---
+
 ### Reading Field Values
 
 ```php
@@ -1013,7 +1061,20 @@ app(\App\Repositories\EntryRepository::class)->delete($entry);
 
 ### Setting Up the User Schema
 
-Create the fields, a field group, a layout, and attach them all to `UserSchema::instance()`. This is typically done once in a seeder:
+`UserSchema` is a singleton — one row, one `FieldLayout`, applied to all users. The setup is handled by `UserSchemaSeeder`, which creates two FieldGroups and a two-tab layout:
+
+| FieldGroup | Slug | Fields |
+|---|---|---|
+| User Profile | `user-profile` | `first_name`, `last_name`, `gender`, `date_of_birth`, `website` |
+| User Bio | `user-bio` | `bio`, `social_twitter`, `social_linkedin` |
+
+Run the seeder to initialise the schema:
+
+```bash
+php artisan db:seed --class=UserSchemaSeeder
+```
+
+To set this up manually (e.g. in a custom seeder):
 
 ```php
 use App\Models\Field;
@@ -1024,58 +1085,52 @@ use App\Models\FieldLayout\Tab;
 use App\Models\FieldLayout\TabElement;
 use App\Models\UserSchema;
 
-$textType = FieldType::where('object', \App\Field\Types\Text::class)->firstOrFail();
+$text = FieldType::where('object', \App\Field\Types\Text::class)->firstOrFail();
 
-// Create the fields
-$fieldDefs = [
-    ['slug' => 'first_name', 'name' => 'First Name', 'label' => 'First Name'],
-    ['slug' => 'last_name',  'name' => 'Last Name',  'label' => 'Last Name'],
-    ['slug' => 'gender',     'name' => 'Gender',     'label' => 'Gender'],
-];
+// 1. Create fields
+$firstName = Field::firstOrCreate(['slug' => 'first_name'], ['field_type_id' => $text->id, 'name' => 'First Name', 'label' => 'First Name']);
+$lastName  = Field::firstOrCreate(['slug' => 'last_name'],  ['field_type_id' => $text->id, 'name' => 'Last Name',  'label' => 'Last Name']);
+$gender    = Field::firstOrCreate(['slug' => 'gender'],     ['field_type_id' => $text->id, 'name' => 'Gender',     'label' => 'Gender']);
 
-foreach ($fieldDefs as $def) {
-    Field::firstOrCreate(
-        ['slug' => $def['slug']],
-        array_merge($def, ['field_type_id' => $textType->id])
-    );
-}
-
-// Create a field group and attach the fields
+// 2. Create a FieldGroup and attach the fields
 $group = FieldGroup::firstOrCreate(
     ['slug' => 'user-profile'],
-    ['name' => 'User Profile', 'description' => 'Extended user profile fields.']
+    ['name' => 'User Profile', 'description' => 'Core identity fields for all users.']
 );
+$group->fields()->syncWithoutDetaching([$firstName->id, $lastName->id, $gender->id]);
 
-foreach ($fieldDefs as $def) {
-    $group->fields()->syncWithoutDetaching([
-        Field::where('slug', $def['slug'])->value('id'),
-    ]);
-}
-
-// Build a layout with a Profile tab
+// 3. Build a FieldLayout with a tab
 $layout = FieldLayout::create(['name' => 'User Profile Layout']);
+$tab    = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Profile', 'sort_order' => 1]);
 
-$tab = Tab::create([
-    'field_layout_id' => $layout->id,
-    'name'            => 'Profile',
-    'sort_order'      => 1,
-]);
-
-foreach (['first_name', 'last_name', 'gender'] as $i => $slug) {
+foreach ([$firstName, $lastName, $gender] as $i => $field) {
     TabElement::create([
         'field_layout_tab_id' => $tab->id,
-        'field_id'            => Field::where('slug', $slug)->value('id'),
+        'field_id'            => $field->id,
         'required'            => false,
         'sort_order'          => $i + 1,
     ]);
 }
 
-// Attach layout and field group to the singleton UserSchema
+// 4. Wire layout and FieldGroup to the singleton
 $schema = UserSchema::instance();
 $schema->field_layout_id = $layout->id;
 $schema->save();
 
 $schema->fieldGroups()->syncWithoutDetaching([$group->id]);
+```
+
+### Reading the layout back
+
+```php
+$schema = UserSchema::instance()->load('fieldLayout.tabs.elements.field');
+
+foreach ($schema->fieldLayout->tabs as $tab) {
+    echo $tab->name; // "Profile", "Bio"
+    foreach ($tab->elements as $el) {
+        echo $el->field->slug; // "first_name", "last_name", ...
+    }
+}
 ```
 
 ### Writing Field Values to a User
@@ -1474,6 +1529,306 @@ foreach ($fieldData as $slug => $value) {
     }
 }
 ```
+
+---
+
+## User Controller with Schema Fields
+
+The `Users` facade, `UserSchema`, and `Fieldable` work together to give you a fully dynamic user edit form driven by the FieldLayout. The controller loads the schema for tab/field structure and a keyed `$fieldValues` map for pre-populating inputs.
+
+### Controller
+
+```php
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Facades\Users;
+use App\Models\User as UserModel;
+use App\Models\UserSchema;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
+
+class User extends Controller
+{
+    public function index(): View
+    {
+        $users = UserModel::with('roles')->paginate(20);
+        return $this->view('users.index', compact('users'));
+    }
+
+    public function create(): View
+    {
+        $roles  = Role::all();
+        $schema = UserSchema::instance()->load('fieldLayout.tabs.elements.field');
+        return $this->view('users.create', compact('roles', 'schema'));
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'roles'    => ['nullable', 'array'],
+            'fields'   => ['nullable', 'array'],
+        ]);
+
+        $user = Users::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => $request->password,
+            'roles'    => $request->input('roles', []),
+            'fields'   => $request->input('fields', []),
+        ]);
+
+        return redirect()->route('users.edit', $user)->with('success', 'User created.');
+    }
+
+    public function edit(string $id): View|RedirectResponse
+    {
+        $user = UserModel::with(['roles', 'fieldValues.field'])->find($id);
+
+        if (! $user instanceof UserModel) {
+            return redirect()->route('users.index')->with('failure', 'User not found.');
+        }
+
+        $roles  = Role::all();
+        $schema = UserSchema::instance()->load('fieldLayout.tabs.elements.field');
+
+        // Keyed map of current field values: ['first_name' => 'Alice', ...]
+        $fieldValues = $user->fieldValues->mapWithKeys(
+            fn($fv) => [$fv->field->slug => $fv->resolvedValue()]
+        );
+
+        return $this->view('users.edit', compact('user', 'roles', 'schema', 'fieldValues'));
+    }
+
+    public function update(Request $request, string $id): RedirectResponse
+    {
+        $user = UserModel::find($id);
+
+        if (! $user instanceof UserModel) {
+            return redirect()->route('users.index')->with('failure', 'User not found.');
+        }
+
+        $request->validate([
+            'name'   => ['required', 'string', 'max:255'],
+            'email'  => ['required', 'email', "unique:users,email,{$user->id}"],
+            'roles'  => ['nullable', 'array'],
+            'fields' => ['nullable', 'array'],
+        ]);
+
+        Users::update($user, [
+            'name'   => $request->name,
+            'email'  => $request->email,
+            'roles'  => $request->input('roles', []),
+            'fields' => $request->input('fields', []),
+        ]);
+
+        return redirect()->route('users.edit', $user)->with('success', 'User updated.');
+    }
+
+    public function destroy(string $id): RedirectResponse
+    {
+        $user = UserModel::find($id);
+
+        if (! $user instanceof UserModel) {
+            return redirect()->route('users.index')->with('failure', 'User not found.');
+        }
+
+        Users::delete($user);
+
+        return redirect()->route('users.index')->with('success', 'User deleted.');
+    }
+}
+```
+
+### Key wiring points
+
+| Concern | How it's handled |
+|---|---|
+| Field schema for the form | `UserSchema::instance()->load('fieldLayout.tabs.elements.field')` |
+| Current field values on edit | `$user->fieldValues->mapWithKeys(...)` |
+| Writing fields on create/update | `Users::create(['fields' => [...]])` / `Users::update($user, ['fields' => [...]])` |
+| Reading a single field anywhere | `$user->field('first_name')` |
+
+---
+
+### Twig — Edit form
+
+```twig
+{# users/edit.html.twig #}
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+<form method="POST" action="{{ route('users.update', user.id) }}">
+    {{ csrf_field()|raw }}
+    {{ method_field('PUT')|raw }}
+
+    <div>
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" value="{{ old('name', user.name) }}" />
+    </div>
+
+    <div>
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" value="{{ old('email', user.email) }}" />
+    </div>
+
+    <fieldset>
+        <legend>Roles</legend>
+        {% for role in roles %}
+            <label>
+                <input type="checkbox"
+                       name="roles[]"
+                       value="{{ role.name }}"
+                       {% if user.roles.contains('name', role.name) %}checked{% endif %} />
+                {{ role.name }}
+            </label>
+        {% endfor %}
+    </fieldset>
+
+    {% if schema.fieldLayout %}
+        {% for tab in schema.fieldLayout.tabs %}
+            <fieldset>
+                <legend>{{ tab.name }}</legend>
+
+                {% for element in tab.elements %}
+                    {% set field = element.field %}
+                    {% set currentValue = old('fields.' ~ field.slug, fieldValues[field.slug] ?? '') %}
+
+                    <div>
+                        <label for="field_{{ field.slug }}">
+                            {{ field.label }}
+                            {% if element.required %}<span>*</span>{% endif %}
+                        </label>
+
+                        {% if field.fieldType.object ends with 'Textarea' %}
+                            <textarea name="fields[{{ field.slug }}]"
+                                      id="field_{{ field.slug }}">{{ currentValue }}</textarea>
+
+                        {% elseif field.fieldType.object ends with 'Checkbox' %}
+                            <input type="checkbox"
+                                   name="fields[{{ field.slug }}]"
+                                   id="field_{{ field.slug }}"
+                                   value="1"
+                                   {% if currentValue %}checked{% endif %} />
+
+                        {% else %}
+                            <input type="text"
+                                   name="fields[{{ field.slug }}]"
+                                   id="field_{{ field.slug }}"
+                                   value="{{ currentValue }}" />
+                        {% endif %}
+
+                        {% if field.instructions %}
+                            <small>{{ field.instructions }}</small>
+                        {% endif %}
+
+                        {% if errors.has('fields.' ~ field.slug) %}
+                            <span class="error">{{ errors.first('fields.' ~ field.slug) }}</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </fieldset>
+        {% endfor %}
+    {% endif %}
+
+    <button type="submit">Save User</button>
+</form>
+{% endblock %}
+```
+
+### Twig — Create form
+
+```twig
+{# users/create.html.twig #}
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+<form method="POST" action="{{ route('users.store') }}">
+    {{ csrf_field()|raw }}
+
+    <div>
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" value="{{ old('name') }}" />
+    </div>
+
+    <div>
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" value="{{ old('email') }}" />
+    </div>
+
+    <div>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" />
+    </div>
+
+    <div>
+        <label for="password_confirmation">Confirm Password</label>
+        <input type="password" name="password_confirmation" id="password_confirmation" />
+    </div>
+
+    <fieldset>
+        <legend>Roles</legend>
+        {% for role in roles %}
+            <label>
+                <input type="checkbox" name="roles[]" value="{{ role.name }}" />
+                {{ role.name }}
+            </label>
+        {% endfor %}
+    </fieldset>
+
+    {% if schema.fieldLayout %}
+        {% for tab in schema.fieldLayout.tabs %}
+            <fieldset>
+                <legend>{{ tab.name }}</legend>
+
+                {% for element in tab.elements %}
+                    {% set field = element.field %}
+                    <div>
+                        <label for="field_{{ field.slug }}">{{ field.label }}</label>
+
+                        {% if field.fieldType.object ends with 'Textarea' %}
+                            <textarea name="fields[{{ field.slug }}]"
+                                      id="field_{{ field.slug }}">{{ old('fields.' ~ field.slug) }}</textarea>
+                        {% else %}
+                            <input type="text"
+                                   name="fields[{{ field.slug }}]"
+                                   id="field_{{ field.slug }}"
+                                   value="{{ old('fields.' ~ field.slug) }}" />
+                        {% endif %}
+
+                        {% if field.instructions %}
+                            <small>{{ field.instructions }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </fieldset>
+        {% endfor %}
+    {% endif %}
+
+    <button type="submit">Create User</button>
+</form>
+{% endblock %}
+```
+
+### Twig vs Blade quick reference
+
+| Blade | Twig |
+|---|---|
+| `@csrf` | `{{ csrf_field()\|raw }}` |
+| `@method('PUT')` | `{{ method_field('PUT')\|raw }}` |
+| `$var ?? 'default'` | `var ?? 'default'` |
+| `old('fields.slug', $val)` | `old('fields.' ~ field.slug, val)` |
+| `$errors->has('x')` | `errors.has('x')` |
+| `@foreach / @endforeach` | `{% for x in y %} / {% endfor %}` |
+| `@if / @endif` | `{% if %} / {% endif %}` |
+
+The form submits `fields[first_name]`, `fields[last_name]`, etc. as a nested PHP array, mapping directly to the `fields` key that `Users::create()` and `Users::update()` expect.
 
 ---
 

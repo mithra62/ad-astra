@@ -10,4 +10,10 @@ class Text extends AbstractField
     {
         return 'value_text';
     }
+
+    public function render(array $params): string
+    {
+        //$params['field'] = $this;
+        return view('_fields.text', $params)->render();
+    }
 }

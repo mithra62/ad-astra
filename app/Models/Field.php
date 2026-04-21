@@ -35,9 +35,24 @@ class Field extends Model
         return $this->morphTo();
     }
 
+    /**
+     * @return MorphToMany
+     */
     public function groups(): MorphToMany
     {
         return $this->morphedByMany(Group::class, 'fieldable')
             ->withTimestamps();
+    }
+
+    /**
+     * @param array $params
+     * @return string
+     */
+    public function render(array $params = []): string
+    {
+        $params['field'] = $this;
+        return $this->fieldType
+            ->instance()
+            ->render($params);
     }
 }

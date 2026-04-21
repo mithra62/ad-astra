@@ -11,6 +11,7 @@ use App\Http\Requests\User\StoreUserRequest;
 use App\Models\User as UserModel;
 use App\Rest\Client;
 use Spatie\Permission\Models\Role as RoleModel;
+use App\Models\UserSchema;
 
 class User extends Controller
 {
@@ -28,8 +29,10 @@ class User extends Controller
      */
     public function create()
     {
-        $roles = RoleModel::all();
-        return $this->view('users.create', ['roles' => $roles]);
+        $roles  = RoleModel::all();
+        $schema = UserSchema::instance()->load('fieldLayout.tabs.elements.field');
+
+        return $this->view('users.create', compact('roles', 'schema'));
     }
 
     /**

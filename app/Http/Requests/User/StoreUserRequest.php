@@ -4,47 +4,41 @@ namespace App\Http\Requests\User;
 
 use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\UserSchemaRules AS SchemaTrait;
 
 class StoreUserRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
+    use SchemaTrait;
+
     public function authorize(): bool
     {
         return Auth::user()->can('create user');
     }
 
-    /**
-     * @return string[]
-     */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:8|confirmed',
-            'password_confirmation' => 'required',
-            'roles' => 'required|array'
-        ];
+        return array_merge(
+            [
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'email', 'unique:users,email'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
+                'password_confirmation' => ['required'],
+                'roles' => ['required', 'array'],
+                'roles.*' => ['string', 'exists:roles,name'],
+                'fields' => ['nullable', 'array'],
+            ],
+            $this->schemaFieldRules()
+        );
     }
 
-    /**
-     * @return string[]
-     */
     public function messages(): array
-
     {
         return [
-            'terms.accepted' => 'You must accept the Terms of Service and Privacy Policy.',
-            'email.unique' => 'This email is already registered. Try logging in instead.',
+            'email.unique' => 'This email is already registered.',
             'roles.required' => 'You must select at least one role.',
         ];
     }
 
-    /**
-     * @return string[]
-     */
     public function attributes(): array
     {
         return [
