@@ -6,6 +6,13 @@ use App\Field\AbstractField;
 
 class Text extends AbstractField
 {
+    /**
+     * @var string
+     */
+    protected string $handle = 'text';
+
+    protected string $name = 'Text';
+
     protected array $rules = [
         'min:255',
         'string',
@@ -18,7 +25,6 @@ class Text extends AbstractField
 
     public function render(array $params): string
     {
-        //$params['field'] = $this;
         return view('_fields.text', $params)->render();
     }
 }

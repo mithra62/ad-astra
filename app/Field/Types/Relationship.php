@@ -6,6 +6,14 @@ use App\Field\AbstractField;
 
 class Relationship extends AbstractField
 {
+    protected string $handle = 'relationship';
+
+    protected string $name = 'Relationship';
+
+    protected array $rules = [
+        'array',
+    ];
+
     /**
      * Relationship fields store data in entry_relationships, not field_values.
      * This method satisfies the abstract contract but is never called.
@@ -39,5 +47,10 @@ class Relationship extends AbstractField
         }
 
         return true;
+    }
+
+    public function render(array $params): string
+    {
+        return view('_fields.relationship', $params)->render();
     }
 }

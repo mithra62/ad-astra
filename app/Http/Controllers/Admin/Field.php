@@ -35,7 +35,7 @@ class Field extends Controller
         $data = [
             'group' => $group,
             'groups' => $groups,
-            'field_types' => app('fields-service')->getFieldTypes()
+            'field_types' => app('fields-service')->getFieldOptions()
         ];
 
         return $this->view('fields.create', $data);
@@ -85,7 +85,7 @@ class Field extends Controller
         $data = [
             'field' => $field,
             'groups' => $groups,
-            'field_types' => app('fields-service')->getFieldTypes(),
+            'field_types' => app('fields-service')->getFieldOptions(),
             'active_group' => $active_group
         ];
 

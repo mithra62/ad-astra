@@ -6,8 +6,29 @@ use App\Models\Field;
 
 abstract class AbstractField
 {
+    /**
+     * @var string
+     */
+    protected string $handle = '';
+
+    /**
+     * @var string
+     */
+    protected string $name = '';
+
+    /**
+     * @var array
+     */
     protected array $settings = [];
+
+    /**
+     * @var Field|null
+     */
     protected ?Field $field;
+
+    /**
+     * @var array
+     */
     protected array $rules = [];
 
     public function __construct(array $settings, Field $field = null)
@@ -16,6 +37,10 @@ abstract class AbstractField
         $this->field = $field;
     }
 
+    /**
+     * @param Field $field
+     * @return $this
+     */
     public function setField(Field $field): AbstractField
     {
         $this->field = $field;
@@ -71,8 +96,28 @@ abstract class AbstractField
         return $this->settings[$key] ?? $default;
     }
 
+    /**
+     * @param array $params
+     * @return string
+     */
     public function render(array $params): string
     {
         return '';
+    }
+
+    /**
+     * @return string
+     */
+    public function handle(): string
+    {
+        return $this->handle;
+    }
+
+    /**
+     * @return string
+     */
+    public function name(): string
+    {
+        return $this->name;
     }
 }
