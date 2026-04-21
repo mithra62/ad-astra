@@ -6,6 +6,35 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/v1/account": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Get details on the authenticated user",
+                "operationId": "getAccount",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/entries": {
             "get": {
                 "tags": [
@@ -499,6 +528,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Account",
+            "description": "Account"
+        },
         {
             "name": "Entries",
             "description": "Entries"
