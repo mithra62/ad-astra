@@ -51,8 +51,9 @@
                                         <div class="mb-12">
                                             <label class="form-label" for="type">Type</label>
                                             <select class="form-select" id="type" name="type">
+                                                {% set selected_type = old('type') ?: current_type_handle %}
                                                 {% for type, name in field_types %}
-                                                    <option value="{{ type }}" {% if old('type') == type %}selected{% elseif type == 'text' %}selected{% endif %}>{{ name }}</option>
+                                                    <option value="{{ type }}" {{ selected_type == type ? 'selected' : '' }}>{{ name }}</option>
                                                 {% endfor %}
                                             </select>
                                             {% if errors.has('storage') %}

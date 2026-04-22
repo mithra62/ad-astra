@@ -6,6 +6,7 @@ use App\Models\Field\Group;
 use App\Models\Field\Type;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Field extends Model
@@ -31,6 +32,11 @@ class Field extends Model
     public function fieldType(): BelongsTo
     {
         return $this->belongsTo(Type::class, 'field_type_id');
+    }
+
+    public function fieldValues(): HasMany
+    {
+        return $this->hasMany(FieldValue::class);
     }
 
     public function fieldable()
