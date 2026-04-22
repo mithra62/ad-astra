@@ -188,7 +188,7 @@ class EntryRepository
         }
     }
 
-    private function resolveLayoutFields(Entry $entry): \Illuminate\Support\Collection
+    public function resolveLayoutFields(Entry $entry): \Illuminate\Support\Collection
     {
         $entry->loadMissing([
             'entryGroup.fieldLayout.tabs.elements.field.fieldType',

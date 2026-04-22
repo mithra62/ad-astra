@@ -1,0 +1,120 @@
+<?php
+
+namespace App\Services;
+
+use App\Builders\EntryQueryBuilder;
+use App\EntryTypes\EntryTypeRegistry;
+use App\Models\Entry;
+use App\Models\FieldLayout;
+use App\Repositories\EntryRepository;
+use Illuminate\Support\Collection;
+
+class EntryService extends AbstractService
+{
+    public function __construct(
+        $app,
+        private readonly EntryTypeRegistry $registry,
+        private readonly EntryRepository $repository,
+    ) {
+        parent::__construct($app);
+    }
+
+    // -------------------------------------------------------------------------
+    // CRUD
+    // -------------------------------------------------------------------------
+
+    /**
+     * Create an entry of the given type handle.
+     *
+     * Accepted keys in $data:
+     *   title, slug, status, published_at  — core attributes
+     *   authors    (array)  — user IDs to sync as authors (keyed by sort order)
+     *   categories (array)  — category IDs to sync
+     *   fields     (array)  — ['slug' => value] field values (relational or scalar)
+     */
+    public function create(string $typeHandle, array $data = []): Entry
+    {
+        $entryType = $this->registry->resolveByHandle($typeHandle);
+
+        return $this->repository->create($entryType, $data);
+    }
+
+    /**
+     * Update an entry's core attributes, authors, categories, and/or fields.
+     * Only keys present in $data are touched.
+     */
+    public function update(Entry $entry, array $data = []): Entry
+    {
+        return $this->repository->applyData($entry, $data);
+    }
+
+    /**
+     * Delete an entry. Field values cascade via DB constraint.
+     */
+    public function delete(Entry $entry): bool
+    {
+        return $this->repository->delete($entry);
+    }
+
+    /**
+     * Fetch an entry by ID with standard eager-loads. Throws ModelNotFoundException if missing.
+     */
+    public function get(int $id): Entry
+    {
+        return $this->repository->findOrFail($id);
+    }
+
+    /**
+     * Fetch an entry by ID with standard eager-loads. Returns null if missing.
+     */
+    public function find(int $id): ?Entry
+    {
+        return $this->repository->find($id);
+    }
+
+    /**
+     * Return a query builder scoped to entries.
+     */
+    public function query(): EntryQueryBuilder
+    {
+        return new EntryQueryBuilder($this->repository);
+    }
+
+    // -------------------------------------------------------------------------
+    // Custom Fields (Fieldable)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Return the entry's current field values as ['slug' => resolvedValue].
+     */
+    public function fieldArray(Entry $entry): array
+    {
+        $entry->loadMissing('fieldValues.field');
+
+        return $entry->fieldArray();
+    }
+
+    // -------------------------------------------------------------------------
+    // Schema Resolution
+    // -------------------------------------------------------------------------
+
+    /**
+     * Resolve the effective FieldLayout for an entry.
+     * Returns the entry type's layout if assigned, otherwise the group's layout.
+     */
+    public function resolveLayout(Entry $entry): ?FieldLayout
+    {
+        $entry->loadMissing('entryType.fieldLayout', 'entryGroup.fieldLayout');
+
+        return $entry->entryType?->fieldLayout ?? $entry->entryGroup?->fieldLayout;
+    }
+
+    /**
+     * Resolve all Field models available to an entry, merged from both the type
+     * and group layouts, deduplicated by field ID.
+     */
+    public function resolveFields(Entry $entry): Collection
+    {
+        return $this->repository->resolveLayoutFields($entry);
+    }
+}

@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Field;
-use App\Models\FieldValue;
+use App\Concerns\PersistsFieldValues;
 use App\Models\User;
 use App\Models\User\OauthToken;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,6 +15,8 @@ use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
 
 class UserService
 {
+    use PersistsFieldValues;
+
     // -------------------------------------------------------------------------
     // CRUD
     // -------------------------------------------------------------------------
@@ -109,64 +110,6 @@ class UserService
         $user->removeRole($role);
 
         return $user;
-    }
-
-    // -------------------------------------------------------------------------
-    // Custom Fields (Fieldable)
-    // -------------------------------------------------------------------------
-
-    /**
-     * Write a single custom field value for a user.
-     * The field's FieldType determines which storage column is used.
-     */
-    public function setField(User $user, string $slug, mixed $value): void
-    {
-        $field  = Field::where('slug', $slug)->firstOrFail();
-        $column = $field->fieldType->instance()->storageColumn();
-
-        FieldValue::updateOrCreate(
-            [
-                'field_id'       => $field->id,
-                'fieldable_id'   => $user->id,
-                'fieldable_type' => User::class,
-            ],
-            [$column => $value]
-        );
-    }
-
-    /**
-     * Write multiple custom field values at once.
-     *
-     * @param array<string, mixed> $fields  ['field_slug' => value]
-     */
-    public function setFields(User $user, array $fields): void
-    {
-        if (empty($fields)) {
-            return;
-        }
-
-        $fieldModels = Field::whereIn('slug', array_keys($fields))
-            ->get()
-            ->keyBy('slug');
-
-        foreach ($fields as $slug => $value) {
-            $field = $fieldModels->get($slug);
-
-            if (! $field || ! $field->fieldType) {
-                continue;
-            }
-
-            $column = $field->fieldType->instance()->storageColumn();
-
-            FieldValue::updateOrCreate(
-                [
-                    'field_id'       => $field->id,
-                    'fieldable_id'   => $user->id,
-                    'fieldable_type' => User::class,
-                ],
-                [$column => $value]
-            );
-        }
     }
 
     // -------------------------------------------------------------------------

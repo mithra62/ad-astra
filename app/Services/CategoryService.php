@@ -2,16 +2,17 @@
 
 namespace App\Services;
 
+use App\Concerns\PersistsFieldValues;
 use App\Models\Category;
 use App\Models\Category\Group as CategoryGroup;
-use App\Models\Field;
 use App\Models\FieldLayout;
-use App\Models\FieldValue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 
 class CategoryService extends AbstractService
 {
+    use PersistsFieldValues;
+
     // -------------------------------------------------------------------------
     // CRUD
     // -------------------------------------------------------------------------
@@ -76,63 +77,6 @@ class CategoryService extends AbstractService
         ]);
 
         return $category->refresh();
-    }
-
-    // -------------------------------------------------------------------------
-    // Custom Fields (Fieldable)
-    // -------------------------------------------------------------------------
-
-    /**
-     * Write a single custom field value for a category.
-     */
-    public function setField(Category $category, string $slug, mixed $value): void
-    {
-        $field  = Field::where('slug', $slug)->firstOrFail();
-        $column = $field->fieldType->instance()->storageColumn();
-
-        FieldValue::updateOrCreate(
-            [
-                'field_id'       => $field->id,
-                'fieldable_id'   => $category->id,
-                'fieldable_type' => Category::class,
-            ],
-            [$column => $value]
-        );
-    }
-
-    /**
-     * Write multiple custom field values at once.
-     *
-     * @param array<string, mixed> $fields  ['field_slug' => value]
-     */
-    public function setFields(Category $category, array $fields): void
-    {
-        if (empty($fields)) {
-            return;
-        }
-
-        $fieldModels = Field::whereIn('slug', array_keys($fields))
-            ->get()
-            ->keyBy('slug');
-
-        foreach ($fields as $slug => $value) {
-            $field = $fieldModels->get($slug);
-
-            if (! $field || ! $field->fieldType) {
-                continue;
-            }
-
-            $column = $field->fieldType->instance()->storageColumn();
-
-            FieldValue::updateOrCreate(
-                [
-                    'field_id'       => $field->id,
-                    'fieldable_id'   => $category->id,
-                    'fieldable_type' => Category::class,
-                ],
-                [$column => $value]
-            );
-        }
     }
 
     /**
