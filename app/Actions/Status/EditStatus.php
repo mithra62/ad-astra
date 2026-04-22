@@ -11,6 +11,13 @@ class EditStatus extends AbstractAction
     {
         $input['is_default'] = ! empty($input['is_default']);
 
+        if ($input['is_default']) {
+            Status::where('status_group_id', $status->status_group_id)
+                ->where('id', '!=', $status->getKey())
+                ->where('is_default', true)
+                ->update(['is_default' => false]);
+        }
+
         return $status->update($input);
     }
 }
