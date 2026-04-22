@@ -3,10 +3,15 @@
 namespace App\Http\Requests\Account;
 
 use App\Http\Requests\FormRequest;
+use App\Traits\UserSchemaRules as SchemaTrait;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\User\StoreUserRequest;
+use Illuminate\Validation\Rule;
 
-class EditUserRequest extends FormRequest
+class EditUserRequest extends StoreUserRequest
 {
+    use SchemaTrait;
+
     /**
      * @return bool
      */
@@ -20,33 +25,13 @@ class EditUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . Auth::user()->id
-        ];
-    }
-
-    /**
-     * @return string[]
-     */
-    public function messages(): array
-
-    {
-        return [
-            'terms.accepted' => 'You must accept the Terms of Service and Privacy Policy.',
-            'email.unique' => 'This email is already registered. Try logging in instead.',
-            'roles.required' => 'You must select at least one role.',
-        ];
-    }
-
-    /**
-     * @return string[]
-     */
-    public function attributes(): array
-    {
-        return [
-            'name' => 'full name',
-            'email' => 'email address',
-        ];
+        return array_merge(
+            [
+                'name'   => ['required', 'string', 'max:255'],
+                'email'  => ['required', 'email', Rule::unique('users', 'email')->ignore(Auth::user()->id)],
+                'fields' => ['nullable', 'array'],
+            ],
+            $this->schemaFieldRules()
+        );
     }
 }

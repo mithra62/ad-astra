@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\User\UpdateUserProfileInformation;
 use App\Http\Controllers\Admin\Controller AS AdminController;
 use App\Http\Requests\Account\EditPasswordRequest;
 use App\Http\Requests\Account\EditUserRequest;
+use App\Models\UserSchema;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +27,15 @@ class Account extends AdminController
      */
     public function settings(): View
     {
-        return $this->view('account.settings');
+        $schema = UserSchema::instance()->resolved();
+        $user = Auth::user();
+        $user->load('fieldValues.field.fieldType');
+        $data = [
+            'user' => $user,
+            'schema' => $schema,
+            'field_values' => $user->fieldArray()
+        ];
+        return $this->view('account.settings', $data);
     }
 
     /**
@@ -51,8 +61,8 @@ class Account extends AdminController
     public function update(EditUserRequest $request)
     {
         $user = Auth::user();
-        $post = $request->all();
-        $user->update($post);
+        $editor = app(UpdateUserProfileInformation::class);
+        $user = $editor->update($user, $request->all());
         return redirect()->route('account.settings')->with('success', trans('account.updated'));
     }
 }

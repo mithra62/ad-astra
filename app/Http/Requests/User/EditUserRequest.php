@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use App\Traits\UserSchemaRules AS SchemaTrait;
 
-class EditUserRequest extends FormRequest
+class EditUserRequest extends StoreUserRequest
 {
     use SchemaTrait;
 
@@ -20,7 +20,6 @@ class EditUserRequest extends FormRequest
     public function rules(): array
     {
         $userId = $this->route()->parameter('user') ?? $this->route()->parameter('id');
-
         return array_merge(
             [
                 'name'   => ['required', 'string', 'max:255'],
@@ -31,21 +30,5 @@ class EditUserRequest extends FormRequest
             ],
             $this->schemaFieldRules()
         );
-    }
-
-    public function messages(): array
-    {
-        return [
-            'email.unique'   => 'This email is already registered.',
-            'roles.required' => 'You must select at least one role.',
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'name'  => 'full name',
-            'email' => 'email address',
-        ];
     }
 }
