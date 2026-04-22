@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
 
             // Entry groups, layouts, and entry types — depends on all of the above
             EntryGroupSeeder::class,
+            ExtendedEntryGroupSeeder::class,
 
             // User extended profile schema
             UserSchemaSeeder::class,
