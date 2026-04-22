@@ -77,7 +77,7 @@ class CategoryRepository
                 [
                     'field_id'       => $field->getKey(),
                     'fieldable_id'   => $category->getKey(),
-                    'fieldable_type' => Category::class,
+                    'fieldable_type' => $category->getMorphClass(),
                 ],
                 [$instance->storageColumn() => $value]
             );

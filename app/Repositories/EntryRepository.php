@@ -157,7 +157,7 @@ class EntryRepository
                     [
                         'field_id'       => $field->getKey(),
                         'fieldable_id'   => $entry->getKey(),
-                        'fieldable_type' => Entry::class,
+                        'fieldable_type' => $entry->getMorphClass(),
                     ],
                     [$instance->storageColumn() => $value]
                 );

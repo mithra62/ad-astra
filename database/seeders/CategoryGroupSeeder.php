@@ -285,7 +285,7 @@ class CategoryGroupSeeder extends Seeder
                 [
                     'field_id'       => $field->id,
                     'fieldable_id'   => $category->id,
-                    'fieldable_type' => Category::class,
+                    'fieldable_type' => (new Category)->getMorphClass(),
                 ],
                 [$column => $value]
             );

@@ -9,7 +9,8 @@
       "Bash(grep -E \"\\\\.\\(php\\)$\")",
       "Bash(git log *)",
       "Bash(xargs ls *)",
-      "Bash(find \"D:\\\\Projects\\\\mithra62\\\\laravel-base\\\\develop/database/migrations\" -type f -name \"*.php\" -exec grep -l \"ALTER.*entry_groups\\\\|ADD.*status_group\" {} \\\\;)"
+      "Bash(find \"D:\\\\Projects\\\\mithra62\\\\laravel-base\\\\develop/database/migrations\" -type f -name \"*.php\" -exec grep -l \"ALTER.*entry_groups\\\\|ADD.*status_group\" {} \\\\;)",
+      "Bash(php artisan *)"
     ]
   }
 }
