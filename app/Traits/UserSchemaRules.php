@@ -6,6 +6,9 @@ use App\Models\UserSchema;
 
 trait UserSchemaRules
 {
+    /**
+     * @return array
+     */
     protected function schemaFieldRules(): array
     {
         $rules = [];
@@ -26,5 +29,28 @@ trait UserSchemaRules
         }
 
         return $rules;
+    }
+
+    /**
+     * @return array
+     */
+    public function schemaFieldAttributes(): array
+    {
+        $attributes = [];
+        $schema = UserSchema::resolved();
+        if (!$schema->fieldLayout) {
+            return $attributes;
+        }
+
+        foreach ($schema->fieldLayout->fields() as $field) {
+            $attributes["fields.{$field->slug}"] = $field->name;
+        }
+
+        return $attributes;
+    }
+
+    protected function schemaFieldMessages(): array
+    {
+        return [];
     }
 }

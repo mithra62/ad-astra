@@ -3,18 +3,24 @@
 namespace App\Http\Requests\User;
 
 use App\Http\Requests\FormRequest;
+use App\Traits\UserSchemaRules as SchemaTrait;
 use Illuminate\Support\Facades\Auth;
-use App\Traits\UserSchemaRules AS SchemaTrait;
 
 class StoreUserRequest extends FormRequest
 {
     use SchemaTrait;
 
+    /**
+     * @return bool
+     */
     public function authorize(): bool
     {
         return Auth::user()->can('create user');
     }
 
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         return array_merge(
@@ -31,19 +37,31 @@ class StoreUserRequest extends FormRequest
         );
     }
 
+    /**
+     * @return array
+     */
     public function messages(): array
     {
-        return [
-            'email.unique' => 'This email is already registered.',
-            'roles.required' => 'You must select at least one role.',
-        ];
+        return array_merge(
+            [
+                'email.unique' => 'This email is already registered.',
+                'roles.required' => 'You must select at least one role.',
+            ],
+            $this->schemaFieldMessages()
+        );
     }
 
+    /**
+     * @return array
+     */
     public function attributes(): array
     {
-        return [
-            'name' => 'full name',
-            'email' => 'email address',
-        ];
+        return array_merge(
+            [
+                'name' => 'full name',
+                'email' => 'email address',
+            ],
+            $this->schemaFieldAttributes()
+        );
     }
 }
