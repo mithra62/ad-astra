@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Repositories\EntryRepository;
 use App\Traits\Category\HasCategories;
 use App\Traits\Fieldable;
 use Illuminate\Database\Eloquent\Builder;
@@ -127,22 +126,4 @@ class Entry extends Model
         return $query->where('entry_type_id', $type);
     }
 
-    /**
-     * Fluent update — applies data through EntryRepository and returns $this.
-     * Note: returns static instead of bool (diverges from Eloquent default).
-     */
-    public function update(array $data = [], array $options = []): static
-    {
-        app(EntryRepository::class)->applyData($this, $data);
-
-        return $this;
-    }
-
-    /**
-     * Delete through EntryRepository.
-     */
-    public function delete(): bool
-    {
-        return app(EntryRepository::class)->delete($this);
-    }
 }

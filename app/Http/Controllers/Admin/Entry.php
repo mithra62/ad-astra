@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\Entry\CreateNewEntry;
 use App\Actions\Entry\UpdateEntry;
+use App\Facades\Entries;
 use App\Http\Requests\Entry\DeleteEntryRequest;
 use App\Http\Requests\Entry\EditEntryRequest;
 use App\Http\Requests\Entry\StoreEntryRequest;
@@ -117,7 +118,7 @@ class Entry extends Controller
         }
 
         $groupId = $entry->entry_group_id;
-        $entry->delete();
+        Entries::delete($entry);
 
         return redirect()
             ->route('entries.groups.show', $groupId)
