@@ -26,7 +26,8 @@
         {{ include('admin._inc._message') }}
 
         <div class="row">
-            <div class="col-lg-10 col-xxl-9">
+            {{ include('admin.field-layouts._sidebar', {active: layout.id}) }}
+            <div class="col-lg-8 col-xxl-9">
 
                 <!-- Layout Settings Form -->
                 <div class="card mb-4">

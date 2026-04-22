@@ -18,7 +18,10 @@ class Tab extends Controller
             abort(404);
         }
 
-        return $this->view('field-layouts.tabs.create', ['layout' => $layout]);
+        return $this->view('field-layouts.tabs.create', array_merge(
+            $this->sidebarData(),
+            ['layout' => $layout]
+        ));
     }
 
     public function store(StoreTabRequest $request, string $layout_id)
@@ -49,11 +52,14 @@ class Tab extends Controller
 
         $availableFields = \App\Models\Field::orderBy('name')->get();
 
-        return $this->view('field-layouts.tabs.edit', [
-            'layout'          => $layout,
-            'tab'             => $tab,
-            'available_fields' => $availableFields,
-        ]);
+        return $this->view('field-layouts.tabs.edit', array_merge(
+            $this->sidebarData(),
+            [
+                'layout'           => $layout,
+                'tab'              => $tab,
+                'available_fields' => $availableFields,
+            ]
+        ));
     }
 
     public function update(EditTabRequest $request, string $layout_id, string $tab_id)
@@ -84,10 +90,13 @@ class Tab extends Controller
             abort(404);
         }
 
-        return $this->view('field-layouts.tabs.delete', [
-            'layout' => $layout,
-            'tab'    => $tab,
-        ]);
+        return $this->view('field-layouts.tabs.delete', array_merge(
+            $this->sidebarData(),
+            [
+                'layout' => $layout,
+                'tab'    => $tab,
+            ]
+        ));
     }
 
     public function destroy(DeleteTabRequest $request, string $layout_id, string $tab_id)
@@ -104,5 +113,12 @@ class Tab extends Controller
         return redirect()
             ->route('field-layouts.edit', $layout->id)
             ->with('success', trans('field_layout.tab.deleted'));
+    }
+
+    private function sidebarData(): array
+    {
+        return [
+            'layouts' => FieldLayoutModel::orderBy('name')->get(),
+        ];
     }
 }

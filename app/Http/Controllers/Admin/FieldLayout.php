@@ -23,7 +23,7 @@ class FieldLayout extends Controller
 
     public function create()
     {
-        return $this->view('field-layouts.create');
+        return $this->view('field-layouts.create', $this->sidebarData());
     }
 
     public function store(StoreFieldLayoutRequest $request)
@@ -48,7 +48,10 @@ class FieldLayout extends Controller
             abort(404);
         }
 
-        return $this->view('field-layouts.edit', ['layout' => $layout]);
+        return $this->view('field-layouts.edit', array_merge(
+            $this->sidebarData(),
+            ['layout' => $layout]
+        ));
     }
 
     public function update(EditFieldLayoutRequest $request, string $id)
@@ -73,7 +76,10 @@ class FieldLayout extends Controller
             return redirect()->route('field-layouts')->with('failure', trans('field_layout.not_found'));
         }
 
-        return $this->view('field-layouts.delete', ['layout' => $layout]);
+        return $this->view('field-layouts.delete', array_merge(
+            $this->sidebarData(),
+            ['layout' => $layout]
+        ));
     }
 
     public function destroy(DeleteFieldLayoutRequest $request, string $id)
@@ -89,5 +95,12 @@ class FieldLayout extends Controller
         return redirect()
             ->route('field-layouts')
             ->with('failure', trans('field_layout.not_found'));
+    }
+
+    private function sidebarData(): array
+    {
+        return [
+            'layouts' => FieldLayoutModel::orderBy('name')->get(),
+        ];
     }
 }

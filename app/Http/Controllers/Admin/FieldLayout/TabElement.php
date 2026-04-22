@@ -81,11 +81,14 @@ class TabElement extends Controller
             abort(404);
         }
 
-        return $this->view('field-layouts.tabs.elements.delete', [
-            'layout'  => $layout,
-            'tab'     => $tab,
-            'element' => $element,
-        ]);
+        return $this->view('field-layouts.tabs.elements.delete', array_merge(
+            $this->sidebarData(),
+            [
+                'layout'  => $layout,
+                'tab'     => $tab,
+                'element' => $element,
+            ]
+        ));
     }
 
     public function destroy(DeleteElementRequest $request, string $layout_id, string $tab_id, string $element_id)
@@ -108,5 +111,12 @@ class TabElement extends Controller
         return redirect()
             ->route('field-layouts.tabs.edit', ['layout_id' => $layout->id, 'tab_id' => $tab->id])
             ->with('success', trans('field_layout.element.removed'));
+    }
+
+    private function sidebarData(): array
+    {
+        return [
+            'layouts' => FieldLayoutModel::orderBy('name')->get(),
+        ];
     }
 }
