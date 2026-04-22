@@ -18,4 +18,12 @@ trait Fieldable
             ->first(fn($v) => $v->field->slug === $handle)
             ?->resolvedValue();
     }
+
+    public function fieldArray(): array
+    {
+        return $this->fieldValues
+            ->filter(fn($v) => $v->field !== null)
+            ->mapWithKeys(fn($v) => [$v->field->slug => $v->resolvedValue()])
+            ->all();
+    }
 }

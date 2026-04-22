@@ -4,7 +4,6 @@ namespace App\Actions\User;
 
 use App\Models\User;
 use App\Traits\PasswordValidationRules;
-use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use App\Actions\AbstractAction;
 use App\Facades\Users AS UsersFacade;

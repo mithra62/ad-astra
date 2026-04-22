@@ -50,6 +50,10 @@ class User extends Controller
      */
     public function show(string $id)
     {
+        $user = UserModel::find($id);
+        $user->load('fieldValues.field.fieldType');
+        print_r($user->fieldArray());
+        exit;
 //        $user = Auth::user();
 //        $tokens = $user->tokens;
 //
