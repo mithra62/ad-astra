@@ -14,7 +14,6 @@ class Text extends AbstractField
     protected string $name = 'Text';
 
     protected array $rules = [
-        'min:255',
         'string',
     ];
 

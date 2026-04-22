@@ -10,6 +10,10 @@ class Date extends AbstractField
 
     protected string $name = 'Date';
 
+    protected array $rules = [
+        'date',
+    ];
+
     public function storageColumn(): string
     {
         return 'value_date';
