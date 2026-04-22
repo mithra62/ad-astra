@@ -30,7 +30,7 @@ class User extends Controller
     public function create()
     {
         $roles  = RoleModel::all();
-        $schema = UserSchema::instance()->load('fieldLayout.tabs.elements.field');
+        $schema = UserSchema::instance()->resolved();
 
         return $this->view('users.create', compact('roles', 'schema'));
     }

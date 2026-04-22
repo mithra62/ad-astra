@@ -70,7 +70,6 @@
 {#                                                {% endif %}#}
                                                 <div class="input-group has-validation">
                                                     {{ field.render({
-                                                        value: old('fields.' ~ field.slug),
                                                         id: 'field_' ~ field.slug,
                                                         class: 'form-control'
                                                     })|raw }}
