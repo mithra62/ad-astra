@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\User\CreateNewUser;
+use App\Actions\User\UpdateUserProfileInformation;
 use App\Actions\User\UpdateUserPassword;
 use App\Http\Requests\User\DeleteUserRequest;
 use App\Http\Requests\User\EditUserRequest;
@@ -95,14 +96,10 @@ class User extends Controller
      */
     public function update(EditUserRequest $request, string $id)
     {
-
-        echo 'fdsa';
-        exit;
         $user = UserModel::find($id);
         if ($user instanceof UserModel) {
-            $post = $request->all();
-            $user->update($post);
-            $user->syncRoles($post['roles']);
+            $editor = app(UpdateUserProfileInformation::class);
+            $user = $editor->update($user, $request->all());
             return redirect()->route('users.edit', $user)->with('success', trans('user.updated'));
         }
 
