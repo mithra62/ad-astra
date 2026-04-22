@@ -6,6 +6,7 @@ use App\Rest\Api;
 use App\Settings;
 use App\Services\FieldService;
 use App\Services\FilesService;
+use App\Services\CategoryService;
 use App\Services\UserService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
@@ -36,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(UserService::class, fn() => new UserService());
+        $this->app->singleton(CategoryService::class, fn($app) => new CategoryService($app));
     }
 
     /**

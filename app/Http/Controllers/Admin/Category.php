@@ -74,13 +74,13 @@ class Category extends Controller
      */
     public function edit(string $id)
     {
-        $category = CategoryModel::with('groups')->find($id);
+        $category = CategoryModel::with('group')->find($id);
         if (!$category instanceof CategoryModel) {
             abort(404);
         }
 
         $groups = CategoryGroup::get();
-        $active_group = $category->groups->first();
+        $active_group = $category->group->first();
         $data = [
             'category' => $category,
             'groups' => $groups,
@@ -127,7 +127,7 @@ class Category extends Controller
         }
 
         $groups = CategoryGroup::get();
-        $active_group = $category->groups->first();
+        $active_group = $category->group->first();
         return $this->view('categories.delete', ['category' => $category, 'groups' => $groups, 'active_group' => $active_group]);
     }
 }
