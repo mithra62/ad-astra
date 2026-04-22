@@ -117,13 +117,23 @@ class EntryRepository
 
         if ($applyDefault) {
             $statusGroup = $entry->entryGroup?->statusGroup;
-            if ($statusGroup) {
-                $statusGroup->loadMissing('statuses');
-                $default = $statusGroup->statuses->firstWhere('is_default', true);
-                if ($default) {
-                    $entry->status = $default->handle;
-                }
+
+            if (! $statusGroup) {
+                throw new \RuntimeException(
+                    "EntryGroup [{$entry->entryGroup?->handle}] has no status group configured."
+                );
             }
+
+            $statusGroup->loadMissing('statuses');
+            $default = $statusGroup->statuses->firstWhere('is_default', true);
+
+            if (! $default) {
+                throw new \RuntimeException(
+                    "StatusGroup for EntryGroup [{$entry->entryGroup?->handle}] has no default status configured."
+                );
+            }
+
+            $entry->status = $default->handle;
         }
     }
 
