@@ -217,7 +217,9 @@ class EntryRepository
         $groupFields = $entry->entryGroup->fieldLayout?->fields() ?? collect();
         $typeFields  = $entry->entryType->fieldLayout?->fields() ?? collect();
 
-        return $groupFields->merge($typeFields)->unique('id');
+        // Type-level fields take precedence: start with type fields, then backfill
+        // group fields that don't share an ID with any type-level field.
+        return $typeFields->merge($groupFields)->unique('id');
     }
 
     private function defaultEagerLoad(): array
