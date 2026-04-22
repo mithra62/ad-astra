@@ -1,0 +1,117 @@
+{{ include('admin._inc._header', {title: 'Edit Entry Type'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12">
+                <h5>Entry Groups</h5>
+                <div class="col-6">
+                    <ul class="app-line-breadcrumbs mb-3">
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                                <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups') }}">Entry Groups</a>
+                        </li>
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups.edit', group) }}">{{ group.name }}</a>
+                        </li>
+                        <li class="active">
+                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups.types.edit', {group_id: group.id, type_id: type.id}) }}">Edit Entry Type</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
+
+        <div class="row">
+            {{ include('admin.entries._sidebar', {active: group.id}) }}
+            <div class="col-lg-8 col-xxl-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Edit Entry Type — {{ type.name }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('entries.groups.types.update', {group_id: group.id, type_id: type.id}) }}"
+                              class="row g-3 needs-validation" novalidate>
+                            {{ csrf_field() }}
+                            {{ method_field('PUT') }}
+                            <input type="hidden" name="id" value="{{ type.id }}" />
+
+                            <div class="col-md-12">
+                                <label class="form-label" for="name">Name</label>
+                                <input class="form-control" id="name" required type="text" value="{{ old('name', type.name) }}" name="name">
+                                {% if errors.has('name') %}<p class="text-danger">{{ errors.first('name') }}</p>{% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label" for="handle">Handle</label>
+                                <input class="form-control" id="handle" required type="text" value="{{ old('handle', type.handle) }}" name="handle">
+                                <small class="text-secondary">Must be unique within this entry group.</small>
+                                {% if errors.has('handle') %}<p class="text-danger">{{ errors.first('handle') }}</p>{% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="sort_order">Sort Order</label>
+                                <input class="form-control" id="sort_order" type="number" value="{{ old('sort_order', type.sort_order) }}" name="sort_order" min="0">
+                            </div>
+
+                            <!-- Class -->
+                            <div class="col-12"><h5 class="border-bottom pb-2">PHP Class</h5></div>
+                            {% if type_classes.count >= 1 %}
+                            <div class="col-md-12">
+                                <label class="form-label" for="class">Entry Type Class</label>
+                                <small class="text-secondary d-block mb-1">
+                                    Select the PHP class that implements this entry type's lifecycle hooks.
+                                    Must extend <code>App\EntryTypes\AbstractEntryType</code>.
+                                </small>
+                                <select class="form-select" id="class" name="class" required>
+                                    <option value="">— Select a class —</option>
+                                    {% for cls in type_classes %}
+                                        <option value="{{ cls }}" {% if old('class', type.class) == cls %}selected{% endif %}>
+                                            {{ cls }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if errors.has('class') %}<p class="text-danger">{{ errors.first('class') }}</p>{% endif %}
+                            </div>
+                            {% else %}
+                            <div class="col-md-12">
+                                <label class="form-label" for="class">Entry Type Class</label>
+                                <input class="form-control" id="class" required type="text" value="{{ old('class', type.class) }}" name="class">
+                                <small class="text-secondary">Must extend <code>App\EntryTypes\AbstractEntryType</code>.</small>
+                                {% if errors.has('class') %}<p class="text-danger">{{ errors.first('class') }}</p>{% endif %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Field Layout -->
+                            <div class="col-12"><h5 class="border-bottom pb-2">Field Layout</h5></div>
+                            <div class="col-md-12">
+                                <label class="form-label" for="field_layout_id">Field Layout</label>
+                                <small class="text-secondary d-block mb-1">Fields from this layout are specific to this entry type. Group-level fields are always included.</small>
+                                <select class="form-select" id="field_layout_id" name="field_layout_id">
+                                    <option value="">— None —</option>
+                                    {% for layout in field_layouts %}
+                                        <option value="{{ layout.id }}"
+                                            {% if old('field_layout_id', type.fieldLayout.id ?? '') == layout.id %}selected{% endif %}>
+                                            {{ layout.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if errors.has('field_layout_id') %}<p class="text-danger">{{ errors.first('field_layout_id') }}</p>{% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <a href="{{ route('entries.groups.edit', group) }}" class="btn btn-secondary">Cancel</a>
+                                <button class="btn btn-primary float-end" type="submit">Save Entry Type</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{{ include('admin._inc._footer') }}

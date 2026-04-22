@@ -1,1 +1,1 @@
-<textarea class="form-control" id="{{ id }}" name="{{ field.slug }}" placeholder="{{ field.instructions }}" rows="3">{{ old('fields.' ~ field.slug, value) }}</textarea>
+<textarea class="{{ class ?? 'form-control' }}" id="{{ id }}" name="fields[{{ field.slug }}]" placeholder="{{ field.instructions }}" rows="3">{{ old('fields.' ~ field.slug, value) }}</textarea>

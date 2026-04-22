@@ -1,0 +1,8 @@
+<select class="{{ class ?? 'form-control' }}" id="{{ id }}" name="fields[{{ field.slug }}][]" multiple>
+    {% if value is iterable %}
+        {% for id in value %}
+            <option value="{{ id }}" selected>{{ id }}</option>
+        {% endfor %}
+    {% endif %}
+</select>
+<small class="text-secondary">Relationship field — selected entry IDs shown above.</small>

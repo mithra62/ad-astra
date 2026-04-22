@@ -14,4 +14,9 @@ class ColorPicker extends AbstractField
     {
         return 'value_text';
     }
+
+    public function render(array $params): string
+    {
+        return view('_fields.color_picker', $params)->render();
+    }
 }

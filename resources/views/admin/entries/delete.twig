@@ -1,0 +1,92 @@
+{{ include('admin._inc._header', {title: 'Delete Entry'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12 ">
+                <h5>Entry</h5>
+                <div class="col-6 ">
+                    <ul class="app-line-breadcrumbs mb-3">
+                        <li class="">
+                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                                <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups') }}">Entry Groups</a>
+                        </li>
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups.show', entry.entryGroup) }}">{{ entry.entryGroup.name }}</a>
+                        </li>
+                        <li class="active">
+                            <a class="f-s-14 f-w-500" href="{{ route('entries.confirm', entry) }}">Delete Entry</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
+
+        <!-- Blank start -->
+        <div class="row">
+            {{ include('admin.entries._sidebar', {active: entry.entry_group_id}) }}
+            <div class="col-lg-8 col-xxl-9">
+                <form method="POST" action="{{ route('entries.destroy', entry) }}" class="row g-3 needs-validation" novalidate>
+                    {{ csrf_field() }}
+                    {{ method_field('DELETE') }}
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Delete Entry</h5>
+                            </div>
+                            <div class="card-body">
+                                <h6>Are you sure you want to remove <strong>{{ entry.title }}</strong>?</h6>
+                                <p class="text-secondary">
+                                    This will permanently delete the entry and all its associated field values.
+                                    This action cannot be undone.
+                                </p>
+                                <table class="table table-sm mt-3 mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <th class="text-secondary" style="width: 30%">Title</th>
+                                            <td>{{ entry.title }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-secondary">Slug</th>
+                                            <td>{{ entry.slug }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-secondary">Type</th>
+                                            <td>{{ entry.entryType.name ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-secondary">Status</th>
+                                            <td>{{ entry.status ?? '—' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="card-footer">
+                                <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                    <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal"
+                                           type="checkbox">
+                                    <label for="confirm_removal">Confirm Removal</label>
+                                    {% if errors.has('confirm_removal') %}
+                                        <p class="text-danger">{{ errors.first('confirm_removal') }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12 float-end">
+                                    <a href="{{ route('entries.groups.show', entry.entryGroup) }}" class="btn btn-secondary">Cancel</a>
+                                    <button class="btn btn-danger ms-2" type="submit">Delete Entry</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Blank end -->
+    </div>
+</main>
+{{ include('admin._inc._footer') }}

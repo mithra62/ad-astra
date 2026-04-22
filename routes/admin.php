@@ -5,6 +5,9 @@ use App\Http\Controllers\Admin\Account\Token as AccountTokens;
 use App\Http\Controllers\Admin\Category;
 use App\Http\Controllers\Admin\Category\Group as CategoryGroup;
 use App\Http\Controllers\Admin\Dashboard;
+use App\Http\Controllers\Admin\Entry;
+use App\Http\Controllers\Admin\Entry\Group as EntryGroup;
+use App\Http\Controllers\Admin\Entry\Type as EntryType;
 use App\Http\Controllers\Admin\Field;
 use App\Http\Controllers\Admin\Field\Group as FieldGroup;
 use App\Http\Controllers\Admin\Media\Library;
@@ -109,6 +112,28 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::post('statuses/{group_id}/create', [Status::class, 'store'])->name('statuses.store');
     Route::get('statuses/{id}/confirm', [Status::class, 'confirm'])->name('statuses.confirm');
     Route::resource('statuses', Status::class)->except(['index', 'create', 'store']);
+
+    //entries
+    Route::get('entries/groups', [EntryGroup::class, 'index'])->name('entries.groups');
+    Route::get('entries/groups/create', [EntryGroup::class, 'create'])->name('entries.groups.create');
+    Route::post('entries/groups', [EntryGroup::class, 'store'])->name('entries.groups.store');
+    Route::get('entries/groups/{id}/edit', [EntryGroup::class, 'edit'])->name('entries.groups.edit');
+    Route::put('entries/groups/{id}', [EntryGroup::class, 'update'])->name('entries.groups.update');
+    Route::delete('entries/groups/{id}', [EntryGroup::class, 'destroy'])->name('entries.groups.destroy');
+    Route::get('entries/groups/{id}/confirm', [EntryGroup::class, 'confirm'])->name('entries.groups.confirm');
+    Route::get('entries/groups/{id}', [EntryGroup::class, 'show'])->name('entries.groups.show');
+    // Entry Types within a group
+    Route::get('entries/groups/{group_id}/types/create', [EntryType::class, 'create'])->name('entries.groups.types.create');
+    Route::post('entries/groups/{group_id}/types', [EntryType::class, 'store'])->name('entries.groups.types.store');
+    Route::get('entries/groups/{group_id}/types/{type_id}/edit', [EntryType::class, 'edit'])->name('entries.groups.types.edit');
+    Route::put('entries/groups/{group_id}/types/{type_id}', [EntryType::class, 'update'])->name('entries.groups.types.update');
+    Route::get('entries/groups/{group_id}/types/{type_id}/confirm', [EntryType::class, 'confirm'])->name('entries.groups.types.confirm');
+    Route::delete('entries/groups/{group_id}/types/{type_id}', [EntryType::class, 'destroy'])->name('entries.groups.types.destroy');
+    // Entry CRUD
+    Route::get('entries/groups/{group_id}/create', [Entry::class, 'create'])->name('entries.create');
+    Route::post('entries/groups/{group_id}/create', [Entry::class, 'store'])->name('entries.store');
+    Route::get('entries/{id}/confirm', [Entry::class, 'confirm'])->name('entries.confirm');
+    Route::resource('entries', Entry::class)->only(['edit', 'update', 'destroy']);
 
     //dashboard
     Route::get('/dashboard', [Dashboard::class, 'index'])->name('dashboard');
