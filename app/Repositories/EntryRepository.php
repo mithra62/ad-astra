@@ -8,33 +8,42 @@ use App\Models\EntryRelationship;
 use App\Models\EntryType as EntryTypeRecord;
 use App\Models\FieldValue;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class EntryRepository
 {
     public function create(AbstractEntryType $entryType, array $data): Entry
     {
-        $entryType->beforeCreate($data);
+        // Wrap core creation in a transaction so any lock acquired in beforeCreate
+        // (e.g. PodcastEpisodeEntryType locking the group row) is held until the
+        // new entry row is committed. afterCreate runs outside the transaction
+        // so its side effects (emails, webhooks, etc.) are not rolled back.
+        $entry = DB::transaction(function () use ($entryType, $data) {
+            $entryType->beforeCreate($data);
 
-        $record = $entryType->getRecord();
-        $record->loadMissing(['entryGroup.statusGroup.statuses', 'entryGroup.fieldLayout', 'fieldLayout']);
+            $record = $entryType->getRecord();
+            $record->loadMissing(['entryGroup.statusGroup.statuses', 'entryGroup.fieldLayout', 'fieldLayout']);
 
-        $entry = new Entry();
-        $entry->entry_group_id     = $record->entry_group_id;
-        $entry->entry_type_id      = $record->getKey();
-        $entry->created_by_user_id = Auth::id();
+            $entry = new Entry();
+            $entry->entry_group_id     = $record->entry_group_id;
+            $entry->entry_type_id      = $record->getKey();
+            $entry->created_by_user_id = Auth::id();
 
-        $this->applyCoreAttributes($entry, $data);
-        $this->applyStatus($entry, $data['status'] ?? null, applyDefault: true);
-        $entry->save();
+            $this->applyCoreAttributes($entry, $data);
+            $this->applyStatus($entry, $data['status'] ?? null, applyDefault: true);
+            $entry->save();
 
-        $this->syncAuthors($entry, $data['authors'] ?? []);
-        $this->syncCategories($entry, $data['categories'] ?? []);
-        $this->applyFieldValues($entry, $data['fields'] ?? []);
+            $this->syncAuthors($entry, $data['authors'] ?? []);
+            $this->syncCategories($entry, $data['categories'] ?? []);
+            $this->applyFieldValues($entry, $data['fields'] ?? []);
+
+            return $entry->refresh();
+        });
 
         $entryType->afterCreate($entry, $data);
 
-        return $entry->refresh();
+        return $entry;
     }
 
     public function findOrFail(int $id): Entry
