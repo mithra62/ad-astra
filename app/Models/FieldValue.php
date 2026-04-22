@@ -20,6 +20,8 @@ class FieldValue extends Model
         'value_json',
     ];
 
+    protected $with = ['field'];
+
     protected $casts = [
         'value_integer' => 'integer',
         'value_float'   => 'float',

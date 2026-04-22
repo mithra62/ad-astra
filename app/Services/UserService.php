@@ -42,7 +42,7 @@ class UserService
             $user->syncRoles((array) $data['roles']);
         }
 
-        if (! empty($data['fields'])) {
+        if (array_key_exists('fields', $data) && is_array($data['fields'])) {
             $this->setFields($user, $data['fields']);
         }
 
@@ -141,9 +141,11 @@ class UserService
      */
     public function setFields(User $user, array $fields): void
     {
-        // Pre-load all matching fields to avoid N+1 queries
+        if (empty($fields)) {
+            return;
+        }
+
         $fieldModels = Field::whereIn('slug', array_keys($fields))
-            ->with('fieldType')
             ->get()
             ->keyBy('slug');
 
