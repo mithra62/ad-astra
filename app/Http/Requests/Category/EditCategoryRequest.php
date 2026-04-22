@@ -21,19 +21,20 @@ class EditCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required',
-            'name' => [
+            'id'     => 'required',
+            'name'   => [
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('categories')->ignore($this->route()->parameter('category')),
             ],
-            'slug' => [
-                'required',
+            'slug'   => [
+                'nullable',
                 'string',
                 'max:255',
                 Rule::unique('categories')->ignore($this->route()->parameter('category')),
             ],
+            'fields' => ['nullable', 'array'],
         ];
     }
 }

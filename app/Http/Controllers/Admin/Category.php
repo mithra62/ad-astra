@@ -12,122 +12,113 @@ use App\Models\Category\Group as CategoryGroup;
 
 class Category extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        echo __FILE__ . ': ' . __LINE__;
-        exit;
+        return redirect()->route('categories.groups');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create($group_id)
+    public function create(string $group_id)
     {
-        $group = CategoryGroup::find($group_id);
-        if (!$group instanceof CategoryGroup) {
+        $group = CategoryGroup::with([
+            'fieldLayout.tabs.elements.field.fieldType',
+        ])->find($group_id);
+
+        if (! $group instanceof CategoryGroup) {
             abort(404);
         }
 
-        $groups = CategoryGroup::get();
-        $data = [
-            'group' => $group,
-            'groups' => $groups,
-        ];
+        $groups = CategoryGroup::ordered()->get();
 
-        return $this->view('categories.create', $data);
+        return $this->view('categories.create', [
+            'group'  => $group,
+            'groups' => $groups,
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreCategoryRequest $request)
     {
-        $creator = app(CreateNewCategory::class);
-        $data = $request->all();
-        $data['group_id'] = $request->group_id;
-        $cat = $creator->createByGroup($data);
-        return redirect()->route('categories.show', $cat->id)->with('status', trans('category.created'));
+        $creator  = app(CreateNewCategory::class);
+        $category = $creator->create(array_merge($request->all(), [
+            'group_id' => $request->route('group_id'),
+        ]));
+
+        return redirect()
+            ->route('categories.groups.show', $category->group_id)
+            ->with('status', trans('category.created'));
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        $category = CategoryModel::with(['children'])->find($id);
-        if (!$category instanceof CategoryModel) {
-            abort(404);
-        }
-
-        //$category->with('group');
-        print_r($category);
-        exit;
-        echo __FILE__ . ': ' . __LINE__;
-        exit;
+        return redirect()->route('categories.edit', $id);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
-        $category = CategoryModel::with('group')->find($id);
-        if (!$category instanceof CategoryModel) {
+        $category = CategoryModel::with([
+            'group.fieldLayout.tabs.elements.field.fieldType',
+            'fieldValues.field.fieldType',
+        ])->find($id);
+
+        if (! $category instanceof CategoryModel) {
             abort(404);
         }
 
-        $groups = CategoryGroup::get();
-        $active_group = $category->group->first();
-        $data = [
-            'category' => $category,
-            'groups' => $groups,
-            'active_group' => $active_group
-        ];
-        return $this->view('categories.edit', $data);
+        $groups = CategoryGroup::ordered()->get();
+
+        return $this->view('categories.edit', [
+            'category'    => $category,
+            'groups'      => $groups,
+            'field_values' => $category->fieldArray(),
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(EditCategoryRequest $request, string $id)
     {
-        $category = CategoryModel::find($id);
-        if ($category instanceof CategoryModel) {
-            $editor = app(EditCategory::class);
-            $editor->edit($category, $request->all());
-            return redirect()->route('categories.groups.show', $category->group)->with('success', trans('category.updated'));
+        $category = CategoryModel::with([
+            'group.fieldLayout.tabs.elements.field.fieldType',
+        ])->find($id);
+
+        if (! $category instanceof CategoryModel) {
+            abort(404);
         }
 
-        abort(404);
+        $editor   = app(EditCategory::class);
+        $category = $editor->edit($category, $request->all());
+
+        return redirect()
+            ->route('categories.edit', $category)
+            ->with('success', trans('category.updated'));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(DeleteCategoryRequest $request, string $id)
     {
         $category = CategoryModel::find($id);
-        if ($category instanceof CategoryModel) {
-            $group = $category->group;
-            $category->delete();
-            return redirect()->route('categories.groups.show', $group)->with('success', trans('category.deleted'));
+
+        if (! $category instanceof CategoryModel) {
+            abort(404);
         }
 
-        abort(404);
+        $groupId = $category->group_id;
+        $category->delete();
+
+        return redirect()
+            ->route('categories.groups.show', $groupId)
+            ->with('success', trans('category.deleted'));
     }
 
     public function confirm(string $id)
     {
-        $category = CategoryModel::find($id);
-        if (!$category instanceof CategoryModel) {
+        $category = CategoryModel::with('group')->find($id);
+
+        if (! $category instanceof CategoryModel) {
             abort(404);
         }
 
-        $groups = CategoryGroup::get();
-        $active_group = $category->group->first();
-        return $this->view('categories.delete', ['category' => $category, 'groups' => $groups, 'active_group' => $active_group]);
+        $groups = CategoryGroup::ordered()->get();
+
+        return $this->view('categories.delete', [
+            'category' => $category,
+            'groups'   => $groups,
+        ]);
     }
 }

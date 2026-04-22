@@ -22,18 +22,17 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => [
+            'name'     => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('categories')->ignore($this->data('id')),
             ],
-            'slug' => [
-                'required',
+            'slug'     => [
+                'nullable',
                 'string',
                 'max:255',
-                Rule::unique('categories')->ignore($this->data('id')),
             ],
+            'fields'   => ['nullable', 'array'],
         ];
     }
 }
