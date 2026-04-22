@@ -1,0 +1,99 @@
+{{ include('admin._inc._header', {title: 'Status Groups'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12">
+                <h5>Status Groups</h5>
+                <div class="col-6">
+                    <ul class="app-line-breadcrumbs mb-3">
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                                <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="active">
+                            <a class="f-s-14 f-w-500" href="{{ route('statuses.groups') }}">Status Groups</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
+
+        <div class="row table-section">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-6">
+                                <h5>Manage Status Groups</h5>
+                                <p>You can manage all Status Groups from here.</p>
+                            </div>
+                            <div class="col-6">
+                                <p class="float-right text-end">
+                                    <a href="{{ route('statuses.groups.create') }}" class="btn btn-primary">Add Status Group</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Handle</th>
+                                    <th scope="col">Statuses</th>
+                                    <th scope="col">Last Modified</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if groups.count >= 1 %}
+                                    {% for group in groups %}
+                                        <tr>
+                                            <td>{{ group.name }}</td>
+                                            <td class="text-secondary">{{ group.handle }}</td>
+                                            <td class="f-w-500">{{ group.statuses_count }}</td>
+                                            <td class="text-secondary f-w-600">{{ group.updated_at.format('F j, Y') }}</td>
+                                            <td>{{ group.created_at.format('F j, Y') }}</td>
+                                            <td>
+                                                <a class="btn btn-primary icon-btn b-r-4"
+                                                   href="{{ route('statuses.groups.show', group) }}">
+                                                    <i class="ti ti-eye"></i>
+                                                </a>
+                                                <a class="btn btn-success icon-btn b-r-4"
+                                                   href="{{ route('statuses.groups.edit', group) }}">
+                                                    <i class="ti ti-edit"></i>
+                                                </a>
+                                                <a class="btn btn-danger icon-btn b-r-4"
+                                                   href="{{ route('statuses.groups.confirm', group) }}">
+                                                    <i class="ti ti-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6">
+                                            <p class="text-center">
+                                                No Status Groups created. <br />
+                                                <a href="{{ route('statuses.groups.create') }}" class="btn btn-outline-primary">Create Status Group</a>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {{ groups.links() }}
+            </div>
+        </div>
+    </div>
+</main>
+{{ include('admin._inc._footer') }}

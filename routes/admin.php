@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\Field\Group as FieldGroup;
 use App\Http\Controllers\Admin\Media\Library;
 use App\Http\Controllers\Admin\Media;
 use App\Http\Controllers\Admin\Role;
+use App\Http\Controllers\Admin\Status;
+use App\Http\Controllers\Admin\Status\Group as StatusGroup;
 use App\Http\Controllers\Admin\User;
 use App\Http\Controllers\Admin\User\Token as UserTokens;
 use Illuminate\Support\Facades\Route;
@@ -92,6 +94,21 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('fields/{id}/confirm', [Field::class, 'confirm'])->name('fields.confirm');
 
     Route::resource('fields', Field::class);
+
+    //statuses
+    Route::get('statuses/groups/{id}/confirm', [StatusGroup::class, 'confirm'])->name('statuses.groups.confirm');
+    Route::resource('statuses/groups', StatusGroup::class)
+        ->name('index', 'statuses.groups')
+        ->name('create', 'statuses.groups.create')
+        ->name('store', 'statuses.groups.store')
+        ->name('show', 'statuses.groups.show')
+        ->name('edit', 'statuses.groups.edit')
+        ->name('update', 'statuses.groups.update')
+        ->name('destroy', 'statuses.groups.destroy');
+    Route::get('statuses/{group_id}/create', [Status::class, 'create'])->name('statuses.create');
+    Route::post('statuses/{group_id}/create', [Status::class, 'store'])->name('statuses.store');
+    Route::get('statuses/{id}/confirm', [Status::class, 'confirm'])->name('statuses.confirm');
+    Route::resource('statuses', Status::class)->except(['index', 'create', 'store']);
 
     //dashboard
     Route::get('/dashboard', [Dashboard::class, 'index'])->name('dashboard');
