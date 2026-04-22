@@ -79,16 +79,15 @@ class User extends Controller
      */
     public function edit(string $id)
     {
+        $schema = UserSchema::instance()->resolved();
         $roles = RoleModel::all();
         $user = UserModel::with('roles')->with('tokens')->find($id);
         if (!$user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
-//        print_r($user);
-//        exit;
-
-        return $this->view('users.edit', ['user' => $user, 'roles' => $roles]);
+        $user->load('fieldValues.field.fieldType');
+        return $this->view('users.edit', ['user' => $user, 'roles' => $roles, 'schema' => $schema, 'field_values' => $user->fieldArray()]);
     }
 
     /**
@@ -96,6 +95,9 @@ class User extends Controller
      */
     public function update(EditUserRequest $request, string $id)
     {
+
+        echo 'fdsa';
+        exit;
         $user = UserModel::find($id);
         if ($user instanceof UserModel) {
             $post = $request->all();
