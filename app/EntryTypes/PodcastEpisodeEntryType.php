@@ -19,7 +19,7 @@ class PodcastEpisodeEntryType extends AbstractEntryType
      * The episode_number field must exist in the entry's field layout for the
      * value to be persisted — it is silently skipped otherwise.
      */
-    public function beforeCreate(array &$data): void
+    public function beforeCreate(array $data): array
     {
         if (! isset($data['fields']['episode_number'])) {
             $groupId = $this->getRecord()->entry_group_id;
@@ -34,5 +34,7 @@ class PodcastEpisodeEntryType extends AbstractEntryType
         if (empty($data['published_at'])) {
             $data['published_at'] = now();
         }
+
+        return $data;
     }
 }

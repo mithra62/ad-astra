@@ -32,11 +32,11 @@ abstract class AbstractEntryType
 
     // Lifecycle hooks — override in concrete types for custom behaviour
 
-    public function beforeCreate(array &$data): void {}
+    public function beforeCreate(array $data): array { return $data; }
 
     public function afterCreate(Entry $entry, array $data): void {}
 
-    public function beforeUpdate(Entry $entry, array &$data): void {}
+    public function beforeUpdate(Entry $entry, array $data): array { return $data; }
 
     public function afterUpdate(Entry $entry, array $data): void {}
 }

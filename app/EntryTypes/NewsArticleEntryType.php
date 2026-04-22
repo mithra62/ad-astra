@@ -9,18 +9,20 @@ class NewsArticleEntryType extends AbstractEntryType
     /**
      * Auto-stamp published_at when an article is created with a live status.
      */
-    public function beforeCreate(array &$data): void
+    public function beforeCreate(array $data): array
     {
         if (($data['status'] ?? null) === 'published' && empty($data['published_at'])) {
             $data['published_at'] = now();
         }
+
+        return $data;
     }
 
     /**
      * Auto-stamp published_at when an article transitions to published
      * and hasn't been given an explicit date.
      */
-    public function beforeUpdate(Entry $entry, array &$data): void
+    public function beforeUpdate(Entry $entry, array $data): array
     {
         if (
             isset($data['status']) &&
@@ -30,5 +32,7 @@ class NewsArticleEntryType extends AbstractEntryType
         ) {
             $data['published_at'] = now();
         }
+
+        return $data;
     }
 }

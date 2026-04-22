@@ -20,7 +20,7 @@ class EntryRepository
         // new entry row is committed. afterCreate runs outside the transaction
         // so its side effects (emails, webhooks, etc.) are not rolled back.
         $entry = DB::transaction(function () use ($entryType, $data) {
-            $entryType->beforeCreate($data);
+            $data = $entryType->beforeCreate($data);
 
             $record = $entryType->getRecord();
             $record->loadMissing(['entryGroup.statusGroup.statuses', 'entryGroup.fieldLayout', 'fieldLayout']);
@@ -62,7 +62,7 @@ class EntryRepository
 
         /** @var AbstractEntryType $typeObject */
         $typeObject = app(\App\EntryTypes\EntryTypeRegistry::class)->resolveByRecord($entryType);
-        $typeObject->beforeUpdate($entry, $data);
+        $data = $typeObject->beforeUpdate($entry, $data);
 
         $this->applyCoreAttributes($entry, $data);
 
