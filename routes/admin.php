@@ -10,6 +10,9 @@ use App\Http\Controllers\Admin\Entry\Group as EntryGroup;
 use App\Http\Controllers\Admin\Entry\Type as EntryType;
 use App\Http\Controllers\Admin\Field;
 use App\Http\Controllers\Admin\Field\Group as FieldGroup;
+use App\Http\Controllers\Admin\FieldLayout as FieldLayoutController;
+use App\Http\Controllers\Admin\FieldLayout\Tab as FieldLayoutTab;
+use App\Http\Controllers\Admin\FieldLayout\TabElement as FieldLayoutTabElement;
 use App\Http\Controllers\Admin\Media\Library;
 use App\Http\Controllers\Admin\Media;
 use App\Http\Controllers\Admin\Role;
@@ -134,6 +137,27 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::post('entries/groups/{group_id}/create', [Entry::class, 'store'])->name('entries.store');
     Route::get('entries/{id}/confirm', [Entry::class, 'confirm'])->name('entries.confirm');
     Route::resource('entries', Entry::class)->only(['edit', 'update', 'destroy']);
+
+    // Field Layouts
+    Route::get('field-layouts', [FieldLayoutController::class, 'index'])->name('field-layouts');
+    Route::get('field-layouts/create', [FieldLayoutController::class, 'create'])->name('field-layouts.create');
+    Route::post('field-layouts', [FieldLayoutController::class, 'store'])->name('field-layouts.store');
+    Route::get('field-layouts/{id}/edit', [FieldLayoutController::class, 'edit'])->name('field-layouts.edit');
+    Route::put('field-layouts/{id}', [FieldLayoutController::class, 'update'])->name('field-layouts.update');
+    Route::get('field-layouts/{id}/confirm', [FieldLayoutController::class, 'confirm'])->name('field-layouts.confirm');
+    Route::delete('field-layouts/{id}', [FieldLayoutController::class, 'destroy'])->name('field-layouts.destroy');
+    // Tabs within a layout
+    Route::get('field-layouts/{layout_id}/tabs/create', [FieldLayoutTab::class, 'create'])->name('field-layouts.tabs.create');
+    Route::post('field-layouts/{layout_id}/tabs', [FieldLayoutTab::class, 'store'])->name('field-layouts.tabs.store');
+    Route::get('field-layouts/{layout_id}/tabs/{tab_id}/edit', [FieldLayoutTab::class, 'edit'])->name('field-layouts.tabs.edit');
+    Route::put('field-layouts/{layout_id}/tabs/{tab_id}', [FieldLayoutTab::class, 'update'])->name('field-layouts.tabs.update');
+    Route::get('field-layouts/{layout_id}/tabs/{tab_id}/confirm', [FieldLayoutTab::class, 'confirm'])->name('field-layouts.tabs.confirm');
+    Route::delete('field-layouts/{layout_id}/tabs/{tab_id}', [FieldLayoutTab::class, 'destroy'])->name('field-layouts.tabs.destroy');
+    // Elements within a tab
+    Route::post('field-layouts/{layout_id}/tabs/{tab_id}/elements', [FieldLayoutTabElement::class, 'store'])->name('field-layouts.tabs.elements.store');
+    Route::put('field-layouts/{layout_id}/tabs/{tab_id}/elements/{element_id}', [FieldLayoutTabElement::class, 'update'])->name('field-layouts.tabs.elements.update');
+    Route::get('field-layouts/{layout_id}/tabs/{tab_id}/elements/{element_id}/confirm', [FieldLayoutTabElement::class, 'confirm'])->name('field-layouts.tabs.elements.confirm');
+    Route::delete('field-layouts/{layout_id}/tabs/{tab_id}/elements/{element_id}', [FieldLayoutTabElement::class, 'destroy'])->name('field-layouts.tabs.elements.destroy');
 
     //dashboard
     Route::get('/dashboard', [Dashboard::class, 'index'])->name('dashboard');

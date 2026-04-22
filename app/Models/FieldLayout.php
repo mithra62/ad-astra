@@ -16,6 +16,16 @@ class FieldLayout extends Model
         return $this->hasMany(Tab::class)->orderBy('sort_order');
     }
 
+    public function entryGroups(): HasMany
+    {
+        return $this->hasMany(EntryGroup::class);
+    }
+
+    public function entryTypes(): HasMany
+    {
+        return $this->hasMany(EntryType::class);
+    }
+
     public function fields(): Collection
     {
         return $this->tabs->flatMap(

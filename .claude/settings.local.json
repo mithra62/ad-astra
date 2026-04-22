@@ -6,7 +6,8 @@
       "Bash(grep -v \"\\\\.php$\")",
       "Bash(xargs -I {} basename {})",
       "Bash(grep -E \"\\\\.php$\")",
-      "Bash(grep -E \"\\\\.\\(php\\)$\")"
+      "Bash(grep -E \"\\\\.\\(php\\)$\")",
+      "Bash(git log *)"
     ]
   }
 }
