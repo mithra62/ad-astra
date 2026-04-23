@@ -41,7 +41,12 @@
       "Read(//d//**)",
       "Read(//c/Program Files/**)",
       "Bash(find /c /d -name \"php.exe\" -maxdepth 5)",
-      "Bash(/c/php/php.exe vendor/bin/pint --dirty --format agent)"
+      "Bash(/c/php/php.exe vendor/bin/pint --dirty --format agent)",
+      "Bash(php vendor/bin/pint --dirty --format agent)",
+      "Bash(cmd.exe /c where php)",
+      "Bash(cmd.exe /c php --version)",
+      "Bash(cmd.exe /c \"dir /b /s C:\\\\php\\\\php.exe C:\\\\xampp\\\\php\\\\php.exe C:\\\\wamp64\\\\bin\\\\php\\\\php.exe 2>nul\")",
+      "Bash(/c/php/php.exe --version)"
     ]
   }
 }

@@ -3,12 +3,15 @@
 namespace App\Models\FieldLayout;
 
 use App\Models\FieldLayout;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tab extends Model
 {
+    use HasFactory;
+
     protected $table = 'field_layout_tabs';
 
     protected $fillable = ['field_layout_id', 'name', 'sort_order'];

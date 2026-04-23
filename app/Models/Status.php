@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Status extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['status_group_id', 'name', 'handle', 'color', 'is_default', 'sort_order'];
 
     protected $casts = [

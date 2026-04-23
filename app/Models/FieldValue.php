@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class FieldValue extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'field_id',
         'fieldable_id',
@@ -24,10 +27,10 @@ class FieldValue extends Model
 
     protected $casts = [
         'value_integer' => 'integer',
-        'value_float'   => 'float',
-        'value_date'    => 'datetime',
+        'value_float' => 'float',
+        'value_date' => 'datetime',
         'value_boolean' => 'boolean',
-        'value_json'    => 'array',
+        'value_json' => 'array',
     ];
 
     public function fieldable(): MorphTo

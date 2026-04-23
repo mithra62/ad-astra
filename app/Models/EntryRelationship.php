@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EntryRelationship extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'entry_id',
         'related_entry_id',

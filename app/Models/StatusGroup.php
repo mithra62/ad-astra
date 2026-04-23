@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class StatusGroup extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['name', 'handle', 'sort_order'];
 
     protected $casts = ['sort_order' => 'integer'];
