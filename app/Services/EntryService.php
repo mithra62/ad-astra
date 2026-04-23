@@ -74,6 +74,23 @@ class EntryService extends AbstractService
     }
 
     /**
+     * Fetch an entry by ID with lightweight eager-loads (entryGroup, entryType, creator only).
+     * Use in list views, dashboards, or anywhere field values are not needed.
+     */
+    public function findMeta(int $id): ?Entry
+    {
+        return $this->repository->findMeta($id);
+    }
+
+    /**
+     * Fetch an entry by ID with lightweight eager-loads. Throws ModelNotFoundException if missing.
+     */
+    public function getMeta(int $id): Entry
+    {
+        return $this->repository->findMetaOrFail($id);
+    }
+
+    /**
      * Fetch an entry by its handle within a specific group. Returns null if not found.
      * Always scope by group — the same handle can exist in multiple groups.
      */

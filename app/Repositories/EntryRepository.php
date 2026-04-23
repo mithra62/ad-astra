@@ -268,6 +268,16 @@ class EntryRepository
         return $typeFields->merge($groupFields)->unique('id');
     }
 
+    public function findMeta(int $id): ?Entry
+    {
+        return Entry::with($this->metaEagerLoad())->find($id);
+    }
+
+    public function findMetaOrFail(int $id): Entry
+    {
+        return Entry::with($this->metaEagerLoad())->findOrFail($id);
+    }
+
     private function defaultEagerLoad(): array
     {
         return [
@@ -280,5 +290,10 @@ class EntryRepository
             'entryRelationships.field',
             'entryRelationships.relatedEntry',
         ];
+    }
+
+    private function metaEagerLoad(): array
+    {
+        return ['entryGroup', 'entryType', 'creator'];
     }
 }
