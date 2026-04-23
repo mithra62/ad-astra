@@ -14,7 +14,7 @@ class EditCategoryGroupTest extends TestCase
     {
         $group = Group::create([
             'name' => 'Old Name',
-            'slug' => 'old-slug',
+            'handle' => 'old-slug',
         ]);
 
         $action = new EditCategoryGroup();

@@ -32,7 +32,7 @@ class FieldableTest extends TestCase
         return Field::create([
             'field_type_id' => $type->id,
             'name'          => $slug,
-            'slug'          => $slug,
+            'handle'          => $slug,
             'label'         => $slug,
         ]);
     }

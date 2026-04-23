@@ -15,12 +15,7 @@ class EditCategoryGroup extends AbstractAction
      */
     public function edit(Group $group, array $input): bool
     {
-        $group->field_groups()->detach();
-        if (!empty($input['field_groups'])) {
-            foreach ($input['field_groups'] as $field_group) {
-                $group->field_groups()->attach($field_group);
-            }
-        }
+        $group->fieldGroups()->sync($input['field_groups'] ?? []);
 
         return $group->update($input);
     }

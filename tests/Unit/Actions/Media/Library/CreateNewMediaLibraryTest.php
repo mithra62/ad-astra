@@ -16,7 +16,7 @@ class CreateNewMediaLibraryTest extends TestCase
         $action = new CreateNewMediaLibrary();
         $input = [
             'name' => 'Test Library',
-            'slug' => 'test-library',
+            'handle' => 'test-library',
             'url' => 'http://localhost',
         ];
 
@@ -28,11 +28,11 @@ class CreateNewMediaLibraryTest extends TestCase
 
     public function test_create_attaches_category_groups_if_provided()
     {
-        $group = Group::create(['name' => 'Group 1', 'slug' => 'group-1']);
+        $group = Group::create(['name' => 'Group 1', 'handle' => 'group-1']);
         $action = new CreateNewMediaLibrary();
         $input = [
             'name' => 'Test Library',
-            'slug' => 'test-library',
+            'handle' => 'test-library',
             'url' => 'http://localhost',
             'category_groups' => [$group->id],
         ];

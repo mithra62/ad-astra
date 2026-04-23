@@ -12,10 +12,10 @@ class EditCategoryTest extends TestCase
 
     public function test_edit_updates_category()
     {
-        $group = \App\Models\Category\Group::create(['name' => 'Test Group', 'slug' => 'test-group']);
+        $group = \App\Models\Category\Group::create(['name' => 'Test Group', 'handle' => 'test-group']);
         $category = Category::create([
             'name' => 'Old Name',
-            'slug' => 'old-slug',
+            'handle' => 'old-slug',
             'group_id' => $group->id,
         ]);
 
@@ -26,7 +26,7 @@ class EditCategoryTest extends TestCase
 
         $result = $action->edit($category, $input);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Category::class, $result);
         $this->assertEquals('New Name', $category->fresh()->name);
     }
 }

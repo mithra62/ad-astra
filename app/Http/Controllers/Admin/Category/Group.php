@@ -71,7 +71,7 @@ class Group extends Controller
      */
     public function edit(string $id)
     {
-        $group = CategoryGroup::with('field_groups')->find($id);
+        $group = CategoryGroup::with('fieldGroups')->find($id);
         if (!$group instanceof CategoryGroup) {
             abort(404);
         }

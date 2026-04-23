@@ -36,7 +36,7 @@ class GroupFieldSchemaTest extends TestCase
         return Field::create([
             'field_type_id' => $type->id,
             'name'          => $slug,
-            'slug'          => $slug,
+            'handle'          => $slug,
             'label'         => $slug,
         ]);
     }
@@ -152,8 +152,8 @@ class GroupFieldSchemaTest extends TestCase
         $fields = $catGroup->fieldLayout->fields();
 
         $this->assertCount(2, $fields);
-        $this->assertEquals('layout_title', $fields[0]->slug);
-        $this->assertEquals('layout_body',  $fields[1]->slug);
+        $this->assertEquals('layout_title', $fields[0]->handle);
+        $this->assertEquals('layout_body',  $fields[1]->handle);
     }
 
     public function test_category_group_without_layout_has_null_field_layout(): void
@@ -172,7 +172,7 @@ class GroupFieldSchemaTest extends TestCase
         // 1. Schema: field type, field, field group, category group, layout
         $type       = $this->makeFieldType();
         $field      = $this->makeField($type, 'region_description');
-        $fieldGroup = FieldGroup::create(['name' => 'Region Fields', 'slug' => 'region-fields']);
+        $fieldGroup = FieldGroup::create(['name' => 'Region Fields', 'handle' => 'region-fields']);
         $catGroup   = CategoryGroup::factory()->create();
         $layout     = FieldLayout::create(['name' => 'Regions Layout']);
 
@@ -205,7 +205,7 @@ class GroupFieldSchemaTest extends TestCase
         // 5. Schema is accessible from the group
         $catGroup->load('fieldLayout.tabs.elements.field');
         $layoutFields = $catGroup->fieldLayout->fields();
-        $this->assertTrue($layoutFields->contains('slug', 'region_description'));
+        $this->assertTrue($layoutFields->contains('handle', 'region_description'));
     }
 
     // -------------------------------------------------------------------------
@@ -214,7 +214,7 @@ class GroupFieldSchemaTest extends TestCase
 
     public function test_field_group_can_be_shared_across_multiple_category_groups(): void
     {
-        $sharedGroup = FieldGroup::create(['name' => 'SEO Fields', 'slug' => 'seo-shared']);
+        $sharedGroup = FieldGroup::create(['name' => 'SEO Fields', 'handle' => 'seo-shared']);
         $catGroupA   = CategoryGroup::factory()->create();
         $catGroupB   = CategoryGroup::factory()->create();
 

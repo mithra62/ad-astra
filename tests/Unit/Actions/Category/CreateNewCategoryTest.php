@@ -12,11 +12,11 @@ class CreateNewCategoryTest extends TestCase
 
     public function test_create_creates_new_category()
     {
-        $group = \App\Models\Category\Group::create(['name' => 'Test Group', 'slug' => 'test-group']);
+        $group = \App\Models\Category\Group::create(['name' => 'Test Group', 'handle' => 'test-group']);
         $action = new CreateNewCategory();
         $input = [
             'name' => 'Test Category',
-            'slug' => 'test-category',
+            'handle' => 'test-category',
             'group_id' => $group->id,
         ];
 

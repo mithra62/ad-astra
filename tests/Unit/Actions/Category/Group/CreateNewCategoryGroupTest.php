@@ -15,7 +15,7 @@ class CreateNewCategoryGroupTest extends TestCase
         $action = new CreateNewCategoryGroup();
         $input = [
             'name' => 'Test Group',
-            'slug' => 'test-group',
+            'handle' => 'test-group',
         ];
 
         $group = $action->create($input);

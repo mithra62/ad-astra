@@ -14,7 +14,7 @@ class DeleteMediaLibraryTest extends TestCase
     {
         $library = Library::create([
             'name' => 'Test Library',
-            'slug' => 'test-library',
+            'handle' => 'test-library',
             'url' => 'http://localhost',
         ]);
 

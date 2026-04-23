@@ -20,7 +20,7 @@ class UploadMediaTest extends TestCase
 
         $library = Library::create([
             'name' => 'Test Library',
-            'slug' => 'test-library',
+            'handle' => 'test-library',
             'adapter' => 'public',
             'url' => 'http://localhost',
         ]);

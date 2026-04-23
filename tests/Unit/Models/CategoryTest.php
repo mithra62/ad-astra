@@ -20,7 +20,7 @@ class CategoryTest extends TestCase
             'group_id',
             'parent_id',
             'name',
-            'slug',
+            'handle',
             'sort_order',
         ];
         $this->assertEquals($fillable, $category->getFillable());

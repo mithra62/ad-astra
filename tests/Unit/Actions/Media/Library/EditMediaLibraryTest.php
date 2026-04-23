@@ -15,7 +15,7 @@ class EditMediaLibraryTest extends TestCase
     {
         $library = Library::create([
             'name' => 'Old Name',
-            'slug' => 'old-slug',
+            'handle' => 'old-slug',
             'url' => 'http://localhost',
         ]);
 
@@ -32,12 +32,12 @@ class EditMediaLibraryTest extends TestCase
 
     public function test_edit_syncs_category_groups()
     {
-        $group1 = Group::create(['name' => 'Group 1', 'slug' => 'group-1']);
-        $group2 = Group::create(['name' => 'Group 2', 'slug' => 'group-2']);
+        $group1 = Group::create(['name' => 'Group 1', 'handle' => 'group-1']);
+        $group2 = Group::create(['name' => 'Group 2', 'handle' => 'group-2']);
 
         $library = Library::create([
             'name' => 'Test Library',
-            'slug' => 'test-library',
+            'handle' => 'test-library',
             'url' => 'http://localhost',
         ]);
         $library->category_groups()->attach($group1);
