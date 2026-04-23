@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Traits\HasFieldLayout;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EntryType extends Model
 {
-    use HasFieldLayout;
+    use HasFactory, HasFieldLayout;
 
     protected $fillable = ['entry_group_id', 'field_layout_id', 'name', 'handle', 'class', 'sort_order'];
 
