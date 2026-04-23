@@ -61,7 +61,12 @@ class Entry extends Model
      * For relational field types this reads from entryRelationships and returns
      * a Collection of related Entry models, ordered by sort_order.
      *
-     * Both relations should be eager-loaded to avoid N+1 queries.
+     * REQUIRES the following relations to be eager-loaded to avoid N+1 queries:
+     *   - fieldValues.field.fieldType
+     *   - entryRelationships.field
+     *   - entryRelationships.relatedEntry
+     *
+     * Use EntryService::get() / EntryService::find() which apply the full eager-load, or load them explicitly.
      */
     public function field(string $handle): mixed
     {
