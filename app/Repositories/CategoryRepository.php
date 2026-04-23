@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Category;
 use App\Models\Category\Group;
 use App\Models\FieldValue;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -83,14 +84,33 @@ class CategoryRepository
 
             $instance = $field->fieldType->instance();
 
-            FieldValue::updateOrCreate(
-                [
-                    'field_id' => $field->getKey(),
-                    'fieldable_id' => $category->getKey(),
-                    'fieldable_type' => $category->getMorphClass(),
-                ],
-                [$instance->storageColumn() => $value]
+            $this->upsertFieldValue(
+                $field->getKey(),
+                $category->getKey(),
+                $category->getMorphClass(),
+                $instance->storageColumn(),
+                $value
             );
+        }
+    }
+
+    private function upsertFieldValue(
+        int $fieldId,
+        int $fieldableId,
+        string $fieldableType,
+        string $column,
+        mixed $value,
+    ): void {
+        $key = ['field_id' => $fieldId, 'fieldable_id' => $fieldableId, 'fieldable_type' => $fieldableType];
+
+        try {
+            FieldValue::updateOrCreate($key, [$column => $value]);
+        } catch (QueryException $e) {
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+
+            FieldValue::updateOrCreate($key, [$column => $value]);
         }
     }
 

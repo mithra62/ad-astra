@@ -21,7 +21,8 @@
       "Bash(/c/php/php.exe vendor/bin/pint --dirty)",
       "Bash(grep -v \"migration\\\\|#\\\\|//.*slug\")",
       "Bash(/c/php/php.exe vendor/bin/pint app/Models/Category.php app/Services/CategoryService.php app/Repositories/CategoryRepository.php)",
-      "Bash(/c/php/php.exe vendor/bin/pint app/Services/EntryService.php app/Repositories/EntryRepository.php)"
+      "Bash(/c/php/php.exe vendor/bin/pint app/Services/EntryService.php app/Repositories/EntryRepository.php)",
+      "Bash(/c/php/php.exe vendor/bin/pint app/Repositories/EntryRepository.php app/Repositories/CategoryRepository.php)"
     ]
   }
 }

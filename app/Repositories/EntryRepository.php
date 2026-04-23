@@ -9,6 +9,7 @@ use App\Models\EntryGroup;
 use App\Models\EntryRelationship;
 use App\Models\Field;
 use App\Models\FieldValue;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -192,15 +193,37 @@ class EntryRepository
             if ($instance->isRelational()) {
                 $this->syncRelationshipField($entry, $field, (array) $value);
             } else {
-                FieldValue::updateOrCreate(
-                    [
-                        'field_id' => $field->getKey(),
-                        'fieldable_id' => $entry->getKey(),
-                        'fieldable_type' => $entry->getMorphClass(),
-                    ],
-                    [$instance->storageColumn() => $value]
+                $this->upsertFieldValue(
+                    $field->getKey(),
+                    $entry->getKey(),
+                    $entry->getMorphClass(),
+                    $instance->storageColumn(),
+                    $value
                 );
             }
+        }
+    }
+
+    private function upsertFieldValue(
+        int $fieldId,
+        int $fieldableId,
+        string $fieldableType,
+        string $column,
+        mixed $value,
+    ): void {
+        $key = ['field_id' => $fieldId, 'fieldable_id' => $fieldableId, 'fieldable_type' => $fieldableType];
+
+        try {
+            FieldValue::updateOrCreate($key, [$column => $value]);
+        } catch (QueryException $e) {
+            // SQLSTATE 23000 = unique constraint violation: two concurrent requests
+            // both saw no existing row and raced to INSERT. Retry once — the second
+            // attempt will find the row the other request committed and UPDATE it.
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+
+            FieldValue::updateOrCreate($key, [$column => $value]);
         }
     }
 
