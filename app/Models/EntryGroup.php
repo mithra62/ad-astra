@@ -50,4 +50,13 @@ class EntryGroup extends Model
     {
         return $query->orderBy('sort_order')->orderBy('name');
     }
+
+    public static function resolved(int $id): static
+    {
+        static $cache = [];
+
+        return $cache[$id] ??= static::query()
+            ->with('fieldLayout.tabs.elements.field')
+            ->findOrFail($id);
+    }
 }
