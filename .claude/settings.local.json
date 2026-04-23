@@ -19,7 +19,8 @@
       "Read(//c/php/**)",
       "Read(//c/xampp/php/**)",
       "Bash(/c/php/php.exe vendor/bin/pint --dirty)",
-      "Bash(grep -v \"migration\\\\|#\\\\|//.*slug\")"
+      "Bash(grep -v \"migration\\\\|#\\\\|//.*slug\")",
+      "Bash(/c/php/php.exe vendor/bin/pint app/Models/Category.php app/Services/CategoryService.php app/Repositories/CategoryRepository.php)"
     ]
   }
 }

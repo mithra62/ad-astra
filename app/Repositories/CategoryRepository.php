@@ -7,6 +7,7 @@ use App\Models\Category\Group;
 use App\Models\FieldValue;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class CategoryRepository
 {
@@ -53,7 +54,15 @@ class CategoryRepository
         }
 
         if (array_key_exists('parent_id', $data)) {
-            $category->parent_id = $data['parent_id'] ?: null;
+            $parentId = $data['parent_id'] ?: null;
+
+            if ($parentId !== null && $category->exists && $this->wouldCreateCycle($category, (int) $parentId)) {
+                throw new InvalidArgumentException(
+                    "Setting parent_id [{$parentId}] on category [{$category->id}] would create a circular reference."
+                );
+            }
+
+            $category->parent_id = $parentId;
         }
     }
 
@@ -83,6 +92,25 @@ class CategoryRepository
                 [$instance->storageColumn() => $value]
             );
         }
+    }
+
+    private function wouldCreateCycle(Category $category, int $targetParentId): bool
+    {
+        if ($targetParentId === $category->id) {
+            return true;
+        }
+
+        $candidate = Category::find($targetParentId);
+
+        while ($candidate?->parent_id !== null) {
+            if ($candidate->parent_id === $category->id) {
+                return true;
+            }
+
+            $candidate = Category::find($candidate->parent_id);
+        }
+
+        return false;
     }
 
     public function resolveLayoutFields(Category $category): Collection

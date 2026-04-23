@@ -16,7 +16,7 @@ class Dashboard extends Controller
         $content = Content::query()->inGroup('products')->published()->first();
         // print_r($content);
 
-        $entry = Entry::where('handle', 'the-pragmatic-programmer')->first();
+        $entry = Entry::inGroup('products')->where('handle', 'the-pragmatic-programmer')->first();
 
         //        $entry = Entry::where('handle', 'the-pragmatic-programmer')
         //            ->with('entryGroup')
