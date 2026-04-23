@@ -15,6 +15,7 @@ class StoreEntryRequest extends FormRequest
 
     public function rules(): array
     {
+        $schema = EntryGroup::resolved($this->route()->parameter('group_id'));
         return array_merge(
             [
                 'type_handle' => ['required', 'string', 'exists:entry_types,handle'],
@@ -28,7 +29,7 @@ class StoreEntryRequest extends FormRequest
                 'categories.*' => ['integer', 'exists:categories,id'],
                 'fields' => ['nullable', 'array'],
             ],
-            $this->schemaFieldRules()
+            $this->schemaFieldRules($schema)
         );
     }
 
@@ -39,27 +40,5 @@ class StoreEntryRequest extends FormRequest
             'type_handle.exists' => 'The selected entry type is invalid.',
             'title.required' => 'A title is required.',
         ];
-    }
-
-    public function schemaFieldRules(): array
-    {
-        $rules = [];
-        $schema = EntryGroup::resolved($this->route()->parameter('group_id'));
-
-        if (! $schema->fieldLayout) {
-            return $rules;
-        }
-
-        foreach ($schema->fieldLayout->tabs as $tab) {
-            foreach ($tab->elements as $element) {
-                $field = $element->field;
-                $key = "fields.{$field->handle}";
-                $fieldRules = $element->required ? ['required'] : ['nullable'];
-
-                $rules[$key] = array_merge($fieldRules, $field->fieldType->instance()->getRules());
-            }
-        }
-
-        return $rules;
     }
 }

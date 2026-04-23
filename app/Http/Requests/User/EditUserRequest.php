@@ -6,11 +6,9 @@ use App\Http\Requests\FormRequest;
 use App\Models\UserSchema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use App\Traits\UserSchemaRules AS SchemaTrait;
 
 class EditUserRequest extends StoreUserRequest
 {
-    use SchemaTrait;
 
     public function authorize(): bool
     {
@@ -19,6 +17,7 @@ class EditUserRequest extends StoreUserRequest
 
     public function rules(): array
     {
+        $schema = UserSchema::resolved();
         $userId = $this->route()->parameter('user') ?? $this->route()->parameter('id');
         return array_merge(
             [
@@ -28,7 +27,7 @@ class EditUserRequest extends StoreUserRequest
                 'roles.*' => ['string', 'exists:roles,name'],
                 'fields' => ['nullable', 'array'],
             ],
-            $this->schemaFieldRules()
+            $this->schemaFieldRules($schema)
         );
     }
 }

@@ -3,13 +3,11 @@
 namespace App\Http\Requests\User;
 
 use App\Http\Requests\FormRequest;
-use App\Traits\UserSchemaRules as SchemaTrait;
+use App\Models\UserSchema;
 use Illuminate\Support\Facades\Auth;
 
 class StoreUserRequest extends FormRequest
 {
-    use SchemaTrait;
-
     /**
      * @return bool
      */
@@ -23,6 +21,7 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $schema = UserSchema::resolved();
         return array_merge(
             [
                 'name' => ['required', 'string', 'max:255'],
@@ -33,7 +32,7 @@ class StoreUserRequest extends FormRequest
                 'roles.*' => ['string', 'exists:roles,name'],
                 'fields' => ['nullable', 'array'],
             ],
-            $this->schemaFieldRules()
+            $this->schemaFieldRules($schema)
         );
     }
 
@@ -42,12 +41,13 @@ class StoreUserRequest extends FormRequest
      */
     public function messages(): array
     {
+        $schema = UserSchema::resolved();
         return array_merge(
             [
                 'email.unique' => 'This email is already registered.',
                 'roles.required' => 'You must select at least one role.',
             ],
-            $this->schemaFieldMessages()
+            $this->schemaFieldMessages($schema)
         );
     }
 
@@ -56,12 +56,13 @@ class StoreUserRequest extends FormRequest
      */
     public function attributes(): array
     {
+        $schema = UserSchema::resolved();
         return array_merge(
             [
                 'name' => 'full name',
                 'email' => 'email address',
             ],
-            $this->schemaFieldAttributes()
+            $this->schemaFieldAttributes($schema)
         );
     }
 }
