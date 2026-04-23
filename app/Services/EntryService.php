@@ -91,6 +91,50 @@ class EntryService extends AbstractService
     }
 
     /**
+     * Recursively load related entries for a given relationship field handle,
+     * stopping at $maxDepth levels or when a previously-seen entry ID is
+     * encountered (cycle detection). Returns a flat Collection of Entry models
+     * in traversal order, deduplicated by ID.
+     *
+     * @param  array<int>  $seen  IDs already visited — managed internally, not by callers
+     */
+    public function loadRelatedRecursive(
+        Entry $entry,
+        string $fieldHandle,
+        int $maxDepth = 3,
+        array $seen = [],
+    ): Collection {
+        if ($maxDepth <= 0 || in_array($entry->id, $seen, true)) {
+            return collect();
+        }
+
+        $seen[] = $entry->id;
+        $entry->loadMissing('entryRelationships.relatedEntry', 'entryRelationships.field');
+
+        $related = $entry->entryRelationships
+            ->filter(fn ($r) => $r->field?->handle === $fieldHandle && $r->relatedEntry !== null)
+            ->sortBy('sort_order')
+            ->pluck('relatedEntry');
+
+        $results = collect();
+
+        foreach ($related as $relatedEntry) {
+            if (in_array($relatedEntry->id, $seen, true)) {
+                continue;
+            }
+
+            $results->push($relatedEntry);
+            $results = $results->merge(
+                $this->loadRelatedRecursive($relatedEntry, $fieldHandle, $maxDepth - 1, $seen)
+            );
+
+            $seen[] = $relatedEntry->id;
+        }
+
+        return $results->unique('id')->values();
+    }
+
+    /**
      * Return a query builder scoped to entries.
      */
     public function query(): EntryQueryBuilder

@@ -206,7 +206,10 @@ class EntryRepository
 
     private function syncRelationshipField(Entry $entry, Field $field, array $relatedIds): void
     {
-        // Remove IDs that would create a self-reference.
+        // Prevent direct self-reference (A → A). Indirect cycles (A → B → A) are
+        // intentionally not enforced here — relationship data is a graph, not a tree,
+        // and cycle prevention for deeper traversals must be handled by the caller
+        // using loadRelatedRecursive() or an equivalent depth-limited loader.
         $relatedIds = array_values(array_filter(
             $relatedIds,
             fn ($id) => (int) $id !== $entry->getKey()
