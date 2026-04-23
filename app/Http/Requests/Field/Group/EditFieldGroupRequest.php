@@ -8,9 +8,6 @@ use Illuminate\Validation\Rule;
 
 class EditFieldGroupRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
         return Auth::user()->can('edit field group');
@@ -29,11 +26,11 @@ class EditFieldGroupRequest extends FormRequest
                 'max:255',
                 Rule::unique('field_groups')->ignore($this->route()->parameter('group')),
             ],
-            'slug' => [
+            'handle' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('field_groups')->ignore($this->route()->parameter('group')),
+                Rule::unique('field_groups', 'handle')->ignore($this->route()->parameter('group')),
             ],
         ];
     }

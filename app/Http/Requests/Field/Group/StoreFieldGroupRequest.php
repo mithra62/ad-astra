@@ -8,9 +8,6 @@ use Illuminate\Validation\Rule;
 
 class StoreFieldGroupRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
         return Auth::user()->can('create field group');
@@ -28,11 +25,11 @@ class StoreFieldGroupRequest extends FormRequest
                 'max:255',
                 Rule::unique('field_groups')->ignore($this->data('id')),
             ],
-            'slug' => [
+            'handle' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('field_groups')->ignore($this->data('id')),
+                Rule::unique('field_groups', 'handle')->ignore($this->data('id')),
             ],
         ];
     }

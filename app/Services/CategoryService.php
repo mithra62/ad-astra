@@ -21,13 +21,13 @@ class CategoryService extends AbstractService
      * Create a category within a group, optionally nested under a parent.
      *
      * Accepted keys in $data:
-     *   name, slug, sort_order   — core category attributes
-     *   parent_id (int|null)     — parent category ID for nested categories
-     *   fields (array)           — ['slug' => value] custom field values
+     *   name, handle, sort_order   — core category attributes
+     *   parent_id (int|null)       — parent category ID for nested categories
+     *   fields (array)             — ['handle' => value] custom field values
      */
     public function create(CategoryGroup|int $group, array $data): Category
     {
-        $groupId    = $group instanceof CategoryGroup ? $group->getKey() : $group;
+        $groupId = $group instanceof CategoryGroup ? $group->getKey() : $group;
         $attributes = Arr::except($data, ['fields']);
 
         $category = Category::create(array_merge($attributes, ['group_id' => $groupId]));
@@ -72,7 +72,7 @@ class CategoryService extends AbstractService
     public function move(Category $category, ?int $parentId, int $sortOrder = 0): Category
     {
         $category->update([
-            'parent_id'  => $parentId,
+            'parent_id' => $parentId,
             'sort_order' => $sortOrder,
         ]);
 
@@ -80,7 +80,7 @@ class CategoryService extends AbstractService
     }
 
     /**
-     * Return the category's current field values as ['slug' => resolvedValue].
+     * Return the category's current field values as ['handle' => resolvedValue].
      */
     public function fieldArray(Category $category): array
     {
@@ -174,4 +174,3 @@ class CategoryService extends AbstractService
         return $category->group;
     }
 }
-

@@ -14,7 +14,7 @@ class Field extends Model
     protected $fillable = [
         'field_type_id',
         'name',
-        'slug',
+        'handle',
         'label',
         'instructions',
         'settings',
@@ -23,7 +23,7 @@ class Field extends Model
 
     protected $casts = [
         'settings' => 'array',
-        'hidden'   => 'boolean',
+        'hidden' => 'boolean',
     ];
 
     // fieldType is needed on virtually every Field access; always load it.
@@ -44,22 +44,16 @@ class Field extends Model
         return $this->morphTo();
     }
 
-    /**
-     * @return MorphToMany
-     */
     public function groups(): MorphToMany
     {
         return $this->morphedByMany(Group::class, 'fieldable')
             ->withTimestamps();
     }
 
-    /**
-     * @param array $params
-     * @return string
-     */
     public function render(array $params = []): string
     {
         $params['field'] = $this;
+
         return $this->fieldType
             ->instance()
             ->render($params);

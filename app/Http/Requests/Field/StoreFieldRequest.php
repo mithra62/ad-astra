@@ -8,9 +8,6 @@ use Illuminate\Validation\Rule;
 
 class StoreFieldRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
         return Auth::user()->can('create field');
@@ -25,7 +22,7 @@ class StoreFieldRequest extends FormRequest
             'type' => [
                 'required',
                 'string',
-                'max:255'
+                'max:255',
             ],
             'name' => [
                 'required',
@@ -33,11 +30,11 @@ class StoreFieldRequest extends FormRequest
                 'max:255',
                 Rule::unique('fields')->ignore($this->route()->parameter('field')),
             ],
-            'slug' => [
+            'handle' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('fields')->ignore($this->route()->parameter('field')),
+                Rule::unique('fields', 'handle')->ignore($this->route()->parameter('field')),
             ],
         ];
     }

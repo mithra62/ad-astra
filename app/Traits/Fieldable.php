@@ -15,15 +15,15 @@ trait Fieldable
     public function field(string $handle): mixed
     {
         return $this->fieldValues
-            ->first(fn($v) => $v->field->slug === $handle)
+            ->first(fn ($v) => $v->field->handle === $handle)
             ?->resolvedValue();
     }
 
     public function fieldArray(): array
     {
         return $this->fieldValues
-            ->filter(fn($v) => $v->field !== null)
-            ->mapWithKeys(fn($v) => [$v->field->slug => $v->resolvedValue()])
+            ->filter(fn ($v) => $v->field !== null)
+            ->mapWithKeys(fn ($v) => [$v->field->handle => $v->resolvedValue()])
             ->all();
     }
 }

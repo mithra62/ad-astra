@@ -25,3 +25,5 @@ Thumbs.db
 /logs/access_log
 /logs/error_log
 /.output.txt
+/boost.json
+/CLAUDE.md

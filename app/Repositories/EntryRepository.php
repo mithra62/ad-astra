@@ -3,10 +3,13 @@
 namespace App\Repositories;
 
 use App\EntryTypes\AbstractEntryType;
+use App\EntryTypes\EntryTypeRegistry;
 use App\Models\Entry;
+use App\Models\EntryGroup;
 use App\Models\EntryRelationship;
-use App\Models\EntryType as EntryTypeRecord;
+use App\Models\Field;
 use App\Models\FieldValue;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -25,9 +28,9 @@ class EntryRepository
             $record = $entryType->getRecord();
             $record->loadMissing(['entryGroup.statusGroup.statuses', 'entryGroup.fieldLayout', 'fieldLayout']);
 
-            $entry = new Entry();
-            $entry->entry_group_id     = $record->entry_group_id;
-            $entry->entry_type_id      = $record->getKey();
+            $entry = new Entry;
+            $entry->entry_group_id = $record->entry_group_id;
+            $entry->entry_type_id = $record->getKey();
             $entry->created_by_user_id = Auth::id();
 
             $this->applyCoreAttributes($entry, $data);
@@ -56,12 +59,28 @@ class EntryRepository
         return Entry::with($this->defaultEagerLoad())->find($id);
     }
 
+    public function findByHandle(string $handle, string|int|EntryGroup $group): ?Entry
+    {
+        return Entry::with($this->defaultEagerLoad())
+            ->inGroup($group)
+            ->where('handle', $handle)
+            ->first();
+    }
+
+    public function findOrFailByHandle(string $handle, string|int|EntryGroup $group): Entry
+    {
+        return Entry::with($this->defaultEagerLoad())
+            ->inGroup($group)
+            ->where('handle', $handle)
+            ->firstOrFail();
+    }
+
     public function applyData(Entry $entry, array $data): Entry
     {
         $entryType = $entry->entryType;
 
         /** @var AbstractEntryType $typeObject */
-        $typeObject = app(\App\EntryTypes\EntryTypeRegistry::class)->resolveByRecord($entryType);
+        $typeObject = app(EntryTypeRegistry::class)->resolveByRecord($entryType);
         $data = $typeObject->beforeUpdate($entry, $data);
 
         $this->applyCoreAttributes($entry, $data);
@@ -101,7 +120,7 @@ class EntryRepository
             $entry->title = $data['title'];
         }
 
-        $entry->slug = $data['slug'] ?? Str::slug($entry->title ?? '');
+        $entry->handle = $data['handle'] ?? Str::slug($entry->title ?? '');
 
         if (array_key_exists('published_at', $data)) {
             $entry->published_at = $data['published_at'];
@@ -112,6 +131,7 @@ class EntryRepository
     {
         if ($handle) {
             $entry->status = $handle;
+
             return;
         }
 
@@ -161,7 +181,7 @@ class EntryRepository
         $layoutFields = $this->resolveLayoutFields($entry);
 
         foreach ($fields as $handle => $value) {
-            $field = $layoutFields->firstWhere('slug', $handle);
+            $field = $layoutFields->firstWhere('handle', $handle);
 
             if (! $field || ! $field->fieldType) {
                 continue;
@@ -174,8 +194,8 @@ class EntryRepository
             } else {
                 FieldValue::updateOrCreate(
                     [
-                        'field_id'       => $field->getKey(),
-                        'fieldable_id'   => $entry->getKey(),
+                        'field_id' => $field->getKey(),
+                        'fieldable_id' => $entry->getKey(),
                         'fieldable_type' => $entry->getMorphClass(),
                     ],
                     [$instance->storageColumn() => $value]
@@ -184,12 +204,12 @@ class EntryRepository
         }
     }
 
-    private function syncRelationshipField(Entry $entry, \App\Models\Field $field, array $relatedIds): void
+    private function syncRelationshipField(Entry $entry, Field $field, array $relatedIds): void
     {
         // Remove IDs that would create a self-reference.
         $relatedIds = array_values(array_filter(
             $relatedIds,
-            fn($id) => (int) $id !== $entry->getKey()
+            fn ($id) => (int) $id !== $entry->getKey()
         ));
 
         // Delete existing pivots for this field on this entry.
@@ -199,15 +219,15 @@ class EntryRepository
 
         foreach ($relatedIds as $order => $relatedId) {
             EntryRelationship::create([
-                'entry_id'         => $entry->getKey(),
+                'entry_id' => $entry->getKey(),
                 'related_entry_id' => (int) $relatedId,
-                'field_id'         => $field->getKey(),
-                'sort_order'       => $order,
+                'field_id' => $field->getKey(),
+                'sort_order' => $order,
             ]);
         }
     }
 
-    public function resolveLayoutFields(Entry $entry): \Illuminate\Support\Collection
+    public function resolveLayoutFields(Entry $entry): Collection
     {
         $entry->loadMissing([
             'entryGroup.fieldLayout.tabs.elements.field.fieldType',
@@ -215,7 +235,7 @@ class EntryRepository
         ]);
 
         $groupFields = $entry->entryGroup->fieldLayout?->fields() ?? collect();
-        $typeFields  = $entry->entryType->fieldLayout?->fields() ?? collect();
+        $typeFields = $entry->entryType->fieldLayout?->fields() ?? collect();
 
         // Type-level fields take precedence: start with type fields, then backfill
         // group fields that don't share an ID with any type-level field.

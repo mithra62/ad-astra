@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Builders\EntryQueryBuilder;
 use App\EntryTypes\EntryTypeRegistry;
 use App\Models\Entry;
+use App\Models\EntryGroup;
 use App\Models\FieldLayout;
 use App\Repositories\EntryRepository;
 use Illuminate\Support\Collection;
@@ -27,10 +28,10 @@ class EntryService extends AbstractService
      * Create an entry of the given type handle.
      *
      * Accepted keys in $data:
-     *   title, slug, status, published_at  — core attributes
+     *   title, handle, status, published_at  — core attributes
      *   authors    (array)  — user IDs to sync as authors (keyed by sort order)
      *   categories (array)  — category IDs to sync
-     *   fields     (array)  — ['slug' => value] field values (relational or scalar)
+     *   fields     (array)  — ['handle' => value] field values (relational or scalar)
      */
     public function create(string $typeHandle, array $data = []): Entry
     {
@@ -73,6 +74,23 @@ class EntryService extends AbstractService
     }
 
     /**
+     * Fetch an entry by its handle within a specific group. Returns null if not found.
+     * Always scope by group — the same handle can exist in multiple groups.
+     */
+    public function findByHandle(string $handle, string|int|EntryGroup $group): ?Entry
+    {
+        return $this->repository->findByHandle($handle, $group);
+    }
+
+    /**
+     * Fetch an entry by its handle within a specific group. Throws ModelNotFoundException if not found.
+     */
+    public function findOrFailByHandle(string $handle, string|int|EntryGroup $group): Entry
+    {
+        return $this->repository->findOrFailByHandle($handle, $group);
+    }
+
+    /**
      * Return a query builder scoped to entries.
      */
     public function query(): EntryQueryBuilder
@@ -85,7 +103,7 @@ class EntryService extends AbstractService
     // -------------------------------------------------------------------------
 
     /**
-     * Return the entry's current field values as ['slug' => resolvedValue].
+     * Return the entry's current field values as ['handle' => resolvedValue].
      */
     public function fieldArray(Entry $entry): array
     {

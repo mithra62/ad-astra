@@ -10,8 +10,8 @@ class Group extends Model
 {
     protected $fillable = [
         'name',
-        'slug',
-        'description'
+        'handle',
+        'description',
     ];
 
     /**
@@ -24,9 +24,6 @@ class Group extends Model
         return $this->morphTo();
     }
 
-    /**
-     * @return MorphToMany
-     */
     public function fields(): MorphToMany
     {
         return $this->morphToMany(Field::class, 'fieldable')

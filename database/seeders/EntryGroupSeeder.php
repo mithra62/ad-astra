@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\EntryTypes\BlogPostEntryType;
+use App\EntryTypes\ProductEntryType;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
@@ -20,12 +22,12 @@ class EntryGroupSeeder extends Seeder
 
     public function run(): void
     {
-        $publication          = StatusGroup::where('handle', 'publication')->firstOrFail();
-        $contentFields        = FieldGroup::where('slug', 'content-fields')->firstOrFail();
-        $seoFields            = FieldGroup::where('slug', 'seo-fields')->firstOrFail();
-        $relationshipFields   = FieldGroup::where('slug', 'relationship-fields')->firstOrFail();
-        $topics               = CategoryGroup::where('slug', 'topics')->firstOrFail();
-        $productCategories    = CategoryGroup::where('slug', 'product-categories')->firstOrFail();
+        $publication = StatusGroup::where('handle', 'publication')->firstOrFail();
+        $contentFields = FieldGroup::where('handle', 'content-fields')->firstOrFail();
+        $seoFields = FieldGroup::where('handle', 'seo-fields')->firstOrFail();
+        $relationshipFields = FieldGroup::where('handle', 'relationship-fields')->firstOrFail();
+        $topics = CategoryGroup::where('handle', 'topics')->firstOrFail();
+        $productCategories = CategoryGroup::where('handle', 'product-categories')->firstOrFail();
 
         $this->seedBlogGroup($publication, $contentFields, $seoFields, $relationshipFields, $topics);
         $this->seedProductsGroup($publication, $contentFields, $seoFields, $productCategories);
@@ -40,18 +42,18 @@ class EntryGroupSeeder extends Seeder
     ): void {
         $layout = $this->createLayout('Blog Layout', [
             'Content' => ['body', 'excerpt'],
-            'SEO'     => ['meta_title', 'meta_description'],
+            'SEO' => ['meta_title', 'meta_description'],
             'Related' => ['related_entries'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'blog'],
             [
-                'name'             => 'Blog',
-                'description'      => 'Blog posts and articles.',
-                'field_layout_id'  => $layout->id,
-                'status_group_id'  => $publication->id,
-                'sort_order'       => 1,
+                'name' => 'Blog',
+                'description' => 'Blog posts and articles.',
+                'field_layout_id' => $layout->id,
+                'status_group_id' => $publication->id,
+                'sort_order' => 1,
             ]
         );
 
@@ -61,8 +63,8 @@ class EntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'blog_post'],
             [
-                'name'       => 'Blog Post',
-                'class'      => \App\EntryTypes\BlogPostEntryType::class,
+                'name' => 'Blog Post',
+                'class' => BlogPostEntryType::class,
                 'sort_order' => 1,
             ]
         );
@@ -76,17 +78,17 @@ class EntryGroupSeeder extends Seeder
     ): void {
         $layout = $this->createLayout('Products Layout', [
             'Description' => ['body', 'excerpt'],
-            'SEO'         => ['meta_title', 'meta_description'],
+            'SEO' => ['meta_title', 'meta_description'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'products'],
             [
-                'name'            => 'Products',
-                'description'     => 'Product catalogue entries.',
+                'name' => 'Products',
+                'description' => 'Product catalogue entries.',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $publication->id,
-                'sort_order'      => 2,
+                'sort_order' => 2,
             ]
         );
 
@@ -96,8 +98,8 @@ class EntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'product'],
             [
-                'name'       => 'Product',
-                'class'      => \App\EntryTypes\ProductEntryType::class,
+                'name' => 'Product',
+                'class' => ProductEntryType::class,
                 'sort_order' => 1,
             ]
         );
@@ -106,33 +108,32 @@ class EntryGroupSeeder extends Seeder
     /**
      * Create a FieldLayout with named tabs, each containing field handles.
      *
-     * @param string $name
-     * @param array<string, string[]> $tabs  Tab name => [field slugs]
+     * @param  array<string, string[]>  $tabs  Tab name => [field handles]
      */
     private function createLayout(string $name, array $tabs): FieldLayout
     {
         $layout = FieldLayout::create(['name' => $name]);
 
         $tabOrder = 1;
-        foreach ($tabs as $tabName => $fieldSlugs) {
+        foreach ($tabs as $tabName => $fieldHandles) {
             $tab = Tab::create([
                 'field_layout_id' => $layout->id,
-                'name'            => $tabName,
-                'sort_order'      => $tabOrder++,
+                'name' => $tabName,
+                'sort_order' => $tabOrder++,
             ]);
 
             $elementOrder = 1;
-            foreach ($fieldSlugs as $slug) {
-                $field = Field::where('slug', $slug)->first();
+            foreach ($fieldHandles as $handle) {
+                $field = Field::where('handle', $handle)->first();
                 if (! $field) {
                     continue;
                 }
 
                 TabElement::create([
                     'field_layout_tab_id' => $tab->id,
-                    'field_id'            => $field->id,
-                    'required'            => false,
-                    'sort_order'          => $elementOrder++,
+                    'field_id' => $field->id,
+                    'required' => false,
+                    'sort_order' => $elementOrder++,
                 ]);
             }
         }

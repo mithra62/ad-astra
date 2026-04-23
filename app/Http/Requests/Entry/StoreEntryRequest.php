@@ -15,16 +15,16 @@ class StoreEntryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type_handle'  => ['required', 'string', 'exists:entry_types,handle'],
-            'title'        => ['required', 'string', 'max:255'],
-            'slug'         => ['nullable', 'string', 'max:255'],
-            'status'       => ['nullable', 'string', 'max:100'],
+            'type_handle' => ['required', 'string', 'exists:entry_types,handle'],
+            'title' => ['required', 'string', 'max:255'],
+            'handle' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', 'string', 'max:100'],
             'published_at' => ['nullable', 'date'],
-            'authors'      => ['nullable', 'array'],
-            'authors.*'    => ['integer', 'exists:users,id'],
-            'categories'   => ['nullable', 'array'],
+            'authors' => ['nullable', 'array'],
+            'authors.*' => ['integer', 'exists:users,id'],
+            'categories' => ['nullable', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
-            'fields'       => ['nullable', 'array'],
+            'fields' => ['nullable', 'array'],
         ];
     }
 
@@ -32,8 +32,8 @@ class StoreEntryRequest extends FormRequest
     {
         return [
             'type_handle.required' => 'An entry type is required.',
-            'type_handle.exists'   => 'The selected entry type is invalid.',
-            'title.required'       => 'A title is required.',
+            'type_handle.exists' => 'The selected entry type is invalid.',
+            'title.required' => 'A title is required.',
         ];
     }
 }

@@ -8,15 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 
 trait PersistsFieldValues
 {
-    public function setField(Model $model, string $slug, mixed $value): void
+    public function setField(Model $model, string $handle, mixed $value): void
     {
-        $field  = Field::where('slug', $slug)->firstOrFail();
+        $field = Field::where('handle', $handle)->firstOrFail();
         $column = $field->fieldType->instance()->storageColumn();
 
         FieldValue::updateOrCreate(
             [
-                'field_id'       => $field->id,
-                'fieldable_id'   => $model->getKey(),
+                'field_id' => $field->id,
+                'fieldable_id' => $model->getKey(),
                 'fieldable_type' => $model->getMorphClass(),
             ],
             [$column => $value]
@@ -24,7 +24,7 @@ trait PersistsFieldValues
     }
 
     /**
-     * @param array<string, mixed> $fields  ['field_slug' => value]
+     * @param  array<string, mixed>  $fields  ['field_handle' => value]
      */
     public function setFields(Model $model, array $fields): void
     {
@@ -32,12 +32,12 @@ trait PersistsFieldValues
             return;
         }
 
-        $fieldModels = Field::whereIn('slug', array_keys($fields))
+        $fieldModels = Field::whereIn('handle', array_keys($fields))
             ->get()
-            ->keyBy('slug');
+            ->keyBy('handle');
 
-        foreach ($fields as $slug => $value) {
-            $field = $fieldModels->get($slug);
+        foreach ($fields as $handle => $value) {
+            $field = $fieldModels->get($handle);
 
             if (! $field || ! $field->fieldType) {
                 continue;
@@ -47,8 +47,8 @@ trait PersistsFieldValues
 
             FieldValue::updateOrCreate(
                 [
-                    'field_id'       => $field->id,
-                    'fieldable_id'   => $model->getKey(),
+                    'field_id' => $field->id,
+                    'fieldable_id' => $model->getKey(),
                     'fieldable_type' => $model->getMorphClass(),
                 ],
                 [$column => $value]

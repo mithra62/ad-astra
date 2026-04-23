@@ -71,19 +71,19 @@
                                                         {% set field = element.field %}
                                                         <div>
                                                             <div class="col-md-12">
-                                                                <label class="form-label" for="field_{{ field.slug }}">{{ field.label }}</label>
+                                                                <label class="form-label" for="field_{{ field.handle }}">{{ field.label }}</label>
                                                                 {% if field.instructions %}
                                                                     <small>{{ field.instructions }}</small>
                                                                 {% endif %}
                                                                 <div class="input-group has-validation">
                                                                     {{ field.render({
-                                                                        value: field_values[field.slug],
-                                                                        id: 'field_' ~ field.slug,
+                                                                        value: field_values[field.handle],
+                                                                        id: 'field_' ~ field.handle,
                                                                         class: 'form-control'
                                                                     })|raw }}
                                                                 </div>
-                                                                {% if errors.has('fields.' ~ field.slug) %}
-                                                                    <p class="text-danger">{{ errors.first('fields.' ~ field.slug) }}</p>
+                                                                {% if errors.has('fields.' ~ field.handle) %}
+                                                                    <p class="text-danger">{{ errors.first('fields.' ~ field.handle) }}</p>
                                                                 {% endif %}
                                                             </div>
 

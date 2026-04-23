@@ -5,15 +5,14 @@ namespace App\Models;
 use App\Models\Category\Group;
 use App\Traits\Fieldable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Category extends Model
 {
-    use HasFactory, Fieldable;
+    use Fieldable, HasFactory;
 
     protected $table = 'categories';
 
@@ -21,7 +20,7 @@ class Category extends Model
         'group_id',
         'parent_id',
         'name',
-        'slug',
+        'handle',
         'sort_order',
     ];
 

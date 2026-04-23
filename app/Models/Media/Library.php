@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Models\Media;
 
 use App\Models\Category;
 use App\Models\Category\Group;
-use App\Models\Field\Group AS FieldGroup;
+use App\Models\Field\Group as FieldGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\HasMedia;
@@ -15,7 +16,7 @@ class Library extends Model implements HasMedia
 
     protected $fillable = [
         'name',
-        'slug',
+        'handle',
         'adapter',
         'adapter_settings',
         'server_path',
@@ -49,8 +50,8 @@ class Library extends Model implements HasMedia
     public function categories()
     {
         $ids = [];
-        foreach($this->category_groups As $group) {
-            foreach($group->categories AS $cat) {
+        foreach ($this->category_groups as $group) {
+            foreach ($group->categories as $cat) {
                 $ids[] = $cat->id;
             }
         }

@@ -12,7 +12,7 @@ class EditField
         // The form submits a type handle (e.g. 'text'); resolve it to field_type_id.
         if (isset($input['type']) && ! isset($input['field_type_id'])) {
             $resolved = FieldType::all()->first(
-                fn(FieldType $ft) => $ft->instance()->handle() === $input['type']
+                fn (FieldType $ft) => $ft->instance()->handle() === $input['type']
             );
 
             if ($resolved) {
@@ -29,7 +29,7 @@ class EditField
             $field->fieldValues()->exists()
         ) {
             throw new \RuntimeException(
-                "Cannot change the type of field [{$field->slug}] — it has existing values. Migrate or clear the values first."
+                "Cannot change the type of field [{$field->handle}] — it has existing values. Migrate or clear the values first."
             );
         }
 

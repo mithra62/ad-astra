@@ -3,25 +3,23 @@
 namespace App\Models\Category;
 
 use App\Models\Category;
-use App\Models\Field\Group as FieldGroup;
 use App\Traits\HasFieldGroups;
 use App\Traits\HasFieldLayout;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Group extends Model
 {
-    use HasFactory, HasFieldLayout, HasFieldGroups;
+    use HasFactory, HasFieldGroups, HasFieldLayout;
 
     protected $table = 'category_groups';
 
     protected $fillable = [
         'field_layout_id',
         'name',
-        'slug',
+        'handle',
         'sort_order',
     ];
 

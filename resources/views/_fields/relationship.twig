@@ -1,4 +1,4 @@
-<select class="{{ class ?? 'form-control' }}" id="{{ id }}" name="fields[{{ field.slug }}][]" multiple>
+<select class="{{ class ?? 'form-control' }}" id="{{ id }}" name="fields[{{ field.handle }}][]" multiple>
     {% if value is iterable %}
         {% for id in value %}
             <option value="{{ id }}" selected>{{ id }}</option>

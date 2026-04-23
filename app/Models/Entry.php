@@ -20,7 +20,7 @@ class Entry extends Model
         'status',
         'created_by_user_id',
         'title',
-        'slug',
+        'handle',
         'published_at',
     ];
 
@@ -66,14 +66,14 @@ class Entry extends Model
     public function field(string $handle): mixed
     {
         // Scalar field values (text, number, date, etc.)
-        $fv = $this->fieldValues->first(fn($v) => $v->field?->slug === $handle);
+        $fv = $this->fieldValues->first(fn ($v) => $v->field?->handle === $handle);
         if ($fv) {
             return $fv->resolvedValue();
         }
 
         // Relational field values stored in entry_relationships
         $related = $this->entryRelationships
-            ->filter(fn($r) => $r->field?->slug === $handle)
+            ->filter(fn ($r) => $r->field?->handle === $handle)
             ->sortBy('sort_order')
             ->pluck('relatedEntry')
             ->filter(); // remove any null entries from broken FKs
@@ -83,7 +83,7 @@ class Entry extends Model
 
     public function getFieldLayout(): FieldLayout
     {
-        $typeLayout  = $this->entryType?->fieldLayout;
+        $typeLayout = $this->entryType?->fieldLayout;
         $groupLayout = $this->entryGroup?->fieldLayout;
 
         return $typeLayout ?? $groupLayout;
@@ -107,7 +107,7 @@ class Entry extends Model
         }
 
         if (is_string($group)) {
-            return $query->whereHas('entryGroup', fn($q) => $q->where('handle', $group));
+            return $query->whereHas('entryGroup', fn ($q) => $q->where('handle', $group));
         }
 
         return $query->where('entry_group_id', $group);
@@ -120,10 +120,9 @@ class Entry extends Model
         }
 
         if (is_string($type)) {
-            return $query->whereHas('entryType', fn($q) => $q->where('handle', $type));
+            return $query->whereHas('entryType', fn ($q) => $q->where('handle', $type));
         }
 
         return $query->where('entry_type_id', $type);
     }
-
 }

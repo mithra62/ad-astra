@@ -4,13 +4,9 @@ namespace App\Http\Requests\Category;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class StoreCategoryRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
         return Auth::user()->can('create category');
@@ -22,17 +18,17 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'     => [
+            'name' => [
                 'required',
                 'string',
                 'max:255',
             ],
-            'slug'     => [
+            'handle' => [
                 'nullable',
                 'string',
                 'max:255',
             ],
-            'fields'   => ['nullable', 'array'],
+            'fields' => ['nullable', 'array'],
         ];
     }
 }

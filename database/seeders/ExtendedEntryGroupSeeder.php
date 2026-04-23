@@ -2,6 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\EntryTypes\EventEntryType;
+use App\EntryTypes\JobListingEntryType;
+use App\EntryTypes\NewsArticleEntryType;
+use App\EntryTypes\PageEntryType;
+use App\EntryTypes\PodcastEpisodeEntryType;
+use App\EntryTypes\PortfolioItemEntryType;
+use App\EntryTypes\RecipeEntryType;
+use App\EntryTypes\VideoEntryType;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\Field;
@@ -19,9 +27,9 @@ class ExtendedEntryGroupSeeder extends Seeder
 
     public function run(): void
     {
-        $publication    = StatusGroup::where('handle', 'publication')->firstOrFail();
-        $contentFields  = FieldGroup::where('slug', 'content-fields')->firstOrFail();
-        $seoFields      = FieldGroup::where('slug', 'seo-fields')->firstOrFail();
+        $publication = StatusGroup::where('handle', 'publication')->firstOrFail();
+        $contentFields = FieldGroup::where('handle', 'content-fields')->firstOrFail();
+        $seoFields = FieldGroup::where('handle', 'seo-fields')->firstOrFail();
 
         $this->seedEventsGroup($publication, $contentFields, $seoFields);
         $this->seedNewsGroup($publication, $contentFields, $seoFields);
@@ -37,17 +45,17 @@ class ExtendedEntryGroupSeeder extends Seeder
     {
         $layout = $this->createLayout('Events Layout', [
             'Details' => ['body', 'excerpt'],
-            'SEO'     => ['meta_title', 'meta_description'],
+            'SEO' => ['meta_title', 'meta_description'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'events'],
             [
-                'name'            => 'Events',
-                'description'     => 'Upcoming and past events, conferences, and webinars.',
+                'name' => 'Events',
+                'description' => 'Upcoming and past events, conferences, and webinars.',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $publication->id,
-                'sort_order'      => 3,
+                'sort_order' => 3,
             ]
         );
 
@@ -56,8 +64,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'event'],
             [
-                'name'       => 'Event',
-                'class'      => \App\EntryTypes\EventEntryType::class,
+                'name' => 'Event',
+                'class' => EventEntryType::class,
                 'sort_order' => 1,
             ]
         );
@@ -67,17 +75,17 @@ class ExtendedEntryGroupSeeder extends Seeder
     {
         $layout = $this->createLayout('News Layout', [
             'Content' => ['body', 'excerpt'],
-            'SEO'     => ['meta_title', 'meta_description'],
+            'SEO' => ['meta_title', 'meta_description'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'news'],
             [
-                'name'            => 'News',
-                'description'     => 'News articles and press releases.',
+                'name' => 'News',
+                'description' => 'News articles and press releases.',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $publication->id,
-                'sort_order'      => 4,
+                'sort_order' => 4,
             ]
         );
 
@@ -86,8 +94,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'news_article'],
             [
-                'name'       => 'News Article',
-                'class'      => \App\EntryTypes\NewsArticleEntryType::class,
+                'name' => 'News Article',
+                'class' => NewsArticleEntryType::class,
                 'sort_order' => 1,
             ]
         );
@@ -97,17 +105,17 @@ class ExtendedEntryGroupSeeder extends Seeder
     {
         $layout = $this->createLayout('Pages Layout', [
             'Content' => ['body'],
-            'SEO'     => ['meta_title', 'meta_description'],
+            'SEO' => ['meta_title', 'meta_description'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'pages'],
             [
-                'name'            => 'Pages',
-                'description'     => 'Static content pages (About, Contact, Privacy Policy, etc.).',
+                'name' => 'Pages',
+                'description' => 'Static content pages (About, Contact, Privacy Policy, etc.).',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $publication->id,
-                'sort_order'      => 5,
+                'sort_order' => 5,
             ]
         );
 
@@ -116,8 +124,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'page'],
             [
-                'name'       => 'Page',
-                'class'      => \App\EntryTypes\PageEntryType::class,
+                'name' => 'Page',
+                'class' => PageEntryType::class,
                 'sort_order' => 1,
             ]
         );
@@ -127,17 +135,17 @@ class ExtendedEntryGroupSeeder extends Seeder
     {
         $layout = $this->createLayout('Jobs Layout', [
             'Listing' => ['body', 'excerpt'],
-            'SEO'     => ['meta_title', 'meta_description'],
+            'SEO' => ['meta_title', 'meta_description'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'jobs'],
             [
-                'name'            => 'Jobs',
-                'description'     => 'Job listings and career opportunities.',
+                'name' => 'Jobs',
+                'description' => 'Job listings and career opportunities.',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $publication->id,
-                'sort_order'      => 6,
+                'sort_order' => 6,
             ]
         );
 
@@ -146,8 +154,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'job_listing'],
             [
-                'name'       => 'Job Listing',
-                'class'      => \App\EntryTypes\JobListingEntryType::class,
+                'name' => 'Job Listing',
+                'class' => JobListingEntryType::class,
                 'sort_order' => 1,
             ]
         );
@@ -157,17 +165,17 @@ class ExtendedEntryGroupSeeder extends Seeder
     {
         $layout = $this->createLayout('Podcast Layout', [
             'Episode' => ['body', 'excerpt'],
-            'SEO'     => ['meta_title', 'meta_description'],
+            'SEO' => ['meta_title', 'meta_description'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'podcast'],
             [
-                'name'            => 'Podcast',
-                'description'     => 'Podcast episodes and show notes.',
+                'name' => 'Podcast',
+                'description' => 'Podcast episodes and show notes.',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $publication->id,
-                'sort_order'      => 7,
+                'sort_order' => 7,
             ]
         );
 
@@ -176,8 +184,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'podcast_episode'],
             [
-                'name'       => 'Podcast Episode',
-                'class'      => \App\EntryTypes\PodcastEpisodeEntryType::class,
+                'name' => 'Podcast Episode',
+                'class' => PodcastEpisodeEntryType::class,
                 'sort_order' => 1,
             ]
         );
@@ -187,17 +195,17 @@ class ExtendedEntryGroupSeeder extends Seeder
     {
         $layout = $this->createLayout('Portfolio Layout', [
             'Case Study' => ['body', 'excerpt'],
-            'SEO'        => ['meta_title', 'meta_description'],
+            'SEO' => ['meta_title', 'meta_description'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'portfolio'],
             [
-                'name'            => 'Portfolio',
-                'description'     => 'Portfolio items, case studies, and work samples.',
+                'name' => 'Portfolio',
+                'description' => 'Portfolio items, case studies, and work samples.',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $publication->id,
-                'sort_order'      => 8,
+                'sort_order' => 8,
             ]
         );
 
@@ -206,8 +214,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'portfolio_item'],
             [
-                'name'       => 'Portfolio Item',
-                'class'      => \App\EntryTypes\PortfolioItemEntryType::class,
+                'name' => 'Portfolio Item',
+                'class' => PortfolioItemEntryType::class,
                 'sort_order' => 1,
             ]
         );
@@ -216,18 +224,18 @@ class ExtendedEntryGroupSeeder extends Seeder
     private function seedVideosGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
     {
         $layout = $this->createLayout('Videos Layout', [
-            'Video'   => ['body', 'excerpt'],
-            'SEO'     => ['meta_title', 'meta_description'],
+            'Video' => ['body', 'excerpt'],
+            'SEO' => ['meta_title', 'meta_description'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'videos'],
             [
-                'name'            => 'Videos',
-                'description'     => 'Video content, tutorials, and recordings.',
+                'name' => 'Videos',
+                'description' => 'Video content, tutorials, and recordings.',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $publication->id,
-                'sort_order'      => 9,
+                'sort_order' => 9,
             ]
         );
 
@@ -236,8 +244,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'video'],
             [
-                'name'       => 'Video',
-                'class'      => \App\EntryTypes\VideoEntryType::class,
+                'name' => 'Video',
+                'class' => VideoEntryType::class,
                 'sort_order' => 1,
             ]
         );
@@ -247,17 +255,17 @@ class ExtendedEntryGroupSeeder extends Seeder
     {
         $layout = $this->createLayout('Recipes Layout', [
             'Recipe' => ['body', 'excerpt'],
-            'SEO'    => ['meta_title', 'meta_description'],
+            'SEO' => ['meta_title', 'meta_description'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'recipes'],
             [
-                'name'            => 'Recipes',
-                'description'     => 'Food recipes with ingredients and instructions.',
+                'name' => 'Recipes',
+                'description' => 'Food recipes with ingredients and instructions.',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $publication->id,
-                'sort_order'      => 10,
+                'sort_order' => 10,
             ]
         );
 
@@ -266,8 +274,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'recipe'],
             [
-                'name'       => 'Recipe',
-                'class'      => \App\EntryTypes\RecipeEntryType::class,
+                'name' => 'Recipe',
+                'class' => RecipeEntryType::class,
                 'sort_order' => 1,
             ]
         );
@@ -277,32 +285,32 @@ class ExtendedEntryGroupSeeder extends Seeder
      * Create a FieldLayout with named tabs, each containing field handles.
      * Fields that don't exist in the database are silently skipped.
      *
-     * @param array<string, string[]> $tabs  Tab name => [field slugs]
+     * @param  array<string, string[]>  $tabs  Tab name => [field handles]
      */
     private function createLayout(string $name, array $tabs): FieldLayout
     {
-        $layout   = FieldLayout::create(['name' => $name]);
+        $layout = FieldLayout::create(['name' => $name]);
         $tabOrder = 1;
 
-        foreach ($tabs as $tabName => $fieldSlugs) {
+        foreach ($tabs as $tabName => $fieldHandles) {
             $tab = Tab::create([
                 'field_layout_id' => $layout->id,
-                'name'            => $tabName,
-                'sort_order'      => $tabOrder++,
+                'name' => $tabName,
+                'sort_order' => $tabOrder++,
             ]);
 
             $elementOrder = 1;
-            foreach ($fieldSlugs as $slug) {
-                $field = Field::where('slug', $slug)->first();
+            foreach ($fieldHandles as $handle) {
+                $field = Field::where('handle', $handle)->first();
                 if (! $field) {
                     continue;
                 }
 
                 TabElement::create([
                     'field_layout_tab_id' => $tab->id,
-                    'field_id'            => $field->id,
-                    'required'            => false,
-                    'sort_order'          => $elementOrder++,
+                    'field_id' => $field->id,
+                    'required' => false,
+                    'sort_order' => $elementOrder++,
                 ]);
             }
         }

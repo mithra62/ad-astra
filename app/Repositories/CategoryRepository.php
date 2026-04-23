@@ -5,13 +5,14 @@ namespace App\Repositories;
 use App\Models\Category;
 use App\Models\Category\Group;
 use App\Models\FieldValue;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class CategoryRepository
 {
     public function create(Group $group, array $data): Category
     {
-        $category          = new Category();
+        $category = new Category;
         $category->group_id = $group->getKey();
 
         $this->applyCoreAttributes($category, $data);
@@ -45,7 +46,7 @@ class CategoryRepository
             $category->name = $data['name'];
         }
 
-        $category->slug = $data['slug'] ?? Str::slug($category->name ?? '');
+        $category->handle = $data['handle'] ?? Str::slug($category->name ?? '');
 
         if (array_key_exists('sort_order', $data)) {
             $category->sort_order = (int) $data['sort_order'];
@@ -65,7 +66,7 @@ class CategoryRepository
         $layoutFields = $this->resolveLayoutFields($category);
 
         foreach ($fields as $handle => $value) {
-            $field = $layoutFields->firstWhere('slug', $handle);
+            $field = $layoutFields->firstWhere('handle', $handle);
 
             if (! $field || ! $field->fieldType) {
                 continue;
@@ -75,8 +76,8 @@ class CategoryRepository
 
             FieldValue::updateOrCreate(
                 [
-                    'field_id'       => $field->getKey(),
-                    'fieldable_id'   => $category->getKey(),
+                    'field_id' => $field->getKey(),
+                    'fieldable_id' => $category->getKey(),
                     'fieldable_type' => $category->getMorphClass(),
                 ],
                 [$instance->storageColumn() => $value]
@@ -84,7 +85,7 @@ class CategoryRepository
         }
     }
 
-    public function resolveLayoutFields(Category $category): \Illuminate\Support\Collection
+    public function resolveLayoutFields(Category $category): Collection
     {
         $category->loadMissing([
             'group.fieldLayout.tabs.elements.field.fieldType',

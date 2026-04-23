@@ -27,7 +27,7 @@ class UserService
      * Accepted keys in $data:
      *   name, email, title, phone, password  — core user attributes
      *   roles   (array)  — role names to sync
-     *   fields  (array)  — ['slug' => value] custom field values
+     *   fields  (array)  — ['handle' => value] custom field values
      */
     public function create(array $data): User
     {

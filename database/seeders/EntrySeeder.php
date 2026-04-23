@@ -31,9 +31,9 @@ class EntrySeeder extends Seeder
      */
     private function seedBlogPosts(User $author): array
     {
-        $technology = Category::where('slug', 'technology')->firstOrFail();
-        $design     = Category::where('slug', 'design')->firstOrFail();
-        $business   = Category::where('slug', 'business')->firstOrFail();
+        $technology = Category::where('handle', 'technology')->firstOrFail();
+        $design     = Category::where('handle', 'design')->firstOrFail();
+        $business   = Category::where('handle', 'business')->firstOrFail();
 
         $definitions = [
             'laravel' => [
@@ -130,9 +130,9 @@ class EntrySeeder extends Seeder
 
     private function seedProducts(User $author): void
     {
-        $electronics = Category::where('slug', 'electronics')->firstOrFail();
-        $clothing    = Category::where('slug', 'clothing')->firstOrFail();
-        $books       = Category::where('slug', 'books')->firstOrFail();
+        $electronics = Category::where('handle', 'electronics')->firstOrFail();
+        $clothing    = Category::where('handle', 'clothing')->firstOrFail();
+        $books       = Category::where('handle', 'books')->firstOrFail();
 
         $products = [
             [

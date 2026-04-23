@@ -91,7 +91,7 @@
                                         <tr>
                                             <td>
                                                 <strong>{{ element.field.label ?: element.field.name }}</strong>
-                                                <small class="text-secondary d-block">{{ element.field.slug }}</small>
+                                                <small class="text-secondary d-block">{{ element.field.handle }}</small>
                                             </td>
                                             <td class="text-secondary">
                                                 {{ element.field.fieldType.name ?? '—' }}
@@ -163,7 +163,7 @@
                                     {% for field in available_fields %}
                                         <option value="{{ field.id }}" {% if old('field_id') == field.id %}selected{% endif %}>
                                             {{ field.label ?: field.name }}
-                                            ({{ field.fieldType.name ?? field.slug }})
+                                            ({{ field.fieldType.name ?? field.handle }})
                                         </option>
                                     {% endfor %}
                                 </select>

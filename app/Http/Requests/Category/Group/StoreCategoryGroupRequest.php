@@ -8,9 +8,6 @@ use Illuminate\Validation\Rule;
 
 class StoreCategoryGroupRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
         return Auth::user()->can('create category group');
@@ -28,11 +25,11 @@ class StoreCategoryGroupRequest extends FormRequest
                 'max:255',
                 Rule::unique('category_groups')->ignore($this->data('id')),
             ],
-            'slug' => [
+            'handle' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('category_groups')->ignore($this->data('id')),
+                Rule::unique('category_groups', 'handle')->ignore($this->data('id')),
             ],
         ];
     }

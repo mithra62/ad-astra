@@ -28,8 +28,8 @@ class TemplateController extends Controller
 
         $view = $this->viewName($group, $template);
 
-        if (!View::exists($view)) {
-            throw new NotFoundHttpException();
+        if (! View::exists($view)) {
+            throw new NotFoundHttpException;
         }
 
         return $this->renderView($request, $view);
@@ -41,8 +41,8 @@ class TemplateController extends Controller
 
         $view = $this->viewName($group, 'index');
 
-        if (!View::exists($view)) {
-            throw new NotFoundHttpException();
+        if (! View::exists($view)) {
+            throw new NotFoundHttpException;
         }
 
         return $this->renderView($request, $view);
@@ -51,7 +51,7 @@ class TemplateController extends Controller
     /**
      * EE-style behavior:
      * - if {group}/{second} template exists -> render it (action template)
-     * - else treat {second} as "slug" and render {group}/entry
+     * - else treat {second} as "handle" and render {group}/entry
      */
     public function renderGroupSecond(Request $request, string $group, string $second)
     {
@@ -61,18 +61,18 @@ class TemplateController extends Controller
         $actionView = $this->viewName($group, $second);
         if (View::exists($actionView)) {
             return $this->renderView($request, $actionView, [
-                'slug' => null,
+                'handle' => null,
             ]);
         }
 
         // Otherwise treat second segment as entry slug (EE: /blog/my-entry)
         $entryView = $this->viewName($group, 'entry');
-        if (!View::exists($entryView)) {
-            throw new NotFoundHttpException();
+        if (! View::exists($entryView)) {
+            throw new NotFoundHttpException;
         }
 
         return $this->renderView($request, $entryView, [
-            'slug' => $second,
+            'handle' => $second,
         ]);
     }
 
@@ -90,8 +90,8 @@ class TemplateController extends Controller
         $this->guard($group, $template);
 
         $view = $this->viewName($group, $template);
-        if (!View::exists($view)) {
-            throw new NotFoundHttpException();
+        if (! View::exists($view)) {
+            throw new NotFoundHttpException;
         }
 
         print_r($tail);
@@ -109,7 +109,7 @@ class TemplateController extends Controller
         // segment_1, segment_2, ... like EE
         $segmentVars = [];
         foreach ($segments as $i => $seg) {
-            $segmentVars['segment_' . ($i + 1)] = $seg;
+            $segmentVars['segment_'.($i + 1)] = $seg;
         }
 
         // If you like EE-style key/value pairs after the template:
@@ -118,22 +118,24 @@ class TemplateController extends Controller
 
         return view($view, array_merge([
             'segments' => $segments,
-            'params'   => $params,
-            'get'      => $request->query(),
+            'params' => $params,
+            'get' => $request->query(),
         ], $segmentVars, $extra));
     }
 
     private function segmentPairs(array $segments): array
     {
         // Try to interpret segments after the first 2 as key/value pairs:
-        // [group, template/slug, key, val, key, val...]
+        // [group, template/handle, key, val, key, val...]
         $rest = array_values(array_slice($segments, 2));
 
         $out = [];
         for ($i = 0; $i < count($rest); $i += 2) {
             $k = $rest[$i] ?? null;
             $v = $rest[$i + 1] ?? null;
-            if ($k === null || $v === null) break;
+            if ($k === null || $v === null) {
+                break;
+            }
             $out[$k] = $v;
         }
 
@@ -149,13 +151,13 @@ class TemplateController extends Controller
     private function guard(string $group, ?string $template = null): void
     {
         if (in_array(strtolower($group), $this->reserved_groups, true)) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException;
         }
 
         foreach (array_filter([$group, $template]) as $seg) {
             // Basic path traversal prevention
             if (str_contains($seg, '..') || str_contains($seg, '/') || str_contains($seg, '\\')) {
-                throw new NotFoundHttpException();
+                throw new NotFoundHttpException;
             }
         }
     }
