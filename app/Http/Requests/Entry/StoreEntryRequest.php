@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Entry;
 
 use App\Http\Requests\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use App\Models\EntryGroup;
+use Illuminate\Support\Facades\Auth;
 
 class StoreEntryRequest extends FormRequest
 {
@@ -35,10 +35,16 @@ class StoreEntryRequest extends FormRequest
 
     public function messages(): array
     {
-        return [
-            'type_handle.required' => 'An entry type is required.',
-            'type_handle.exists' => 'The selected entry type is invalid.',
-            'title.required' => 'A title is required.',
-        ];
+        $schema = EntryGroup::resolved($this->route()->parameter('group_id'));
+        return $this->schemaFieldMessages($schema);
+    }
+
+    /**
+     * @return array
+     */
+    public function attributes(): array
+    {
+        $schema = EntryGroup::resolved($this->route()->parameter('group_id'));
+        return $this->schemaFieldAttributes($schema);
     }
 }
