@@ -22,7 +22,11 @@
       "Bash(grep -v \"migration\\\\|#\\\\|//.*slug\")",
       "Bash(/c/php/php.exe vendor/bin/pint app/Models/Category.php app/Services/CategoryService.php app/Repositories/CategoryRepository.php)",
       "Bash(/c/php/php.exe vendor/bin/pint app/Services/EntryService.php app/Repositories/EntryRepository.php)",
-      "Bash(/c/php/php.exe vendor/bin/pint app/Repositories/EntryRepository.php app/Repositories/CategoryRepository.php)"
+      "Bash(/c/php/php.exe vendor/bin/pint app/Repositories/EntryRepository.php app/Repositories/CategoryRepository.php)",
+      "Bash(/c/php/php.exe vendor/bin/pint app/EntryTypes/EntryTypeRegistry.php --format agent)",
+      "Bash(/c/php/php.exe artisan *)",
+      "Bash(/c/php/php.exe vendor/bin/pint app/Models/Entry.php --format agent)",
+      "Bash(/c/php/php.exe vendor/bin/pint tests/TestCase.php --format agent)"
     ]
   }
 }
