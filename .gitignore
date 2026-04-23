@@ -27,3 +27,4 @@ Thumbs.db
 /.output.txt
 /boost.json
 /CLAUDE.md
+/coverage/*
