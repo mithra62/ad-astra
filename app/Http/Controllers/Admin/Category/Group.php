@@ -76,6 +76,8 @@ class Group extends Controller
             abort(404);
         }
 
+        $group->fieldGroups()->allRelatedIds();
+
         $field_groups = FieldGroup::all();
         $data = [
             'group' => $group,

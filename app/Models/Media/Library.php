@@ -19,8 +19,6 @@ class Library extends Model implements HasMedia
         'handle',
         'adapter',
         'adapter_settings',
-        'server_path',
-        'url',
         'allowed_types',
         'max_size',
         'sort_order',

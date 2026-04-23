@@ -75,7 +75,9 @@
                                                 {% endfor %}
 
                                             {% else %}
-                                                {% for key, field in group.field_groups %}
+
+
+                                                {% for key, field in group.fieldGroups %}
                                                     {% if field.id == fg.id %}checked{% endif %}
                                                 {% endfor %}
                                             {% endif %}
