@@ -6,27 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('category_groups', function (Blueprint $table) {
             $table->id();
-
+            $table->foreignId('field_layout_id')
+                ->nullable()
+                ->constrained('field_layouts')
+                ->nullOnDelete();
             $table->string('name');
-            $table->string('slug')->unique();
+            $table->string('handle')->unique();
             $table->unsignedInteger('sort_order')->default(0);
-
             $table->timestamps();
 
             $table->index(['sort_order', 'name']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('category_groups');

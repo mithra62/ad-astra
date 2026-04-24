@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('field_groups', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('slug')->index();
+            $table->string('handle')->index();
             $table->string('description')->nullable();
             $table->timestamps();
         });

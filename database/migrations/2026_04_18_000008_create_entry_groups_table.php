@@ -16,6 +16,11 @@ return new class extends Migration
                 ->constrained('field_layouts')
                 ->nullOnDelete();
 
+            $table->foreignId('status_group_id')
+                ->nullable()
+                ->constrained('status_groups')
+                ->nullOnDelete();
+
             $table->string('name');
             $table->string('handle')->unique();
             $table->text('description')->nullable();

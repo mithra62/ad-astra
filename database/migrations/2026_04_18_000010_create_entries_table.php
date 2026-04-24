@@ -24,13 +24,13 @@ return new class extends Migration
                 ->restrictOnDelete();
 
             $table->string('title');
-            $table->string('slug');
+            $table->string('handle');
+            $table->string('status')->nullable()->index();
             $table->timestamp('published_at')->nullable();
 
             $table->timestamps();
 
-            // Slug uniqueness scoped to entry group
-            $table->unique(['entry_group_id', 'slug'], 'entry_group_slug_unique');
+            $table->unique(['entry_group_id', 'handle'], 'entry_group_handle_unique');
 
             $table->index(['entry_group_id', 'entry_type_id'], 'entry_group_type_idx');
             $table->index(['entry_group_id', 'published_at'], 'entry_group_published_idx');
