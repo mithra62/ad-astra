@@ -17,7 +17,16 @@ class EntryTypeTest extends TestCase
     public function test_has_correct_fillable_attributes(): void
     {
         $this->assertEquals(
-            ['entry_group_id', 'field_layout_id', 'name', 'handle', 'class', 'sort_order'],
+            ['entry_group_id',
+                'field_layout_id',
+                'name',
+                'handle',
+                'default_template',
+                'has_entry_tree',
+                'max_depth',
+                'allowed_parent_types',
+                'class',
+                'sort_order'],
             (new EntryType)->getFillable()
         );
     }
