@@ -2,7 +2,8 @@
 
 namespace App\Http\Requests\Category;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
+use App\Models\Category\Group as CategoryGroup;
 use Illuminate\Support\Facades\Auth;
 
 class StoreCategoryRequest extends FormRequest
@@ -17,7 +18,8 @@ class StoreCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $schema = CategoryGroup::resolvedFields($this->route()->parameter('group_id'));
+        return array_merge([
             'name' => [
                 'required',
                 'string',
@@ -29,6 +31,23 @@ class StoreCategoryRequest extends FormRequest
                 'max:255',
             ],
             'fields' => ['nullable', 'array'],
-        ];
+        ],
+            $this->schemaFieldRules($schema));
+    }
+
+
+    public function messages(): array
+    {
+        $schema = CategoryGroup::resolvedFields($this->route()->parameter('group_id'));
+        return $this->schemaFieldMessages($schema);
+    }
+
+    /**
+     * @return array
+     */
+    public function attributes(): array
+    {
+        $schema = CategoryGroup::resolvedFields($this->route()->parameter('group_id'));
+        return $this->schemaFieldAttributes($schema);
     }
 }

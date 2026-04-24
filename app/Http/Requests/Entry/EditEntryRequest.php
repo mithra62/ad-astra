@@ -17,7 +17,7 @@ class EditEntryRequest extends FormRequest
     public function rules(): array
     {
         $group = Entry::find($this->route()->parameter('entry'));
-        $schema = EntryGroup::resolved($group->entryGroup()->first()->id);
+        $schema = EntryGroup::resolvedFields($group->entryGroup()->first()->id);
         return array_merge(
             [
                 'title' => ['required', 'string', 'max:255'],
@@ -41,7 +41,7 @@ class EditEntryRequest extends FormRequest
     public function attributes(): array
     {
         $group = Entry::find($this->route()->parameter('entry'));
-        $schema = EntryGroup::resolved($group->entryGroup()->first()->id);
+        $schema = EntryGroup::resolvedFields($group->entryGroup()->first()->id);
         return $this->schemaFieldAttributes($schema);
     }
 }

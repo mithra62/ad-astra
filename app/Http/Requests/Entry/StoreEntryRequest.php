@@ -15,7 +15,7 @@ class StoreEntryRequest extends FormRequest
 
     public function rules(): array
     {
-        $schema = EntryGroup::resolved($this->route()->parameter('group_id'));
+        $schema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
         return array_merge(
             [
                 'type_handle' => ['required', 'string', 'exists:entry_types,handle'],
@@ -35,7 +35,7 @@ class StoreEntryRequest extends FormRequest
 
     public function messages(): array
     {
-        $schema = EntryGroup::resolved($this->route()->parameter('group_id'));
+        $schema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
         return $this->schemaFieldMessages($schema);
     }
 
@@ -44,7 +44,7 @@ class StoreEntryRequest extends FormRequest
      */
     public function attributes(): array
     {
-        $schema = EntryGroup::resolved($this->route()->parameter('group_id'));
+        $schema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
         return $this->schemaFieldAttributes($schema);
     }
 }

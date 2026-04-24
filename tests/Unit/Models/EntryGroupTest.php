@@ -100,7 +100,7 @@ class EntryGroupTest extends TestCase
     {
         $group = EntryGroup::factory()->create();
 
-        $resolved = EntryGroup::resolved($group->id);
+        $resolved = EntryGroup::resolvedFields($group->id);
 
         $this->assertEquals($group->id, $resolved->id);
     }

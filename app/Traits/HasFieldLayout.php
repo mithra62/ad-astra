@@ -11,4 +11,13 @@ trait HasFieldLayout
     {
         return $this->belongsTo(FieldLayout::class);
     }
+
+    public static function resolvedFields(int $id): static
+    {
+        static $cache = [];
+
+        return $cache[$id] ??= static::query()
+            ->with('fieldLayout.tabs.elements.field')
+            ->findOrFail($id);
+    }
 }
