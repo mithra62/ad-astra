@@ -127,6 +127,8 @@ class ExtendedEntryGroupSeeder extends Seeder
                 'name' => 'Page',
                 'class' => PageEntryType::class,
                 'sort_order' => 1,
+                'default_template' => 'entries.page',
+                'has_entry_tree' => true,
             ]
         );
     }
@@ -217,6 +219,8 @@ class ExtendedEntryGroupSeeder extends Seeder
                 'name' => 'Portfolio Item',
                 'class' => PortfolioItemEntryType::class,
                 'sort_order' => 1,
+                'default_template' => 'entries.page',
+                'has_entry_tree' => true,
             ]
         );
     }
@@ -247,6 +251,8 @@ class ExtendedEntryGroupSeeder extends Seeder
                 'name' => 'Video',
                 'class' => VideoEntryType::class,
                 'sort_order' => 1,
+                'default_template' => 'entries.page',
+                'has_entry_tree' => true,
             ]
         );
     }
@@ -277,6 +283,8 @@ class ExtendedEntryGroupSeeder extends Seeder
                 'name' => 'Recipe',
                 'class' => RecipeEntryType::class,
                 'sort_order' => 1,
+                'default_template' => 'entries.page',
+                'has_entry_tree' => true,
             ]
         );
     }

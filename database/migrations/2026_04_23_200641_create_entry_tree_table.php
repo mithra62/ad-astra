@@ -24,7 +24,7 @@ return new class extends Migration
                 ->constrained('entry_trees')
                 ->nullOnDelete();
 
-            $table->string('slug');
+            $table->string('handle');
             $table->string('uri')->unique();
 
             $table->unsignedInteger('depth')->default(0);
@@ -35,7 +35,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->unique(['parent_id', 'slug']);
+            $table->unique(['parent_id', 'handle']);
             $table->index(['parent_id', 'sort_order']);
             $table->index('uri');
         });

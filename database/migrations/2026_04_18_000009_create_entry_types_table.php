@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('handle');
             $table->string('default_template')->nullable();
 
-            $table->boolean('has_tree')->default(false);
+            $table->boolean('has_entry_tree')->default(false);
             $table->unsignedInteger('max_depth')->nullable();
             $table->json('allowed_parent_types')->nullable();
 
