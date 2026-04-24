@@ -112,7 +112,7 @@ class EntryRepository
 
     public function delete(Entry $entry): bool
     {
-        return (bool) $entry->delete();
+        return (bool)$entry->delete();
     }
 
     private function applyCoreAttributes(Entry $entry, array $data): void
@@ -139,7 +139,7 @@ class EntryRepository
         if ($applyDefault) {
             $statusGroup = $entry->entryGroup?->statusGroup;
 
-            if (! $statusGroup) {
+            if (!$statusGroup) {
                 throw new \RuntimeException(
                     "EntryGroup [{$entry->entryGroup?->handle}] has no status group configured."
                 );
@@ -148,7 +148,7 @@ class EntryRepository
             $statusGroup->loadMissing('statuses');
             $default = $statusGroup->statuses->firstWhere('is_default', true);
 
-            if (! $default) {
+            if (!$default) {
                 throw new \RuntimeException(
                     "StatusGroup for EntryGroup [{$entry->entryGroup?->handle}] has no default status configured."
                 );
@@ -184,14 +184,14 @@ class EntryRepository
         foreach ($fields as $handle => $value) {
             $field = $layoutFields->firstWhere('handle', $handle);
 
-            if (! $field || ! $field->fieldType) {
+            if (!$field || !$field->fieldType) {
                 continue;
             }
 
             $instance = $field->fieldType->instance();
 
             if ($instance->isRelational()) {
-                $this->syncRelationshipField($entry, $field, (array) $value);
+                $this->syncRelationshipField($entry, $field, (array)$value);
             } else {
                 $this->upsertFieldValue(
                     $field->getKey(),
@@ -205,12 +205,13 @@ class EntryRepository
     }
 
     private function upsertFieldValue(
-        int $fieldId,
-        int $fieldableId,
+        int    $fieldId,
+        int    $fieldableId,
         string $fieldableType,
         string $column,
-        mixed $value,
-    ): void {
+        mixed  $value,
+    ): void
+    {
         $key = ['field_id' => $fieldId, 'fieldable_id' => $fieldableId, 'fieldable_type' => $fieldableType];
 
         try {
@@ -235,7 +236,7 @@ class EntryRepository
         // using loadRelatedRecursive() or an equivalent depth-limited loader.
         $relatedIds = array_values(array_filter(
             $relatedIds,
-            fn ($id) => (int) $id !== $entry->getKey()
+            fn($id) => (int)$id !== $entry->getKey()
         ));
 
         // Delete existing pivots for this field on this entry.
@@ -246,7 +247,7 @@ class EntryRepository
         foreach ($relatedIds as $order => $relatedId) {
             EntryRelationship::create([
                 'entry_id' => $entry->getKey(),
-                'related_entry_id' => (int) $relatedId,
+                'related_entry_id' => (int)$relatedId,
                 'field_id' => $field->getKey(),
                 'sort_order' => $order,
             ]);
