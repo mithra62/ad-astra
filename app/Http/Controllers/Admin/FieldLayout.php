@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\FieldLayout\CreateNewFieldLayout;
+use App\Actions\FieldLayout\DeleteFieldLayout;
 use App\Actions\FieldLayout\EditFieldLayout;
-use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\FieldLayout\DeleteFieldLayoutRequest;
 use App\Http\Requests\FieldLayout\EditFieldLayoutRequest;
 use App\Http\Requests\FieldLayout\StoreFieldLayoutRequest;
@@ -29,7 +29,7 @@ class FieldLayout extends Controller
     public function store(StoreFieldLayoutRequest $request)
     {
         $creator = app(CreateNewFieldLayout::class);
-        $layout  = $creator->create($request->all());
+        $layout = $creator->create($request->all());
 
         return redirect()
             ->route('field-layouts.edit', $layout->id)
@@ -86,7 +86,8 @@ class FieldLayout extends Controller
     {
         $layout = FieldLayoutModel::find($id);
         if ($layout instanceof FieldLayoutModel) {
-            $layout->delete();
+            app(DeleteFieldLayout::class)->delete($layout);
+
             return redirect()
                 ->route('field-layouts')
                 ->with('success', trans('field_layout.deleted'));
