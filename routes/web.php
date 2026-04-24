@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\Index;
 use App\Http\Controllers\Login;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TemplateController;

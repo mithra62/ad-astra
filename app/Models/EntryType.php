@@ -13,9 +13,24 @@ class EntryType extends Model
 {
     use HasFactory, HasFieldLayout;
 
-    protected $fillable = ['entry_group_id', 'field_layout_id', 'name', 'handle', 'class', 'sort_order'];
+    protected $fillable = [
+        'entry_group_id',
+        'field_layout_id',
+        'name',
+        'handle',
+        'default_template',
+        'has_entry_tree',
+        'max_depth',
+        'allowed_parent_types',
+        'class',
+        'sort_order'
+    ];
 
-    protected $casts = ['sort_order' => 'integer'];
+    protected $casts = [
+        'sort_order' => 'integer',
+        'has_entry_tree' => 'boolean',
+        'allowed_parent_types' => 'array',
+    ];
 
     public function entryGroup(): BelongsTo
     {
