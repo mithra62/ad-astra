@@ -1,0 +1,27 @@
+<div class="col-lg-4 col-xxl-3">
+    <div class="card">
+        <div class="card-header">
+            <h5>Field Layouts</h5>
+        </div>
+        <div class="card-body">
+            <div class="vertical-tab setting-tab">
+                <ul class="nav nav-tabs app-tabs-primary" id="v-bg" role="tablist">
+                    {% for layout in layouts %}
+                    <li class="nav-item" role="presentation">
+                        <a aria-controls="layout-tab-pane" aria-selected="true"
+                           href="{{ route('field-layouts.edit', layout) }}"
+                           class="nav-link {% if active == layout.id %} active {% endif %}"
+                           id="layout-tab-{{ layout.id }}">
+                            <i class="ph-bold ph-layout pe-2"></i>
+                            {{ layout.name }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="mt-3">
+                <a href="{{ route('field-layouts.create') }}" class="btn btn-primary btn-sm w-100">Add Layout</a>
+            </div>
+        </div>
+    </div>
+</div>

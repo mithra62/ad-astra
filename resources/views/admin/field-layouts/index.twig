@@ -1,0 +1,88 @@
+{{ include('admin._inc._header', {title: 'Field Layouts'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12">
+                <h5>Field Layouts</h5>
+                <div class="col-6">
+                    <ul class="app-line-breadcrumbs mb-3">
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                                <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="active">
+                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts') }}">Field Layouts</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
+
+        <div class="row table-section">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-6">
+                                <h5>Manage Field Layouts</h5>
+                                <p>Field layouts define the tab and field structure used when editing entries.</p>
+                            </div>
+                            <div class="col-6">
+                                <p class="float-right text-end">
+                                    <a href="{{ route('field-layouts.create') }}" class="btn btn-primary">Add Field Layout</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Tabs</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if layouts.count >= 1 %}
+                                    {% for layout in layouts %}
+                                        <tr>
+                                            <td><strong>{{ layout.name }}</strong></td>
+                                            <td class="f-w-500">{{ layout.tabs_count }}</td>
+                                            <td>
+                                                <a class="btn btn-success icon-btn b-r-4"
+                                                   href="{{ route('field-layouts.edit', layout) }}">
+                                                    <i class="ti ti-edit"></i>
+                                                </a>
+                                                <a class="btn btn-danger icon-btn b-r-4"
+                                                   href="{{ route('field-layouts.confirm', layout) }}">
+                                                    <i class="ti ti-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="3">
+                                            <p class="text-center">
+                                                No field layouts found. <a href="{{ route('field-layouts.create') }}">Create one now.</a>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {{ layouts.links() }}
+            </div>
+        </div>
+    </div>
+</main>
+{{ include('admin._inc._footer') }}

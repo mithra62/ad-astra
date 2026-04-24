@@ -1,0 +1,162 @@
+{{ include('admin._inc._header', {title: 'Edit Field Layout'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12">
+                <h5>Field Layouts</h5>
+                <div class="col-6">
+                    <ul class="app-line-breadcrumbs mb-3">
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                                <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts') }}">Field Layouts</a>
+                        </li>
+                        <li class="active">
+                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
+
+        <div class="row">
+            {{ include('admin.field-layouts._sidebar', {active: layout.id}) }}
+            <div class="col-lg-8 col-xxl-9">
+
+                <!-- Layout Settings Form -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Layout Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('field-layouts.update', layout) }}" class="row g-3 needs-validation" novalidate>
+                            {{ csrf_field() }}
+                            {{ method_field('PUT') }}
+                            <input type="hidden" name="id" value="{{ layout.id }}" />
+
+                            <div class="col-md-12">
+                                <label class="form-label" for="name">Name</label>
+                                <input class="form-control" id="name" required type="text"
+                                       value="{{ old('name', layout.name) }}" name="name">
+                                {% if errors.has('name') %}<p class="text-danger">{{ errors.first('name') }}</p>{% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <button class="btn btn-primary float-end" type="submit">Save Layout</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Used By -->
+                {% set usedByGroups = layout.entryGroups %}
+                {% set usedByTypes  = layout.entryTypes %}
+                {% if usedByGroups.count >= 1 or usedByTypes.count >= 1 %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Used By</h5>
+                        <small class="text-secondary">Entry groups and types that use this field layout.</small>
+                    </div>
+                    <div class="card-body">
+                        {% if usedByGroups.count >= 1 %}
+                            <p class="mb-1"><strong>Entry Groups (shared layout):</strong></p>
+                            <ul class="mb-3">
+                                {% for eg in usedByGroups %}
+                                    <li>
+                                        <a href="{{ route('entries.groups.edit', eg) }}">{{ eg.name }}</a>
+                                        <small class="text-secondary">({{ eg.handle }})</small>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if usedByTypes.count >= 1 %}
+                            <p class="mb-1"><strong>Entry Types (type-specific layout):</strong></p>
+                            <ul class="mb-0">
+                                {% for et in usedByTypes %}
+                                    <li>
+                                        <a href="{{ route('entries.groups.types.edit', {group_id: et.entryGroup.id, type_id: et.id}) }}">{{ et.name }}</a>
+                                        <small class="text-secondary">in {{ et.entryGroup.name ?? '?' }}</small>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning mb-4">
+                    <strong>This layout is not assigned anywhere.</strong>
+                    Assign it to an <a href="{{ route('entries.groups') }}">entry group</a> or entry type to use it on entry forms.
+                </div>
+                {% endif %}
+
+                <!-- Tabs Management -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="mb-0">Tabs</h5>
+                                <small class="text-secondary">Tabs group fields visually when editing an entry.</small>
+                            </div>
+                            <div class="col-auto">
+                                <a href="{{ route('field-layouts.tabs.create', layout) }}" class="btn btn-primary btn-sm">
+                                    Add Tab
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Fields</th>
+                                    <th scope="col">Sort Order</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if layout.tabs.count >= 1 %}
+                                    {% for tab in layout.tabs %}
+                                        <tr>
+                                            <td><strong>{{ tab.name }}</strong></td>
+                                            <td class="f-w-500">{{ tab.elements.count }}</td>
+                                            <td class="text-secondary">{{ tab.sort_order }}</td>
+                                            <td>
+                                                <a class="btn btn-success icon-btn b-r-4"
+                                                   href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}">
+                                                    <i class="ti ti-edit"></i>
+                                                </a>
+                                                <a class="btn btn-danger icon-btn b-r-4"
+                                                   href="{{ route('field-layouts.tabs.confirm', {layout_id: layout.id, tab_id: tab.id}) }}">
+                                                    <i class="ti ti-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4">
+                                            <p class="text-center mb-0">
+                                                No tabs configured. <a href="{{ route('field-layouts.tabs.create', layout) }}">Add one now.</a>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+{{ include('admin._inc._footer') }}

@@ -6,5 +6,22 @@ use App\Field\AbstractField;
 
 class Date extends AbstractField
 {
-    protected string $type = 'date';
+    protected string $handle = 'date';
+
+    protected string $name = 'Date';
+
+    protected array $rules = [
+        'date',
+    ];
+
+    public function storageColumn(): string
+    {
+        return 'value_date';
+    }
+
+    public function render(array $params): string
+    {
+        //$params['field'] = $this;
+        return view('_fields.date', $params)->render();
+    }
 }

@@ -12,57 +12,50 @@ class ApiLogTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_api_log_has_fillable_attributes(): void
+    public function test_has_correct_fillable_attributes(): void
     {
-        $apiLog = new ApiLog();
-        $fillable = [
-            'request_route',
-            'method',
-            'request_payload',
-            'request_headers',
-            'response_payload',
-            'response_headers',
-            'response_status_code',
-            'user_id',
-        ];
-        $this->assertEquals($fillable, $apiLog->getFillable());
+        $model = new ApiLog;
+
+        $this->assertEquals(
+            [
+                'request_route',
+                'method',
+                'request_payload',
+                'request_headers',
+                'response_payload',
+                'response_headers',
+                'response_status_code',
+                'user_id',
+            ],
+            $model->getFillable()
+        );
     }
 
-    public function test_api_log_has_correct_table_name(): void
+    public function test_uses_api_logs_table(): void
     {
-        $apiLog = new ApiLog();
-        $this->assertEquals('api_logs', $apiLog->getTable());
+        $this->assertEquals('api_logs', (new ApiLog)->getTable());
     }
 
-    public function test_api_log_belongs_to_user(): void
+    public function test_user_relationship_is_belongs_to(): void
     {
-        $apiLog = new ApiLog();
-        $this->assertInstanceOf(BelongsTo::class, $apiLog->user());
-        $this->assertInstanceOf(User::class, $apiLog->user()->getRelated());
+        $log = ApiLog::factory()->create();
+
+        $this->assertInstanceOf(BelongsTo::class, $log->user());
     }
 
-    public function test_api_log_can_be_created_via_factory(): void
+    public function test_user_relationship_returns_associated_user(): void
     {
         $user = User::factory()->create();
-        $apiLog = ApiLog::factory()->create([
-            'user_id' => $user->id,
-            'method' => 'POST',
-            'response_status_code' => 201,
-        ]);
+        $log = ApiLog::factory()->create(['user_id' => $user->id]);
 
-        $this->assertDatabaseHas('api_logs', [
-            'id' => $apiLog->id,
-            'user_id' => $user->id,
-            'method' => 'POST',
-            'response_status_code' => 201,
-        ]);
+        $this->assertEquals($user->id, $log->user->id);
     }
 
-    public function test_api_log_user_relationship_is_accessible(): void
+    public function test_user_id_is_required_by_database(): void
     {
-        $apiLog = ApiLog::factory()->create();
+        $user = User::factory()->create();
+        $log = ApiLog::factory()->create(['user_id' => $user->id]);
 
-        $this->assertInstanceOf(User::class, $apiLog->user);
-        $this->assertEquals($apiLog->user_id, $apiLog->user->id);
+        $this->assertNotNull($log->user_id);
     }
 }

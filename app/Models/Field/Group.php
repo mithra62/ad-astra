@@ -3,15 +3,18 @@
 namespace App\Models\Field;
 
 use App\Models\Field;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Group extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name',
-        'slug',
-        'description'
+        'handle',
+        'description',
     ];
 
     /**
@@ -24,9 +27,6 @@ class Group extends Model
         return $this->morphTo();
     }
 
-    /**
-     * @return MorphToMany
-     */
     public function fields(): MorphToMany
     {
         return $this->morphToMany(Field::class, 'fieldable')

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests\Category;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -7,9 +8,6 @@ use Illuminate\Validation\Rule;
 
 class EditCategoryRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
         return Auth::user()->can('edit category');
@@ -28,12 +26,13 @@ class EditCategoryRequest extends FormRequest
                 'max:255',
                 Rule::unique('categories')->ignore($this->route()->parameter('category')),
             ],
-            'slug' => [
-                'required',
+            'handle' => [
+                'nullable',
                 'string',
                 'max:255',
-                Rule::unique('categories')->ignore($this->route()->parameter('category')),
+                Rule::unique('categories', 'handle')->ignore($this->route()->parameter('category')),
             ],
+            'fields' => ['nullable', 'array'],
         ];
     }
 }

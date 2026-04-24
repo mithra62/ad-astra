@@ -44,10 +44,10 @@
                             {% endif %}
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label" for="slug">Slug</label>
-                            <input class="form-control" id="slug" required type="text" value="{{ old('slug') }}" name="slug">
-                            {% if errors.has('slug') %}
-                                <p class="text-danger">{{ errors.first('slug') }}</p>
+                            <label class="form-label" for="handle">Slug</label>
+                            <input class="form-control" id="handle" required type="text" value="{{ old('handle') }}" name="handle">
+                            {% if errors.has('handle') %}
+                                <p class="text-danger">{{ errors.first('handle') }}</p>
                             {% endif %}
                         </div>
 
@@ -58,7 +58,7 @@
                                 {% for group in field_groups %}
                                     <div class="form-check d-flex">
                                         <input class="form-check-input mg-2"
-                                               id="library.{{ group.slug }}"
+                                               id="library.{{ group.handle }}"
                                                type="checkbox"
                                                name="field_groups[]"
                                                value="{{ group.id }}"
@@ -73,7 +73,7 @@
                                                 {% endfor %}
                                             {% endif %}
                                         >
-                                        <label class="form-check-label ms-2" for="library.{{ group.slug }}">
+                                        <label class="form-check-label ms-2" for="library.{{ group.handle }}">
                                             {{ group.name }}
                                         </label>
                                     </div>

@@ -38,7 +38,7 @@
                 <span>Content</span>
             </li>
             <li class="no-sub">
-                <a href="/posts">Posts</a>
+                <a href="{{ route('entries.groups') }}">Posts</a>
             </li>
             <li class="no-sub">
                 <a href="{{ route('categories.groups') }}">Categories</a>
@@ -48,6 +48,12 @@
             </li>
             <li class="no-sub">
                 <a href="{{ route('fields.groups') }}">Fields</a>
+            </li>
+            <li class="no-sub">
+                <a href="{{ route('statuses.groups') }}">Statuses</a>
+            </li>
+            <li class="no-sub">
+                <a href="{{ route('field-layouts') }}">Field Layouts</a>
             </li>
             {% if can('api') %}
                 <li class="menu-title">
@@ -70,6 +76,11 @@
                 <li class="no-sub">
                     <a href="{{ route('roles.index') }}">
                         Roles
+                    </a>
+                </li>
+                <li class="no-sub">
+                    <a href="{{ route('users.layouts.show') }}">
+                        Fields
                     </a>
                 </li>
             {% endif %}

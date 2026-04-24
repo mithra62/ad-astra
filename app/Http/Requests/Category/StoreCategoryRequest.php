@@ -2,15 +2,12 @@
 
 namespace App\Http\Requests\Category;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
+use App\Models\Category\Group as CategoryGroup;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class StoreCategoryRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
         return Auth::user()->can('create category');
@@ -21,19 +18,37 @@ class StoreCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('categories')->ignore($this->data('id')),
+        $schema = CategoryGroup::resolvedFields($this->route()->parameter('group_id'));
+        return array_merge(
+            [
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+                'handle' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+                'fields' => ['nullable', 'array'],
             ],
-            'slug' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('categories')->ignore($this->data('id')),
-            ],
-        ];
+            $this->schemaFieldRules($schema));
+    }
+
+
+    public function messages(): array
+    {
+        $schema = CategoryGroup::resolvedFields($this->route()->parameter('group_id'));
+        return $this->schemaFieldMessages($schema);
+    }
+
+    /**
+     * @return array
+     */
+    public function attributes(): array
+    {
+        $schema = CategoryGroup::resolvedFields($this->route()->parameter('group_id'));
+        return $this->schemaFieldAttributes($schema);
     }
 }

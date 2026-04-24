@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\User\CreateNewUser;
+use App\Actions\User\UpdateUserProfileInformation;
 use App\Actions\User\UpdateUserPassword;
 use App\Http\Requests\User\DeleteUserRequest;
 use App\Http\Requests\User\EditUserRequest;
@@ -11,6 +12,7 @@ use App\Http\Requests\User\StoreUserRequest;
 use App\Models\User as UserModel;
 use App\Rest\Client;
 use Spatie\Permission\Models\Role as RoleModel;
+use App\Models\UserSchema;
 
 class User extends Controller
 {
@@ -28,8 +30,10 @@ class User extends Controller
      */
     public function create()
     {
-        $roles = RoleModel::all();
-        return $this->view('users.create', ['roles' => $roles]);
+        $roles  = RoleModel::all();
+        $schema = UserSchema::instance()->resolved();
+
+        return $this->view('users.create', compact('roles', 'schema'));
     }
 
     /**
@@ -47,6 +51,10 @@ class User extends Controller
      */
     public function show(string $id)
     {
+        $user = UserModel::find($id);
+        $user->load('fieldValues.field.fieldType');
+        print_r($user->fieldArray());
+        exit;
 //        $user = Auth::user();
 //        $tokens = $user->tokens;
 //
@@ -72,16 +80,15 @@ class User extends Controller
      */
     public function edit(string $id)
     {
+        $schema = UserSchema::instance()->resolved();
         $roles = RoleModel::all();
         $user = UserModel::with('roles')->with('tokens')->find($id);
         if (!$user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
-//        print_r($user);
-//        exit;
-
-        return $this->view('users.edit', ['user' => $user, 'roles' => $roles]);
+        $user->load('fieldValues.field.fieldType');
+        return $this->view('users.edit', ['user' => $user, 'roles' => $roles, 'schema' => $schema, 'field_values' => $user->fieldArray()]);
     }
 
     /**
@@ -91,9 +98,8 @@ class User extends Controller
     {
         $user = UserModel::find($id);
         if ($user instanceof UserModel) {
-            $post = $request->all();
-            $user->update($post);
-            $user->syncRoles($post['roles']);
+            $editor = app(UpdateUserProfileInformation::class);
+            $user = $editor->update($user, $request->all());
             return redirect()->route('users.edit', $user)->with('success', trans('user.updated'));
         }
 

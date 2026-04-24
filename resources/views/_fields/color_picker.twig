@@ -1,0 +1,10 @@
+<div class="input-group">
+    <input type="color" class="form-control form-control-color" id="{{ id }}_picker"
+           value="{{ old('fields.' ~ field.handle, value) ?? '#000000' }}"
+           oninput="document.getElementById('{{ id }}').value = this.value">
+    <input type="text" class="{{ class ?? 'form-control' }}" id="{{ id }}"
+           name="fields[{{ field.handle }}]"
+           value="{{ old('fields.' ~ field.handle, value) }}"
+           placeholder="#000000"
+           oninput="document.getElementById('{{ id }}_picker').value = this.value">
+</div>

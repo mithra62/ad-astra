@@ -3,16 +3,16 @@
 namespace App\Models;
 
 use App\Models\Category\Group;
+use App\Traits\Fieldable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Category extends Model
 {
-    use HasFactory;
+    use Fieldable, HasFactory;
 
     protected $table = 'categories';
 
@@ -20,7 +20,7 @@ class Category extends Model
         'group_id',
         'parent_id',
         'name',
-        'slug',
+        'handle',
         'sort_order',
     ];
 
@@ -35,10 +35,9 @@ class Category extends Model
         return $this->morphTo();
     }
 
-    public function groups(): MorphToMany
+    public function group(): BelongsTo
     {
-        return $this->morphedByMany(Group::class, 'categorizable')
-            ->withTimestamps();
+        return $this->belongsTo(Group::class, 'group_id');
     }
 
     public function parent(): BelongsTo
@@ -53,9 +52,15 @@ class Category extends Model
             ->orderBy('name');
     }
 
-    public function childrenRecursive(): HasMany
+    public function childrenRecursive(int $maxDepth = 10): HasMany
     {
-        return $this->children()->with('childrenRecursive');
+        if ($maxDepth <= 0) {
+            return $this->children()->whereRaw('0 = 1');
+        }
+
+        return $this->children()->with([
+            'childrenRecursive' => fn ($q) => $q->childrenRecursive($maxDepth - 1),
+        ]);
     }
 
     public function scopeRoots(Builder $query): Builder

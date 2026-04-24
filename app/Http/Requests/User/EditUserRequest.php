@@ -3,55 +3,31 @@
 namespace App\Http\Requests\User;
 
 use App\Http\Requests\FormRequest;
+use App\Models\UserSchema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-class EditUserRequest extends FormRequest
+class EditUserRequest extends StoreUserRequest
 {
-    /**
-     * @return bool
-     */
+
     public function authorize(): bool
     {
         return Auth::user()->can('edit user');
     }
 
-    /**
-     * @return string[]
-     */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string|max:255',
-            'email' => [
-                'required',
-                'email',
-                Rule::unique('users')->ignore($this->route()->parameter('user')),
+        $schema = UserSchema::resolved();
+        $userId = $this->route()->parameter('user') ?? $this->route()->parameter('id');
+        return array_merge(
+            [
+                'name'   => ['required', 'string', 'max:255'],
+                'email'  => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
+                'roles'  => ['required', 'array'],
+                'roles.*' => ['string', 'exists:roles,name'],
+                'fields' => ['nullable', 'array'],
             ],
-            'roles' => 'required|array',
-        ];
-    }
-
-    /**
-     * @return string[]
-     */
-    public function messages(): array
-    {
-        return [
-            'terms.accepted' => 'You must accept the Terms of Service and Privacy Policy.',
-            'email.unique' => 'This email is already registered.',
-            'roles.required' => 'You must select at least one role.',
-        ];
-    }
-
-    /**
-     * @return string[]
-     */
-    public function attributes(): array
-    {
-        return [
-            'name' => 'full name',
-            'email' => 'email address',
-        ];
+            $this->schemaFieldRules($schema)
+        );
     }
 }

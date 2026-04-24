@@ -7,7 +7,6 @@ use App\Http\Resources\Api\UserCollection;
 use App\Http\Resources\Api\UserResource;
 use App\Http\Controllers\Api\Controller;
 use Illuminate\Support\Facades\Auth;
-use OpenApi\Annotations as OA;
 use App\Models\User as UserModel;
 
 class User extends Controller

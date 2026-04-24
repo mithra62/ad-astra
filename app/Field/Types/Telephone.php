@@ -6,5 +6,22 @@ use App\Field\AbstractField;
 
 class Telephone extends AbstractField
 {
-    protected string $type = 'string';
+    protected string $handle = 'telephone';
+
+    protected string $name = 'Telephone';
+
+    protected array $rules = [
+        'string',
+        'telephone',
+    ];
+
+    public function storageColumn(): string
+    {
+        return 'value_text';
+    }
+
+    public function render(array $params): string
+    {
+        return view('_fields.telephone', $params)->render();
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests\Category\Group;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -7,9 +8,6 @@ use Illuminate\Validation\Rule;
 
 class EditCategoryGroupRequest extends FormRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
         return Auth::user()->can('edit category group');
@@ -28,11 +26,11 @@ class EditCategoryGroupRequest extends FormRequest
                 'max:255',
                 Rule::unique('category_groups')->ignore($this->route()->parameter('group')),
             ],
-            'slug' => [
+            'handle' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('category_groups')->ignore($this->route()->parameter('group')),
+                Rule::unique('category_groups', 'handle')->ignore($this->route()->parameter('group')),
             ],
         ];
     }

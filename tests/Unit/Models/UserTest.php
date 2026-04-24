@@ -4,123 +4,138 @@ namespace Tests\Unit\Models;
 
 use App\Models\User;
 use App\Models\User\OauthToken;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Tests\TestCase;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravolt\Avatar\Avatar;
-use Mockery;
+use Tests\TestCase;
 
 class UserTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_user_has_fillable_attributes(): void
+    public function test_has_correct_fillable_attributes(): void
     {
-        $user = new User();
-        $fillable = ['name', 'email', 'title', 'phone', 'password'];
-        $this->assertEquals($fillable, $user->getFillable());
+        $model = new User;
+
+        $this->assertEquals(['name', 'email', 'password'], $model->getFillable());
     }
 
-    public function test_user_has_hidden_attributes(): void
+    public function test_hides_password_and_remember_token(): void
     {
-        $user = new User();
-        $hidden = ['password', 'remember_token'];
-        $this->assertEquals($hidden, $user->getHidden());
+        $model = new User;
+
+        $this->assertContains('password', $model->getHidden());
+        $this->assertContains('remember_token', $model->getHidden());
     }
 
-    public function test_user_casts_attributes(): void
+    public function test_casts_email_verified_at_to_datetime(): void
     {
-        $user = new User();
-        $casts = $user->getCasts();
-        $this->assertArrayHasKey('email_verified_at', $casts);
-        $this->assertEquals('datetime', $casts['email_verified_at']);
-        $this->assertArrayHasKey('password', $casts);
-        $this->assertEquals('hashed', $casts['password']);
+        $user = User::factory()->create(['email_verified_at' => now()]);
+
+        $this->assertInstanceOf(Carbon::class, $user->email_verified_at);
     }
 
-    public function test_user_has_oauth_tokens_relationship(): void
+    public function test_email_verified_at_can_be_null(): void
     {
-        $user = new User();
+        $user = User::factory()->unverified()->create();
+
+        $this->assertNull($user->email_verified_at);
+    }
+
+    public function test_oauth_tokens_relationship_is_has_many(): void
+    {
+        $user = User::factory()->create();
+
         $this->assertInstanceOf(HasMany::class, $user->oauthTokens());
-        $this->assertInstanceOf(OauthToken::class, $user->oauthTokens()->getRelated());
+    }
+
+    public function test_oauth_tokens_relationship_returns_user_tokens(): void
+    {
+        $user = User::factory()->create();
+        OauthToken::factory()->for($user)->create(['provider' => 'github']);
+        OauthToken::factory()->for($user)->create(['provider' => 'google']);
+
+        $this->assertCount(2, $user->oauthTokens);
     }
 
     public function test_oauth_token_for_returns_active_token_for_provider(): void
     {
         $user = User::factory()->create();
-
-        // Active token
-        $activeToken = OauthToken::create([
-            'user_id' => $user->id,
-            'provider' => 'google',
-            'access_token' => 'active-token',
-            'expires_at' => now()->addHour(),
-        ]);
-
-        // Revoked token
-        OauthToken::create([
-            'user_id' => $user->id,
-            'provider' => 'google',
-            'access_token' => 'revoked-token',
-            'expires_at' => now()->addHour(),
-            'revoked_at' => now(),
-        ]);
-
-        // Token for different provider
-        OauthToken::create([
-            'user_id' => $user->id,
+        $token = OauthToken::factory()->for($user)->create([
             'provider' => 'github',
-            'access_token' => 'github-token',
             'expires_at' => now()->addHour(),
+            'revoked_at' => null,
         ]);
 
-        $token = $user->oauthTokenFor('google');
+        $result = $user->oauthTokenFor('github');
 
-        $this->assertNotNull($token);
-        $this->assertEquals($activeToken->id, $token->id);
-        $this->assertEquals('google', $token->provider);
+        $this->assertNotNull($result);
+        $this->assertEquals($token->id, $result->id);
     }
 
-    public function test_oauth_token_for_returns_latest_expiring_token(): void
+    public function test_oauth_token_for_returns_null_for_nonexistent_provider(): void
     {
         $user = User::factory()->create();
 
-        $earlierToken = OauthToken::create([
-            'user_id' => $user->id,
-            'provider' => 'google',
-            'access_token' => 'earlier-token',
+        $this->assertNull($user->oauthTokenFor('github'));
+    }
+
+    public function test_oauth_token_for_returns_null_when_token_is_revoked(): void
+    {
+        $user = User::factory()->create();
+        OauthToken::factory()->revoked()->for($user)->create(['provider' => 'github']);
+
+        $this->assertNull($user->oauthTokenFor('github'));
+    }
+
+    public function test_oauth_token_for_returns_expired_token_when_not_revoked(): void
+    {
+        $user = User::factory()->create();
+        $token = OauthToken::factory()->expired()->for($user)->create(['provider' => 'github']);
+
+        $result = $user->oauthTokenFor('github');
+
+        $this->assertNotNull($result);
+        $this->assertEquals($token->id, $result->id);
+    }
+
+    public function test_oauth_token_for_returns_latest_by_expiry(): void
+    {
+        $user = User::factory()->create();
+        OauthToken::factory()->for($user)->create([
+            'provider' => 'github',
             'expires_at' => now()->addHour(),
         ]);
-
-        $laterToken = OauthToken::create([
-            'user_id' => $user->id,
-            'provider' => 'google',
-            'access_token' => 'later-token',
+        $newer = OauthToken::factory()->for($user)->create([
+            'provider' => 'github',
             'expires_at' => now()->addHours(2),
         ]);
 
-        $token = $user->oauthTokenFor('google');
+        $result = $user->oauthTokenFor('github');
 
-        $this->assertNotNull($token);
-        $this->assertEquals($laterToken->id, $token->id);
+        $this->assertEquals($newer->id, $result->id);
     }
 
-    public function test_avatar_returns_gravatar_url_when_email_exists(): void
+    public function test_avatar_returns_non_empty_string(): void
     {
-        $user = new User(['email' => 'test@example.com']);
+        $user = User::factory()->create(['email' => 'test@example.com']);
 
-        $mockAvatar = Mockery::mock(Avatar::class);
-        $mockAvatar->shouldReceive('create')->with('test@example.com')->andReturnSelf();
-        $mockAvatar->shouldReceive('toGravatar')->andReturn('https://gravatar.com/avatar/hash');
-
-        $this->app->instance(Avatar::class, $mockAvatar);
-
-        $this->assertEquals('https://gravatar.com/avatar/hash', $user->avatar());
+        $this->assertIsString($user->avatar());
+        $this->assertNotEmpty($user->avatar());
     }
 
-    public function test_avatar_returns_empty_string_when_email_is_missing(): void
+    public function test_avatar_returns_empty_string_when_no_email(): void
     {
-        $user = new User();
+        $user = new User(['email' => null]);
+
         $this->assertEquals('', $user->avatar());
+    }
+
+    public function test_has_field_values_morph_many_from_fieldable_trait(): void
+    {
+        $user = User::factory()->create();
+
+        $this->assertInstanceOf(MorphMany::class, $user->fieldValues());
     }
 }

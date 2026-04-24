@@ -4,9 +4,9 @@ namespace App\Actions\User;
 
 use App\Models\User;
 use App\Traits\PasswordValidationRules;
-use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use App\Actions\AbstractAction;
+use App\Facades\Users AS UsersFacade;
 
 class CreateNewUser extends AbstractAction implements CreatesNewUsers
 {
@@ -14,17 +14,6 @@ class CreateNewUser extends AbstractAction implements CreatesNewUsers
 
     public function create(array $input): User
     {
-        if (!empty($input['password'])) {
-            $input['password'] = Hash::make($input['password']);
-        }
-
-        $user = User::create($input);
-        if (!empty($input['roles'])) {
-            foreach($input['roles'] AS $role) {
-                $user->assignRole($role);
-            }
-        }
-
-        return $user;
+        return UsersFacade::create($input);
     }
 }

@@ -2,10 +2,22 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
+use App\Models\Category\Group as CategoryGroup;
+use App\Models\Entry;
+use App\Models\EntryGroup;
+use App\Models\EntryType;
+use App\Models\Field\Group as FieldGroup;
+use App\Models\Media;
+use App\Models\Media\Library as MediaLibrary;
+use App\Models\User;
 use App\Rest\Api;
 use App\Settings;
-use App\Services\FilesService;
 use App\Services\FieldService;
+use App\Services\FilesService;
+use App\Services\CategoryService;
+use App\Services\UserService;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -33,6 +45,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('fields-service', function ($app) {
             return new FieldService($app);
         });
+
+        $this->app->singleton(UserService::class, fn() => new UserService());
+        $this->app->singleton(CategoryService::class, fn($app) => new CategoryService($app));
     }
 
     /**
@@ -40,6 +55,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Decouple stored polymorphic type strings from class names so that
+        // model renames do not silently orphan rows in polymorphic tables.
+        Relation::morphMap([
+            'entry'          => Entry::class,
+            'entry_group'    => EntryGroup::class,
+            'entry_type'     => EntryType::class,
+            'category'       => Category::class,
+            'category_group' => CategoryGroup::class,
+            'field_group'    => FieldGroup::class,
+            'media'          => Media::class,
+            'media_library'  => MediaLibrary::class,
+            'user'           => User::class,
+        ]);
+
 //        Route::group([
 //            'namespace' => 'mithra62\Shop\Http\Controllers',
 //            'domain' => config('fortify.domain', null),

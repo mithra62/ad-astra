@@ -49,10 +49,10 @@
                             {% endif %}
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label" for="slug">Slug</label>
-                            <input class="form-control" id="slug" required type="text" value="{{ old('slug', group.slug) }}" name="slug">
-                            {% if errors.has('slug') %}
-                                <p class="text-danger">{{ errors.first('slug') }}</p>
+                            <label class="form-label" for="handle">Slug</label>
+                            <input class="form-control" id="handle" required type="text" value="{{ old('handle', group.handle) }}" name="handle">
+                            {% if errors.has('handle') %}
+                                <p class="text-danger">{{ errors.first('handle') }}</p>
                             {% endif %}
                         </div>
 
@@ -65,7 +65,7 @@
                                 {% for fg in field_groups %}
                                     <div class="form-check d-flex">
                                         <input class="form-check-input mg-2"
-                                               id="library.{{ fg.slug }}"
+                                               id="library.{{ fg.handle }}"
                                                type="checkbox"
                                                name="field_groups[]"
                                                value="{{ fg.id }}"
@@ -75,12 +75,14 @@
                                                 {% endfor %}
 
                                             {% else %}
-                                                {% for key, field in group.field_groups %}
+
+
+                                                {% for key, field in group.fieldGroups %}
                                                     {% if field.id == fg.id %}checked{% endif %}
                                                 {% endfor %}
                                             {% endif %}
                                         >
-                                        <label class="form-check-label ms-2" for="library.{{ fg.slug }}">
+                                        <label class="form-check-label ms-2" for="library.{{ fg.handle }}">
                                             {{ fg.name }}
                                         </label>
                                     </div>

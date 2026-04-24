@@ -1,22 +1,18 @@
 <?php
+
 namespace App\Actions\Category;
 
+use App\Actions\AbstractAction;
 use App\Models\Category;
 use App\Models\Category\Group;
-use App\Actions\AbstractAction;
+use App\Repositories\CategoryRepository;
 
 class CreateNewCategory extends AbstractAction
 {
     public function create(array $input): Category
     {
-        $cat = Category::create($input);
+        $group = Group::findOrFail($input['group_id']);
 
-        return $cat;
-    }
-
-    public function createByGroup(array $input): Category
-    {
-        $group = Group::find($input['group_id']);
-        return $group->categories()->create($input);
+        return app(CategoryRepository::class)->create($group, $input);
     }
 }

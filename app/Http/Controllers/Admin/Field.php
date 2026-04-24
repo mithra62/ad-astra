@@ -35,7 +35,7 @@ class Field extends Controller
         $data = [
             'group' => $group,
             'groups' => $groups,
-            'field_types' => app('fields-service')->getFieldTypes()
+            'field_types' => app('fields-service')->getFieldOptions()
         ];
 
         return $this->view('fields.create', $data);
@@ -83,10 +83,11 @@ class Field extends Controller
         $groups = FieldGroup::all();
         $active_group = $field->groups->first();
         $data = [
-            'field' => $field,
-            'groups' => $groups,
-            'field_types' => app('fields-service')->getFieldTypes(),
-            'active_group' => $active_group
+            'field'               => $field,
+            'groups'              => $groups,
+            'field_types'         => app('fields-service')->getFieldOptions(),
+            'active_group'        => $active_group,
+            'current_type_handle' => $field->fieldType?->instance()->handle(),
         ];
 
         return $this->view('fields.edit', $data);

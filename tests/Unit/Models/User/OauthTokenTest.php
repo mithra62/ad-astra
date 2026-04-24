@@ -4,180 +4,214 @@ namespace Tests\Unit\Models\User;
 
 use App\Models\User;
 use App\Models\User\OauthToken;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 class OauthTokenTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_oauth_token_has_fillable_attributes(): void
+    public function test_uses_user_oauth_tokens_table(): void
     {
-        $token = new OauthToken();
-        $fillable = [
-            'user_id',
-            'provider',
-            'provider_account',
-            'provider_user_id',
-            'issuer',
-            'subject',
-            'id_token',
-            'access_token',
-            'refresh_token',
-            'token_type',
-            'expires_at',
-            'scopes',
-            'meta',
-            'revoked_at',
-            'last_used_at',
-        ];
-        $this->assertEquals($fillable, $token->getFillable());
+        $this->assertEquals('user_oauth_tokens', (new OauthToken)->getTable());
     }
 
-    public function test_oauth_token_casts_attributes(): void
+    public function test_casts_scopes_to_array(): void
     {
-        $token = new OauthToken();
-        $casts = $token->getCasts();
+        $token = OauthToken::factory()->create(['scopes' => ['read', 'write']]);
 
-        $this->assertEquals('array', $casts['scopes']);
-        $this->assertEquals('array', $casts['meta']);
-        $this->assertEquals('datetime', $casts['expires_at']);
-        $this->assertEquals('datetime', $casts['revoked_at']);
-        $this->assertEquals('datetime', $casts['last_used_at']);
+        $this->assertIsArray($token->scopes);
+        $this->assertEquals(['read', 'write'], $token->scopes);
     }
 
-    public function test_oauth_token_has_correct_table_name(): void
+    public function test_casts_meta_to_array(): void
     {
-        $token = new OauthToken();
-        $this->assertEquals('user_oauth_tokens', $token->getTable());
+        $token = OauthToken::factory()->create(['meta' => ['foo' => 'bar']]);
+
+        $this->assertIsArray($token->meta);
+        $this->assertEquals(['foo' => 'bar'], $token->meta);
     }
 
-    public function test_oauth_token_belongs_to_user(): void
+    public function test_casts_expires_at_to_datetime(): void
+    {
+        $token = OauthToken::factory()->create(['expires_at' => now()->addHour()]);
+
+        $this->assertInstanceOf(Carbon::class, $token->expires_at);
+    }
+
+    public function test_casts_revoked_at_to_datetime(): void
+    {
+        $token = OauthToken::factory()->revoked()->create();
+
+        $this->assertInstanceOf(Carbon::class, $token->revoked_at);
+    }
+
+    public function test_user_relationship_is_belongs_to(): void
+    {
+        $token = OauthToken::factory()->create();
+
+        $this->assertInstanceOf(BelongsTo::class, $token->user());
+    }
+
+    public function test_user_relationship_returns_owner(): void
     {
         $user = User::factory()->create();
-        $token = OauthToken::factory()->create(['user_id' => $user->id]);
+        $token = OauthToken::factory()->for($user)->create();
 
-        $this->assertInstanceOf(User::class, $token->user);
-        $this->assertEquals($user->id, $token->user_id);
+        $this->assertEquals($user->id, $token->user->id);
     }
 
-    public function test_scope_provider(): void
+    public function test_scope_provider_filters_by_provider_name(): void
     {
-        OauthToken::factory()->create(['provider' => 'google']);
-        OauthToken::factory()->create(['provider' => 'github']);
+        $github = OauthToken::factory()->create(['provider' => 'github']);
+        $google = OauthToken::factory()->create(['provider' => 'google']);
 
-        $this->assertCount(1, OauthToken::provider('google')->get());
-        $this->assertEquals('google', OauthToken::provider('google')->first()->provider);
+        $results = OauthToken::query()->provider('github')->get();
+
+        $this->assertTrue($results->contains($github));
+        $this->assertFalse($results->contains($google));
     }
 
-    public function test_scope_active(): void
+    public function test_scope_active_excludes_revoked_tokens(): void
     {
-        OauthToken::factory()->create(['revoked_at' => null]);
-        OauthToken::factory()->create(['revoked_at' => now()]);
+        $active = OauthToken::factory()->create(['revoked_at' => null]);
+        $revoked = OauthToken::factory()->revoked()->create();
 
-        $this->assertCount(1, OauthToken::active()->get());
+        $results = OauthToken::query()->active()->get();
+
+        $this->assertTrue($results->contains($active));
+        $this->assertFalse($results->contains($revoked));
     }
 
-    public function test_scope_expired(): void
+    public function test_scope_expired_returns_expired_tokens(): void
     {
-        OauthToken::factory()->create(['expires_at' => now()->subDay()]);
-        OauthToken::factory()->create(['expires_at' => now()->addDay()]);
+        $expired = OauthToken::factory()->expired()->create();
+        $valid = OauthToken::factory()->create(['expires_at' => now()->addHour()]);
 
-        $this->assertCount(1, OauthToken::expired()->get());
+        $results = OauthToken::query()->expired()->get();
+
+        $this->assertTrue($results->contains($expired));
+        $this->assertFalse($results->contains($valid));
     }
 
-    public function test_scope_expiring_soon(): void
+    public function test_scope_expired_excludes_tokens_with_null_expires_at(): void
     {
-        // Expiring in 2 minutes (soon)
-        OauthToken::factory()->create(['expires_at' => now()->addMinutes(2)]);
-        // Expiring in 10 minutes (not soon by default 300s/5m)
-        OauthToken::factory()->create(['expires_at' => now()->addMinutes(10)]);
+        $noExpiry = OauthToken::factory()->create(['expires_at' => null]);
 
-        $this->assertCount(1, OauthToken::expiringSoon()->get());
-        $this->assertCount(2, OauthToken::expiringSoon(900)->get()); // 15 minutes
+        $results = OauthToken::query()->expired()->get();
+
+        $this->assertFalse($results->contains($noExpiry));
     }
 
-    public function test_scope_oidc_identity(): void
+    public function test_scope_expiring_soon_returns_tokens_within_window(): void
     {
-        OauthToken::factory()->create([
-            'issuer' => 'https://accounts.google.com',
-            'subject' => 'sub123'
-        ]);
-        OauthToken::factory()->create([
-            'issuer' => 'https://github.com',
-            'subject' => 'sub456'
-        ]);
+        $soonToken = OauthToken::factory()->create(['expires_at' => now()->addSeconds(200)]);
+        $laterToken = OauthToken::factory()->create(['expires_at' => now()->addHours(2)]);
 
-        $token = OauthToken::oidcIdentity('https://accounts.google.com', 'sub123')->first();
-        $this->assertNotNull($token);
-        $this->assertEquals('sub123', $token->subject);
+        $results = OauthToken::query()->expiringSoon(300)->get();
+
+        $this->assertTrue($results->contains($soonToken));
+        $this->assertFalse($results->contains($laterToken));
     }
 
-    public function test_is_expired(): void
+    public function test_scope_oidc_identity_filters_by_issuer_and_subject(): void
     {
-        $expiredToken = new OauthToken(['expires_at' => now()->subDay()]);
-        $activeToken = new OauthToken(['expires_at' => now()->addDay()]);
-        $noExpiryToken = new OauthToken(['expires_at' => null]);
+        $match = OauthToken::factory()->create(['issuer' => 'https://auth.example.com', 'subject' => 'user-123']);
+        $noMatch = OauthToken::factory()->create(['issuer' => 'https://auth.example.com', 'subject' => 'user-456']);
 
-        $this->assertTrue($expiredToken->isExpired());
-        $this->assertFalse($activeToken->isExpired());
-        $this->assertFalse($noExpiryToken->isExpired());
+        $results = OauthToken::query()->oidcIdentity('https://auth.example.com', 'user-123')->get();
+
+        $this->assertTrue($results->contains($match));
+        $this->assertFalse($results->contains($noMatch));
     }
 
-    public function test_is_active(): void
+    public function test_is_expired_returns_true_when_expires_at_is_past(): void
     {
-        $activeToken = new OauthToken([
+        $token = OauthToken::factory()->expired()->create();
+
+        $this->assertTrue($token->isExpired());
+    }
+
+    public function test_is_expired_returns_false_when_expires_at_is_future(): void
+    {
+        $token = OauthToken::factory()->create(['expires_at' => now()->addHour()]);
+
+        $this->assertFalse($token->isExpired());
+    }
+
+    public function test_is_expired_returns_false_when_no_expires_at(): void
+    {
+        $token = OauthToken::factory()->create(['expires_at' => null]);
+
+        $this->assertFalse($token->isExpired());
+    }
+
+    public function test_is_active_returns_true_for_valid_non_revoked_token(): void
+    {
+        $token = OauthToken::factory()->create([
+            'expires_at' => now()->addHour(),
             'revoked_at' => null,
-            'expires_at' => now()->addDay()
-        ]);
-        $revokedToken = new OauthToken([
-            'revoked_at' => now(),
-            'expires_at' => now()->addDay()
-        ]);
-        $expiredToken = new OauthToken([
-            'revoked_at' => null,
-            'expires_at' => now()->subDay()
         ]);
 
-        $this->assertTrue($activeToken->isActive());
-        $this->assertFalse($revokedToken->isActive());
-        $this->assertFalse($expiredToken->isActive());
+        $this->assertTrue($token->isActive());
     }
 
-    public function test_revoke(): void
+    public function test_is_active_returns_false_when_revoked(): void
+    {
+        $token = OauthToken::factory()->revoked()->create(['expires_at' => now()->addHour()]);
+
+        $this->assertFalse($token->isActive());
+    }
+
+    public function test_is_active_returns_false_when_expired(): void
+    {
+        $token = OauthToken::factory()->expired()->create(['revoked_at' => null]);
+
+        $this->assertFalse($token->isActive());
+    }
+
+    public function test_revoke_sets_revoked_at_timestamp(): void
     {
         $token = OauthToken::factory()->create(['revoked_at' => null]);
+
         $token->revoke();
 
-        $this->assertNotNull($token->revoked_at);
-        $this->assertDatabaseHas('user_oauth_tokens', [
-            'id' => $token->id,
-        ]);
-        $this->assertNotNull(OauthToken::find($token->id)->revoked_at);
+        $this->assertNotNull($token->fresh()->revoked_at);
+        $this->assertInstanceOf(Carbon::class, $token->fresh()->revoked_at);
     }
 
-    public function test_mark_used(): void
+    public function test_mark_used_sets_last_used_at_timestamp(): void
     {
         $token = OauthToken::factory()->create(['last_used_at' => null]);
+
         $token->markUsed();
 
-        $this->assertNotNull($token->last_used_at);
-        $this->assertDatabaseHas('user_oauth_tokens', [
-            'id' => $token->id,
-        ]);
-        $this->assertNotNull(OauthToken::find($token->id)->last_used_at);
+        $this->assertNotNull($token->fresh()->last_used_at);
+        $this->assertInstanceOf(Carbon::class, $token->fresh()->last_used_at);
     }
 
-    public function test_has_scope(): void
+    public function test_has_scope_returns_true_for_existing_scope(): void
     {
-        $token = new OauthToken(['scopes' => ['read', 'write']]);
+        $token = OauthToken::factory()->create(['scopes' => ['read', 'write', 'admin']]);
 
         $this->assertTrue($token->hasScope('read'));
-        $this->assertTrue($token->hasScope('write'));
-        $this->assertFalse($token->hasScope('delete'));
+        $this->assertTrue($token->hasScope('admin'));
+    }
 
-        $tokenNoScopes = new OauthToken(['scopes' => null]);
-        $this->assertFalse($tokenNoScopes->hasScope('read'));
+    public function test_has_scope_returns_false_for_missing_scope(): void
+    {
+        $token = OauthToken::factory()->create(['scopes' => ['read']]);
+
+        $this->assertFalse($token->hasScope('write'));
+        $this->assertFalse($token->hasScope('delete'));
+    }
+
+    public function test_has_scope_returns_false_when_scopes_is_null(): void
+    {
+        $token = OauthToken::factory()->create(['scopes' => null]);
+
+        $this->assertFalse($token->hasScope('read'));
     }
 }

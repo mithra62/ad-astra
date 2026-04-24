@@ -25,11 +25,11 @@ class StoreMediaLibraryFormRequest extends FormRequest
                 'max:255',
                 Rule::unique('media_libraries')->ignore($this->route()->parameter('library')),
             ],
-            'slug' => [
+            'handle' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('media_libraries')->ignore($this->route()->parameter('library')),
+                Rule::unique('media_libraries', 'handle')->ignore($this->route()->parameter('library')),
             ],
             'storage' => [
                 'required',
@@ -46,10 +46,10 @@ class StoreMediaLibraryFormRequest extends FormRequest
             'category_groups' => [
                 'array',
             ],
-            'allowed_types'=> [
+            'allowed_types' => [
                 'required',
                 'array',
-            ]
+            ],
         ];
 
         if ($this->data('storage') == 'local') {

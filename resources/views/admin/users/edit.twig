@@ -58,22 +58,35 @@
                                 <p class="text-danger">{{ errors.first('email') }}</p>
                             {% endif %}
                         </div>
-                        <div class="col-md-12">
-                            <label class="form-label" for="title">Title</label>
-                            <input class="form-control" id="title" required type="text"
-                                   value="{{ old('title', user.title) }}" name="title">
-                            {% if errors.has('title') %}
-                                <p class="text-danger">{{ errors.first('title') }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label" for="phone">Phone Number</label>
-                            <input class="form-control" id="phone" required type="text"
-                                   value="{{ old('phone', user.phone) }}" name="phone">
-                            {% if errors.has('phone') %}
-                                <p class="text-danger">{{ errors.first('phone') }}</p>
-                            {% endif %}
-                        </div>
+
+                        {% if schema.fieldLayout %}
+                            {% for tab in schema.fieldLayout.tabs %}
+                                <h4>{{ tab.name }}</h4>
+
+                                {% for element in tab.elements %}
+                                    {% set field = element.field %}
+                                    <div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="field_{{ field.handle }}">{{ field.label }}</label>
+                                            {% if field.instructions %}
+                                                <small>{{ field.instructions }}</small>
+                                            {% endif %}
+                                            <div class="input-group has-validation">
+                                                {{ field.render({
+                                                    value: field_values[field.handle],
+                                                    id: 'field_' ~ field.handle,
+                                                    class: 'form-control'
+                                                })|raw }}
+                                            </div>
+                                            {% if errors.has('fields.' ~ field.handle) %}
+                                                <p class="text-danger">{{ errors.first('fields.' ~ field.handle) }}</p>
+                                            {% endif %}
+                                        </div>
+
+                                    </div>
+                                {% endfor %}
+                            {% endfor %}
+                        {% endif %}
 
                         <div class="col-md-12">
                             <label class="form-label" for="roles">Roles</label>
