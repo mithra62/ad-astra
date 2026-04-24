@@ -22,6 +22,12 @@ return new class extends Migration
 
             $table->string('name');
             $table->string('handle');
+            $table->string('default_template')->nullable();
+
+            $table->boolean('has_tree')->default(false);
+            $table->unsignedInteger('max_depth')->nullable();
+            $table->json('allowed_parent_types')->nullable();
+
             $table->string('class');
             $table->unsignedInteger('sort_order')->default(0);
 
