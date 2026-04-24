@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin\User;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Controller;
+use App\Models\FieldLayout as FieldLayoutModel;
+use App\Models\UserSchema;
 use Illuminate\Http\Request;
 
 class Layout extends Controller
@@ -34,9 +36,23 @@ class Layout extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show()
     {
-        //
+        $shema = UserSchema::resolved();
+        $layout = FieldLayoutModel::with([
+            'tabs.elements.field.fieldType',
+            'entryGroups',
+            'entryTypes.entryGroup',
+        ])->find($shema->field_layout_id);
+
+        if (! $layout instanceof FieldLayoutModel) {
+            abort(404);
+        }
+
+        return $this->view('field-layouts.edit', array_merge(
+            $this->sidebarData(),
+            ['layout' => $layout]
+        ));
     }
 
     /**
@@ -61,5 +77,12 @@ class Layout extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    private function sidebarData(): array
+    {
+        return [
+            'layouts' => FieldLayoutModel::orderBy('name')->get(),
+        ];
     }
 }
