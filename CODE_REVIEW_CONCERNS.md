@@ -5,12 +5,11 @@ Several controllers contain `print_r()`, `exit;`, and `echo` statements that app
 
 **Affected Files:**
 - `app/Http/Controllers/Admin/User.php`: Lines 56-57, 74-75.
-- `app/Http/Controllers/Admin/Category.php`: Lines 20-21, 66-69.
 - `app/Http/Controllers/Admin/Field.php`: Lines 20-21, 67-70.
-- `app/Http/Controllers/Admin/Index.php`: Lines 16-17.
-- `app/Http/Controllers/Login.php`: Lines 22, 25-26.
+- `app/Http/Controllers/Admin/Index.php`: Lines 15-17.
+- `app/Http/Controllers/Login.php`: Lines 21-22, 25-26.
 - `app/Http/Controllers/TemplateController.php`: Lines 97-98.
-- `app/Policies/UserPolicy.php`: Line 39.
+- `app/Policies/UserPolicy.php`: Lines 38-39.
 
 **Recommendation:** Remove all instances of `print_r()`, `exit;`, `die()`, and `echo` used for debugging. Use Laravel's logging facilities or `dd()`/`dump()` during development (and ensure they don't reach production).
 
@@ -21,8 +20,8 @@ There is a significant amount of commented-out code in various controllers, whic
 
 **Affected Files:**
 - `app/Http/Controllers/Admin/User.php`: Lines 58-71.
-- `app/Http/Controllers/Admin/Dashboard.php`: Multiple lines.
-- `app/Http/Controllers/Admin/Category.php`: Line 65.
+- `app/Http/Controllers/Admin/Dashboard.php`: Multiple blocks (lines 17, 21-27, 29-45).
+- `app/Http/Controllers/Admin/Field.php`: Line 66.
 
 **Recommendation:** Remove commented-out code. Rely on Version Control (Git) if you need to retrieve previous versions of the code.
 

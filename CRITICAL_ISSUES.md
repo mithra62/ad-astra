@@ -10,7 +10,7 @@ This document combines the full fragility analysis of the data model with concre
 
 ---
 
-### 1. `Entry::update()` and `Entry::delete()` bypass Eloquent entirely
+### 1. [RESOLVED] `Entry::update()` and `Entry::delete()` bypass Eloquent entirely
 
 **What is fragile:**
 Both methods are overridden in `app/Models/Entry.php` to route through `EntryRepository`. Eloquent's observer events (`updating`, `updated`, `deleting`, `deleted`) never fire. Any feature that hooks into those events — audit logs, cache invalidation, search indexing, webhooks — silently does nothing. `$model->isDirty()` also stops working correctly. This is invisible because the code appears to work until an observer is added and never triggers.
@@ -39,7 +39,7 @@ Check `app/Http/Controllers/Admin/` and `app/Actions/Entry/` for all `$entry->up
 
 ---
 
-### 2. `EntryType::class` and `FieldType::object` stored as plain strings
+### 2. [RESOLVED] `EntryType::class` and `FieldType::object` stored as plain strings
 
 **What is fragile:**
 Both `entry_types.class` and `field_types.object` store fully-qualified class names as plain VARCHAR with no validation. Renaming `PodcastEpisodeEntryType` to `PodcastEpisode`, or moving the namespace, leaves every row pointing at a class that no longer exists. `EntryTypeRegistry::instantiate()` throws a `RuntimeException` at request time. Entries in that group become completely unloadable and users see 500 errors. There is no compile-time or deploy-time signal.
@@ -76,7 +76,7 @@ FieldType::all()->each(function ($type) {
 
 ---
 
-### 3. Polymorphic type columns use raw class name strings with no morph map
+### 3. [RESOLVED] Polymorphic type columns use raw class name strings with no morph map
 
 **What is fragile:**
 `field_values.fieldable_type` and other polymorphic columns store raw class names like `App\Models\Entry`. Renaming or moving the class makes every row silently an orphan — queries return empty collections rather than erroring. Additionally, `EntryRepository::applyFieldValues()` hardcodes `Entry::class` while `PersistsFieldValues::setField()` uses `$model->getMorphClass()`. If a morph alias is ever configured, these two paths diverge and produce duplicate FieldValue rows — one visible, one not.
@@ -145,7 +145,7 @@ DB::table('field_values')
 
 ---
 
-### 5. `PodcastEpisodeEntryType` has a race condition on episode numbers
+### 5. [RESOLVED] `PodcastEpisodeEntryType` has a race condition on episode numbers
 
 **What is fragile:**
 `beforeCreate` reads `Entry::where('entry_group_id', $groupId)->count()` then adds 1. Two concurrent creates see the same count and assign the same episode number. No lock and no unique constraint on the episode number field value.
@@ -218,7 +218,7 @@ private function applyStatus(Entry $entry, ?string $handle, bool $applyDefault):
 
 ---
 
-### 7. Lifecycle hooks mutate `$data` by reference with no rollback on exception
+### 7. [RESOLVED] Lifecycle hooks mutate `$data` by reference with no rollback on exception
 
 **What is fragile:**
 `beforeCreate(array &$data)` and `beforeUpdate(Entry $entry, array &$data)` mutate the caller's array in place. If a hook throws mid-mutation, the caller receives partially-modified data. On retry, the second attempt starts from the already-modified state — the podcast episode number is pre-injected, fields may already be normalized.
@@ -281,7 +281,7 @@ DB::statement(
 
 ---
 
-### 9. Changing a field's type silently corrupts existing `field_values` rows
+### 9. [RESOLVED] Changing a field's type silently corrupts existing `field_values` rows
 
 **What is fragile:**
 `FieldValue` stores values in five typed columns (`value_text`, `value_integer`, etc.). `storageColumn()` determines which to read based on the current field type. Changing a field from text to integer leaves data in `value_text` but code reads `value_integer`, returning `NULL` silently. The old value is still in the row, just invisible.
@@ -304,7 +304,7 @@ if ($field->isDirty('field_type_id') && $field->fieldValues()->exists()) {
 
 ---
 
-### 10. `resolveLayoutFields()` merge order is wrong — group-level fields win on collision
+### 10. [RESOLVED] `resolveLayoutFields()` merge order is wrong — group-level fields win on collision
 
 **What is fragile:**
 `$groupFields->merge($typeFields)->unique('id')` keeps the first occurrence per ID. Since `merge()` appends `$typeFields` after `$groupFields`, and `unique()` keeps the first seen, group-level fields silently override type-level fields on conflict. The documented intent is the opposite ("type-specific on top, group-shared below").
@@ -360,7 +360,7 @@ public function findBySlug(string $slug, string|int|\App\Models\EntryGroup $grou
 
 ---
 
-### 12. Category parent cycles are not prevented
+### 12. [RESOLVED] Category parent cycles are not prevented
 
 **What is fragile:**
 `categories.parent_id` has `nullOnDelete` but no constraint prevents A → B → A. `Category::childrenRecursive()` eager-loads without depth limits and will loop until PHP memory is exhausted.
@@ -517,7 +517,7 @@ try {
 
 ---
 
-### 17. `EntryTypeRegistry` queries the database on every resolution with no caching
+### 17. [RESOLVED] `EntryTypeRegistry` queries the database on every resolution with no caching
 
 **What is fragile:**
 `resolveByHandle()` runs a query with eager-loads on every call. In a request that processes multiple entries of the same type, this fires repeatedly for the same record.

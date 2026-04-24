@@ -68,9 +68,9 @@ The migration defines `name` as `nullable()` but the `StoreFieldLayoutRequest` t
 
 `UserSchema::instance()` uses a static property for request-level caching. In a standard HTTP context this is fine, but in tests or queue jobs that reuse the same process, the static cache persists across test cases unless explicitly cleared. This is worth knowing if field layout functionality is added to user profiles.
 
-### 10. Categories support recursion but have no depth limit
+### 10. [RESOLVED] Categories support recursion but have no depth limit
 
-`Category::childrenRecursive()` eager-loads infinitely deep trees. A misconfigured category tree with circular parents — `parent_id` pointing to a descendant, which the `nullOnDelete` constraint does not prevent — would cause an infinite recursion. A depth guard should be considered if category management is exposed to end users.
+`Category::childrenRecursive()` now includes a depth guard, and `CategoryService` includes cycle detection to prevent circular references.
 
 ---
 
@@ -81,4 +81,4 @@ The migration defines `name` as `nullable()` but the `StoreFieldLayoutRequest` t
 - The **polymorphic fieldability** (`Entry`, `Category`, `User` all share the same field system) is a strong foundation for future extension.
 - The **unique slug per group** constraint on both entries and categories prevents collisions without requiring a global namespace.
 
-The biggest practical day-to-day risks are the **denormalized status string** (concern 1) and the **unenforced `required` flag** (concern 4) — both will produce silent wrong behavior rather than catchable errors.
+The biggest practical day-to-day risks are the **denormalized status string** (concern 1) and the **unenforced `required` flag** (concern 4) — both will produce silent wrong behavior rather than catchable errors. **Note:** Major architectural risks (polymorphic fragility, Eloquent bypasses) have been addressed.

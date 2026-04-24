@@ -46,6 +46,7 @@
   - [Reading Field Values from a User](#reading-field-values-from-a-user)
   - [Typical Controller Pattern](#typical-controller-pattern)
   - [Comparison: Users vs Entries](#comparison-users-vs-entries)
+- [System Health and Data Integrity](#system-health-and-data-integrity)
 - [UserService and the Users Facade](#userservice-and-the-users-facade)
   - [CRUD](#crud)
   - [Roles](#roles)
@@ -835,9 +836,6 @@ $updated = Content::update($entry, [
         'excerpt' => 'Revised summary.',
     ],
 ]);
-
-// Or via the model's fluent update (calls the same repository)
-$entry->update(['status' => 'archived']);
 ```
 
 ### Using the Relationship Field
@@ -1046,11 +1044,11 @@ foreach ($related as $rel) {
 ## Deleting Entries
 
 ```php
-// Via the model (delegates to EntryRepository)
+// Via the model (uses standard Eloquent delete)
 $entry->delete();
 
-// Via the repository directly
-app(\App\Repositories\EntryRepository::class)->delete($entry);
+// Via the facade (handles repository-level cleanup if needed)
+Content::delete($entry);
 ```
 
 ---
@@ -1223,6 +1221,19 @@ public function update(Request $request, User $user): void
 | Schema | Per-group FieldLayout + per-type FieldLayout | Single `UserSchema` singleton |
 | Lifecycle hooks | `beforeCreate`, `afterCreate`, etc. | None — plain Eloquent |
 | Custom Fields | Scalar + Relational | **Scalar only** (relational fields return `null`) |
+
+---
+
+## System Health and Data Integrity
+
+The system includes a dedicated command to validate that all class references stored in the database (for Entry Types and Field Types) are valid and currently exist in the codebase. This is especially important since these references are stored as strings.
+
+```bash
+# Validate all class references in the database
+php artisan system:validate-class-references
+```
+
+Additionally, the system uses **Eloquent Morph Maps** (configured in `AppServiceProvider`) to ensure that polymorphic relationships remain stable even if model classes are moved or renamed.
 
 ---
 
