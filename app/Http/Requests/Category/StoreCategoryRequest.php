@@ -19,19 +19,20 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         $schema = CategoryGroup::resolvedFields($this->route()->parameter('group_id'));
-        return array_merge([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
+        return array_merge(
+            [
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+                'handle' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+                'fields' => ['nullable', 'array'],
             ],
-            'handle' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-            'fields' => ['nullable', 'array'],
-        ],
             $this->schemaFieldRules($schema));
     }
 
