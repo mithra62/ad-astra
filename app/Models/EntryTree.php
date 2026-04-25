@@ -14,7 +14,7 @@ class EntryTree extends Model
     protected $fillable = [
         'entry_id',
         'parent_id',
-        'slug',
+        'handle',
         'uri',
         'depth',
         'sort_order',
@@ -57,9 +57,9 @@ class EntryTree extends Model
         return $this->uri === '/' ? '/' : '/' . $this->uri;
     }
 
-    public static function normalizeSlug(string $slug): string
+    public static function normalizeHandle(string $handle): string
     {
-        return Str::slug($slug);
+        return Str::slug($handle);
     }
 
     public static function normalizeUri(?string $uri): string

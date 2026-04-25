@@ -2,8 +2,6 @@
 
 namespace App\Actions\Entry\Tree;
 
-namespace App\Actions\EntryTree;
-
 use App\Models\EntryTree;
 
 class RebuildEntryTreeUri
@@ -35,7 +33,7 @@ class RebuildEntryTreeUri
 
         while ($current) {
             if (! $current->is_home) {
-                array_unshift($segments, $current->slug);
+                array_unshift($segments, $current->handle);
             }
 
             $current = $current->parent;

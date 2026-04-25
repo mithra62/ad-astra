@@ -10,9 +10,9 @@ use InvalidArgumentException;
 
 class CreateEntryTreeNode extends AbstractAction
 {
-    public function create(Entry $entry, string $slug, ?EntryTree $parent = null, ?string $template = null, bool $isHome = false): EntryTree
+    public function create(Entry $entry, string $handle, ?EntryTree $parent = null, ?string $template = null, bool $isHome = false): EntryTree
     {
-        return DB::transaction(function () use ($entry, $slug, $parent, $template, $isHome) {
+        return DB::transaction(function () use ($entry, $handle, $parent, $template, $isHome) {
             $entry->loadMissing('type');
 
             if (! $entry->type->has_entry_tree) {
@@ -22,7 +22,7 @@ class CreateEntryTreeNode extends AbstractAction
             $node = EntryTree::create([
                 'entry_id' => $entry->id,
                 'parent_id' => $parent?->id,
-                'slug' => $isHome ? 'home' : EntryTree::normalizeSlug($slug),
+                'handle' => $isHome ? 'home' : EntryTree::normalizeHandle($handle),
                 'uri' => '__pending__' . uniqid(),
                 'depth' => $parent ? $parent->depth + 1 : 0,
                 'sort_order' => $this->nextSortOrder($parent),
