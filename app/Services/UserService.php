@@ -31,7 +31,7 @@ class UserService
      */
     public function create(array $data): User
     {
-        $attributes = Arr::except($data, ['roles', 'fields']);
+        $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation']);
 
         if (! empty($attributes['password'])) {
             $attributes['password'] = Hash::make($attributes['password']);
