@@ -9,11 +9,13 @@ use App\Models\EntryGroup;
 use App\Models\EntryRelationship;
 use App\Models\Field;
 use App\Models\FieldValue;
+use App\Models\Status;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class EntryRepository
 {
@@ -131,6 +133,25 @@ class EntryRepository
     private function applyStatus(Entry $entry, ?string $handle, bool $applyDefault): void
     {
         if ($handle) {
+            $statusGroup = $entry->entryGroup?->statusGroup;
+
+            if (! $statusGroup) {
+                throw new \RuntimeException(
+                    "EntryGroup [{$entry->entryGroup?->handle}] has no status group configured."
+                );
+            }
+
+            $isValidForGroup = Status::query()
+                ->where('status_group_id', $statusGroup->getKey())
+                ->where('handle', $handle)
+                ->exists();
+
+            if (! $isValidForGroup) {
+                throw new InvalidArgumentException(
+                    "Status [{$handle}] does not belong to EntryGroup [{$entry->entryGroup?->handle}]."
+                );
+            }
+
             $entry->status = $handle;
 
             return;

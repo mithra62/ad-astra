@@ -101,6 +101,7 @@
                                         </option>
                                     {% endfor %}
                                 </select>
+                                <small class="text-secondary">Only statuses from the {{ group.statusGroup.name }} group are allowed.</small>
                                 {% if errors.has('status') %}
                                     <p class="text-danger">{{ errors.first('status') }}</p>
                                 {% endif %}

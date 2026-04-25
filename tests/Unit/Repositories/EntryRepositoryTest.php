@@ -127,6 +127,27 @@ class EntryRepositoryTest extends TestCase
         $this->assertEquals('published', $entry->status);
     }
 
+    public function test_create_throws_when_explicit_status_does_not_belong_to_entry_group(): void
+    {
+        $statusGroup = $this->makeStatusGroup();
+        $otherStatusGroup = StatusGroup::factory()->create();
+        Status::factory()->create([
+            'status_group_id' => $otherStatusGroup->id,
+            'handle' => 'published',
+            'is_default' => false,
+        ]);
+        $group = $this->makeEntryGroup($statusGroup);
+        $type = $this->makeEntryType($group);
+        $this->actingAs(User::factory()->create());
+
+        $entryType = $this->makeAbstractEntryType($type);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Status [published] does not belong to EntryGroup');
+
+        $this->repo->create($entryType, ['title' => 'Live', 'status' => 'published']);
+    }
+
     public function test_create_auto_generates_handle_from_title(): void
     {
         $statusGroup = $this->makeStatusGroup();
@@ -342,6 +363,29 @@ class EntryRepositoryTest extends TestCase
         $updated = $this->repo->applyData($entry, ['status' => 'published']);
 
         $this->assertEquals('published', $updated->status);
+    }
+
+    public function test_apply_data_throws_when_status_does_not_belong_to_entry_group(): void
+    {
+        $statusGroup = $this->makeStatusGroup();
+        $otherStatusGroup = StatusGroup::factory()->create();
+        Status::factory()->create([
+            'status_group_id' => $otherStatusGroup->id,
+            'handle' => 'published',
+            'is_default' => false,
+        ]);
+        $group = $this->makeEntryGroup($statusGroup);
+        $type = $this->makeEntryType($group);
+        $entry = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id' => $type->id,
+            'status' => 'draft',
+        ]);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Status [published] does not belong to EntryGroup');
+
+        $this->repo->applyData($entry, ['status' => 'published']);
     }
 
     public function test_apply_data_updates_authors(): void

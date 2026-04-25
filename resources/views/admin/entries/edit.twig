@@ -65,6 +65,9 @@
                             <div class="col-md-4">
                                 <label class="form-label" for="status">Status</label>
                                 <select class="form-select" id="status" name="status">
+                                    {% if entry.status and not entry.entryGroup.statusGroup.statuses.firstWhere('handle', entry.status) %}
+                                        <option value="{{ entry.status }}" selected>{{ entry.status }} (invalid for this group)</option>
+                                    {% endif %}
                                     {% for s in entry.entryGroup.statusGroup.statuses %}
                                         <option value="{{ s.handle }}"
                                             {% if old('status', entry.status) == s.handle %}selected{% endif %}>
@@ -72,6 +75,7 @@
                                         </option>
                                     {% endfor %}
                                 </select>
+                                <small class="text-secondary">Only statuses from the {{ entry.entryGroup.statusGroup.name }} group are allowed.</small>
                                 {% if errors.has('status') %}
                                     <p class="text-danger">{{ errors.first('status') }}</p>
                                 {% endif %}

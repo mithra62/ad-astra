@@ -6,6 +6,7 @@ use App\Http\Requests\FormRequest;
 use App\Models\Entry;
 use App\Models\EntryGroup;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class EditEntryRequest extends FormRequest
 {
@@ -16,13 +17,23 @@ class EditEntryRequest extends FormRequest
 
     public function rules(): array
     {
-        $group = Entry::find($this->route()->parameter('entry'));
-        $schema = EntryGroup::resolvedFields($group->entryGroup()->first()->id);
+        $entry = Entry::query()
+            ->with('entryGroup.statusGroup')
+            ->findOrFail($this->route()->parameter('entry'));
+        $schema = EntryGroup::resolvedFields($entry->entry_group_id);
+
         return array_merge(
             [
                 'title' => ['required', 'string', 'max:255'],
                 'handle' => ['nullable', 'string', 'max:255'],
-                'status' => ['nullable', 'string', 'max:100'],
+                'status' => [
+                    'nullable',
+                    'string',
+                    'max:100',
+                    Rule::exists('statuses', 'handle')->where(
+                        fn ($query) => $query->where('status_group_id', $entry->entryGroup->status_group_id)
+                    ),
+                ],
                 'published_at' => ['nullable', 'date'],
                 'authors' => ['nullable', 'array'],
                 'authors.*' => ['integer', 'exists:users,id'],
@@ -40,8 +51,9 @@ class EditEntryRequest extends FormRequest
      */
     public function attributes(): array
     {
-        $group = Entry::find($this->route()->parameter('entry'));
-        $schema = EntryGroup::resolvedFields($group->entryGroup()->first()->id);
+        $entry = Entry::query()->findOrFail($this->route()->parameter('entry'));
+        $schema = EntryGroup::resolvedFields($entry->entry_group_id);
+
         return $this->schemaFieldAttributes($schema);
     }
 }

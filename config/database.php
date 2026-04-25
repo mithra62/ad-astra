@@ -115,7 +115,8 @@ return [
 
         'testing' => [
             'driver' => 'sqlite',
-            'database' => ':memory:', // This creates an in-memory database
+            'database' => env('DB_DATABASE', database_path('testing.sqlite')),
+            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
             'prefix' => '',
         ],
 

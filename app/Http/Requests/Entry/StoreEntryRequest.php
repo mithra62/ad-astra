@@ -4,6 +4,7 @@ namespace App\Http\Requests\Entry;
 
 use App\Http\Requests\FormRequest;
 use App\Models\EntryGroup;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
 class StoreEntryRequest extends FormRequest
@@ -15,13 +16,24 @@ class StoreEntryRequest extends FormRequest
 
     public function rules(): array
     {
-        $schema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
+        $group = EntryGroup::query()
+            ->with('statusGroup')
+            ->findOrFail($this->route()->parameter('group_id'));
+        $schema = EntryGroup::resolvedFields($group->id);
+
         return array_merge(
             [
                 'type_handle' => ['required', 'string', 'exists:entry_types,handle'],
                 'title' => ['required', 'string', 'max:255'],
                 'handle' => ['nullable', 'string', 'max:255'],
-                'status' => ['nullable', 'string', 'max:100'],
+                'status' => [
+                    'nullable',
+                    'string',
+                    'max:100',
+                    Rule::exists('statuses', 'handle')->where(
+                        fn ($query) => $query->where('status_group_id', $group->status_group_id)
+                    ),
+                ],
                 'published_at' => ['nullable', 'date'],
                 'authors' => ['nullable', 'array'],
                 'authors.*' => ['integer', 'exists:users,id'],
