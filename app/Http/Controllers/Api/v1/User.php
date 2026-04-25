@@ -119,7 +119,7 @@ class User extends Controller
      */
     public function show($id)
     {
-        if (!$this->can('read users') || Auth::user()->id === $id) {
+        if (!$this->can('read users')) {
             return response()->json(['error' => 'Not Found'], 404);
         }
 

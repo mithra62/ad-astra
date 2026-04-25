@@ -22,10 +22,6 @@ class Login extends Controller
             exit;
         }
 
-        print_r($user);
-        exit;
-
-
         // Find user by email or create a new user
         $localUser = User::firstOrCreate(
             ['email' => $user->getEmail()],
