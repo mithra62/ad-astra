@@ -28,7 +28,7 @@ class LogRequestResponse
      */
     public function handle(Request $request, Closure $next): mixed
     {
-        $data = $request->all();
+        $data = $request->validated();
 
         // If logging an authentication request, mask the password in the log
         if ($request->isMethod('post') && $request->path() === 'api/auth/login' && isset($data['password'])) {
@@ -41,7 +41,7 @@ class LogRequestResponse
             'request_route' => $request->getPathInfo(),
             'method' => $request->method(),
             'user_id' => Auth::id(),
-            'request_payload' => json_encode($request->all()),
+            'request_payload' => json_encode($request->validated()),
             'request_headers' => json_encode($request->headers->all()),
             'response_payload' => $response->getContent(),
             'response_headers' => json_encode($response->headers->all()),

@@ -62,7 +62,7 @@ class Account extends AdminController
     {
         $user = Auth::user();
         $editor = app(UpdateUserProfileInformation::class);
-        $user = $editor->update($user, $request->all());
+        $user = $editor->update($user, $request->validated());
         return redirect()->route('account.settings')->with('success', trans('account.updated'));
     }
 }

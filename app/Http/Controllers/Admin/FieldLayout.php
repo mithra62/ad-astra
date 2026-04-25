@@ -29,7 +29,7 @@ class FieldLayout extends Controller
     public function store(StoreFieldLayoutRequest $request)
     {
         $creator = app(CreateNewFieldLayout::class);
-        $layout = $creator->create($request->all());
+        $layout = $creator->create($request->validated());
 
         return redirect()
             ->route('field-layouts.edit', $layout->id)
@@ -62,7 +62,7 @@ class FieldLayout extends Controller
         }
 
         $editor = app(EditFieldLayout::class);
-        $editor->edit($layout, $request->all());
+        $editor->edit($layout, $request->validated());
 
         return redirect()
             ->route('field-layouts.edit', $id)

@@ -36,7 +36,7 @@ class Group extends Controller
     public function store(StoreFieldGroupRequest $request)
     {
         $creator = app(CreateNewFieldGroup::class);
-        $group = $creator->create($request->all());
+        $group = $creator->create($request->validated());
         return redirect()->route('fields.groups.show', $group->id)->with('status', trans('field.group.created'));
     }
 
@@ -82,7 +82,7 @@ class Group extends Controller
         $group = FieldGroup::find($id);
         if ($group instanceof FieldGroup) {
             $editor = app(EditFieldGroup::class);
-            $editor->edit($group, $request->all());
+            $editor->edit($group, $request->validated());
             return redirect()->route('fields.groups')->with('success', trans('field.group.updated'));
         }
 

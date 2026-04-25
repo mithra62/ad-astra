@@ -31,7 +31,7 @@ class DeleteUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'confirm_removal.required' => 'You must select at least one role.',
+            'confirm_removal.required' => 'You must confirm the removal.',
         ];
     }
 

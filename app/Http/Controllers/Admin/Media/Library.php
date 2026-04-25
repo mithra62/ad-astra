@@ -111,7 +111,7 @@ class Library extends Controller
         $library = LibraryModel::find($id);
         if ($library instanceof LibraryModel) {
             $editor = app(EditMediaLibrary::class);
-            $editor->edit($library, $request->all());
+            $editor->edit($library, $request->validated());
             return redirect()->route('media.libraries')->with('success', trans('media.library.updated'));
         }
 

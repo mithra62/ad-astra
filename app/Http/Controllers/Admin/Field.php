@@ -47,7 +47,7 @@ class Field extends Controller
     public function store(StoreFieldRequest $request)
     {
         $creator = app(CreateNewField::class);
-        $data = $request->all();
+        $data = $request->validated();
         $data['group_id'] = $request->group_id;
         $group = $creator->createByGroup($data);
         return redirect()->route('fields.show', $group->id)->with('status', trans('field.created'));
@@ -101,7 +101,7 @@ class Field extends Controller
         $field = FieldModel::find($id);
         if ($field instanceof FieldModel) {
             $editor = app(EditField::class);
-            $editor->edit($field, $request->all());
+            $editor->edit($field, $request->validated());
             return redirect()->route('fields.show', $id)->with('success', trans('field.updated'));
         }
 

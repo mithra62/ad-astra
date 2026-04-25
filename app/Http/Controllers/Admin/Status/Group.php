@@ -26,7 +26,7 @@ class Group extends Controller
     public function store(StoreStatusGroupRequest $request)
     {
         $creator = app(CreateNewStatusGroup::class);
-        $group   = $creator->create($request->all());
+        $group   = $creator->create($request->validated());
         return redirect()->route('statuses.groups.show', $group->id)->with('status', trans('status.group.created'));
     }
 
@@ -63,7 +63,7 @@ class Group extends Controller
         $group = StatusGroup::find($id);
         if ($group instanceof StatusGroup) {
             $editor = app(EditStatusGroup::class);
-            $editor->edit($group, $request->all());
+            $editor->edit($group, $request->validated());
             return redirect()->route('statuses.groups')->with('success', trans('status.group.updated'));
         }
 

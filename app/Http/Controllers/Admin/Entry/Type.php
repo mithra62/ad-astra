@@ -41,7 +41,7 @@ class Type extends Controller
         }
 
         $creator = app(CreateNewEntryType::class);
-        $creator->create($group_id, $request->all());
+        $creator->create($group_id, $request->validated());
 
         return redirect()
             ->route('entries.groups.edit', $group_id)
@@ -79,7 +79,7 @@ class Type extends Controller
         }
 
         $editor = app(EditEntryType::class);
-        $editor->edit($type, $request->all());
+        $editor->edit($type, $request->validated());
 
         return redirect()
             ->route('entries.groups.edit', $group_id)

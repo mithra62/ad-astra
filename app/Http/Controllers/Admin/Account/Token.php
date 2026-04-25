@@ -40,7 +40,7 @@ class Token extends AdminController
         $token = '';
         if ($user instanceof UserModel) {
             $creator = app(CreateNewUserToken::class);
-            $token = $creator->create($user, $request->all())->plainTextToken;
+            $token = $creator->create($user, $request->validated())->plainTextToken;
         }
 
         return redirect()->route('account.tokens.index')->with('success', __('account.token_created') . ' - ' . $token);
@@ -80,7 +80,7 @@ class Token extends AdminController
             abort(404);
         }
 
-        $token->update($request->all());
+        $token->update($request->validated());
         return redirect()->route('account.tokens.index', $user)->with('success', trans('account.token_updated'));
     }
 

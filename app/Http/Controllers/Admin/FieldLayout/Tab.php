@@ -35,7 +35,7 @@ class Tab extends Controller
             abort(404);
         }
 
-        app(CreateNewTab::class)->create($layout, $request->all());
+        app(CreateNewTab::class)->create($layout, $request->validated());
 
         return redirect()
             ->route('field-layouts.edit', $layout->id)
@@ -72,7 +72,7 @@ class Tab extends Controller
             abort(404);
         }
 
-        app(EditTab::class)->edit($tab, $request->all());
+        app(EditTab::class)->edit($tab, $request->validated());
 
         return redirect()
             ->route('field-layouts.tabs.edit', ['layout_id' => $layout->id, 'tab_id' => $tab->id])

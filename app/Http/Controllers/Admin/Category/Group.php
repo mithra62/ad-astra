@@ -41,7 +41,7 @@ class Group extends Controller
     public function store(StoreCategoryGroupRequest $request)
     {
         $creator = app(CreateNewCategoryGroup::class);
-        $group = $creator->create($request->all());
+        $group = $creator->create($request->validated());
         return redirect()->route('categories.groups.show', $group->id)->with('status', trans('category.group.created'));
     }
 
@@ -94,7 +94,7 @@ class Group extends Controller
         $group = CategoryGroup::find($id);
         if ($group instanceof CategoryGroup) {
             $editor = app(EditCategoryGroup::class);
-            $editor->edit($group, $request->all());
+            $editor->edit($group, $request->validated());
             return redirect()->route('categories.groups')->with('success', trans('category.group.updated'));
         }
 

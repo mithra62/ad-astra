@@ -24,7 +24,7 @@ class TabElement extends Controller
             abort(404);
         }
 
-        app(CreateTabElement::class)->create($tab, $request->all());
+        app(CreateTabElement::class)->create($tab, $request->validated());
 
         return redirect()
             ->route('field-layouts.tabs.edit', ['layout_id' => $layout->id, 'tab_id' => $tab->id])
@@ -46,7 +46,7 @@ class TabElement extends Controller
             abort(404);
         }
 
-        app(EditTabElement::class)->edit($element, $request->all());
+        app(EditTabElement::class)->edit($element, $request->validated());
 
         return redirect()
             ->route('field-layouts.tabs.edit', ['layout_id' => $layout->id, 'tab_id' => $tab->id])

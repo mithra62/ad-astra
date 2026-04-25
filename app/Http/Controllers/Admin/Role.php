@@ -37,7 +37,7 @@ class Role extends Controller
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         $creator = app(CreateNewRole::class);
-        $role = $creator->create($request->all());
+        $role = $creator->create($request->validated());
         return redirect()->route('roles.show', $role->id)->with('status', trans('role.created'));
     }
 
@@ -71,7 +71,7 @@ class Role extends Controller
         $role = RoleModel::find($id);
         if ($role instanceof RoleModel) {
             $editor = app(EditRole::class);
-            $editor->edit($role, $request->all());
+            $editor->edit($role, $request->validated());
             return redirect()->route('roles.index')->with('success', trans('role.updated'));
         }
 

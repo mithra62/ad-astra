@@ -38,7 +38,7 @@ class Category extends Controller
     public function store(StoreCategoryRequest $request)
     {
         $creator  = app(CreateNewCategory::class);
-        $category = $creator->create(array_merge($request->all(), [
+        $category = $creator->create(array_merge($request->validated(), [
             'group_id' => $request->route('group_id'),
         ]));
 
@@ -83,7 +83,7 @@ class Category extends Controller
         }
 
         $editor   = app(EditCategory::class);
-        $category = $editor->edit($category, $request->all());
+        $category = $editor->edit($category, $request->validated());
 
         return redirect()
             ->route('categories.edit', $category)

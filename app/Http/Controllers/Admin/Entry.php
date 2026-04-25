@@ -56,7 +56,7 @@ class Entry extends Controller
     public function store(StoreEntryRequest $request)
     {
         $creator = app(CreateNewEntry::class);
-        $entry   = $creator->create($request->all());
+        $entry   = $creator->create($request->validated());
 
         return redirect()
             ->route('entries.groups.show', $entry->entry_group_id)
@@ -103,7 +103,7 @@ class Entry extends Controller
         }
 
         $editor = app(UpdateEntry::class);
-        $entry  = $editor->update($entry, $request->all());
+        $entry  = $editor->update($entry, $request->validated());
 
         return redirect()
             ->route('entries.edit', $entry)

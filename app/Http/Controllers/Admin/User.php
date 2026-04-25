@@ -42,7 +42,7 @@ class User extends Controller
     public function store(StoreUserRequest $request)
     {
         $creator = app(CreateNewUser::class);
-        $user = $creator->create($request->all());
+        $user = $creator->create($request->validated());
         return redirect()->route('users.show', $user->id)->with('status', trans('user.created'));
     }
 
@@ -99,7 +99,7 @@ class User extends Controller
         $user = UserModel::find($id);
         if ($user instanceof UserModel) {
             $editor = app(UpdateUserProfileInformation::class);
-            $user = $editor->update($user, $request->all());
+            $user = $editor->update($user, $request->validated());
             return redirect()->route('users.edit', $user)->with('success', trans('user.updated'));
         }
 
@@ -147,7 +147,7 @@ class User extends Controller
         }
 
         $password = app(UpdateUserPassword::class);
-        $password->update($user, $request->all());
+        $password->update($user, $request->validated());
 
         return redirect()->route('users.index')->with('success', trans('user.password_changed'));
     }
