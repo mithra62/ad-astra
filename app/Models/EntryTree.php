@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class EntryTree extends Model
 {
@@ -42,12 +44,12 @@ class EntryTree extends Model
             ->orderBy('sort_order');
     }
 
-    public function scopeRoot($query)
+    public function scopeRoot(Builder $query): Builder
     {
         return $query->whereNull('parent_id');
     }
 
-    public function scopeByUri($query, string $uri)
+    public function scopeByUri(Builder $query, string $uri): Builder
     {
         return $query->where('uri', self::normalizeUri($uri));
     }
@@ -60,6 +62,17 @@ class EntryTree extends Model
     public static function normalizeHandle(string $handle): string
     {
         return Str::slug($handle);
+    }
+
+    public static function validatedHandle(string $handle): string
+    {
+        $normalized = self::normalizeHandle($handle);
+
+        if ($normalized === '') {
+            throw new InvalidArgumentException('Entry Tree handles must contain at least one URL-safe character.');
+        }
+
+        return $normalized;
     }
 
     public static function normalizeUri(?string $uri): string

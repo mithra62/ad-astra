@@ -8,7 +8,7 @@ return [
     ],
     'templates' => [
         'base_path' => 'site',
-        'default_template' => 'site.index',
+        'default_template' => 'templates::site.index',
         'not_found_template' => 'errors.404',
     ],
 ];

@@ -10,6 +10,10 @@ class RebuildEntryTreeUri
     {
         $node->loadMissing(['parent', 'children']);
 
+        if ($node->is_home && $node->parent_id !== null) {
+            throw new \InvalidArgumentException('The Entry Tree home node must remain at the root.');
+        }
+
         $node->depth = $node->parent
             ? $node->parent->depth + 1
             : 0;

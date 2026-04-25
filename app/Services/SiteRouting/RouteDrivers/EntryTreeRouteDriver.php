@@ -12,13 +12,14 @@ class EntryTreeRouteDriver implements RouteDriverInterface
         $uri = EntryTree::normalizeUri($uri);
         $node = EntryTree::query()
             ->with([
-                'entry.type',
+                'entry.entryType',
                 'parent.entry',
-                'children.entry.type',
+                'children.entry.entryType',
             ])
             ->where('uri', $uri)
             ->whereHas('entry', function ($query) {
-                $query->where('status', 'published');
+                $query->where('status', 'published')
+                    ->published();
             })
             ->first();
 
@@ -29,7 +30,7 @@ class EntryTreeRouteDriver implements RouteDriverInterface
         $entry = $node->entry;
 
         $template = $node->template
-            ?? $entry->type->default_template
+            ?? $entry->entryType?->default_template
             ?? 'entries.show';
 
         return new RouteResult(
@@ -37,7 +38,7 @@ class EntryTreeRouteDriver implements RouteDriverInterface
             template: $template,
             data: [
                 'entry' => $entry,
-                'entryType' => $entry->type,
+                'entryType' => $entry->entryType,
                 'node' => $node,
             ],
             resource: $node,

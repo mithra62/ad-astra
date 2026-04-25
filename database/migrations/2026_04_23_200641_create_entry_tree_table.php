@@ -46,6 +46,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('entry_tree');
+        Schema::dropIfExists('entry_trees');
     }
 };
