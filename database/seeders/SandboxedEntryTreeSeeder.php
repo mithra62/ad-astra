@@ -98,7 +98,7 @@ class SandboxedEntryTreeSeeder extends Seeder
                 'name' => 'Sandbox Tree Page',
                 'class' => PageEntryType::class,
                 'sort_order' => 1,
-                'default_template' => 'entries.page',
+                'default_template' => 'templates::entries.page',
                 'has_entry_tree' => true,
                 'field_layout_id' => null,
             ]
@@ -210,7 +210,7 @@ class SandboxedEntryTreeSeeder extends Seeder
                     'uri' => '__seed__-' . $definition['entry_handle'],
                     'depth' => 0,
                     'sort_order' => $definition['sort_order'],
-                    'template' => null,
+                    'template' => 'templates::site.tree',
                     'is_home' => false,
                 ]
             );
