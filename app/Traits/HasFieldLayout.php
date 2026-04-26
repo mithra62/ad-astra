@@ -14,9 +14,7 @@ trait HasFieldLayout
 
     public static function resolvedFields(int $id): static
     {
-        static $cache = [];
-
-        return $cache[$id] ??= static::query()
+        return static::query()
             ->with('fieldLayout.tabs.elements.field')
             ->findOrFail($id);
     }
