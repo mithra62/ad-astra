@@ -88,7 +88,7 @@ class Entry extends Model
         return $related->isNotEmpty() ? $related->values() : null;
     }
 
-    public function getFieldLayout(): FieldLayout
+    public function getFieldLayout(): ?FieldLayout
     {
         $typeLayout = $this->entryType?->fieldLayout;
         $groupLayout = $this->entryGroup?->fieldLayout;
