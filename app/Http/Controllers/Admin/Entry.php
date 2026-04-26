@@ -81,7 +81,7 @@ class Entry extends Controller
         }
 
         $allGroups = EntryGroup::ordered()->get();
-        $users     = User::orderBy('name')->get();
+        $users     = User::orderBy('name')->limit(10)->get();
 
         return $this->view('entries.edit', [
             'entry'       => $entry,
