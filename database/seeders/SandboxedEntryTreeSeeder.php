@@ -65,12 +65,12 @@ class SandboxedEntryTreeSeeder extends Seeder
 
         Status::query()->updateOrCreate(
             ['status_group_id' => $group->id, 'handle' => 'published'],
-            ['name' => 'Published', 'color' => '#22c55e', 'is_default' => true, 'sort_order' => 1]
+            ['name' => 'Published', 'color' => '#22c55e', 'is_default' => true, 'is_public' => true, 'sort_order' => 1]
         );
 
         Status::query()->updateOrCreate(
             ['status_group_id' => $group->id, 'handle' => 'draft'],
-            ['name' => 'Draft', 'color' => '#94a3b8', 'is_default' => false, 'sort_order' => 2]
+            ['name' => 'Draft', 'color' => '#94a3b8', 'is_default' => false, 'is_public' => false, 'sort_order' => 2]
         );
 
         return $group;
@@ -187,6 +187,7 @@ class SandboxedEntryTreeSeeder extends Seeder
                     'title' => $definition['title'],
                     'status_id' => $publishedStatus->id,
                     'status_handle' => $publishedStatus->handle,
+                    'status_is_public' => $publishedStatus->is_public,
                     'published_at' => $definition['published_at'],
                 ]
             );

@@ -19,9 +19,9 @@ class StatusGroupSeeder extends Seeder
         );
 
         $statuses = [
-            ['name' => 'Draft',     'handle' => 'draft',     'color' => '#9CA3AF', 'is_default' => true,  'sort_order' => 1],
-            ['name' => 'Published', 'handle' => 'published', 'color' => '#10B981', 'is_default' => false, 'sort_order' => 2],
-            ['name' => 'Archived',  'handle' => 'archived',  'color' => '#EF4444', 'is_default' => false, 'sort_order' => 3],
+            ['name' => 'Draft',     'handle' => 'draft',     'color' => '#9CA3AF', 'is_default' => true,  'is_public' => false, 'sort_order' => 1],
+            ['name' => 'Published', 'handle' => 'published', 'color' => '#10B981', 'is_default' => false, 'is_public' => true,  'sort_order' => 2],
+            ['name' => 'Archived',  'handle' => 'archived',  'color' => '#EF4444', 'is_default' => false, 'is_public' => false, 'sort_order' => 3],
         ];
 
         foreach ($statuses as $status) {

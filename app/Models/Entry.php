@@ -21,13 +21,17 @@ class Entry extends Model
         'entry_type_id',
         'status_id',
         'status_handle',
+        'status_is_public',
         'created_by_user_id',
         'title',
         'handle',
         'published_at',
     ];
 
-    protected $casts = ['published_at' => 'datetime'];
+    protected $casts = [
+        'published_at'    => 'datetime',
+        'status_is_public' => 'boolean',
+    ];
 
     public function status(): BelongsTo
     {
@@ -104,7 +108,8 @@ class Entry extends Model
 
     public function scopePublished(Builder $query): Builder
     {
-        return $query->whereNotNull('published_at')
+        return $query->where('status_is_public', true)
+            ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
     }
 

@@ -88,6 +88,15 @@
                                                 <label for="is_default">Set as Default Status</label>
                                             </div>
                                         </div>
+                                        <div class="col-md-12">
+                                            <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                                <input class="toggle switch-border-primary" name="is_public" id="is_public"
+                                                       type="checkbox" value="1"
+                                                       {% if old('is_public', status.is_public) %}checked{% endif %}>
+                                                <label for="is_public">Publicly Visible</label>
+                                            </div>
+                                            <small class="text-secondary">Entries with this status will appear in public-facing queries.</small>
+                                        </div>
                                         <div class="col-12">
                                             <button class="btn btn-primary float-end" type="submit">Save Status</button>
                                         </div>

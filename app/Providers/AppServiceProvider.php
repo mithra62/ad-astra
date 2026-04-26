@@ -10,7 +10,9 @@ use App\Models\EntryType;
 use App\Models\Field\Group as FieldGroup;
 use App\Models\Media;
 use App\Models\Media\Library as MediaLibrary;
+use App\Models\Status;
 use App\Models\User;
+use App\Observers\StatusObserver;
 use App\Rest\Api;
 use App\Settings;
 use App\Services\FieldService;
@@ -84,5 +86,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             return $user->hasRole('super admin') ? true : null;
         });
+
+        Status::observe(StatusObserver::class);
     }
 }

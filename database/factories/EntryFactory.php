@@ -21,7 +21,8 @@ class EntryFactory extends Factory
             'created_by_user_id' => User::factory(),
             'title' => fake()->sentence(4, false),
             'handle' => fake()->unique()->regexify('[a-z]{4,8}-[a-z]{4,8}-[a-z]{4,8}'),
-            'status' => 'draft',
+            'status_handle' => 'draft',
+            'status_is_public' => false,
             'published_at' => null,
         ];
     }
@@ -29,6 +30,8 @@ class EntryFactory extends Factory
     public function published(): static
     {
         return $this->state(fn (array $attributes) => [
+            'status_handle' => 'published',
+            'status_is_public' => true,
             'published_at' => now()->subHour(),
         ]);
     }

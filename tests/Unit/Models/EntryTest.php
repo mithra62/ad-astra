@@ -331,9 +331,12 @@ class EntryTest extends TestCase
     // scopePublished
     // -------------------------------------------------------------------------
 
-    public function test_scope_published_returns_entries_with_past_published_at(): void
+    public function test_scope_published_returns_entries_with_past_published_at_and_public_status(): void
     {
-        $publishedEntry = Entry::factory()->create(['published_at' => now()->subHour()]);
+        $publishedEntry = Entry::factory()->create([
+            'published_at' => now()->subHour(),
+            'status_is_public' => true,
+        ]);
 
         $results = Entry::query()->published()->get();
 
@@ -342,7 +345,10 @@ class EntryTest extends TestCase
 
     public function test_scope_published_excludes_entries_with_future_published_at(): void
     {
-        $futureEntry = Entry::factory()->create(['published_at' => now()->addDay()]);
+        $futureEntry = Entry::factory()->create([
+            'published_at' => now()->addDay(),
+            'status_is_public' => true,
+        ]);
 
         $results = Entry::query()->published()->get();
 
@@ -351,7 +357,22 @@ class EntryTest extends TestCase
 
     public function test_scope_published_excludes_entries_with_null_published_at(): void
     {
-        $draftEntry = Entry::factory()->create(['published_at' => null]);
+        $draftEntry = Entry::factory()->create([
+            'published_at' => null,
+            'status_is_public' => true,
+        ]);
+
+        $results = Entry::query()->published()->get();
+
+        $this->assertFalse($results->contains($draftEntry));
+    }
+
+    public function test_scope_published_excludes_non_public_status_with_past_published_at(): void
+    {
+        $draftEntry = Entry::factory()->create([
+            'published_at' => now()->subHour(),
+            'status_is_public' => false,
+        ]);
 
         $results = Entry::query()->published()->get();
 
@@ -364,8 +385,8 @@ class EntryTest extends TestCase
 
     public function test_scope_with_status_returns_matching_entries(): void
     {
-        $activeEntry = Entry::factory()->create(['status' => 'active']);
-        Entry::factory()->create(['status' => 'draft']);
+        $activeEntry = Entry::factory()->create(['status_handle' => 'active']);
+        Entry::factory()->create(['status_handle' => 'draft']);
 
         $results = Entry::query()->withStatus('active')->get();
 
@@ -375,7 +396,7 @@ class EntryTest extends TestCase
 
     public function test_scope_with_status_excludes_non_matching_entries(): void
     {
-        $draftEntry = Entry::factory()->create(['status' => 'draft']);
+        $draftEntry = Entry::factory()->create(['status_handle' => 'draft']);
 
         $results = Entry::query()->withStatus('active')->get();
 

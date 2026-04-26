@@ -152,8 +152,9 @@ class EntryRepository
                 );
             }
 
-            $entry->status_id     = $status->getKey();
-            $entry->status_handle = $status->handle;
+            $entry->status_id        = $status->getKey();
+            $entry->status_handle    = $status->handle;
+            $entry->status_is_public = $status->is_public;
 
             return;
         }
@@ -176,8 +177,9 @@ class EntryRepository
                 );
             }
 
-            $entry->status_id     = $default->getKey();
-            $entry->status_handle = $default->handle;
+            $entry->status_id        = $default->getKey();
+            $entry->status_handle    = $default->handle;
+            $entry->status_is_public = $default->is_public;
         }
     }
 

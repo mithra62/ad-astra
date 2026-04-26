@@ -20,6 +20,7 @@ class EditStatusRequest extends FormRequest
             'handle' => ['required', 'string', 'max:255', new UniqueHandleByGroup(['status_id' => $this->route('status')])],
             'color' => ['nullable', 'string', 'max:20'],
             'is_default' => ['nullable', 'boolean'],
+            'is_public' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }

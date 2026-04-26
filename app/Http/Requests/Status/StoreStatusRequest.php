@@ -21,6 +21,7 @@ class StoreStatusRequest extends FormRequest
             'handle' => ['required', 'string', 'max:255', new UniqueHandleByGroup(['group_id' => $this->route('group_id')])],
             'color' => ['nullable', 'string', 'max:20'],
             'is_default' => ['nullable', 'boolean'],
+            'is_public' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'status_group_id' => ['required', 'integer', 'exists:status_groups,id'],
         ];

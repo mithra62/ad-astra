@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('handle');
             $table->string('color', 7)->nullable();
             $table->boolean('is_default')->default(false);
+            $table->boolean('is_public')->default(false);
             $table->unsignedInteger('sort_order')->default(0);
 
             $table->timestamps();
