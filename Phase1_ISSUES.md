@@ -40,7 +40,7 @@ Any action that hits `Gate::allows('update', $user)` — including the admin use
 
 ---
 
-### CRIT-02 — Trait Static Cache Collides Across Classes (`HasFieldLayout::resolvedFields`)
+### [RESOLVED] CRIT-02 — Trait Static Cache Collides Across Classes (`HasFieldLayout::resolvedFields`)
 
 **File:** `app/Traits/HasFieldLayout.php:16-23`
 
@@ -81,7 +81,7 @@ public static function resolvedFields(int $id): static
 
 ---
 
-### CRIT-03 — `Fieldable::field()` Throws on Orphaned Field Values (vs `Entry::field()` Which Is Safe)
+### [RESOLVED] CRIT-03 — `Fieldable::field()` Throws on Orphaned Field Values (vs `Entry::field()` Which Is Safe)
 
 **File:** `app/Traits/Fieldable.php:16-19`
 
@@ -108,7 +108,7 @@ The `Fieldable` trait is used by `Category` and `User`. If any `field_values` ro
 
 ---
 
-### CRIT-04 — `Entry::getFieldLayout()` Declares `FieldLayout` Return Type But Can Return `null`
+### [RESOLVED] CRIT-04 — `Entry::getFieldLayout()` Declares `FieldLayout` Return Type But Can Return `null`
 
 **File:** `app/Models/Entry.php:91-97`
 
@@ -140,7 +140,7 @@ These will not immediately crash normal flows but represent data integrity failu
 
 ---
 
-### HIGH-01 — `fields.handle` Has No Unique Constraint
+### [RESOLVED] HIGH-01 — `fields.handle` Has No Unique Constraint
 
 **File:** `database/migrations/2026_04_14_000001_create_fields_table.php:18`
 
@@ -165,7 +165,7 @@ $table->string('handle')->unique();
 
 ---
 
-### HIGH-02 — `field_groups.handle` Has No Unique Constraint
+### [RESOLVED] HIGH-02 — `field_groups.handle` Has No Unique Constraint
 
 **File:** `database/migrations/2026_01_05_174237_create_field_groups_table.php:14`
 
@@ -179,7 +179,7 @@ Multiple field groups can share the same handle. The seeders use `firstOrCreate(
 
 ---
 
-### HIGH-03 — `field_types.object` Has No Unique Constraint
+### [RESOLVED] HIGH-03 — `field_types.object` Has No Unique Constraint
 
 **File:** `database/migrations/2026_04_13_215842_create_field_types_table.php`
 
