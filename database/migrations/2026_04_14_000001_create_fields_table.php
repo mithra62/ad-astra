@@ -15,7 +15,7 @@ return new class extends Migration
                 ->constrained('field_types')
                 ->nullOnDelete();
             $table->string('name');
-            $table->string('handle')->index();
+            $table->string('handle')->unique();
             $table->string('label')->nullable();
             $table->text('instructions')->nullable();
             $table->json('settings')->nullable();
