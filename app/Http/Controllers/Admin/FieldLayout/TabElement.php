@@ -7,6 +7,7 @@ use App\Actions\FieldLayout\Tab\Element\DeleteTabElement;
 use App\Actions\FieldLayout\Tab\Element\EditTabElement;
 use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\FieldLayout\Tab\Element\DeleteElementRequest;
+use App\Http\Requests\FieldLayout\Tab\Element\EditElementRequest;
 use App\Http\Requests\FieldLayout\Tab\Element\StoreElementRequest;
 use App\Models\FieldLayout as FieldLayoutModel;
 use App\Models\FieldLayout\Tab as TabModel;
@@ -31,7 +32,7 @@ class TabElement extends Controller
             ->with('success', trans('field_layout.element.added'));
     }
 
-    public function update(Request $request, string $layout_id, string $tab_id, string $element_id)
+    public function update(EditElementRequest $request, string $layout_id, string $tab_id, string $element_id)
     {
         $layout = FieldLayoutModel::find($layout_id);
         $tab = TabModel::find($tab_id);
