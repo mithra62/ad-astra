@@ -22,11 +22,6 @@ class Group extends Model
      */
     protected $table = 'field_groups';
 
-    public function field_groupable()
-    {
-        return $this->morphTo();
-    }
-
     public function fields(): MorphToMany
     {
         return $this->morphToMany(Field::class, 'fieldable')

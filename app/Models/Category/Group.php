@@ -25,11 +25,6 @@ class Group extends Model
 
     protected $casts = ['sort_order' => 'integer'];
 
-    public function category_groupable()
-    {
-        return $this->morphTo();
-    }
-
     public function categories(): HasMany
     {
         return $this->hasMany(Category::class, 'group_id');

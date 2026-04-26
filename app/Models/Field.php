@@ -42,11 +42,6 @@ class Field extends Model
         return $this->hasMany(FieldValue::class);
     }
 
-    public function fieldable()
-    {
-        return $this->morphTo();
-    }
-
     public function groups(): MorphToMany
     {
         return $this->morphedByMany(Group::class, 'fieldable')

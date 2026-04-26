@@ -250,7 +250,7 @@ A migration-based approach would be to add a composite index and ensure entry cr
 
 ---
 
-### HIGH-06 — `Entry::scopePublished` and the `status` Field Are Independent (Dual Publication State)
+### [RESOLVED] HIGH-06 — `Entry::scopePublished` and the `status` Field Are Independent (Dual Publication State)
 
 **File:** `app/Models/Entry.php:99-103`
 
@@ -271,7 +271,7 @@ See the **Business Rules** section for a detailed discussion.
 
 ---
 
-### HIGH-07 — `Field::fieldable()` Is a Logically Incorrect `morphTo()` Relationship
+### [RESOLVED] HIGH-07 — `Field::fieldable()` Is a Logically Incorrect `morphTo()` Relationship
 
 **File:** `app/Models/Field.php:45-48`
 
@@ -681,7 +681,7 @@ Issues where the logic, even if technically correct, could cause unexpected beha
 
 ---
 
-### BR-01 — Dual Publication State: `status` String + `published_at` Timestamp Are Not Coordinated
+### [RESOLVED] BR-01 — Dual Publication State: `status` String + `published_at` Timestamp Are Not Coordinated
 
 The system has two independent signals for whether an entry is "publicly visible":
 
