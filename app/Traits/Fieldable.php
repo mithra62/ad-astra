@@ -15,7 +15,7 @@ trait Fieldable
     public function field(string $handle): mixed
     {
         return $this->fieldValues
-            ->first(fn ($v) => $v->field->handle === $handle)
+            ->first(fn ($v) => $v->field?->handle === $handle)
             ?->resolvedValue();
     }
 
