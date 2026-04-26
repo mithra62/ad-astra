@@ -226,7 +226,7 @@ The most reliable fix is enforcing it in form requests and in the seeder, and ad
 
 ---
 
-### HIGH-05 — `entries.status` Is a Free-Text String With No Referential Integrity
+### [RESOLVED] HIGH-05 — `entries.status` Is a Free-Text String With No Referential Integrity
 
 **File:** `database/migrations/2026_04_18_000010_create_entries_table.php:28`
 

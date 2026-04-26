@@ -19,16 +19,16 @@ class Type extends Controller
     public function create(string $group_id)
     {
         $group = EntryGroup::find($group_id);
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
         $allGroups = EntryGroup::ordered()->get();
 
         return $this->view('entries.groups.types.create', [
-            'group'        => $group,
-            'groups'       => $allGroups,
-            'field_layouts'=> FieldLayout::orderBy('name')->get(),
+            'group' => $group,
+            'groups' => $allGroups,
+            'field_layouts' => FieldLayout::orderBy('name')->get(),
             'type_classes' => $this->discoverTypeClasses(),
         ]);
     }
@@ -36,7 +36,7 @@ class Type extends Controller
     public function store(StoreEntryTypeRequest $request, string $group_id)
     {
         $group = EntryGroup::find($group_id);
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
@@ -51,22 +51,22 @@ class Type extends Controller
     public function edit(string $group_id, string $type_id)
     {
         $group = EntryGroup::find($group_id);
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
         $type = EntryTypeModel::with('fieldLayout')->find($type_id);
-        if (! $type instanceof EntryTypeModel || $type->entry_group_id != $group_id) {
+        if (!$type instanceof EntryTypeModel || $type->entry_group_id != $group_id) {
             abort(404);
         }
 
         $allGroups = EntryGroup::ordered()->get();
 
         return $this->view('entries.groups.types.edit', [
-            'group'        => $group,
-            'groups'       => $allGroups,
-            'type'         => $type,
-            'field_layouts'=> FieldLayout::orderBy('name')->get(),
+            'group' => $group,
+            'groups' => $allGroups,
+            'type' => $type,
+            'field_layouts' => FieldLayout::orderBy('name')->get(),
             'type_classes' => $this->discoverTypeClasses(),
         ]);
     }
@@ -74,7 +74,7 @@ class Type extends Controller
     public function update(EditEntryTypeRequest $request, string $group_id, string $type_id)
     {
         $type = EntryTypeModel::find($type_id);
-        if (! $type instanceof EntryTypeModel || $type->entry_group_id != $group_id) {
+        if (!$type instanceof EntryTypeModel || $type->entry_group_id != $group_id) {
             abort(404);
         }
 
@@ -104,21 +104,21 @@ class Type extends Controller
     public function confirm(string $group_id, string $type_id)
     {
         $group = EntryGroup::find($group_id);
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
         $type = EntryTypeModel::find($type_id);
-        if (! $type instanceof EntryTypeModel || $type->entry_group_id != $group_id) {
+        if (!$type instanceof EntryTypeModel || $type->entry_group_id != $group_id) {
             abort(404);
         }
 
         $allGroups = EntryGroup::ordered()->get();
 
         return $this->view('entries.groups.types.delete', [
-            'group'  => $group,
+            'group' => $group,
             'groups' => $allGroups,
-            'type'   => $type,
+            'type' => $type,
         ]);
     }
 

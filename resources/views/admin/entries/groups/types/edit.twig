@@ -58,6 +58,15 @@
                                 <input class="form-control" id="sort_order" type="number" value="{{ old('sort_order', type.sort_order) }}" name="sort_order" min="0">
                             </div>
 
+
+                            <div class="col-md-12 main-switch main-switch-color switch-unchecked switch_border">
+                                <div class="switch-danger switch-unchecked-danger switch-border-danger my-3">
+                                    <input class="toggle switch-border-primary" name="has_entry_tree" id="has_entry_tree"
+                                           type="checkbox" value="1"
+                                           {% if old('has_entry_tree', type.has_entry_tree) %}checked{% endif %}>
+                                    <label for="has_entry_tree">Allow Entry Tree</label>
+                                </div>
+                            </div>
                             <!-- Class -->
                             <div class="col-12"><h5 class="border-bottom pb-2">PHP Class</h5></div>
                             {% if type_classes.count >= 1 %}
