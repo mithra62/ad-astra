@@ -23,9 +23,14 @@ return new class extends Migration
                 ->constrained('users')
                 ->restrictOnDelete();
 
+            $table->foreignId('status_id')
+                ->nullable()
+                ->constrained('statuses')
+                ->nullOnDelete();
+
             $table->string('title');
             $table->string('handle');
-            $table->string('status')->nullable()->index();
+            $table->string('status_handle')->nullable()->index();
             $table->timestamp('published_at')->nullable();
 
             $table->timestamps();

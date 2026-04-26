@@ -65,12 +65,12 @@
                             <div class="col-md-4">
                                 <label class="form-label" for="status">Status</label>
                                 <select class="form-select" id="status" name="status">
-                                    {% if entry.status and not entry.entryGroup.statusGroup.statuses.firstWhere('handle', entry.status) %}
-                                        <option value="{{ entry.status }}" selected>{{ entry.status }} (invalid for this group)</option>
+                                    {% if entry.status_handle and not entry.entryGroup.statusGroup.statuses.firstWhere('handle', entry.status_handle) %}
+                                        <option value="{{ entry.status_handle }}" selected>{{ entry.status_handle }} (invalid for this group)</option>
                                     {% endif %}
                                     {% for s in entry.entryGroup.statusGroup.statuses %}
                                         <option value="{{ s.handle }}"
-                                            {% if old('status', entry.status) == s.handle %}selected{% endif %}>
+                                            {% if old('status', entry.status_handle) == s.handle %}selected{% endif %}>
                                             {{ s.name }}
                                         </option>
                                     {% endfor %}

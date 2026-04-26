@@ -141,18 +141,19 @@ class EntryRepository
                 );
             }
 
-            $isValidForGroup = Status::query()
+            $status = Status::query()
                 ->where('status_group_id', $statusGroup->getKey())
                 ->where('handle', $handle)
-                ->exists();
+                ->first();
 
-            if (! $isValidForGroup) {
+            if (! $status) {
                 throw new InvalidArgumentException(
                     "Status [{$handle}] does not belong to EntryGroup [{$entry->entryGroup?->handle}]."
                 );
             }
 
-            $entry->status = $handle;
+            $entry->status_id     = $status->getKey();
+            $entry->status_handle = $status->handle;
 
             return;
         }
@@ -175,7 +176,8 @@ class EntryRepository
                 );
             }
 
-            $entry->status = $default->handle;
+            $entry->status_id     = $default->getKey();
+            $entry->status_handle = $default->handle;
         }
     }
 

@@ -73,8 +73,8 @@
                                                             {{ entry.entryType.name ?? '—' }}
                                                         </td>
                                                         <td>
-                                                            {% if entry.status %}
-                                                                <span class="badge bg-secondary">{{ entry.status }}</span>
+                                                            {% if entry.status.handle %}
+                                                                <span class="badge bg-secondary">{{ entry.status.handle }}</span>
                                                             {% else %}
                                                                 <span class="text-secondary">—</span>
                                                             {% endif %}

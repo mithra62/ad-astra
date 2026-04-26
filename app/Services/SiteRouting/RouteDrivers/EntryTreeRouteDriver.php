@@ -18,7 +18,7 @@ class EntryTreeRouteDriver implements RouteDriverInterface
             ])
             ->where('uri', $uri)
             ->whereHas('entry', function ($query) {
-                $query->where('status', 'published')
+                $query->where('status_handle', 'published')
                     ->published();
             })
             ->first();

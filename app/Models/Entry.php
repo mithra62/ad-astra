@@ -19,7 +19,8 @@ class Entry extends Model
     protected $fillable = [
         'entry_group_id',
         'entry_type_id',
-        'status',
+        'status_id',
+        'status_handle',
         'created_by_user_id',
         'title',
         'handle',
@@ -27,6 +28,11 @@ class Entry extends Model
     ];
 
     protected $casts = ['published_at' => 'datetime'];
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(Status::class);
+    }
 
     public function entryGroup(): BelongsTo
     {
@@ -104,7 +110,7 @@ class Entry extends Model
 
     public function scopeWithStatus(Builder $query, string $handle): Builder
     {
-        return $query->where('status', $handle);
+        return $query->where('status_handle', $handle);
     }
 
     public function scopeInGroup(Builder $query, string|int|EntryGroup $group): Builder

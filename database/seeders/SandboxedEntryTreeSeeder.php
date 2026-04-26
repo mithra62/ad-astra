@@ -168,6 +168,11 @@ class SandboxedEntryTreeSeeder extends Seeder
      */
     protected function seedEntries(array $definitions, EntryGroup $entryGroup, EntryType $entryType, User $author): array
     {
+        $publishedStatus = Status::query()
+            ->where('status_group_id', $entryGroup->status_group_id)
+            ->where('handle', 'published')
+            ->firstOrFail();
+
         $entries = [];
 
         foreach ($definitions as $key => $definition) {
@@ -180,7 +185,8 @@ class SandboxedEntryTreeSeeder extends Seeder
                     'entry_type_id' => $entryType->id,
                     'created_by_user_id' => $author->id,
                     'title' => $definition['title'],
-                    'status' => 'published',
+                    'status_id' => $publishedStatus->id,
+                    'status_handle' => $publishedStatus->handle,
                     'published_at' => $definition['published_at'],
                 ]
             );
