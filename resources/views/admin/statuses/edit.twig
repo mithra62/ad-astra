@@ -82,6 +82,7 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                                <input type="hidden" name="is_default" value="0">
                                                 <input class="toggle switch-border-primary" name="is_default" id="is_default"
                                                        type="checkbox" value="1"
                                                        {% if old('is_default', status.is_default) %}checked{% endif %}>
@@ -90,6 +91,7 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                                <input type="hidden" name="is_public" value="0">
                                                 <input class="toggle switch-border-primary" name="is_public" id="is_public"
                                                        type="checkbox" value="1"
                                                        {% if old('is_public', status.is_public) %}checked{% endif %}>
