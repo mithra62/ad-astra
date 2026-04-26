@@ -51,6 +51,7 @@
                                                 <tr>
                                                     <th scope="col">Name</th>
                                                     <th scope="col">Slug</th>
+                                                    <th scope="col">Children</th>
                                                     <th scope="col">Last Modified</th>
                                                     <th scope="col">Created</th>
                                                     <th scope="col"></th>
@@ -64,7 +65,10 @@
                                                             {{ category.handle }}
                                                         </td>
                                                         <td class="text-secondary f-w-600">
-                                                            {{ category.updated_at.format('F j, Y') }}
+                                                            {{ category.children.count() }}
+                                                        </td>
+                                                        <td>
+                                                            {{ category.created_at.format('F j, Y') }}
                                                         </td>
                                                         <td>
                                                             {{ category.created_at.format('F j, Y') }}

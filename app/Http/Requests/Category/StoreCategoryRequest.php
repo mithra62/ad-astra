@@ -36,7 +36,6 @@ class StoreCategoryRequest extends FormRequest
             $this->schemaFieldRules($schema));
     }
 
-
     public function messages(): array
     {
         $schema = CategoryGroup::resolvedFields($this->route()->parameter('group_id'));

@@ -19,7 +19,7 @@ These will break the application or cause data corruption in normal operation.
 
 ---
 
-### CRIT-01 — Debug Code Hard-Kills Application on User Update Authorization
+### [RESOLVED] CRIT-01 — Debug Code Hard-Kills Application on User Update Authorization
 
 **File:** `app/Policies/UserPolicy.php:38-39`
 
@@ -189,7 +189,7 @@ The `field_types` table has no unique constraint on the `object` column. Two row
 
 ---
 
-### HIGH-04 — `statuses.is_default` Has No Per-Group Uniqueness Constraint
+### [RESOLVED] HIGH-04 — `statuses.is_default` Has No Per-Group Uniqueness Constraint
 
 **File:** `database/migrations/2026_04_18_000006_create_statuses_table.php`
 
@@ -432,7 +432,7 @@ This is already done in `EntryRepository::defaultEagerLoad()` — the global `$w
 
 ---
 
-### MED-03 — No Log Retention/Pruning for `api_logs` Table
+### [RESOLVED] MED-03 — No Log Retention/Pruning for `api_logs` Table
 
 **File:** `app/Http/Middleware/LogRequestResponse.php`
 

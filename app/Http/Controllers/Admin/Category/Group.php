@@ -57,6 +57,7 @@ class Group extends Controller
 
         $groups = CategoryGroup::all();
         $categories = $group->categories()->whereNull('parent_id')->get();
+        $categories->load('children');
         $data = [
             'group' => $group,
             'groups' => $groups,

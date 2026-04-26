@@ -43,7 +43,6 @@
                               class="row g-3 needs-validation" novalidate>
                             {{ csrf_field() }}
                             {{ method_field('PUT') }}
-                            <input type="hidden" name="id" value="{{ category.id }}" />
 
                             <div class="col-md-12">
                                 <label class="form-label" for="name">Name</label>
@@ -93,6 +92,69 @@
                                 <button class="btn btn-primary float-end" type="submit">Save Category</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+
+                <!-- Children card -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5>Children</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if category.children.count >= 1 %}
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Slug</th>
+                                        <th scope="col">Children</th>
+                                        <th scope="col">Last Modified</th>
+                                        <th scope="col">Created</th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for child in category.children %}
+                                        <tr>
+                                            <td>{{ child.name }}</td>
+                                            <td class="f-w-500">
+                                                {{ child.handle }}
+                                            </td>
+                                            <td class="text-secondary f-w-600">
+                                                {{ child.children.count() }}
+                                            </td>
+                                            <td>
+                                                {{ child.created_at.format('F j, Y') }}
+                                            </td>
+                                            <td>
+                                                {{ child.created_at.format('F j, Y') }}
+                                            </td>
+                                            <td>
+                                                <a class="btn btn-primary icon-btn b-r-4"
+                                                   href="{{ route('categories.show', child) }}">
+                                                    <i class="ti ti-eye"></i>
+                                                </a>
+                                                <a class="btn btn-success icon-btn b-r-4"
+                                                   href="{{ route('categories.edit', child) }}">
+                                                    <i class="ti ti-edit"></i>
+                                                </a>
+                                                <a class="btn btn-danger icon-btn b-r-4"
+                                                   href="{{ route('categories.confirm', child) }}">
+                                                    <i class="ti ti-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-center">
+                                No Child Categories Created. <br />
+                                <a href="{{ route('categories.create', {group_id: category.group.id}) }}" class="btn btn-outline-primary">Create Child Category</a>
+                            </p>
+                        {% endif %}
                     </div>
                 </div>
 
