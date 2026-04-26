@@ -27,8 +27,8 @@ class FakeDataSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    private const USER_COUNT  = 10_000;
-    private const ENTRY_COUNT = 10_000;
+    private const USER_COUNT  = 1_000;
+    private const ENTRY_COUNT = 1_000;
 
     // Weighted role pool: ~70 % user, ~25 % admin, ~5 % super admin
     private const ROLE_POOL = [
