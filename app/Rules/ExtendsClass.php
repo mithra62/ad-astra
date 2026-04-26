@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class ExtendsClass implements ValidationRule
 {
-    public function __construct(private readonly string $parentClass) {}
+    public function __construct(private readonly string $parent_class) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -16,8 +16,8 @@ class ExtendsClass implements ValidationRule
             return;
         }
 
-        if (! is_subclass_of($value, $this->parentClass)) {
-            $fail("The :attribute must extend or implement [{$this->parentClass}].");
+        if (! is_subclass_of($value, $this->parent_class)) {
+            $fail("The :attribute must extend or implement [{$this->parent_class}].");
         }
     }
 }
