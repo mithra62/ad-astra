@@ -308,7 +308,7 @@ In all three cases, the model is the "owner" side of a polymorphic many-to-many 
 
 ---
 
-### HIGH-08 — `FieldLayout::fields()` Silently Triggers N+1 Queries Without Eager Loading
+### [RESOLVED] HIGH-08 — `FieldLayout::fields()` Silently Triggers N+1 Queries Without Eager Loading
 
 **File:** `app/Models/FieldLayout.php:33-37`
 
@@ -473,7 +473,7 @@ Any future change to layout seeding logic requires updating both files.
 
 ---
 
-### MED-05 — `entry_groups.status_group_id` Is Nullable But EntryRepository Throws RuntimeException If Absent
+### [RESOLVED] MED-05 — `entry_groups.status_group_id` Is Nullable But EntryRepository Throws RuntimeException If Absent
 
 **File:** `database/migrations/2026_04_18_000008_create_entry_groups_table.php:19-21`  
 **File:** `app/Repositories/EntryRepository.php:138-143`

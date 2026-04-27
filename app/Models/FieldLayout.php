@@ -31,6 +31,8 @@ class FieldLayout extends Model
 
     public function fields(): Collection
     {
+        $this->loadMissing('tabs.elements.field');
+
         return $this->tabs->flatMap(
             fn ($tab) => $tab->elements->map(fn ($el) => $el->field)
         );
