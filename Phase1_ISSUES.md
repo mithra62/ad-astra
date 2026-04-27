@@ -1,15 +1,21 @@
 # Phase 1 Issues Report
 
-**Project:** laravel-base  
-**Branch:** phase1  
-**Date:** 2026-04-25  
-**Scope:** Full codebase analysis — data model, business logic, and structural integrity
+**Project:** laravel-base
+**Branch:** phase1
+**Date:** 2026-04-26
+**Scope:** Full codebase analysis — data model, business logic, and structural integrity. This pass re-verified every previously listed item against the live source. Resolution markers reflect what the code now does, not what the prior report claimed.
+
+> **Status legend.**
+> `[RESOLVED]` — fix is in place and the code now matches the recommended shape.
+> `[PARTIALLY RESOLVED]` — application code mitigates the issue but at least one named gap (DB constraint, scheduler, observer, parameterised flow) remains.
+> `[OPEN]` — code still exhibits the original behaviour described.
+> `[REGRESSED / NEW]` — the original bug returned in a different file, or an equivalent issue is now present elsewhere.
 
 ---
 
 ## Project Overview
 
-This is a Laravel 12 CMS-style framework with a plugin-oriented, headless architecture. It implements a Craft CMS-inspired content model: **Entry Groups** → **Entry Types** → **Entries**, a dynamic **Field** system where custom field definitions are applied to entries, categories, and users via polymorphic relationships, a **Taxonomy** system (Categories + Tags), a **Status** workflow, and hierarchical **Entry Trees** for URL-routable page trees. Authentication is handled by Fortify (2FA, OAuth) with Sanctum API tokens, Spatie RBAC, and a lightweight honeypot bot-block system. The admin interface is a full Blade-rendered dashboard; the API is Sanctum-protected REST (v1).
+This is a Laravel 12 CMS-style framework with a plugin-oriented, headless architecture. It implements a Craft CMS-inspired content model: **Entry Groups** → **Entry Types** → **Entries**, a dynamic **Field** system where custom field definitions are applied to entries, categories, and users via polymorphic relationships, a **Taxonomy** system (Categories + Tags), a **Status** workflow, and hierarchical **Entry Trees** for URL-routable page trees. Authentication is handled by Fortify (2FA, OAuth) with Sanctum API tokens, Spatie RBAC, and a lightweight honeypot bot-block system. The admin interface is rendered through TwigBridge (Twig templates under `resources/views/admin`); the API is Sanctum-protected REST (v1).
 
 ---
 
@@ -21,7 +27,7 @@ These will break the application or cause data corruption in normal operation.
 
 ### [RESOLVED] CRIT-01 — Debug Code Hard-Kills Application on User Update Authorization
 
-**File:** `app/Policies/UserPolicy.php:38-39`
+**Original location:** `app/Policies/UserPolicy.php:38-39`
 
 ```php
 public function update(User $user, User $model): bool
@@ -32,111 +38,100 @@ public function update(User $user, User $model): bool
 }
 ```
 
-Any action that hits `Gate::allows('update', $user)` — including the admin user edit flow — will output `fdsa` to the raw response and immediately terminate the request. This affects every environment, including production once deployed. The actual comparison logic below the `exit` is dead code.
+**Current state.** The entire `app/Policies/` directory has been removed (`Glob 'app/Policies/*'` returns no files). There is no `UserPolicy` class anywhere in the codebase, so the original failure path no longer exists. The user update authorisation is now handled implicitly by the `Gate::before` super-admin bypass and direct `auth` middleware on the admin routes.
 
-**Fix:** Remove lines 38–39. The intended logic `return $user->id === $model->id;` is correct and should be the only statement.
-
-**Repercussion:** None beyond removing debug output. The policy will then work as intended.
+**However — see CRIT-05 below.** The same `echo 'fdsa'; exit;` pattern has reappeared in a different controller. Marking the original entry resolved does not mean the codebase is clean of this pattern.
 
 ---
 
 ### [RESOLVED] CRIT-02 — Trait Static Cache Collides Across Classes (`HasFieldLayout::resolvedFields`)
 
-**File:** `app/Traits/HasFieldLayout.php:16-23`
+**File:** `app/Traits/HasFieldLayout.php:14-19`
+
+**Current state — verified:**
 
 ```php
 public static function resolvedFields(int $id): static
 {
-    static $cache = [];   // <-- PHP method-level static: shared across ALL classes using this trait
-
-    return $cache[$id] ??= static::query()
+    return static::query()
         ->with('fieldLayout.tabs.elements.field')
         ->findOrFail($id);
 }
 ```
 
-In PHP, `static $cache` declared inside a **trait method** is a single shared variable for all classes that include the trait — it is **not** per-class. `EntryGroup`, `EntryType`, `Category\Group`, and `UserSchema` all use `HasFieldLayout`. If `EntryGroup::resolvedFields(1)` runs first, it stores an `EntryGroup` in `$cache[1]`. When `EntryType::resolvedFields(1)` is called next, PHP returns the cached `EntryGroup` record instead of an `EntryType` — a wrong-type object with wrong data is silently returned.
+The method-level `static $cache` has been removed entirely. `static::query()` correctly dispatches to the calling subclass via late static binding, and the `with(...)` eager-load chain handles the read pattern that the cache used to optimise. There is no remaining cross-class collision risk.
 
-**Example scenario:**
-```php
-$group = EntryGroup::resolvedFields(1);   // Stores EntryGroup #1 in shared $cache[1]
-$type  = EntryType::resolvedFields(1);    // Returns EntryGroup #1 — wrong model, wrong data
-```
-
-**Fix:** Replace the method-level static with a class-level static property (per-class via LSB), or simply remove the cache entirely and rely on Laravel's relation eager-loading, which is already applied everywhere this is called.
-
-```php
-// In each class (or via a properly structured trait property):
-protected static array $resolvedCache = [];
-
-public static function resolvedFields(int $id): static
-{
-    return static::$resolvedCache[$id] ??= static::query()
-        ->with('fieldLayout.tabs.elements.field')
-        ->findOrFail($id);
-}
-```
-
-**Repercussion:** Removing the in-process cache increases DB queries for repeated calls within a single request. In most web contexts this is negligible; add per-class cache properties if profiling shows it matters.
+**Repercussion of the fix.** Repeated `EntryGroup::resolvedFields($id)` calls inside a single request now issue an extra DB query each. In practice every call site already follows it with relation walks that would hit the same rows, so this is fine. Add a per-class cache property only if profiling shows it matters.
 
 ---
 
-### [RESOLVED] CRIT-03 — `Fieldable::field()` Throws on Orphaned Field Values (vs `Entry::field()` Which Is Safe)
+### [RESOLVED] CRIT-03 — `Fieldable::field()` Throws on Orphaned Field Values
 
-**File:** `app/Traits/Fieldable.php:16-19`
+**File:** `app/Traits/Fieldable.php:15-20`
+
+**Current state — verified:**
 
 ```php
-// UNSAFE — will throw TypeError if $v->field is null
 public function field(string $handle): mixed
 {
     return $this->fieldValues
-        ->first(fn ($v) => $v->field->handle === $handle)  // no null-safe operator
+        ->first(fn ($v) => $v->field?->handle === $handle)  // null-safe operator
         ?->resolvedValue();
 }
 ```
 
-Compare with the correct implementation in `Entry::field()` (app/Models/Entry.php:76):
-
-```php
-// SAFE — null-safe operator prevents crash
-$fv = $this->fieldValues->first(fn ($v) => $v->field?->handle === $handle);
-```
-
-The `Fieldable` trait is used by `Category` and `User`. If any `field_values` row has a `field_id` that no longer exists in the `fields` table (orphaned via direct DB manipulation or a bug), calling `->field('handle')` on a Category or User will throw a `TypeError` ("cannot access property of null"). The `fields.field_id` FK cascades deletes, so this is unlikely — but the discrepancy between the trait and the model implementation is itself a defect.
-
-**Fix:** Change `$v->field->handle` to `$v->field?->handle` in `Fieldable::field()`.
+The trait now uses the null-safe operator on `$v->field`, matching `Entry::field()`. `Fieldable::fieldArray()` (lines 22-28) also filters `field === null` before calling `mapWithKeys`, so an orphaned `field_values` row will not crash either method. The trait is used by `User` and `Category`, so both are safe.
 
 ---
 
 ### [RESOLVED] CRIT-04 — `Entry::getFieldLayout()` Declares `FieldLayout` Return Type But Can Return `null`
 
-**File:** `app/Models/Entry.php:91-97`
+**File:** `app/Models/Entry.php:101-107`
 
-```php
-public function getFieldLayout(): FieldLayout  // return type says non-nullable
-{
-    $typeLayout  = $this->entryType?->fieldLayout;  // can be null
-    $groupLayout = $this->entryGroup?->fieldLayout; // can be null
-
-    return $typeLayout ?? $groupLayout;  // returns null if both are null
-}
-```
-
-`entry_types.field_layout_id` is nullable and `entry_groups.field_layout_id` is nullable. Any code calling `getFieldLayout()` and expecting a concrete `FieldLayout` will receive `null`, causing downstream `TypeError` or `Call to a member function on null` exceptions. This includes `FieldLayout::fields()` which is called throughout the rendering pipeline.
-
-**Fix:** Change the return type to `?FieldLayout`:
+**Current state — verified:**
 
 ```php
 public function getFieldLayout(): ?FieldLayout
+{
+    $typeLayout  = $this->entryType?->fieldLayout;
+    $groupLayout = $this->entryGroup?->fieldLayout;
+
+    return $typeLayout ?? $groupLayout;
+}
 ```
 
-All callers must then null-check before proceeding. Alternatively, throw an explicit exception when the layout is missing so the failure is visible rather than silent.
+Return type is now nullable. Callers must null-check, but `EntryRepository::resolveLayoutFields()` (the dominant call site) merges both layouts via `Collection::merge()` and is null-safe by virtue of the `?? collect()` fallbacks.
+
+---
+
+### [REGRESSED / NEW] CRIT-05 — `echo 'fdsa'; exit;` Now Lives in the Field Group Destroy Action
+
+**File:** `app/Http/Controllers/Admin/Field/Group.php:95-106`
+
+```php
+public function destroy(DeleteFieldGroupRequest $request, string $id)
+{
+    echo 'fdsa';
+    exit;
+    $group = FieldGroup::find($id);
+    if ($group instanceof FieldGroup) {
+        $group->delete();
+        return redirect()->route('fields.groups')->with('success', trans('field.group.deleted'));
+    }
+
+    return redirect()->route('fields.groups')->with('failure', trans('field.group.not_found'));
+}
+```
+
+The exact debug pattern from CRIT-01 (output a four-letter string, then `exit` before the real logic) has been re-introduced in the admin field-group delete handler. Hitting the `fields.groups.destroy` route — wired up at `routes/admin.php:91-98` (`Route::resource('fields/groups', FieldGroup::class)`) — outputs `fdsa` and terminates the request. The `DeleteFieldGroupRequest` form-request authorisation runs first, so super-admins / admins can still trigger it just by clicking the delete button on a field group.
+
+**Fix:** Delete lines 97–98. The remaining body is correct.
+
+**Repercussion:** Once removed, deleting a field group will detach it via the polymorphic `field_groupables` pivot and remove the row. Cascade behaviour on the pivot is `cascadeOnDelete` (verify in `2026_04_09_153821_create_field_groupables_table.php`).
 
 ---
 
 ## HIGH SEVERITY ISSUES
-
-These will not immediately crash normal flows but represent data integrity failures, silent bugs, or conditions that will cause hard-to-diagnose problems as data grows.
 
 ---
 
@@ -144,24 +139,13 @@ These will not immediately crash normal flows but represent data integrity failu
 
 **File:** `database/migrations/2026_04_14_000001_create_fields_table.php:18`
 
-```php
-$table->string('handle')->index();   // only indexed, NOT unique
-```
+**Current state — verified:**
 
-Two fields can have the same handle. `PersistsFieldValues::setField()` (app/Concerns/PersistsFieldValues.php:13) resolves a field by handle:
-
-```php
-$field = Field::where('handle', $handle)->firstOrFail();
-```
-
-If two fields share the handle `body`, this silently returns whichever MySQL returns first (ordering is non-deterministic without ORDER BY). Field values would be written to the wrong field with no error. The `CategoryGroupSeeder` and `UserSchemaSeeder` both call `Field::firstOrCreate(['handle' => ...])` which would correctly find the existing record — but direct DB or Admin creation doesn't prevent duplicates.
-
-**Fix:** Add a unique constraint to the migration:
 ```php
 $table->string('handle')->unique();
 ```
 
-**Repercussion:** Re-seeding or migrating requires verifying no duplicate handles exist in the `fields` table. With two seeders, `FieldGroupSeeder` and `UserSchemaSeeder` both create fields with distinct handles so no conflict exists in seed data.
+Lookups via `Field::where('handle', $h)->firstOrFail()` (used by `PersistsFieldValues::setField()` at `app/Concerns/PersistsFieldValues.php:13`) are now backed by a uniqueness guarantee at the DB layer.
 
 ---
 
@@ -169,190 +153,154 @@ $table->string('handle')->unique();
 
 **File:** `database/migrations/2026_01_05_174237_create_field_groups_table.php:14`
 
+**Current state — verified:**
+
 ```php
-$table->string('handle')->index();   // only indexed, NOT unique
+$table->string('handle')->unique();
 ```
-
-Multiple field groups can share the same handle. The seeders use `firstOrCreate(['handle' => ...])` which would find the first match, but the admin UI can create duplicate groups. Duplicate handles break any lookup-by-handle logic.
-
-**Fix:** Change to `->unique()`.
 
 ---
 
 ### [RESOLVED] HIGH-03 — `field_types.object` Has No Unique Constraint
 
-**File:** `database/migrations/2026_04_13_215842_create_field_types_table.php`
+**File:** `database/migrations/2026_04_13_215842_create_field_types_table.php:16`
 
-The `field_types` table has no unique constraint on the `object` column. Two rows could map to the same PHP class (`App\Field\Types\Text::class`). `FieldTypeSeeder` uses `firstOrCreate(['object' => ...])` which is safe, but there is no database-level guard. If a duplicate is created, `Field::fieldType->instance()` would return whichever type the ORM picks — silently using the wrong type configuration.
+**Current state — verified:**
 
-**Fix:** Add `$table->string('object')->unique();` to the migration.
+```php
+$table->string('object')->unique();
+```
+
+`FieldTypeSeeder` uses `firstOrCreate(['object' => ...])` which now relies on this constraint.
 
 ---
 
-### [RESOLVED] HIGH-04 — `statuses.is_default` Has No Per-Group Uniqueness Constraint
+### [PARTIALLY RESOLVED] HIGH-04 — `statuses.is_default` Has No Per-Group Uniqueness Constraint
 
-**File:** `database/migrations/2026_04_18_000006_create_statuses_table.php`
+**Files:**
+- `database/migrations/2026_04_18_000006_create_statuses_table.php:21`
+- `app/Actions/Status/CreateNewStatus.php:13-29`
+- `app/Actions/Status/EditStatus.php:13-23`
 
-```php
-$table->boolean('is_default')->default(false);
-// No constraint prevents multiple is_default=true in the same group
-```
-
-`EntryRepository::applyStatus()` (app/Repositories/EntryRepository.php:170) uses:
+**Current state — verified.** The migration still has only `$table->boolean('is_default')->default(false);` with no unique index. Application-level enforcement was added in both create and edit actions:
 
 ```php
-$default = $statusGroup->statuses->firstWhere('is_default', true);
+// CreateNewStatus
+if (! empty($input['is_default'])) {
+    Status::where('status_group_id', $input['status_group_id'])
+        ->where('is_default', true)
+        ->update(['is_default' => false]);
+}
+return Status::create($input);
 ```
-
-If a status group has two statuses with `is_default=true`, `firstWhere` returns whichever is ordered first by `sort_order`. Newly created entries will receive an arbitrarily chosen default. The admin can currently set multiple defaults with no DB error.
-
-**Fix:** There is no single-column partial unique constraint syntax in standard SQL. The correct approach is an application-level validation in the seeder and admin form request, plus a DB-level check constraint (MySQL 8.0.16+):
-
-```sql
--- Option A (MySQL 8+): check constraint allowing only one default per group
--- Or enforced via unique index on a computed value.
-```
-
-A practical fix is adding a unique partial index via a raw migration statement:
 
 ```php
-$table->unique(['status_group_id', 'is_default'], 'status_group_default_unique');
-// This enforces only one (group_id, is_default=true) combination is allowed.
-// NOTE: MySQL UNIQUE treats multiple NULL as distinct, so (group, false) pairs
-// need careful handling. Consider an application-level guard instead.
+// EditStatus
+if ($input['is_default']) {
+    Status::where('status_group_id', $status->status_group_id)
+        ->where('id', '!=', $status->getKey())
+        ->where('is_default', true)
+        ->update(['is_default' => false]);
+}
 ```
 
-The most reliable fix is enforcing it in form requests and in the seeder, and adding application logic that resets `is_default=false` on other statuses in the same group before setting a new default.
+**Remaining gaps.**
+
+1. The clear-then-write sequence is **not transactional**. Two concurrent admins setting different statuses to default in the same group can both clear, then both insert, leaving two `is_default=true` rows (matches `CURRENT_ISSUES_REVIEW.md` §5).
+2. Direct `Status::create([...])` outside the action (e.g. seeders, tinker) bypasses the guard. `StatusGroupSeeder` is currently safe because each group seeds exactly one default, but ad-hoc data entry has no protection.
+3. `EntryRepository::applyStatus()` still uses `firstWhere('is_default', true)` to pick a default — order-dependent if the invariant breaks.
+
+**Recommended fix.** Wrap the clear-and-set in `DB::transaction(function () { ... lockForUpdate() ... })` inside both actions. Optionally add a partial unique index via raw SQL for MySQL 8+ if you can tolerate the migration churn.
 
 ---
 
 ### [RESOLVED] HIGH-05 — `entries.status` Is a Free-Text String With No Referential Integrity
 
-**File:** `database/migrations/2026_04_18_000010_create_entries_table.php:28`
+**Files:**
+- `database/migrations/2026_04_18_000010_create_entries_table.php:23-37`
+- `app/Repositories/EntryRepository.php:133-184`
+- `app/Observers/StatusObserver.php`
 
-```php
-$table->string('status')->nullable()->index();
-// No FK to statuses.handle; any string can be written
+**Current state — verified.** The single `status` string has been replaced by a three-column denormalisation, all maintained together by `EntryRepository::applyStatus()`:
+
+```
+status_id          → FK to statuses.id (nullOnDelete)
+status_handle      → indexed string (denormalised handle for fast equality reads)
+status_is_public   → indexed boolean (denormalised is_public for scopePublished)
 ```
 
-The `status` column stores a handle string like `'draft'` or `'published'`. When a `Status` record is deleted from the `statuses` table, all entries with that status value become orphaned — they hold a handle that no longer maps to any status record. The admin interface can display these entries with an unresolvable status.
+`applyStatus()` rejects status handles that don't belong to the entry's group's status group (throws `InvalidArgumentException`), and `StatusObserver::updating()` propagates `is_public` flips to every referencing entry's `status_is_public` column. `Entry::scopeWithStatus()` reads `status_handle`, `Entry::scopePublished()` reads `status_is_public`.
 
-Additionally, direct Eloquent model updates (bypassing `EntryRepository::applyStatus()`) can set any arbitrary string. For example:
-
-```php
-$entry->status = 'foobar';
-$entry->save();   // succeeds — no DB validation
-```
-
-**Fix:** Application-level: enforce all writes through the repository. DB-level: add a trigger or application-side validation on save. There is no FK from string to string in standard SQL, so this must be enforced by convention and validation.
-
-A migration-based approach would be to add a composite index and ensure entry creation always goes through the repository. Also add a form request validation rule that resolves the handle against the group's status list.
+**Caveat.** Request-side validation in `StoreEntryRequest` and `EditEntryRequest` only enforces `'status' => ['nullable','string','max:100']` — it does not yet validate the handle against the group's allowed statuses. The repository still catches it, but a non-HTTP caller invoking `Content::create(...)` with a typo gets a `RuntimeException` deeper in the call stack rather than a friendly validation message. This residual gap is tracked in `CURRENT_ISSUES_REVIEW.md` §1; the migration-level concern from HIGH-05 itself is closed.
 
 ---
 
 ### [RESOLVED] HIGH-06 — `Entry::scopePublished` and the `status` Field Are Independent (Dual Publication State)
 
-**File:** `app/Models/Entry.php:99-103`
+**File:** `app/Models/Entry.php:109-114`
+
+**Current state — verified:**
 
 ```php
 public function scopePublished(Builder $query): Builder
 {
-    return $query->whereNotNull('published_at')
+    return $query->where('status_is_public', true)
+        ->whereNotNull('published_at')
         ->where('published_at', '<=', now());
-    // Does NOT check status — a Draft entry with past published_at is "published"
 }
 ```
 
-An entry with `status = 'draft'` and `published_at = '2025-01-01'` will be returned by `scopePublished()`. There are now two independent mechanisms controlling whether an entry is "live": the `status` string and the `published_at` timestamp. Neither system coordinates with the other.
-
-This is a business logic issue that will cause content to appear publicly before an editor considers it ready.
-
-See the **Business Rules** section for a detailed discussion.
+The scope now AND-joins all three conditions. Combined with `StatusObserver` keeping `status_is_public` in sync with the source `Status` row, the dual-state ambiguity from BR-01 is closed. A draft entry with a past `published_at` is **not** considered published, which was the original failure mode.
 
 ---
 
-### [RESOLVED] HIGH-07 — `Field::fieldable()` Is a Logically Incorrect `morphTo()` Relationship
+### [RESOLVED] HIGH-07 — Incorrect `morphTo()` Relationships on Owner-Side Models
 
-**File:** `app/Models/Field.php:45-48`
+**Files originally cited:**
+- `app/Models/Field.php`
+- `app/Models/Field/Group.php`
+- `app/Models/Category/Group.php`
 
-```php
-public function fieldable()
-{
-    return $this->morphTo();
-}
-```
+**Current state — verified.** None of the cited models still expose a stub `morphTo()` method.
 
-The `Field` model does not have `fieldable_type` or `fieldable_id` columns — the `fields` table schema has no such columns. `morphTo()` will attempt to read these non-existent attributes and return `null` or throw depending on context. This is dead code that will mislead developers.
+- `Field` declares `groups()` returning `$this->morphedByMany(Group::class, 'fieldable')` (correct — Field is the inverse side of a polymorphic many-to-many).
+- `Field\Group` declares `fields()` returning `$this->morphToMany(Field::class, 'fieldable')` — the owner side via the `fieldables` pivot.
+- `Category\Group` only exposes `categories()` (a regular `hasMany`); the polymorphic `categoryGroups()` relation lives on the consumer side via the `HasCategoryGroups` trait, mapped through `category_groupables`.
 
-The same pattern appears in two other models:
-
-**`app/Models/Field/Group.php:25-28`:**
-```php
-public function field_groupable()
-{
-    return $this->morphTo();  // field_groups table has no field_groupable_* columns
-}
-```
-
-**`app/Models/Category/Group.php:28-30`:**
-```php
-public function category_groupable()
-{
-    return $this->morphTo();  // category_groups table has no category_groupable_* columns
-}
-```
-
-In all three cases, the model is the "owner" side of a polymorphic many-to-many (via pivot tables `fieldables`, `field_groupables`, `category_groupables`), not the polymorphic "child" side that `morphTo()` represents.
-
-**Fix:** Remove all three `morphTo()` methods. The correct inverse relationships are already defined (`fields()`, `groups()`, etc.) and the pivot tables handle polymorphism correctly.
+The dead `morphTo()` declarations are gone and the correct M2M directionality is in place.
 
 ---
 
 ### [RESOLVED] HIGH-08 — `FieldLayout::fields()` Silently Triggers N+1 Queries Without Eager Loading
 
-**File:** `app/Models/FieldLayout.php:33-37`
+**File:** `app/Models/FieldLayout.php:33-40`
 
-```php
-public function fields(): Collection
-{
-    return $this->tabs->flatMap(          // lazy-loads tabs if not eager-loaded
-        fn ($tab) => $tab->elements->map( // lazy-loads elements for each tab
-            fn ($el) => $el->field        // lazy-loads field for each element
-        )
-    );
-}
-```
-
-If `FieldLayout` is retrieved without eager-loading `tabs.elements.field`, this triggers:
-- 1 query to load tabs
-- N queries (one per tab) to load elements
-- M queries (one per element) to load fields
-
-For a layout with 3 tabs and 5 fields each = 19 queries. This method is called in `EntryRepository::resolveLayoutFields()`, `Entry::getFieldLayout()->fields()`, `CategoryService::resolveFields()`, and `FieldService` paths.
-
-The `defaultEagerLoad()` in `EntryRepository` does include `entryGroup.fieldLayout.tabs.elements.field.fieldType`, which prevents the issue there. But any code path that loads a `FieldLayout` independently and calls `fields()` will hit N+1.
-
-**Fix:** Assert that `tabs` is loaded in the method, or document the required eager-load contract explicitly. Alternatively, add `$this->loadMissing('tabs.elements.field')` at the top of `fields()`:
+**Current state — verified:**
 
 ```php
 public function fields(): Collection
 {
     $this->loadMissing('tabs.elements.field');
-    return $this->tabs->flatMap(fn ($tab) => $tab->elements->map(fn ($el) => $el->field));
+
+    return $this->tabs->flatMap(
+        fn ($tab) => $tab->elements->map(fn ($el) => $el->field)
+    );
 }
 ```
+
+The leading `loadMissing()` call ensures the relation chain is loaded exactly once on first access. Subsequent calls within the same request re-use the cached collection.
 
 ---
 
 ## MEDIUM SEVERITY ISSUES
 
-These are structural problems that won't break normal operation today but will cause maintenance problems, performance degradation, or subtle bugs as the system grows.
-
 ---
 
-### MED-01 — `CategoryService::wouldCreateCycle()` N+1 Query Pattern
+### [OPEN] MED-01 — `CategoryService::wouldCreateCycle()` N+1 Query Pattern
 
-**File:** `app/Services/CategoryService.php:90-107`
+**File:** `app/Services/CategoryService.php:96-114`
+
+**Current state — verified.** The method is unchanged from the original report:
 
 ```php
 private function wouldCreateCycle(Category $category, int $targetParentId): bool
@@ -363,299 +311,267 @@ private function wouldCreateCycle(Category $category, int $targetParentId): bool
 
     $candidate = Category::find($targetParentId);
 
-    while ($candidate?->parent_id !== null) {         // One DB query per loop iteration
+    while ($candidate?->parent_id !== null) {
         if ($candidate->parent_id === $category->id) {
             return true;
         }
-        $candidate = Category::find($candidate->parent_id);  // N+1 per ancestor level
+
+        $candidate = Category::find($candidate->parent_id);
     }
 
     return false;
 }
 ```
 
-For a category hierarchy 10 levels deep, this executes up to 10 individual `SELECT` queries. The seed data only has 2 levels, so this is not currently visible, but it will degrade for any real-world taxonomy.
+Each ancestor walk still costs one full `Category::find()` per level. There is no `$visited` guard, so a pre-existing cycle in stored data — which `MED-09` makes possible because parent/group invariants are unenforced — would loop until PHP's max execution time fires.
 
-**Fix:** Load the entire ancestor chain in a single recursive CTE query, or use a closure table pattern. A simpler immediate fix is to load ancestors by collecting all parent IDs first:
+**Fix.** Walk ancestors using `Category::where('id', $id)->value('parent_id')` to read only the column needed, accumulate visited IDs to break pre-existing cycles, and stop after a sane depth cap (e.g. 32). A recursive-CTE query would be optimal, but is not necessary for typical taxonomy depths.
+
+---
+
+### [OPEN] MED-02 — Global `$with` on `Field` and `FieldValue` Creates Always-On Eager Load Overhead
+
+**Files:**
+- `app/Models/Field.php:33` — `protected $with = ['fieldType'];`
+- `app/Models/FieldValue.php:27` — `protected $with = ['field'];`
+
+**Current state — verified.** Both `$with` arrays are still present. They create a transitive eager-load chain `FieldValue → Field → FieldType` on every query that touches `field_values`, even when only an ID or a count is needed. `EntryRepository::defaultEagerLoad()` already specifies the same chain explicitly, so the global `$with` is redundant in the hot path while still adding overhead in cold paths (admin counts, simple list views, factories, tests).
+
+**Fix.** Remove both `$with` declarations. Update any caller that relied on implicit loading (e.g. `$category->fieldValues->first()->field->name` without an explicit `with`).
+
+---
+
+### [PARTIALLY RESOLVED] MED-03 — No Log Retention/Pruning for `api_logs` Table
+
+**Files:**
+- `app/Models/ApiLog.php`
+- `routes/console.php`
+- `bootstrap/app.php`
+
+**Current state — verified.** `ApiLog` now `use`s the `Prunable` trait and declares:
 
 ```php
-private function wouldCreateCycle(Category $category, int $targetParentId): bool
+public function prunable()
 {
-    $visited = [$targetParentId];
-    $parentId = Category::where('id', $targetParentId)->value('parent_id');
-
-    while ($parentId !== null) {
-        if ($parentId === $category->id) {
-            return true;
-        }
-        if (in_array($parentId, $visited, true)) {
-            return true; // existing cycle in data
-        }
-        $visited[] = $parentId;
-        $parentId = Category::where('id', $parentId)->value('parent_id');
-    }
-
-    return false;
+    return static::where('created_at', '<', now()->subDays(90));
 }
 ```
 
-This still has N+1 but is structurally clearer. A CTE-based approach would be optimal.
+That fixes the missing prune scope. **However**, the `model:prune` Artisan command is **not scheduled anywhere**:
+- `routes/console.php` only registers the `inspire` example command.
+- `bootstrap/app.php` configures middleware and routing but does not register a schedule.
+- A `grep` for `Schedule::`, `model:prune`, or `->daily(` across `app/` and `routes/` returns nothing.
 
----
+So the prune scope exists but never runs unless an operator manually invokes `php artisan model:prune --model=App\Models\ApiLog`.
 
-### MED-02 — Global `$with` on `Field` and `FieldValue` Creates Always-On Eager Load Overhead
-
-**File:** `app/Models/Field.php:33` and `app/Models/FieldValue.php:27`
+**Fix.** Register the schedule explicitly. Laravel 12 supports either `Schedule::command(...)` inside `routes/console.php` or `withSchedule(...)` in `bootstrap/app.php`:
 
 ```php
-// Field.php
-protected $with = ['fieldType'];  // Every Field load automatically loads FieldType
+// routes/console.php
+use Illuminate\Support\Facades\Schedule;
 
-// FieldValue.php
-protected $with = ['field'];      // Every FieldValue load automatically loads Field (which loads FieldType)
+Schedule::command('model:prune', ['--model' => [\App\Models\ApiLog::class]])
+    ->daily();
 ```
 
-These create a three-level always-on eager load chain: `FieldValue → Field → FieldType`. Every query that loads field values — including the full entry eager-load chain in `EntryRepository::defaultEagerLoad()` — loads this entire chain. Bulk operations that only need a count or a specific column of `FieldValue` still pay the full join cost.
-
-This is particularly expensive in admin listing views and API endpoints that fetch many entries.
-
-**Fix:** Remove `$with` from both models and explicitly specify eager loads at the query site:
-
-```php
-// At query time in EntryRepository:
-'fieldValues.field.fieldType'
-```
-
-This is already done in `EntryRepository::defaultEagerLoad()` — the global `$with` is redundant and only adds overhead.
-
-**Repercussion:** Any code path that loads `FieldValue` without specifying the `field` relation (e.g., `$category->fieldValues` without eager loading) will no longer auto-load the field. Every caller must add the explicit relation. This is the correct behavior.
+Until the schedule lands, treat MED-03 as production-unsafe for any system with steady API traffic.
 
 ---
 
-### [RESOLVED] MED-03 — No Log Retention/Pruning for `api_logs` Table
+### [OPEN] MED-04 — Duplicate `createLayout()` Method Across Two Seeders
 
-**File:** `app/Http/Middleware/LogRequestResponse.php`
+**Files:**
+- `database/seeders/EntryGroupSeeder.php:113`
+- `database/seeders/ExtendedEntryGroupSeeder.php:298`
 
-Every authenticated API request inserts a row into `api_logs`. There is no TTL column, no scheduled purge command, no partitioning strategy, and no size cap visible anywhere in the codebase. In an active API environment, this table grows indefinitely.
+**Current state — verified.** Both seeders still define identical private `createLayout(string $name, array $tabs): FieldLayout` methods. Any change to layout seeding logic still has to be applied twice.
 
-The `LogRequestResponse` middleware is applied to all `api.php` routes. For APIs under moderate traffic (e.g., 100 req/min), the table would accumulate ~4.3 million rows per month.
-
-**Fix:** Add a `prunable()` method to the `ApiLog` model and schedule the `model:prune` Artisan command, or add a queued cleanup job:
-
-```php
-// In ApiLog.php
-use Illuminate\Database\Eloquent\Prunable;
-
-class ApiLog extends Model
-{
-    use Prunable;
-
-    public function prunable(): Builder
-    {
-        return static::where('created_at', '<', now()->subDays(90));
-    }
-}
-```
+**Fix.** Extract the helper to a shared trait (e.g. `Database\Seeders\Concerns\BuildsLayouts`) or a common base class so both seeders inherit it.
 
 ---
 
-### MED-04 — Duplicate `createLayout()` Method Across Two Seeders
+### [PARTIALLY RESOLVED] MED-05 — `entry_groups.status_group_id` Is Nullable But EntryRepository Throws RuntimeException If Absent
 
-**Files:**  
-- `database/seeders/EntryGroupSeeder.php:113-143`  
-- `database/seeders/ExtendedEntryGroupSeeder.php:298-327`
+**Files:**
+- `database/migrations/2026_04_18_000008_create_entry_groups_table.php:19-22`
+- `app/Repositories/EntryRepository.php:135-184`
+- `app/Actions/Entry/Group/CreateNewEntryGroup.php`
+- `app/Actions/Entry/Group/EditEntryGroup.php`
+- `app/Http/Requests/Entry/Group/StoreEntryGroupRequest.php`
 
-Identical private `createLayout(string $name, array $tabs): FieldLayout` methods exist in both seeders. The implementations are functionally the same — both create a `FieldLayout`, iterate tabs, and create `TabElement` records. The only difference is that `ExtendedEntryGroupSeeder::createLayout()` has the comment "Fields that don't exist in the database are silently skipped" while `EntryGroupSeeder::createLayout()` does not comment this (but the behavior is the same — `$field = Field::where('handle', $handle)->first()` followed by `if (! $field) { continue; }`).
-
-Any future change to layout seeding logic requires updating both files.
-
-**Fix:** Extract `createLayout()` into a shared seeder trait or a dedicated `SeederHelper` class. Alternatively, have `ExtendedEntryGroupSeeder` call the parent or an inherited method.
-
----
-
-### [RESOLVED] MED-05 — `entry_groups.status_group_id` Is Nullable But EntryRepository Throws RuntimeException If Absent
-
-**File:** `database/migrations/2026_04_18_000008_create_entry_groups_table.php:19-21`  
-**File:** `app/Repositories/EntryRepository.php:138-143`
+**Current state — verified.** The schema still declares the column nullable:
 
 ```php
-// Migration: status_group_id is optional
 $table->foreignId('status_group_id')
     ->nullable()
     ->constrained('status_groups')
     ->nullOnDelete();
+```
 
-// Repository: throws if missing
-$statusGroup = $entry->entryGroup?->statusGroup;
-if (! $statusGroup) {
-    throw new \RuntimeException(
-        "EntryGroup [{$entry->entryGroup?->handle}] has no status group configured."
-    );
+Request-side validation now requires `status_group_id` for entry-group create/edit, and `EntryRepository::applyStatus()` throws when the group has no status group. So the *web admin path* is safe. But:
+
+- `CreateNewEntryGroup` and `EditEntryGroup` still allow a `null` value through (the actions defer to the request layer).
+- Any non-HTTP caller (`tinker`, a future REST endpoint, a future CLI command) can still construct an entry group with `status_group_id = null`.
+- The first attempt to create an entry in that group throws `RuntimeException` — visible, but later than ideal.
+
+This matches `CURRENT_ISSUES_REVIEW.md` §3.
+
+**Recommended fix.** Make the column non-nullable in the existing migration (the project is still resettable; per the current review, no repair migration is needed), and remove the `?? null` fallback from the actions.
+
+---
+
+### [PARTIALLY RESOLVED] MED-06 — `entry_trees.is_home` Has No Uniqueness Constraint
+
+**Files:**
+- `database/migrations/2026_04_23_200641_create_entry_tree_table.php:27`
+- `app/Actions/Entry/Tree/CreateEntryTreeNode.php:74-83`
+
+**Current state — verified.** The DB column has no unique index. App-level enforcement was added in `CreateEntryTreeNode::assertValidPlacement()`:
+
+```php
+if ($isHome) {
+    if ($parent) {
+        throw new InvalidArgumentException('The Entry Tree home node must be a root node.');
+    }
+
+    if (EntryTree::query()->where('is_home', true)->exists()) {
+        throw new InvalidArgumentException('Only one Entry Tree home node may exist.');
+    }
 }
 ```
 
-An admin can create an `EntryGroup` without a status group (the field is nullable). Attempting to create any entry in that group will throw a `RuntimeException`. This is a schema–code contract mismatch: the database permits the absence of a status group, but the application requires one. The error will surface unexpectedly in production.
+`MoveEntryTreeNode::handle()` also rejects any move that would attach the home node under a parent. **Two gaps remain:**
 
-**Fix:** Either make `status_group_id` non-nullable in the migration (enforce the contract at the DB level), or handle the missing status group gracefully in the repository — such as skipping status assignment and leaving it null.
+1. **Race condition.** `assertValidPlacement` is a check-then-act: two concurrent requests could both see no home and both create one. There is no `lockForUpdate()` or DB-level uniqueness to backstop it.
+2. **`is_home` flag flips outside the actions.** Anything that updates `EntryTree` directly (raw `$node->update(['is_home' => true])`, a future bulk import) bypasses the guard.
+
+**Fix.** Add a partial unique index via raw SQL in the existing migration:
+
+```php
+DB::statement('CREATE UNIQUE INDEX entry_trees_is_home_unique ON entry_trees ((CASE WHEN is_home THEN 1 END))');
+```
+
+(or similar, depending on MySQL version). Failing that, wrap the action body in `DB::transaction()` with a `SELECT ... FOR UPDATE` on `entry_trees WHERE is_home = true`.
 
 ---
 
-### MED-06 — `entry_trees.is_home` Has No Uniqueness Constraint
+### [OPEN] MED-07 — Missing Migration Files: Sequence Gaps `000007` and `000012`
 
-**File:** `database/migrations/2026_04_23_200641_create_entry_tree_table.php:27`
-
-```php
-$table->boolean('is_home')->default(false);
-// No unique constraint prevents multiple home entries
-```
-
-Multiple `EntryTree` records can have `is_home=true`. Any routing logic that searches for `where('is_home', true)->first()` would return an arbitrary result, making the home page non-deterministic.
-
-**Fix:** Add a unique partial index. In MySQL:
-
-```php
-// In migration or a new migration:
-DB::statement('CREATE UNIQUE INDEX entry_trees_is_home_unique ON entry_trees (is_home) WHERE is_home = 1');
-```
-
-Or enforce it at the application layer in the service that creates/updates entry trees by setting all other `is_home` values to false before setting the new one.
-
----
-
-### MED-07 — Missing Migration Files: Sequence Gaps `000007` and `000012`
-
-Reviewing the migration file list sorted by filename:
+**Current state — verified.** A directory listing of `database/migrations/` shows the same gaps:
 
 ```
+2026_04_18_000005_create_status_groups_table.php
 2026_04_18_000006_create_statuses_table.php
 2026_04_18_000008_create_entry_groups_table.php   ← gap: 000007 missing
+…
 2026_04_18_000011_create_entry_authors_table.php
 2026_04_18_000013_create_user_schema_table.php    ← gap: 000012 missing
+…
 ```
 
-Two migration sequence numbers (`000007` and `000012`) are absent from the `database/migrations/` directory. Since these use timestamp-based naming (not auto-increment names), gaps may indicate migrations that were deleted after being committed to version control. On a fresh install the gaps have no functional impact, but in any environment that ran the deleted migrations (and has a `migrations` table entry for them), re-running `migrate:fresh` or rolling back across that range will produce errors.
+On a fresh install this is harmless; on a database that ran the missing files at any point in their history it can cause `migrate:rollback` to fail.
 
-**Fix:** Verify in git history whether migrations for these sequence numbers ever existed. If so, ensure they are not referenced in the `migrations` table on any deployed database. If they are phantom numbers (never created), the gaps are harmless.
+**Fix.** Verify in `git log -- database/migrations/` whether either sequence number ever existed. If they do exist in any deployed database's `migrations` table, hand-delete those rows or renumber the surrounding files.
 
 ---
 
-### MED-08 — `UsersSeeder` Runs Unconditionally With Hardcoded Credentials
+### [OPEN] MED-08 — `UsersSeeder` Runs Unconditionally With Hardcoded Credentials
 
-**File:** `database/seeders/UsersSeeder.php` (creates `eric@mithra62.com` / `password`)  
-**File:** `database/seeders/DatabaseSeeder.php:12`
+**Files:**
+- `database/seeders/UsersSeeder.php`
+- `database/seeders/DatabaseSeeder.php:14-17`
+
+**Current state — verified.** `DatabaseSeeder::run()` still calls `UsersSeeder` outside any environment guard:
 
 ```php
 $this->call([
     RolesPermissionsSeeder::class,
-    UsersSeeder::class,      // ← always runs, not gated by environment
-    ...
+    UsersSeeder::class,                   // ← always runs
+    FieldTypeSeeder::class,
+    …
 ]);
 ```
 
-`EntrySeeder` and `FakeDataSeeder` are correctly gated to `local` and `testing` environments. `UsersSeeder` is not. If `db:seed` is run on a staging or production database (e.g., during a fresh deploy), it creates an admin user with email `eric@mithra62.com` and password `password` — an immediately exploitable credential.
+`UsersSeeder` creates **`eric@mithra62.com` with password `password` and the `super admin` role** — unconditionally. Running `php artisan db:seed` against any database (including production) creates an immediately-exploitable super-admin account. The seeder uses `User::factory()->create([...])` rather than `firstOrCreate`, so re-runs will fail on the unique-email constraint, but the first run is the dangerous one.
 
-The seeder uses `firstOrCreate`, so repeated runs won't duplicate the record, but it will create the account on a clean production database.
-
-**Fix:** Either gate `UsersSeeder` to non-production environments:
+**Fix.** Either:
 
 ```php
-if (app()->environment(['local', 'testing', 'staging'])) {
+if (app()->environment(['local', 'testing'])) {
     $this->call([UsersSeeder::class]);
 }
 ```
 
-Or remove hardcoded credentials entirely and use environment variables or interactive prompts for the initial admin user.
+or replace the hardcoded creds with environment variables (`env('SEED_ADMIN_EMAIL')`) and document the deployment expectation.
 
 ---
 
-### MED-09 — Categories Can Have Parents From a Different Group (No Cross-Group Guard)
+### [OPEN] MED-09 — Categories Can Have Parents From a Different Group
 
-**File:** `database/migrations/2026_04_18_000016_create_categories_table.php:11-19`
+**Files:**
+- `database/migrations/2026_04_18_000016_create_categories_table.php`
+- `app/Services/CategoryService.php` (`create()`, `move()`, `wouldCreateCycle()`)
 
-```php
-$table->foreignId('group_id')->constrained('category_groups')->cascadeOnDelete();
-$table->foreignId('parent_id')->nullable()->constrained('categories')->nullOnDelete();
-```
+**Current state — verified.** Neither `CategoryService::create()` nor `CategoryService::move()` checks that the target `parent_id` belongs to the same `group_id`. `wouldCreateCycle()` only walks ancestors — it does not consider group membership.
 
-The `parent_id` FK points to the `categories` table with no constraint ensuring the parent belongs to the same `group_id`. A "Technology" category from the `topics` group could be assigned as parent to a "Phones" category from the `product-categories` group. The `wouldCreateCycle()` check in `CategoryService` does not check group membership either.
-
-**Fix:** Add a check constraint or enforce at the application level in `CategoryService::move()` and `CategoryService::create()`:
+**Fix.** In both methods:
 
 ```php
 if ($parentId !== null) {
     $parentGroup = Category::where('id', $parentId)->value('group_id');
-    if ($parentGroup !== $groupId) {
+    if ((int) $parentGroup !== (int) $groupId) {
         throw new \InvalidArgumentException("Parent category must belong to the same group.");
     }
 }
 ```
 
+Correlated with **BR-03** below.
+
 ---
 
 ## LOW SEVERITY ISSUES
 
-Cosmetic, structural, or minor concerns that won't cause failures in current scope but should be addressed before the project matures.
+---
+
+### [PARTIALLY RESOLVED] LOW-01 — `UserSchema::resolved()` In-Process Static Cache Can Return Stale Data
+
+**Files:**
+- `app/Models/UserSchema.php:42-45`
+- `tests/TestCase.php:13` and `tests/Unit/Models/UserSchemaTest.php` (callers)
+
+**Current state — verified.** The static cache and `flushResolved()` helper are unchanged. `flushResolved()` is now actually called from `tests/TestCase.php` between cases, eliminating the stale-cache problem in unit tests. **No production code calls it**, however — neither the `UserSchema` admin controller (if and when one exists) nor any field-layout edit action invalidates the cache. In a long-lived process (Octane, persistent queue worker), edits to the user schema will not be visible until the worker restarts.
+
+**Fix.** Call `UserSchema::flushResolved()` at the end of any admin action that modifies the user schema's `field_layout_id` or its underlying `FieldLayout`/`Tab`/`TabElement` rows. Better yet, listen to those models' `saved`/`deleted` events and flush from a single place.
 
 ---
 
-### LOW-01 — `UserSchema::resolved()` In-Process Static Cache Can Return Stale Data in Long-Lived Processes
-
-**File:** `app/Models/UserSchema.php:17-37`
-
-```php
-private static ?self $resolved = null;
-
-public static function resolved(): static
-{
-    if (static::$resolved === null) {
-        static::$resolved = static::with(...)->firstOrCreate(['id' => 1]);
-    }
-    return static::$resolved;
-}
-```
-
-In standard PHP-FPM, each request gets a fresh process so `$resolved` resets per request — safe. In Laravel Octane (Swoole/RoadRunner), the process persists across requests. If `UserSchema` is updated (field layout changed via admin), `static::$resolved` holds the old object for all subsequent requests in that worker until the worker restarts.
-
-The `flushResolved()` method exists but is not called after admin updates.
-
-**Fix:** Call `UserSchema::flushResolved()` in the admin controller after any update to the user schema or its related field layout. Also consider whether this cache is necessary at all for the current traffic expectations.
-
----
-
-### LOW-02 — Permission Gaps for Entry and Field Management Areas
+### [OPEN] LOW-02 — Permission Gaps for Entry, Field, Status, and Role Management Areas
 
 **File:** `database/seeders/RolesPermissionsSeeder.php`
 
-The permission system defines permissions for:
-- `api`, `access admin`, user management, user tokens, category groups, categories, media libraries
+**Current state — verified.** The seeder defines permissions only for: `api`, `access admin`, user/user-token CRUD, category-group + category CRUD/reorder, and media-library CRUD/reorder. **No** permissions exist for entries, entry groups, entry types, fields, field groups, field layouts (or their tabs/elements), statuses, status groups, roles, or individual media items. Every admin section that touches those areas is gated only by `access admin` plus the super-admin bypass.
 
-There are **no defined permissions** for:
-- Entry management (create/edit/delete entries, entry groups, entry types)
-- Field management (fields, field groups, field layouts)
-- Status group management
-- Media management (uploading/editing individual media items)
-
-All of these admin sections currently rely on the **super admin gate bypass** to be accessible (non-super-admins cannot reach them). This means the admin role cannot delegate entry editing or field configuration to non-super-admin users. The RBAC model is incomplete for the content management use cases the system is designed for.
-
-**Fix:** Add permissions for each major content area to `RolesPermissionsSeeder` and assign them appropriately to the `admin` role.
+**Fix.** Extend `RolesPermissionsSeeder` to add the missing permissions and grant them to the existing `admin` role. Audit each `app/Http/Controllers/Admin/*` controller and its `FormRequest` to gate operations on the new permissions. This was deferred during phase 1; it is a deliberate gap, not an oversight in the report.
 
 ---
 
-### LOW-03 — `Entry::handle` Auto-Generation Can Produce an Empty String
+### [OPEN] LOW-03 — `Entry::handle` Auto-Generation Can Produce an Empty String
 
-**File:** `app/Repositories/EntryRepository.php:126`
+**File:** `app/Repositories/EntryRepository.php:120-131`
+
+**Current state — verified.** `applyCoreAttributes()` is unchanged:
 
 ```php
 $entry->handle = $data['handle'] ?? Str::slug($entry->title ?? '');
 ```
 
-If no explicit handle is provided and the entry title evaluates to empty/null (theoretically prevented by the `NOT NULL` column, but possible through direct model assignment), `Str::slug('')` returns `''`. An empty string handle fails the unique constraint `entry_group_handle_unique` in a non-obvious way (MySQL's behavior with empty strings in unique indexes).
+If the title is null/empty (in practice prevented by DB `NOT NULL`, but possible via direct model assignment in tests or a custom command), `Str::slug('')` returns `''`. An empty handle then collides with another empty handle in the same group on the unique `(entry_group_id, handle)` index, surfacing as a `QueryException`.
 
-**Fix:** Add a guard after handle generation:
+**Fix.** Reject empty handles explicitly:
 
 ```php
 $handle = $data['handle'] ?? Str::slug($entry->title ?? '');
-if (empty($handle)) {
+if ($handle === '') {
     throw new \InvalidArgumentException('Entry handle cannot be empty.');
 }
 $entry->handle = $handle;
@@ -663,124 +579,100 @@ $entry->handle = $handle;
 
 ---
 
-### LOW-04 — Concurrent Entry Creation With Same Title Will Race on `handle` Unique Constraint
+### [OPEN] LOW-04 — Concurrent Entry Creation With Same Title Will Race on `handle` Unique Constraint
 
-**File:** `app/Repositories/EntryRepository.php:126`
+**File:** `app/Repositories/EntryRepository.php` (no fix in `create()` or `applyCoreAttributes()`)
 
-The `upsertFieldValue()` method handles the race condition for field values via a try/catch on `SQLSTATE 23000`. No equivalent handling exists for the `entry_group_handle_unique` constraint on the `entries` table. Two simultaneous requests to create an entry with title "My Post" in the same group will both compute `handle = 'my-post'`, and one will receive an unhandled `QueryException` from the DB.
+**Current state — verified.** `EntryRepository::upsertFieldValue()` retries on SQLSTATE `23000` (unique-constraint violation) for `field_values` writes, but no equivalent guard exists for the `entry_group_handle_unique` index on `entries`. Two concurrent `Content::create('blog_post', ['title' => 'My Post'])` calls in the same group both compute `handle = 'my-post'` and one will receive a raw `QueryException`.
 
-**Fix:** Add suffix disambiguation (append a counter) when a handle collision is detected, similar to how WordPress and Craft CMS handle duplicate slugs. Or add a DB-level lock on the entry group row before generating the handle.
+`PodcastEpisodeEntryType::beforeCreate()` does take a `lockForUpdate()` on the entry group row when assigning episode numbers, which incidentally serialises podcast episode creation — but that protection is type-specific and does not cover other entry types or the title-vs-handle race generally.
 
----
+**Fix.** Either lock the entry group row at the start of `EntryRepository::create()`, or detect the unique-constraint violation and append a numeric suffix (`my-post-2`, `my-post-3`, …) before retrying.
 
 ---
 
 ## BUSINESS RULES ISSUES
 
-Issues where the logic, even if technically correct, could cause unexpected behavior or content management problems in real-world use.
-
 ---
 
 ### [RESOLVED] BR-01 — Dual Publication State: `status` String + `published_at` Timestamp Are Not Coordinated
 
-The system has two independent signals for whether an entry is "publicly visible":
+**Resolution.** Resolved by the same code change as HIGH-06. `Entry::scopePublished()` now ANDs `status_is_public`, `published_at IS NOT NULL`, and `published_at <= now()`, with `StatusObserver` keeping the denormalised `status_is_public` truthful. The behaviour table from the original report now reads:
 
-1. **`status` field** (`'draft'`, `'published'`, `'archived'`) — a string handle stored on the entry
-2. **`published_at` timestamp** — nullable; the `scopePublished` scope checks `published_at IS NOT NULL AND published_at <= now()`
-
-These are entirely independent. There is no code that enforces consistency between them. The resulting behaviors are:
-
-| status | published_at | `scopePublished` returns? | Expected behavior? |
+| status_handle | status_is_public | published_at | `scopePublished` returns? |
 |---|---|---|---|
-| `draft` | past date | **YES** | No — should be excluded |
-| `published` | null | No | Potentially yes — depends on design intent |
-| `published` | future date | No | Correct — scheduled publish |
-| `archived` | past date | **YES** | No — should be excluded |
+| `draft` (or any non-public) | `false` | past date | **No** ✓ |
+| `published` | `true` | `null` | **No** ✓ (intentional — must be explicitly scheduled) |
+| `published` | `true` | future date | **No** ✓ (scheduled — flips automatically when `now()` overtakes it) |
+| `archived` | `false` | past date | **No** ✓ |
 
-Front-end templates using `scopePublished()` will display draft and archived content if `published_at` has been set, regardless of editorial status.
-
-**Recommendation:** Define which system is authoritative. Two approaches:
-
-**Option A — Status is canonical.** Modify `scopePublished` to also require `status = 'published'`:
-```php
-public function scopePublished(Builder $query): Builder
-{
-    return $query->where('status', 'published')
-        ->whereNotNull('published_at')
-        ->where('published_at', '<=', now());
-}
-```
-
-**Option B — Eliminate `published_at` as a separate concept.** Use only `status` for editorial state and `published_at` purely as metadata (display date). Remove `published_at` from the `scopePublished` check.
-
-Either way, the behavior must be clearly defined and enforced consistently.
+The dual-state ambiguity is closed.
 
 ---
 
-### BR-02 — Entry Relationship Graph Allows Indirect Cycles
+### [PARTIALLY RESOLVED] BR-02 — Entry Relationship Graph Allows Indirect Cycles
 
-**File:** `app/Repositories/EntryRepository.php:257-260`
+**Files:**
+- `app/Repositories/EntryRepository.php` (`syncRelationshipField()` — write-side)
+- `app/Services/EntryService.php` (`loadRelatedRecursive()` — read-side)
+
+**Current state — verified.**
+
+*Write side.* `syncRelationshipField()` still only filters direct self-references (A → A). The inline comment is explicit:
 
 ```php
-// Only prevents A → A. Indirect cycles (A → B → A) are
-// intentionally not enforced here...
-$relatedIds = array_values(array_filter(
-    $relatedIds,
-    fn($id) => (int)$id !== $entry->getKey()
-));
+// Prevent direct self-reference (A → A). Indirect cycles (A → B → A) are
+// intentionally not enforced here — relationship data is a graph, not a tree,
+// and cycle prevention for deeper traversals must be handled by the caller
+// using loadRelatedRecursive() or an equivalent depth-limited loader.
 ```
 
-The comment explicitly acknowledges that cycles like `A → B → A` are permitted. Any consumer of `entryRelationships` that performs recursive traversal (e.g., "related entries of related entries") will enter an infinite loop unless the caller implements depth-limiting or visited-set logic.
+*Read side.* `EntryService::loadRelatedRecursive()` was added with both a `$maxDepth` budget (default 3) and a `$seen` ID set, so consumers walking the graph cannot trigger infinite recursion.
 
-If the system ever renders related entries recursively in Twig templates, this will cause infinite recursion and stack overflow errors.
+**Why partially resolved.** The graph-versus-tree decision is now defensible, and a safe traversal helper exists, but **any code that traverses `entry->entryRelationships` directly without using `loadRelatedRecursive()` is still vulnerable**. Twig templates rendering "related entries of related entries" inline will loop on a pre-existing cycle. Additionally, the `entry_relationships` schema has no DB-level guard against cycles (a unique index covers `(entry_id, related_entry_id, field_id)` only).
 
-**Recommendation:** Document the maximum traversal depth in the `Entry::entryRelationships` relationship docblock. Add a depth limit to any recursive entry-relationship resolution. Consider adding a cycle check at the repository level if the UX/admin does not clearly convey to editors that cycles are allowed.
+**Recommendation.** Document the contract on `Entry::entryRelationships` itself. If renderers need uncapped traversal, route them through `EntryService::loadRelatedRecursive()` only.
 
 ---
 
-### BR-03 — Category Hierarchy Allows Parent From Different Group (See Also MED-09)
+### [OPEN] BR-03 — Category Hierarchy Allows Parent From Different Group
 
-As noted in MED-09, categories can be parented to categories in a different group. This means category trees can become cross-contaminated. A "Technology" category (topics group) becoming a parent of "Phones" (product-categories group) would make the product hierarchy incorrect. The `CategoryService::tree()` method queries by group but follows `childrenRecursive` which does not filter by group:
+Same root cause as MED-09: neither `CategoryService::create()` nor `move()` enforces that `parent.group_id === child.group_id`, and `Category::childrenRecursive()` does not filter by `group_id`. A parent attached from a different group does not appear in `CategoryService::tree($group)` (which scopes the root query by group), but the orphaned child still has a `parent_id` pointing outside its declared group, which can confuse breadcrumb generation, admin pickers, and any cross-group reporting.
 
-```php
-// Category::childrenRecursive() does not scope by group_id
-public function childrenRecursive(int $maxDepth = 10): HasMany
-{
-    return $this->children()->with([
-        'childrenRecursive' => fn ($q) => $q->childrenRecursive($maxDepth - 1),
-    ]);
-}
-```
-
-A cross-group parent would not appear in the group's `tree()` results, but the orphaned category would still have a `parent_id` pointing outside its group.
+See MED-09 for the recommended fix.
 
 ---
 
-### BR-04 — Entry Tree `nullOnDelete` on `parent_id` Creates Silent URI Orphans
+### [OPEN] BR-04 — Entry Tree `nullOnDelete` on `parent_id` Creates Silent URI Orphans
 
 **File:** `database/migrations/2026_04_23_200641_create_entry_tree_table.php:23-25`
+
+**Current state — verified.**
 
 ```php
 $table->foreignId('parent_id')
     ->nullable()
     ->constrained('entry_trees')
-    ->nullOnDelete();   // parent deleted → child becomes root with old URI
+    ->nullOnDelete();
 ```
 
-When a parent `EntryTree` node is deleted, all children have their `parent_id` set to `null`. The children become roots but retain their URIs (e.g., `/blog/2025/my-post` is now a root node instead of a child of `/blog/2025`). The URI is now structurally disconnected from the actual tree and may conflict with a new root-level entry.
+When a parent `EntryTree` row is deleted, MySQL sets every child's `parent_id` to `NULL`. The children become root nodes silently, retaining their old `uri` and `depth` values. `RebuildEntryTreeUri` is the only code path that recomputes `uri` and `depth`, and it is invoked from `MoveEntryTreeNode::handle()` only — **not** from any deletion observer.
 
-The `uri` column has a globally unique constraint, so there is no data corruption. However:
-1. Orphaned subtrees exist in the tree with incorrect depth values
-2. The site routing will still serve requests to the old URIs (which may or may not be desired)
-3. No cleanup cascade exists to remove or re-root the child URI hierarchy
+**Concrete consequences:**
 
-**Recommendation:** Add an observer or cascading delete on `EntryTree` that either deletes the entire subtree or re-parents children to the deleted node's parent when the node is removed.
+1. URI stays the same (`/blog/2025/my-post`) even though the node is now a root. Adding a new root with a colliding handle then fails the `(parent_id, handle)` unique index.
+2. `depth` is stale (e.g. still `2` when the row is at depth `0`). `EntryType.max_depth` checks against this become wrong.
+3. Subtree URIs further down also stay stale because no rebuild was triggered.
+
+**Fix.** Add a model observer (`app/Observers/EntryTreeObserver.php`) that, on `deleting`, walks the descendants and either re-roots them with rebuilt URIs and depths or hard-deletes the subtree, depending on product intent. Register it in `AppServiceProvider::boot()` alongside `StatusObserver`.
 
 ---
 
-### BR-05 — Super Admin Gate Bypass Has No Audit Trail
+### [OPEN] BR-05 — Super Admin Gate Bypass Has No Audit Trail
 
-**File:** `app/Providers/AppServiceProvider.php:84-86`
+**File:** `app/Providers/AppServiceProvider.php:85-87`
+
+**Current state — verified:**
 
 ```php
 Gate::before(function ($user, $ability) {
@@ -788,15 +680,29 @@ Gate::before(function ($user, $ability) {
 });
 ```
 
-Super admins bypass all policy checks and authorization gates. There is no logging, audit trail, or rate limiting specific to super admin actions. Any user who has been assigned the `super admin` role can perform any operation in the system with no record of what they did beyond Laravel's default logging.
+Unchanged from the original report. There is no audit log, no event dispatch on bypass, and no separation between super-admin actions and ordinary admin actions in `api_logs` (which only captures HTTP-routed requests, not arbitrary gate calls in jobs or commands).
 
-**Recommendation:** Add an event listener or middleware that logs gate bypass events for super admin users to a separate audit table.
+**Recommendation.** Wrap the bypass in an explicit event:
+
+```php
+Gate::before(function ($user, $ability, $arguments) {
+    if ($user->hasRole('super admin')) {
+        event(new \App\Events\SuperAdminGateBypass($user, $ability, $arguments));
+        return true;
+    }
+    return null;
+});
+```
+
+…and write a listener that persists to a dedicated audit table.
 
 ---
 
-### BR-06 — `apilog` Captures Full Response Bodies for All JSON Responses
+### [OPEN] BR-06 — `api_logs` Captures Full Response Bodies for All JSON Responses
 
-**File:** `app/Http/Middleware/LogRequestResponse.php:131-133`
+**File:** `app/Http/Middleware/LogRequestResponse.php` (`summarizeResponse()`)
+
+**Current state — verified.** The middleware's behaviour is unchanged:
 
 ```php
 if ($response instanceof JsonResponse) {
@@ -804,22 +710,81 @@ if ($response instanceof JsonResponse) {
 }
 ```
 
-For JSON API responses (all normal API calls), the full response body is logged. While the middleware sanitizes known sensitive keys, any business-specific sensitive data in the response (user PII, private entry content) will be stored in `api_logs`. The truncation at 4000 characters helps bound the size per record, but the data is still stored in plaintext.
+Sensitive *keys* are redacted (`password`, `token`, `authorization`, …) and the final JSON is truncated to 4 000 characters per record, but business-specific PII or private entry content is captured verbatim. This is a deliberate design choice; flag it as a privacy/compliance question rather than a bug.
 
-**Recommendation:** Review what data should be exempt from logging. Consider logging only status codes and route paths for successful responses, and full payloads only for error responses.
-
----
-
-### BR-07 — Entry Tree `depth` Column Is Not Automatically Maintained
-
-**File:** `app/Models/EntryTree.php`
-
-The `depth` column on `entry_trees` is a stored integer. There is no observable code that recalculates `depth` when a tree node is moved (parent changed) or when parent nodes are deleted and children are re-rooted. If depth values become stale, any logic that uses `depth` for breadcrumb generation, `max_depth` enforcement, or UI rendering will produce incorrect results.
-
-`EntryType.max_depth` (the maximum allowed nesting depth) is validated against this `depth` value. If depth is wrong, entries deeper than `max_depth` could be created silently.
-
-**Recommendation:** Ensure that any operation which modifies `parent_id` on an `EntryTree` record also recalculates `depth` for the node and all its descendants.
+**Recommendation.** Decide policy: log JSON bodies only on 4xx/5xx responses, log only on a configurable allowlist of routes, or move `request_payload`/`response_payload` columns to an encrypted cast.
 
 ---
 
-*End of Phase 1 Issues Report*
+### [PARTIALLY RESOLVED] BR-07 — Entry Tree `depth` Column Is Now Maintained on Move But Not on Delete
+
+**Files:**
+- `app/Actions/Entry/Tree/MoveEntryTreeNode.php`
+- `app/Actions/Entry/Tree/RebuildEntryTreeUri.php`
+
+**Current state — verified.** The original report claimed depth was never maintained. That is no longer true: `MoveEntryTreeNode::handle()` invokes `RebuildEntryTreeUri::handle()`, which recursively recalculates `depth` for the moved node and every descendant:
+
+```php
+$node->depth = $node->parent
+    ? $node->parent->depth + 1
+    : 0;
+
+$node->uri = $this->buildUri($node);
+$node->save();
+
+foreach ($node->children as $child) {
+    $this->handle($child);
+}
+```
+
+Move and re-parent paths are therefore depth-correct.
+
+**Remaining gap.** Same root cause as **BR-04**: when a parent is deleted, `nullOnDelete` mutates `parent_id` directly without invoking `RebuildEntryTreeUri`. Children's `depth` and `uri` go stale. `EntryType.max_depth` validation that relies on `depth` becomes unreliable for subtrees affected by deletion.
+
+**Fix.** Same observer as BR-04 — a `deleting` hook that calls `RebuildEntryTreeUri` on every descendant after the parent delete.
+
+---
+
+## Doc-vs-Code Drift Notes
+
+A handful of items in this report were previously marked `[RESOLVED]` despite the fix being only partial. They have been re-classified above with explicit `[PARTIALLY RESOLVED]` markers and a description of what remains. The full list, for change-tracking visibility:
+
+| Item | Old marker | New marker | Why |
+|---|---|---|---|
+| HIGH-04 | `[RESOLVED]` | `[PARTIALLY RESOLVED]` | App-only enforcement; clear-and-set is non-transactional, no DB unique. |
+| MED-03 | `[RESOLVED]` | `[PARTIALLY RESOLVED]` | `Prunable` exists but no scheduler runs it. |
+| MED-05 | `[RESOLVED]` | `[PARTIALLY RESOLVED]` | Schema column still nullable; non-HTTP callers can violate the contract. |
+| MED-06 | `[OPEN]` (already correctly described) | `[PARTIALLY RESOLVED]` | App-level guard added in `CreateEntryTreeNode`; DB constraint still missing. |
+| LOW-01 | `[OPEN]` (already correctly described) | `[PARTIALLY RESOLVED]` | Flushed in tests; no production flush on schema edits. |
+| BR-02 | `[OPEN]` (already correctly described) | `[PARTIALLY RESOLVED]` | Read-side `loadRelatedRecursive` adds depth + cycle guards. |
+| BR-07 | `[OPEN]` (already correctly described) | `[PARTIALLY RESOLVED]` | Depth is rebuilt on move; still stale on delete. |
+
+A new entry, **CRIT-05**, was added to capture an `echo 'fdsa'; exit;` regression in `app/Http/Controllers/Admin/Field/Group.php:97-98`. This is the same pattern that originally appeared in the now-deleted `UserPolicy` from CRIT-01, but in a different file.
+
+---
+
+# Recommended Order Of Work
+
+1. **CRIT-05** — delete the `echo 'fdsa'; exit;` lines from `app/Http/Controllers/Admin/Field/Group.php::destroy()`. Five seconds.
+2. **MED-08** — gate `UsersSeeder` to non-production environments (or remove hardcoded credentials).
+3. **MED-03** — register the `model:prune` schedule for `App\Models\ApiLog`.
+4. **HIGH-04** — make the default-status switch transactional in `CreateNewStatus` and `EditStatus`; consider a partial unique index.
+5. **MED-05** — make `entry_groups.status_group_id` non-nullable (project is still resettable, per `CURRENT_ISSUES_REVIEW.md`); strip the `?? null` fallback from the entry-group actions.
+6. **MED-09 / BR-03** — add the parent-group guard in `CategoryService::create()` and `move()`.
+7. **BR-04 / BR-07** — add the `EntryTreeObserver` (deleting handler) that re-roots or hard-deletes subtrees and rebuilds `depth`/`uri` for affected nodes.
+8. **LOW-03 / LOW-04** — guard against empty handles and serialise per-group entry creation against handle collisions.
+9. **MED-06** — add a partial-unique index for `entry_trees.is_home`.
+10. **MED-02** — drop the global `$with` from `Field` and `FieldValue`; verify all callers eager-load explicitly.
+11. **MED-01** — replace the per-level `Category::find()` walk in `wouldCreateCycle()` with a column-only `value('parent_id')` walk plus a visited-set guard.
+12. **LOW-01** — flush `UserSchema::resolved()` from any admin action that modifies the user schema or its layout subtree.
+13. **LOW-02** — author the missing entry / field / status / role permissions.
+14. **BR-05** — add audit logging for super-admin gate bypass.
+15. **BR-06** — decide and document the `api_logs` body-capture policy; reduce surface area accordingly.
+16. **MED-04** — extract the duplicated `createLayout()` to a shared seeder helper.
+17. **MED-07** — confirm the `000007` and `000012` migration sequence numbers were never deployed; document the gap.
+
+Items higher in the list either prevent immediate harm (CRIT, security) or are mechanical wins that unblock subsequent work.
+
+---
+
+*End of Phase 1 Issues Report — verified against current source on 2026-04-26.*
