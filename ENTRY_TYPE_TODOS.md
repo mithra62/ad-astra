@@ -225,6 +225,52 @@ With the infrastructure above in place, each class can be updated.
 
 ---
 
+---
+
+## Layer 10 — Settings System
+
+Replace the existing flat key/value settings infrastructure with a typed, field-driven system that supports both system-wide and per-user overrides.
+
+### Scrapped (remove these):
+- [ ] **Delete** `app/Settings.php` — service class
+- [ ] **Delete** `app/Models/Settings.php` — Eloquent model
+- [ ] **Delete** `database/migrations/2025_11_28_161734_create_settings_table.php`
+- [ ] **Delete** `database/migrations/2025_12_14_185751_create_user_settings_table.php`
+
+### New infrastructure:
+- [ ] **Create** migration `create_setting_values_table`:
+  - `id` (primary)
+  - `domain` (string — e.g. `'general'`, `'media'`, `'email'`)
+  - `field_handle` (string)
+  - `user_id` (FK → users, nullable, cascade delete)
+  - `value` (text, nullable)
+  - Unique constraint on `[domain, field_handle, user_id]`
+  - Index on `[user_id, domain]` for user settings lookups
+- [ ] **Create** `app/Models/SettingValue.php` — Eloquent model with the above fillable
+- [ ] **Create** `app/Models/SettingsDomain.php` — implements `Fieldable` trait; one record per domain (general, media, email, etc.); carries `FieldLayout` for form rendering
+- [ ] **Create** `database/seeders/SettingsDomainSeeder.php` — seeds all domains and their field layouts using `firstOrCreate`
+- [ ] **Create** `app/Settings.php` (replacement) — `SettingsResolver` service:
+  - Constructed with optional `?User $user`
+  - `get(string $domain, string $handle, mixed $default = null): mixed` — resolves user override → system value → field default
+  - `set(string $domain, string $handle, mixed $value, ?User $user = null): void`
+  - `all(string $domain): array` — returns resolved key/value map for a full domain (used by form rendering)
+  - Registered as a scoped service in `AppServiceProvider` so the authenticated user is injected at request time
+
+### Caching:
+- [ ] **Cache system settings per domain** — on `all($domain)` with `user_id = null`, cache the result under a key like `settings.{domain}`. TTL can be long (1 hour or indefinite until invalidated).
+- [ ] **Cache user settings per user per domain** — cache under `settings.user.{userId}.{domain}`. Loaded once per request via the scoped service; no repeated queries for the same domain.
+- [ ] **Invalidate on write** — `set()` must forget the relevant cache key(s) after persisting. System writes bust `settings.{domain}`; user writes bust `settings.user.{userId}.{domain}`.
+- [ ] **Warm on first load** — `all()` fetches `WHERE (user_id = ? OR user_id IS NULL) AND domain = ?` in a single query, resolves PHP-side precedence (user value wins), then caches the result. No per-field queries.
+- [ ] **Cache driver** — use whatever `CACHE_DRIVER` is configured; no special driver required. The key structure is flat and portable across file, Redis, and Memcached.
+
+### UI:
+- [ ] **Create** settings controller and routes — index lists domains, show renders the domain's `FieldLayout` as a form
+- [ ] **Create** settings form view — reuses existing field rendering pipeline (`_fields/*.twig` partials)
+- [ ] **Create** user settings page — filters to only `user_overridable` fields; renders override inputs alongside current system values
+- [ ] **Add** `user_overridable` boolean column to the `fields` table (default false) — controls which fields appear on the user settings page
+
+---
+
 ## DatabaseSeeder Load Order
 
 No new seeder classes are required — all additions go into existing files. The call order in `DatabaseSeeder.php` remains unchanged:
