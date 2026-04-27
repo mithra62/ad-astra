@@ -157,7 +157,7 @@ class UserSchemaSeeder extends Seeder
                 TabElement::create([
                     'field_layout_tab_id' => $tab->id,
                     'field_id' => $field->id,
-                    'required' => false,
+                    'required' => true,
                     'sort_order' => $elementOrder++,
                 ]);
             }

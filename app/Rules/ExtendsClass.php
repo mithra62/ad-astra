@@ -5,9 +5,9 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class ExtendsClass implements ValidationRule
+readonly class ExtendsClass implements ValidationRule
 {
-    public function __construct(private readonly string $parent_class) {}
+    public function __construct(private string $parent_class) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
