@@ -22,6 +22,7 @@ class FieldTypeSeeder extends Seeder
             ['name' => 'Telephone',    'object' => \App\Field\Types\Telephone::class],
             ['name' => 'Color Picker', 'object' => \App\Field\Types\ColorPicker::class],
             ['name' => 'Relationship', 'object' => \App\Field\Types\Relationship::class],
+            ['name' => 'Boolean',      'object' => \App\Field\Types\Boolean::class],
         ];
 
         foreach ($types as $type) {

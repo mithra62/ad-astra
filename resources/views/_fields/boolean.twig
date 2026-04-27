@@ -1,0 +1,18 @@
+{%- set checked = old('fields.' ~ field.handle, value) ? true : false -%}
+<div class="form-check">
+    <input type="hidden" name="fields[{{ field.handle }}]" value="0">
+    <input
+        class="form-check-input"
+        type="checkbox"
+        id="{{ id }}"
+        name="fields[{{ field.handle }}]"
+        value="1"
+        {% if checked %}checked{% endif %}
+    >
+    {% if field.label is defined and field.label %}
+        <label class="form-check-label" for="{{ id }}">{{ field.label }}</label>
+    {% endif %}
+    {% if field.instructions is defined and field.instructions %}
+        <div class="form-text text-muted">{{ field.instructions }}</div>
+    {% endif %}
+</div>

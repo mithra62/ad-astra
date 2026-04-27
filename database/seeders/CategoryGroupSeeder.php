@@ -29,10 +29,20 @@ class CategoryGroupSeeder extends Seeder
         $this->text = FieldType::where('object', Text::class)->firstOrFail();
         $this->textarea = FieldType::where('object', Textarea::class)->firstOrFail();
 
+        // Extended content groups — have field layouts and field values on each category
         $this->seedTopics();
         $this->seedProductCategories();
+
+        // Controlled vocabulary groups — simple lists with no additional fields
+        $this->seedCuisines();
+        $this->seedDietTypes();
+        $this->seedEventTypes();
+        $this->seedEmploymentTypes();
+        $this->seedExperienceLevels();
     }
 
+    // -------------------------------------------------------------------------
+    // Extended groups
     // -------------------------------------------------------------------------
 
     private function seedTopics(): void
@@ -248,8 +258,122 @@ class CategoryGroupSeeder extends Seeder
     }
 
     // -------------------------------------------------------------------------
+    // Controlled vocabulary groups
+    // -------------------------------------------------------------------------
+
+    private function seedCuisines(): void
+    {
+        $group = CategoryGroup::firstOrCreate(
+            ['handle' => 'cuisines'],
+            ['name' => 'Cuisines', 'sort_order' => 3]
+        );
+
+        $cuisines = [
+            ['name' => 'American',      'handle' => 'american',      'sort_order' => 1],
+            ['name' => 'French',        'handle' => 'french',        'sort_order' => 2],
+            ['name' => 'Indian',        'handle' => 'indian',        'sort_order' => 3],
+            ['name' => 'Italian',       'handle' => 'italian',       'sort_order' => 4],
+            ['name' => 'Japanese',      'handle' => 'japanese',      'sort_order' => 5],
+            ['name' => 'Mediterranean', 'handle' => 'mediterranean', 'sort_order' => 6],
+            ['name' => 'Mexican',       'handle' => 'mexican',       'sort_order' => 7],
+            ['name' => 'Thai',          'handle' => 'thai',          'sort_order' => 8],
+        ];
+
+        $this->seedSimpleCategories($group, $cuisines);
+    }
+
+    private function seedDietTypes(): void
+    {
+        $group = CategoryGroup::firstOrCreate(
+            ['handle' => 'diet-types'],
+            ['name' => 'Diet Types', 'sort_order' => 4]
+        );
+
+        $dietTypes = [
+            ['name' => 'Dairy-Free',  'handle' => 'dairy-free',  'sort_order' => 1],
+            ['name' => 'Gluten-Free', 'handle' => 'gluten-free', 'sort_order' => 2],
+            ['name' => 'Keto',        'handle' => 'keto',        'sort_order' => 3],
+            ['name' => 'Paleo',       'handle' => 'paleo',       'sort_order' => 4],
+            ['name' => 'Vegan',       'handle' => 'vegan',       'sort_order' => 5],
+            ['name' => 'Vegetarian',  'handle' => 'vegetarian',  'sort_order' => 6],
+        ];
+
+        $this->seedSimpleCategories($group, $dietTypes);
+    }
+
+    private function seedEventTypes(): void
+    {
+        $group = CategoryGroup::firstOrCreate(
+            ['handle' => 'event-types'],
+            ['name' => 'Event Types', 'sort_order' => 5]
+        );
+
+        $eventTypes = [
+            ['name' => 'Conference',  'handle' => 'conference',  'sort_order' => 1],
+            ['name' => 'Course',      'handle' => 'course',      'sort_order' => 2],
+            ['name' => 'Meetup',      'handle' => 'meetup',      'sort_order' => 3],
+            ['name' => 'Networking',  'handle' => 'networking',  'sort_order' => 4],
+            ['name' => 'Webinar',     'handle' => 'webinar',     'sort_order' => 5],
+            ['name' => 'Workshop',    'handle' => 'workshop',    'sort_order' => 6],
+        ];
+
+        $this->seedSimpleCategories($group, $eventTypes);
+    }
+
+    private function seedEmploymentTypes(): void
+    {
+        $group = CategoryGroup::firstOrCreate(
+            ['handle' => 'employment-types'],
+            ['name' => 'Employment Types', 'sort_order' => 6]
+        );
+
+        $employmentTypes = [
+            ['name' => 'Contract',   'handle' => 'contract',   'sort_order' => 1],
+            ['name' => 'Freelance',  'handle' => 'freelance',  'sort_order' => 2],
+            ['name' => 'Full-Time',  'handle' => 'full-time',  'sort_order' => 3],
+            ['name' => 'Part-Time',  'handle' => 'part-time',  'sort_order' => 4],
+            ['name' => 'Remote',     'handle' => 'remote',     'sort_order' => 5],
+        ];
+
+        $this->seedSimpleCategories($group, $employmentTypes);
+    }
+
+    private function seedExperienceLevels(): void
+    {
+        $group = CategoryGroup::firstOrCreate(
+            ['handle' => 'experience-levels'],
+            ['name' => 'Experience Levels', 'sort_order' => 7]
+        );
+
+        $levels = [
+            ['name' => 'Entry Level', 'handle' => 'entry-level', 'sort_order' => 1],
+            ['name' => 'Mid Level',   'handle' => 'mid-level',   'sort_order' => 2],
+            ['name' => 'Senior',      'handle' => 'senior',      'sort_order' => 3],
+            ['name' => 'Lead',        'handle' => 'lead',        'sort_order' => 4],
+            ['name' => 'Executive',   'handle' => 'executive',   'sort_order' => 5],
+        ];
+
+        $this->seedSimpleCategories($group, $levels);
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    /**
+     * Seed a list of plain categories (no fields or field layout) into a group.
+     *
+     * @param  array<array{name: string, handle: string, sort_order: int}>  $categories
+     */
+    private function seedSimpleCategories(CategoryGroup $group, array $categories): void
+    {
+        foreach ($categories as $attrs) {
+            Category::firstOrCreate(
+                ['group_id' => $group->id, 'handle' => $attrs['handle']],
+                array_merge($attrs, ['group_id' => $group->id])
+            );
+        }
+    }
 
     private function seedCategory(CategoryGroup $group, array $attrs, array $fields): Category
     {
