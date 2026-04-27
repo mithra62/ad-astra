@@ -2,6 +2,8 @@
 
 namespace Tests\Unit\Models\FieldLayout;
 
+use App\Models\Field;
+use App\Models\Field\Type;
 use App\Models\FieldLayout;
 use App\Models\FieldLayout\Tab;
 use App\Models\FieldLayout\TabElement;
@@ -51,8 +53,11 @@ class TabTest extends TestCase
     public function test_elements_are_ordered_by_sort_order(): void
     {
         $tab = Tab::factory()->create();
-        TabElement::factory()->for($tab, 'tab')->create(['sort_order' => 3]);
-        TabElement::factory()->for($tab, 'tab')->create(['sort_order' => 1]);
+        $type = Type::factory()->create();
+        $field1 = Field::factory()->create(['field_type_id' => $type->id]);
+        $field2 = Field::factory()->create(['field_type_id' => $type->id]);
+        TabElement::factory()->for($tab, 'tab')->create(['field_id' => $field1->id, 'sort_order' => 3]);
+        TabElement::factory()->for($tab, 'tab')->create(['field_id' => $field2->id, 'sort_order' => 1]);
 
         $elements = $tab->elements()->get();
 

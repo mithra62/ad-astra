@@ -109,7 +109,7 @@ class EntryRepositoryTest extends TestCase
 
         $entry = $this->repo->create($entryType, ['title' => 'Draft Entry']);
 
-        $this->assertEquals('draft', $entry->status);
+        $this->assertEquals('draft', $entry->status_handle);
     }
 
     public function test_create_uses_explicit_status_when_provided(): void
@@ -124,7 +124,7 @@ class EntryRepositoryTest extends TestCase
 
         $entry = $this->repo->create($entryType, ['title' => 'Live', 'status' => 'published']);
 
-        $this->assertEquals('published', $entry->status);
+        $this->assertEquals('published', $entry->status_handle);
     }
 
     public function test_create_throws_when_explicit_status_does_not_belong_to_entry_group(): void
@@ -357,12 +357,11 @@ class EntryRepositoryTest extends TestCase
         $entry = Entry::factory()->create([
             'entry_group_id' => $group->id,
             'entry_type_id' => $type->id,
-            'status' => 'draft',
         ]);
 
         $updated = $this->repo->applyData($entry, ['status' => 'published']);
 
-        $this->assertEquals('published', $updated->status);
+        $this->assertEquals('published', $updated->status_handle);
     }
 
     public function test_apply_data_throws_when_status_does_not_belong_to_entry_group(): void
@@ -379,7 +378,6 @@ class EntryRepositoryTest extends TestCase
         $entry = Entry::factory()->create([
             'entry_group_id' => $group->id,
             'entry_type_id' => $type->id,
-            'status' => 'draft',
         ]);
 
         $this->expectException(\InvalidArgumentException::class);

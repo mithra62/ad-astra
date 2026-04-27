@@ -46,7 +46,8 @@ class EntryTreeRouteDriverTest extends TestCase
     public function test_resolve_does_not_return_scheduled_entries(): void
     {
         $entry = $this->makePublishedTreeEntry([
-            'status' => 'published',
+            'status_handle' => 'published',
+            'status_is_public' => true,
             'published_at' => now()->addDay(),
         ]);
 
@@ -78,7 +79,8 @@ class EntryTreeRouteDriverTest extends TestCase
             ->for($group)
             ->for($type)
             ->create(array_merge([
-                'status' => 'published',
+                'status_handle' => 'published',
+                'status_is_public' => true,
                 'published_at' => now()->subHour(),
             ], $entryOverrides));
     }

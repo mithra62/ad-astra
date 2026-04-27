@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\EntryGroup;
+use App\Models\StatusGroup;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -13,6 +14,7 @@ class EntryGroupFactory extends Factory
     public function definition(): array
     {
         return [
+            'status_group_id' => StatusGroup::factory(),
             'name' => fake()->words(2, true),
             'handle' => fake()->unique()->regexify('[a-z]{4,8}-[a-z]{4,8}'),
             'description' => fake()->optional()->sentence(),

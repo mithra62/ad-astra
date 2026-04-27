@@ -46,7 +46,7 @@ class EntryStatusValidationTest extends TestCase
 
         $response->assertRedirect(route('entries.groups.show', $group->id));
         $this->assertNotNull($entry);
-        $this->assertSame('published', $entry->status);
+        $this->assertSame('published', $entry->status_handle);
     }
 
     public function test_store_rejects_status_from_another_status_group(): void
@@ -92,7 +92,7 @@ class EntryStatusValidationTest extends TestCase
             'created_by_user_id' => $user->id,
             'title' => 'Draft Entry',
             'handle' => 'draft-entry',
-            'status' => 'draft',
+            'status_handle' => 'draft',
         ]);
 
         $response = $this->actingAs($user)->put(route('entries.update', $entry), [
@@ -102,7 +102,7 @@ class EntryStatusValidationTest extends TestCase
         ]);
 
         $response->assertRedirect(route('entries.edit', $entry));
-        $this->assertSame('published', $entry->fresh()->status);
+        $this->assertSame('published', $entry->fresh()->status_handle);
     }
 
     public function test_update_rejects_status_from_another_status_group(): void
@@ -124,7 +124,7 @@ class EntryStatusValidationTest extends TestCase
             'created_by_user_id' => $user->id,
             'title' => 'Draft Entry',
             'handle' => 'draft-entry',
-            'status' => 'draft',
+            'status_handle' => 'draft',
         ]);
 
         $response = $this->actingAs($user)
@@ -137,7 +137,7 @@ class EntryStatusValidationTest extends TestCase
 
         $response->assertRedirect(route('entries.edit', $entry));
         $response->assertSessionHasErrors('status');
-        $this->assertSame('draft', $entry->fresh()->status);
+        $this->assertSame('draft', $entry->fresh()->status_handle);
     }
 
     protected function makeSuperAdmin(): User

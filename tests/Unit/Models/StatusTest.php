@@ -17,9 +17,17 @@ class StatusTest extends TestCase
         $model = new Status;
 
         $this->assertEquals(
-            ['status_group_id', 'name', 'handle', 'color', 'is_default', 'sort_order'],
+            ['status_group_id', 'name', 'handle', 'color', 'is_default', 'is_public', 'sort_order'],
             $model->getFillable()
         );
+    }
+
+    public function test_casts_is_public_to_boolean(): void
+    {
+        $status = Status::factory()->create(['is_public' => 1]);
+
+        $this->assertIsBool($status->is_public);
+        $this->assertTrue($status->is_public);
     }
 
     public function test_casts_is_default_to_boolean(): void
@@ -65,6 +73,26 @@ class StatusTest extends TestCase
         $results = Status::query()->default()->get();
 
         $this->assertFalse($results->contains($nonDefault));
+    }
+
+    public function test_scope_public_returns_only_public_statuses(): void
+    {
+        $public = Status::factory()->create(['is_public' => true]);
+        Status::factory()->create(['is_public' => false]);
+
+        $results = Status::query()->public()->get();
+
+        $this->assertTrue($results->contains($public));
+        $this->assertCount(1, $results);
+    }
+
+    public function test_scope_public_excludes_non_public_statuses(): void
+    {
+        $nonPublic = Status::factory()->create(['is_public' => false]);
+
+        $results = Status::query()->public()->get();
+
+        $this->assertFalse($results->contains($nonPublic));
     }
 
     public function test_scope_in_group_filters_by_status_group_model(): void

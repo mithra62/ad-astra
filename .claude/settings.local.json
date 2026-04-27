@@ -46,7 +46,11 @@
       "Bash(cmd.exe /c where php)",
       "Bash(cmd.exe /c php --version)",
       "Bash(cmd.exe /c \"dir /b /s C:\\\\php\\\\php.exe C:\\\\xampp\\\\php\\\\php.exe C:\\\\wamp64\\\\bin\\\\php\\\\php.exe 2>nul\")",
-      "Bash(/c/php/php.exe --version)"
+      "Bash(/c/php/php.exe --version)",
+      "Read(//usr/**)",
+      "Read(//c/wamp64/bin/**)",
+      "Bash(/c/PHP/php.exe artisan *)",
+      "Bash(/c/PHP/php.exe vendor/bin/phpunit --no-coverage)"
     ]
   }
 }

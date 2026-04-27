@@ -39,10 +39,12 @@ class SandboxedEntryTreeSeederTest extends TestCase
             'status_group_id' => $statusGroup->id,
             'handle' => 'published',
             'is_default' => true,
+            'is_public' => true,
         ]);
         $this->assertDatabaseHas('statuses', [
             'status_group_id' => $statusGroup->id,
             'handle' => 'draft',
+            'is_public' => false,
         ]);
 
         $entries = Entry::query()

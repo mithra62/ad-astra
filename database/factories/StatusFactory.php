@@ -19,6 +19,7 @@ class StatusFactory extends Factory
             'handle' => fake()->unique()->regexify('[a-z]{4,8}'),
             'color' => fake()->hexColor(),
             'is_default' => false,
+            'is_public' => false,
             'sort_order' => fake()->numberBetween(0, 100),
         ];
     }

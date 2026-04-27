@@ -17,6 +17,7 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->foreignId('status_group_id')
+                ->nullable()
                 ->constrained('status_groups')
                 ->nullOnDelete();
 

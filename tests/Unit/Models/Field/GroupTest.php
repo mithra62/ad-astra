@@ -4,6 +4,7 @@ namespace Tests\Unit\Models\Field;
 
 use App\Models\Field;
 use App\Models\Field\Group;
+use App\Models\Field\Type;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -44,8 +45,9 @@ class GroupTest extends TestCase
     public function test_can_attach_multiple_fields(): void
     {
         $group = Group::factory()->create();
-        $field1 = Field::factory()->create();
-        $field2 = Field::factory()->create();
+        $type = Type::factory()->create();
+        $field1 = Field::factory()->create(['field_type_id' => $type->id]);
+        $field2 = Field::factory()->create(['field_type_id' => $type->id]);
         $group->fields()->attach([$field1->id, $field2->id]);
 
         $this->assertCount(2, $group->fields);

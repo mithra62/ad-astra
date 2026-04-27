@@ -6,6 +6,7 @@ use App\Actions\FieldLayout\Tab\Element\CreateTabElement;
 use App\Actions\FieldLayout\Tab\Element\DeleteTabElement;
 use App\Actions\FieldLayout\Tab\Element\EditTabElement;
 use App\Models\Field;
+use App\Models\Field\Type;
 use App\Models\FieldLayout\Tab;
 use App\Models\FieldLayout\TabElement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,8 +37,9 @@ class TabElementActionsTest extends TestCase
     public function test_create_tab_element_auto_calculates_next_sort_order(): void
     {
         $tab = Tab::factory()->create();
-        $field1 = Field::factory()->create();
-        $field2 = Field::factory()->create();
+        $type = Type::factory()->create();
+        $field1 = Field::factory()->create(['field_type_id' => $type->id]);
+        $field2 = Field::factory()->create(['field_type_id' => $type->id]);
 
         TabElement::factory()->for($tab, 'tab')->create(['field_id' => $field1->id, 'sort_order' => 5]);
 
