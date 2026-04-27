@@ -60,6 +60,21 @@
                                     <p class="text-danger">{{ errors.first('handle') }}</p>
                                 {% endif %}
                             </div>
+                            <div class="col-md-12">
+                                <label class="form-label" for="parent_id">Parent Category</label>
+                                <select class="form-select" id="parent_id" name="parent_id">
+                                    <option value="">— No Parent (top-level) —</option>
+                                    {% for cat in parent_categories %}
+                                        <option value="{{ cat.id }}"
+                                            {{ old('parent_id', selected_parent_id) == cat.id ? 'selected' : '' }}>
+                                            {{ cat.label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if errors.has('parent_id') %}
+                                    <p class="text-danger">{{ errors.first('parent_id') }}</p>
+                                {% endif %}
+                            </div>
 
                             <!-- Group Field Layout -->
                             {% set layout = group.fieldLayout %}

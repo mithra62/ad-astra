@@ -5,6 +5,7 @@ namespace App\Http\Requests\Category;
 use App\Http\Requests\FormRequest;
 use App\Models\Category\Group as CategoryGroup;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreCategoryRequest extends FormRequest
 {
@@ -32,6 +33,11 @@ class StoreCategoryRequest extends FormRequest
                     'max:255',
                 ],
                 'fields' => ['nullable', 'array'],
+                'parent_id' => [
+                    'nullable',
+                    'integer',
+                    Rule::exists('categories', 'id')->where('group_id', $this->route()->parameter('group_id')),
+                ],
             ],
             $this->schemaFieldRules($schema));
     }

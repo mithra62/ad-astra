@@ -60,6 +60,21 @@
                                     <p class="text-danger">{{ errors.first('handle') }}</p>
                                 {% endif %}
                             </div>
+                            <div class="col-md-12">
+                                <label class="form-label" for="parent_id">Parent Category</label>
+                                <select class="form-select" id="parent_id" name="parent_id">
+                                    <option value="">— No Parent (top-level) —</option>
+                                    {% for cat in parent_categories %}
+                                        <option value="{{ cat.id }}"
+                                            {{ old('parent_id', category.parent_id) == cat.id ? 'selected' : '' }}>
+                                            {{ cat.label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if errors.has('parent_id') %}
+                                    <p class="text-danger">{{ errors.first('parent_id') }}</p>
+                                {% endif %}
+                            </div>
 
                             <!-- Group Field Layout -->
                             {% set layout = category.group.fieldLayout %}
@@ -125,7 +140,7 @@
                                                 {{ child.children.count() }}
                                             </td>
                                             <td>
-                                                {{ child.created_at.format('F j, Y') }}
+                                                {{ child.updated_at.format('F j, Y') }}
                                             </td>
                                             <td>
                                                 {{ child.created_at.format('F j, Y') }}
@@ -134,6 +149,11 @@
                                                 <a class="btn btn-primary icon-btn b-r-4"
                                                    href="{{ route('categories.show', child) }}">
                                                     <i class="ti ti-eye"></i>
+                                                </a>
+                                                <a class="btn btn-secondary icon-btn b-r-4"
+                                                   href="{{ route('categories.create', {group_id: category.group.id, parent_id: child.id}) }}"
+                                                   title="Add child category">
+                                                    <i class="ti ti-plus"></i>
                                                 </a>
                                                 <a class="btn btn-success icon-btn b-r-4"
                                                    href="{{ route('categories.edit', child) }}">
@@ -152,7 +172,7 @@
                         {% else %}
                             <p class="text-center">
                                 No Child Categories Created. <br />
-                                <a href="{{ route('categories.create', {group_id: category.group.id}) }}" class="btn btn-outline-primary">Create Child Category</a>
+                                <a href="{{ route('categories.create', {group_id: category.group.id, parent_id: category.id}) }}" class="btn btn-outline-primary">Create Child Category</a>
                             </p>
                         {% endif %}
                     </div>

@@ -37,6 +37,13 @@ class EditCategoryRequest extends FormRequest
                     Rule::unique('categories', 'handle')->ignore($this->route()->parameter('category')),
                 ],
                 'fields' => ['nullable', 'array'],
+                'parent_id' => [
+                    'nullable',
+                    'integer',
+                    Rule::exists('categories', 'id')
+                        ->where('group_id', $category->group_id)
+                        ->whereNot('id', $this->route()->parameter('category')),
+                ],
             ],
             $this->schemaFieldRules($schema)
         );
