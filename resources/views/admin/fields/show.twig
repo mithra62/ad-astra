@@ -1,0 +1,172 @@
+{{ include('admin._inc._header', {title: 'View Field'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12">
+                <h4 class="main-title">Field Groups</h4>
+                <ul class="app-line-breadcrumbs mb-3">
+                    <li class="">
+                        <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                            <span>
+                                <i class="ph-duotone ph-table f-s-16"></i> Dashboard
+                            </span>
+                        </a>
+                    </li>
+                    <li class="">
+                        <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Field Groups</a>
+                    </li>
+                    {% if active_group %}
+                    <li>
+                        <a class="f-s-14 f-w-500" href="{{ route('fields.groups.show', active_group) }}">{{ active_group.name }}</a>
+                    </li>
+                    {% endif %}
+                    <li class="active">
+                        <a class="f-s-14 f-w-500" href="{{ route('fields.show', field) }}">{{ field.name }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- Breadcrumb end -->
+        {{ include('admin._inc._message') }}
+
+        <!-- setting-app start -->
+        <div class="row">
+            {{ include('admin.fields._sidebar', {active: active_group.id ?? null}) }}
+            <div class="col-lg-8 col-xxl-9">
+                <div class="card setting-profile-tab">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>{{ field.name }}</h5>
+                        <span class="badge bg-secondary">{{ field.fieldType.name }}</span>
+                    </div>
+                    <div class="card-body">
+
+                        <table class="table table-borderless mb-0">
+                            <tbody>
+                                <tr>
+                                    <th class="text-muted f-w-500" style="width: 28%;">Type</th>
+                                    <td>{{ field.fieldType.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted f-w-500">Name</th>
+                                    <td>{{ field.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted f-w-500">Handle</th>
+                                    <td><code>{{ field.handle }}</code></td>
+                                </tr>
+                                {% if field.label %}
+                                <tr>
+                                    <th class="text-muted f-w-500">Label</th>
+                                    <td>{{ field.label }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <th class="text-muted f-w-500">Instructions</th>
+                                    <td>
+                                        {% if field.instructions %}
+                                            {{ field.instructions }}
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted f-w-500">Visibility</th>
+                                    <td>
+                                        {% if field.hidden %}
+                                            <span class="badge bg-warning text-dark">Hidden</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Visible</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted f-w-500">Groups</th>
+                                    <td>
+                                        {% if field.groups is not empty %}
+                                            {% for group in field.groups %}
+                                                <a href="{{ route('fields.groups.show', group) }}"
+                                                   class="badge bg-secondary text-decoration-none me-1">{{ group.name }}</a>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted f-w-500">Created</th>
+                                    <td>{{ field.created_at|date('M j, Y g:i A') }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted f-w-500">Last Updated</th>
+                                    <td>{{ field.updated_at|date('M j, Y g:i A') }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <div class="card-footer d-flex justify-content-end gap-2">
+                        <a href="{{ route('fields.confirm', field) }}" class="btn btn-outline-danger">Delete Field</a>
+                        <a href="{{ route('fields.edit', field) }}" class="btn btn-primary">Edit Field</a>
+                    </div>
+
+
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5>Field Layouts</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if layouts is not empty %}
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Layout</th>
+                                    <th>Entry Groups</th>
+                                    <th>Entry Types</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for layout in layouts %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ route('field-layouts.edit', layout.id) }}">{{ layout.name }}</a>
+                                        </td>
+                                        <td>
+                                            {% if layout.entryGroups is not empty %}
+                                                {% for entryGroup in layout.entryGroups %}
+                                                    <a href="{{ route('entries.groups.show', entryGroup) }}"
+                                                       class="badge bg-secondary text-decoration-none me-1">{{ entryGroup.name }}</a>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if layout.entryTypes is not empty %}
+                                                {% for entryType in layout.entryTypes %}
+                                                    <a href="{{ route('entries.groups.types.edit', {group_id: entryType.entry_group_id, type_id: entryType.id}) }}"
+                                                       class="badge bg-secondary text-decoration-none me-1">{{ entryType.name }}</a>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="p-3 text-muted">This field is not used in any Field Layout.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            </div>
+
+</main>
+{{ include('admin._inc._footer') }}

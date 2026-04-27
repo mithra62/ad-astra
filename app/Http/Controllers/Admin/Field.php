@@ -9,6 +9,7 @@ use App\Http\Requests\Field\EditFieldRequest;
 use App\Http\Requests\Field\StoreFieldRequest;
 use App\Models\Field as FieldModel;
 use App\Models\Field\Group as FieldGroup;
+use App\Models\FieldLayout as FieldLayoutModel;
 
 class Field extends Controller
 {
@@ -58,16 +59,26 @@ class Field extends Controller
      */
     public function show(string $id)
     {
-        $field = FieldModel::find($id);
+        $field = FieldModel::with('groups')->find($id);
         if (!$field instanceof FieldModel) {
             abort(404);
         }
 
-        //$category->with('group');
-        print_r($field);
-        exit;
-        echo __FILE__ . ': ' . __LINE__;
-        exit;
+        $groups = FieldGroup::all();
+        $active_group = $field->groups->first();
+        $layouts = FieldLayoutModel::with(['entryGroups', 'entryTypes.entryGroup'])
+            ->whereHas('tabs.elements', fn ($q) => $q->where('field_id', $field->id))
+            ->orderBy('name')
+            ->get();
+
+        $data = [
+            'field'        => $field,
+            'groups'       => $groups,
+            'active_group' => $active_group,
+            'layouts'      => $layouts,
+        ];
+
+        return $this->view('fields.show', $data);
     }
 
     /**
