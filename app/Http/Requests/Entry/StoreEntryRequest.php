@@ -4,6 +4,7 @@ namespace App\Http\Requests\Entry;
 
 use App\Http\Requests\FormRequest;
 use App\Models\EntryGroup;
+use App\Models\EntryType;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,7 +20,8 @@ class StoreEntryRequest extends FormRequest
         $group = EntryGroup::query()
             ->with('statusGroup')
             ->findOrFail($this->route()->parameter('group_id'));
-        $schema = EntryGroup::resolvedFields($group->id);
+        $groupSchema = EntryGroup::resolvedFields($group->id);
+        $typeSchema  = $this->resolveEntryTypeSchema($group->id);
 
         return array_merge(
             [
@@ -41,22 +43,44 @@ class StoreEntryRequest extends FormRequest
                 'categories.*' => ['integer', 'exists:categories,id'],
                 'fields' => ['nullable', 'array'],
             ],
-            $this->schemaFieldRules($schema)
+            $this->schemaFieldRules($groupSchema),
+            $this->schemaFieldRules($typeSchema)
         );
     }
 
     public function messages(): array
     {
-        $schema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
-        return $this->schemaFieldMessages($schema);
+        $groupSchema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
+        $typeSchema  = $this->resolveEntryTypeSchema($this->route()->parameter('group_id'));
+
+        return array_merge(
+            $this->schemaFieldMessages($groupSchema),
+            $this->schemaFieldMessages($typeSchema)
+        );
     }
 
-    /**
-     * @return array
-     */
     public function attributes(): array
     {
-        $schema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
-        return $this->schemaFieldAttributes($schema);
+        $groupSchema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
+        $typeSchema  = $this->resolveEntryTypeSchema($this->route()->parameter('group_id'));
+
+        return array_merge(
+            $this->schemaFieldAttributes($groupSchema),
+            $this->schemaFieldAttributes($typeSchema)
+        );
+    }
+
+    private function resolveEntryTypeSchema(int $groupId): ?EntryType
+    {
+        $handle = $this->input('type_handle');
+        if (! $handle) {
+            return null;
+        }
+
+        return EntryType::query()
+            ->with('fieldLayout.tabs.elements.field')
+            ->where('handle', $handle)
+            ->where('entry_group_id', $groupId)
+            ->first();
     }
 }

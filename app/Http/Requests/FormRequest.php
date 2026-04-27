@@ -7,10 +7,10 @@ use Illuminate\Foundation\Http\FormRequest As LaravelFormRequest;
 
 class FormRequest extends LaravelFormRequest
 {
-    protected function schemaFieldRules(Model $schema): array
+    protected function schemaFieldRules(?Model $schema): array
     {
         $rules = [];
-        if (! $schema->fieldLayout) {
+        if (! $schema || ! $schema->fieldLayout) {
             return $rules;
         }
 
@@ -27,10 +27,10 @@ class FormRequest extends LaravelFormRequest
         return $rules;
     }
 
-    public function schemaFieldAttributes(Model $schema): array
+    public function schemaFieldAttributes(?Model $schema): array
     {
         $attributes = [];
-        if (! $schema->fieldLayout) {
+        if (! $schema || ! $schema->fieldLayout) {
             return $attributes;
         }
 
@@ -41,7 +41,7 @@ class FormRequest extends LaravelFormRequest
         return $attributes;
     }
 
-    protected function schemaFieldMessages(Model $schema): array
+    protected function schemaFieldMessages(?Model $schema): array
     {
         return [];
     }

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Entry;
 use App\Http\Requests\FormRequest;
 use App\Models\Entry;
 use App\Models\EntryGroup;
+use App\Models\EntryType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -20,7 +21,8 @@ class EditEntryRequest extends FormRequest
         $entry = Entry::query()
             ->with('entryGroup.statusGroup')
             ->findOrFail($this->route()->parameter('entry'));
-        $schema = EntryGroup::resolvedFields($entry->entry_group_id);
+        $groupSchema = EntryGroup::resolvedFields($entry->entry_group_id);
+        $typeSchema  = EntryType::resolvedFields($entry->entry_type_id);
 
         return array_merge(
             [
@@ -41,19 +43,20 @@ class EditEntryRequest extends FormRequest
                 'categories.*' => ['integer', 'exists:categories,id'],
                 'fields' => ['nullable', 'array'],
             ],
-            $this->schemaFieldRules($schema)
+            $this->schemaFieldRules($groupSchema),
+            $this->schemaFieldRules($typeSchema)
         );
     }
 
-
-    /**
-     * @return array
-     */
     public function attributes(): array
     {
         $entry = Entry::query()->findOrFail($this->route()->parameter('entry'));
-        $schema = EntryGroup::resolvedFields($entry->entry_group_id);
+        $groupSchema = EntryGroup::resolvedFields($entry->entry_group_id);
+        $typeSchema  = EntryType::resolvedFields($entry->entry_type_id);
 
-        return $this->schemaFieldAttributes($schema);
+        return array_merge(
+            $this->schemaFieldAttributes($groupSchema),
+            $this->schemaFieldAttributes($typeSchema)
+        );
     }
 }
