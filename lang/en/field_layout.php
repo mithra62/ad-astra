@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'created'   => 'Field layout was created.',
-    'updated'   => 'Field layout was updated.',
-    'deleted'   => 'Field layout was deleted.',
+    'created' => 'Field layout was created.',
+    'updated' => 'Field layout was updated.',
+    'deleted' => 'Field layout was deleted.',
     'not_found' => 'Field layout was not found.',
 
     'tab' => [
@@ -13,7 +13,7 @@ return [
     ],
 
     'element' => [
-        'added'   => 'Field was added to the tab.',
+        'added' => 'Field was added to the tab.',
         'updated' => 'Field assignment was updated.',
         'removed' => 'Field was removed from the tab.',
     ],
