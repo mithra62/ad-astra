@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\EntryGroup;
 use App\Models\FieldLayout;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EntryGroupService extends AbstractService
 {
@@ -18,23 +17,23 @@ class EntryGroupService extends AbstractService
      * A FieldLayout is automatically created and associated with the group.
      *
      * Accepted keys in $data:
-     *   name            (string, required)
-     *   handle          (string, required)
-     *   description     (string|null)
-     *   sort_order      (int, default 0)
+     *   name (string, required)
+     *   handle (string, required)
+     *   description (string|null)
+     *   sort_order (int, default 0)
      *   status_group_id (int|null)
      *   category_groups (int[], IDs to sync)
-     *   field_groups    (int[], IDs to sync)
+     *   field_groups (int[], IDs to sync)
      */
     public function create(array $data): EntryGroup
     {
         $layout = FieldLayout::create(['name' => $data['name'] . ' Entries']);
 
         $group = EntryGroup::create([
-            'name'            => $data['name'],
-            'handle'          => $data['handle'],
-            'description'     => $data['description'] ?? null,
-            'sort_order'      => $data['sort_order'] ?? 0,
+            'name' => $data['name'],
+            'handle' => $data['handle'],
+            'description' => $data['description'] ?? null,
+            'sort_order' => $data['sort_order'] ?? 0,
             'status_group_id' => $data['status_group_id'] ?? null,
             'field_layout_id' => $layout->id,
         ]);
@@ -53,10 +52,10 @@ class EntryGroupService extends AbstractService
     public function update(EntryGroup $group, array $data): EntryGroup
     {
         $group->update([
-            'name'            => $data['name'],
-            'handle'          => $data['handle'],
-            'description'     => $data['description'] ?? null,
-            'sort_order'      => $data['sort_order'] ?? 0,
+            'name' => $data['name'],
+            'handle' => $data['handle'],
+            'description' => $data['description'] ?? null,
+            'sort_order' => $data['sort_order'] ?? 0,
             'status_group_id' => $data['status_group_id'] ?? null,
             'field_layout_id' => $data['field_layout_id'] ?? null,
         ]);
@@ -72,7 +71,7 @@ class EntryGroupService extends AbstractService
      */
     public function delete(EntryGroup $group): bool
     {
-        return (bool) $group->delete();
+        return (bool)$group->delete();
     }
 
     /**
