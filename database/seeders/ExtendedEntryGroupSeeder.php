@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\EntryTypes\EventEntryType;
+use App\EntryTypes\GeneralEntryType;
 use App\EntryTypes\JobListingEntryType;
 use App\EntryTypes\NewsArticleEntryType;
 use App\EntryTypes\PageEntryType;
@@ -38,6 +39,7 @@ class ExtendedEntryGroupSeeder extends Seeder
         $this->seedPortfolioGroup($publication, $contentFields, $seoFields);
         $this->seedVideosGroup($publication, $contentFields, $seoFields);
         $this->seedRecipesGroup($publication, $contentFields, $seoFields);
+        $this->seedGeneralGroup($publication, $contentFields, $seoFields);
     }
 
     private function seedEventsGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
@@ -337,6 +339,32 @@ class ExtendedEntryGroupSeeder extends Seeder
                 'default_template' => 'entries.page',
                 'has_entry_tree'   => true,
             ]
+        );
+    }
+
+    private function seedGeneralGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
+    {
+        $layout = $this->createLayout('General Layout', [
+            'Content' => ['body', 'excerpt'],
+            'SEO'     => ['meta_title', 'meta_description'],
+        ]);
+
+        $group = EntryGroup::firstOrCreate(
+            ['handle' => 'general'],
+            [
+                'name'            => 'General',
+                'description'     => 'General-purpose content that does not belong to a dedicated section.',
+                'field_layout_id' => $layout->id,
+                'status_group_id' => $publication->id,
+                'sort_order'      => 11,
+            ]
+        );
+
+        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id]);
+
+        EntryType::firstOrCreate(
+            ['entry_group_id' => $group->id, 'handle' => 'general'],
+            ['name' => 'General', 'class' => GeneralEntryType::class, 'sort_order' => 1]
         );
     }
 

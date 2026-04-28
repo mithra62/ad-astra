@@ -6,9 +6,12 @@ use App\Builders\EntryQueryBuilder;
 use App\EntryTypes\EntryTypeRegistry;
 use App\Models\Entry;
 use App\Models\EntryGroup;
+use App\Models\EntryMetric;
 use App\Models\EntryTree;
 use App\Models\FieldLayout;
 use App\Repositories\EntryRepository;
+use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -63,6 +66,58 @@ class EntryService extends AbstractService
     public function delete(Entry $entry): bool
     {
         return $this->repository->delete($entry);
+    }
+
+    /**
+     * Record (or increment) a named metric for an entry on the given date.
+     *
+     * When a row already exists for (entry, metric, date) the $value is added to
+     * the existing total — repeated calls accumulate. Pass a custom $date to
+     * backfill historical data; defaults to today.
+     *
+     * Race conditions are handled with a single retry on unique-constraint
+     * violation: if two processes both see no existing row and race to INSERT,
+     * the loser retries as an UPDATE increment.
+     *
+     * @param  int           $value  Amount to add (defaults to 1).
+     * @param  Carbon|null   $date   Date to record against; defaults to today.
+     */
+    public function recordMetric(Entry $entry, string $metric, int $value = 1, ?Carbon $date = null): EntryMetric
+    {
+        $recordedDate = ($date ?? today())->toDateString();
+
+        $existing = EntryMetric::where('entry_id', $entry->id)
+            ->where('metric', $metric)
+            ->whereDate('recorded_date', $recordedDate)
+            ->first();
+
+        if ($existing) {
+            $existing->increment('value', $value);
+            return $existing->fresh();
+        }
+
+        try {
+            return EntryMetric::create([
+                'entry_id'      => $entry->id,
+                'metric'        => $metric,
+                'value'         => $value,
+                'recorded_date' => $recordedDate,
+            ]);
+        } catch (QueryException $e) {
+            // SQLSTATE 23000: two concurrent requests both saw no row and raced
+            // to INSERT. Retry as an increment — the row is now guaranteed to exist.
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+
+            $row = EntryMetric::where('entry_id', $entry->id)
+                ->where('metric', $metric)
+                ->whereDate('recorded_date', $recordedDate)
+                ->firstOrFail();
+
+            $row->increment('value', $value);
+            return $row->fresh();
+        }
     }
 
     /**

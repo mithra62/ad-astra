@@ -64,7 +64,11 @@ class EntryMetricTest extends TestCase
     public function test_entry_has_metrics_relationship(): void
     {
         $entry = Entry::factory()->create();
-        EntryMetric::factory()->count(3)->create(['entry_id' => $entry->id, 'metric' => 'views']);
+        EntryMetric::factory()->count(3)->sequence(
+            ['recorded_date' => '2026-01-01'],
+            ['recorded_date' => '2026-01-02'],
+            ['recorded_date' => '2026-01-03'],
+        )->create(['entry_id' => $entry->id, 'metric' => 'views']);
 
         $this->assertCount(3, $entry->metrics);
     }

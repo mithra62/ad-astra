@@ -3,6 +3,7 @@
 namespace App\EntryTypes;
 
 use App\Models\EntryType as EntryTypeRecord;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class EntryTypeRegistry
@@ -32,8 +33,16 @@ class EntryTypeRegistry
     {
         $class = $record->class;
 
+        // Null or empty class — use GeneralEntryType as the default behaviour.
+        if (empty($class)) {
+            Log::warning("EntryType [{$record->handle}] has no class assigned; falling back to GeneralEntryType.");
+            return new GeneralEntryType($record);
+        }
+
+        // Class name recorded but the file is missing — same fallback, louder warning.
         if (!class_exists($class)) {
-            throw new RuntimeException("EntryType class [{$class}] does not exist.");
+            Log::warning("EntryType class [{$class}] does not exist for entry type [{$record->handle}]; falling back to GeneralEntryType.");
+            return new GeneralEntryType($record);
         }
 
         if (!is_subclass_of($class, AbstractEntryType::class)) {

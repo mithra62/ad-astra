@@ -3,39 +3,55 @@
 namespace App\EntryTypes;
 
 use App\Models\Entry;
-use InvalidArgumentException;
 
 class ProductEntryType extends AbstractEntryType
 {
     /**
-     * Validate price and sale_price on create; auto-status on stock depletion.
+     * Normalise pricing fields on create.
      */
     public function beforeCreate(array $data): array
     {
-        $data = $this->validateAndNormalisePricing($data);
-
-        return $data;
+        return $this->normalisePricing($data);
     }
 
     /**
-     * Validate pricing, auto-set out-of-stock status when stock hits zero.
+     * Normalise pricing fields and auto-set out-of-stock status when stock hits zero.
      */
     public function beforeUpdate(Entry $entry, array $data): array
     {
-        $data = $this->validateAndNormalisePricing($data);
+        $data = $this->normalisePricing($data);
         $data = $this->applyStockStatus($entry, $data);
 
         return $data;
     }
 
     /**
-     * Require SKU when publishing.
+     * Guard pricing rules and require SKU when publishing.
+     *
+     * Pricing errors are reported here (via ValidationException through the service
+     * layer) rather than thrown from hooks, so they surface as 422 responses instead
+     * of 500s.
      *
      * {@inheritdoc}
      */
     public function validate(array $data, ?Entry $entry = null): array
     {
         $errors = [];
+
+        $price     = $data['fields']['price']      ?? null;
+        $salePrice = $data['fields']['sale_price'] ?? null;
+
+        if ($price !== null) {
+            if ($price < 0) {
+                $errors['price'] = 'price cannot be negative.';
+            } elseif ($salePrice !== null) {
+                if ($price === 0) {
+                    $errors['sale_price'] = 'sale_price cannot be set when price is zero.';
+                } elseif ($salePrice >= $price) {
+                    $errors['sale_price'] = 'sale_price must be less than price.';
+                }
+            }
+        }
 
         $requestedStatus = $data['status'] ?? ($entry?->status_handle);
 
@@ -52,32 +68,12 @@ class ProductEntryType extends AbstractEntryType
 
     // -------------------------------------------------------------------------
 
-    private function validateAndNormalisePricing(array $data): array
+    /**
+     * Coerce pricing field types. Runs only after validate() has confirmed the
+     * values are logically consistent, so no guards are needed here.
+     */
+    private function normalisePricing(array $data): array
     {
-        $price     = $data['fields']['price']      ?? null;
-        $salePrice = $data['fields']['sale_price'] ?? null;
-
-        if ($price !== null) {
-            if ($price < 0) {
-                throw new InvalidArgumentException('price cannot be negative.');
-            }
-
-            if ($salePrice !== null) {
-                if ($price === 0) {
-                    unset($data['fields']['sale_price']);
-                    throw new InvalidArgumentException(
-                        'sale_price cannot be set when price is zero.'
-                    );
-                }
-
-                if ($salePrice >= $price) {
-                    throw new InvalidArgumentException(
-                        'sale_price must be less than price.'
-                    );
-                }
-            }
-        }
-
         return $data;
     }
 

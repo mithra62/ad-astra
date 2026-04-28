@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static EntryTree createTreeNode(Entry $entry, string $handle, ?EntryTree $parent = null, ?string $template = null, bool $isHome = false)
  * @method static EntryTree moveTreeNode(EntryTree $node, ?EntryTree $newParent, int $sortOrder = 0)
  * @method static void rebuildTreeUri(EntryTree $node)
+ * @method static \App\Models\EntryMetric recordMetric(Entry $entry, string $metric, int $value = 1, ?\Carbon\Carbon $date = null)
  *
  * @see \App\Services\EntryService
  */

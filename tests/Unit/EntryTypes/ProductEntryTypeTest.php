@@ -6,7 +6,6 @@ use App\EntryTypes\ProductEntryType;
 use App\Models\Entry;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use InvalidArgumentException;
 use Tests\TestCase;
 
 class ProductEntryTypeTest extends TestCase
@@ -20,28 +19,8 @@ class ProductEntryTypeTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // beforeCreate / beforeUpdate — price validation
+    // beforeCreate — normalisation (no longer throws)
     // -------------------------------------------------------------------------
-
-    public function test_before_create_throws_when_price_is_negative(): void
-    {
-        $type = $this->makeType();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('price cannot be negative');
-
-        $type->beforeCreate(['fields' => ['price' => -1]]);
-    }
-
-    public function test_before_update_throws_when_price_is_negative(): void
-    {
-        $type  = $this->makeType();
-        $entry = Entry::factory()->create();
-
-        $this->expectException(InvalidArgumentException::class);
-
-        $type->beforeUpdate($entry, ['fields' => ['price' => -0.01]]);
-    }
 
     public function test_before_create_passes_when_price_is_zero(): void
     {
@@ -59,39 +38,6 @@ class ProductEntryTypeTest extends TestCase
         $result = $type->beforeCreate(['fields' => ['price' => 29.99]]);
 
         $this->assertSame(29.99, $result['fields']['price']);
-    }
-
-    // -------------------------------------------------------------------------
-    // sale_price validation
-    // -------------------------------------------------------------------------
-
-    public function test_before_create_throws_when_sale_price_equals_price(): void
-    {
-        $type = $this->makeType();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('sale_price must be less than price');
-
-        $type->beforeCreate(['fields' => ['price' => 100, 'sale_price' => 100]]);
-    }
-
-    public function test_before_create_throws_when_sale_price_exceeds_price(): void
-    {
-        $type = $this->makeType();
-
-        $this->expectException(InvalidArgumentException::class);
-
-        $type->beforeCreate(['fields' => ['price' => 50, 'sale_price' => 75]]);
-    }
-
-    public function test_before_create_throws_when_sale_price_set_and_price_is_zero(): void
-    {
-        $type = $this->makeType();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('sale_price cannot be set when price is zero');
-
-        $type->beforeCreate(['fields' => ['price' => 0, 'sale_price' => 10]]);
     }
 
     public function test_before_create_passes_when_sale_price_is_less_than_price(): void
@@ -147,7 +93,78 @@ class ProductEntryTypeTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // validate()
+    // validate() — pricing guards
+    // -------------------------------------------------------------------------
+
+    public function test_validate_returns_error_when_price_is_negative(): void
+    {
+        $type = $this->makeType();
+
+        $errors = $type->validate(['fields' => ['price' => -1]]);
+
+        $this->assertArrayHasKey('price', $errors);
+        $this->assertStringContainsString('negative', $errors['price']);
+    }
+
+    public function test_validate_returns_error_when_sale_price_equals_price(): void
+    {
+        $type = $this->makeType();
+
+        $errors = $type->validate(['fields' => ['price' => 100, 'sale_price' => 100]]);
+
+        $this->assertArrayHasKey('sale_price', $errors);
+        $this->assertStringContainsString('less than price', $errors['sale_price']);
+    }
+
+    public function test_validate_returns_error_when_sale_price_exceeds_price(): void
+    {
+        $type = $this->makeType();
+
+        $errors = $type->validate(['fields' => ['price' => 50, 'sale_price' => 75]]);
+
+        $this->assertArrayHasKey('sale_price', $errors);
+    }
+
+    public function test_validate_returns_error_when_sale_price_set_and_price_is_zero(): void
+    {
+        $type = $this->makeType();
+
+        $errors = $type->validate(['fields' => ['price' => 0, 'sale_price' => 10]]);
+
+        $this->assertArrayHasKey('sale_price', $errors);
+        $this->assertStringContainsString('price is zero', $errors['sale_price']);
+    }
+
+    public function test_validate_passes_when_sale_price_is_less_than_price(): void
+    {
+        $type = $this->makeType();
+
+        $errors = $type->validate(['fields' => ['price' => 100, 'sale_price' => 79]]);
+
+        $this->assertArrayNotHasKey('price', $errors);
+        $this->assertArrayNotHasKey('sale_price', $errors);
+    }
+
+    public function test_validate_passes_when_price_is_zero_without_sale_price(): void
+    {
+        $type = $this->makeType();
+
+        $errors = $type->validate(['fields' => ['price' => 0]]);
+
+        $this->assertEmpty($errors);
+    }
+
+    public function test_validate_passes_when_no_pricing_fields_present(): void
+    {
+        $type = $this->makeType();
+
+        $errors = $type->validate(['fields' => []]);
+
+        $this->assertEmpty($errors);
+    }
+
+    // -------------------------------------------------------------------------
+    // validate() — SKU / publish gate
     // -------------------------------------------------------------------------
 
     public function test_validate_returns_error_when_sku_empty_on_publish(): void
@@ -171,7 +188,7 @@ class ProductEntryTypeTest extends TestCase
             'fields' => ['sku' => 'WIDGET-001'],
         ]);
 
-        $this->assertEmpty($errors);
+        $this->assertArrayNotHasKey('sku', $errors);
     }
 
     public function test_validate_passes_when_status_is_draft_without_sku(): void
@@ -181,5 +198,18 @@ class ProductEntryTypeTest extends TestCase
         $errors = $type->validate(['status' => 'draft', 'fields' => []]);
 
         $this->assertEmpty($errors);
+    }
+
+    public function test_validate_can_return_both_pricing_and_sku_errors_simultaneously(): void
+    {
+        $type = $this->makeType();
+
+        $errors = $type->validate([
+            'status' => 'published',
+            'fields' => ['price' => -5, 'sku' => ''],
+        ]);
+
+        $this->assertArrayHasKey('price', $errors);
+        $this->assertArrayHasKey('sku', $errors);
     }
 }
