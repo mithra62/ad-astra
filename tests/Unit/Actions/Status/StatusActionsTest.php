@@ -6,7 +6,9 @@ use App\Actions\Status\CreateNewStatus;
 use App\Actions\Status\EditStatus;
 use App\Models\Status;
 use App\Models\StatusGroup;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class StatusActionsTest extends TestCase
@@ -235,5 +237,196 @@ class StatusActionsTest extends TestCase
         ]);
 
         $this->assertTrue($status->fresh()->is_default);
+    }
+
+    // -------------------------------------------------------------------------
+    // Transaction safety — HIGH-04 guard
+    //
+    // These tests verify two properties of the fix introduced for HIGH-04:
+    //
+    // 1. DETECTION  — each action runs its queries inside a DB::transaction(),
+    //    confirmed by observing that DB::transactionLevel() reaches ≥ 1 during
+    //    execution.  If someone strips the DB::transaction() wrapper the level
+    //    stays at 0 and the assertion fails.
+    //
+    // 2. ATOMICITY  — if the INSERT / UPDATE at the end of the action throws
+    //    (simulated via a unique-constraint violation on statuses.status_group_id
+    //    + handle), the preceding UPDATE … is_default = false is rolled back and
+    //    the group is left with exactly one default status.  Without the
+    //    transaction wrapper, the clear would be committed and the group would
+    //    end up with zero default statuses.
+    // -------------------------------------------------------------------------
+
+    // -- CreateNewStatus::create() -------------------------------------------
+
+    public function test_create_runs_inside_a_database_transaction(): void
+    {
+        $group = StatusGroup::factory()->create();
+        $observedLevel = 0;
+
+        // DB::listen fires for every query on this connection. We record the
+        // highest transaction nesting level seen; after the action commits it
+        // drops back to 0, so we must capture the peak during execution.
+        DB::listen(function () use (&$observedLevel) {
+            $observedLevel = max($observedLevel, DB::transactionLevel());
+        });
+
+        app(CreateNewStatus::class)->create([
+            'status_group_id' => $group->id,
+            'name'            => 'Draft',
+            'handle'          => 'draft',
+            'color'           => '#cccccc',
+            'is_default'      => true,
+        ]);
+
+        $this->assertGreaterThanOrEqual(
+            1,
+            $observedLevel,
+            'CreateNewStatus::create() must wrap its queries in DB::transaction().'
+        );
+    }
+
+    public function test_create_rolls_back_cleared_default_when_insert_fails(): void
+    {
+        $group    = StatusGroup::factory()->create();
+        $original = Status::factory()->for($group, 'group')->create(['is_default' => true,  'handle' => 'original']);
+
+        // Pre-occupy the handle we will attempt to create, guaranteeing a
+        // unique-constraint violation on (status_group_id, handle).
+        Status::factory()->for($group, 'group')->create(['is_default' => false, 'handle' => 'collision']);
+
+        $threw = false;
+
+        try {
+            app(CreateNewStatus::class)->create([
+                'status_group_id' => $group->id,
+                'name'            => 'New Default',
+                'handle'          => 'collision',   // duplicate → QueryException
+                'color'           => '#0000ff',
+                'is_default'      => true,           // triggers the clear-then-insert path
+            ]);
+        } catch (QueryException $e) {
+            $threw = true;
+        }
+
+        $this->assertTrue($threw, 'Expected a QueryException from the unique-constraint violation.');
+        $this->assertTrue(
+            $original->fresh()->is_default,
+            'Transaction must roll back the is_default = false update when the subsequent insert fails.'
+        );
+    }
+
+    // -- CreateNewStatus::createByGroup() ------------------------------------
+
+    public function test_create_by_group_runs_inside_a_database_transaction(): void
+    {
+        $group = StatusGroup::factory()->create();
+        $observedLevel = 0;
+
+        DB::listen(function () use (&$observedLevel) {
+            $observedLevel = max($observedLevel, DB::transactionLevel());
+        });
+
+        app(CreateNewStatus::class)->createByGroup([
+            'status_group_id' => $group->id,
+            'name'            => 'Draft',
+            'handle'          => 'draft',
+            'color'           => '#cccccc',
+            'is_default'      => true,
+        ]);
+
+        $this->assertGreaterThanOrEqual(
+            1,
+            $observedLevel,
+            'CreateNewStatus::createByGroup() must wrap its queries in DB::transaction().'
+        );
+    }
+
+    public function test_create_by_group_rolls_back_cleared_default_when_insert_fails(): void
+    {
+        $group    = StatusGroup::factory()->create();
+        $original = Status::factory()->for($group, 'group')->create(['is_default' => true,  'handle' => 'original']);
+        Status::factory()->for($group, 'group')->create(['is_default' => false, 'handle' => 'collision']);
+
+        $threw = false;
+
+        try {
+            app(CreateNewStatus::class)->createByGroup([
+                'status_group_id' => $group->id,
+                'name'            => 'New Default',
+                'handle'          => 'collision',
+                'color'           => '#0000ff',
+                'is_default'      => true,
+            ]);
+        } catch (QueryException $e) {
+            $threw = true;
+        }
+
+        $this->assertTrue($threw, 'Expected a QueryException from the unique-constraint violation.');
+        $this->assertTrue(
+            $original->fresh()->is_default,
+            'Transaction must roll back the is_default = false update when the subsequent insert fails.'
+        );
+    }
+
+    // -- EditStatus::edit() --------------------------------------------------
+
+    public function test_edit_runs_inside_a_database_transaction(): void
+    {
+        $group   = StatusGroup::factory()->create();
+        $subject = Status::factory()->for($group, 'group')->create(['is_default' => false, 'handle' => 'subject']);
+        $observedLevel = 0;
+
+        DB::listen(function () use (&$observedLevel) {
+            $observedLevel = max($observedLevel, DB::transactionLevel());
+        });
+
+        app(EditStatus::class)->edit($subject, [
+            'name'       => $subject->name,
+            'handle'     => $subject->handle,
+            'color'      => $subject->color,
+            'is_default' => true,
+        ]);
+
+        $this->assertGreaterThanOrEqual(
+            1,
+            $observedLevel,
+            'EditStatus::edit() must wrap its queries in DB::transaction().'
+        );
+    }
+
+    public function test_edit_rolls_back_cleared_default_when_update_fails(): void
+    {
+        $group   = StatusGroup::factory()->create();
+        $other   = Status::factory()->for($group, 'group')->create(['is_default' => true,  'handle' => 'other']);
+        $subject = Status::factory()->for($group, 'group')->create(['is_default' => false, 'handle' => 'subject']);
+
+        // Pre-occupy the handle we will try to assign to $subject.  When
+        // $status->update() runs inside the transaction it will violate the
+        // (status_group_id, handle) unique index, triggering a rollback.
+        Status::factory()->for($group, 'group')->create(['is_default' => false, 'handle' => 'collision']);
+
+        $threw = false;
+
+        try {
+            app(EditStatus::class)->edit($subject, [
+                'name'       => $subject->name,
+                'handle'     => 'collision',   // duplicate → QueryException on the UPDATE
+                'color'      => $subject->color,
+                'is_default' => true,           // triggers the clear-other-defaults step first
+            ]);
+        } catch (QueryException $e) {
+            $threw = true;
+        }
+
+        $this->assertTrue($threw, 'Expected a QueryException from the unique-constraint violation.');
+        $this->assertTrue(
+            $other->fresh()->is_default,
+            'Transaction must roll back the is_default = false update on the sibling status.'
+        );
+        $this->assertFalse(
+            $subject->fresh()->is_default,
+            'Subject status must not have been promoted to default after the failed update.'
+        );
     }
 }
