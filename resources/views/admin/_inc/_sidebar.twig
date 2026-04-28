@@ -85,10 +85,21 @@
                 </li>
             {% endif %}
             <li class="menu-title">
+                <span>System</span>
+            </li>
+            <li class="no-sub">
+                <a href="{{ route('settings') }}">
+                    <i class="ti ti-settings pe-1"></i> Settings
+                </a>
+            </li>
+            <li class="menu-title">
                 <span>Account</span>
             </li>
             <li class="no-sub">
-                <a href="{{ route('account.settings') }}">Settings</a>
+                <a href="{{ route('account.settings') }}">Profile</a>
+            </li>
+            <li class="no-sub">
+                <a href="{{ route('settings.user') }}">My Preferences</a>
             </li>
             <li class="no-sub">
                 <a class="mb-0 text-danger" href="{{ route('logout') }}"

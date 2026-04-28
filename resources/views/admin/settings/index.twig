@@ -1,0 +1,82 @@
+{{ include('admin::_inc._header', {title: 'Settings'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb -->
+        <div class="row m-1">
+            <div class="col-12">
+                <h4 class="main-title">Settings</h4>
+                <ul class="app-line-breadcrumbs mb-3">
+                    <li>
+                        <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                            <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a class="f-s-14 f-w-500" href="{{ route('settings') }}">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {{ include('admin::_inc._message') }}
+
+        <div class="row">
+            {{ include('admin::settings._sidebar', {all_domains: domains, current_handle: ''}) }}
+
+            <div class="col-lg-8 col-xxl-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>System Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-4">
+                            Select a settings area from the sidebar to configure your system.
+                            Settings marked as user-overridable can also be personalised per user
+                            via <a href="{{ route('settings.user') }}">My Preferences</a>.
+                        </p>
+
+                        <div class="row g-3">
+                            {% for domain in domains %}
+                                <div class="col-md-6">
+                                    <a href="{{ route('settings.show', domain.handle) }}"
+                                       class="card h-100 text-decoration-none border hover-shadow">
+                                        <div class="card-body d-flex align-items-start gap-3">
+                                            <div class="bg-light-primary rounded p-2">
+                                                <i class="ti {{ domain.icon ?? 'ti-settings' }} f-s-22 text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1 text-dark">{{ domain.name }}</h6>
+                                                {% if domain.description %}
+                                                    <p class="mb-0 text-muted f-s-13">{{ domain.description }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            {% endfor %}
+
+                            <div class="col-md-6">
+                                <a href="{{ route('settings.user') }}"
+                                   class="card h-100 text-decoration-none border hover-shadow">
+                                    <div class="card-body d-flex align-items-start gap-3">
+                                        <div class="bg-light-success rounded p-2">
+                                            <i class="ti ti-user-cog f-s-22 text-success"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1 text-dark">My Preferences</h6>
+                                            <p class="mb-0 text-muted f-s-13">
+                                                Override system settings for your own account,
+                                                such as timezone and date format.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{{ include('admin::_inc._footer') }}

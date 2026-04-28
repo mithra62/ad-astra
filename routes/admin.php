@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\FieldLayout\TabElement as FieldLayoutTabElement;
 use App\Http\Controllers\Admin\Media\Library;
 use App\Http\Controllers\Admin\Media;
 use App\Http\Controllers\Admin\Role;
+use App\Http\Controllers\Admin\Settings\Domain as SettingsDomain;
+use App\Http\Controllers\Admin\Settings\UserSettings;
 use App\Http\Controllers\Admin\Status;
 use App\Http\Controllers\Admin\Status\Group as StatusGroup;
 use App\Http\Controllers\Admin\User;
@@ -160,6 +162,13 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::put('field-layouts/{layout_id}/tabs/{tab_id}/elements/{element_id}', [FieldLayoutTabElement::class, 'update'])->name('field-layouts.tabs.elements.update');
     Route::get('field-layouts/{layout_id}/tabs/{tab_id}/elements/{element_id}/confirm', [FieldLayoutTabElement::class, 'confirm'])->name('field-layouts.tabs.elements.confirm');
     Route::delete('field-layouts/{layout_id}/tabs/{tab_id}/elements/{element_id}', [FieldLayoutTabElement::class, 'destroy'])->name('field-layouts.tabs.elements.destroy');
+
+    // System settings
+    Route::get('settings', [SettingsDomain::class, 'index'])->name('settings');
+    Route::get('settings/user', [UserSettings::class, 'show'])->name('settings.user');
+    Route::put('settings/user', [UserSettings::class, 'update'])->name('settings.user.update');
+    Route::get('settings/{handle}', [SettingsDomain::class, 'show'])->name('settings.show');
+    Route::put('settings/{handle}', [SettingsDomain::class, 'update'])->name('settings.update');
 
     //dashboard
     Route::get('/dashboard', [Dashboard::class, 'index'])->name('dashboard');

@@ -1,0 +1,130 @@
+{{ include('admin::_inc._header', {title: domain.name ~ ' Settings'}) }}
+<main>
+    <div class="container-fluid">
+        <!-- Breadcrumb -->
+        <div class="row m-1">
+            <div class="col-12">
+                <h4 class="main-title">Settings</h4>
+                <ul class="app-line-breadcrumbs mb-3">
+                    <li>
+                        <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
+                            <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="f-s-14 f-w-500" href="{{ route('settings') }}">Settings</a>
+                    </li>
+                    <li class="active">
+                        <a class="f-s-14 f-w-500" href="{{ route('settings.show', domain.handle) }}">{{ domain.name }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {{ include('admin::_inc._message') }}
+
+        <div class="row">
+            {{ include('admin::settings._sidebar', {all_domains: domains, current_handle: domain.handle}) }}
+
+            <div class="col-lg-8 col-xxl-9">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center gap-2">
+                        {% if domain.icon %}
+                            <i class="ti {{ domain.icon }} f-s-20 text-primary"></i>
+                        {% endif %}
+                        <h5 class="mb-0">{{ domain.name }} Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if domain.description %}
+                            <p class="text-muted mb-4">{{ domain.description }}</p>
+                        {% endif %}
+
+                        {% if grouped_fields|length > 0 %}
+                            <form method="POST" action="{{ route('settings.update', domain.handle) }}"
+                                  class="row g-3 needs-validation" novalidate>
+                                {{ csrf_field() }}
+                                {{ method_field('PUT') }}
+
+                                {% for groupName, fields in grouped_fields %}
+                                    {% if groupName %}
+                                        <div class="col-12">
+                                            <h6 class="border-bottom pb-2 text-muted text-uppercase f-s-12 f-w-600">
+                                                {{ groupName }}
+                                            </h6>
+                                        </div>
+                                    {% endif %}
+
+                                    {% for field in fields %}
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="field_{{ field.handle }}">
+                                                {{ field.label }}
+                                                {% if field.user_overridable %}
+                                                    <span class="badge bg-light-primary text-primary ms-1 f-s-11">
+                                                        user overridable
+                                                    </span>
+                                                {% endif %}
+                                            </label>
+                                            {% if field.instructions %}
+                                                <small class="text-secondary d-block mb-1">{{ field.instructions }}</small>
+                                            {% endif %}
+
+                                            {% set val = field_values[field.handle] is defined ? field_values[field.handle] : (field.default ?? '') %}
+
+                                            {% if field.type == 'boolean' %}
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input"
+                                                           type="checkbox"
+                                                           name="fields[{{ field.handle }}]"
+                                                           id="field_{{ field.handle }}"
+                                                           value="1"
+                                                           {{ val ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="field_{{ field.handle }}">
+                                                        Enable
+                                                    </label>
+                                                </div>
+                                            {% elseif field.type == 'integer' or field.type == 'float' %}
+                                                <input type="number"
+                                                       class="form-control"
+                                                       name="fields[{{ field.handle }}]"
+                                                       id="field_{{ field.handle }}"
+                                                       value="{{ val }}"
+                                                       {{ field.type == 'float' ? 'step="any"' : 'step="1"' }}>
+                                            {% elseif field.type == 'textarea' %}
+                                                <textarea class="form-control"
+                                                          name="fields[{{ field.handle }}]"
+                                                          id="field_{{ field.handle }}"
+                                                          rows="4">{{ val }}</textarea>
+                                            {% else %}
+                                                <input type="{{ field.type == 'email' ? 'email' : 'text' }}"
+                                                       class="form-control"
+                                                       name="fields[{{ field.handle }}]"
+                                                       id="field_{{ field.handle }}"
+                                                       value="{{ val }}">
+                                            {% endif %}
+
+                                            {% if errors.has('fields.' ~ field.handle) %}
+                                                <p class="text-danger mt-1">{{ errors.first('fields.' ~ field.handle) }}</p>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                {% endfor %}
+
+                                <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                                    <a href="{{ route('settings') }}" class="btn btn-outline-secondary">Cancel</a>
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="ti ti-device-floppy me-1"></i> Save Settings
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <p class="text-center text-muted py-4">
+                                No settings have been configured for this domain yet.
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{{ include('admin::_inc._footer') }}

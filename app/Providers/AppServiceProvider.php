@@ -32,9 +32,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('settings', function ($app) {
-            return new Settings($app);
-        });
+        // Bind by class name so constructor injection works in controllers,
+        // then alias to 'settings' for backwards-compatible app('settings') calls.
+        $this->app->singleton(Settings::class, fn () => new Settings());
+        $this->app->alias(Settings::class, 'settings');
 
         $this->app->singleton('api', function ($app) {
             return new Api($app);
@@ -66,9 +67,9 @@ class AppServiceProvider extends ServiceProvider
             'category'       => Category::class,
             'category_group' => CategoryGroup::class,
             'field_group'    => FieldGroup::class,
-            'media'          => Media::class,
-            'media_library'  => MediaLibrary::class,
-            'user'           => User::class,
+            'media'           => Media::class,
+            'media_library'   => MediaLibrary::class,
+            'user'            => User::class,
         ]);
 
 //        Route::group([

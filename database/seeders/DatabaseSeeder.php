@@ -29,6 +29,9 @@ class DatabaseSeeder extends Seeder
 
             // User extended profile schema
             UserSchemaSeeder::class,
+
+            // Settings domains, field layouts, and default values
+            SettingsDomainSeeder::class,
         ]);
 
         if (app()->environment(['local', 'testing'])) {

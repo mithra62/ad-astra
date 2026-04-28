@@ -1,0 +1,27 @@
+{% set current_handle = current_handle ?? '' %}
+
+<div class="col-lg-4 col-xxl-3">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Settings</h5>
+        </div>
+        <div class="list-group list-group-flush">
+            {% for domain in all_domains %}
+                <a href="{{ route('settings.show', domain.handle) }}"
+                   class="list-group-item list-group-item-action d-flex align-items-center gap-2
+                          {{ current_handle == domain.handle ? 'active' : '' }}">
+                    {% if domain.icon %}
+                        <i class="ti {{ domain.icon }}"></i>
+                    {% endif %}
+                    {{ domain.name }}
+                </a>
+            {% endfor %}
+            <a href="{{ route('settings.user') }}"
+               class="list-group-item list-group-item-action d-flex align-items-center gap-2
+                      {{ current_handle == 'user' ? 'active' : '' }}">
+                <i class="ti ti-user-cog"></i>
+                My Preferences
+            </a>
+        </div>
+    </div>
+</div>
