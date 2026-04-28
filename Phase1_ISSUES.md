@@ -124,15 +124,15 @@ site) merges both layouts via `Collection::merge()` and is null-safe by virtue o
 
 ---
 
-### [REGRESSED / NEW] CRIT-05 — `echo 'fdsa'; exit;` Now Lives in the Field Group Destroy Action
+### [RESOLVED] CRIT-05 — `echo 'fdsa'; exit;` Now Lives in the Field Group Destroy Action
 
-**File:** `app/Http/Controllers/Admin/Field/Group.php:95-106`
+**File:** `app/Http/Controllers/Admin/Field/Group.php`
+
+**Current state — verified.** The `echo 'fdsa'; exit;` lines have been removed. The `destroy()` method is now clean:
 
 ```php
 public function destroy(DeleteFieldGroupRequest $request, string $id)
 {
-    echo 'fdsa';
-    exit;
     $group = FieldGroup::find($id);
     if ($group instanceof FieldGroup) {
         $group->delete();
@@ -143,17 +143,8 @@ public function destroy(DeleteFieldGroupRequest $request, string $id)
 }
 ```
 
-The exact debug pattern from CRIT-01 (output a four-letter string, then `exit` before the real logic) has been
-re-introduced in the admin field-group delete handler. Hitting the `fields.groups.destroy` route — wired up at
-`routes/admin.php:91-98` (`Route::resource('fields/groups', FieldGroup::class)`) — outputs `fdsa` and terminates the
-request. The `DeleteFieldGroupRequest` form-request authorisation runs first, so super-admins / admins can still trigger
-it just by clicking the delete button on a field group.
-
-**Fix:** Delete lines 97–98. The remaining body is correct.
-
-**Repercussion:** Once removed, deleting a field group will detach it via the polymorphic `field_groupables` pivot and
-remove the row. Cascade behaviour on the pivot is `cascadeOnDelete` (verify in
-`2026_04_09_153821_create_field_groupables_table.php`).
+Field group deletion now correctly reaches the delete logic and redirects. Cascade behaviour on the polymorphic
+`field_groupables` pivot is `cascadeOnDelete` (per `2026_04_09_153821_create_field_groupables_table.php`).
 
 ---
 
@@ -903,39 +894,38 @@ change-tracking visibility:
 
 A new entry, **CRIT-05**, was added to capture an `echo 'fdsa'; exit;` regression in
 `app/Http/Controllers/Admin/Field/Group.php:97-98`. This is the same pattern that originally appeared in the now-deleted
-`UserPolicy` from CRIT-01, but in a different file.
+`UserPolicy` from CRIT-01, but in a different file. As of the 2026-04-28 pass, CRIT-05 is also resolved — the debug
+lines have been removed and `destroy()` functions correctly.
 
 ---
 
 # Recommended Order Of Work
 
-1. **CRIT-05** — delete the `echo 'fdsa'; exit;` lines from `app/Http/Controllers/Admin/Field/Group.php::destroy()`.
-   Five seconds.
-2. **MED-08** — gate `UsersSeeder` to non-production environments (or remove hardcoded credentials).
-3. **MED-03** — register the `model:prune` schedule for `App\Models\ApiLog`.
-4. **HIGH-04** — make the default-status switch transactional in `CreateNewStatus` and `EditStatus`; consider a partial
+1. **MED-08** — gate `UsersSeeder` to non-production environments (or remove hardcoded credentials).
+2. **MED-03** — register the `model:prune` schedule for `App\Models\ApiLog`.
+3. **HIGH-04** — make the default-status switch transactional in `CreateNewStatus` and `EditStatus`; consider a partial
    unique index.
-5. **MED-05** — make `entry_groups.status_group_id` non-nullable (project is still resettable, per
+4. **MED-05** — make `entry_groups.status_group_id` non-nullable (project is still resettable, per
    `CURRENT_ISSUES_REVIEW.md`); strip the `?? null` fallback from the entry-group actions.
-6. **MED-09 / BR-03** — add the parent-group guard in `CategoryService::create()` and `move()`.
-7. **BR-04 / BR-07** — add the `EntryTreeObserver` (deleting handler) that re-roots or hard-deletes subtrees and
+5. **MED-09 / BR-03** — add the parent-group guard in `CategoryService::create()` and `move()`.
+6. **BR-04 / BR-07** — add the `EntryTreeObserver` (deleting handler) that re-roots or hard-deletes subtrees and
    rebuilds `depth`/`uri` for affected nodes.
-8. **LOW-03 / LOW-04** — guard against empty handles and serialise per-group entry creation against handle collisions.
-9. **MED-06** — add a partial-unique index for `entry_trees.is_home`.
-10. **MED-02** — drop the global `$with` from `Field` and `FieldValue`; verify all callers eager-load explicitly.
-11. **MED-01** — replace the per-level `Category::find()` walk in `wouldCreateCycle()` with a column-only
+7. **LOW-03 / LOW-04** — guard against empty handles and serialise per-group entry creation against handle collisions.
+8. **MED-06** — add a partial-unique index for `entry_trees.is_home`.
+9. **MED-02** — drop the global `$with` from `Field` and `FieldValue`; verify all callers eager-load explicitly.
+10. **MED-01** — replace the per-level `Category::find()` walk in `wouldCreateCycle()` with a column-only
     `value('parent_id')` walk plus a visited-set guard.
-12. **LOW-01** — flush `UserSchema::resolved()` from any admin action that modifies the user schema or its layout
+11. **LOW-01** — flush `UserSchema::resolved()` from any admin action that modifies the user schema or its layout
     subtree.
-13. **LOW-02** — author the missing entry / field / status / role permissions.
-14. **BR-05** — add audit logging for super-admin gate bypass.
-15. **BR-06** — decide and document the `api_logs` body-capture policy; reduce surface area accordingly.
-16. **MED-04** — extract the duplicated `createLayout()` to a shared seeder helper.
-17. **MED-07** — confirm the `000007` and `000012` migration sequence numbers were never deployed; document the gap.
+12. **LOW-02** — author the missing entry / field / status / role permissions.
+13. **BR-05** — add audit logging for super-admin gate bypass.
+14. **BR-06** — decide and document the `api_logs` body-capture policy; reduce surface area accordingly.
+15. **MED-04** — extract the duplicated `createLayout()` to a shared seeder helper.
+16. **MED-07** — confirm the `000007` and `000012` migration sequence numbers were never deployed; document the gap.
 
 Items higher in the list either prevent immediate harm (CRIT, security) or are mechanical wins that unblock subsequent
 work.
 
 ---
 
-*End of Phase 1 Issues Report — verified against current source on 2026-04-26.*
+*End of Phase 1 Issues Report — originally verified 2026-04-26; re-verified against current source on 2026-04-28.*
