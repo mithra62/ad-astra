@@ -536,9 +536,9 @@ DB::statement('CREATE UNIQUE INDEX entry_trees_is_home_unique ON entry_trees ((C
 
 ---
 
-### [OPEN] MED-07 — Missing Migration Files: Sequence Gaps `000007` and `000012`
+### [RESOLVED] MED-07 — Missing Migration Files: Sequence Gaps `000007` and `000012`
 
-**Current state — verified.** A directory listing of `database/migrations/` shows the same gaps:
+**Current state — verified.** A directory listing of `database/migrations/` showed the following gaps:
 
 ```
 2026_04_18_000005_create_status_groups_table.php
@@ -550,11 +550,24 @@ DB::statement('CREATE UNIQUE INDEX entry_trees_is_home_unique ON entry_trees ((C
 …
 ```
 
-On a fresh install this is harmless; on a database that ran the missing files at any point in their history it can cause
-`migrate:rollback` to fail.
+**Resolution.** The system has not been deployed, so renaming was safe with no `migrations` table rows to reconcile.
+Every file from `000008` onwards was shifted down by 1 (gap 1), and every file from `000013` onwards shifted down by a
+further 1 (gap 2). The sequence is now unbroken from `000002` to `000017`:
 
-**Fix.** Verify in `git log -- database/migrations/` whether either sequence number ever existed. If they do exist in
-any deployed database's `migrations` table, hand-delete those rows or renumber the surrounding files.
+```
+2026_04_18_000006_create_statuses_table.php
+2026_04_18_000007_create_entry_groups_table.php
+2026_04_18_000008_create_entry_types_table.php
+2026_04_18_000009_create_entries_table.php
+2026_04_18_000010_create_entry_authors_table.php
+2026_04_18_000011_create_user_schema_table.php
+2026_04_18_000012_create_field_values_table.php
+2026_04_18_000013_create_category_groups_table.php
+…
+2026_04_18_000017_create_category_groupables_table.php
+```
+
+No migration file contents were changed; only filenames were updated.
 
 ---
 
@@ -769,7 +782,7 @@ See MED-09 for the recommended fix.
 
 ---
 
-### [OPEN] BR-04 — Entry Tree `nullOnDelete` on `parent_id` Creates Silent URI Orphans
+### [RESOLVED] BR-04 — Entry Tree `nullOnDelete` on `parent_id` Creates Silent URI Orphans
 
 **File:** `database/migrations/2026_04_23_200641_create_entry_tree_table.php:23-25`
 
@@ -786,7 +799,7 @@ When a parent `EntryTree` row is deleted, MySQL sets every child's `parent_id` t
 silently, retaining their old `uri` and `depth` values. `RebuildEntryTreeUri` is the only code path that recomputes
 `uri` and `depth`, and it is invoked from `MoveEntryTreeNode::handle()` only — **not** from any deletion observer.
 
-**Concrete consequences:**
+**Concrete consequences (original):**
 
 1. URI stays the same (`/blog/2025/my-post`) even though the node is now a root. Adding a new root with a colliding
    handle then fails the `(parent_id, handle)` unique index.
@@ -794,9 +807,28 @@ silently, retaining their old `uri` and `depth` values. `RebuildEntryTreeUri` is
    wrong.
 3. Subtree URIs further down also stay stale because no rebuild was triggered.
 
-**Fix.** Add a model observer (`app/Observers/EntryTreeObserver.php`) that, on `deleting`, walks the descendants and
-either re-roots them with rebuilt URIs and depths or hard-deletes the subtree, depending on product intent. Register it
-in `AppServiceProvider::boot()` alongside `StatusObserver`.
+**Resolution.** `app/Observers/EntryTreeObserver.php` was added and registered in `AppServiceProvider::boot()`:
+
+```php
+Status::observe(StatusObserver::class);
+EntryTree::observe(EntryTreeObserver::class);
+```
+
+The observer uses a two-hook pattern to work around `nullOnDelete` bypassing Eloquent:
+
+- `deleting` — snapshots direct child IDs (via `static::$pendingReroot`) while the FK still resolves and the parent row
+  still exists.
+- `deleted` — fires after `nullOnDelete` has committed; re-fetches each promoted child with fresh DB state
+  (`unsetRelations()`), then calls `EntryService::rebuildTreeUri()` recursively to correct `depth` and `uri` for the
+  entire promoted subtree.
+
+The static property is required because Laravel resolves the observer from the container on each event dispatch, so
+`deleting` and `deleted` receive different instances.
+
+`EntryService::deleteTreeNode(EntryTree $node): bool` was also added — it wraps `$node->delete()` in a
+`DB::transaction()` so that any exception thrown during the observer's URI rebuild rolls back the entire delete.
+
+Covered by `tests/Unit/Observers/EntryTreeObserverTest.php` (13 tests).
 
 ---
 
@@ -853,7 +885,7 @@ routes, or move `request_payload`/`response_payload` columns to an encrypted cas
 
 ---
 
-### [PARTIALLY RESOLVED] BR-07 — Entry Tree `depth` Column Is Now Maintained on Move But Not on Delete
+### [RESOLVED] BR-07 — Entry Tree `depth` Column Is Now Maintained on Move But Not on Delete
 
 **Files:**
 
@@ -879,12 +911,9 @@ foreach ($node->children as $child) {
 
 Move and re-parent paths are therefore depth-correct.
 
-**Remaining gap.** Same root cause as **BR-04**: when a parent is deleted, `nullOnDelete` mutates `parent_id` directly
-without invoking `RebuildEntryTreeUri`. Children's `depth` and `uri` go stale. `EntryType.max_depth` validation that
-relies on `depth` becomes unreliable for subtrees affected by deletion.
-
-**Fix.** Same observer as BR-04 — a `deleting` hook that calls `RebuildEntryTreeUri` on every descendant after the
-parent delete.
+**Resolution.** The remaining gap (stale `depth` and `uri` after parent deletion) shares the same root cause as BR-04
+and is closed by the same fix. `EntryTreeObserver::deleted()` calls `EntryService::rebuildTreeUri()` on each promoted
+child, which recalculates both `depth` and `uri` in a single recursive pass — see BR-04 above for full details.
 
 ---
 
@@ -902,7 +931,7 @@ change-tracking visibility:
 | MED-06  | `[OPEN]` (already correctly described) | `[PARTIALLY RESOLVED]` | App-level guard added in `CreateEntryTreeNode`; DB constraint still missing. |
 | LOW-01  | `[OPEN]` (already correctly described) | `[PARTIALLY RESOLVED]` | Flushed in tests; no production flush on schema edits.                       |
 | BR-02   | `[OPEN]` (already correctly described) | `[PARTIALLY RESOLVED]` | Read-side `loadRelatedRecursive` adds depth + cycle guards.                  |
-| BR-07   | `[OPEN]` (already correctly described) | `[PARTIALLY RESOLVED]` | Depth is rebuilt on move; still stale on delete.                             |
+| BR-07   | `[OPEN]` (already correctly described) | `[PARTIALLY RESOLVED]` → `[RESOLVED]` | Observer rebuilds depth and URI on delete; same fix as BR-04. |
 
 A new entry, **CRIT-05**, was added to capture an `echo 'fdsa'; exit;` regression in
 `app/Http/Controllers/Admin/Field/Group.php:97-98`. This is the same pattern that originally appeared in the now-deleted
@@ -917,8 +946,7 @@ lines have been removed and `destroy()` functions correctly.
 2. **MED-05** — make `entry_groups.status_group_id` non-nullable (project is still resettable, per
    `CURRENT_ISSUES_REVIEW.md`); strip the `?? null` fallback from the entry-group actions.
 5. **MED-09 / BR-03** — add the parent-group guard in `CategoryService::create()` and `move()`.
-6. **BR-04 / BR-07** — add the `EntryTreeObserver` (deleting handler) that re-roots or hard-deletes subtrees and
-   rebuilds `depth`/`uri` for affected nodes.
+6. ~~**BR-04 / BR-07**~~ — `EntryTreeObserver` added; both resolved.
 7. **LOW-03 / LOW-04** — guard against empty handles and serialise per-group entry creation against handle collisions.
 8. **MED-06** — add a partial-unique index for `entry_trees.is_home`.
 9. **MED-02** — drop the global `$with` from `Field` and `FieldValue`; verify all callers eager-load explicitly.
@@ -927,11 +955,11 @@ lines have been removed and `destroy()` functions correctly.
 12. **LOW-02** — author the missing entry / field / status / role permissions.
 13. **BR-05** — add audit logging for super-admin gate bypass.
 14. **BR-06** — decide and document the `api_logs` body-capture policy; reduce surface area accordingly.
-16. **MED-07** — confirm the `000007` and `000012` migration sequence numbers were never deployed; document the gap.
+16. ~~**MED-07**~~ — sequence gaps resolved; files renumbered `000002`–`000017`.
 
 Items higher in the list either prevent immediate harm (CRIT, security) or are mechanical wins that unblock subsequent
 work.
 
 ---
 
-*End of Phase 1 Issues Report — originally verified 2026-04-26; re-verified against current source on 2026-04-28.*
+*End of Phase 1 Issues Report — originally verified 2026-04-26; re-verified against current source on 2026-04-28; BR-04 and BR-07 resolved 2026-04-28.*
