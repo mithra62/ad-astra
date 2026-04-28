@@ -44,6 +44,8 @@ class RolesPermissionsSeeder extends Seeder
         Permission::create(['name' => 'create media library', 'description' => 'Allow users to create media libraries']);
         Permission::create(['name' => 'reorder media library', 'description' => 'Allow users to reorder media libraries']);
 
+        Permission::create(['name' => 'edit setting', 'description' => 'Allow users to edit system settings']);
+
         // update cache to know about the newly created permissions (required if using WithoutModelEvents in seeders)
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
@@ -78,5 +80,7 @@ class RolesPermissionsSeeder extends Seeder
         $role->givePermissionTo('edit media library');
         $role->givePermissionTo('create media library');
         $role->givePermissionTo('reorder media library');
+
+        $role->givePermissionTo('edit setting');
     }
 }

@@ -2,25 +2,22 @@
 
 namespace App\Http\Controllers\Admin\Settings;
 
+use App\Actions\Settings\UpdateDomainSettings;
 use App\Http\Controllers\Admin\Controller;
+use App\Http\Requests\Settings\UpdateDomainSettingsRequest;
 use App\Models\SettingDomain;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class Domain extends Controller
 {
-    use ValidatesSettingFields;
-
     /**
      * List all setting domains.
      */
     public function index(): View
     {
-        $domains = SettingDomain::ordered()->get();
-
         return $this->view('settings.index', [
-            'domains' => $domains,
+            'domains' => SettingDomain::ordered()->get(),
         ]);
     }
 
@@ -29,9 +26,8 @@ class Domain extends Controller
      */
     public function show(string $handle): View
     {
-        $domain      = SettingDomain::where('handle', $handle)->firstOrFail();
-        $allDomains  = SettingDomain::ordered()->get();
-        $fieldValues = $this->settings->system($handle);
+        $domain     = SettingDomain::where('handle', $handle)->firstOrFail();
+        $allDomains = SettingDomain::ordered()->get();
 
         $groupedFields = $this->groupFields(
             config("settings.{$handle}.fields", []),
@@ -42,35 +38,18 @@ class Domain extends Controller
             'domain'         => $domain,
             'domains'        => $allDomains,
             'grouped_fields' => $groupedFields,
-            'field_values'   => $fieldValues,
+            'field_values'   => $this->settings->system($handle),
         ]);
     }
 
     /**
      * Persist system-level settings for a domain.
-     *
-     * Validation runs first against each field's declared 'rules'. Boolean
-     * fields are normalised to true/false after validation, before save.
      */
-    public function update(Request $request, string $handle): RedirectResponse
+    public function update(UpdateDomainSettingsRequest $request, string $handle): RedirectResponse
     {
         SettingDomain::where('handle', $handle)->firstOrFail();
 
-        $fields = config("settings.{$handle}.fields", []);
-
-        $this->validateSettingFields($fields, $request);
-
-        $handles   = array_column($fields, 'handle');
-        $submitted = $request->only($handles);
-
-        // Normalise boolean fields — unchecked checkboxes are absent from POST.
-        foreach ($fields as $field) {
-            if (($field['type'] ?? 'text') === 'boolean') {
-                $submitted[$field['handle']] = $request->has($field['handle']);
-            }
-        }
-
-        $this->settings->setMany($handle, $submitted, user: null);
+        app(UpdateDomainSettings::class)->execute($handle, $request->settingsPayload());
 
         return redirect()
             ->route('settings.show', $handle)
@@ -94,8 +73,7 @@ class Domain extends Controller
             if ($visibleOnly && ($field['hidden'] ?? false)) {
                 continue;
             }
-            $group = $field['group'] ?? '';
-            $grouped[$group][] = $field;
+            $grouped[$field['group'] ?? ''][] = $field;
         }
 
         return $grouped;
