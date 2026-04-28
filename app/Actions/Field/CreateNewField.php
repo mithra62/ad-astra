@@ -2,13 +2,13 @@
 
 namespace App\Actions\Field;
 
-use App\Models\Category;
+
 use App\Models\Field\Group;
 use App\Models\Field;
 
 class CreateNewField
 {
-    public function create(array $input): Group
+    public function create(array $input): Field
     {
         return Field::create($input);
     }
