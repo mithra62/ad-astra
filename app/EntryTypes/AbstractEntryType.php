@@ -51,4 +51,47 @@ abstract class AbstractEntryType
     public function afterUpdate(Entry $entry, array $data): void
     {
     }
+
+    // -------------------------------------------------------------------------
+    // Validation contract
+    // -------------------------------------------------------------------------
+
+    /**
+     * Return field-keyed validation errors for the given data payload.
+     * An empty array means the data is valid.
+     *
+     * Concrete types override this; the repository does NOT call it automatically.
+     * Invoke from a Form Request or controller before calling create/update.
+     *
+     * @param  array       $data   The same payload that would be passed to create/update.
+     * @param  Entry|null  $entry  The existing entry when validating an update; null on create.
+     * @return array<string, string>  ['field_handle' => 'error message']
+     */
+    public function validate(array $data, ?Entry $entry = null): array
+    {
+        return [];
+    }
+
+    // -------------------------------------------------------------------------
+    // Protected helpers for lifecycle hooks
+    // -------------------------------------------------------------------------
+
+    /**
+     * Safely read a field value from an entry inside a lifecycle hook.
+     *
+     * Callers cannot assume that the entry passed to beforeUpdate has its
+     * field relations loaded. This helper calls loadMissing() (idempotent —
+     * a no-op when the relation is already loaded) before delegating to
+     * $entry->field().
+     */
+    protected function existingFieldValue(Entry $entry, string $handle): mixed
+    {
+        $entry->loadMissing([
+            'fieldValues.field.fieldType',
+            'entryRelationships.field',
+            'entryRelationships.relatedEntry',
+        ]);
+
+        return $entry->field($handle);
+    }
 }

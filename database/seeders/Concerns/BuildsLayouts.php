@@ -53,4 +53,42 @@ trait BuildsLayouts
 
         return $layout;
     }
+
+    /**
+     * Add a tab (with its fields) to an existing layout only if no tab with
+     * that name already exists. Safe to re-run on existing databases.
+     *
+     * @param  string[]  $fieldHandles
+     */
+    private function addTabIfMissing(int $layoutId, string $tabName, array $fieldHandles, int $sortOrder): void
+    {
+        $exists = Tab::where('field_layout_id', $layoutId)
+            ->where('name', $tabName)
+            ->exists();
+
+        if ($exists) {
+            return;
+        }
+
+        $tab = Tab::create([
+            'field_layout_id' => $layoutId,
+            'name'            => $tabName,
+            'sort_order'      => $sortOrder,
+        ]);
+
+        $order = 1;
+        foreach ($fieldHandles as $handle) {
+            $field = Field::where('handle', $handle)->first();
+            if (!$field) {
+                continue;
+            }
+
+            TabElement::create([
+                'field_layout_tab_id' => $tab->id,
+                'field_id'            => $field->id,
+                'required'            => false,
+                'sort_order'          => $order++,
+            ]);
+        }
+    }
 }

@@ -7,6 +7,7 @@ use App\Traits\Fieldable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -147,5 +148,22 @@ class Entry extends Model
     public function entryTree(): HasOne
     {
         return $this->hasOne(EntryTree::class);
+    }
+
+    public function metrics(): HasMany
+    {
+        return $this->hasMany(EntryMetric::class);
+    }
+
+    /**
+     * Return the total value for a named metric, optionally filtered from a given date forward.
+     * Aggregates in the database — safe to call on entries with long metric histories.
+     */
+    public function metricTotal(string $metric, ?Carbon $from = null): int
+    {
+        return (int) $this->metrics()
+            ->where('metric', $metric)
+            ->when($from, fn ($q) => $q->where('recorded_date', '>=', $from->toDateString()))
+            ->sum('value');
     }
 }

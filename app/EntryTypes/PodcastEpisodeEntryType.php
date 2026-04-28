@@ -4,6 +4,7 @@ namespace App\EntryTypes;
 
 use App\Models\Entry;
 use App\Models\EntryGroup;
+use InvalidArgumentException;
 
 class PodcastEpisodeEntryType extends AbstractEntryType
 {
@@ -33,6 +34,22 @@ class PodcastEpisodeEntryType extends AbstractEntryType
 
         if (empty($data['published_at'])) {
             $data['published_at'] = now();
+        }
+
+        return $data;
+    }
+
+    /**
+     * Validate that episode_duration, when provided, is a positive integer.
+     */
+    public function beforeUpdate(Entry $entry, array $data): array
+    {
+        $duration = $data['fields']['episode_duration'] ?? null;
+
+        if ($duration !== null && (!is_int($duration) || $duration <= 0)) {
+            throw new InvalidArgumentException(
+                'episode_duration must be a positive integer (seconds).'
+            );
         }
 
         return $data;

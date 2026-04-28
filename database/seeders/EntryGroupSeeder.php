@@ -19,15 +19,18 @@ class EntryGroupSeeder extends Seeder
 
     public function run(): void
     {
-        $publication = StatusGroup::where('handle', 'publication')->firstOrFail();
-        $contentFields = FieldGroup::where('handle', 'content-fields')->firstOrFail();
-        $seoFields = FieldGroup::where('handle', 'seo-fields')->firstOrFail();
+        $publication       = StatusGroup::where('handle', 'publication')->firstOrFail();
+        $productStatus     = StatusGroup::where('handle', 'product-status')->firstOrFail();
+        $contentFields     = FieldGroup::where('handle', 'content-fields')->firstOrFail();
+        $seoFields         = FieldGroup::where('handle', 'seo-fields')->firstOrFail();
         $relationshipFields = FieldGroup::where('handle', 'relationship-fields')->firstOrFail();
-        $topics = CategoryGroup::where('handle', 'topics')->firstOrFail();
+        $blogFields        = FieldGroup::where('handle', 'blog-fields')->firstOrFail();
+        $productFields     = FieldGroup::where('handle', 'product-fields')->firstOrFail();
+        $topics            = CategoryGroup::where('handle', 'topics')->firstOrFail();
         $productCategories = CategoryGroup::where('handle', 'product-categories')->firstOrFail();
 
-        $this->seedBlogGroup($publication, $contentFields, $seoFields, $relationshipFields, $topics);
-        $this->seedProductsGroup($publication, $contentFields, $seoFields, $productCategories);
+        $this->seedBlogGroup($publication, $contentFields, $seoFields, $relationshipFields, $blogFields, $topics);
+        $this->seedProductsGroup($productStatus, $contentFields, $seoFields, $productFields, $productCategories);
     }
 
     private function seedBlogGroup(
@@ -35,72 +38,91 @@ class EntryGroupSeeder extends Seeder
         FieldGroup    $contentFields,
         FieldGroup    $seoFields,
         FieldGroup    $relationshipFields,
+        FieldGroup    $blogFields,
         CategoryGroup $topics,
-    ): void
-    {
+    ): void {
         $layout = $this->createLayout('Blog Layout', [
-            'Content' => ['body', 'excerpt'],
-            'SEO' => ['meta_title', 'meta_description'],
-            'Related' => ['related_entries'],
+            'Content'    => ['body', 'excerpt'],
+            'SEO'        => ['meta_title', 'meta_description'],
+            'Related'    => ['related_entries'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'blog'],
             [
-                'name' => 'Blog',
-                'description' => 'Blog posts and articles.',
+                'name'            => 'Blog',
+                'description'     => 'Blog posts and articles.',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $publication->id,
-                'sort_order' => 1,
+                'sort_order'      => 1,
             ]
         );
 
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id, $relationshipFields->id]);
+        $group->fieldGroups()->syncWithoutDetaching([
+            $contentFields->id,
+            $seoFields->id,
+            $relationshipFields->id,
+            $blogFields->id,
+        ]);
         $group->categoryGroups()->syncWithoutDetaching([$topics->id]);
+
+        // Add "Publishing" tab to the layout if not already present.
+        $this->addTabIfMissing($group->field_layout_id, 'Publishing', ['reading_time'], 99);
 
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'blog_post'],
             [
-                'name' => 'Blog Post',
-                'class' => BlogPostEntryType::class,
+                'name'       => 'Blog Post',
+                'class'      => BlogPostEntryType::class,
                 'sort_order' => 1,
             ]
         );
     }
 
     private function seedProductsGroup(
-        StatusGroup   $publication,
+        StatusGroup   $productStatus,
         FieldGroup    $contentFields,
         FieldGroup    $seoFields,
+        FieldGroup    $productFields,
         CategoryGroup $productCategories,
-    ): void
-    {
+    ): void {
         $layout = $this->createLayout('Products Layout', [
             'Description' => ['body', 'excerpt'],
-            'SEO' => ['meta_title', 'meta_description'],
+            'SEO'         => ['meta_title', 'meta_description'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'products'],
             [
-                'name' => 'Products',
-                'description' => 'Product catalogue entries.',
+                'name'            => 'Products',
+                'description'     => 'Product catalogue entries.',
                 'field_layout_id' => $layout->id,
-                'status_group_id' => $publication->id,
-                'sort_order' => 2,
+                'status_group_id' => $productStatus->id,
+                'sort_order'      => 2,
             ]
         );
 
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id]);
+        // Swap to product-status on existing group.
+        $group->update(['status_group_id' => $productStatus->id]);
+
+        $group->fieldGroups()->syncWithoutDetaching([
+            $contentFields->id,
+            $seoFields->id,
+            $productFields->id,
+        ]);
         $group->categoryGroups()->syncWithoutDetaching([$productCategories->id]);
+
+        $this->addTabIfMissing($group->field_layout_id, 'Pricing',   ['price', 'sale_price', 'sku'], 10);
+        $this->addTabIfMissing($group->field_layout_id, 'Inventory', ['stock_quantity', 'weight', 'dimensions'], 11);
 
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'product'],
             [
-                'name' => 'Product',
-                'class' => ProductEntryType::class,
+                'name'       => 'Product',
+                'class'      => ProductEntryType::class,
                 'sort_order' => 1,
             ]
         );
     }
+
 }

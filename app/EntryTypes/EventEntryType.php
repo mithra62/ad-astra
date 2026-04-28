@@ -3,13 +3,11 @@
 namespace App\EntryTypes;
 
 use App\Models\Entry;
+use Carbon\Carbon;
+use InvalidArgumentException;
 
 class EventEntryType extends AbstractEntryType
 {
-    /**
-     * Default published_at to now so the event is immediately queryable.
-     * If a caller passes an explicit published_at, it is respected.
-     */
     public function beforeCreate(array $data): array
     {
         if (empty($data['published_at'])) {
@@ -19,9 +17,6 @@ class EventEntryType extends AbstractEntryType
         return $data;
     }
 
-    /**
-     * Stamp published_at when the event is explicitly published and has no date yet.
-     */
     public function beforeUpdate(Entry $entry, array $data): array
     {
         if (
@@ -33,6 +28,27 @@ class EventEntryType extends AbstractEntryType
             $data['published_at'] = now();
         }
 
+        $this->validateDateRange($entry, $data);
+
         return $data;
+    }
+
+    // -------------------------------------------------------------------------
+
+    private function validateDateRange(Entry $entry, array $data): void
+    {
+        $endRaw   = $data['fields']['end_date']   ?? null;
+        $startRaw = $data['fields']['start_date'] ?? $this->existingFieldValue($entry, 'start_date');
+
+        if ($endRaw === null || $startRaw === null) {
+            return;
+        }
+
+        $end   = Carbon::parse($endRaw);
+        $start = $startRaw instanceof Carbon ? $startRaw : Carbon::parse($startRaw);
+
+        if ($end->lt($start)) {
+            throw new InvalidArgumentException('end_date cannot be earlier than start_date.');
+        }
     }
 }
