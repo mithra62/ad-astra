@@ -193,7 +193,7 @@ $table->string('object')->unique();
 
 ---
 
-### [PARTIALLY RESOLVED] HIGH-04 — `statuses.is_default` Has No Per-Group Uniqueness Constraint
+### [RESOLVED] HIGH-04 — `statuses.is_default` Has No Per-Group Uniqueness Constraint
 
 **Files:**
 
@@ -224,18 +224,16 @@ if ($input['is_default']) {
 }
 ```
 
-**Remaining gaps.**
+**Current state — verified.** Both `CreateNewStatus` and `EditStatus` now wrap their clear-then-write sequences in
+`DB::transaction()` with a `StatusGroup::lockForUpdate()->findOrFail(...)` at the start. Two concurrent requests that
+target the same group will now queue behind the row lock rather than racing through independently.
 
-1. The clear-then-write sequence is **not transactional**. Two concurrent admins setting different statuses to default
-   in the same group can both clear, then both insert, leaving two `is_default=true` rows (matches
-   `CURRENT_ISSUES_REVIEW.md` §5).
-2. Direct `Status::create([...])` outside the action (e.g. seeders, tinker) bypasses the guard. `StatusGroupSeeder` is
-   currently safe because each group seeds exactly one default, but ad-hoc data entry has no protection.
-3. `EntryRepository::applyStatus()` still uses `firstWhere('is_default', true)` to pick a default — order-dependent if
-   the invariant breaks.
+`createByGroup()` acquires the lock via the group relation (already loaded), while `create()` and `edit()` acquire it
+by ID. All three paths are covered.
 
-**Recommended fix.** Wrap the clear-and-set in `DB::transaction(function () { ... lockForUpdate() ... })` inside both
-actions. Optionally add a partial unique index via raw SQL for MySQL 8+ if you can tolerate the migration churn.
+**Remaining note.** Direct `Status::create([...])` outside the actions (seeders, tinker) still bypasses the guard —
+but `StatusGroupSeeder` seeds exactly one default per group so this is safe in practice. The DB-level partial unique
+index is not present; the transaction lock is the sole enforcement mechanism.
 
 ---
 
@@ -884,7 +882,7 @@ change-tracking visibility:
 
 | Item    | Old marker                             | New marker             | Why                                                                          |
 |---------|----------------------------------------|------------------------|------------------------------------------------------------------------------|
-| HIGH-04 | `[RESOLVED]`                           | `[PARTIALLY RESOLVED]` | App-only enforcement; clear-and-set is non-transactional, no DB unique.      |
+| HIGH-04 | `[RESOLVED]`                           | `[PARTIALLY RESOLVED]` → `[RESOLVED]` | Transactional `lockForUpdate()` added to all three write paths.  |
 | MED-03  | `[RESOLVED]`                           | `[PARTIALLY RESOLVED]` | `Prunable` exists but no scheduler runs it.                                  |
 | MED-05  | `[RESOLVED]`                           | `[PARTIALLY RESOLVED]` | Schema column still nullable; non-HTTP callers can violate the contract.     |
 | MED-06  | `[OPEN]` (already correctly described) | `[PARTIALLY RESOLVED]` | App-level guard added in `CreateEntryTreeNode`; DB constraint still missing. |
@@ -903,9 +901,7 @@ lines have been removed and `destroy()` functions correctly.
 
 1. **MED-08** — gate `UsersSeeder` to non-production environments (or remove hardcoded credentials).
 2. **MED-03** — register the `model:prune` schedule for `App\Models\ApiLog`.
-3. **HIGH-04** — make the default-status switch transactional in `CreateNewStatus` and `EditStatus`; consider a partial
-   unique index.
-4. **MED-05** — make `entry_groups.status_group_id` non-nullable (project is still resettable, per
+3. **MED-05** — make `entry_groups.status_group_id` non-nullable (project is still resettable, per
    `CURRENT_ISSUES_REVIEW.md`); strip the `?? null` fallback from the entry-group actions.
 5. **MED-09 / BR-03** — add the parent-group guard in `CategoryService::create()` and `move()`.
 6. **BR-04 / BR-07** — add the `EntryTreeObserver` (deleting handler) that re-roots or hard-deletes subtrees and
