@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static Collection loadRelatedRecursive(Entry $entry, string $fieldHandle, int $maxDepth = 3, array $seen = [])
  * @method static EntryQueryBuilder query()
  * @method static array fieldArray(Entry $entry)
+ * @method static mixed getFieldValue(Entry $entry, string $fieldHandle)
+ * @method static void setFieldValue(Entry $entry, string $fieldHandle, mixed $value)
  * @method static FieldLayout|null resolveLayout(Entry $entry)
  * @method static Collection resolveFields(Entry $entry)
  * @method static EntryTree createTreeNode(Entry $entry, string $handle, ?EntryTree $parent = null, ?string $template = null, bool $isHome = false)

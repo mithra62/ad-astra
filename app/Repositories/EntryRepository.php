@@ -279,6 +279,18 @@ class EntryRepository
         }
     }
 
+    /**
+     * Persist a single field value on an entry.
+     *
+     * Routes to scalar (FieldValue) or relational (EntryRelationship) storage
+     * automatically based on the field type. Silently skips the handle if it
+     * is not present in the entry's resolved layout.
+     */
+    public function setFieldValue(Entry $entry, string $handle, mixed $value): void
+    {
+        $this->applyFieldValues($entry, [$handle => $value]);
+    }
+
     public function resolveLayoutFields(Entry $entry): Collection
     {
         $entry->loadMissing([

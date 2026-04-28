@@ -5,7 +5,9 @@ namespace App\Providers;
 use App\EntryTypes\EntryTypeRegistry;
 use App\Repositories\EntryRepository;
 use App\Services\ContentService;
+use App\Services\EntryGroupService;
 use App\Services\EntryService;
+use App\Services\EntryTypeService;
 use Illuminate\Support\ServiceProvider;
 
 class ContentServiceProvider extends ServiceProvider
@@ -25,5 +27,8 @@ class ContentServiceProvider extends ServiceProvider
         });
 
         $this->app->alias(ContentService::class, EntryService::class);
+
+        $this->app->singleton(EntryGroupService::class, fn ($app) => new EntryGroupService($app));
+        $this->app->singleton(EntryTypeService::class, fn ($app) => new EntryTypeService($app));
     }
 }

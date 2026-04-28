@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Entry;
 
-use App\Actions\Entry\Group\CreateNewEntryGroup;
-use App\Actions\Entry\Group\EditEntryGroup;
+use App\Facades\EntryGroups;
 use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\Entry\Group\DeleteEntryGroupRequest;
 use App\Http\Requests\Entry\Group\EditEntryGroupRequest;
@@ -22,6 +21,7 @@ class Group extends Controller
             ->with('statusGroup')
             ->ordered()
             ->paginate(20);
+
         return $this->view('entries.groups.index', ['groups' => $groups]);
     }
 
@@ -32,8 +32,7 @@ class Group extends Controller
 
     public function store(StoreEntryGroupRequest $request)
     {
-        $creator = app(CreateNewEntryGroup::class);
-        $group   = $creator->create($request->validated());
+        $group = EntryGroups::create($request->validated());
 
         return redirect()
             ->route('entries.groups.show', $group->id)
@@ -91,13 +90,13 @@ class Group extends Controller
 
     public function update(EditEntryGroupRequest $request, string $id)
     {
-        $group = EntryGroup::find($id);
+        $group = EntryGroups::find((int) $id);
+
         if (! $group instanceof EntryGroup) {
             abort(404);
         }
 
-        $editor = app(EditEntryGroup::class);
-        $editor->edit($group, $request->validated());
+        EntryGroups::update($group, $request->validated());
 
         return redirect()
             ->route('entries.groups.edit', $id)
@@ -106,22 +105,25 @@ class Group extends Controller
 
     public function destroy(DeleteEntryGroupRequest $request, string $id)
     {
-        $group = EntryGroup::find($id);
-        if ($group instanceof EntryGroup) {
-            $group->delete();
+        $group = EntryGroups::find((int) $id);
+
+        if (! $group instanceof EntryGroup) {
             return redirect()
                 ->route('entries.groups')
-                ->with('success', trans('entry.group.deleted'));
+                ->with('failure', trans('entry.group.not_found'));
         }
+
+        EntryGroups::delete($group);
 
         return redirect()
             ->route('entries.groups')
-            ->with('failure', trans('entry.group.not_found'));
+            ->with('success', trans('entry.group.deleted'));
     }
 
     public function confirm(string $id)
     {
         $group = EntryGroup::withCount('entries')->find($id);
+
         if (! $group instanceof EntryGroup) {
             return redirect()->route('entries.groups')->with('failure', trans('entry.group.not_found'));
         }

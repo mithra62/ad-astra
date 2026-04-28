@@ -2,11 +2,10 @@
 
 namespace Tests\Unit\Actions\Entry\Type;
 
-use App\Actions\Entry\Type\CreateNewEntryType;
-use App\Actions\Entry\Type\EditEntryType;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\FieldLayout;
+use App\Services\EntryTypeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,15 +14,14 @@ class EntryTypeActionsTest extends TestCase
     use RefreshDatabase;
 
     // -------------------------------------------------------------------------
-    // CreateNewEntryType
+    // create  (via EntryTypeService)
     // -------------------------------------------------------------------------
 
     public function test_create_returns_entry_type_instance(): void
     {
-        $group  = EntryGroup::factory()->create();
-        $action = app(CreateNewEntryType::class);
+        $group = EntryGroup::factory()->create();
 
-        $result = $action->create($group->id, [
+        $result = app(EntryTypeService::class)->create($group->id, [
             'name'   => 'Blog Post',
             'handle' => 'blog-post',
             'class'  => 'App\\EntryTypes\\BlogPostEntryType',
@@ -34,10 +32,9 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_create_persists_entry_type_to_database(): void
     {
-        $group  = EntryGroup::factory()->create();
-        $action = app(CreateNewEntryType::class);
+        $group = EntryGroup::factory()->create();
 
-        $action->create($group->id, [
+        app(EntryTypeService::class)->create($group->id, [
             'name'   => 'Page',
             'handle' => 'page',
             'class'  => 'App\\EntryTypes\\PageEntryType',
@@ -53,10 +50,9 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_create_assigns_correct_entry_group(): void
     {
-        $group  = EntryGroup::factory()->create();
-        $action = app(CreateNewEntryType::class);
+        $group = EntryGroup::factory()->create();
 
-        $result = $action->create($group->id, [
+        $result = app(EntryTypeService::class)->create($group->id, [
             'name'   => 'News',
             'handle' => 'news',
             'class'  => 'App\\EntryTypes\\NewsArticleEntryType',
@@ -65,12 +61,24 @@ class EntryTypeActionsTest extends TestCase
         $this->assertEquals($group->id, $result->entry_group_id);
     }
 
+    public function test_create_accepts_entry_group_model_directly(): void
+    {
+        $group = EntryGroup::factory()->create();
+
+        $result = app(EntryTypeService::class)->create($group, [
+            'name'   => 'Video',
+            'handle' => 'video',
+            'class'  => 'App\\EntryTypes\\VideoEntryType',
+        ]);
+
+        $this->assertEquals($group->id, $result->entry_group_id);
+    }
+
     public function test_create_stores_sort_order(): void
     {
-        $group  = EntryGroup::factory()->create();
-        $action = app(CreateNewEntryType::class);
+        $group = EntryGroup::factory()->create();
 
-        $result = $action->create($group->id, [
+        $result = app(EntryTypeService::class)->create($group->id, [
             'name'       => 'Event',
             'handle'     => 'event',
             'class'      => 'App\\EntryTypes\\EventEntryType',
@@ -82,10 +90,9 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_create_defaults_sort_order_to_zero(): void
     {
-        $group  = EntryGroup::factory()->create();
-        $action = app(CreateNewEntryType::class);
+        $group = EntryGroup::factory()->create();
 
-        $result = $action->create($group->id, [
+        $result = app(EntryTypeService::class)->create($group->id, [
             'name'   => 'Job',
             'handle' => 'job',
             'class'  => 'App\\EntryTypes\\JobListingEntryType',
@@ -98,9 +105,8 @@ class EntryTypeActionsTest extends TestCase
     {
         $group  = EntryGroup::factory()->create();
         $layout = FieldLayout::factory()->create();
-        $action = app(CreateNewEntryType::class);
 
-        $result = $action->create($group->id, [
+        $result = app(EntryTypeService::class)->create($group->id, [
             'name'            => 'Product',
             'handle'          => 'product',
             'class'           => 'App\\EntryTypes\\ProductEntryType',
@@ -112,10 +118,9 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_create_allows_null_field_layout_id(): void
     {
-        $group  = EntryGroup::factory()->create();
-        $action = app(CreateNewEntryType::class);
+        $group = EntryGroup::factory()->create();
 
-        $result = $action->create($group->id, [
+        $result = app(EntryTypeService::class)->create($group->id, [
             'name'   => 'Podcast',
             'handle' => 'podcast',
             'class'  => 'App\\EntryTypes\\PodcastEpisodeEntryType',
@@ -125,15 +130,14 @@ class EntryTypeActionsTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // EditEntryType
+    // update  (via EntryTypeService)
     // -------------------------------------------------------------------------
 
     public function test_edit_returns_entry_type_instance(): void
     {
-        $type   = EntryType::factory()->create();
-        $action = app(EditEntryType::class);
+        $type = EntryType::factory()->create();
 
-        $result = $action->edit($type, [
+        $result = app(EntryTypeService::class)->update($type, [
             'name'   => 'Updated',
             'handle' => 'updated',
             'class'  => $type->class,
@@ -144,10 +148,9 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_edit_updates_name_handle_and_class(): void
     {
-        $type   = EntryType::factory()->create(['name' => 'Old', 'handle' => 'old']);
-        $action = app(EditEntryType::class);
+        $type = EntryType::factory()->create(['name' => 'Old', 'handle' => 'old']);
 
-        $action->edit($type, [
+        app(EntryTypeService::class)->update($type, [
             'name'   => 'New Name',
             'handle' => 'new-handle',
             'class'  => 'App\\EntryTypes\\PageEntryType',
@@ -163,10 +166,9 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_edit_updates_sort_order(): void
     {
-        $type   = EntryType::factory()->create(['sort_order' => 1]);
-        $action = app(EditEntryType::class);
+        $type = EntryType::factory()->create(['sort_order' => 1]);
 
-        $result = $action->edit($type, [
+        $result = app(EntryTypeService::class)->update($type, [
             'name'       => $type->name,
             'handle'     => $type->handle,
             'class'      => $type->class,
@@ -180,9 +182,8 @@ class EntryTypeActionsTest extends TestCase
     {
         $layout = FieldLayout::factory()->create();
         $type   = EntryType::factory()->create();
-        $action = app(EditEntryType::class);
 
-        $result = $action->edit($type, [
+        $result = app(EntryTypeService::class)->update($type, [
             'name'            => $type->name,
             'handle'          => $type->handle,
             'class'           => $type->class,
@@ -194,10 +195,9 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_edit_returns_fresh_model_not_original(): void
     {
-        $type   = EntryType::factory()->create(['name' => 'Before']);
-        $action = app(EditEntryType::class);
+        $type = EntryType::factory()->create(['name' => 'Before']);
 
-        $result = $action->edit($type, [
+        $result = app(EntryTypeService::class)->update($type, [
             'name'   => 'After',
             'handle' => 'after',
             'class'  => $type->class,
@@ -209,10 +209,9 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_edit_defaults_sort_order_to_zero_when_omitted(): void
     {
-        $type   = EntryType::factory()->create(['sort_order' => 3]);
-        $action = app(EditEntryType::class);
+        $type = EntryType::factory()->create(['sort_order' => 3]);
 
-        $result = $action->edit($type, [
+        $result = app(EntryTypeService::class)->update($type, [
             'name'   => $type->name,
             'handle' => $type->handle,
             'class'  => $type->class,

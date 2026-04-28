@@ -35,6 +35,14 @@ class EntryService extends AbstractService
      *   authors    (array)  — user IDs to sync as authors (keyed by sort order)
      *   categories (array)  — category IDs to sync
      *   fields     (array)  — ['handle' => value] field values (relational or scalar)
+     *
+     * Lifecycle hooks:
+     *   The resolved entry type's `beforeCreate(array $data): array` hook runs
+     *   inside the database transaction so any locks it acquires (e.g. for
+     *   auto-incrementing sequence fields) are held until the row is committed.
+     *   `afterCreate(Entry $entry, array $data): void` runs after the transaction
+     *   commits, so its side effects (emails, webhooks, etc.) are not rolled back
+     *   if persistence fails.
      */
     public function create(string $typeHandle, array $data = []): Entry
     {
@@ -46,6 +54,12 @@ class EntryService extends AbstractService
     /**
      * Update an entry's core attributes, authors, categories, and/or fields.
      * Only keys present in $data are touched.
+     *
+     * Lifecycle hooks:
+     *   The resolved entry type's `beforeUpdate(Entry $entry, array $data): array`
+     *   hook runs before any attributes are written, allowing the type to modify
+     *   or augment the incoming data. `afterUpdate(Entry $entry, array $data): void`
+     *   runs after the entry is saved and refreshed.
      */
     public function update(Entry $entry, array $data = []): Entry
     {
@@ -174,6 +188,37 @@ class EntryService extends AbstractService
         $entry->loadMissing('fieldValues.field');
 
         return $entry->fieldArray();
+    }
+
+    /**
+     * Read a single field value by handle, ensuring all required relations are
+     * loaded before delegating to Entry::field().
+     *
+     * Returns the resolved scalar value for scalar field types, a Collection of
+     * related Entry models for relational field types, or null when no value is
+     * stored for that handle.
+     */
+    public function getFieldValue(Entry $entry, string $fieldHandle): mixed
+    {
+        $entry->loadMissing([
+            'fieldValues.field.fieldType',
+            'entryRelationships.field',
+            'entryRelationships.relatedEntry',
+        ]);
+
+        return $entry->field($fieldHandle);
+    }
+
+    /**
+     * Persist a single field value on an entry.
+     *
+     * Routes to scalar (FieldValue) or relational (EntryRelationship) storage
+     * automatically based on the field type. Silently skips the handle when it
+     * is not present in the entry's resolved layout.
+     */
+    public function setFieldValue(Entry $entry, string $fieldHandle, mixed $value): void
+    {
+        $this->repository->setFieldValue($entry, $fieldHandle, $value);
     }
 
     // -------------------------------------------------------------------------
