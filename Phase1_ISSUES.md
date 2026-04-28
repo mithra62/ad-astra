@@ -445,19 +445,18 @@ retention for error-status rows.
 
 ---
 
-### [OPEN] MED-04 — Duplicate `createLayout()` Method Across Two Seeders
+### [RESOLVED] MED-04 — Duplicate `createLayout()` Method Across Two Seeders
 
 **Files:**
 
-- `database/seeders/EntryGroupSeeder.php:113`
-- `database/seeders/ExtendedEntryGroupSeeder.php:298`
+- `database/seeders/Concerns/BuildsLayouts.php` *(new)*
+- `database/seeders/EntryGroupSeeder.php`
+- `database/seeders/ExtendedEntryGroupSeeder.php`
 
-**Current state — verified.** Both seeders still define identical private
-`createLayout(string $name, array $tabs): FieldLayout` methods. Any change to layout seeding logic still has to be
-applied twice.
-
-**Fix.** Extract the helper to a shared trait (e.g. `Database\Seeders\Concerns\BuildsLayouts`) or a common base class so
-both seeders inherit it.
+**Current state — verified.** The shared helper now lives in `Database\Seeders\Concerns\BuildsLayouts`.
+Both seeders declare `use BuildsLayouts, WithoutModelEvents;` and the four imports that were only
+needed by `createLayout()` (`Field`, `FieldLayout`, `Tab`, `TabElement`) have been removed from
+each seeder. Layout seeding logic now has a single authoritative location.
 
 ---
 
@@ -928,7 +927,6 @@ lines have been removed and `destroy()` functions correctly.
 12. **LOW-02** — author the missing entry / field / status / role permissions.
 13. **BR-05** — add audit logging for super-admin gate bypass.
 14. **BR-06** — decide and document the `api_logs` body-capture policy; reduce surface area accordingly.
-15. **MED-04** — extract the duplicated `createLayout()` to a shared seeder helper.
 16. **MED-07** — confirm the `000007` and `000012` migration sequence numbers were never deployed; document the gap.
 
 Items higher in the list either prevent immediate harm (CRIT, security) or are mechanical wins that unblock subsequent

@@ -12,18 +12,15 @@ use App\EntryTypes\RecipeEntryType;
 use App\EntryTypes\VideoEntryType;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
-use App\Models\Field;
 use App\Models\Field\Group as FieldGroup;
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
-use App\Models\FieldLayout\TabElement;
 use App\Models\StatusGroup;
+use Database\Seeders\Concerns\BuildsLayouts;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ExtendedEntryGroupSeeder extends Seeder
 {
-    use WithoutModelEvents;
+    use BuildsLayouts, WithoutModelEvents;
 
     public function run(): void
     {
@@ -69,43 +66,6 @@ class ExtendedEntryGroupSeeder extends Seeder
                 'sort_order' => 1,
             ]
         );
-    }
-
-    /**
-     * Create a FieldLayout with named tabs, each containing field handles.
-     * Fields that don't exist in the database are silently skipped.
-     *
-     * @param array<string, string[]> $tabs Tab name => [field handles]
-     */
-    private function createLayout(string $name, array $tabs): FieldLayout
-    {
-        $layout = FieldLayout::create(['name' => $name]);
-        $tabOrder = 1;
-
-        foreach ($tabs as $tabName => $fieldHandles) {
-            $tab = Tab::create([
-                'field_layout_id' => $layout->id,
-                'name' => $tabName,
-                'sort_order' => $tabOrder++,
-            ]);
-
-            $elementOrder = 1;
-            foreach ($fieldHandles as $handle) {
-                $field = Field::where('handle', $handle)->first();
-                if (!$field) {
-                    continue;
-                }
-
-                TabElement::create([
-                    'field_layout_tab_id' => $tab->id,
-                    'field_id' => $field->id,
-                    'required' => false,
-                    'sort_order' => $elementOrder++,
-                ]);
-            }
-        }
-
-        return $layout;
     }
 
     private function seedNewsGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
