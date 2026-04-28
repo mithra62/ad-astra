@@ -335,11 +335,11 @@ within the same request re-use the cached collection.
 
 ---
 
-### [OPEN] MED-01 — `CategoryService::wouldCreateCycle()` N+1 Query Pattern
+### [RESOLVED] MED-01 — `CategoryService::wouldCreateCycle()` N+1 Query Pattern
 
-**File:** `app/Services/CategoryService.php:96-114`
+**File:** `app/Services/CategoryService.php`
 
-**Current state — verified.** The method is unchanged from the original report:
+**Current state — verified.** The method has been rewritten:
 
 ```php
 private function wouldCreateCycle(Category $category, int $targetParentId): bool
@@ -348,27 +348,29 @@ private function wouldCreateCycle(Category $category, int $targetParentId): bool
         return true;
     }
 
-    $candidate = Category::find($targetParentId);
+    $visited  = [$targetParentId => true];
+    $current  = $targetParentId;
+    $maxDepth = self::MAX_ANCESTOR_DEPTH; // 32
 
-    while ($candidate?->parent_id !== null) {
-        if ($candidate->parent_id === $category->id) {
-            return true;
-        }
+    while ($maxDepth-- > 0) {
+        $parentId = Category::where('id', $current)->value('parent_id');
 
-        $candidate = Category::find($candidate->parent_id);
+        if ($parentId === null)              { return false; }
+        if ($parentId === $category->id)     { return true;  }
+        if (isset($visited[$parentId]))      { return false; } // pre-existing cycle guard
+
+        $visited[$parentId] = true;
+        $current = $parentId;
     }
 
     return false;
 }
 ```
 
-Each ancestor walk still costs one full `Category::find()` per level. There is no `$visited` guard, so a pre-existing
-cycle in stored data — which `MED-09` makes possible because parent/group invariants are unenforced — would loop until
-PHP's max execution time fires.
-
-**Fix.** Walk ancestors using `Category::where('id', $id)->value('parent_id')` to read only the column needed,
-accumulate visited IDs to break pre-existing cycles, and stop after a sane depth cap (e.g. 32). A recursive-CTE query
-would be optimal, but is not necessary for typical taxonomy depths.
+Each step now reads only the `parent_id` column (no full model hydration). The `$visited` set breaks any pre-existing
+cycle in stored data so the walk cannot loop infinitely. The `MAX_ANCESTOR_DEPTH = 32` constant caps the walk as a
+final safety net. Tests covering deep-chain detection, pre-existing-cycle safety, and per-query column narrowness have
+been added to `tests/Unit/Services/CategoryServiceTest.php`.
 
 ---
 
@@ -909,8 +911,6 @@ lines have been removed and `destroy()` functions correctly.
 7. **LOW-03 / LOW-04** — guard against empty handles and serialise per-group entry creation against handle collisions.
 8. **MED-06** — add a partial-unique index for `entry_trees.is_home`.
 9. **MED-02** — drop the global `$with` from `Field` and `FieldValue`; verify all callers eager-load explicitly.
-10. **MED-01** — replace the per-level `Category::find()` walk in `wouldCreateCycle()` with a column-only
-    `value('parent_id')` walk plus a visited-set guard.
 11. **LOW-01** — flush `UserSchema::resolved()` from any admin action that modifies the user schema or its layout
     subtree.
 12. **LOW-02** — author the missing entry / field / status / role permissions.

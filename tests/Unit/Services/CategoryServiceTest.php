@@ -9,6 +9,7 @@ use App\Services\CategoryService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Tests\TestCase;
 
@@ -586,6 +587,127 @@ class CategoryServiceTest extends TestCase
         $ids = $result->pluck('id')->all();
 
         $this->assertEquals([$a->id, $b->id, $c->id], $ids);
+    }
+
+    // -------------------------------------------------------------------------
+    // wouldCreateCycle() — MED-01 fix guard
+    //
+    // These tests target the private cycle-detection walk called by move().
+    // Three properties are verified:
+    //
+    // 1. CORRECTNESS  — deep ancestor chains (beyond grandchild) are detected,
+    //    proving the walk iterates fully rather than stopping after two levels.
+    //
+    // 2. SAFETY       — when stored data already contains a cycle (corrupt
+    //    state), the visited-ID set prevents an infinite loop and move()
+    //    returns a result rather than hanging.
+    //
+    // 3. EFFICIENCY   — each ancestor step issues a single-column
+    //    SELECT "parent_id" query rather than a full SELECT *, confirming
+    //    the N+1 full-model-load pattern from the original code is gone.
+    // -------------------------------------------------------------------------
+
+    public function test_move_throws_when_moving_category_under_deep_descendant(): void
+    {
+        // Build: root → A → B → C → D → E  (5 levels deep)
+        $group = $this->makeGroup();
+        $root = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
+        $a    = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $root->id]);
+        $b    = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $a->id]);
+        $c    = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b->id]);
+        $d    = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $c->id]);
+        $e    = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $d->id]);
+
+        // Moving $root under $e would require root to be a child of its own
+        // 5th-generation descendant — a cycle the walk must detect.
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->service->move($root, $e->id);
+    }
+
+    public function test_move_does_not_throw_across_a_long_sibling_chain(): void
+    {
+        // 5-level chain in a separate branch — moving an unrelated node there
+        // must not be misidentified as a cycle.
+        $group  = $this->makeGroup();
+        $branch = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
+        $b1     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $branch->id]);
+        $b2     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b1->id]);
+        $b3     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b2->id]);
+        $b4     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b3->id]);
+
+        $unrelated = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
+
+        $result = $this->service->move($unrelated, $b4->id);
+
+        $this->assertEquals($b4->id, $result->fresh()->parent_id);
+    }
+
+    public function test_move_completes_safely_when_stored_data_contains_a_cycle(): void
+    {
+        // Arrange: A and B in a valid parent/child relationship,
+        // then manually corrupt the DB so A ↔ B reference each other.
+        $group = $this->makeGroup();
+        $a     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
+        $b     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $a->id]);
+
+        // Corrupt stored data: give A a parent_id pointing back to B.
+        // This bypasses move() so no cycle guard fires during setup.
+        Category::where('id', $a->id)->update(['parent_id' => $b->id]);
+
+        // An unrelated category D that we want to place under A.
+        $d = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
+
+        // The visited-ID set must detect the A ↔ B cycle and stop the walk
+        // rather than looping forever. The move itself is not a cycle (D is
+        // not an ancestor of A), so it should succeed.
+        $result = $this->service->move($d, $a->id);
+
+        $this->assertEquals($a->id, $result->fresh()->parent_id);
+    }
+
+    public function test_cycle_walk_issues_narrow_single_column_queries(): void
+    {
+        // Build a 4-level chain: root → a → b → c
+        // Moving $root under $c requires walking c → b → a → (finds root → cycle).
+        // That is 3 ancestor-walk queries; each must select only "parent_id".
+        $group = $this->makeGroup();
+        $root  = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
+        $a     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $root->id]);
+        $b     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $a->id]);
+        $c     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b->id]);
+
+        DB::enableQueryLog();
+
+        try {
+            $this->service->move($root, $c->id); // throws — cycle detected
+        } catch (InvalidArgumentException $e) {
+            // Expected; we only care about the queries that ran.
+        }
+
+        $log = DB::getQueryLog();
+        DB::disableQueryLog();
+
+        // Isolate the three ancestor-walk queries by their distinctive shape:
+        // they select a single column from categories by primary key.
+        $walkQueries = array_values(array_filter(
+            $log,
+            fn($q) => str_contains(strtolower($q['query']), 'parent_id')
+                   && str_contains(strtolower($q['query']), 'categories'),
+        ));
+
+        // Exactly 3 steps: c → b → a → (parent_id === root → return true).
+        $this->assertCount(3, $walkQueries,
+            'Expected exactly 3 ancestor-walk queries for a 3-level chain before the cycle is found.'
+        );
+
+        // Each query must read "parent_id" specifically — not "select *".
+        foreach ($walkQueries as $q) {
+            $sql = strtolower($q['query']);
+            $this->assertStringNotContainsString('select *', $sql,
+                'Ancestor walk must not use SELECT * — it should read only the parent_id column.'
+            );
+        }
     }
 
     protected function setUp(): void

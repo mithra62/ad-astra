@@ -14,6 +14,8 @@ class CategoryService extends AbstractService
 {
     use PersistsFieldValues;
 
+    private const MAX_ANCESTOR_DEPTH = 32;
+
     // -------------------------------------------------------------------------
     // CRUD
     // -------------------------------------------------------------------------
@@ -69,22 +71,49 @@ class CategoryService extends AbstractService
         return $category->refresh();
     }
 
+    /**
+     * Walk the ancestor chain of $targetParentId and return true if $category
+     * appears in it (which would create a cycle after the move).
+     *
+     * Reads only the `parent_id` column per level — no full model hydration.
+     * A visited-ID set prevents an infinite loop when stored data already
+     * contains a cycle (MED-09 / corrupt state). The walk is capped at
+     * MAX_ANCESTOR_DEPTH levels as a final safety net.
+     */
     private function wouldCreateCycle(Category $category, int $targetParentId): bool
     {
+        // Direct self-reference: moving $category under itself.
         if ($targetParentId === $category->id) {
             return true;
         }
 
-        $candidate = Category::find($targetParentId);
+        $visited  = [$targetParentId => true];
+        $current  = $targetParentId;
+        $maxDepth = self::MAX_ANCESTOR_DEPTH;
 
-        while ($candidate?->parent_id !== null) {
-            if ($candidate->parent_id === $category->id) {
+        while ($maxDepth-- > 0) {
+            $parentId = Category::where('id', $current)->value('parent_id');
+
+            if ($parentId === null) {
+                // Reached a root — $category is not in this ancestor chain.
+                return false;
+            }
+
+            if ($parentId === $category->id) {
+                // $category is an ancestor of $targetParentId: the move would create a cycle.
                 return true;
             }
 
-            $candidate = Category::find($candidate->parent_id);
+            if (isset($visited[$parentId])) {
+                // Pre-existing cycle in stored data — stop to avoid an infinite loop.
+                return false;
+            }
+
+            $visited[$parentId] = true;
+            $current = $parentId;
         }
 
+        // Depth cap reached — treat as no cycle (conservative: allows the move).
         return false;
     }
 
