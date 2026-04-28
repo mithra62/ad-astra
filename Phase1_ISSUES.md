@@ -391,7 +391,7 @@ the hot path while still adding overhead in cold paths (admin counts, simple lis
 
 ---
 
-### [PARTIALLY RESOLVED] MED-03 — No Log Retention/Pruning for `api_logs` Table
+### [RESOLVED] MED-03 — No Log Retention/Pruning for `api_logs` Table
 
 **Files:**
 
@@ -417,18 +417,31 @@ That fixes the missing prune scope. **However**, the `model:prune` Artisan comma
 So the prune scope exists but never runs unless an operator manually invokes
 `php artisan model:prune --model=App\Models\ApiLog`.
 
-**Fix.** Register the schedule explicitly. Laravel 12 supports either `Schedule::command(...)` inside
-`routes/console.php` or `withSchedule(...)` in `bootstrap/app.php`:
+**Current state — verified.** Automated pruning is handled by `app/Jobs/PruneApiLogs.php`, a
+self-rescheduling queued job. On each execution it calls `ApiLog::pruneAll()` (which honours the
+90-day scope in `ApiLog::prunable()`) then re-dispatches itself with a delay targeting 02:00 the
+following day. No cron entry is required — the job perpetuates itself through the queue.
 
-```php
-// routes/console.php
-use Illuminate\Support\Facades\Schedule;
+`routes/console.php` retains the `Schedule::command('model:prune', ...)` entry for manual shell
+use at any time without disturbing the queue chain:
 
-Schedule::command('model:prune', ['--model' => [\App\Models\ApiLog::class]])
-    ->daily();
+```bash
+php artisan model:prune --model="App\Models\ApiLog"
 ```
 
-Until the schedule lands, treat MED-03 as production-unsafe for any system with steady API traffic.
+**Deployment steps (one-time):**
+
+1. Ensure `QUEUE_CONNECTION` in `.env` is set to a driver that supports delayed jobs (`database`,
+   `redis`, etc.) — `sync` ignores delays and is not suitable.
+2. Confirm a queue worker is running (e.g. via Supervisor: `php artisan queue:work`).
+3. Kick off the chain once:
+   ```bash
+   php artisan tinker --execute="App\Jobs\PruneApiLogs::dispatch()"
+   ```
+   After this, the job re-queues itself nightly at 02:00 indefinitely.
+
+Deferred to a separate work item: retention period env var, first-run backlog prune, tiered
+retention for error-status rows.
 
 ---
 
@@ -902,8 +915,7 @@ lines have been removed and `destroy()` functions correctly.
 # Recommended Order Of Work
 
 1. **MED-08** — gate `UsersSeeder` to non-production environments (or remove hardcoded credentials).
-2. **MED-03** — register the `model:prune` schedule for `App\Models\ApiLog`.
-3. **MED-05** — make `entry_groups.status_group_id` non-nullable (project is still resettable, per
+2. **MED-05** — make `entry_groups.status_group_id` non-nullable (project is still resettable, per
    `CURRENT_ISSUES_REVIEW.md`); strip the `?? null` fallback from the entry-group actions.
 5. **MED-09 / BR-03** — add the parent-group guard in `CategoryService::create()` and `move()`.
 6. **BR-04 / BR-07** — add the `EntryTreeObserver` (deleting handler) that re-roots or hard-deletes subtrees and
