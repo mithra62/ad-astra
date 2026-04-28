@@ -52,15 +52,13 @@ class Category extends Model
             ->orderBy('name');
     }
 
-    public function childrenRecursive(int $maxDepth = 10): HasMany
+    public function childrenRecursive(int $maxDepth = PHP_INT_MAX): HasMany
     {
         if ($maxDepth <= 0) {
             return $this->children()->whereRaw('0 = 1');
         }
 
-        return $this->children()->with([
-            'childrenRecursive' => fn ($q) => $q->childrenRecursive($maxDepth - 1),
-        ]);
+        return $this->children()->with('childrenRecursive');
     }
 
     public function scopeRoots(Builder $query): Builder

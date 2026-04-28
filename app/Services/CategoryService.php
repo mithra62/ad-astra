@@ -8,6 +8,7 @@ use App\Models\FieldLayout;
 use App\Traits\PersistsFieldValues;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection as SupportCollection;
 
 class CategoryService extends AbstractService
 {
@@ -136,7 +137,7 @@ class CategoryService extends AbstractService
     /**
      * Resolve the FieldGroups attached to the category's group.
      */
-    public function resolveFieldGroups(Category $category): Collection
+    public function resolveFieldGroups(Category $category): SupportCollection
     {
         return $this->loadGroup($category)?->fieldGroups ?? collect();
     }
@@ -145,7 +146,7 @@ class CategoryService extends AbstractService
      * Resolve all Field models available to a category via its group's layout,
      * returned in tab/sort_order sequence.
      */
-    public function resolveFields(Category $category): Collection
+    public function resolveFields(Category $category): SupportCollection
     {
         $layout = $this->resolveLayout($category);
 
