@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Concerns\PersistsFieldValues;
 use App\Models\User;
 use App\Models\User\OauthToken;
+use App\Traits\PersistsFieldValues;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;

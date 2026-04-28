@@ -159,7 +159,7 @@ class UserSettingsTest extends TestCase
     public function test_update_redirects_guests_to_login(): void
     {
         $response = $this->put(route('settings.user.update'), [
-            'fields' => ['timezone' => 'UTC'],
+            'timezone' => 'UTC',
         ]);
 
         $response->assertRedirect(route('login'));
@@ -171,7 +171,7 @@ class UserSettingsTest extends TestCase
         $this->makeDomainWithMixedFields('ud6');
 
         $this->actingAs($user)->put(route('settings.user.update'), [
-            'fields' => ['ud6_tz' => 'Asia/Tokyo'],
+            'ud6_tz' => 'Asia/Tokyo',
         ]);
 
         $this->assertDatabaseHas('setting_values', [
@@ -188,7 +188,7 @@ class UserSettingsTest extends TestCase
         $this->makeDomainWithMixedFields('ud7');
 
         $this->actingAs($user)->put(route('settings.user.update'), [
-            'fields' => ['ud7_tz' => 'Europe/Paris'],
+            'ud7_tz' => 'Europe/Paris',
         ]);
 
         $this->assertDatabaseMissing('setting_values', [
@@ -204,10 +204,8 @@ class UserSettingsTest extends TestCase
         $this->makeDomainWithMixedFields('ud8');
 
         $this->actingAs($user)->put(route('settings.user.update'), [
-            'fields' => [
-                'ud8_tz'        => 'UTC',
-                'ud8_site_name' => 'Should Be Ignored',
-            ],
+            'ud8_tz'        => 'UTC',
+            'ud8_site_name' => 'Should Be Ignored',
         ]);
 
         $this->assertDatabaseMissing('setting_values', [
@@ -222,7 +220,7 @@ class UserSettingsTest extends TestCase
         $this->makeDomainWithMixedFields('ud9');
 
         $response = $this->actingAs($user)->put(route('settings.user.update'), [
-            'fields' => ['ud9_tz' => 'UTC'],
+            'ud9_tz' => 'UTC',
         ]);
 
         $response->assertRedirect(route('settings.user'));
@@ -243,7 +241,7 @@ class UserSettingsTest extends TestCase
         ]);
 
         $this->actingAs($userA)->put(route('settings.user.update'), [
-            'fields' => ['ud10_tz' => 'America/New_York'],
+            'ud10_tz' => 'America/New_York',
         ]);
 
         $this->assertDatabaseHas('setting_values', [
@@ -263,10 +261,105 @@ class UserSettingsTest extends TestCase
         Cache::put("settings.user.{$userB->id}.ud11", ['ud11_tz' => 'UTC'], 3600);
 
         $this->actingAs($userA)->put(route('settings.user.update'), [
-            'fields' => ['ud11_tz' => 'Asia/Seoul'],
+            'ud11_tz' => 'Asia/Seoul',
         ]);
 
         $this->assertNull(Cache::get("settings.user.{$userA->id}.ud11"));
         $this->assertNotNull(Cache::get("settings.user.{$userB->id}.ud11"));
+    }
+
+    // -------------------------------------------------------------------------
+    // Validation
+    // -------------------------------------------------------------------------
+
+    /**
+     * Register a domain with a validated overridable field.
+     */
+    private function makeDomainWithValidatedField(string $handle): SettingDomain
+    {
+        config(["settings.{$handle}" => [
+            'name'        => strtoupper($handle),
+            'description' => null,
+            'icon'        => null,
+            'sort_order'  => 99,
+            'fields'      => [
+                [
+                    'handle'          => "{$handle}_count",
+                    'label'           => 'Count',
+                    'type'            => 'integer',
+                    'default'         => 10,
+                    'rules'           => ['required', 'integer', 'min:1', 'max:100'],
+                    'instructions'    => null,
+                    'group'           => null,
+                    'hidden'          => false,
+                    'user_overridable' => true,
+                ],
+            ],
+        ]]);
+
+        return SettingDomain::create([
+            'name'       => strtoupper($handle),
+            'handle'     => $handle,
+            'sort_order' => 99,
+        ]);
+    }
+
+    public function test_update_fails_validation_when_overridable_field_is_invalid(): void
+    {
+        $user = $this->makeSuperAdmin();
+        $this->makeDomainWithValidatedField('uv1');
+
+        $response = $this->actingAs($user)->put(route('settings.user.update'), [
+            'uv1_count' => 'not-a-number',
+        ]);
+
+        $response->assertSessionHasErrors('uv1_count');
+        $this->assertDatabaseMissing('setting_values', ['domain' => 'uv1', 'user_id' => $user->id]);
+    }
+
+    public function test_update_fails_validation_when_overridable_field_exceeds_max(): void
+    {
+        $user = $this->makeSuperAdmin();
+        $this->makeDomainWithValidatedField('uv2');
+
+        $response = $this->actingAs($user)->put(route('settings.user.update'), [
+            'uv2_count' => 9999,
+        ]);
+
+        $response->assertSessionHasErrors('uv2_count');
+        $this->assertDatabaseMissing('setting_values', ['domain' => 'uv2', 'user_id' => $user->id]);
+    }
+
+    public function test_update_passes_validation_with_valid_overridable_field(): void
+    {
+        $user = $this->makeSuperAdmin();
+        $this->makeDomainWithValidatedField('uv3');
+
+        $response = $this->actingAs($user)->put(route('settings.user.update'), [
+            'uv3_count' => 50,
+        ]);
+
+        $response->assertRedirect(route('settings.user'));
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('setting_values', [
+            'domain'        => 'uv3',
+            'field_handle'  => 'uv3_count',
+            'user_id'       => $user->id,
+            'value_integer' => 50,
+        ]);
+    }
+
+    public function test_validation_error_messages_use_field_label_for_user_settings(): void
+    {
+        $user = $this->makeSuperAdmin();
+        $this->makeDomainWithValidatedField('uv4');
+
+        $response = $this->actingAs($user)->put(route('settings.user.update'), [
+            'uv4_count' => 'bad',
+        ]);
+
+        $response->assertSessionHasErrors('uv4_count');
+        $errors = session('errors')->getBag('default');
+        $this->assertStringContainsString('Count', $errors->first('uv4_count'));
     }
 }

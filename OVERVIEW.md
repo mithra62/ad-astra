@@ -1469,8 +1469,7 @@ foreach ([$altText, $caption, $credit] as $i => $field) {
 correct value for `fieldable_type`.
 
 ```php
-use App\Concerns\PersistsFieldValues;
-use App\Models\Media;
+use App\Models\Field;use App\Models\FieldValue;use App\Models\Media;use App\Traits\PersistsFieldValues;
 
 // Option A — via PersistsFieldValues in a service
 class MediaFieldService
@@ -1491,8 +1490,6 @@ $service->saveFields($media, [
 ]);
 
 // Option B — write directly (mirrors what PersistsFieldValues does internally)
-use App\Models\Field;
-use App\Models\FieldValue;
 
 $field = Field::where('handle', 'media_alt_text')->firstOrFail();
 
@@ -1513,10 +1510,7 @@ To write field values at upload time, extend `UploadMedia` with
 // app/Actions/Media/Library/UploadMedia.php
 namespace App\Actions\Media\Library;
 
-use App\Actions\AbstractAction;
-use App\Concerns\PersistsFieldValues;
-use App\Http\Requests\FormRequest;
-use App\Models\Media\Library as LibraryModel;
+use App\Actions\AbstractAction;use App\Http\Requests\FormRequest;use App\Models\Media\Library as LibraryModel;use App\Traits\PersistsFieldValues;
 
 class UploadMedia extends AbstractAction
 {

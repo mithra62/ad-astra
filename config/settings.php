@@ -8,14 +8,19 @@
  * that domain.
  *
  * Field keys:
- *   handle          – unique within the domain; used as the DB field_handle
- *   label           – human-readable label shown in the admin UI
- *   type            – storage type: text | integer | float | boolean | json
- *                     determines which value_* column is read/written
- *   default         – returned when no DB value exists for the field
- *   instructions    – optional helper text shown beneath the label
- *   group           – optional section heading for grouping fields visually
- *   hidden          – when true the field is excluded from the admin UI
+ *   handle           – unique within the domain; used as the DB field_handle
+ *   label            – human-readable label shown in the admin UI
+ *   type             – storage type: text | integer | float | boolean | json
+ *                      determines which value_* column is read/written
+ *   default          – returned when no DB value exists for the field
+ *   rules            – Laravel validation rules array, applied before save.
+ *                      Do not include 'nullable' — it is prepended automatically
+ *                      for any field that does not declare 'required'.
+ *                      Boolean fields are normalised before save and skip validation.
+ *                      Example: ['string', 'max:255'] or ['integer', 'min:1', 'max:500']
+ *   instructions     – optional helper text shown beneath the label
+ *   group            – optional section heading for grouping fields visually
+ *   hidden           – when true the field is excluded from the admin UI
  *   user_overridable – when true authenticated users may set a personal override
  *
  * Adding a new setting: add an entry to the appropriate domain's 'fields' array.
@@ -40,6 +45,7 @@ return [
                 'label' => 'Site Name',
                 'type' => 'text',
                 'default' => '',
+                'rules' => ['required', 'string', 'max:255'],
                 'instructions' => 'The public name of this site.',
                 'group' => null,
                 'hidden' => false,
@@ -50,6 +56,7 @@ return [
                 'label' => 'Timezone',
                 'type' => 'text',
                 'default' => 'UTC',
+                'rules' => ['required', 'string', 'timezone'],
                 'instructions' => 'Default timezone for date display (e.g. UTC, America/New_York).',
                 'group' => null,
                 'hidden' => false,
@@ -60,6 +67,7 @@ return [
                 'label' => 'Date Format',
                 'type' => 'text',
                 'default' => 'Y-m-d',
+                'rules' => ['required', 'string', 'max:50'],
                 'instructions' => 'PHP date format string (e.g. Y-m-d, d/m/Y).',
                 'group' => null,
                 'hidden' => false,
@@ -70,6 +78,7 @@ return [
                 'label' => 'Time Format',
                 'type' => 'text',
                 'default' => 'H:i',
+                'rules' => ['required', 'string', 'max:50'],
                 'instructions' => 'PHP time format string (e.g. H:i, g:i A).',
                 'group' => null,
                 'hidden' => false,
@@ -80,6 +89,7 @@ return [
                 'label' => 'Items Per Page',
                 'type' => 'integer',
                 'default' => 25,
+                'rules' => ['required', 'integer', 'min:1', 'max:500'],
                 'instructions' => 'Default number of items shown per page in admin listings.',
                 'group' => null,
                 'hidden' => false,
@@ -103,6 +113,7 @@ return [
                 'label' => 'Max Upload Size (KB)',
                 'type' => 'integer',
                 'default' => 10240,
+                'rules' => ['required', 'integer', 'min:1'],
                 'instructions' => 'Maximum file upload size in kilobytes.',
                 'group' => 'Uploads',
                 'hidden' => false,
@@ -113,6 +124,7 @@ return [
                 'label' => 'Allowed File Extensions',
                 'type' => 'text',
                 'default' => 'jpg,jpeg,png,gif,webp,pdf,mp3,mp4,mov',
+                'rules' => ['required', 'string', 'max:500'],
                 'instructions' => 'Comma-separated list of permitted extensions (e.g. jpg,png,pdf).',
                 'group' => 'Uploads',
                 'hidden' => false,
@@ -123,6 +135,7 @@ return [
                 'label' => 'Image Quality (1–100)',
                 'type' => 'integer',
                 'default' => 85,
+                'rules' => ['required', 'integer', 'min:1', 'max:100'],
                 'instructions' => 'JPEG/WebP compression quality for processed images.',
                 'group' => 'Processing',
                 'hidden' => false,
@@ -146,6 +159,7 @@ return [
                 'label' => 'From Name',
                 'type' => 'text',
                 'default' => '',
+                'rules' => ['string', 'max:255'],
                 'instructions' => 'The sender name that appears in outbound emails.',
                 'group' => 'Sender',
                 'hidden' => false,
@@ -156,6 +170,7 @@ return [
                 'label' => 'From Address',
                 'type' => 'text',
                 'default' => '',
+                'rules' => ['email', 'max:255'],
                 'instructions' => 'The sender email address for outbound emails.',
                 'group' => 'Sender',
                 'hidden' => false,
@@ -166,6 +181,7 @@ return [
                 'label' => 'Reply-To Address',
                 'type' => 'text',
                 'default' => '',
+                'rules' => ['email', 'max:255'],
                 'instructions' => 'Optional reply-to address. Leave blank to use the From Address.',
                 'group' => 'Sender',
                 'hidden' => false,
@@ -189,6 +205,7 @@ return [
                 'label' => 'Entries Per Page',
                 'type' => 'integer',
                 'default' => 20,
+                'rules' => ['required', 'integer', 'min:1', 'max:500'],
                 'instructions' => 'Default number of entries shown per page on public listing pages.',
                 'group' => null,
                 'hidden' => false,
@@ -199,6 +216,7 @@ return [
                 'label' => 'Default Entry Status',
                 'type' => 'text',
                 'default' => 'draft',
+                'rules' => ['required', 'string', 'max:100'],
                 'instructions' => 'Status handle applied to new entries when none is specified.',
                 'group' => null,
                 'hidden' => false,
@@ -206,4 +224,5 @@ return [
             ],
         ],
     ],
+
 ];

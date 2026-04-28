@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Concerns\PersistsFieldValues;
 use App\Models\Category;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\FieldLayout;
+use App\Traits\PersistsFieldValues;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 

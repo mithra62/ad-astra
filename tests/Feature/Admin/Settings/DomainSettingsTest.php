@@ -151,7 +151,7 @@ class DomainSettingsTest extends TestCase
         $this->makeDomain();
 
         $response = $this->put(route('settings.update', 'td_test'), [
-            'fields' => ['td_test_site_name' => 'New Value'],
+            'td_test_site_name' => 'New Value',
         ]);
 
         $response->assertRedirect(route('login'));
@@ -163,7 +163,7 @@ class DomainSettingsTest extends TestCase
         $this->makeDomain('td3');
 
         $this->actingAs($user)->put(route('settings.update', 'td3'), [
-            'fields' => ['td3_site_name' => 'Hello World'],
+            'td3_site_name' => 'Hello World',
         ]);
 
         $this->assertDatabaseHas('setting_values', [
@@ -180,7 +180,7 @@ class DomainSettingsTest extends TestCase
         $this->makeDomain('td4');
 
         $response = $this->actingAs($user)->put(route('settings.update', 'td4'), [
-            'fields' => ['td4_site_name' => 'Redirect Test'],
+            'td4_site_name' => 'Redirect Test',
         ]);
 
         $response->assertRedirect(route('settings.show', 'td4'));
@@ -198,7 +198,7 @@ class DomainSettingsTest extends TestCase
         ]);
 
         $this->actingAs($user)->put(route('settings.update', 'td5'), [
-            'fields' => ['td5_site_name' => 'New Value'],
+            'td5_site_name' => 'New Value',
         ]);
 
         $this->assertDatabaseCount('setting_values', 1);
@@ -213,7 +213,7 @@ class DomainSettingsTest extends TestCase
         Cache::put('settings.system.td6', ['td6_site_name' => 'cached'], 3600);
 
         $this->actingAs($user)->put(route('settings.update', 'td6'), [
-            'fields' => ['td6_site_name' => 'Fresh Value'],
+            'td6_site_name' => 'Fresh Value',
         ]);
 
         $this->assertNull(Cache::get('settings.system.td6'));
@@ -224,9 +224,154 @@ class DomainSettingsTest extends TestCase
         $user = $this->makeSuperAdmin();
 
         $response = $this->actingAs($user)->put(route('settings.update', 'no-such-domain'), [
-            'fields' => ['foo' => 'bar'],
+            'foo' => 'bar',
         ]);
 
         $response->assertNotFound();
+    }
+
+    // -------------------------------------------------------------------------
+    // Validation
+    // -------------------------------------------------------------------------
+
+    public function test_update_fails_validation_when_required_field_is_missing(): void
+    {
+        $user = $this->makeSuperAdmin();
+
+        config(['settings.vd1' => [
+            'name'   => 'VD1',
+            'fields' => [
+                [
+                    'handle'          => 'vd1_name',
+                    'label'           => 'Name',
+                    'type'            => 'text',
+                    'default'         => '',
+                    'rules'           => ['required', 'string'],
+                    'hidden'          => false,
+                    'user_overridable' => false,
+                ],
+            ],
+        ]]);
+        SettingDomain::create(['name' => 'VD1', 'handle' => 'vd1', 'sort_order' => 99]);
+
+        $response = $this->actingAs($user)->put(route('settings.update', 'vd1'), [
+            'vd1_name' => '',
+        ]);
+
+        $response->assertSessionHasErrors('vd1_name');
+        $this->assertDatabaseMissing('setting_values', ['domain' => 'vd1']);
+    }
+
+    public function test_update_fails_validation_when_integer_field_receives_string(): void
+    {
+        $user = $this->makeSuperAdmin();
+
+        config(['settings.vd2' => [
+            'name'   => 'VD2',
+            'fields' => [
+                [
+                    'handle'          => 'vd2_count',
+                    'label'           => 'Count',
+                    'type'            => 'integer',
+                    'default'         => 10,
+                    'rules'           => ['required', 'integer', 'min:1'],
+                    'hidden'          => false,
+                    'user_overridable' => false,
+                ],
+            ],
+        ]]);
+        SettingDomain::create(['name' => 'VD2', 'handle' => 'vd2', 'sort_order' => 99]);
+
+        $response = $this->actingAs($user)->put(route('settings.update', 'vd2'), [
+            'vd2_count' => 'not-a-number',
+        ]);
+
+        $response->assertSessionHasErrors('vd2_count');
+        $this->assertDatabaseMissing('setting_values', ['domain' => 'vd2']);
+    }
+
+    public function test_update_passes_validation_when_nullable_field_is_empty(): void
+    {
+        $user = $this->makeSuperAdmin();
+
+        config(['settings.vd3' => [
+            'name'   => 'VD3',
+            'fields' => [
+                [
+                    'handle'          => 'vd3_email',
+                    'label'           => 'Email',
+                    'type'            => 'text',
+                    'default'         => '',
+                    'rules'           => ['email'],   // no 'required' — nullable prepended
+                    'hidden'          => false,
+                    'user_overridable' => false,
+                ],
+            ],
+        ]]);
+        SettingDomain::create(['name' => 'VD3', 'handle' => 'vd3', 'sort_order' => 99]);
+
+        $response = $this->actingAs($user)->put(route('settings.update', 'vd3'), [
+            'vd3_email' => '',
+        ]);
+
+        $response->assertRedirect(route('settings.show', 'vd3'));
+        $response->assertSessionHasNoErrors();
+    }
+
+    public function test_update_fails_validation_when_nullable_field_has_invalid_value(): void
+    {
+        $user = $this->makeSuperAdmin();
+
+        config(['settings.vd4' => [
+            'name'   => 'VD4',
+            'fields' => [
+                [
+                    'handle'          => 'vd4_email',
+                    'label'           => 'Email',
+                    'type'            => 'text',
+                    'default'         => '',
+                    'rules'           => ['email'],
+                    'hidden'          => false,
+                    'user_overridable' => false,
+                ],
+            ],
+        ]]);
+        SettingDomain::create(['name' => 'VD4', 'handle' => 'vd4', 'sort_order' => 99]);
+
+        $response = $this->actingAs($user)->put(route('settings.update', 'vd4'), [
+            'vd4_email' => 'not-an-email',
+        ]);
+
+        $response->assertSessionHasErrors('vd4_email');
+    }
+
+    public function test_validation_error_messages_use_field_label(): void
+    {
+        $user = $this->makeSuperAdmin();
+
+        config(['settings.vd5' => [
+            'name'   => 'VD5',
+            'fields' => [
+                [
+                    'handle'          => 'vd5_title',
+                    'label'           => 'Page Title',
+                    'type'            => 'text',
+                    'default'         => '',
+                    'rules'           => ['required', 'string'],
+                    'hidden'          => false,
+                    'user_overridable' => false,
+                ],
+            ],
+        ]]);
+        SettingDomain::create(['name' => 'VD5', 'handle' => 'vd5', 'sort_order' => 99]);
+
+        $response = $this->actingAs($user)->put(route('settings.update', 'vd5'), [
+            'vd5_title' => '',
+        ]);
+
+        // Error message should reference the label, not the handle
+        $response->assertSessionHasErrors('vd5_title');
+        $errors = session('errors')->getBag('default');
+        $this->assertStringContainsString('Page Title', $errors->first('vd5_title'));
     }
 }

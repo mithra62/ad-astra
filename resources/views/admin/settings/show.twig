@@ -74,10 +74,10 @@
                                                 <div class="form-check form-switch">
                                                     <input class="form-check-input"
                                                            type="checkbox"
-                                                           name="fields[{{ field.handle }}]"
+                                                           name="{{ field.handle }}"
                                                            id="field_{{ field.handle }}"
                                                            value="1"
-                                                           {{ val ? 'checked' : '' }}>
+                                                           {{ old(field.handle, val) ? 'checked' : '' }}>
                                                     <label class="form-check-label" for="field_{{ field.handle }}">
                                                         Enable
                                                     </label>
@@ -85,25 +85,25 @@
                                             {% elseif field.type == 'integer' or field.type == 'float' %}
                                                 <input type="number"
                                                        class="form-control"
-                                                       name="fields[{{ field.handle }}]"
+                                                       name="{{ field.handle }}"
                                                        id="field_{{ field.handle }}"
-                                                       value="{{ val }}"
+                                                       value="{{ old(field.handle, val) }}"
                                                        {{ field.type == 'float' ? 'step="any"' : 'step="1"' }}>
                                             {% elseif field.type == 'textarea' %}
                                                 <textarea class="form-control"
-                                                          name="fields[{{ field.handle }}]"
+                                                          name="{{ field.handle }}"
                                                           id="field_{{ field.handle }}"
-                                                          rows="4">{{ val }}</textarea>
+                                                          rows="4">{{ old(field.handle, val) }}</textarea>
                                             {% else %}
                                                 <input type="{{ field.type == 'email' ? 'email' : 'text' }}"
                                                        class="form-control"
-                                                       name="fields[{{ field.handle }}]"
+                                                       name="{{ field.handle }}"
                                                        id="field_{{ field.handle }}"
-                                                       value="{{ val }}">
+                                                       value="{{ old(field.handle, val) }}">
                                             {% endif %}
 
-                                            {% if errors.has('fields.' ~ field.handle) %}
-                                                <p class="text-danger mt-1">{{ errors.first('fields.' ~ field.handle) }}</p>
+                                            {% if errors.has(field.handle) %}
+                                                <p class="text-danger mt-1">{{ errors.first(field.handle) }}</p>
                                             {% endif %}
                                         </div>
                                     {% endfor %}

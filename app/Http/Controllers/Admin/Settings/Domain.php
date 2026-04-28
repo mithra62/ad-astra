@@ -10,6 +10,8 @@ use Illuminate\Contracts\View\View;
 
 class Domain extends Controller
 {
+    use ValidatesSettingFields;
+
     /**
      * List all setting domains.
      */
@@ -27,11 +29,10 @@ class Domain extends Controller
      */
     public function show(string $handle): View
     {
-        $domain     = SettingDomain::where('handle', $handle)->firstOrFail();
-        $allDomains = SettingDomain::ordered()->get();
+        $domain      = SettingDomain::where('handle', $handle)->firstOrFail();
+        $allDomains  = SettingDomain::ordered()->get();
         $fieldValues = $this->settings->system($handle);
 
-        // Group visible fields by their 'group' key for sectioned rendering.
         $groupedFields = $this->groupFields(
             config("settings.{$handle}.fields", []),
             visibleOnly: true
@@ -47,18 +48,25 @@ class Domain extends Controller
 
     /**
      * Persist system-level settings for a domain.
+     *
+     * Validation runs first against each field's declared 'rules'. Boolean
+     * fields are normalised to true/false after validation, before save.
      */
     public function update(Request $request, string $handle): RedirectResponse
     {
         SettingDomain::where('handle', $handle)->firstOrFail();
 
-        $submitted = $request->input('fields', []);
-        $fields    = config("settings.{$handle}.fields", []);
+        $fields = config("settings.{$handle}.fields", []);
 
-        // Normalise boolean fields — unchecked checkboxes are not submitted.
+        $this->validateSettingFields($fields, $request);
+
+        $handles   = array_column($fields, 'handle');
+        $submitted = $request->only($handles);
+
+        // Normalise boolean fields — unchecked checkboxes are absent from POST.
         foreach ($fields as $field) {
             if (($field['type'] ?? 'text') === 'boolean') {
-                $submitted[$field['handle']] = isset($submitted[$field['handle']]);
+                $submitted[$field['handle']] = $request->has($field['handle']);
             }
         }
 
@@ -75,7 +83,6 @@ class Domain extends Controller
 
     /**
      * Group field definitions by their 'group' key.
-     * Returns a plain array: ['Group Name' => [fields], '' => [ungrouped fields]]
      *
      * @return array<string, array<int, array<string, mixed>>>
      */
