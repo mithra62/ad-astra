@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use Illuminate\Http\Request;
+use App\Facades\Users;
 use App\Http\Resources\Api\UserCollection;
 use App\Http\Resources\Api\UserResource;
 use App\Http\Controllers\Api\Controller;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User as UserModel;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class User extends Controller
 {
@@ -78,12 +79,12 @@ class User extends Controller
      */
     public function index(Request $request)
     {
-        if (!$this->can('read users')) {
+        if (! $this->can('read users')) {
             return response()->json(['error' => 'Not Found'], 404);
         }
 
         $query = UserModel::with('roles');
-        if($this->sortDir($request) && $this->sort($request)) {
+        if ($this->sortDir($request) && $this->sort($request)) {
             $query->orderBy($this->sort($request), $this->sortDir($request));
         }
 
@@ -119,12 +120,12 @@ class User extends Controller
      */
     public function show($id)
     {
-        if (!$this->can('read users')) {
+        if (! $this->can('read users')) {
             return response()->json(['error' => 'Not Found'], 404);
         }
 
-        $user = UserModel::find($id);
-        if (!$user instanceof UserModel) {
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel) {
             return response()->json(['error' => 'Not Found'], 404);
         }
 

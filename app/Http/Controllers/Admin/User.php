@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Actions\User\CreateNewUser;
 use App\Actions\User\UpdateUserProfileInformation;
 use App\Actions\User\UpdateUserPassword;
+use App\Facades\Users;
 use App\Http\Requests\User\DeleteUserRequest;
 use App\Http\Requests\User\EditUserRequest;
 use App\Http\Requests\User\PasswordUserRequest;
@@ -21,7 +22,7 @@ class User extends Controller
      */
     public function index()
     {
-        $users = UserModel::paginate(20);
+        $users = Users::paginate(20);
         return $this->view('users.index', ['users' => $users]);
     }
 
@@ -51,28 +52,17 @@ class User extends Controller
      */
     public function show(string $id)
     {
-        $user = UserModel::find($id);
-        $user->load('fieldValues.field.fieldType');
-        print_r($user->fieldArray());
-        exit;
-//        $user = Auth::user();
-//        $tokens = $user->tokens;
-//
-//        foreach ($tokens as $token) {
-//            print_r($token->tokenable());
-//            exit;
-//        }
-//
-//        echo hash('sha256', '658cefa547608f38b29d3d6aeab5e220e0682f2b31c95f065e821b499894d4f2');
-//        exit;
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel) {
+            return redirect()->route('users.index')->with('failure', 'user.not_found');
+        }
 
-//        $user = Auth::user();
-//        echo $user->createToken('MyApp 2')->plainTextToken;
-//        exit;
-        $client = new Client;
-        $data = $client->get('remittances/corn');
-        print_r($data);
-        exit;
+        $user->loadMissing(['roles', 'tokens', 'fieldValues.field.fieldType']);
+
+        return $this->view('users.show', [
+            'user'         => $user,
+            'field_values' => $user->fieldArray(),
+        ]);
     }
 
     /**
@@ -81,14 +71,21 @@ class User extends Controller
     public function edit(string $id)
     {
         $schema = UserSchema::instance()->resolved();
-        $roles = RoleModel::all();
-        $user = UserModel::with('roles')->with('tokens')->find($id);
-        if (!$user instanceof UserModel) {
+        $roles  = RoleModel::all();
+        $user   = Users::find((int) $id);
+
+        if (! $user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
-        $user->load('fieldValues.field.fieldType');
-        return $this->view('users.edit', ['user' => $user, 'roles' => $roles, 'schema' => $schema, 'field_values' => $user->fieldArray()]);
+        $user->loadMissing(['roles', 'tokens', 'fieldValues.field.fieldType']);
+
+        return $this->view('users.edit', [
+            'user'         => $user,
+            'roles'        => $roles,
+            'schema'       => $schema,
+            'field_values' => $user->fieldArray(),
+        ]);
     }
 
     /**
@@ -96,14 +93,14 @@ class User extends Controller
      */
     public function update(EditUserRequest $request, string $id)
     {
-        $user = UserModel::find($id);
+        $user = Users::find((int) $id);
         if ($user instanceof UserModel) {
             $editor = app(UpdateUserProfileInformation::class);
             $user = $editor->update($user, $request->validated());
             return redirect()->route('users.edit', $user)->with('success', trans('user.updated'));
         }
 
-        return redirect()->route('users.edit', $user)->with('failure', trans('user.not_found'));
+        return redirect()->route('users.edit', $id)->with('failure', trans('user.not_found'));
     }
 
     /**
@@ -111,9 +108,9 @@ class User extends Controller
      */
     public function destroy(DeleteUserRequest $request, string $id)
     {
-        $user = UserModel::find($id);
+        $user = Users::find((int) $id);
         if ($user instanceof UserModel) {
-            $user->delete();
+            Users::delete($user);
             return redirect()->route('users.index')->with('success', trans('user.deleted'));
         }
 
@@ -126,8 +123,8 @@ class User extends Controller
      */
     public function confirm(string $id)
     {
-        $user = UserModel::find($id);
-        if (!$user instanceof UserModel) {
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
@@ -141,8 +138,8 @@ class User extends Controller
      */
     public function password(PasswordUserRequest $request, string $id)
     {
-        $user = UserModel::find($id);
-        if (!$user instanceof UserModel) {
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 

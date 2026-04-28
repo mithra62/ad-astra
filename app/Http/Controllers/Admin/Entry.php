@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Actions\Entry\CreateNewEntry;
 use App\Actions\Entry\UpdateEntry;
 use App\Facades\Entries;
+use App\Facades\Users;
 use App\Http\Requests\Entry\DeleteEntryRequest;
 use App\Http\Requests\Entry\EditEntryRequest;
 use App\Http\Requests\Entry\StoreEntryRequest;
 use App\Models\EntryGroup;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class Entry extends Controller
@@ -42,7 +42,7 @@ class Entry extends Controller
         }
 
         $allGroups = EntryGroup::ordered()->get();
-        $users     = User::orderBy('name')->limit(10)->get();
+        $users     = Users::getForDropdown(10);
 
         return $this->view('entries.create', [
             'group'     => $group,
@@ -79,7 +79,7 @@ class Entry extends Controller
         ]);
 
         $allGroups = EntryGroup::ordered()->get();
-        $users     = User::orderBy('name')->limit(10)->get();
+        $users     = Users::getForDropdown(10);
 
         return $this->view('entries.edit', [
             'entry'        => $entry,

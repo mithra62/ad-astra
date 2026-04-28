@@ -5,17 +5,97 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\User\OauthToken;
 use App\Traits\PersistsFieldValues;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
+use Laravel\Sanctum\NewAccessToken;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserService
 {
     use PersistsFieldValues;
+
+    // -------------------------------------------------------------------------
+    // Retrieval
+    // -------------------------------------------------------------------------
+
+    /**
+     * Find a User by ID. Returns null when not found.
+     */
+    public function find(int $id): ?User
+    {
+        return User::find($id);
+    }
+
+    /**
+     * Find a User by ID. Throws ModelNotFoundException when not found.
+     */
+    public function get(int $id): User
+    {
+        return User::findOrFail($id);
+    }
+
+    /**
+     * Return a paginated list of users, eager-loading the given relations.
+     *
+     * @param int $perPage Records per page (default 20)
+     * @param array $with Relations to eager-load (default ['roles'])
+     */
+    public function paginate(int $perPage = 20, array $with = ['roles']): LengthAwarePaginator
+    {
+        return User::with($with)->paginate($perPage);
+    }
+
+    /**
+     * Return a lightweight collection of users suitable for select/dropdown UI.
+     * Only id and name are loaded; ordered alphabetically.
+     */
+    public function getForDropdown(int $limit = 50): Collection
+    {
+        return User::select(['id', 'name'])
+            ->orderBy('name')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Return the total number of users in the database.
+     */
+    public function getTotalCount(): int
+    {
+        return User::count();
+    }
+
+    /**
+     * Return the most recently created users, ordered newest-first.
+     */
+    public function getLatestUsers(int $limit = 9): Collection
+    {
+        return User::orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Find a user by email or create one for a social-login callback.
+     * Only `name` is set on creation; password and roles are left for later.
+     */
+    public function firstOrCreateFromSocial(string $email, string $name): User
+    {
+        return User::firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => $name,
+                'password' => Hash::make(\Illuminate\Support\Str::random(32)),
+            ],
+        );
+    }
 
     // -------------------------------------------------------------------------
     // CRUD
@@ -33,14 +113,14 @@ class UserService
     {
         $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation']);
 
-        if (! empty($attributes['password'])) {
+        if (!empty($attributes['password'])) {
             $attributes['password'] = Hash::make($attributes['password']);
         }
 
         $user = User::create($attributes);
 
-        if (! empty($data['roles'])) {
-            $user->syncRoles((array) $data['roles']);
+        if (!empty($data['roles'])) {
+            $user->syncRoles((array)$data['roles']);
         }
 
         if (array_key_exists('fields', $data) && is_array($data['fields'])) {
@@ -58,12 +138,12 @@ class UserService
     {
         $attributes = Arr::except($data, ['password', 'roles', 'fields']);
 
-        if (! empty($attributes)) {
+        if (!empty($attributes)) {
             $user->update($attributes);
         }
 
         if (array_key_exists('roles', $data)) {
-            $user->syncRoles((array) $data['roles']);
+            $user->syncRoles((array)$data['roles']);
         }
 
         if (array_key_exists('fields', $data)) {
@@ -75,7 +155,7 @@ class UserService
 
     public function delete(User $user): bool
     {
-        return (bool) $user->delete();
+        return (bool)$user->delete();
     }
 
     // -------------------------------------------------------------------------
@@ -126,6 +206,60 @@ class UserService
     }
 
     // -------------------------------------------------------------------------
+    // Sanctum Personal Access Tokens
+    // -------------------------------------------------------------------------
+
+    /**
+     * Issue a new personal access token for a user.
+     *
+     * @param string $name Token display name
+     * @param array $abilities Sanctum ability strings (default ['*'])
+     * @param Carbon|null $expiresAt Optional expiry timestamp
+     */
+    public function createToken(User $user, string $name, array $abilities = ['*'], ?Carbon $expiresAt = null): NewAccessToken
+    {
+        return $user->createToken($name, $abilities, $expiresAt);
+    }
+
+    /**
+     * Retrieve a single personal access token belonging to a user.
+     * Returns null when the token does not exist or belongs to another user.
+     */
+    public function getToken(User $user, int|string $tokenId): ?PersonalAccessToken
+    {
+        /** @var PersonalAccessToken|null $token */
+        $token = $user->tokens()->where('id', $tokenId)->first();
+
+        return $token;
+    }
+
+    /**
+     * Update a personal access token's attributes (e.g. name, abilities, expires_at).
+     * Returns null when the token does not exist or belongs to another user.
+     */
+    public function updateToken(User $user, int|string $tokenId, array $data): ?PersonalAccessToken
+    {
+        $token = $this->getToken($user, $tokenId);
+
+        if (!$token instanceof PersonalAccessToken) {
+            return null;
+        }
+
+        $token->update($data);
+
+        return $token->refresh();
+    }
+
+    /**
+     * Revoke (delete) a personal access token belonging to a user.
+     * Returns true when deleted, false when the token was not found.
+     */
+    public function revokeToken(User $user, int|string $tokenId): bool
+    {
+        return (bool)$user->tokens()->where('id', $tokenId)->delete();
+    }
+
+    // -------------------------------------------------------------------------
     // Two-Factor Authentication
     //
     // Requires the User model to use:
@@ -149,7 +283,7 @@ class UserService
 
         return [
             'qr_code_svg' => $user->twoFactorQrCodeSvg(),
-            'secret'      => decrypt($user->two_factor_secret),
+            'secret' => decrypt($user->two_factor_secret),
         ];
     }
 
@@ -177,7 +311,7 @@ class UserService
      */
     public function hasTwoFactor(User $user): bool
     {
-        return ! is_null($user->two_factor_confirmed_at);
+        return !is_null($user->two_factor_confirmed_at);
     }
 
     /**

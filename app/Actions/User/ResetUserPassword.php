@@ -3,8 +3,8 @@
 namespace App\Actions\User;
 
 use App\Models\User;
+use App\Services\UserService;
 use App\Traits\PasswordValidationRules;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\ResetsUserPasswords;
 use App\Actions\AbstractAction;
@@ -24,8 +24,6 @@ class ResetUserPassword extends AbstractAction implements ResetsUserPasswords
             'password' => $this->passwordRules(),
         ])->validate();
 
-        $user->forceFill([
-            'password' => Hash::make($input['password']),
-        ])->save();
+        app(UserService::class)->setPassword($user, $input['password']);
     }
 }

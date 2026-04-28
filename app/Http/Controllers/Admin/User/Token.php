@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\User;
 
 use App\Actions\User\Token\CreateNewUserToken;
+use App\Facades\Users;
 use App\Http\Controllers\Admin\Controller as AdminController;
 use App\Http\Requests\User\Token\DeleteUserTokenRequest;
 use App\Http\Requests\User\Token\EditUserTokenRequest;
@@ -19,7 +20,7 @@ class Token extends AdminController
     {
         echo __FILE__ . ':' . __LINE__;
         exit;
-        $users = UserModel::paginate(20);
+        $users = Users::paginate(20);
         return view('users.index', ['users' => $users]);
     }
 
@@ -28,8 +29,8 @@ class Token extends AdminController
      */
     public function create(string $id)
     {
-        $user = UserModel::find($id);
-        if (!$user instanceof UserModel || !$user->can('api')) {
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel || ! $user->can('api')) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
@@ -38,11 +39,11 @@ class Token extends AdminController
 
     public function store(StoreUserTokenRequest $request, string $id)
     {
-        $user = UserModel::find($id);
+        $user  = Users::find((int) $id);
         $token = '';
         if ($user instanceof UserModel) {
             $creator = app(CreateNewUserToken::class);
-            $token = $creator->create($user, $request->validated())->plainTextToken;
+            $token   = $creator->create($user, $request->validated())->plainTextToken;
         }
 
         return redirect()->route('users.edit', $user)->with('success', __('user.token_created') . ' - ' . $token);
@@ -53,7 +54,6 @@ class Token extends AdminController
      */
     public function show(string $id)
     {
-
     }
 
     /**
@@ -61,13 +61,13 @@ class Token extends AdminController
      */
     public function edit(string $id, string $token_id)
     {
-        $user = UserModel::find($id);
-        if (!$user instanceof UserModel) {
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel) {
             abort(404);
         }
 
-        $token = $user->tokens()->where('id', $token_id)->first();
-        if(!$token instanceof PersonalAccessToken) {
+        $token = Users::getToken($user, $token_id);
+        if (! $token instanceof PersonalAccessToken) {
             abort(404);
         }
 
@@ -79,17 +79,15 @@ class Token extends AdminController
      */
     public function update(EditUserTokenRequest $request, string $id, string $token_id)
     {
-        $user = UserModel::find($id);
-        if (!$user instanceof UserModel) {
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel) {
             abort(404);
         }
 
-        $token = $user->tokens()->where('id', $token_id)->first();
-        if(!$token instanceof PersonalAccessToken) {
+        $token = Users::updateToken($user, $token_id, $request->validated());
+        if (! $token instanceof PersonalAccessToken) {
             abort(404);
         }
-
-        $token->update($request->validated());
 
         return redirect()->route('users.edit', $user)->with('success', trans('user.token_updated'));
     }
@@ -99,9 +97,9 @@ class Token extends AdminController
      */
     public function destroy(DeleteUserTokenRequest $request, string $id, string $token_id)
     {
-        $user = UserModel::find($id);
+        $user = Users::find((int) $id);
         if ($user instanceof UserModel) {
-            $user->tokens()->where('id', $token_id)->delete();
+            Users::revokeToken($user, $token_id);
             return redirect()->route('users.edit', $user)->with('success', trans('user.token_deleted'));
         }
 
@@ -115,13 +113,13 @@ class Token extends AdminController
      */
     public function confirm(string $id, string $token_id)
     {
-        $user = UserModel::find($id);
-        if (!$user instanceof UserModel) {
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel) {
             abort(404);
         }
 
-        $token = $user->tokens()->where('id', $token_id)->get();
-        if($token->count() !== 1) {
+        $token = Users::getToken($user, $token_id);
+        if (! $token instanceof PersonalAccessToken) {
             abort(404);
         }
 

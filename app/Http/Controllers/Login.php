@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Admin\User;
-use Laravel\Socialite\Socialite;
+use App\Facades\Users;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 
 class Login extends Controller
@@ -16,20 +17,20 @@ class Login extends Controller
     public function handleProviderCallback($provider)
     {
         try {
-            $user = Socialite::driver($provider)->user();
+            $socialUser = Socialite::driver($provider)->user();
         } catch (InvalidStateException $e) {
             echo "broken";
             exit;
         }
 
-        // Find user by email or create a new user
-        $localUser = User::firstOrCreate(
-            ['email' => $user->getEmail()],
-            ['name' => $user->getName()]
+        // Find user by email or create a new one for this social provider
+        $localUser = Users::firstOrCreateFromSocial(
+            $socialUser->getEmail(),
+            $socialUser->getName(),
         );
 
-        Auth::login($localUser, true); // Login the user
+        Auth::login($localUser, true);
 
-        return redirect($this->redirectTo); // Redirect the user after successful login
+        return redirect($this->redirectTo);
     }
 }

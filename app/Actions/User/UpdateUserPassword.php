@@ -3,8 +3,8 @@
 namespace App\Actions\User;
 
 use App\Models\User;
+use App\Services\UserService;
 use App\Traits\PasswordValidationRules;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\UpdatesUserPasswords;
 use App\Actions\AbstractAction;
@@ -27,8 +27,6 @@ class UpdateUserPassword extends AbstractAction implements UpdatesUserPasswords
             'current_password.current_password' => __('The provided password does not match your current password.'),
         ])->validateWithBag('updatePassword');
 
-        $user->forceFill([
-            'password' => Hash::make($input['password']),
-        ])->save();
+        app(UserService::class)->setPassword($user, $input['password']);
     }
 }

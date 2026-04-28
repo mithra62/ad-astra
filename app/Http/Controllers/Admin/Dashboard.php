@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Facades\Content;
+use App\Facades\Users;
 use App\Models\ApiLog;
 use App\Models\Entry;
-use App\Models\User;
 use App\Rest\Client;
 use Illuminate\Support\Number;
 
@@ -44,15 +44,15 @@ class Dashboard extends Controller
         //        print_r($data);
         //        exit;
         $params = [
-            'total_users' => User::count(),
-            'total_api_requests' => ApiLog::count(),
-            'api_logs' => ApiLog::limit(100)->with(['user'])->get(),
-            'latest_users' => User::limit(9)->orderBy('created_at', 'desc')->get(),
-            'total_remittances' => 0,
-            'total_submissions' => 0,
-            'total_corn_remittances' => 0,
-            'total_soybean_remittances' => 0,
-            'sum_corn_remittance_totals' => Number::currency(0),
+            'total_users'                  => Users::getTotalCount(),
+            'total_api_requests'           => ApiLog::count(),
+            'api_logs'                     => ApiLog::limit(100)->with(['user'])->get(),
+            'latest_users'                 => Users::getLatestUsers(9),
+            'total_remittances'            => 0,
+            'total_submissions'            => 0,
+            'total_corn_remittances'       => 0,
+            'total_soybean_remittances'    => 0,
+            'sum_corn_remittance_totals'   => Number::currency(0),
             'sum_soybean_remittance_totals' => Number::currency(0),
         ];
 
@@ -65,7 +65,7 @@ class Dashboard extends Controller
 
         return response()->json([
             'labels' => $continuous->keys()->values(),
-            'data' => $continuous->values(),
+            'data'   => $continuous->values(),
         ]);
     }
 }
