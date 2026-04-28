@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Actions\Entry\Tree\RebuildEntryTreeUri;
+use App\Facades\Entries;
 use App\EntryTypes\PageEntryType;
 use App\Models\Entry;
 use App\Models\EntryGroup;
@@ -223,7 +223,7 @@ class SandboxedEntryTreeSeeder extends Seeder
             );
         }
 
-        app(RebuildEntryTreeUri::class)->handle($nodes['site']);
+        Entries::rebuildTreeUri($nodes['site']);
     }
 
     /**

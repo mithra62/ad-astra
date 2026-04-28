@@ -8,7 +8,6 @@ use App\Facades\Entries;
 use App\Http\Requests\Entry\DeleteEntryRequest;
 use App\Http\Requests\Entry\EditEntryRequest;
 use App\Http\Requests\Entry\StoreEntryRequest;
-use App\Models\Entry as EntryModel;
 use App\Models\EntryGroup;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -65,42 +64,40 @@ class Entry extends Controller
 
     public function edit(string $id)
     {
-        $entry = EntryModel::with([
+        $entry = Entries::get((int) $id);
+
+        if (! $entry) {
+            abort(404);
+        }
+
+        $entry->loadMissing([
             'entryGroup.entryTypes',
             'entryGroup.statusGroup.statuses',
             'entryGroup.categoryGroups.categories',
             'entryGroup.fieldLayout.tabs.elements.field.fieldType',
             'entryType.fieldLayout.tabs.elements.field.fieldType',
-            'authors',
-            'categories',
-            'fieldValues.field.fieldType',
-        ])->find($id);
-
-        if (! $entry instanceof EntryModel) {
-            abort(404);
-        }
+        ]);
 
         $allGroups = EntryGroup::ordered()->get();
         $users     = User::orderBy('name')->limit(10)->get();
 
         return $this->view('entries.edit', [
-            'entry'       => $entry,
-            'groups'      => $allGroups,
-            'users'       => $users,
+            'entry'        => $entry,
+            'groups'       => $allGroups,
+            'users'        => $users,
             'field_values' => $entry->fieldArray(),
         ]);
     }
 
     public function update(EditEntryRequest $request, string $id)
     {
-        $entry = EntryModel::with([
-            'entryGroup.statusGroup.statuses',
-            'entryType',
-        ])->find($id);
+        $entry = Entries::findMeta((int) $id);
 
-        if (! $entry instanceof EntryModel) {
+        if (! $entry) {
             abort(404);
         }
+
+        $entry->loadMissing('entryGroup.statusGroup.statuses');
 
         $editor = app(UpdateEntry::class);
         $entry  = $editor->update($entry, $request->validated());
@@ -112,8 +109,9 @@ class Entry extends Controller
 
     public function destroy(DeleteEntryRequest $request, string $id)
     {
-        $entry = EntryModel::find($id);
-        if (! $entry instanceof EntryModel) {
+        $entry = Entries::find((int) $id);
+
+        if (! $entry) {
             abort(404);
         }
 
@@ -127,12 +125,9 @@ class Entry extends Controller
 
     public function confirm(string $id)
     {
-        $entry = EntryModel::with([
-            'entryGroup',
-            'entryType',
-        ])->find($id);
+        $entry = Entries::findMeta((int) $id);
 
-        if (! $entry instanceof EntryModel) {
+        if (! $entry) {
             abort(404);
         }
 
