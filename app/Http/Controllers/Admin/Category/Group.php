@@ -8,7 +8,6 @@ use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\Category\Group\DeleteCategoryGroupRequest;
 use App\Http\Requests\Category\Group\EditCategoryGroupRequest;
 use App\Http\Requests\Category\Group\StoreCategoryGroupRequest;
-use App\Models\Category as CategoryModel;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\Field\Group as FieldGroup;
 
@@ -24,6 +23,16 @@ class Group extends Controller
     }
 
     /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreCategoryGroupRequest $request)
+    {
+        $creator = app(CreateNewCategoryGroup::class);
+        $group = $creator->create($request->validated());
+        return redirect()->route('categories.groups.show', $group->id)->with('status', trans('category.group.created'));
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -33,16 +42,6 @@ class Group extends Controller
             'field_groups' => $field_groups,
         ];
         return $this->view('categories.groups.create', $data);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreCategoryGroupRequest $request)
-    {
-        $creator = app(CreateNewCategoryGroup::class);
-        $group = $creator->create($request->validated());
-        return redirect()->route('categories.groups.show', $group->id)->with('status', trans('category.group.created'));
     }
 
     /**
@@ -67,6 +66,21 @@ class Group extends Controller
     }
 
     /**
+     * Update the specified resource in storage.
+     */
+    public function update(EditCategoryGroupRequest $request, string $id)
+    {
+        $group = CategoryGroup::find($id);
+        if ($group instanceof CategoryGroup) {
+            $editor = app(EditCategoryGroup::class);
+            $editor->edit($group, $request->validated());
+            return redirect()->route('categories.groups')->with('success', trans('category.group.updated'));
+        }
+
+        abort(404);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
@@ -84,21 +98,6 @@ class Group extends Controller
             'field_groups' => $field_groups,
         ];
         return $this->view('categories.groups.edit', $data);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(EditCategoryGroupRequest $request, string $id)
-    {
-        $group = CategoryGroup::find($id);
-        if ($group instanceof CategoryGroup) {
-            $editor = app(EditCategoryGroup::class);
-            $editor->edit($group, $request->validated());
-            return redirect()->route('categories.groups')->with('success', trans('category.group.updated'));
-        }
-
-        abort(404);
     }
 
     /**

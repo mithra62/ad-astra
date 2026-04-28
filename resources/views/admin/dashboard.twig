@@ -161,9 +161,11 @@
                                         <td>{{ log.request_route }}</td>
                                         <td data-order="{{ log.response_status_code }}">
                                             {% if log.response_status_code == 200 %}
-                                                <span class="badge text-bg-success">{{ log.response_status_code }} </span>
+                                                <span
+                                                    class="badge text-bg-success">{{ log.response_status_code }} </span>
                                             {% elseif log.response_status_code == 404 %}
-                                                <span class="badge text-bg-warning">{{ log.response_status_code }}</span>
+                                                <span
+                                                    class="badge text-bg-warning">{{ log.response_status_code }}</span>
                                             {% else %}
                                                 <span class="badge text-bg-danger">{{ log.response_status_code }}</span>
                                             {% endif %}

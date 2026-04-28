@@ -12,7 +12,9 @@ use App\Services\EntryService;
  */
 class CreateEntryTreeNode extends AbstractAction
 {
-    public function __construct(private readonly EntryService $entryService) {}
+    public function __construct(private readonly EntryService $entryService)
+    {
+    }
 
     public function create(Entry $entry, string $handle, ?EntryTree $parent = null, ?string $template = null, bool $isHome = false): EntryTree
     {

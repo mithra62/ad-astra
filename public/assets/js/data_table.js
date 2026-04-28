@@ -52,10 +52,10 @@ $(function () {
                 data: null,
                 defaultContent: ''
             },
-            { data: 'name' },
-            { data: 'position' },
-            { data: 'office' },
-            { data: 'salary' }
+            {data: 'name'},
+            {data: 'position'},
+            {data: 'office'},
+            {data: 'salary'}
         ],
         order: [[1, 'asc']],
         dom: 'Blfrtip',

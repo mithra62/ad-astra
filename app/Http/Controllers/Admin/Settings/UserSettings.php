@@ -21,7 +21,7 @@ class UserSettings extends Controller
      */
     public function show(): View
     {
-        $user       = Auth::user();
+        $user = Auth::user();
         $allDomains = SettingDomain::ordered()->get();
 
         $domainData = $allDomains
@@ -33,9 +33,9 @@ class UserSettings extends Controller
                 }
 
                 return [
-                    'domain'           => $domain,
-                    'fields'           => $overridableFields,
-                    'field_values'     => $this->settings->all($domain->handle, $user),
+                    'domain' => $domain,
+                    'fields' => $overridableFields,
+                    'field_values' => $this->settings->all($domain->handle, $user),
                     'override_handles' => SettingValue::where('domain', $domain->handle)
                         ->where('user_id', $user->id)
                         ->pluck('field_handle')
@@ -46,9 +46,9 @@ class UserSettings extends Controller
             ->values();
 
         return $this->view('settings.user', [
-            'domains'     => $domainData,
+            'domains' => $domainData,
             'all_domains' => $allDomains,
-            'user'        => $user,
+            'user' => $user,
         ]);
     }
 

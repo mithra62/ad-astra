@@ -3,14 +3,28 @@
 namespace App\Http\Requests;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Http\FormRequest As LaravelFormRequest;
+use Illuminate\Foundation\Http\FormRequest as LaravelFormRequest;
 
 class FormRequest extends LaravelFormRequest
 {
+    public function schemaFieldAttributes(?Model $schema): array
+    {
+        $attributes = [];
+        if (!$schema || !$schema->fieldLayout) {
+            return $attributes;
+        }
+
+        foreach ($schema->fieldLayout->fields() as $field) {
+            $attributes["fields.{$field->handle}"] = $field->name;
+        }
+
+        return $attributes;
+    }
+
     protected function schemaFieldRules(?Model $schema): array
     {
         $rules = [];
-        if (! $schema || ! $schema->fieldLayout) {
+        if (!$schema || !$schema->fieldLayout) {
             return $rules;
         }
 
@@ -25,20 +39,6 @@ class FormRequest extends LaravelFormRequest
         }
 
         return $rules;
-    }
-
-    public function schemaFieldAttributes(?Model $schema): array
-    {
-        $attributes = [];
-        if (! $schema || ! $schema->fieldLayout) {
-            return $attributes;
-        }
-
-        foreach ($schema->fieldLayout->fields() as $field) {
-            $attributes["fields.{$field->handle}"] = $field->name;
-        }
-
-        return $attributes;
     }
 
     protected function schemaFieldMessages(?Model $schema): array

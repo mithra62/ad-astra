@@ -7,24 +7,31 @@
                 th:first-child {
                     min-width: 50px;
                 }
+
                 th:nth-child(2) {
                     min-width: 250px;
                 }
+
                 th:nth-child(3) {
                     min-width: 100px;
                 }
+
                 th:nth-child(4) {
                     min-width: 100px;
                 }
+
                 th:nth-child(5) {
                     min-width: 100px;
                 }
+
                 th:nth-child(6) {
                     min-width: 100px;
                 }
+
                 th:nth-child(7) {
                     min-width: 200px;
                 }
+
                 th:nth-child(8) {
                     min-width: 100px;
                 }
@@ -32,4 +39,5 @@
         }
     }
 }
+
 // >>-- 77 Product_list css end --<<

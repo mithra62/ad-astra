@@ -1,6 +1,6 @@
 // >>-- 54 Blog css start --<<
-.blog-card{
-    .card-text{
+.blog-card {
+    .card-text {
         line-break: anywhere;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -8,7 +8,8 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
     }
-    h5{
+
+    h5 {
         line-break: anywhere;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -16,8 +17,9 @@
         -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
     }
-    &:hover{
-        h5{
+
+    &:hover {
+        h5 {
             color: rgba(var(--primary), 1) !important;
         }
     }
@@ -28,7 +30,8 @@
     overflow: hidden;
     position: relative;
     display: block;
-    &:before{
+
+    &:before {
         content: '';
         width: 100%;
         height: 100%;
@@ -39,36 +42,43 @@
         backdrop-filter: blur(2px);
         z-index: 1;
     }
-   //a{
-   //    position: relative;
-   //    z-index: 1;
-   //}
+
+    //a{
+    //    position: relative;
+    //    z-index: 1;
+    //}
     img {
         transition: transform 0.5s ease-out;
     }
+
     &:hover {
-        &:before{
+        &:before {
             backdrop-filter: blur(0px);
         }
+
         img {
             transform: scale(1.1);
         }
     }
 }
+
 .tag-container {
     position: absolute;
     right: 10px;
     top: 10px;
     z-index: 2;
+
     .badge {
-        color: rgba(var(--white),1);
+        color: rgba(var(--white), 1);
         background-color: rgba(var(--dark), 0.8);
     }
 }
+
 .app-carousel {
     .carousel-inner {
         position: relative;
         border-radius: 8px;
+
         .carousel-item {
             &::before {
                 content: "";
@@ -79,6 +89,7 @@
                 z-index: 1;
             }
         }
+
         .carousel-caption {
             z-index: 2;
             text-align: start;
@@ -88,26 +99,30 @@
         }
     }
 }
+
 .bloglink {
     &:hover {
         color: rgba(var(--primary), 1);
     }
 }
+
 .blog-list {
     li {
         color: rgba(var(--secondary), 1);
         padding: 5px 0px;
     }
 }
-.vertical-blog  {
-    a{
-        img{
+
+.vertical-blog {
+    a {
+        img {
             object-fit: cover;
             width: 100%;
             height: 100%;
         }
-    } 
-    .card-text{
+    }
+
+    .card-text {
         line-break: anywhere;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -116,8 +131,9 @@
         -webkit-box-orient: vertical;
     }
 }
-.popular-blog-list{
-    p{
+
+.popular-blog-list {
+    p {
         line-break: anywhere;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -126,4 +142,5 @@
         -webkit-box-orient: vertical;
     }
 }
+
 // >>-- 54 Blog css end --<<

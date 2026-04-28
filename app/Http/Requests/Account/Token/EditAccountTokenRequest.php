@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests\Account\Token;
 
 use App\Http\Requests\FormRequest;
@@ -20,7 +21,7 @@ class EditAccountTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:255',
         ];
     }
 }

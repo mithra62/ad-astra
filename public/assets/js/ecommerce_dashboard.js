@@ -99,7 +99,7 @@ const revenueChartOptions = {
     chart: {
         height: 230,
         fontFamily: '"Rubik", serif',
-        toolbar: { show: false }
+        toolbar: {show: false}
     },
     series: [
         {

@@ -52,71 +52,6 @@ class EntryRepository
         return $entry;
     }
 
-    public function findOrFail(int $id): Entry
-    {
-        return Entry::with($this->defaultEagerLoad())->findOrFail($id);
-    }
-
-    public function find(int $id): ?Entry
-    {
-        return Entry::with($this->defaultEagerLoad())->find($id);
-    }
-
-    public function findByHandle(string $handle, string|int|EntryGroup $group): ?Entry
-    {
-        return Entry::with($this->defaultEagerLoad())
-            ->inGroup($group)
-            ->where('handle', $handle)
-            ->first();
-    }
-
-    public function findOrFailByHandle(string $handle, string|int|EntryGroup $group): Entry
-    {
-        return Entry::with($this->defaultEagerLoad())
-            ->inGroup($group)
-            ->where('handle', $handle)
-            ->firstOrFail();
-    }
-
-    public function applyData(Entry $entry, array $data): Entry
-    {
-        $entryType = $entry->entryType;
-
-        /** @var AbstractEntryType $typeObject */
-        $typeObject = app(EntryTypeRegistry::class)->resolveByRecord($entryType);
-        $data = $typeObject->beforeUpdate($entry, $data);
-
-        $this->applyCoreAttributes($entry, $data);
-
-        if (array_key_exists('status', $data)) {
-            $entry->loadMissing('entryGroup.statusGroup.statuses');
-            $this->applyStatus($entry, $data['status'], applyDefault: false);
-        }
-
-        $entry->save();
-
-        if (array_key_exists('authors', $data)) {
-            $this->syncAuthors($entry, $data['authors']);
-        }
-
-        if (array_key_exists('categories', $data)) {
-            $this->syncCategories($entry, $data['categories']);
-        }
-
-        if (array_key_exists('fields', $data)) {
-            $this->applyFieldValues($entry, $data['fields']);
-        }
-
-        $typeObject->afterUpdate($entry, $data);
-
-        return $entry->refresh();
-    }
-
-    public function delete(Entry $entry): bool
-    {
-        return (bool)$entry->delete();
-    }
-
     private function applyCoreAttributes(Entry $entry, array $data): void
     {
         if (isset($data['title'])) {
@@ -135,7 +70,7 @@ class EntryRepository
         if ($handle) {
             $statusGroup = $entry->entryGroup?->statusGroup;
 
-            if (! $statusGroup) {
+            if (!$statusGroup) {
                 throw new \RuntimeException(
                     "EntryGroup [{$entry->entryGroup?->handle}] has no status group configured."
                 );
@@ -146,14 +81,14 @@ class EntryRepository
                 ->where('handle', $handle)
                 ->first();
 
-            if (! $status) {
+            if (!$status) {
                 throw new InvalidArgumentException(
                     "Status [{$handle}] does not belong to EntryGroup [{$entry->entryGroup?->handle}]."
                 );
             }
 
-            $entry->status_id        = $status->getKey();
-            $entry->status_handle    = $status->handle;
+            $entry->status_id = $status->getKey();
+            $entry->status_handle = $status->handle;
             $entry->status_is_public = $status->is_public;
 
             return;
@@ -177,8 +112,8 @@ class EntryRepository
                 );
             }
 
-            $entry->status_id        = $default->getKey();
-            $entry->status_handle    = $default->handle;
+            $entry->status_id = $default->getKey();
+            $entry->status_handle = $default->handle;
             $entry->status_is_public = $default->is_public;
         }
     }
@@ -229,28 +164,19 @@ class EntryRepository
         }
     }
 
-    private function upsertFieldValue(
-        int    $fieldId,
-        int    $fieldableId,
-        string $fieldableType,
-        string $column,
-        mixed  $value,
-    ): void
+    public function resolveLayoutFields(Entry $entry): Collection
     {
-        $key = ['field_id' => $fieldId, 'fieldable_id' => $fieldableId, 'fieldable_type' => $fieldableType];
+        $entry->loadMissing([
+            'entryGroup.fieldLayout.tabs.elements.field.fieldType',
+            'entryType.fieldLayout.tabs.elements.field.fieldType',
+        ]);
 
-        try {
-            FieldValue::updateOrCreate($key, [$column => $value]);
-        } catch (QueryException $e) {
-            // SQLSTATE 23000 = unique constraint violation: two concurrent requests
-            // both saw no existing row and raced to INSERT. Retry once — the second
-            // attempt will find the row the other request committed and UPDATE it.
-            if ($e->getCode() !== '23000') {
-                throw $e;
-            }
+        $groupFields = $entry->entryGroup->fieldLayout?->fields() ?? collect();
+        $typeFields = $entry->entryType->fieldLayout?->fields() ?? collect();
 
-            FieldValue::updateOrCreate($key, [$column => $value]);
-        }
+        // Type-level fields take precedence: start with type fields, then backfill
+        // group fields that don't share an ID with any type-level field.
+        return $typeFields->merge($groupFields)->unique('id');
     }
 
     private function syncRelationshipField(Entry $entry, Field $field, array $relatedIds): void
@@ -279,41 +205,41 @@ class EntryRepository
         }
     }
 
-    /**
-     * Persist a single field value on an entry.
-     *
-     * Routes to scalar (FieldValue) or relational (EntryRelationship) storage
-     * automatically based on the field type. Silently skips the handle if it
-     * is not present in the entry's resolved layout.
-     */
-    public function setFieldValue(Entry $entry, string $handle, mixed $value): void
+    public function delete(Entry $entry): bool
     {
-        $this->applyFieldValues($entry, [$handle => $value]);
+        return (bool)$entry->delete();
     }
 
-    public function resolveLayoutFields(Entry $entry): Collection
+    private function upsertFieldValue(
+        int    $fieldId,
+        int    $fieldableId,
+        string $fieldableType,
+        string $column,
+        mixed  $value,
+    ): void
     {
-        $entry->loadMissing([
-            'entryGroup.fieldLayout.tabs.elements.field.fieldType',
-            'entryType.fieldLayout.tabs.elements.field.fieldType',
-        ]);
+        $key = ['field_id' => $fieldId, 'fieldable_id' => $fieldableId, 'fieldable_type' => $fieldableType];
 
-        $groupFields = $entry->entryGroup->fieldLayout?->fields() ?? collect();
-        $typeFields = $entry->entryType->fieldLayout?->fields() ?? collect();
+        try {
+            FieldValue::updateOrCreate($key, [$column => $value]);
+        } catch (QueryException $e) {
+            // SQLSTATE 23000 = unique constraint violation: two concurrent requests
+            // both saw no existing row and raced to INSERT. Retry once — the second
+            // attempt will find the row the other request committed and UPDATE it.
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
 
-        // Type-level fields take precedence: start with type fields, then backfill
-        // group fields that don't share an ID with any type-level field.
-        return $typeFields->merge($groupFields)->unique('id');
+            FieldValue::updateOrCreate($key, [$column => $value]);
+        }
     }
 
-    public function findMeta(int $id): ?Entry
+    public function findByHandle(string $handle, string|int|EntryGroup $group): ?Entry
     {
-        return Entry::with($this->metaEagerLoad())->find($id);
-    }
-
-    public function findMetaOrFail(int $id): Entry
-    {
-        return Entry::with($this->metaEagerLoad())->findOrFail($id);
+        return Entry::with($this->defaultEagerLoad())
+            ->inGroup($group)
+            ->where('handle', $handle)
+            ->first();
     }
 
     private function defaultEagerLoad(): array
@@ -330,8 +256,82 @@ class EntryRepository
         ];
     }
 
+    public function findOrFailByHandle(string $handle, string|int|EntryGroup $group): Entry
+    {
+        return Entry::with($this->defaultEagerLoad())
+            ->inGroup($group)
+            ->where('handle', $handle)
+            ->firstOrFail();
+    }
+
+    public function applyData(Entry $entry, array $data): Entry
+    {
+        $entryType = $entry->entryType;
+
+        /** @var AbstractEntryType $typeObject */
+        $typeObject = app(EntryTypeRegistry::class)->resolveByRecord($entryType);
+        $data = $typeObject->beforeUpdate($entry, $data);
+
+        $this->applyCoreAttributes($entry, $data);
+
+        if (array_key_exists('status', $data)) {
+            $entry->loadMissing('entryGroup.statusGroup.statuses');
+            $this->applyStatus($entry, $data['status'], applyDefault: false);
+        }
+
+        $entry->save();
+
+        if (array_key_exists('authors', $data)) {
+            $this->syncAuthors($entry, $data['authors']);
+        }
+
+        if (array_key_exists('categories', $data)) {
+            $this->syncCategories($entry, $data['categories']);
+        }
+
+        if (array_key_exists('fields', $data)) {
+            $this->applyFieldValues($entry, $data['fields']);
+        }
+
+        $typeObject->afterUpdate($entry, $data);
+
+        return $entry->refresh();
+    }
+
+    /**
+     * Persist a single field value on an entry.
+     *
+     * Routes to scalar (FieldValue) or relational (EntryRelationship) storage
+     * automatically based on the field type. Silently skips the handle if it
+     * is not present in the entry's resolved layout.
+     */
+    public function setFieldValue(Entry $entry, string $handle, mixed $value): void
+    {
+        $this->applyFieldValues($entry, [$handle => $value]);
+    }
+
+    public function findMeta(int $id): ?Entry
+    {
+        return Entry::with($this->metaEagerLoad())->find($id);
+    }
+
+    public function find(int $id): ?Entry
+    {
+        return Entry::with($this->defaultEagerLoad())->find($id);
+    }
+
     private function metaEagerLoad(): array
     {
         return ['entryGroup', 'entryType', 'creator'];
+    }
+
+    public function findMetaOrFail(int $id): Entry
+    {
+        return Entry::with($this->metaEagerLoad())->findOrFail($id);
+    }
+
+    public function findOrFail(int $id): Entry
+    {
+        return Entry::with($this->defaultEagerLoad())->findOrFail($id);
     }
 }

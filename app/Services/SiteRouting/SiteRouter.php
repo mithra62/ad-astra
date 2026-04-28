@@ -10,6 +10,13 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SiteRouter
 {
+    public function render(?string $uri): View
+    {
+        $result = $this->resolve($uri);
+
+        return view($result->template, $result->data);
+    }
+
     public function resolve(?string $uri): RouteResult
     {
         foreach ($this->drivers() as $driver) {
@@ -21,13 +28,6 @@ class SiteRouter
         }
 
         throw new NotFoundHttpException();
-    }
-
-    public function render(?string $uri): View
-    {
-        $result = $this->resolve($uri);
-
-        return view($result->template, $result->data);
     }
 
     protected function drivers(): array

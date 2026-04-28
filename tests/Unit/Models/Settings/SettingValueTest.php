@@ -154,9 +154,9 @@ class SettingValueTest extends TestCase
         $userA = User::factory()->create();
         $userB = User::factory()->create();
 
-        SettingValue::create(['domain' => 'general', 'field_handle' => 'timezone', 'user_id' => null,        'value_text' => 'UTC']);
-        SettingValue::create(['domain' => 'general', 'field_handle' => 'timezone', 'user_id' => $userA->id,  'value_text' => 'America/New_York']);
-        SettingValue::create(['domain' => 'general', 'field_handle' => 'timezone', 'user_id' => $userB->id,  'value_text' => 'Europe/London']);
+        SettingValue::create(['domain' => 'general', 'field_handle' => 'timezone', 'user_id' => null, 'value_text' => 'UTC']);
+        SettingValue::create(['domain' => 'general', 'field_handle' => 'timezone', 'user_id' => $userA->id, 'value_text' => 'America/New_York']);
+        SettingValue::create(['domain' => 'general', 'field_handle' => 'timezone', 'user_id' => $userB->id, 'value_text' => 'Europe/London']);
 
         $this->assertDatabaseCount('setting_values', 3);
     }

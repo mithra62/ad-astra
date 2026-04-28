@@ -7,8 +7,9 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="Multipurpose, super flexible, powerful, clean modern responsive bootstrap 5 admin template"
           name="description">
-    <meta content="admin template, ki-admin admin template, dashboard template, flat admin template, responsive admin template, web app"
-          name="keywords">
+    <meta
+        content="admin template, ki-admin admin template, dashboard template, flat admin template, responsive admin template, web app"
+        name="keywords">
     <meta content="la-themes" name="author">
     <link href="/assets/images/logo/favicon.png" rel="icon" type="image/x-icon">
     <link href="/assets/images/logo/favicon.png" rel="shortcut icon" type="image/x-icon">

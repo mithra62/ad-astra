@@ -24,48 +24,6 @@ class EntryRepositoryTest extends TestCase
 
     private EntryRepository $repo;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->repo = new EntryRepository;
-    }
-
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
-
-    private function makeEntryGroup(?StatusGroup $statusGroup = null): EntryGroup
-    {
-        return EntryGroup::factory()->create([
-            'status_group_id' => $statusGroup?->id,
-        ]);
-    }
-
-    private function makeEntryType(EntryGroup $group): EntryType
-    {
-        return EntryType::factory()->create([
-            'entry_group_id' => $group->id,
-            'class' => 'App\\EntryTypes\\BlogPostEntryType',
-        ]);
-    }
-
-    private function makeStatusGroup(): StatusGroup
-    {
-        $statusGroup = StatusGroup::factory()->create();
-        Status::factory()->default()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft']);
-
-        return $statusGroup;
-    }
-
-    private function makeAbstractEntryType(EntryType $record): AbstractEntryType
-    {
-        return new class($record) extends AbstractEntryType {};
-    }
-
-    // -----------------------------------------------------------------------
-    // create()
-    // -----------------------------------------------------------------------
-
     public function test_create_persists_entry_and_returns_instance(): void
     {
         $statusGroup = $this->makeStatusGroup();
@@ -82,6 +40,43 @@ class EntryRepositoryTest extends TestCase
         $this->assertTrue($entry->exists);
         $this->assertDatabaseHas('entries', ['id' => $entry->id, 'title' => 'Hello World']);
     }
+
+    // -----------------------------------------------------------------------
+    // Helpers
+    // -----------------------------------------------------------------------
+
+    private function makeStatusGroup(): StatusGroup
+    {
+        $statusGroup = StatusGroup::factory()->create();
+        Status::factory()->default()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft']);
+
+        return $statusGroup;
+    }
+
+    private function makeEntryGroup(?StatusGroup $statusGroup = null): EntryGroup
+    {
+        return EntryGroup::factory()->create([
+            'status_group_id' => $statusGroup?->id,
+        ]);
+    }
+
+    private function makeEntryType(EntryGroup $group): EntryType
+    {
+        return EntryType::factory()->create([
+            'entry_group_id' => $group->id,
+            'class' => 'App\\EntryTypes\\BlogPostEntryType',
+        ]);
+    }
+
+    private function makeAbstractEntryType(EntryType $record): AbstractEntryType
+    {
+        return new class($record) extends AbstractEntryType {
+        };
+    }
+
+    // -----------------------------------------------------------------------
+    // create()
+    // -----------------------------------------------------------------------
 
     public function test_create_sets_created_by_user_id_from_auth(): void
     {
@@ -232,10 +227,6 @@ class EntryRepositoryTest extends TestCase
         ]);
     }
 
-    // -----------------------------------------------------------------------
-    // find() / findOrFail() / findByHandle() / findOrFailByHandle()
-    // -----------------------------------------------------------------------
-
     public function test_find_returns_entry_when_it_exists(): void
     {
         $entry = Entry::factory()->create();
@@ -245,6 +236,10 @@ class EntryRepositoryTest extends TestCase
         $this->assertNotNull($result);
         $this->assertEquals($entry->id, $result->id);
     }
+
+    // -----------------------------------------------------------------------
+    // find() / findOrFail() / findByHandle() / findOrFailByHandle()
+    // -----------------------------------------------------------------------
 
     public function test_find_returns_null_when_entry_does_not_exist(): void
     {
@@ -294,10 +289,6 @@ class EntryRepositoryTest extends TestCase
         $this->repo->findOrFailByHandle('nonexistent', $group);
     }
 
-    // -----------------------------------------------------------------------
-    // applyData()
-    // -----------------------------------------------------------------------
-
     public function test_apply_data_updates_title(): void
     {
         $statusGroup = $this->makeStatusGroup();
@@ -314,6 +305,10 @@ class EntryRepositoryTest extends TestCase
         $this->assertEquals('New Title', $updated->title);
         $this->assertDatabaseHas('entries', ['id' => $entry->id, 'title' => 'New Title']);
     }
+
+    // -----------------------------------------------------------------------
+    // applyData()
+    // -----------------------------------------------------------------------
 
     public function test_apply_data_updates_published_at(): void
     {
@@ -416,10 +411,6 @@ class EntryRepositoryTest extends TestCase
         ]);
     }
 
-    // -----------------------------------------------------------------------
-    // delete()
-    // -----------------------------------------------------------------------
-
     public function test_delete_removes_entry_from_database(): void
     {
         $entry = Entry::factory()->create();
@@ -431,7 +422,7 @@ class EntryRepositoryTest extends TestCase
     }
 
     // -----------------------------------------------------------------------
-    // findMeta() / findMetaOrFail()
+    // delete()
     // -----------------------------------------------------------------------
 
     public function test_find_meta_returns_entry_when_it_exists(): void
@@ -443,6 +434,10 @@ class EntryRepositoryTest extends TestCase
         $this->assertNotNull($result);
         $this->assertEquals($entry->id, $result->id);
     }
+
+    // -----------------------------------------------------------------------
+    // findMeta() / findMetaOrFail()
+    // -----------------------------------------------------------------------
 
     public function test_find_meta_returns_null_when_entry_does_not_exist(): void
     {
@@ -456,10 +451,6 @@ class EntryRepositoryTest extends TestCase
         $this->repo->findMetaOrFail(999999);
     }
 
-    // -----------------------------------------------------------------------
-    // resolveLayoutFields()
-    // -----------------------------------------------------------------------
-
     public function test_resolve_layout_fields_returns_empty_when_no_layouts(): void
     {
         $group = EntryGroup::factory()->create(['field_layout_id' => null]);
@@ -472,7 +463,7 @@ class EntryRepositoryTest extends TestCase
     }
 
     // -----------------------------------------------------------------------
-    // Relationship field (syncRelationshipField via applyData)
+    // resolveLayoutFields()
     // -----------------------------------------------------------------------
 
     public function test_apply_data_filters_self_reference_from_relationship_field(): void
@@ -500,5 +491,15 @@ class EntryRepositoryTest extends TestCase
             'entry_id' => $entry->id,
             'related_entry_id' => $other->id,
         ]);
+    }
+
+    // -----------------------------------------------------------------------
+    // Relationship field (syncRelationshipField via applyData)
+    // -----------------------------------------------------------------------
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->repo = new EntryRepository;
     }
 }

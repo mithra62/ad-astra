@@ -35,7 +35,8 @@
                             </div>
                             <div class="col-6">
                                 <p class="float-right text-end">
-                                    <a href="{{ route('categories.groups.create') }}" class="btn btn-primary">Add Category Group</a>
+                                    <a href="{{ route('categories.groups.create') }}" class="btn btn-primary">Add
+                                        Category Group</a>
                                 </p>
                             </div>
                         </div>
@@ -54,40 +55,41 @@
                                 </thead>
                                 <tbody>
                                 {% if groups.count >= 1 %}
-                                {% for group in groups %}
-                                    <tr>
-                                        <td>{{ group.name }}</td>
-                                        <td class="f-w-500">
-                                            {{ group.categories.count() }}
-                                        </td>
-                                        <td class="text-secondary f-w-600">
-                                            {{ group.updated_at.format('F j, Y') }}
-                                        </td>
-                                        <td>
-                                            {{ group.created_at.format('F j, Y') }}
-                                        </td>
-                                        <td>
-                                            <a class="btn btn-primary icon-btn b-r-4"
-                                               href="{{ route('categories.groups.show', group) }}">
-                                                <i class="ti ti-eye"></i>
-                                            </a>
-                                            <a class="btn btn-success icon-btn b-r-4"
-                                               href="{{ route('categories.groups.edit', group) }}">
-                                                <i class="ti ti-edit"></i>
-                                            </a>
-                                            <a class="btn btn-danger icon-btn b-r-4"
-                                               href="{{ route('categories.groups.confirm', group) }}">
-                                                <i class="ti ti-trash"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+                                    {% for group in groups %}
+                                        <tr>
+                                            <td>{{ group.name }}</td>
+                                            <td class="f-w-500">
+                                                {{ group.categories.count() }}
+                                            </td>
+                                            <td class="text-secondary f-w-600">
+                                                {{ group.updated_at.format('F j, Y') }}
+                                            </td>
+                                            <td>
+                                                {{ group.created_at.format('F j, Y') }}
+                                            </td>
+                                            <td>
+                                                <a class="btn btn-primary icon-btn b-r-4"
+                                                   href="{{ route('categories.groups.show', group) }}">
+                                                    <i class="ti ti-eye"></i>
+                                                </a>
+                                                <a class="btn btn-success icon-btn b-r-4"
+                                                   href="{{ route('categories.groups.edit', group) }}">
+                                                    <i class="ti ti-edit"></i>
+                                                </a>
+                                                <a class="btn btn-danger icon-btn b-r-4"
+                                                   href="{{ route('categories.groups.confirm', group) }}">
+                                                    <i class="ti ti-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
                                 {% else %}
                                     <tr>
                                         <td colspan="6">
                                             <p class="text-center">
-                                                No Category Groups Created. <br />
-                                                <a href="{{ route('categories.groups.create') }}" class="btn btn-outline-primary">Create Category Group</a>
+                                                No Category Groups Created. <br/>
+                                                <a href="{{ route('categories.groups.create') }}"
+                                                   class="btn btn-outline-primary">Create Category Group</a>
                                             </p>
                                         </td>
                                     </tr>

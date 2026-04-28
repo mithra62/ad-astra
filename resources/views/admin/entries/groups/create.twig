@@ -31,101 +31,114 @@
                     <h5>Create Entry Group</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('entries.groups.store') }}" class="row g-3 needs-validation" novalidate>
+                    <form method="POST" action="{{ route('entries.groups.store') }}" class="row g-3 needs-validation"
+                          novalidate>
                         {{ csrf_field() }}
 
                         <!-- Details -->
                         <div class="col-12"><h5 class="border-bottom pb-2">Details</h5></div>
                         <div class="col-md-12">
                             <label class="form-label" for="name">Name</label>
-                            <input class="form-control" id="name" required type="text" value="{{ old('name') }}" name="name">
+                            <input class="form-control" id="name" required type="text" value="{{ old('name') }}"
+                                   name="name">
                             {% if errors.has('name') %}<p class="text-danger">{{ errors.first('name') }}</p>{% endif %}
                         </div>
                         <div class="col-md-8">
                             <label class="form-label" for="handle">Handle</label>
-                            <input class="form-control" id="handle" required type="text" value="{{ old('handle') }}" name="handle">
-                            {% if errors.has('handle') %}<p class="text-danger">{{ errors.first('handle') }}</p>{% endif %}
+                            <input class="form-control" id="handle" required type="text" value="{{ old('handle') }}"
+                                   name="handle">
+                            {% if errors.has('handle') %}<p
+                                class="text-danger">{{ errors.first('handle') }}</p>{% endif %}
                         </div>
                         <div class="col-md-4">
                             <label class="form-label" for="sort_order">Sort Order</label>
-                            <input class="form-control" id="sort_order" type="number" value="{{ old('sort_order', 0) }}" name="sort_order" min="0">
+                            <input class="form-control" id="sort_order" type="number" value="{{ old('sort_order', 0) }}"
+                                   name="sort_order" min="0">
                         </div>
                         <div class="col-md-12">
                             <label class="form-label" for="description">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="3">{{ old('description') }}</textarea>
+                            <textarea class="form-control" id="description" name="description"
+                                      rows="3">{{ old('description') }}</textarea>
                         </div>
 
                         <!-- Status Group -->
                         <div class="col-12"><h5 class="border-bottom pb-2">Status Group</h5></div>
                         <div class="col-md-12">
                             <label class="form-label" for="status_group_id">Status Group</label>
-                            <small class="text-secondary d-block mb-1">The status group determines which statuses are available on entries in this group.</small>
+                            <small class="text-secondary d-block mb-1">The status group determines which statuses are
+                                available on entries in this group.</small>
                             <select class="form-select" id="status_group_id" name="status_group_id">
                                 <option value="">— None —</option>
                                 {% for sg in status_groups %}
-                                    <option value="{{ sg.id }}" {% if old('status_group_id') == sg.id %}selected{% endif %}>
+                                    <option value="{{ sg.id }}"
+                                            {% if old('status_group_id') == sg.id %}selected{% endif %}>
                                         {{ sg.name }}
                                     </option>
                                 {% endfor %}
                             </select>
-                            {% if errors.has('status_group_id') %}<p class="text-danger">{{ errors.first('status_group_id') }}</p>{% endif %}
+                            {% if errors.has('status_group_id') %}<p
+                                class="text-danger">{{ errors.first('status_group_id') }}</p>{% endif %}
                         </div>
 
                         <!-- Field Layout -->
                         <div class="col-12"><h5 class="border-bottom pb-2">Shared Field Layout</h5></div>
                         <div class="col-md-12">
                             <label class="form-label" for="field_layout_id">Field Layout</label>
-                            <small class="text-secondary d-block mb-1">Fields from this layout are shared across all entry types in this group.</small>
+                            <small class="text-secondary d-block mb-1">Fields from this layout are shared across all
+                                entry types in this group.</small>
                             <select class="form-select" id="field_layout_id" name="field_layout_id">
                                 <option value="">— None —</option>
                                 {% for layout in field_layouts %}
-                                    <option value="{{ layout.id }}" {% if old('field_layout_id') == layout.id %}selected{% endif %}>
+                                    <option value="{{ layout.id }}"
+                                            {% if old('field_layout_id') == layout.id %}selected{% endif %}>
                                         {{ layout.name }}
                                     </option>
                                 {% endfor %}
                             </select>
-                            {% if errors.has('field_layout_id') %}<p class="text-danger">{{ errors.first('field_layout_id') }}</p>{% endif %}
+                            {% if errors.has('field_layout_id') %}<p
+                                class="text-danger">{{ errors.first('field_layout_id') }}</p>{% endif %}
                         </div>
 
                         <!-- Category Groups -->
                         {% if category_groups.count >= 1 %}
-                        <div class="col-12"><h5 class="border-bottom pb-2">Category Groups</h5></div>
-                        <div class="col-md-12">
-                            <small class="text-secondary d-block mb-2">Entries in this group can be assigned to categories from the selected category groups.</small>
-                            {% for cg in category_groups %}
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox"
-                                           name="category_groups[]" value="{{ cg.id }}"
-                                           id="cg_{{ cg.id }}"
-                                        {% if old('category_groups') %}
+                            <div class="col-12"><h5 class="border-bottom pb-2">Category Groups</h5></div>
+                            <div class="col-md-12">
+                                <small class="text-secondary d-block mb-2">Entries in this group can be assigned to
+                                    categories from the selected category groups.</small>
+                                {% for cg in category_groups %}
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="category_groups[]" value="{{ cg.id }}"
+                                               id="cg_{{ cg.id }}"
+                                            {% if old('category_groups') %}
                                             {% for key, val in old('category_groups') %}
                                                 {% if old('category_groups.' ~ key) == cg.id %}checked{% endif %}
                                             {% endfor %}
-                                        {% endif %}>
-                                    <label class="form-check-label" for="cg_{{ cg.id }}">{{ cg.name }}</label>
-                                </div>
-                            {% endfor %}
-                        </div>
+                                            {% endif %}>
+                                        <label class="form-check-label" for="cg_{{ cg.id }}">{{ cg.name }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         {% endif %}
 
                         <!-- Field Groups -->
                         {% if field_groups.count >= 1 %}
-                        <div class="col-12"><h5 class="border-bottom pb-2">Field Groups</h5></div>
-                        <div class="col-md-12">
-                            {% for fg in field_groups %}
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox"
-                                           name="field_groups[]" value="{{ fg.id }}"
-                                           id="fg_{{ fg.id }}"
-                                        {% if old('field_groups') %}
+                            <div class="col-12"><h5 class="border-bottom pb-2">Field Groups</h5></div>
+                            <div class="col-md-12">
+                                {% for fg in field_groups %}
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="field_groups[]" value="{{ fg.id }}"
+                                               id="fg_{{ fg.id }}"
+                                            {% if old('field_groups') %}
                                             {% for key, val in old('field_groups') %}
                                                 {% if old('field_groups.' ~ key) == fg.id %}checked{% endif %}
                                             {% endfor %}
-                                        {% endif %}>
-                                    <label class="form-check-label" for="fg_{{ fg.id }}">{{ fg.name }}</label>
-                                </div>
-                            {% endfor %}
-                        </div>
+                                            {% endif %}>
+                                        <label class="form-check-label" for="fg_{{ fg.id }}">{{ fg.name }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         {% endif %}
 
                         <div class="col-12">

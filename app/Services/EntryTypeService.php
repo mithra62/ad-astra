@@ -28,13 +28,13 @@ class EntryTypeService extends AbstractService
         $groupId = $group instanceof EntryGroup ? $group->getKey() : $group;
 
         return EntryType::create([
-            'entry_group_id'  => $groupId,
-            'name'            => $data['name'],
-            'handle'          => $data['handle'],
-            'class'           => $data['class'],
-            'sort_order'      => $data['sort_order'] ?? 0,
+            'entry_group_id' => $groupId,
+            'name' => $data['name'],
+            'handle' => $data['handle'],
+            'class' => $data['class'],
+            'sort_order' => $data['sort_order'] ?? 0,
             'field_layout_id' => $data['field_layout_id'] ?? null,
-            'has_entry_tree'  => $data['has_entry_tree'] ?? false,
+            'has_entry_tree' => $data['has_entry_tree'] ?? false,
             'default_template' => $data['default_template'] ?? null,
         ]);
     }
@@ -45,12 +45,12 @@ class EntryTypeService extends AbstractService
     public function update(EntryType $type, array $data): EntryType
     {
         $type->update([
-            'name'            => $data['name'],
-            'handle'          => $data['handle'],
-            'class'           => $data['class'],
-            'sort_order'      => $data['sort_order'] ?? 0,
+            'name' => $data['name'],
+            'handle' => $data['handle'],
+            'class' => $data['class'],
+            'sort_order' => $data['sort_order'] ?? 0,
             'field_layout_id' => $data['field_layout_id'] ?? null,
-            'has_entry_tree'  => $data['has_entry_tree'] ?? false,
+            'has_entry_tree' => $data['has_entry_tree'] ?? false,
             'default_template' => $data['default_template'] ?? null,
         ]);
 
@@ -62,7 +62,7 @@ class EntryTypeService extends AbstractService
      */
     public function delete(EntryType $type): bool
     {
-        return (bool) $type->delete();
+        return (bool)$type->delete();
     }
 
     /**

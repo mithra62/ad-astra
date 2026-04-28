@@ -15,12 +15,6 @@ class CategoryRepositoryTest extends TestCase
 
     private CategoryRepository $repo;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->repo = new CategoryRepository;
-    }
-
     public function test_create_persists_category_in_database(): void
     {
         $group = Group::factory()->create();
@@ -184,5 +178,11 @@ class CategoryRepositoryTest extends TestCase
         $fields = $this->repo->resolveLayoutFields($category);
 
         $this->assertCount(0, $fields);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->repo = new CategoryRepository;
     }
 }

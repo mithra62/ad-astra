@@ -22,7 +22,8 @@
                                href="{{ route('categories.groups.show', category.group) }}">{{ category.group.name }}</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('categories.confirm', category) }}">Delete Category</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('categories.confirm', category) }}">Delete
+                                Category</a>
                         </li>
                     </ul>
                 </div>
@@ -51,23 +52,24 @@
                                 </p>
                                 <table class="table table-sm mt-3 mb-0">
                                     <tbody>
-                                        <tr>
-                                            <th class="text-secondary" style="width: 30%">Name</th>
-                                            <td>{{ category.name }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-secondary">Slug</th>
-                                            <td>{{ category.handle }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-secondary">Group</th>
-                                            <td>{{ category.group.name }}</td>
-                                        </tr>
+                                    <tr>
+                                        <th class="text-secondary" style="width: 30%">Name</th>
+                                        <td>{{ category.name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-secondary">Slug</th>
+                                        <td>{{ category.handle }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-secondary">Group</th>
+                                        <td>{{ category.group.name }}</td>
+                                    </tr>
                                     </tbody>
                                 </table>
                             </div>
                             <div class="card-footer">
-                                <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                <div
+                                    class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
                                     <input class="toggle switch-border-primary" name="confirm_removal"
                                            id="confirm_removal" type="checkbox">
                                     <label for="confirm_removal">Confirm Removal</label>

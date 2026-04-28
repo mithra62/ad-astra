@@ -6,7 +6,6 @@ use App\Actions\Category\Group\CreateNewCategoryGroup;
 use App\Actions\Category\Group\EditCategoryGroup;
 use App\Models\Category\Group;
 use App\Models\Field\Group as FieldGroup;
-use App\Models\FieldLayout;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -34,7 +33,7 @@ class CategoryGroupActionsTest extends TestCase
         $action->create(['name' => 'Blog Tags', 'handle' => 'blog-tags', 'sort_order' => 0]);
 
         $this->assertDatabaseHas('category_groups', [
-            'name'   => 'Blog Tags',
+            'name' => 'Blog Tags',
             'handle' => 'blog-tags',
         ]);
     }
@@ -47,7 +46,7 @@ class CategoryGroupActionsTest extends TestCase
 
         $this->assertNotNull($group->field_layout_id);
         $this->assertDatabaseHas('field_layouts', [
-            'id'   => $group->field_layout_id,
+            'id' => $group->field_layout_id,
             'name' => 'Topics Layout cat',
         ]);
     }
@@ -77,7 +76,7 @@ class CategoryGroupActionsTest extends TestCase
 
     public function test_edit_returns_true_on_success(): void
     {
-        $group  = Group::factory()->create(['name' => 'Old Name']);
+        $group = Group::factory()->create(['name' => 'Old Name']);
         $action = app(EditCategoryGroup::class);
 
         $result = $action->edit($group, ['name' => 'New Name', 'handle' => 'new-name']);
@@ -87,24 +86,24 @@ class CategoryGroupActionsTest extends TestCase
 
     public function test_edit_updates_group_name_and_handle(): void
     {
-        $group  = Group::factory()->create(['name' => 'Old Name', 'handle' => 'old-name']);
+        $group = Group::factory()->create(['name' => 'Old Name', 'handle' => 'old-name']);
         $action = app(EditCategoryGroup::class);
 
         $action->edit($group, ['name' => 'Updated Name', 'handle' => 'updated-name']);
 
         $this->assertDatabaseHas('category_groups', [
-            'id'     => $group->id,
-            'name'   => 'Updated Name',
+            'id' => $group->id,
+            'name' => 'Updated Name',
             'handle' => 'updated-name',
         ]);
     }
 
     public function test_edit_syncs_field_groups(): void
     {
-        $group       = Group::factory()->create();
+        $group = Group::factory()->create();
         $fieldGroup1 = FieldGroup::factory()->create();
         $fieldGroup2 = FieldGroup::factory()->create();
-        $action      = app(EditCategoryGroup::class);
+        $action = app(EditCategoryGroup::class);
 
         // Attach first field group
         $action->edit($group, ['name' => $group->name, 'handle' => $group->handle, 'field_groups' => [$fieldGroup1->id]]);
@@ -118,7 +117,7 @@ class CategoryGroupActionsTest extends TestCase
 
     public function test_edit_detaches_all_field_groups_when_none_provided(): void
     {
-        $group      = Group::factory()->create();
+        $group = Group::factory()->create();
         $fieldGroup = FieldGroup::factory()->create();
         $group->fieldGroups()->attach($fieldGroup->id);
         $action = app(EditCategoryGroup::class);

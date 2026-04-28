@@ -5,7 +5,6 @@ namespace App\Http\Requests\Status;
 use App\Http\Requests\FormRequest;
 use App\Rules\Status\UniqueHandleByGroup;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class StoreStatusRequest extends FormRequest
 {

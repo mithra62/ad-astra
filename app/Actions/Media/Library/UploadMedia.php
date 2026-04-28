@@ -17,7 +17,7 @@ class UploadMedia extends AbstractAction
         $media->name = $request->input('name');
 
         $media->categories()->detach();
-        if (! empty($request->input('categories'))) {
+        if (!empty($request->input('categories'))) {
             foreach ($request->input('categories') as $cat_group) {
                 $media->categories()->attach($cat_group);
             }

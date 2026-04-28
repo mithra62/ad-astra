@@ -10,7 +10,9 @@ use App\Services\EntryService;
  */
 class MoveEntryTreeNode
 {
-    public function __construct(private readonly EntryService $entryService) {}
+    public function __construct(private readonly EntryService $entryService)
+    {
+    }
 
     public function handle(EntryTree $node, ?EntryTree $newParent, int $sortOrder = 0): EntryTree
     {

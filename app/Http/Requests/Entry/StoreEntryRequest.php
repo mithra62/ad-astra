@@ -5,8 +5,8 @@ namespace App\Http\Requests\Entry;
 use App\Http\Requests\FormRequest;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreEntryRequest extends FormRequest
 {
@@ -21,7 +21,7 @@ class StoreEntryRequest extends FormRequest
             ->with('statusGroup')
             ->findOrFail($this->route()->parameter('group_id'));
         $groupSchema = EntryGroup::resolvedFields($group->id);
-        $typeSchema  = $this->resolveEntryTypeSchema($group->id);
+        $typeSchema = $this->resolveEntryTypeSchema($group->id);
 
         return array_merge(
             [
@@ -33,7 +33,7 @@ class StoreEntryRequest extends FormRequest
                     'string',
                     'max:100',
                     Rule::exists('statuses', 'handle')->where(
-                        fn ($query) => $query->where('status_group_id', $group->status_group_id)
+                        fn($query) => $query->where('status_group_id', $group->status_group_id)
                     ),
                 ],
                 'published_at' => ['nullable', 'date'],
@@ -48,10 +48,24 @@ class StoreEntryRequest extends FormRequest
         );
     }
 
+    private function resolveEntryTypeSchema(int $groupId): ?EntryType
+    {
+        $handle = $this->input('type_handle');
+        if (!$handle) {
+            return null;
+        }
+
+        return EntryType::query()
+            ->with('fieldLayout.tabs.elements.field')
+            ->where('handle', $handle)
+            ->where('entry_group_id', $groupId)
+            ->first();
+    }
+
     public function messages(): array
     {
         $groupSchema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
-        $typeSchema  = $this->resolveEntryTypeSchema($this->route()->parameter('group_id'));
+        $typeSchema = $this->resolveEntryTypeSchema($this->route()->parameter('group_id'));
 
         return array_merge(
             $this->schemaFieldMessages($groupSchema),
@@ -62,25 +76,11 @@ class StoreEntryRequest extends FormRequest
     public function attributes(): array
     {
         $groupSchema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
-        $typeSchema  = $this->resolveEntryTypeSchema($this->route()->parameter('group_id'));
+        $typeSchema = $this->resolveEntryTypeSchema($this->route()->parameter('group_id'));
 
         return array_merge(
             $this->schemaFieldAttributes($groupSchema),
             $this->schemaFieldAttributes($typeSchema)
         );
-    }
-
-    private function resolveEntryTypeSchema(int $groupId): ?EntryType
-    {
-        $handle = $this->input('type_handle');
-        if (! $handle) {
-            return null;
-        }
-
-        return EntryType::query()
-            ->with('fieldLayout.tabs.elements.field')
-            ->where('handle', $handle)
-            ->where('entry_group_id', $groupId)
-            ->first();
     }
 }

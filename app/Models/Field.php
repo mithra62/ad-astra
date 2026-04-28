@@ -26,7 +26,7 @@ class Field extends Model
 
     protected $casts = [
         'settings' => 'array',
-        'hidden'   => 'boolean',
+        'hidden' => 'boolean',
     ];
 
     // fieldType is needed on virtually every Field access; always load it.

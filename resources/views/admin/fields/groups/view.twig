@@ -37,7 +37,8 @@
                                 <h5>Fields</h5>
                                 <div class="col-12">
                                     <p class="float-right text-end">
-                                        <a href="{{ route('fields.create', {group_id: group.id}) }}" class="btn btn-primary">Create
+                                        <a href="{{ route('fields.create', {group_id: group.id}) }}"
+                                           class="btn btn-primary">Create
                                             Field</a>
                                     </p>
                                 </div>
@@ -90,8 +91,9 @@
                                         </div>
                                     {% else %}
                                         <p class="text-center">
-                                            No Fields Created. <br />
-                                            <a href="{{ route('fields.create', {group_id: group.id}) }}" class="btn btn-outline-primary">Create Field</a>
+                                            No Fields Created. <br/>
+                                            <a href="{{ route('fields.create', {group_id: group.id}) }}"
+                                               class="btn btn-outline-primary">Create Field</a>
                                         </p>
                                     {% endif %}
                                 </div>

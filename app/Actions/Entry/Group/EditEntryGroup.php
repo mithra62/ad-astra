@@ -11,7 +11,9 @@ use App\Services\EntryGroupService;
  */
 class EditEntryGroup extends AbstractAction
 {
-    public function __construct(private readonly EntryGroupService $service) {}
+    public function __construct(private readonly EntryGroupService $service)
+    {
+    }
 
     public function edit(EntryGroup $group, array $input): EntryGroup
     {

@@ -22,6 +22,16 @@ class SettingFormRequestTest extends TestCase
     // Test doubles
     // -------------------------------------------------------------------------
 
+    public function test_fields_with_no_rules_key_are_excluded(): void
+    {
+        $subject = $this->makeSubject();
+        $fields = [
+            ['handle' => 'foo', 'label' => 'Foo', 'type' => 'text', 'user_overridable' => false],
+        ];
+
+        $this->assertSame([], $subject->exposedRules($fields));
+    }
+
     /**
      * A concrete SettingFormRequest subclass that exposes every protected helper
      * as a public method so tests can call them directly.
@@ -31,9 +41,20 @@ class SettingFormRequestTest extends TestCase
     private function makeSubject(): object
     {
         return new class extends SettingFormRequest {
-            public function authorize(): bool { return true; }
-            public function rules(): array { return []; }
-            public function settingsPayload(): array { return []; }
+            public function authorize(): bool
+            {
+                return true;
+            }
+
+            public function rules(): array
+            {
+                return [];
+            }
+
+            public function settingsPayload(): array
+            {
+                return [];
+            }
 
             public function exposedRules(array $fields): array
             {
@@ -47,54 +68,14 @@ class SettingFormRequestTest extends TestCase
         };
     }
 
-    /**
-     * A concrete SettingFormRequest subclass suitable for testing normaliseFields().
-     *
-     * Data is placed in the request (POST) bag and REQUEST_METHOD is set to POST
-     * so that Laravel's getInputSource() resolves to the request bag rather than
-     * the query bag (the default for GET requests), making has() / only() work.
-     */
-    private function makeNormaliseSubject(array $postData): object
-    {
-        return (new class($postData) extends SettingFormRequest {
-            public function __construct(private array $postData)
-            {
-                parent::__construct(
-                    query:   [],
-                    request: $this->postData,
-                    server:  ['REQUEST_METHOD' => 'POST'],
-                );
-            }
-
-            public function authorize(): bool { return true; }
-            public function rules(): array { return []; }
-            public function settingsPayload(): array { return []; }
-
-            public function exposedNormalise(array $fields): array
-            {
-                return $this->normaliseFields($fields);
-            }
-        });
-    }
-
     // -------------------------------------------------------------------------
     // settingRulesFromFields()
     // -------------------------------------------------------------------------
 
-    public function test_fields_with_no_rules_key_are_excluded(): void
-    {
-        $subject = $this->makeSubject();
-        $fields  = [
-            ['handle' => 'foo', 'label' => 'Foo', 'type' => 'text', 'user_overridable' => false],
-        ];
-
-        $this->assertSame([], $subject->exposedRules($fields));
-    }
-
     public function test_boolean_fields_are_excluded_regardless_of_rules(): void
     {
         $subject = $this->makeSubject();
-        $fields  = [
+        $fields = [
             ['handle' => 'active', 'label' => 'Active', 'type' => 'boolean', 'rules' => ['required'], 'user_overridable' => false],
         ];
 
@@ -104,7 +85,7 @@ class SettingFormRequestTest extends TestCase
     public function test_nullable_is_prepended_when_required_is_absent(): void
     {
         $subject = $this->makeSubject();
-        $fields  = [
+        $fields = [
             ['handle' => 'email', 'label' => 'Email', 'type' => 'text', 'rules' => ['email', 'max:255'], 'user_overridable' => false],
         ];
 
@@ -116,7 +97,7 @@ class SettingFormRequestTest extends TestCase
     public function test_nullable_is_not_prepended_when_required_is_present(): void
     {
         $subject = $this->makeSubject();
-        $fields  = [
+        $fields = [
             ['handle' => 'name', 'label' => 'Name', 'type' => 'text', 'rules' => ['required', 'string'], 'user_overridable' => false],
         ];
 
@@ -129,7 +110,7 @@ class SettingFormRequestTest extends TestCase
     public function test_rules_are_keyed_by_field_handle(): void
     {
         $subject = $this->makeSubject();
-        $fields  = [
+        $fields = [
             ['handle' => 'my_setting', 'label' => 'My Setting', 'type' => 'text', 'rules' => ['string'], 'user_overridable' => false],
         ];
 
@@ -142,9 +123,9 @@ class SettingFormRequestTest extends TestCase
     public function test_multiple_fields_produce_separate_rule_entries(): void
     {
         $subject = $this->makeSubject();
-        $fields  = [
-            ['handle' => 'alpha', 'label' => 'Alpha', 'type' => 'text',    'rules' => ['required', 'string'],  'user_overridable' => false],
-            ['handle' => 'beta',  'label' => 'Beta',  'type' => 'integer', 'rules' => ['required', 'integer'], 'user_overridable' => false],
+        $fields = [
+            ['handle' => 'alpha', 'label' => 'Alpha', 'type' => 'text', 'rules' => ['required', 'string'], 'user_overridable' => false],
+            ['handle' => 'beta', 'label' => 'Beta', 'type' => 'integer', 'rules' => ['required', 'integer'], 'user_overridable' => false],
         ];
 
         $rules = $subject->exposedRules($fields);
@@ -164,9 +145,9 @@ class SettingFormRequestTest extends TestCase
     public function test_mixed_boolean_and_text_fields_only_include_text_in_rules(): void
     {
         $subject = $this->makeSubject();
-        $fields  = [
-            ['handle' => 'label',   'label' => 'Label',   'type' => 'text',    'rules' => ['required', 'string'], 'user_overridable' => false],
-            ['handle' => 'enabled', 'label' => 'Enabled', 'type' => 'boolean', 'rules' => ['required'],           'user_overridable' => false],
+        $fields = [
+            ['handle' => 'label', 'label' => 'Label', 'type' => 'text', 'rules' => ['required', 'string'], 'user_overridable' => false],
+            ['handle' => 'enabled', 'label' => 'Enabled', 'type' => 'boolean', 'rules' => ['required'], 'user_overridable' => false],
         ];
 
         $rules = $subject->exposedRules($fields);
@@ -176,14 +157,10 @@ class SettingFormRequestTest extends TestCase
         $this->assertCount(1, $rules);
     }
 
-    // -------------------------------------------------------------------------
-    // settingAttributesFromFields()
-    // -------------------------------------------------------------------------
-
     public function test_attributes_are_keyed_by_field_handle_with_label_as_value(): void
     {
         $subject = $this->makeSubject();
-        $fields  = [
+        $fields = [
             ['handle' => 'timezone', 'label' => 'Timezone', 'type' => 'text', 'user_overridable' => false],
         ];
 
@@ -194,12 +171,16 @@ class SettingFormRequestTest extends TestCase
         $this->assertArrayNotHasKey('fields.timezone', $attributes);
     }
 
+    // -------------------------------------------------------------------------
+    // settingAttributesFromFields()
+    // -------------------------------------------------------------------------
+
     public function test_attributes_includes_all_fields_regardless_of_rules(): void
     {
         $subject = $this->makeSubject();
-        $fields  = [
-            ['handle' => 'a', 'label' => 'Field A', 'type' => 'text',    'user_overridable' => false],
-            ['handle' => 'b', 'label' => 'Field B', 'type' => 'text',    'rules' => ['required'], 'user_overridable' => false],
+        $fields = [
+            ['handle' => 'a', 'label' => 'Field A', 'type' => 'text', 'user_overridable' => false],
+            ['handle' => 'b', 'label' => 'Field B', 'type' => 'text', 'rules' => ['required'], 'user_overridable' => false],
             ['handle' => 'c', 'label' => 'Field C', 'type' => 'boolean', 'user_overridable' => false],
         ];
 
@@ -218,14 +199,10 @@ class SettingFormRequestTest extends TestCase
         $this->assertSame([], $subject->exposedAttributes([]));
     }
 
-    // -------------------------------------------------------------------------
-    // normaliseFields()
-    // -------------------------------------------------------------------------
-
     public function test_normalise_returns_submitted_text_value(): void
     {
         $subject = $this->makeNormaliseSubject(['site_name' => 'Acme Corp']);
-        $fields  = [
+        $fields = [
             ['handle' => 'site_name', 'type' => 'text', 'label' => 'Site Name', 'user_overridable' => false],
         ];
 
@@ -234,10 +211,55 @@ class SettingFormRequestTest extends TestCase
         $this->assertSame('Acme Corp', $result['site_name']);
     }
 
+    // -------------------------------------------------------------------------
+    // normaliseFields()
+    // -------------------------------------------------------------------------
+
+    /**
+     * A concrete SettingFormRequest subclass suitable for testing normaliseFields().
+     *
+     * Data is placed in the request (POST) bag and REQUEST_METHOD is set to POST
+     * so that Laravel's getInputSource() resolves to the request bag rather than
+     * the query bag (the default for GET requests), making has() / only() work.
+     */
+    private function makeNormaliseSubject(array $postData): object
+    {
+        return (new class($postData) extends SettingFormRequest {
+            public function __construct(private array $postData)
+            {
+                parent::__construct(
+                    query: [],
+                    request: $this->postData,
+                    server: ['REQUEST_METHOD' => 'POST'],
+                );
+            }
+
+            public function authorize(): bool
+            {
+                return true;
+            }
+
+            public function rules(): array
+            {
+                return [];
+            }
+
+            public function settingsPayload(): array
+            {
+                return [];
+            }
+
+            public function exposedNormalise(array $fields): array
+            {
+                return $this->normaliseFields($fields);
+            }
+        });
+    }
+
     public function test_normalise_sets_present_boolean_to_true(): void
     {
         $subject = $this->makeNormaliseSubject(['enabled' => '1']);
-        $fields  = [
+        $fields = [
             ['handle' => 'enabled', 'type' => 'boolean', 'label' => 'Enabled', 'user_overridable' => false],
         ];
 
@@ -250,7 +272,7 @@ class SettingFormRequestTest extends TestCase
     {
         // 'enabled' is not in the POST body — simulates an unchecked checkbox
         $subject = $this->makeNormaliseSubject(['other_field' => 'value']);
-        $fields  = [
+        $fields = [
             ['handle' => 'enabled', 'type' => 'boolean', 'label' => 'Enabled', 'user_overridable' => false],
         ];
 
@@ -262,7 +284,7 @@ class SettingFormRequestTest extends TestCase
     public function test_normalise_excludes_handles_not_in_fields(): void
     {
         $subject = $this->makeNormaliseSubject([
-            'known'   => 'yes',
+            'known' => 'yes',
             'unknown' => 'should not appear',
         ]);
         $fields = [
@@ -279,13 +301,13 @@ class SettingFormRequestTest extends TestCase
     {
         $subject = $this->makeNormaliseSubject([
             'site_name' => 'Hello',
-            'enabled'   => '1',
+            'enabled' => '1',
             // 'archived' is absent — unchecked checkbox
         ]);
         $fields = [
-            ['handle' => 'site_name', 'type' => 'text',    'label' => 'Site Name', 'user_overridable' => false],
-            ['handle' => 'enabled',   'type' => 'boolean',  'label' => 'Enabled',   'user_overridable' => false],
-            ['handle' => 'archived',  'type' => 'boolean',  'label' => 'Archived',  'user_overridable' => false],
+            ['handle' => 'site_name', 'type' => 'text', 'label' => 'Site Name', 'user_overridable' => false],
+            ['handle' => 'enabled', 'type' => 'boolean', 'label' => 'Enabled', 'user_overridable' => false],
+            ['handle' => 'archived', 'type' => 'boolean', 'label' => 'Archived', 'user_overridable' => false],
         ];
 
         $result = $subject->exposedNormalise($fields);

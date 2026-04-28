@@ -2,10 +2,10 @@
 
 namespace App\Actions\User\Token;
 
+use App\Actions\AbstractAction;
 use App\Models\User;
 use App\Services\UserService;
 use Carbon\Carbon;
-use App\Actions\AbstractAction;
 use Laravel\Sanctum\NewAccessToken;
 
 /**
@@ -17,7 +17,7 @@ class CreateNewUserToken extends AbstractAction
     public function create(User $user, array $input): NewAccessToken
     {
         $expires = null;
-        if (! empty($input['expires_at'])) {
+        if (!empty($input['expires_at'])) {
             $expires = new Carbon($input['expires_at']);
         }
 

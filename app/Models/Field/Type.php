@@ -38,11 +38,11 @@ class Type extends Model
     {
         $class = $this->object;
 
-        if (! class_exists($class)) {
+        if (!class_exists($class)) {
             throw new RuntimeException("FieldType class [{$class}] does not exist.");
         }
 
-        if (! is_subclass_of($class, AbstractField::class)) {
+        if (!is_subclass_of($class, AbstractField::class)) {
             throw new RuntimeException("FieldType class [{$class}] must extend AbstractField.");
         }
 

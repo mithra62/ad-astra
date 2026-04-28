@@ -6,8 +6,6 @@ use App\Actions\Entry\CreateNewEntry;
 use App\Actions\Entry\UpdateEntry;
 use App\Facades\Content;
 use App\Models\Entry;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -62,7 +60,7 @@ class EntryActionsTest extends TestCase
 
     public function test_update_delegates_to_content_facade(): void
     {
-        $entry   = Entry::factory()->create();
+        $entry = Entry::factory()->create();
         $updated = Entry::factory()->create();
         Content::shouldReceive('update')
             ->once()
@@ -77,7 +75,7 @@ class EntryActionsTest extends TestCase
 
     public function test_update_returns_entry_instance(): void
     {
-        $entry   = Entry::factory()->create();
+        $entry = Entry::factory()->create();
         $updated = Entry::factory()->create();
         Content::shouldReceive('update')->once()->andReturn($updated);
 

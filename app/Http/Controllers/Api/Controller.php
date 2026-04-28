@@ -63,7 +63,7 @@ abstract class Controller extends DefaultController
     protected function limit(Request $request): int
     {
         $limit = (int)$request->input('limit', 10);
-        if($limit > 100) {
+        if ($limit > 100) {
             $limit = 100;
         }
 
@@ -98,6 +98,28 @@ abstract class Controller extends DefaultController
     }
 
     /**
+     * @param array $where
+     * @param Request $request
+     * @return array
+     */
+    protected function buildWhere(array $where, Request $request): array
+    {
+        if ($this->createdBefore($request)) {
+            $where[] = [
+                'created_at', '<=', $this->createdBefore($request),
+            ];
+        }
+
+        if ($this->createdAfter($request)) {
+            $where[] = [
+                'created_at', '>=', $this->createdAfter($request),
+            ];
+        }
+
+        return $where;
+    }
+
+    /**
      * @param Request $request
      * @return string
      */
@@ -113,27 +135,5 @@ abstract class Controller extends DefaultController
     protected function createdAfter(Request $request): string
     {
         return $request->input('created_after', '');
-    }
-
-    /**
-     * @param array $where
-     * @param Request $request
-     * @return array
-     */
-    protected function buildWhere(array $where, Request $request): array
-    {
-        if($this->createdBefore($request)) {
-            $where[] = [
-                'created_at', '<=', $this->createdBefore($request)
-            ];
-        }
-
-        if($this->createdAfter($request)) {
-            $where[] = [
-                'created_at', '>=', $this->createdAfter($request)
-            ];
-        }
-
-        return $where;
     }
 }

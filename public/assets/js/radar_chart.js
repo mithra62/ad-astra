@@ -11,7 +11,7 @@ const radar1options = {
         type: 'radar',
     },
 
-    colors: [getLocalStorageItem('color-primary','#0F626A')],
+    colors: [getLocalStorageItem('color-primary', '#0F626A')],
     xaxis: {
         categories: ['January', 'February', 'March', 'April', 'May', 'June']
     }
@@ -56,7 +56,7 @@ const radar2options = {
     xaxis: {
         categories: ['2011', '2012', '2013', '2014', '2015', '2016']
     },
-    colors: [getLocalStorageItem('color-secondary','#626262'),'#0AB964','#E14E5A',],
+    colors: [getLocalStorageItem('color-secondary', '#626262'), '#0AB964', '#E14E5A',],
 };
 
 const radar2chart = new ApexCharts(document.querySelector("#radar2"), radar2options);
@@ -96,7 +96,7 @@ const radar3options = {
     },
     tooltip: {
         y: {
-            formatter: function(val) {
+            formatter: function (val) {
                 return val
             }
         }
@@ -107,7 +107,7 @@ const radar3options = {
     yaxis: {
         tickAmount: 7,
         labels: {
-            formatter: function(val, i) {
+            formatter: function (val, i) {
                 if (i % 2 === 0) {
                     return val
                 } else {

@@ -32,8 +32,8 @@ class StatusGroupActionsTest extends TestCase
         $action->create(['name' => 'Content States', 'handle' => 'content-states', 'sort_order' => 1]);
 
         $this->assertDatabaseHas('status_groups', [
-            'name'       => 'Content States',
-            'handle'     => 'content-states',
+            'name' => 'Content States',
+            'handle' => 'content-states',
             'sort_order' => 1,
         ]);
     }
@@ -63,7 +63,7 @@ class StatusGroupActionsTest extends TestCase
 
     public function test_edit_returns_true_on_success(): void
     {
-        $group  = StatusGroup::factory()->create();
+        $group = StatusGroup::factory()->create();
         $action = app(EditStatusGroup::class);
 
         $result = $action->edit($group, ['name' => 'Updated', 'handle' => 'updated']);
@@ -73,26 +73,26 @@ class StatusGroupActionsTest extends TestCase
 
     public function test_edit_updates_name_and_handle(): void
     {
-        $group  = StatusGroup::factory()->create(['name' => 'Old', 'handle' => 'old']);
+        $group = StatusGroup::factory()->create(['name' => 'Old', 'handle' => 'old']);
         $action = app(EditStatusGroup::class);
 
         $action->edit($group, ['name' => 'New Name', 'handle' => 'new-handle']);
 
         $this->assertDatabaseHas('status_groups', [
-            'id'     => $group->id,
-            'name'   => 'New Name',
+            'id' => $group->id,
+            'name' => 'New Name',
             'handle' => 'new-handle',
         ]);
     }
 
     public function test_edit_updates_sort_order(): void
     {
-        $group  = StatusGroup::factory()->create(['sort_order' => 1]);
+        $group = StatusGroup::factory()->create(['sort_order' => 1]);
         $action = app(EditStatusGroup::class);
 
         $action->edit($group, [
-            'name'       => $group->name,
-            'handle'     => $group->handle,
+            'name' => $group->name,
+            'handle' => $group->handle,
             'sort_order' => 7,
         ]);
 
@@ -101,7 +101,7 @@ class StatusGroupActionsTest extends TestCase
 
     public function test_edit_persists_changes(): void
     {
-        $group  = StatusGroup::factory()->create(['name' => 'Before']);
+        $group = StatusGroup::factory()->create(['name' => 'Before']);
         $action = app(EditStatusGroup::class);
 
         $action->edit($group, ['name' => 'After', 'handle' => 'after']);

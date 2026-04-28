@@ -22,15 +22,6 @@ class Role extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $permissions = Permission::all();
-        return $this->view('roles.create', ['permissions' => $permissions]);
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(StoreRoleRequest $request)
@@ -42,25 +33,20 @@ class Role extends Controller
     }
 
     /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $permissions = Permission::all();
+        return $this->view('roles.create', ['permissions' => $permissions]);
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
         //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $role = RoleModel::with('permissions')->find($id);
-        if (!$role instanceof RoleModel) {
-            abort(404);
-        }
-
-        $permissions = Permission::all();
-        return $this->view('roles.edit', ['role' => $role, 'permissions' => $permissions]);
     }
 
     /**
@@ -76,6 +62,20 @@ class Role extends Controller
         }
 
         abort(404);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $role = RoleModel::with('permissions')->find($id);
+        if (!$role instanceof RoleModel) {
+            abort(404);
+        }
+
+        $permissions = Permission::all();
+        return $this->view('roles.edit', ['role' => $role, 'permissions' => $permissions]);
     }
 
     /**

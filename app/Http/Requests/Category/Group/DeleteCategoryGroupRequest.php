@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests\Category\Group;
 
 use App\Http\Requests\FormRequest;
@@ -20,7 +21,7 @@ class DeleteCategoryGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'confirm_removal' => 'required'
+            'confirm_removal' => 'required',
         ];
     }
 

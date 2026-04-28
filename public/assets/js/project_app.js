@@ -23,14 +23,14 @@ $(function () {
 
 // Add New Card Js
 function projectCardContent() {
-  const files = document.querySelector(".file_upload").files;
-	return `
+    const files = document.querySelector(".file_upload").files;
+    return `
 				<div class="col-md-6 col-xl-4 project-card">
 					<div class="card hover-effect">
            <div class="card-header">
              <div class="d-flex align-items-center">
                <div>
-                 <img src=${files.length > 0 ? URL.createObjectURL(files[0]) : "" } alt="image" class="h-40 w-40 d-flex-center b-r-50 overflow-hidden" id="preview">
+                 <img src=${files.length > 0 ? URL.createObjectURL(files[0]) : ""} alt="image" class="h-40 w-40 d-flex-center b-r-50 overflow-hidden" id="preview">
                </div>
                <a href="project_details.html" target="_blank" class="flex-grow-1 ps-2">
                  <h6 class="m-0 f-w-600">${$('#pName').val()}</h6>
@@ -129,12 +129,12 @@ function getActions() {
 }
 
 function resetModalInputs() {
-  $('#pName').val('');
-  $('#startDate').val('');
-  $('#endDate').val('');
-  $('#pricing').val('');
-  $('#projectDescription').val('');
-  document.querySelector(".file_upload").value = '';
+    $('#pName').val('');
+    $('#startDate').val('');
+    $('#endDate').val('');
+    $('#pricing').val('');
+    $('#projectDescription').val('');
+    document.querySelector(".file_upload").value = '';
 }
 
 try {

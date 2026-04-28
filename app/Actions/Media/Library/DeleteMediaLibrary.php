@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Actions\Media\Library;
 
-use App\Models\Media\Library;
 use App\Actions\AbstractAction;
+use App\Models\Media\Library;
 
 class DeleteMediaLibrary extends AbstractAction
 {

@@ -1,4 +1,3 @@
-
 // ---------basic tree start---- //
 $('#theme_tree').jstree({
 
@@ -14,7 +13,7 @@ $('#theme_tree').jstree({
                     "selected": false
                 },
                 "type": "demo",
-                "children": [ 
+                "children": [
                     {
                         "text": "asset",
                         "icon": "fa fa-folder text-warning",
@@ -23,7 +22,7 @@ $('#theme_tree').jstree({
                         },
                         // "li_attr": {
                         //     "class": "li-style"
-                        // },   
+                        // },
                         // "a_attr": {
                         //     "class": "a-style"
                         // }
@@ -31,7 +30,7 @@ $('#theme_tree').jstree({
                             {
                                 "text": "css",
                                 "icon": "fa fa-folder text-warning",
-                                
+
 
                                 "state": {
 
@@ -81,7 +80,7 @@ $('#theme_tree').jstree({
                                 },
                             },
                         ]
-                        
+
                     },
                     {
                         "text": "node modules",
@@ -98,42 +97,42 @@ $('#theme_tree').jstree({
                         },
                         "children": [
                             {
-                            "text": "index.html",
-                            "icon": "fa fa-folder text-warning",
-                            "state": {
+                                "text": "index.html",
+                                "icon": "fa fa-folder text-warning",
+                                "state": {
 
-                                "selected": true
-                            }
-                        },
-                        {
-                            "text": "accordian.html",
-                            "icon": "fa fa-folder text-warning",
-                            "state": {
-                                "selected": true
+                                    "selected": true
+                                }
                             },
-                        },
-                        {
-                            "text": "animation.html",
-                            "icon": "fa fa-folder text-warning ",
-                            "state": {
-                                "selected": true
+                            {
+                                "text": "accordian.html",
+                                "icon": "fa fa-folder text-warning",
+                                "state": {
+                                    "selected": true
+                                },
                             },
-                        },
-                        {
-                            "text": "calander.html",
-                            "icon": "fa fa-folder text-warning",
-                            "state": {
-                                "selected": true
+                            {
+                                "text": "animation.html",
+                                "icon": "fa fa-folder text-warning ",
+                                "state": {
+                                    "selected": true
+                                },
                             },
-                        },
-                        {
-                            "text": "clipboard.html",
-                            "icon": "fa fa-folder text-warning",
-                            "state": {
-                                "selected": true
+                            {
+                                "text": "calander.html",
+                                "icon": "fa fa-folder text-warning",
+                                "state": {
+                                    "selected": true
+                                },
                             },
-                        },
-                    ]
+                            {
+                                "text": "clipboard.html",
+                                "icon": "fa fa-folder text-warning",
+                                "state": {
+                                    "selected": true
+                                },
+                            },
+                        ]
                     },
                     {
                         "text": "gulpfile",
@@ -141,7 +140,7 @@ $('#theme_tree').jstree({
                         "state": {
                             "selected": true
                         },
-                        
+
                     },
                     {
                         "text": "package.json",
@@ -149,7 +148,7 @@ $('#theme_tree').jstree({
                         "state": {
                             "selected": true
                         },
-                       
+
                     },
                     {
                         "text": "package-lock.json",
@@ -157,7 +156,7 @@ $('#theme_tree').jstree({
                         "state": {
                             "selected": true
                         },
-                        
+
                     },
                 ]
             } // root node end, end of JSON
@@ -165,7 +164,6 @@ $('#theme_tree').jstree({
     },
 });
 // -----end basic tree-------- //
-
 
 
 // -----tree with checkbox start------ //
@@ -182,7 +180,7 @@ $('#level_tree').jstree({
                     "selected": false
                 },
                 "type": "demo",
-                "children": [ 
+                "children": [
                     {
                         "text": "Dash board",
                         "icon": "ti ti-home-heart",
@@ -193,7 +191,7 @@ $('#level_tree').jstree({
                             {
                                 "text": "Ecommerce",
                                 "icon": "ti ti-circle text-primary",
-                                
+
 
                                 "state": {
 
@@ -221,9 +219,9 @@ $('#level_tree').jstree({
                                     "selected": true
                                 },
                             },
-                           
+
                         ]
-                        
+
                     },
                     {
                         "text": "App",
@@ -235,7 +233,7 @@ $('#level_tree').jstree({
                             {
                                 "text": "calender",
                                 "icon": "ti ti-circle text-primary",
-                                
+
 
                                 "state": {
 
@@ -277,7 +275,7 @@ $('#level_tree').jstree({
                                     "selected": true
                                 },
                             },
-                           
+
                         ]
                     },
                     {
@@ -288,51 +286,51 @@ $('#level_tree').jstree({
                         },
                         "children": [
                             {
-                            "text": "cheatsheet",
-                            "icon": "ti ti-circle text-primary",
-                            "state": {
+                                "text": "cheatsheet",
+                                "icon": "ti ti-circle text-primary",
+                                "state": {
 
-                                "selected": true
-                            }
-                        },
-                        {
-                            "text": "alert",
-                            "icon": "ti ti-circle text-primary",
-                            "state": {
-                                "selected": true
+                                    "selected": true
+                                }
                             },
-                        },
-                        {
-                            "text": "badges",
-                            "icon": "ti ti-circle text-primary ",
-                            "state": {
-                                "selected": true
+                            {
+                                "text": "alert",
+                                "icon": "ti ti-circle text-primary",
+                                "state": {
+                                    "selected": true
+                                },
                             },
-                        },
-                        {
-                            "text": "buttonns",
-                            "icon": "ti ti-circle text-primary",
-                            "state": {
-                                "selected": true
+                            {
+                                "text": "badges",
+                                "icon": "ti ti-circle text-primary ",
+                                "state": {
+                                    "selected": true
+                                },
                             },
-                        },
-                        {
-                            "text": "cards",
-                            "icon": "ti ti-circle text-primary",
-                            "state": {
-                                "selected": true
+                            {
+                                "text": "buttonns",
+                                "icon": "ti ti-circle text-primary",
+                                "state": {
+                                    "selected": true
+                                },
                             },
-                        },
-                    ]
+                            {
+                                "text": "cards",
+                                "icon": "ti ti-circle text-primary",
+                                "state": {
+                                    "selected": true
+                                },
+                            },
+                        ]
                     },
-                    
+
                 ]
             } // root node end, end of JSON
         ]
     },
-  
-    "plugins" : [ "themes", "html_data", "checkbox", "sort", "ui" ],
-   
-  
+
+    "plugins": ["themes", "html_data", "checkbox", "sort", "ui"],
+
+
 });
 // -------tree with checkbox end------ //

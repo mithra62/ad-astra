@@ -49,7 +49,7 @@
                                                            value="{{ old('name', app.auth.user.name) }}">
                                                 </div>
                                                 {% if errors.has('name') %}
-                                                <p class="text-danger">{{ errors.first('name') }}</p>
+                                                    <p class="text-danger">{{ errors.first('name') }}</p>
                                                 {% endif %}
                                             </div>
                                             <div class="col-12">
@@ -71,7 +71,8 @@
                                                         {% set field = element.field %}
                                                         <div>
                                                             <div class="col-md-12">
-                                                                <label class="form-label" for="field_{{ field.handle }}">{{ field.label }}</label>
+                                                                <label class="form-label"
+                                                                       for="field_{{ field.handle }}">{{ field.label }}</label>
                                                                 {% if field.instructions %}
                                                                     <small>{{ field.instructions }}</small>
                                                                 {% endif %}

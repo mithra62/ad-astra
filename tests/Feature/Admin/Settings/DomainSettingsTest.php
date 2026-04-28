@@ -15,68 +15,16 @@ class DomainSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->withoutMiddleware(VerifyCsrfToken::class);
-        Cache::flush();
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function makeSuperAdmin(): User
-    {
-        $role = Role::firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $user = User::factory()->create();
-        $user->assignRole($role);
-        return $user;
-    }
-
-    /**
-     * Register a domain in config and create its DB row.
-     * Defines a single text field so the form has something to render and submit.
-     */
-    private function makeDomain(string $handle = 'td_test'): SettingDomain
-    {
-        config(["settings.{$handle}" => [
-            'name'        => 'Test Domain',
-            'description' => 'Feature test domain.',
-            'icon'        => null,
-            'sort_order'  => 99,
-            'fields'      => [
-                [
-                    'handle'          => "{$handle}_site_name",
-                    'label'           => 'Site Name',
-                    'type'            => 'text',
-                    'default'         => '',
-                    'instructions'    => null,
-                    'group'           => null,
-                    'hidden'          => false,
-                    'user_overridable' => false,
-                ],
-            ],
-        ]]);
-
-        return SettingDomain::create([
-            'name'        => 'Test Domain',
-            'handle'      => $handle,
-            'description' => 'Feature test domain.',
-            'sort_order'  => 99,
-        ]);
-    }
-
-    // -------------------------------------------------------------------------
-    // index
-    // -------------------------------------------------------------------------
-
     public function test_index_redirects_guests_to_login(): void
     {
         $response = $this->get(route('settings'));
 
         $response->assertRedirect(route('login'));
     }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
 
     public function test_index_renders_for_authenticated_user(): void
     {
@@ -90,9 +38,50 @@ class DomainSettingsTest extends TestCase
         $response->assertSee('Test Domain');
     }
 
+    private function makeSuperAdmin(): User
+    {
+        $role = Role::firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
+        $user = User::factory()->create();
+        $user->assignRole($role);
+        return $user;
+    }
+
     // -------------------------------------------------------------------------
-    // show
+    // index
     // -------------------------------------------------------------------------
+
+    /**
+     * Register a domain in config and create its DB row.
+     * Defines a single text field so the form has something to render and submit.
+     */
+    private function makeDomain(string $handle = 'td_test'): SettingDomain
+    {
+        config(["settings.{$handle}" => [
+            'name' => 'Test Domain',
+            'description' => 'Feature test domain.',
+            'icon' => null,
+            'sort_order' => 99,
+            'fields' => [
+                [
+                    'handle' => "{$handle}_site_name",
+                    'label' => 'Site Name',
+                    'type' => 'text',
+                    'default' => '',
+                    'instructions' => null,
+                    'group' => null,
+                    'hidden' => false,
+                    'user_overridable' => false,
+                ],
+            ],
+        ]]);
+
+        return SettingDomain::create([
+            'name' => 'Test Domain',
+            'handle' => $handle,
+            'description' => 'Feature test domain.',
+            'sort_order' => 99,
+        ]);
+    }
 
     public function test_show_redirects_guests_to_login(): void
     {
@@ -102,6 +91,10 @@ class DomainSettingsTest extends TestCase
 
         $response->assertRedirect(route('login'));
     }
+
+    // -------------------------------------------------------------------------
+    // show
+    // -------------------------------------------------------------------------
 
     public function test_show_renders_domain_form(): void
     {
@@ -130,10 +123,10 @@ class DomainSettingsTest extends TestCase
         $this->makeDomain('td2');
 
         SettingValue::create([
-            'domain'       => 'td2',
+            'domain' => 'td2',
             'field_handle' => 'td2_site_name',
-            'user_id'      => null,
-            'value_text'   => 'My Existing Site',
+            'user_id' => null,
+            'value_text' => 'My Existing Site',
         ]);
 
         $response = $this->actingAs($user)->get(route('settings.show', 'td2'));
@@ -141,10 +134,6 @@ class DomainSettingsTest extends TestCase
         $response->assertOk();
         $response->assertSee('My Existing Site');
     }
-
-    // -------------------------------------------------------------------------
-    // update
-    // -------------------------------------------------------------------------
 
     public function test_update_redirects_guests_to_login(): void
     {
@@ -157,6 +146,10 @@ class DomainSettingsTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
+    // -------------------------------------------------------------------------
+    // update
+    // -------------------------------------------------------------------------
+
     public function test_update_persists_system_setting_to_typed_column(): void
     {
         $user = $this->makeSuperAdmin();
@@ -167,10 +160,10 @@ class DomainSettingsTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('setting_values', [
-            'domain'       => 'td3',
+            'domain' => 'td3',
             'field_handle' => 'td3_site_name',
-            'user_id'      => null,
-            'value_text'   => 'Hello World',
+            'user_id' => null,
+            'value_text' => 'Hello World',
         ]);
     }
 
@@ -230,24 +223,20 @@ class DomainSettingsTest extends TestCase
         $response->assertNotFound();
     }
 
-    // -------------------------------------------------------------------------
-    // Validation
-    // -------------------------------------------------------------------------
-
     public function test_update_fails_validation_when_required_field_is_missing(): void
     {
         $user = $this->makeSuperAdmin();
 
         config(['settings.vd1' => [
-            'name'   => 'VD1',
+            'name' => 'VD1',
             'fields' => [
                 [
-                    'handle'          => 'vd1_name',
-                    'label'           => 'Name',
-                    'type'            => 'text',
-                    'default'         => '',
-                    'rules'           => ['required', 'string'],
-                    'hidden'          => false,
+                    'handle' => 'vd1_name',
+                    'label' => 'Name',
+                    'type' => 'text',
+                    'default' => '',
+                    'rules' => ['required', 'string'],
+                    'hidden' => false,
                     'user_overridable' => false,
                 ],
             ],
@@ -262,20 +251,24 @@ class DomainSettingsTest extends TestCase
         $this->assertDatabaseMissing('setting_values', ['domain' => 'vd1']);
     }
 
+    // -------------------------------------------------------------------------
+    // Validation
+    // -------------------------------------------------------------------------
+
     public function test_update_fails_validation_when_integer_field_receives_string(): void
     {
         $user = $this->makeSuperAdmin();
 
         config(['settings.vd2' => [
-            'name'   => 'VD2',
+            'name' => 'VD2',
             'fields' => [
                 [
-                    'handle'          => 'vd2_count',
-                    'label'           => 'Count',
-                    'type'            => 'integer',
-                    'default'         => 10,
-                    'rules'           => ['required', 'integer', 'min:1'],
-                    'hidden'          => false,
+                    'handle' => 'vd2_count',
+                    'label' => 'Count',
+                    'type' => 'integer',
+                    'default' => 10,
+                    'rules' => ['required', 'integer', 'min:1'],
+                    'hidden' => false,
                     'user_overridable' => false,
                 ],
             ],
@@ -295,15 +288,15 @@ class DomainSettingsTest extends TestCase
         $user = $this->makeSuperAdmin();
 
         config(['settings.vd3' => [
-            'name'   => 'VD3',
+            'name' => 'VD3',
             'fields' => [
                 [
-                    'handle'          => 'vd3_email',
-                    'label'           => 'Email',
-                    'type'            => 'text',
-                    'default'         => '',
-                    'rules'           => ['email'],   // no 'required' — nullable prepended
-                    'hidden'          => false,
+                    'handle' => 'vd3_email',
+                    'label' => 'Email',
+                    'type' => 'text',
+                    'default' => '',
+                    'rules' => ['email'],   // no 'required' — nullable prepended
+                    'hidden' => false,
                     'user_overridable' => false,
                 ],
             ],
@@ -323,15 +316,15 @@ class DomainSettingsTest extends TestCase
         $user = $this->makeSuperAdmin();
 
         config(['settings.vd4' => [
-            'name'   => 'VD4',
+            'name' => 'VD4',
             'fields' => [
                 [
-                    'handle'          => 'vd4_email',
-                    'label'           => 'Email',
-                    'type'            => 'text',
-                    'default'         => '',
-                    'rules'           => ['email'],
-                    'hidden'          => false,
+                    'handle' => 'vd4_email',
+                    'label' => 'Email',
+                    'type' => 'text',
+                    'default' => '',
+                    'rules' => ['email'],
+                    'hidden' => false,
                     'user_overridable' => false,
                 ],
             ],
@@ -350,15 +343,15 @@ class DomainSettingsTest extends TestCase
         $user = $this->makeSuperAdmin();
 
         config(['settings.vd5' => [
-            'name'   => 'VD5',
+            'name' => 'VD5',
             'fields' => [
                 [
-                    'handle'          => 'vd5_title',
-                    'label'           => 'Page Title',
-                    'type'            => 'text',
-                    'default'         => '',
-                    'rules'           => ['required', 'string'],
-                    'hidden'          => false,
+                    'handle' => 'vd5_title',
+                    'label' => 'Page Title',
+                    'type' => 'text',
+                    'default' => '',
+                    'rules' => ['required', 'string'],
+                    'hidden' => false,
                     'user_overridable' => false,
                 ],
             ],
@@ -373,5 +366,12 @@ class DomainSettingsTest extends TestCase
         $response->assertSessionHasErrors('vd5_title');
         $errors = session('errors')->getBag('default');
         $this->assertStringContainsString('Page Title', $errors->first('vd5_title'));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+        Cache::flush();
     }
 }

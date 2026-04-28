@@ -13,8 +13,8 @@ use App\Http\Requests\Media\Library\StoreMediaLibraryFormRequest;
 use App\Http\Requests\Media\Library\UploadMediaRequest;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\Field\Group as FieldGroup;
-use App\Models\Media\Library as LibraryModel;
 use App\Models\Media as MediaModel;
+use App\Models\Media\Library as LibraryModel;
 
 class Library extends Controller
 {
@@ -25,6 +25,16 @@ class Library extends Controller
     {
         $libraries = LibraryModel::paginate(20);
         return $this->view('media.libraries.index', ['libraries' => $libraries]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreMediaLibraryFormRequest $request)
+    {
+        $creator = app(CreateNewMediaLibrary::class);
+        $library = $creator->create($request->all());
+        return redirect()->route('media.libraries.show', $library->id)->with('status', trans('media.library.created'));
     }
 
     /**
@@ -45,16 +55,6 @@ class Library extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreMediaLibraryFormRequest $request)
-    {
-        $creator = app(CreateNewMediaLibrary::class);
-        $library = $creator->create($request->all());
-        return redirect()->route('media.libraries.show', $library->id)->with('status', trans('media.library.created'));
-    }
-
-    /**
      * Display the specified resource.
      */
     public function show(string $id)
@@ -66,7 +66,7 @@ class Library extends Controller
 
         $query = MediaModel::query();
         $where = [
-            'library_id' => $id
+            'library_id' => $id,
         ];
         $media = $query->where($where)->paginate(20);
 
@@ -77,6 +77,21 @@ class Library extends Controller
         ];
 
         return $this->view('media.libraries.view', $data);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(EditMediaLibraryRequest $request, string $id)
+    {
+        $library = LibraryModel::find($id);
+        if ($library instanceof LibraryModel) {
+            $editor = app(EditMediaLibrary::class);
+            $editor->edit($library, $request->validated());
+            return redirect()->route('media.libraries')->with('success', trans('media.library.updated'));
+        }
+
+        abort(404);
     }
 
     /**
@@ -101,21 +116,6 @@ class Library extends Controller
         ];
 
         return $this->view('media.libraries.edit', $data);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(EditMediaLibraryRequest $request, string $id)
-    {
-        $library = LibraryModel::find($id);
-        if ($library instanceof LibraryModel) {
-            $editor = app(EditMediaLibrary::class);
-            $editor->edit($library, $request->validated());
-            return redirect()->route('media.libraries')->with('success', trans('media.library.updated'));
-        }
-
-        abort(404);
     }
 
     public function destroy(DeleteMediaLibraryRequest $request, string $id)
@@ -150,8 +150,8 @@ class Library extends Controller
         $uploader = app(UploadMedia::class);
         $media = $uploader->upload($request, $library);
 
-        if($media) {
-            return redirect()->route('media.show', $media, )->with('success', 'media.uploaded');
+        if ($media) {
+            return redirect()->route('media.show', $media)->with('success', 'media.uploaded');
         }
 
         return redirect()->route('media.libraries.show', $library)->with('failure', 'media.upload_failed');

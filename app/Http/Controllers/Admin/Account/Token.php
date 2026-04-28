@@ -21,6 +21,18 @@ class Token extends AdminController
         return $this->view('account.tokens.index');
     }
 
+    public function store(StoreAccountTokenRequest $request)
+    {
+        $user = Auth::user();
+        $token = '';
+        if ($user instanceof UserModel) {
+            $creator = app(CreateNewUserToken::class);
+            $token = $creator->create($user, $request->validated())->plainTextToken;
+        }
+
+        return redirect()->route('account.tokens.index')->with('success', __('account.token_created') . ' - ' . $token);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -32,18 +44,6 @@ class Token extends AdminController
         }
 
         return $this->view('account.tokens.create', ['user' => $user]);
-    }
-
-    public function store(StoreAccountTokenRequest $request)
-    {
-        $user = Auth::user();
-        $token = '';
-        if ($user instanceof UserModel) {
-            $creator = app(CreateNewUserToken::class);
-            $token = $creator->create($user, $request->validated())->plainTextToken;
-        }
-
-        return redirect()->route('account.tokens.index')->with('success', __('account.token_created') . ' - ' . $token);
     }
 
     /**
@@ -62,7 +62,7 @@ class Token extends AdminController
     {
         $user = Auth::user();
         $token = $user->tokens()->where('id', $token_id)->first();
-        if(!$token instanceof PersonalAccessToken) {
+        if (!$token instanceof PersonalAccessToken) {
             abort(404);
         }
 
@@ -76,7 +76,7 @@ class Token extends AdminController
     {
         $user = Auth::user();
         $token = $user->tokens()->where('id', $token_id)->first();
-        if(!$token instanceof PersonalAccessToken) {
+        if (!$token instanceof PersonalAccessToken) {
             abort(404);
         }
 
@@ -102,7 +102,7 @@ class Token extends AdminController
     {
         $user = Auth::user();
         $token = $user->tokens()->where('id', $token_id)->get();
-        if($token->count() !== 1) {
+        if ($token->count() !== 1) {
             abort(404);
         }
 

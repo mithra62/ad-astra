@@ -16,10 +16,13 @@
                             <a class="f-s-14 f-w-500" href="{{ route('field-layouts') }}">Field Layouts</a>
                         </li>
                         <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts.tabs.confirm', {layout_id: layout.id, tab_id: tab.id}) }}">Delete Tab</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('field-layouts.tabs.confirm', {layout_id: layout.id, tab_id: tab.id}) }}">Delete
+                                Tab</a>
                         </li>
                     </ul>
                 </div>
@@ -31,7 +34,8 @@
         <div class="row">
             {{ include('admin.field-layouts._sidebar', {active: layout.id}) }}
             <div class="col-lg-8 col-xxl-9">
-                <form method="POST" action="{{ route('field-layouts.tabs.destroy', {layout_id: layout.id, tab_id: tab.id}) }}"
+                <form method="POST"
+                      action="{{ route('field-layouts.tabs.destroy', {layout_id: layout.id, tab_id: tab.id}) }}"
                       class="row g-3 needs-validation" novalidate>
                     {{ csrf_field() }}
                     {{ method_field('DELETE') }}
@@ -41,27 +45,33 @@
                                 <h5>Delete Tab</h5>
                             </div>
                             <div class="card-body">
-                                <h6>Are you sure you want to remove the <strong>{{ tab.name }}</strong> tab from <strong>{{ layout.name }}</strong>?</h6>
+                                <h6>Are you sure you want to remove the <strong>{{ tab.name }}</strong> tab from
+                                    <strong>{{ layout.name }}</strong>?</h6>
                                 <p class="text-secondary">
                                     This will permanently remove the tab and all of its field assignments.
                                     The fields themselves will not be deleted. This action cannot be undone.
                                 </p>
                                 {% if tab.elements_count > 0 %}
                                     <div class="alert alert-warning">
-                                        <strong>Warning:</strong> This tab contains {{ tab.elements_count }} field {{ tab.elements_count == 1 ? 'assignment' : 'assignments' }} that will be removed.
+                                        <strong>Warning:</strong> This tab contains {{ tab.elements_count }}
+                                        field {{ tab.elements_count == 1 ? 'assignment' : 'assignments' }} that will be
+                                        removed.
                                     </div>
                                 {% endif %}
                             </div>
                             <div class="card-footer">
-                                <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
-                                    <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal" type="checkbox">
+                                <div
+                                    class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                    <input class="toggle switch-border-primary" name="confirm_removal"
+                                           id="confirm_removal" type="checkbox">
                                     <label for="confirm_removal">Confirm Removal</label>
                                     {% if errors.has('confirm_removal') %}
                                         <p class="text-danger">{{ errors.first('confirm_removal') }}</p>
                                     {% endif %}
                                 </div>
                                 <div class="col-12 float-end">
-                                    <a href="{{ route('field-layouts.edit', layout) }}" class="btn btn-secondary">Cancel</a>
+                                    <a href="{{ route('field-layouts.edit', layout) }}"
+                                       class="btn btn-secondary">Cancel</a>
                                     <button class="btn btn-danger ms-2" type="submit">Delete Tab</button>
                                 </div>
                             </div>

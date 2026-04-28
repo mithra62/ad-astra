@@ -13,20 +13,23 @@ class UpdateDomainSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    public function test_execute_persists_text_value_to_value_text_column(): void
     {
-        parent::setUp();
-        Cache::flush();
+        $this->makeDomain('ds1');
+
+        $this->action()->execute('ds1', ['ds1_name' => 'Hello World']);
+
+        $this->assertDatabaseHas('setting_values', [
+            'domain' => 'ds1',
+            'field_handle' => 'ds1_name',
+            'user_id' => null,
+            'value_text' => 'Hello World',
+        ]);
     }
 
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
-
-    private function action(): UpdateDomainSettings
-    {
-        return app(UpdateDomainSettings::class);
-    }
 
     /**
      * Register a domain in config with a text, integer, and boolean field,
@@ -35,31 +38,31 @@ class UpdateDomainSettingsTest extends TestCase
     private function makeDomain(string $handle): SettingDomain
     {
         config(["settings.{$handle}" => [
-            'name'   => strtoupper($handle),
+            'name' => strtoupper($handle),
             'fields' => [
                 [
-                    'handle'           => "{$handle}_name",
-                    'label'            => 'Name',
-                    'type'             => 'text',
-                    'default'          => '',
+                    'handle' => "{$handle}_name",
+                    'label' => 'Name',
+                    'type' => 'text',
+                    'default' => '',
                     'user_overridable' => false,
-                    'hidden'           => false,
+                    'hidden' => false,
                 ],
                 [
-                    'handle'           => "{$handle}_count",
-                    'label'            => 'Count',
-                    'type'             => 'integer',
-                    'default'          => 0,
+                    'handle' => "{$handle}_count",
+                    'label' => 'Count',
+                    'type' => 'integer',
+                    'default' => 0,
                     'user_overridable' => false,
-                    'hidden'           => false,
+                    'hidden' => false,
                 ],
                 [
-                    'handle'           => "{$handle}_enabled",
-                    'label'            => 'Enabled',
-                    'type'             => 'boolean',
-                    'default'          => false,
+                    'handle' => "{$handle}_enabled",
+                    'label' => 'Enabled',
+                    'type' => 'boolean',
+                    'default' => false,
                     'user_overridable' => false,
-                    'hidden'           => false,
+                    'hidden' => false,
                 ],
             ],
         ]]);
@@ -67,23 +70,14 @@ class UpdateDomainSettingsTest extends TestCase
         return SettingDomain::create(['name' => strtoupper($handle), 'handle' => $handle]);
     }
 
+    private function action(): UpdateDomainSettings
+    {
+        return app(UpdateDomainSettings::class);
+    }
+
     // -------------------------------------------------------------------------
     // Persistence — typed columns
     // -------------------------------------------------------------------------
-
-    public function test_execute_persists_text_value_to_value_text_column(): void
-    {
-        $this->makeDomain('ds1');
-
-        $this->action()->execute('ds1', ['ds1_name' => 'Hello World']);
-
-        $this->assertDatabaseHas('setting_values', [
-            'domain'       => 'ds1',
-            'field_handle' => 'ds1_name',
-            'user_id'      => null,
-            'value_text'   => 'Hello World',
-        ]);
-    }
 
     public function test_execute_persists_integer_value_to_value_integer_column(): void
     {
@@ -92,9 +86,9 @@ class UpdateDomainSettingsTest extends TestCase
         $this->action()->execute('ds2', ['ds2_count' => 42]);
 
         $this->assertDatabaseHas('setting_values', [
-            'domain'        => 'ds2',
-            'field_handle'  => 'ds2_count',
-            'user_id'       => null,
+            'domain' => 'ds2',
+            'field_handle' => 'ds2_count',
+            'user_id' => null,
             'value_integer' => 42,
         ]);
     }
@@ -106,16 +100,12 @@ class UpdateDomainSettingsTest extends TestCase
         $this->action()->execute('ds3', ['ds3_enabled' => true]);
 
         $this->assertDatabaseHas('setting_values', [
-            'domain'         => 'ds3',
-            'field_handle'   => 'ds3_enabled',
-            'user_id'        => null,
-            'value_boolean'  => true,
+            'domain' => 'ds3',
+            'field_handle' => 'ds3_enabled',
+            'user_id' => null,
+            'value_boolean' => true,
         ]);
     }
-
-    // -------------------------------------------------------------------------
-    // System scope — user_id must be null
-    // -------------------------------------------------------------------------
 
     public function test_execute_writes_as_system_value_with_null_user_id(): void
     {
@@ -125,17 +115,17 @@ class UpdateDomainSettingsTest extends TestCase
 
         $this->assertDatabaseHas('setting_values', [
             'field_handle' => 'ds4_name',
-            'user_id'      => null,
+            'user_id' => null,
         ]);
 
         $this->assertDatabaseMissing('setting_values', [
             'field_handle' => 'ds4_name',
-            'user_id'      => 1,
+            'user_id' => 1,
         ]);
     }
 
     // -------------------------------------------------------------------------
-    // Upsert behaviour
+    // System scope — user_id must be null
     // -------------------------------------------------------------------------
 
     public function test_execute_overwrites_existing_system_value(): void
@@ -143,10 +133,10 @@ class UpdateDomainSettingsTest extends TestCase
         $this->makeDomain('ds5');
 
         SettingValue::create([
-            'domain'       => 'ds5',
+            'domain' => 'ds5',
             'field_handle' => 'ds5_name',
-            'user_id'      => null,
-            'value_text'   => 'Old Value',
+            'user_id' => null,
+            'value_text' => 'Old Value',
         ]);
 
         $this->action()->execute('ds5', ['ds5_name' => 'New Value']);
@@ -156,7 +146,7 @@ class UpdateDomainSettingsTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Multiple fields
+    // Upsert behaviour
     // -------------------------------------------------------------------------
 
     public function test_execute_writes_multiple_fields_in_one_call(): void
@@ -164,19 +154,19 @@ class UpdateDomainSettingsTest extends TestCase
         $this->makeDomain('ds6');
 
         $this->action()->execute('ds6', [
-            'ds6_name'    => 'Acme',
-            'ds6_count'   => 10,
+            'ds6_name' => 'Acme',
+            'ds6_count' => 10,
             'ds6_enabled' => true,
         ]);
 
         $this->assertDatabaseCount('setting_values', 3);
-        $this->assertDatabaseHas('setting_values', ['field_handle' => 'ds6_name',    'value_text'    => 'Acme']);
-        $this->assertDatabaseHas('setting_values', ['field_handle' => 'ds6_count',   'value_integer' => 10]);
+        $this->assertDatabaseHas('setting_values', ['field_handle' => 'ds6_name', 'value_text' => 'Acme']);
+        $this->assertDatabaseHas('setting_values', ['field_handle' => 'ds6_count', 'value_integer' => 10]);
         $this->assertDatabaseHas('setting_values', ['field_handle' => 'ds6_enabled', 'value_boolean' => true]);
     }
 
     // -------------------------------------------------------------------------
-    // Cache invalidation
+    // Multiple fields
     // -------------------------------------------------------------------------
 
     public function test_execute_busts_system_domain_cache(): void
@@ -189,6 +179,10 @@ class UpdateDomainSettingsTest extends TestCase
         $this->assertNull(Cache::get('settings.system.ds7'));
     }
 
+    // -------------------------------------------------------------------------
+    // Cache invalidation
+    // -------------------------------------------------------------------------
+
     public function test_execute_does_not_bust_cache_of_other_domains(): void
     {
         $this->makeDomain('ds8');
@@ -197,5 +191,11 @@ class UpdateDomainSettingsTest extends TestCase
         $this->action()->execute('ds8', ['ds8_name' => 'value']);
 
         $this->assertNotNull(Cache::get('settings.system.other_domain'));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Cache::flush();
     }
 }

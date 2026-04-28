@@ -4,7 +4,7 @@ const revenueChartOptions = {
     chart: {
         height: 260,
         fontFamily: '"Rubik", serif',
-        toolbar: { show: false }
+        toolbar: {show: false}
     },
     series: [
         {
@@ -204,7 +204,7 @@ const profitOverviewOptions = {
         height: 180,
         type: 'line',
     },
-    colors:['rgba(var(--white),1)','rgba(var(--white),1)'],
+    colors: ['rgba(var(--white),1)', 'rgba(var(--white),1)'],
     stroke: {
         curve: 'smooth',
         width: [0, 2]

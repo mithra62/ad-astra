@@ -15,16 +15,27 @@ class UserSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    public function test_show_redirects_guests_to_login(): void
     {
-        parent::setUp();
-        $this->withoutMiddleware(VerifyCsrfToken::class);
-        Cache::flush();
+        $response = $this->get(route('settings.user'));
+
+        $response->assertRedirect(route('login'));
     }
 
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    public function test_show_renders_for_authenticated_user(): void
+    {
+        $user = $this->makeSuperAdmin();
+        $this->makeDomainWithMixedFields();
+
+        $response = $this->actingAs($user)->get(route('settings.user'));
+
+        $response->assertOk();
+        $response->assertSee('My Preferences');
+    }
 
     private function makeSuperAdmin(): User
     {
@@ -33,6 +44,10 @@ class UserSettingsTest extends TestCase
         $user->assignRole($role);
         return $user;
     }
+
+    // -------------------------------------------------------------------------
+    // show
+    // -------------------------------------------------------------------------
 
     /**
      * Register a domain in config with two fields:
@@ -44,61 +59,39 @@ class UserSettingsTest extends TestCase
     private function makeDomainWithMixedFields(string $handle = 'ud_test'): SettingDomain
     {
         config(["settings.{$handle}" => [
-            'name'        => strtoupper($handle),
+            'name' => strtoupper($handle),
             'description' => null,
-            'icon'        => null,
-            'sort_order'  => 99,
-            'fields'      => [
+            'icon' => null,
+            'sort_order' => 99,
+            'fields' => [
                 [
-                    'handle'          => "{$handle}_tz",
-                    'label'           => 'Timezone',
-                    'type'            => 'text',
-                    'default'         => 'UTC',
-                    'instructions'    => null,
-                    'group'           => null,
-                    'hidden'          => false,
+                    'handle' => "{$handle}_tz",
+                    'label' => 'Timezone',
+                    'type' => 'text',
+                    'default' => 'UTC',
+                    'instructions' => null,
+                    'group' => null,
+                    'hidden' => false,
                     'user_overridable' => true,
                 ],
                 [
-                    'handle'          => "{$handle}_site_name",
-                    'label'           => 'Site Name',
-                    'type'            => 'text',
-                    'default'         => '',
-                    'instructions'    => null,
-                    'group'           => null,
-                    'hidden'          => false,
+                    'handle' => "{$handle}_site_name",
+                    'label' => 'Site Name',
+                    'type' => 'text',
+                    'default' => '',
+                    'instructions' => null,
+                    'group' => null,
+                    'hidden' => false,
                     'user_overridable' => false,
                 ],
             ],
         ]]);
 
         return SettingDomain::create([
-            'name'       => strtoupper($handle),
-            'handle'     => $handle,
+            'name' => strtoupper($handle),
+            'handle' => $handle,
             'sort_order' => 99,
         ]);
-    }
-
-    // -------------------------------------------------------------------------
-    // show
-    // -------------------------------------------------------------------------
-
-    public function test_show_redirects_guests_to_login(): void
-    {
-        $response = $this->get(route('settings.user'));
-
-        $response->assertRedirect(route('login'));
-    }
-
-    public function test_show_renders_for_authenticated_user(): void
-    {
-        $user = $this->makeSuperAdmin();
-        $this->makeDomainWithMixedFields();
-
-        $response = $this->actingAs($user)->get(route('settings.user'));
-
-        $response->assertOk();
-        $response->assertSee('My Preferences');
     }
 
     public function test_show_includes_overridable_fields(): void
@@ -129,10 +122,10 @@ class UserSettingsTest extends TestCase
         $this->makeDomainWithMixedFields('ud4');
 
         SettingValue::create([
-            'domain'       => 'ud4',
+            'domain' => 'ud4',
             'field_handle' => 'ud4_tz',
-            'user_id'      => $user->id,
-            'value_text'   => 'America/Chicago',
+            'user_id' => $user->id,
+            'value_text' => 'America/Chicago',
         ]);
 
         $response = $this->actingAs($user)->get(route('settings.user'));
@@ -152,10 +145,6 @@ class UserSettingsTest extends TestCase
         $response->assertSee('system default');
     }
 
-    // -------------------------------------------------------------------------
-    // update
-    // -------------------------------------------------------------------------
-
     public function test_update_redirects_guests_to_login(): void
     {
         $response = $this->put(route('settings.user.update'), [
@@ -164,6 +153,10 @@ class UserSettingsTest extends TestCase
 
         $response->assertRedirect(route('login'));
     }
+
+    // -------------------------------------------------------------------------
+    // update
+    // -------------------------------------------------------------------------
 
     public function test_update_saves_user_override_for_overridable_field(): void
     {
@@ -175,10 +168,10 @@ class UserSettingsTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('setting_values', [
-            'domain'       => 'ud6',
+            'domain' => 'ud6',
             'field_handle' => 'ud6_tz',
-            'user_id'      => $user->id,
-            'value_text'   => 'Asia/Tokyo',
+            'user_id' => $user->id,
+            'value_text' => 'Asia/Tokyo',
         ]);
     }
 
@@ -192,9 +185,9 @@ class UserSettingsTest extends TestCase
         ]);
 
         $this->assertDatabaseMissing('setting_values', [
-            'domain'       => 'ud7',
+            'domain' => 'ud7',
             'field_handle' => 'ud7_tz',
-            'user_id'      => null,
+            'user_id' => null,
         ]);
     }
 
@@ -204,13 +197,13 @@ class UserSettingsTest extends TestCase
         $this->makeDomainWithMixedFields('ud8');
 
         $this->actingAs($user)->put(route('settings.user.update'), [
-            'ud8_tz'        => 'UTC',
+            'ud8_tz' => 'UTC',
             'ud8_site_name' => 'Should Be Ignored',
         ]);
 
         $this->assertDatabaseMissing('setting_values', [
             'field_handle' => 'ud8_site_name',
-            'user_id'      => $user->id,
+            'user_id' => $user->id,
         ]);
     }
 
@@ -234,10 +227,10 @@ class UserSettingsTest extends TestCase
         $this->makeDomainWithMixedFields('ud10');
 
         SettingValue::create([
-            'domain'       => 'ud10',
+            'domain' => 'ud10',
             'field_handle' => 'ud10_tz',
-            'user_id'      => $userB->id,
-            'value_text'   => 'Europe/London',
+            'user_id' => $userB->id,
+            'value_text' => 'Europe/London',
         ]);
 
         $this->actingAs($userA)->put(route('settings.user.update'), [
@@ -246,8 +239,8 @@ class UserSettingsTest extends TestCase
 
         $this->assertDatabaseHas('setting_values', [
             'field_handle' => 'ud10_tz',
-            'user_id'      => $userB->id,
-            'value_text'   => 'Europe/London',
+            'user_id' => $userB->id,
+            'value_text' => 'Europe/London',
         ]);
     }
 
@@ -268,42 +261,6 @@ class UserSettingsTest extends TestCase
         $this->assertNotNull(Cache::get("settings.user.{$userB->id}.ud11"));
     }
 
-    // -------------------------------------------------------------------------
-    // Validation
-    // -------------------------------------------------------------------------
-
-    /**
-     * Register a domain with a validated overridable field.
-     */
-    private function makeDomainWithValidatedField(string $handle): SettingDomain
-    {
-        config(["settings.{$handle}" => [
-            'name'        => strtoupper($handle),
-            'description' => null,
-            'icon'        => null,
-            'sort_order'  => 99,
-            'fields'      => [
-                [
-                    'handle'          => "{$handle}_count",
-                    'label'           => 'Count',
-                    'type'            => 'integer',
-                    'default'         => 10,
-                    'rules'           => ['required', 'integer', 'min:1', 'max:100'],
-                    'instructions'    => null,
-                    'group'           => null,
-                    'hidden'          => false,
-                    'user_overridable' => true,
-                ],
-            ],
-        ]]);
-
-        return SettingDomain::create([
-            'name'       => strtoupper($handle),
-            'handle'     => $handle,
-            'sort_order' => 99,
-        ]);
-    }
-
     public function test_update_fails_validation_when_overridable_field_is_invalid(): void
     {
         $user = $this->makeSuperAdmin();
@@ -315,6 +272,42 @@ class UserSettingsTest extends TestCase
 
         $response->assertSessionHasErrors('uv1_count');
         $this->assertDatabaseMissing('setting_values', ['domain' => 'uv1', 'user_id' => $user->id]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Validation
+    // -------------------------------------------------------------------------
+
+    /**
+     * Register a domain with a validated overridable field.
+     */
+    private function makeDomainWithValidatedField(string $handle): SettingDomain
+    {
+        config(["settings.{$handle}" => [
+            'name' => strtoupper($handle),
+            'description' => null,
+            'icon' => null,
+            'sort_order' => 99,
+            'fields' => [
+                [
+                    'handle' => "{$handle}_count",
+                    'label' => 'Count',
+                    'type' => 'integer',
+                    'default' => 10,
+                    'rules' => ['required', 'integer', 'min:1', 'max:100'],
+                    'instructions' => null,
+                    'group' => null,
+                    'hidden' => false,
+                    'user_overridable' => true,
+                ],
+            ],
+        ]]);
+
+        return SettingDomain::create([
+            'name' => strtoupper($handle),
+            'handle' => $handle,
+            'sort_order' => 99,
+        ]);
     }
 
     public function test_update_fails_validation_when_overridable_field_exceeds_max(): void
@@ -342,9 +335,9 @@ class UserSettingsTest extends TestCase
         $response->assertRedirect(route('settings.user'));
         $response->assertSessionHasNoErrors();
         $this->assertDatabaseHas('setting_values', [
-            'domain'        => 'uv3',
-            'field_handle'  => 'uv3_count',
-            'user_id'       => $user->id,
+            'domain' => 'uv3',
+            'field_handle' => 'uv3_count',
+            'user_id' => $user->id,
             'value_integer' => 50,
         ]);
     }
@@ -361,5 +354,12 @@ class UserSettingsTest extends TestCase
         $response->assertSessionHasErrors('uv4_count');
         $errors = session('errors')->getBag('default');
         $this->assertStringContainsString('Count', $errors->first('uv4_count'));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+        Cache::flush();
     }
 }

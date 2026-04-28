@@ -24,7 +24,7 @@ trait PersistsFieldValues
     }
 
     /**
-     * @param  array<string, mixed>  $fields  ['field_handle' => value]
+     * @param array<string, mixed> $fields ['field_handle' => value]
      */
     public function setFields(Model $model, array $fields): void
     {
@@ -39,7 +39,7 @@ trait PersistsFieldValues
         foreach ($fields as $handle => $value) {
             $field = $fieldModels->get($handle);
 
-            if (! $field || ! $field->fieldType) {
+            if (!$field || !$field->fieldType) {
                 continue;
             }
 

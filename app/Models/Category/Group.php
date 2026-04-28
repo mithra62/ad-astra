@@ -25,14 +25,14 @@ class Group extends Model
 
     protected $casts = ['sort_order' => 'integer'];
 
-    public function categories(): HasMany
-    {
-        return $this->hasMany(Category::class, 'group_id');
-    }
-
     public function rootCategories(): HasMany
     {
         return $this->categories()->whereNull('parent_id');
+    }
+
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class, 'group_id');
     }
 
     public function scopeOrdered(Builder $query): Builder

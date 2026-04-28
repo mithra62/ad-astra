@@ -7,7 +7,7 @@ class EditElementRequest extends StoreElementRequest
     public function rules(): array
     {
         return [
-            'required'   => ['nullable', 'boolean'],
+            'required' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }

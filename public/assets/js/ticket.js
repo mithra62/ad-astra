@@ -5,37 +5,37 @@ $('.ticket-slider').slick({
     autoplaySpeed: 2000,
     responsive: [
 
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 3
-        }
-      },
-      {
-        breakpoint: 576,
-        settings: {
-          slidesToShow: 1
-        }
-      },
+        {
+            breakpoint: 768,
+            settings: {
+                slidesToShow: 3
+            }
+        },
+        {
+            breakpoint: 576,
+            settings: {
+                slidesToShow: 1
+            }
+        },
     ]
-  });
+});
 
-  // Function to format the date in "D MMM YYYY"
-  function formatDate(date) {
-      const d = new Date(date);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const day = d.getDate();
-      const month = months[d.getMonth()];
-      const year = d.getFullYear();
-      return `${day} ${month} ${year}`;
-  }
+// Function to format the date in "D MMM YYYY"
+function formatDate(date) {
+    const d = new Date(date);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const day = d.getDate();
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+}
 
 
-  $(function() {
+$(function () {
     $('#ticketdatatable').DataTable();
-   });
+});
 
-   function tableBodyFun() {
+function tableBodyFun() {
     return `
     <tr>
                             <td>
@@ -83,40 +83,40 @@ $('.ticket-slider').slick({
                             </td>
                         </tr>
   `
-  }
+}
 
-  $('#ticketkey').on('click', function () {
+$('#ticketkey').on('click', function () {
     let tableBody = document.querySelector("#ticket_key_body");
-        tableBody.innerHTML = tableBodyFun() + tableBody.innerHTML;
-        $("#ticketModal").modal("hide");
-        $('#clientname').val("");
-        $('#priorityname').val("");
-        $('#titlename').val("");
-        $('#statusname').val("");
-        $('#datename').val("");
-        $('#duename').val("");
-        deletAction();
-        // document.querySelector(".api_key_content").classList.toggle("d-none");
+    tableBody.innerHTML = tableBodyFun() + tableBody.innerHTML;
+    $("#ticketModal").modal("hide");
+    $('#clientname').val("");
+    $('#priorityname').val("");
+    $('#titlename').val("");
+    $('#statusname').val("");
+    $('#datename').val("");
+    $('#duename').val("");
+    deletAction();
+    // document.querySelector(".api_key_content").classList.toggle("d-none");
 
 
-  });
-   $('#create_ticket_key').on('click', function () {
+});
+$('#create_ticket_key').on('click', function () {
     $("#ticketModal").modal("show");
-  })
+})
 
 
-  function generateUUID() {
+function generateUUID() {
     var d = new Date().getTime();
     if (window.performance && typeof window.performance.now === "function") {
-      d += performance.now();
+        d += performance.now();
     }
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = (d + Math.random() * 16) % 16 | 0;
-      d = Math.floor(d / 16);
-      return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        var r = (d + Math.random() * 16) % 16 | 0;
+        d = Math.floor(d / 16);
+        return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
     return uuid;
-  }
+}
 
 function deletAction() {
     const deleteButtons = document.querySelectorAll(".delete-btn");

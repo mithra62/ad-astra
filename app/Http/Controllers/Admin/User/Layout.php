@@ -45,7 +45,7 @@ class Layout extends Controller
             'entryTypes.entryGroup',
         ])->find($shema->field_layout_id);
 
-        if (! $layout instanceof FieldLayoutModel) {
+        if (!$layout instanceof FieldLayoutModel) {
             abort(404);
         }
 
@@ -53,6 +53,13 @@ class Layout extends Controller
             $this->sidebarData(),
             ['layout' => $layout]
         ));
+    }
+
+    private function sidebarData(): array
+    {
+        return [
+            'layouts' => FieldLayoutModel::orderBy('name')->get(),
+        ];
     }
 
     /**
@@ -77,12 +84,5 @@ class Layout extends Controller
     public function destroy(string $id)
     {
         //
-    }
-
-    private function sidebarData(): array
-    {
-        return [
-            'layouts' => FieldLayoutModel::orderBy('name')->get(),
-        ];
     }
 }

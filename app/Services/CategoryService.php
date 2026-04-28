@@ -41,30 +41,11 @@ class CategoryService extends AbstractService
     }
 
     /**
-     * Update a category's core attributes and/or custom fields.
-     * Only keys present in $data are touched.
-     */
-    public function update(Category $category, array $data): Category
-    {
-        $attributes = Arr::except($data, ['fields']);
-
-        if (! empty($attributes)) {
-            $category->update($attributes);
-        }
-
-        if (array_key_exists('fields', $data) && is_array($data['fields'])) {
-            $this->setFields($category, $data['fields']);
-        }
-
-        return $category->refresh();
-    }
-
-    /**
      * Delete a category. Field values cascade via DB constraint.
      */
     public function delete(Category $category): bool
     {
-        return (bool) $category->delete();
+        return (bool)$category->delete();
     }
 
     /**
@@ -108,6 +89,25 @@ class CategoryService extends AbstractService
     }
 
     /**
+     * Update a category's core attributes and/or custom fields.
+     * Only keys present in $data are touched.
+     */
+    public function update(Category $category, array $data): Category
+    {
+        $attributes = Arr::except($data, ['fields']);
+
+        if (!empty($attributes)) {
+            $category->update($attributes);
+        }
+
+        if (array_key_exists('fields', $data) && is_array($data['fields'])) {
+            $this->setFields($category, $data['fields']);
+        }
+
+        return $category->refresh();
+    }
+
+    /**
      * Return the category's current field values as ['handle' => resolvedValue].
      */
     public function fieldArray(Category $category): array
@@ -126,20 +126,18 @@ class CategoryService extends AbstractService
     // -------------------------------------------------------------------------
 
     /**
-     * Resolve the FieldLayout for the category's group.
-     * Returns null if the group has no layout assigned.
-     */
-    public function resolveLayout(Category $category): ?FieldLayout
-    {
-        return $this->loadGroup($category)?->fieldLayout;
-    }
-
-    /**
      * Resolve the FieldGroups attached to the category's group.
      */
     public function resolveFieldGroups(Category $category): SupportCollection
     {
         return $this->loadGroup($category)?->fieldGroups ?? collect();
+    }
+
+    private function loadGroup(Category $category): ?CategoryGroup
+    {
+        $category->loadMissing('group.fieldLayout', 'group.fieldGroups');
+
+        return $category->group;
     }
 
     /**
@@ -150,7 +148,7 @@ class CategoryService extends AbstractService
     {
         $layout = $this->resolveLayout($category);
 
-        if (! $layout) {
+        if (!$layout) {
             return collect();
         }
 
@@ -162,6 +160,15 @@ class CategoryService extends AbstractService
     // -------------------------------------------------------------------------
     // Querying
     // -------------------------------------------------------------------------
+
+    /**
+     * Resolve the FieldLayout for the category's group.
+     * Returns null if the group has no layout assigned.
+     */
+    public function resolveLayout(Category $category): ?FieldLayout
+    {
+        return $this->loadGroup($category)?->fieldLayout;
+    }
 
     /**
      * Full recursive tree of categories for a group (roots + all descendants).
@@ -178,6 +185,10 @@ class CategoryService extends AbstractService
             ->get();
     }
 
+    // -------------------------------------------------------------------------
+    // Internals
+    // -------------------------------------------------------------------------
+
     /**
      * Flat list of all categories in a group.
      */
@@ -189,16 +200,5 @@ class CategoryService extends AbstractService
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
-    }
-
-    // -------------------------------------------------------------------------
-    // Internals
-    // -------------------------------------------------------------------------
-
-    private function loadGroup(Category $category): ?CategoryGroup
-    {
-        $category->loadMissing('group.fieldLayout', 'group.fieldGroups');
-
-        return $category->group;
     }
 }

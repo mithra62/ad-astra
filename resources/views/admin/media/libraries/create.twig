@@ -58,7 +58,8 @@
                             <label class="form-label" for="storage">Storage</label>
                             <select class="form-select" id="storage" name="storage">
                                 {% for key, disk in disks %}
-                                <option value="{{ key }}" {% if old('storage') == key %}selected{% endif %}>{{ disk.title }}</option>
+                                    <option value="{{ key }}"
+                                            {% if old('storage') == key %}selected{% endif %}>{{ disk.title }}</option>
                                 {% endfor %}
                             </select>
                             {% if errors.has('storage') %}

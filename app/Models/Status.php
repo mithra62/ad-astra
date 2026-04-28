@@ -15,7 +15,7 @@ class Status extends Model
 
     protected $casts = [
         'is_default' => 'boolean',
-        'is_public'  => 'boolean',
+        'is_public' => 'boolean',
         'sort_order' => 'integer',
     ];
 

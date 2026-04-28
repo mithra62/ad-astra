@@ -76,6 +76,22 @@ class LogRequestResponse
         return $response;
     }
 
+    private function encodeForLog(mixed $value): string
+    {
+        return $this->truncate(
+            json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: 'null'
+        );
+    }
+
+    private function truncate(string $value): string
+    {
+        if (strlen($value) <= $this->maxJsonLength) {
+            return $value;
+        }
+
+        return substr($value, 0, $this->maxJsonLength) . '...[truncated]';
+    }
+
     private function sanitizeValue(mixed $value, ?string $key = null): mixed
     {
         if ($key !== null && $this->isSensitiveKey($key)) {
@@ -102,6 +118,19 @@ class LogRequestResponse
         return $value;
     }
 
+    private function isSensitiveKey(string $key): bool
+    {
+        $normalizedKey = strtolower($key);
+
+        foreach ($this->sensitiveKeys as $sensitiveKey) {
+            if ($normalizedKey === $sensitiveKey || str_contains($normalizedKey, $sensitiveKey)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private function sanitizeHeaders(array $headers): array
     {
         $sanitized = [];
@@ -124,44 +153,15 @@ class LogRequestResponse
     {
         $payload = [
             'content_type' => $response->headers->get('Content-Type'),
-            'content_length' => strlen((string) $response->getContent()),
+            'content_length' => strlen((string)$response->getContent()),
         ];
 
         if ($response instanceof JsonResponse) {
             $payload['body'] = $this->sanitizeValue($response->getData(true));
         } elseif ($response->isClientError() || $response->isServerError()) {
-            $payload['body_preview'] = $this->truncate((string) $response->getContent());
+            $payload['body_preview'] = $this->truncate((string)$response->getContent());
         }
 
         return $this->encodeForLog($payload);
-    }
-
-    private function encodeForLog(mixed $value): string
-    {
-        return $this->truncate(
-            json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: 'null'
-        );
-    }
-
-    private function truncate(string $value): string
-    {
-        if (strlen($value) <= $this->maxJsonLength) {
-            return $value;
-        }
-
-        return substr($value, 0, $this->maxJsonLength) . '...[truncated]';
-    }
-
-    private function isSensitiveKey(string $key): bool
-    {
-        $normalizedKey = strtolower($key);
-
-        foreach ($this->sensitiveKeys as $sensitiveKey) {
-            if ($normalizedKey === $sensitiveKey || str_contains($normalizedKey, $sensitiveKey)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

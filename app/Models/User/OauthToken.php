@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OauthToken extends Model
 {
     use HasFactory;
+
     protected $table = 'user_oauth_tokens';
 
     protected $fillable = [
@@ -118,15 +119,15 @@ class OauthToken extends Model
      | -----------------------------------------------------------------
      */
 
+    public function isActive(): bool
+    {
+        return $this->revoked_at === null && !$this->isExpired();
+    }
+
     public function isExpired(): bool
     {
         return $this->expires_at instanceof CarbonInterface
             && $this->expires_at->isPast();
-    }
-
-    public function isActive(): bool
-    {
-        return $this->revoked_at === null && !$this->isExpired();
     }
 
     public function revoke(): void

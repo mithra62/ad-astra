@@ -3,17 +3,18 @@
     .draggable-card-img {
         position: relative;
 
-        &:hover{
-            .draggable-card-icon{
-              visibility: visible;
-              opacity: 1;
-              transition: all 0.6s;
-              transform: translatex(10px);
+        &:hover {
+            .draggable-card-icon {
+                visibility: visible;
+                opacity: 1;
+                transition: all 0.6s;
+                transform: translatex(10px);
             }
         }
-        img{
+
+        img {
             border-radius: var(--app-border-radius);
-           }
+        }
 
         .video-transparent-box {
             width: 100%;
@@ -33,21 +34,24 @@
             right: 16px;
             top: 17px;
         }
-        .draggable-card-icon{
+
+        .draggable-card-icon {
             position: absolute;
             left: 19px;
             top: 20px;
             visibility: hidden;
             opacity: 0;
             transform: translatex(0px);
-            animation-name:rotate-icon;
-           }
+            animation-name: rotate-icon;
+        }
     }
-    ul{
+
+    ul {
         transition: all 0.5s;
     }
+
     .draggable-card-content {
-        p{
+        p {
             line-break: anywhere;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -59,4 +63,5 @@
     }
 
 }
+
 // >>-- 113 Bookmark css end --<<

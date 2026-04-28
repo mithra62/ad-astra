@@ -21,11 +21,11 @@ class SettingValue extends Model
     ];
 
     protected $casts = [
-        'user_id'       => 'integer',
+        'user_id' => 'integer',
         'value_integer' => 'integer',
-        'value_float'   => 'float',
+        'value_float' => 'float',
         'value_boolean' => 'boolean',
-        'value_json'    => 'array',
+        'value_json' => 'array',
     ];
 
     public function user(): BelongsTo

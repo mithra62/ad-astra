@@ -16,16 +16,16 @@ class StoreEntryGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'             => ['required', 'string', 'max:255'],
-            'handle'           => ['required', 'string', 'max:255', Rule::unique('entry_groups', 'handle')],
-            'description'      => ['nullable', 'string'],
-            'sort_order'       => ['nullable', 'integer', 'min:0'],
-            'status_group_id'  => ['required', 'integer', 'exists:status_groups,id'],
-            'field_layout_id'  => ['nullable', 'integer', 'exists:field_layouts,id'],
-            'category_groups'  => ['nullable', 'array'],
-            'category_groups.*'=> ['integer', 'exists:category_groups,id'],
-            'field_groups'     => ['nullable', 'array'],
-            'field_groups.*'   => ['integer', 'exists:field_groups,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'handle' => ['required', 'string', 'max:255', Rule::unique('entry_groups', 'handle')],
+            'description' => ['nullable', 'string'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'status_group_id' => ['required', 'integer', 'exists:status_groups,id'],
+            'field_layout_id' => ['nullable', 'integer', 'exists:field_layouts,id'],
+            'category_groups' => ['nullable', 'array'],
+            'category_groups.*' => ['integer', 'exists:category_groups,id'],
+            'field_groups' => ['nullable', 'array'],
+            'field_groups.*' => ['integer', 'exists:field_groups,id'],
         ];
     }
 }

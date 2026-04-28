@@ -28,10 +28,10 @@ class SettingsDomainSeeder extends Seeder
             SettingDomain::firstOrCreate(
                 ['handle' => $handle],
                 [
-                    'name'        => $domainConfig['name'],
+                    'name' => $domainConfig['name'],
                     'description' => $domainConfig['description'] ?? null,
-                    'icon'        => $domainConfig['icon'] ?? null,
-                    'sort_order'  => $domainConfig['sort_order'] ?? 0,
+                    'icon' => $domainConfig['icon'] ?? null,
+                    'sort_order' => $domainConfig['sort_order'] ?? 0,
                 ]
             );
 

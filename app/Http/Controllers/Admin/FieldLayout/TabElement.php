@@ -12,7 +12,6 @@ use App\Http\Requests\FieldLayout\Tab\Element\StoreElementRequest;
 use App\Models\FieldLayout as FieldLayoutModel;
 use App\Models\FieldLayout\Tab as TabModel;
 use App\Models\FieldLayout\TabElement as TabElementModel;
-use Illuminate\Http\Request;
 
 class TabElement extends Controller
 {
@@ -21,7 +20,7 @@ class TabElement extends Controller
         $layout = FieldLayoutModel::find($layout_id);
         $tab = TabModel::find($tab_id);
 
-        if (! $layout instanceof FieldLayoutModel || ! $tab instanceof TabModel || $tab->field_layout_id != $layout->id) {
+        if (!$layout instanceof FieldLayoutModel || !$tab instanceof TabModel || $tab->field_layout_id != $layout->id) {
             abort(404);
         }
 
@@ -38,9 +37,9 @@ class TabElement extends Controller
         $tab = TabModel::find($tab_id);
         $element = TabElementModel::find($element_id);
 
-        if (! $layout instanceof FieldLayoutModel
-            || ! $tab instanceof TabModel
-            || ! $element instanceof TabElementModel
+        if (!$layout instanceof FieldLayoutModel
+            || !$tab instanceof TabModel
+            || !$element instanceof TabElementModel
             || $tab->field_layout_id != $layout->id
             || $element->field_layout_tab_id != $tab->id
         ) {
@@ -60,9 +59,9 @@ class TabElement extends Controller
         $tab = TabModel::find($tab_id);
         $element = TabElementModel::with('field.fieldType')->find($element_id);
 
-        if (! $layout instanceof FieldLayoutModel
-            || ! $tab instanceof TabModel
-            || ! $element instanceof TabElementModel
+        if (!$layout instanceof FieldLayoutModel
+            || !$tab instanceof TabModel
+            || !$element instanceof TabElementModel
             || $tab->field_layout_id != $layout->id
             || $element->field_layout_tab_id != $tab->id
         ) {
@@ -79,15 +78,22 @@ class TabElement extends Controller
         ));
     }
 
+    private function sidebarData(): array
+    {
+        return [
+            'layouts' => FieldLayoutModel::orderBy('name')->get(),
+        ];
+    }
+
     public function destroy(DeleteElementRequest $request, string $layout_id, string $tab_id, string $element_id)
     {
         $layout = FieldLayoutModel::find($layout_id);
         $tab = TabModel::find($tab_id);
         $element = TabElementModel::find($element_id);
 
-        if (! $layout instanceof FieldLayoutModel
-            || ! $tab instanceof TabModel
-            || ! $element instanceof TabElementModel
+        if (!$layout instanceof FieldLayoutModel
+            || !$tab instanceof TabModel
+            || !$element instanceof TabElementModel
             || $tab->field_layout_id != $layout->id
             || $element->field_layout_tab_id != $tab->id
         ) {
@@ -99,12 +105,5 @@ class TabElement extends Controller
         return redirect()
             ->route('field-layouts.tabs.edit', ['layout_id' => $layout->id, 'tab_id' => $tab->id])
             ->with('success', trans('field_layout.element.removed'));
-    }
-
-    private function sidebarData(): array
-    {
-        return [
-            'layouts' => FieldLayoutModel::orderBy('name')->get(),
-        ];
     }
 }

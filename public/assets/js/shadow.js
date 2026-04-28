@@ -14,8 +14,9 @@ shadowBoxes.forEach(box => {
                 gravity: "top",
                 position: "right",
                 stopOnFocus: true,
-                style: { background: "rgba(var(--success),1)" },
-                onClick: function () {}
+                style: {background: "rgba(var(--success),1)"},
+                onClick: function () {
+                }
             }).showToast();
         } catch (error) {
             console.error("Error copying class name:", error);
@@ -26,8 +27,9 @@ shadowBoxes.forEach(box => {
                 gravity: "top",
                 position: "right",
                 stopOnFocus: true,
-                style: { background: "rgba(var(--danger),1)" },
-                onClick: function () {}
+                style: {background: "rgba(var(--danger),1)"},
+                onClick: function () {
+                }
             }).showToast();
         }
     });

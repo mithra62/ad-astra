@@ -17,7 +17,8 @@
                         <a class="f-s-14 f-w-500" href="{{ route('statuses.groups') }}">Status Groups</a>
                     </li>
                     <li>
-                        <a class="f-s-14 f-w-500" href="{{ route('statuses.groups.show', status.group) }}">{{ status.group.name }}</a>
+                        <a class="f-s-14 f-w-500"
+                           href="{{ route('statuses.groups.show', status.group) }}">{{ status.group.name }}</a>
                     </li>
                     <li class="active">
                         <a class="f-s-14 f-w-500" href="{{ route('statuses.edit', status) }}">Edit Status</a>
@@ -41,20 +42,23 @@
                             </div>
                             <div class="card-body">
                                 <div class="profile-tab profile-container">
-                                    <form method="POST" action="{{ route('statuses.update', status.id) }}" class="row g-3 needs-validation" novalidate>
+                                    <form method="POST" action="{{ route('statuses.update', status.id) }}"
+                                          class="row g-3 needs-validation" novalidate>
                                         {{ csrf_field() }}
-                                        <input type="hidden" name="id" value="{{ status.id }}" />
+                                        <input type="hidden" name="id" value="{{ status.id }}"/>
                                         {{ method_field('PUT') }}
                                         <div class="col-md-12">
                                             <label class="form-label" for="name">Name</label>
-                                            <input class="form-control" id="name" required type="text" value="{{ old('name', status.name) }}" name="name">
+                                            <input class="form-control" id="name" required type="text"
+                                                   value="{{ old('name', status.name) }}" name="name">
                                             {% if errors.has('name') %}
                                                 <p class="text-danger">{{ errors.first('name') }}</p>
                                             {% endif %}
                                         </div>
                                         <div class="col-md-12">
                                             <label class="form-label" for="handle">Handle</label>
-                                            <input class="form-control" id="handle" required type="text" value="{{ old('handle', status.handle) }}" name="handle">
+                                            <input class="form-control" id="handle" required type="text"
+                                                   value="{{ old('handle', status.handle) }}" name="handle">
                                             {% if errors.has('handle') %}
                                                 <p class="text-danger">{{ errors.first('handle') }}</p>
                                             {% endif %}
@@ -63,9 +67,11 @@
                                             <label class="form-label" for="color">Color</label>
                                             <div class="input-group">
                                                 <input class="form-control" id="color" type="color"
-                                                       value="{{ old('color', status.color ?? '#6c757d') }}" name="color" style="max-width: 60px;">
+                                                       value="{{ old('color', status.color ?? '#6c757d') }}"
+                                                       name="color" style="max-width: 60px;">
                                                 <input class="form-control" id="color_hex" type="text"
-                                                       value="{{ old('color', status.color ?? '#6c757d') }}" placeholder="#6c757d"
+                                                       value="{{ old('color', status.color ?? '#6c757d') }}"
+                                                       placeholder="#6c757d"
                                                        oninput="document.getElementById('color').value = this.value">
                                             </div>
                                             {% if errors.has('color') %}
@@ -75,29 +81,35 @@
                                         <div class="col-md-4">
                                             <label class="form-label" for="sort_order">Sort Order</label>
                                             <input class="form-control" id="sort_order" type="number"
-                                                   value="{{ old('sort_order', status.sort_order) }}" name="sort_order" min="0">
+                                                   value="{{ old('sort_order', status.sort_order) }}" name="sort_order"
+                                                   min="0">
                                             {% if errors.has('sort_order') %}
                                                 <p class="text-danger">{{ errors.first('sort_order') }}</p>
                                             {% endif %}
                                         </div>
                                         <div class="col-md-12">
-                                            <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                            <div
+                                                class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
                                                 <input type="hidden" name="is_default" value="0">
-                                                <input class="toggle switch-border-primary" name="is_default" id="is_default"
+                                                <input class="toggle switch-border-primary" name="is_default"
+                                                       id="is_default"
                                                        type="checkbox" value="1"
                                                        {% if old('is_default', status.is_default) %}checked{% endif %}>
                                                 <label for="is_default">Set as Default Status</label>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
-                                            <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                            <div
+                                                class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
                                                 <input type="hidden" name="is_public" value="0">
-                                                <input class="toggle switch-border-primary" name="is_public" id="is_public"
+                                                <input class="toggle switch-border-primary" name="is_public"
+                                                       id="is_public"
                                                        type="checkbox" value="1"
                                                        {% if old('is_public', status.is_public) %}checked{% endif %}>
                                                 <label for="is_public">Publicly Visible</label>
                                             </div>
-                                            <small class="text-secondary">Entries with this status will appear in public-facing queries.</small>
+                                            <small class="text-secondary">Entries with this status will appear in
+                                                public-facing queries.</small>
                                         </div>
                                         <div class="col-12">
                                             <button class="btn btn-primary float-end" type="submit">Save Status</button>

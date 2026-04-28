@@ -66,12 +66,14 @@
                                                     {{ field.label }}
                                                 </label>
                                                 {% if field.instructions %}
-                                                    <small class="text-secondary d-block mb-1">{{ field.instructions }}</small>
+                                                    <small
+                                                        class="text-secondary d-block mb-1">{{ field.instructions }}</small>
                                                 {% endif %}
 
                                                 {% if hasOverride %}
                                                     <small class="text-success d-block mb-1">
-                                                        <span class="badge bg-light-success">your override is active</span>
+                                                        <span
+                                                            class="badge bg-light-success">your override is active</span>
                                                     </small>
                                                 {% else %}
                                                     <small class="text-muted d-block mb-1">
@@ -87,7 +89,7 @@
                                                                name="{{ field.handle }}"
                                                                id="field_{{ field.handle }}"
                                                                value="1"
-                                                               {{ old(field.handle, val) ? 'checked' : '' }}>
+                                                            {{ old(field.handle, val) ? 'checked' : '' }}>
                                                         <label class="form-check-label" for="field_{{ field.handle }}">
                                                             Enable
                                                         </label>
@@ -98,7 +100,7 @@
                                                            name="{{ field.handle }}"
                                                            id="field_{{ field.handle }}"
                                                            value="{{ old(field.handle, val) }}"
-                                                           {{ field.type == 'float' ? 'step="any"' : 'step="1"' }}>
+                                                        {{ field.type == 'float' ? 'step="any"' : 'step="1"' }}>
                                                 {% elseif field.type == 'textarea' %}
                                                     <textarea class="form-control"
                                                               name="{{ field.handle }}"

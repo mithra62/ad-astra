@@ -16,7 +16,8 @@
                             <a class="f-s-14 f-w-500" href="{{ route('field-layouts') }}">Field Layouts</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
                         </li>
                     </ul>
                 </div>
@@ -35,16 +36,18 @@
                         <h5>Layout Settings</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('field-layouts.update', layout) }}" class="row g-3 needs-validation" novalidate>
+                        <form method="POST" action="{{ route('field-layouts.update', layout) }}"
+                              class="row g-3 needs-validation" novalidate>
                             {{ csrf_field() }}
                             {{ method_field('PUT') }}
-                            <input type="hidden" name="id" value="{{ layout.id }}" />
+                            <input type="hidden" name="id" value="{{ layout.id }}"/>
 
                             <div class="col-md-12">
                                 <label class="form-label" for="name">Name</label>
                                 <input class="form-control" id="name" required type="text"
                                        value="{{ old('name', layout.name) }}" name="name">
-                                {% if errors.has('name') %}<p class="text-danger">{{ errors.first('name') }}</p>{% endif %}
+                                {% if errors.has('name') %}<p
+                                    class="text-danger">{{ errors.first('name') }}</p>{% endif %}
                             </div>
 
                             <div class="col-12">
@@ -58,41 +61,42 @@
                 {% set usedByGroups = layout.entryGroups %}
                 {% set usedByTypes  = layout.entryTypes %}
                 {% if usedByGroups.count >= 1 or usedByTypes.count >= 1 %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Used By</h5>
-                        <small class="text-secondary">Entry groups and types that use this field layout.</small>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Used By</h5>
+                            <small class="text-secondary">Entry groups and types that use this field layout.</small>
+                        </div>
+                        <div class="card-body">
+                            {% if usedByGroups.count >= 1 %}
+                                <p class="mb-1"><strong>Entry Groups (shared layout):</strong></p>
+                                <ul class="mb-3">
+                                    {% for eg in usedByGroups %}
+                                        <li>
+                                            <a href="{{ route('entries.groups.edit', eg) }}">{{ eg.name }}</a>
+                                            <small class="text-secondary">({{ eg.handle }})</small>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {% if usedByTypes.count >= 1 %}
+                                <p class="mb-1"><strong>Entry Types (type-specific layout):</strong></p>
+                                <ul class="mb-0">
+                                    {% for et in usedByTypes %}
+                                        <li>
+                                            <a href="{{ route('entries.groups.types.edit', {group_id: et.entryGroup.id, type_id: et.id}) }}">{{ et.name }}</a>
+                                            <small class="text-secondary">in {{ et.entryGroup.name ?? '?' }}</small>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="card-body">
-                        {% if usedByGroups.count >= 1 %}
-                            <p class="mb-1"><strong>Entry Groups (shared layout):</strong></p>
-                            <ul class="mb-3">
-                                {% for eg in usedByGroups %}
-                                    <li>
-                                        <a href="{{ route('entries.groups.edit', eg) }}">{{ eg.name }}</a>
-                                        <small class="text-secondary">({{ eg.handle }})</small>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                        {% if usedByTypes.count >= 1 %}
-                            <p class="mb-1"><strong>Entry Types (type-specific layout):</strong></p>
-                            <ul class="mb-0">
-                                {% for et in usedByTypes %}
-                                    <li>
-                                        <a href="{{ route('entries.groups.types.edit', {group_id: et.entryGroup.id, type_id: et.id}) }}">{{ et.name }}</a>
-                                        <small class="text-secondary">in {{ et.entryGroup.name ?? '?' }}</small>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-                </div>
                 {% else %}
-                <div class="alert alert-warning mb-4">
-                    <strong>This layout is not assigned anywhere.</strong>
-                    Assign it to an <a href="{{ route('entries.groups') }}">entry group</a> or entry type to use it on entry forms.
-                </div>
+                    <div class="alert alert-warning mb-4">
+                        <strong>This layout is not assigned anywhere.</strong>
+                        Assign it to an <a href="{{ route('entries.groups') }}">entry group</a> or entry type to use it
+                        on entry forms.
+                    </div>
                 {% endif %}
 
                 <!-- Tabs Management -->
@@ -104,7 +108,8 @@
                                 <small class="text-secondary">Tabs group fields visually when editing an entry.</small>
                             </div>
                             <div class="col-auto">
-                                <a href="{{ route('field-layouts.tabs.create', layout) }}" class="btn btn-primary btn-sm">
+                                <a href="{{ route('field-layouts.tabs.create', layout) }}"
+                                   class="btn btn-primary btn-sm">
                                     Add Tab
                                 </a>
                             </div>
@@ -144,7 +149,9 @@
                                     <tr>
                                         <td colspan="4">
                                             <p class="text-center mb-0">
-                                                No tabs configured. <a href="{{ route('field-layouts.tabs.create', layout) }}">Add one now.</a>
+                                                No tabs configured. <a
+                                                    href="{{ route('field-layouts.tabs.create', layout) }}">Add one
+                                                    now.</a>
                                             </p>
                                         </td>
                                     </tr>

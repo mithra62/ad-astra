@@ -34,14 +34,6 @@ class UserService
     }
 
     /**
-     * Find a User by ID. Throws ModelNotFoundException when not found.
-     */
-    public function get(int $id): User
-    {
-        return User::findOrFail($id);
-    }
-
-    /**
      * Return a paginated list of users, eager-loading the given relations.
      *
      * @param int $perPage Records per page (default 20)
@@ -62,6 +54,14 @@ class UserService
             ->orderBy('name')
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Find a User by ID. Throws ModelNotFoundException when not found.
+     */
+    public function get(int $id): User
+    {
+        return User::findOrFail($id);
     }
 
     /**
@@ -102,33 +102,82 @@ class UserService
     // -------------------------------------------------------------------------
 
     /**
-     * Create a user, optionally assigning roles and setting custom field values.
-     *
-     * Accepted keys in $data:
-     *   name, email, title, phone, password  — core user attributes
-     *   roles   (array)  — role names to sync
-     *   fields  (array)  — ['handle' => value] custom field values
+     * Add one or more roles without removing existing ones.
      */
-    public function create(array $data): User
+    public function assignRoles(User $user, array|string $roles): User
     {
-        $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation']);
+        $user->assignRole($roles);
 
-        if (!empty($attributes['password'])) {
-            $attributes['password'] = Hash::make($attributes['password']);
-        }
-
-        $user = User::create($attributes);
-
-        if (!empty($data['roles'])) {
-            $user->syncRoles((array)$data['roles']);
-        }
-
-        if (array_key_exists('fields', $data) && is_array($data['fields'])) {
-            $this->setFields($user, $data['fields']);
-        }
-
-        return $user->refresh();
+        return $user;
     }
+
+    /**
+     * Remove a single role.
+     */
+    public function revokeRole(User $user, string $role): User
+    {
+        $user->removeRole($role);
+
+        return $user;
+    }
+
+    /**
+     * Admin force-set — bypasses current-password verification.
+     * Use this when an admin resets another user's password.
+     */
+    public function setPassword(User $user, string $newPassword): void
+    {
+        $user->forceFill(['password' => Hash::make($newPassword)])->save();
+    }
+
+    // -------------------------------------------------------------------------
+    // Roles
+    // -------------------------------------------------------------------------
+
+    /**
+     * Issue a new personal access token for a user.
+     *
+     * @param string $name Token display name
+     * @param array $abilities Sanctum ability strings (default ['*'])
+     * @param Carbon|null $expiresAt Optional expiry timestamp
+     */
+    public function createToken(User $user, string $name, array $abilities = ['*'], ?Carbon $expiresAt = null): NewAccessToken
+    {
+        return $user->createToken($name, $abilities, $expiresAt);
+    }
+
+    /**
+     * Update a personal access token's attributes (e.g. name, abilities, expires_at).
+     * Returns null when the token does not exist or belongs to another user.
+     */
+    public function updateToken(User $user, int|string $tokenId, array $data): ?PersonalAccessToken
+    {
+        $token = $this->getToken($user, $tokenId);
+
+        if (!$token instanceof PersonalAccessToken) {
+            return null;
+        }
+
+        $token->update($data);
+
+        return $token->refresh();
+    }
+
+    /**
+     * Retrieve a single personal access token belonging to a user.
+     * Returns null when the token does not exist or belongs to another user.
+     */
+    public function getToken(User $user, int|string $tokenId): ?PersonalAccessToken
+    {
+        /** @var PersonalAccessToken|null $token */
+        $token = $user->tokens()->where('id', $tokenId)->first();
+
+        return $token;
+    }
+
+    // -------------------------------------------------------------------------
+    // Passwords
+    // -------------------------------------------------------------------------
 
     /**
      * Update a user's core attributes, roles, and/or custom fields.
@@ -153,24 +202,9 @@ class UserService
         return $user->refresh();
     }
 
-    public function delete(User $user): bool
-    {
-        return (bool)$user->delete();
-    }
-
     // -------------------------------------------------------------------------
-    // Roles
+    // Sanctum Personal Access Tokens
     // -------------------------------------------------------------------------
-
-    /**
-     * Add one or more roles without removing existing ones.
-     */
-    public function assignRoles(User $user, array|string $roles): User
-    {
-        $user->assignRole($roles);
-
-        return $user;
-    }
 
     /**
      * Replace all roles with the given set.
@@ -183,74 +217,6 @@ class UserService
     }
 
     /**
-     * Remove a single role.
-     */
-    public function revokeRole(User $user, string $role): User
-    {
-        $user->removeRole($role);
-
-        return $user;
-    }
-
-    // -------------------------------------------------------------------------
-    // Passwords
-    // -------------------------------------------------------------------------
-
-    /**
-     * Admin force-set — bypasses current-password verification.
-     * Use this when an admin resets another user's password.
-     */
-    public function setPassword(User $user, string $newPassword): void
-    {
-        $user->forceFill(['password' => Hash::make($newPassword)])->save();
-    }
-
-    // -------------------------------------------------------------------------
-    // Sanctum Personal Access Tokens
-    // -------------------------------------------------------------------------
-
-    /**
-     * Issue a new personal access token for a user.
-     *
-     * @param string $name Token display name
-     * @param array $abilities Sanctum ability strings (default ['*'])
-     * @param Carbon|null $expiresAt Optional expiry timestamp
-     */
-    public function createToken(User $user, string $name, array $abilities = ['*'], ?Carbon $expiresAt = null): NewAccessToken
-    {
-        return $user->createToken($name, $abilities, $expiresAt);
-    }
-
-    /**
-     * Retrieve a single personal access token belonging to a user.
-     * Returns null when the token does not exist or belongs to another user.
-     */
-    public function getToken(User $user, int|string $tokenId): ?PersonalAccessToken
-    {
-        /** @var PersonalAccessToken|null $token */
-        $token = $user->tokens()->where('id', $tokenId)->first();
-
-        return $token;
-    }
-
-    /**
-     * Update a personal access token's attributes (e.g. name, abilities, expires_at).
-     * Returns null when the token does not exist or belongs to another user.
-     */
-    public function updateToken(User $user, int|string $tokenId, array $data): ?PersonalAccessToken
-    {
-        $token = $this->getToken($user, $tokenId);
-
-        if (!$token instanceof PersonalAccessToken) {
-            return null;
-        }
-
-        $token->update($data);
-
-        return $token->refresh();
-    }
-
-    /**
      * Revoke (delete) a personal access token belonging to a user.
      * Returns true when deleted, false when the token was not found.
      */
@@ -259,12 +225,10 @@ class UserService
         return (bool)$user->tokens()->where('id', $tokenId)->delete();
     }
 
-    // -------------------------------------------------------------------------
-    // Two-Factor Authentication
-    //
-    // Requires the User model to use:
-    //   Laravel\Fortify\TwoFactorAuthenticatable
-    // -------------------------------------------------------------------------
+    public function delete(User $user): bool
+    {
+        return (bool)$user->delete();
+    }
 
     /**
      * Begin 2FA setup. Returns the QR code SVG and the plain-text secret
@@ -286,6 +250,13 @@ class UserService
             'secret' => decrypt($user->two_factor_secret),
         ];
     }
+
+    // -------------------------------------------------------------------------
+    // Two-Factor Authentication
+    //
+    // Requires the User model to use:
+    //   Laravel\Fortify\TwoFactorAuthenticatable
+    // -------------------------------------------------------------------------
 
     /**
      * Confirm 2FA setup with a valid TOTP code from the authenticator app.
@@ -315,19 +286,6 @@ class UserService
     }
 
     /**
-     * Return the user's current 2FA recovery codes as a plain array.
-     * Returns an empty array if 2FA is not set up.
-     */
-    public function getRecoveryCodes(User $user): array
-    {
-        if (empty($user->two_factor_recovery_codes)) {
-            return [];
-        }
-
-        return json_decode(decrypt($user->two_factor_recovery_codes), true) ?? [];
-    }
-
-    /**
      * Invalidate existing recovery codes and generate a fresh set.
      * Returns the new codes as a plain array.
      */
@@ -340,9 +298,18 @@ class UserService
         return $this->getRecoveryCodes($user);
     }
 
-    // -------------------------------------------------------------------------
-    // OAuth Token Management
-    // -------------------------------------------------------------------------
+    /**
+     * Return the user's current 2FA recovery codes as a plain array.
+     * Returns an empty array if 2FA is not set up.
+     */
+    public function getRecoveryCodes(User $user): array
+    {
+        if (empty($user->two_factor_recovery_codes)) {
+            return [];
+        }
+
+        return json_decode(decrypt($user->two_factor_recovery_codes), true) ?? [];
+    }
 
     /**
      * Store a new OAuth token for a provider, revoking any existing active token
@@ -361,6 +328,39 @@ class UserService
         return $user->oauthTokens()->create(
             array_merge($data, ['provider' => $provider])
         );
+    }
+
+    // -------------------------------------------------------------------------
+    // OAuth Token Management
+    // -------------------------------------------------------------------------
+
+    /**
+     * Create a user, optionally assigning roles and setting custom field values.
+     *
+     * Accepted keys in $data:
+     *   name, email, title, phone, password  — core user attributes
+     *   roles   (array)  — role names to sync
+     *   fields  (array)  — ['handle' => value] custom field values
+     */
+    public function create(array $data): User
+    {
+        $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation']);
+
+        if (!empty($attributes['password'])) {
+            $attributes['password'] = Hash::make($attributes['password']);
+        }
+
+        $user = User::create($attributes);
+
+        if (!empty($data['roles'])) {
+            $user->syncRoles((array)$data['roles']);
+        }
+
+        if (array_key_exists('fields', $data) && is_array($data['fields'])) {
+            $this->setFields($user, $data['fields']);
+        }
+
+        return $user->refresh();
     }
 
     /**

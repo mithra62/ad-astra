@@ -21,11 +21,6 @@ class FieldLayout extends Controller
         return $this->view('field-layouts.index', ['layouts' => $layouts]);
     }
 
-    public function create()
-    {
-        return $this->view('field-layouts.create', $this->sidebarData());
-    }
-
     public function store(StoreFieldLayoutRequest $request)
     {
         $creator = app(CreateNewFieldLayout::class);
@@ -36,28 +31,22 @@ class FieldLayout extends Controller
             ->with('success', trans('field_layout.created'));
     }
 
-    public function edit(string $id)
+    public function create()
     {
-        $layout = FieldLayoutModel::with([
-            'tabs.elements.field.fieldType',
-            'entryGroups',
-            'entryTypes.entryGroup',
-        ])->find($id);
+        return $this->view('field-layouts.create', $this->sidebarData());
+    }
 
-        if (! $layout instanceof FieldLayoutModel) {
-            abort(404);
-        }
-
-        return $this->view('field-layouts.edit', array_merge(
-            $this->sidebarData(),
-            ['layout' => $layout]
-        ));
+    private function sidebarData(): array
+    {
+        return [
+            'layouts' => FieldLayoutModel::orderBy('name')->get(),
+        ];
     }
 
     public function update(EditFieldLayoutRequest $request, string $id)
     {
         $layout = FieldLayoutModel::find($id);
-        if (! $layout instanceof FieldLayoutModel) {
+        if (!$layout instanceof FieldLayoutModel) {
             abort(404);
         }
 
@@ -69,10 +58,28 @@ class FieldLayout extends Controller
             ->with('success', trans('field_layout.updated'));
     }
 
+    public function edit(string $id)
+    {
+        $layout = FieldLayoutModel::with([
+            'tabs.elements.field.fieldType',
+            'entryGroups',
+            'entryTypes.entryGroup',
+        ])->find($id);
+
+        if (!$layout instanceof FieldLayoutModel) {
+            abort(404);
+        }
+
+        return $this->view('field-layouts.edit', array_merge(
+            $this->sidebarData(),
+            ['layout' => $layout]
+        ));
+    }
+
     public function confirm(string $id)
     {
         $layout = FieldLayoutModel::withCount('tabs')->find($id);
-        if (! $layout instanceof FieldLayoutModel) {
+        if (!$layout instanceof FieldLayoutModel) {
             return redirect()->route('field-layouts')->with('failure', trans('field_layout.not_found'));
         }
 
@@ -96,12 +103,5 @@ class FieldLayout extends Controller
         return redirect()
             ->route('field-layouts')
             ->with('failure', trans('field_layout.not_found'));
-    }
-
-    private function sidebarData(): array
-    {
-        return [
-            'layouts' => FieldLayoutModel::orderBy('name')->get(),
-        ];
     }
 }

@@ -19,37 +19,14 @@ class EntryService extends AbstractService
         $app,
         private readonly EntryTypeRegistry $registry,
         private readonly EntryRepository $repository,
-    ) {
+    )
+    {
         parent::__construct($app);
     }
 
     // -------------------------------------------------------------------------
     // CRUD
     // -------------------------------------------------------------------------
-
-    /**
-     * Create an entry of the given type handle.
-     *
-     * Accepted keys in $data:
-     *   title, handle, status, published_at  — core attributes
-     *   authors    (array)  — user IDs to sync as authors (keyed by sort order)
-     *   categories (array)  — category IDs to sync
-     *   fields     (array)  — ['handle' => value] field values (relational or scalar)
-     *
-     * Lifecycle hooks:
-     *   The resolved entry type's `beforeCreate(array $data): array` hook runs
-     *   inside the database transaction so any locks it acquires (e.g. for
-     *   auto-incrementing sequence fields) are held until the row is committed.
-     *   `afterCreate(Entry $entry, array $data): void` runs after the transaction
-     *   commits, so its side effects (emails, webhooks, etc.) are not rolled back
-     *   if persistence fails.
-     */
-    public function create(string $typeHandle, array $data = []): Entry
-    {
-        $entryType = $this->registry->resolveByHandle($typeHandle);
-
-        return $this->repository->create($entryType, $data);
-    }
 
     /**
      * Update an entry's core attributes, authors, categories, and/or fields.
@@ -72,14 +49,6 @@ class EntryService extends AbstractService
     public function delete(Entry $entry): bool
     {
         return $this->repository->delete($entry);
-    }
-
-    /**
-     * Fetch an entry by ID with standard eager-loads. Throws ModelNotFoundException if missing.
-     */
-    public function get(int $id): Entry
-    {
-        return $this->repository->findOrFail($id);
     }
 
     /**
@@ -130,14 +99,15 @@ class EntryService extends AbstractService
      * encountered (cycle detection). Returns a flat Collection of Entry models
      * in traversal order, deduplicated by ID.
      *
-     * @param  array<int>  $seen  IDs already visited — managed internally, not by callers
+     * @param array<int> $seen IDs already visited — managed internally, not by callers
      */
     public function loadRelatedRecursive(
-        Entry $entry,
+        Entry  $entry,
         string $fieldHandle,
-        int $maxDepth = 3,
-        array $seen = [],
-    ): Collection {
+        int    $maxDepth = 3,
+        array  $seen = [],
+    ): Collection
+    {
         if ($maxDepth <= 0 || in_array($entry->id, $seen, true)) {
             return collect();
         }
@@ -146,7 +116,7 @@ class EntryService extends AbstractService
         $entry->loadMissing('entryRelationships.relatedEntry', 'entryRelationships.field');
 
         $related = $entry->entryRelationships
-            ->filter(fn ($r) => $r->field?->handle === $fieldHandle && $r->relatedEntry !== null)
+            ->filter(fn($r) => $r->field?->handle === $fieldHandle && $r->relatedEntry !== null)
             ->sortBy('sort_order')
             ->pluck('relatedEntry');
 
@@ -167,18 +137,6 @@ class EntryService extends AbstractService
 
         return $results->unique('id')->values();
     }
-
-    /**
-     * Return a query builder scoped to entries.
-     */
-    public function query(): EntryQueryBuilder
-    {
-        return new EntryQueryBuilder($this->repository);
-    }
-
-    // -------------------------------------------------------------------------
-    // Custom Fields (Fieldable)
-    // -------------------------------------------------------------------------
 
     /**
      * Return the entry's current field values as ['handle' => resolvedValue].
@@ -222,7 +180,7 @@ class EntryService extends AbstractService
     }
 
     // -------------------------------------------------------------------------
-    // Schema Resolution
+    // Custom Fields (Fieldable)
     // -------------------------------------------------------------------------
 
     /**
@@ -248,10 +206,6 @@ class EntryService extends AbstractService
         return $this->repository->resolveLayoutFields($entry);
     }
 
-    // -------------------------------------------------------------------------
-    // Entry Tree
-    // -------------------------------------------------------------------------
-
     /**
      * Create a new Entry Tree node and attach it to the given entry.
      *
@@ -264,16 +218,17 @@ class EntryService extends AbstractService
      *                                  duplicate handle exists at the same level.
      */
     public function createTreeNode(
-        Entry $entry,
-        string $handle,
+        Entry      $entry,
+        string     $handle,
         ?EntryTree $parent = null,
-        ?string $template = null,
-        bool $isHome = false,
-    ): EntryTree {
+        ?string    $template = null,
+        bool       $isHome = false,
+    ): EntryTree
+    {
         return DB::transaction(function () use ($entry, $handle, $parent, $template, $isHome) {
             $entry->loadMissing('entryType');
 
-            if (! $entry->entryType?->has_entry_tree) {
+            if (!$entry->entryType?->has_entry_tree) {
                 throw new InvalidArgumentException('This entry type does not support Entry Tree routing.');
             }
 
@@ -283,14 +238,14 @@ class EntryService extends AbstractService
             $this->treeAssertUniqueHandleWithinParent($normalizedHandle, $parent);
 
             $node = EntryTree::create([
-                'entry_id'   => $entry->id,
-                'parent_id'  => $parent?->id,
-                'handle'     => $normalizedHandle,
-                'uri'        => '__pending__' . uniqid(),
-                'depth'      => $parent ? $parent->depth + 1 : 0,
+                'entry_id' => $entry->id,
+                'parent_id' => $parent?->id,
+                'handle' => $normalizedHandle,
+                'uri' => '__pending__' . uniqid(),
+                'depth' => $parent ? $parent->depth + 1 : 0,
                 'sort_order' => $this->treeNextSortOrder($parent),
-                'template'   => $template,
-                'is_home'    => $isHome,
+                'template' => $template,
+                'is_home' => $isHome,
             ]);
 
             $node->uri = $this->treeBuildUri($node);
@@ -298,6 +253,110 @@ class EntryService extends AbstractService
 
             return $node->fresh(['entry.entryType', 'parent']);
         });
+    }
+
+    // -------------------------------------------------------------------------
+    // Schema Resolution
+    // -------------------------------------------------------------------------
+
+    private function treeAssertValidPlacement(?EntryTree $parent, bool $isHome): void
+    {
+        if (!$isHome) {
+            return;
+        }
+
+        if ($parent) {
+            throw new InvalidArgumentException('The Entry Tree home node must be a root node.');
+        }
+
+        if (EntryTree::query()->where('is_home', true)->exists()) {
+            throw new InvalidArgumentException('Only one Entry Tree home node may exist.');
+        }
+    }
+
+    /**
+     * Return a query builder scoped to entries.
+     */
+    public function query(): EntryQueryBuilder
+    {
+        return new EntryQueryBuilder($this->repository);
+    }
+
+    // -------------------------------------------------------------------------
+    // Entry Tree
+    // -------------------------------------------------------------------------
+
+    /**
+     * Used when creating a new node — checks handle uniqueness by string value.
+     */
+    private function treeAssertUniqueHandleWithinParent(string $handle, ?EntryTree $parent): void
+    {
+        $query = EntryTree::query()->where('handle', $handle);
+
+        if ($parent) {
+            $query->where('parent_id', $parent->id);
+        } else {
+            $query->whereNull('parent_id');
+        }
+
+        if ($query->exists()) {
+            throw new InvalidArgumentException(
+                "An Entry Tree node with handle [{$handle}] already exists at this level."
+            );
+        }
+    }
+
+    /**
+     * Create an entry of the given type handle.
+     *
+     * Accepted keys in $data:
+     *   title, handle, status, published_at  — core attributes
+     *   authors    (array)  — user IDs to sync as authors (keyed by sort order)
+     *   categories (array)  — category IDs to sync
+     *   fields     (array)  — ['handle' => value] field values (relational or scalar)
+     *
+     * Lifecycle hooks:
+     *   The resolved entry type's `beforeCreate(array $data): array` hook runs
+     *   inside the database transaction so any locks it acquires (e.g. for
+     *   auto-incrementing sequence fields) are held until the row is committed.
+     *   `afterCreate(Entry $entry, array $data): void` runs after the transaction
+     *   commits, so its side effects (emails, webhooks, etc.) are not rolled back
+     *   if persistence fails.
+     */
+    public function create(string $typeHandle, array $data = []): Entry
+    {
+        $entryType = $this->registry->resolveByHandle($typeHandle);
+
+        return $this->repository->create($entryType, $data);
+    }
+
+    private function treeNextSortOrder(?EntryTree $parent): int
+    {
+        return ((int)EntryTree::query()
+                ->where('parent_id', $parent?->id)
+                ->max('sort_order')) + 1;
+    }
+
+    // -- Tree helpers (private) ------------------------------------------------
+
+    private function treeBuildUri(EntryTree $node): string
+    {
+        if ($node->is_home) {
+            return '/';
+        }
+
+        $segments = [];
+        $current = $node;
+
+        while ($current) {
+            if (!$current->is_home) {
+                array_unshift($segments, $current->handle);
+            }
+
+            $current = $current->parent;
+        }
+
+        return implode('/', array_filter($segments)) ?: '/';
     }
 
     /**
@@ -327,7 +386,7 @@ class EntryService extends AbstractService
 
             $this->treeAssertUniqueHandleInParent($node, $newParent);
 
-            $node->parent_id  = $newParent?->id;
+            $node->parent_id = $newParent?->id;
             $node->sort_order = $this->treeNormalizeSortOrder($newParent, $node, $sortOrder);
             $node->setRelation('parent', $newParent);
             $node->save();
@@ -340,91 +399,19 @@ class EntryService extends AbstractService
         });
     }
 
-    /**
-     * Recursively rebuild the URI and depth for a node and all of its
-     * descendants. Call after any structural change to the tree.
-     *
-     * @throws InvalidArgumentException if a home node is found below the root.
-     */
-    public function rebuildTreeUri(EntryTree $node): void
+    private function treeIsDescendantOf(EntryTree $possibleChild, EntryTree $possibleParent): bool
     {
-        $node->loadMissing(['parent', 'children']);
-
-        if ($node->is_home && $node->parent_id !== null) {
-            throw new InvalidArgumentException('The Entry Tree home node must remain at the root.');
-        }
-
-        $node->depth = $node->parent ? $node->parent->depth + 1 : 0;
-        $node->uri   = $this->treeBuildUri($node);
-        $node->save();
-
-        foreach ($node->children as $child) {
-            $this->rebuildTreeUri($child);
-        }
-    }
-
-    // -- Tree helpers (private) ------------------------------------------------
-
-    private function treeNextSortOrder(?EntryTree $parent): int
-    {
-        return ((int) EntryTree::query()
-            ->where('parent_id', $parent?->id)
-            ->max('sort_order')) + 1;
-    }
-
-    private function treeBuildUri(EntryTree $node): string
-    {
-        if ($node->is_home) {
-            return '/';
-        }
-
-        $segments = [];
-        $current  = $node;
+        $current = $possibleChild->loadMissing('parent');
 
         while ($current) {
-            if (! $current->is_home) {
-                array_unshift($segments, $current->handle);
+            if ($current->parent_id === $possibleParent->id) {
+                return true;
             }
 
             $current = $current->parent;
         }
 
-        return implode('/', array_filter($segments)) ?: '/';
-    }
-
-    private function treeAssertValidPlacement(?EntryTree $parent, bool $isHome): void
-    {
-        if (! $isHome) {
-            return;
-        }
-
-        if ($parent) {
-            throw new InvalidArgumentException('The Entry Tree home node must be a root node.');
-        }
-
-        if (EntryTree::query()->where('is_home', true)->exists()) {
-            throw new InvalidArgumentException('Only one Entry Tree home node may exist.');
-        }
-    }
-
-    /**
-     * Used when creating a new node — checks handle uniqueness by string value.
-     */
-    private function treeAssertUniqueHandleWithinParent(string $handle, ?EntryTree $parent): void
-    {
-        $query = EntryTree::query()->where('handle', $handle);
-
-        if ($parent) {
-            $query->where('parent_id', $parent->id);
-        } else {
-            $query->whereNull('parent_id');
-        }
-
-        if ($query->exists()) {
-            throw new InvalidArgumentException(
-                "An Entry Tree node with handle [{$handle}] already exists at this level."
-            );
-        }
+        return false;
     }
 
     /**
@@ -449,26 +436,11 @@ class EntryService extends AbstractService
         }
     }
 
-    private function treeIsDescendantOf(EntryTree $possibleChild, EntryTree $possibleParent): bool
-    {
-        $current = $possibleChild->loadMissing('parent');
-
-        while ($current) {
-            if ($current->parent_id === $possibleParent->id) {
-                return true;
-            }
-
-            $current = $current->parent;
-        }
-
-        return false;
-    }
-
     private function treeNormalizeSortOrder(?EntryTree $parent, EntryTree $node, int $sortOrder): int
     {
         $siblingCount = EntryTree::query()
             ->where('parent_id', $parent?->id)
-            ->when($node->exists, fn ($query) => $query->whereKeyNot($node->id))
+            ->when($node->exists, fn($query) => $query->whereKeyNot($node->id))
             ->count();
 
         return max(1, min($sortOrder, $siblingCount + 1));
@@ -478,7 +450,7 @@ class EntryService extends AbstractService
     {
         $siblings = EntryTree::query()
             ->where('parent_id', $parentId)
-            ->when($exceptNodeId, fn ($query) => $query->whereKeyNot($exceptNodeId))
+            ->when($exceptNodeId, fn($query) => $query->whereKeyNot($exceptNodeId))
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
@@ -490,6 +462,14 @@ class EntryService extends AbstractService
                 $sibling->forceFill(['sort_order' => $newSortOrder])->save();
             }
         }
+    }
+
+    /**
+     * Fetch an entry by ID with standard eager-loads. Throws ModelNotFoundException if missing.
+     */
+    public function get(int $id): Entry
+    {
+        return $this->repository->findOrFail($id);
     }
 
     private function treePlaceNodeAmongSiblings(EntryTree $node): void
@@ -510,6 +490,29 @@ class EntryService extends AbstractService
             if ($sibling->sort_order !== $newSortOrder) {
                 $sibling->forceFill(['sort_order' => $newSortOrder])->save();
             }
+        }
+    }
+
+    /**
+     * Recursively rebuild the URI and depth for a node and all of its
+     * descendants. Call after any structural change to the tree.
+     *
+     * @throws InvalidArgumentException if a home node is found below the root.
+     */
+    public function rebuildTreeUri(EntryTree $node): void
+    {
+        $node->loadMissing(['parent', 'children']);
+
+        if ($node->is_home && $node->parent_id !== null) {
+            throw new InvalidArgumentException('The Entry Tree home node must remain at the root.');
+        }
+
+        $node->depth = $node->parent ? $node->parent->depth + 1 : 0;
+        $node->uri = $this->treeBuildUri($node);
+        $node->save();
+
+        foreach ($node->children as $child) {
+            $this->rebuildTreeUri($child);
         }
     }
 }

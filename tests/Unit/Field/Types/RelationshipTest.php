@@ -6,11 +6,7 @@ use App\Field\AbstractField;
 use App\Field\Types\Relationship;
 use App\Models\Entry;
 use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\StatusGroup;
-use App\Models\Status;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Collection;
 use Tests\TestCase;
 
 class RelationshipTest extends TestCase
@@ -167,46 +163,64 @@ class RelationshipTest extends TestCase
     public function test_render_includes_select_element_with_correct_name(): void
     {
         $field = $this->makeFieldModel();
-        $html  = (new Relationship([]))->render(['id' => 'f1', 'value' => null, 'field' => $field]);
+        $html = (new Relationship([]))->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringContainsString('<select', $html);
         $this->assertStringContainsString('name="fields[' . $field->handle . '][]"', $html);
         $this->assertStringContainsString('multiple', $html);
     }
 
+    /**
+     * Return a minimal Field model with a random handle so render() can build
+     * the correct name="fields[handle][]" attribute.
+     */
+    private function makeFieldModel(): \App\Models\Field
+    {
+        return \App\Models\Field::factory()->make(['handle' => 'related_entries']);
+    }
+
     public function test_render_shows_no_entries_available_when_no_entry_group_configured(): void
     {
         $field = $this->makeFieldModel();
-        $html  = (new Relationship([]))->render(['id' => 'f1', 'value' => null, 'field' => $field]);
+        $html = (new Relationship([]))->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringContainsString('No entries available', $html);
     }
 
     public function test_render_shows_entry_titles_when_entry_group_is_configured(): void
     {
-        $group   = $this->makeEntryGroup('articles');
-        $entryA  = Entry::factory()->for($group)->create(['title' => 'Alpha Post']);
-        $entryB  = Entry::factory()->for($group)->create(['title' => 'Beta Post']);
+        $group = $this->makeEntryGroup('articles');
+        $entryA = Entry::factory()->for($group)->create(['title' => 'Alpha Post']);
+        $entryB = Entry::factory()->for($group)->create(['title' => 'Beta Post']);
 
-        $field   = $this->makeFieldModel();
-        $html    = (new Relationship(['entry_group' => 'articles']))
+        $field = $this->makeFieldModel();
+        $html = (new Relationship(['entry_group' => 'articles']))
             ->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringContainsString('Alpha Post', $html);
         $this->assertStringContainsString('Beta Post', $html);
-        $this->assertStringContainsString((string) $entryA->id, $html);
-        $this->assertStringContainsString((string) $entryB->id, $html);
+        $this->assertStringContainsString((string)$entryA->id, $html);
+        $this->assertStringContainsString((string)$entryB->id, $html);
+    }
+
+    /**
+     * Create a minimal EntryGroup with the given handle (and a StatusGroup so
+     * the factory chain doesn't fail on the status_group_id FK).
+     */
+    private function makeEntryGroup(string $handle): EntryGroup
+    {
+        return EntryGroup::factory()->create(['handle' => $handle]);
     }
 
     public function test_render_excludes_entries_from_other_groups(): void
     {
-        $group1  = $this->makeEntryGroup('articles');
-        $group2  = $this->makeEntryGroup('pages');
+        $group1 = $this->makeEntryGroup('articles');
+        $group2 = $this->makeEntryGroup('pages');
         Entry::factory()->for($group1)->create(['title' => 'Article One']);
         Entry::factory()->for($group2)->create(['title' => 'Page One']);
 
         $field = $this->makeFieldModel();
-        $html  = (new Relationship(['entry_group' => 'articles']))
+        $html = (new Relationship(['entry_group' => 'articles']))
             ->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringContainsString('Article One', $html);
@@ -221,7 +235,7 @@ class RelationshipTest extends TestCase
         Entry::factory()->for($group2)->create(['title' => 'Page One']);
 
         $field = $this->makeFieldModel();
-        $html  = (new Relationship(['entry_group' => ['articles', 'pages']]))
+        $html = (new Relationship(['entry_group' => ['articles', 'pages']]))
             ->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringContainsString('Article One', $html);
@@ -230,13 +244,13 @@ class RelationshipTest extends TestCase
 
     public function test_render_marks_currently_related_entries_as_selected(): void
     {
-        $group  = $this->makeEntryGroup('articles');
-        $entry  = Entry::factory()->for($group)->create(['title' => 'Selected Post']);
+        $group = $this->makeEntryGroup('articles');
+        $entry = Entry::factory()->for($group)->create(['title' => 'Selected Post']);
 
-        $field  = $this->makeFieldModel();
-        $html   = (new Relationship(['entry_group' => 'articles']))
+        $field = $this->makeFieldModel();
+        $html = (new Relationship(['entry_group' => 'articles']))
             ->render([
-                'id'    => 'f1',
+                'id' => 'f1',
                 'value' => collect([$entry]),   // as returned by Entry::field()
                 'field' => $field,
             ]);
@@ -253,9 +267,9 @@ class RelationshipTest extends TestCase
         $entry = Entry::factory()->for($group)->create(['title' => 'Flash Post']);
 
         $field = $this->makeFieldModel();
-        $html  = (new Relationship(['entry_group' => 'articles']))
+        $html = (new Relationship(['entry_group' => 'articles']))
             ->render([
-                'id'    => 'f1',
+                'id' => 'f1',
                 'value' => [$entry->id],   // as returned by old() flash data
                 'field' => $field,
             ]);
@@ -268,14 +282,14 @@ class RelationshipTest extends TestCase
 
     public function test_render_does_not_mark_unrelated_entries_as_selected(): void
     {
-        $group    = $this->makeEntryGroup('articles');
+        $group = $this->makeEntryGroup('articles');
         $selected = Entry::factory()->for($group)->create(['title' => 'Selected']);
-        $other    = Entry::factory()->for($group)->create(['title' => 'Other']);
+        $other = Entry::factory()->for($group)->create(['title' => 'Other']);
 
         $field = $this->makeFieldModel();
-        $html  = (new Relationship(['entry_group' => 'articles']))
+        $html = (new Relationship(['entry_group' => 'articles']))
             ->render([
-                'id'    => 'f1',
+                'id' => 'f1',
                 'value' => collect([$selected]),
                 'field' => $field,
             ]);
@@ -287,10 +301,14 @@ class RelationshipTest extends TestCase
         );
     }
 
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
     public function test_render_shows_limit_hint_when_limit_is_set(): void
     {
         $field = $this->makeFieldModel();
-        $html  = (new Relationship(['limit' => 3]))
+        $html = (new Relationship(['limit' => 3]))
             ->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringContainsString('3', $html);
@@ -300,31 +318,9 @@ class RelationshipTest extends TestCase
     public function test_render_omits_limit_hint_when_limit_is_zero(): void
     {
         $field = $this->makeFieldModel();
-        $html  = (new Relationship(['limit' => 0]))
+        $html = (new Relationship(['limit' => 0]))
             ->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringNotContainsString('data-limit', $html);
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    /**
-     * Create a minimal EntryGroup with the given handle (and a StatusGroup so
-     * the factory chain doesn't fail on the status_group_id FK).
-     */
-    private function makeEntryGroup(string $handle): EntryGroup
-    {
-        return EntryGroup::factory()->create(['handle' => $handle]);
-    }
-
-    /**
-     * Return a minimal Field model with a random handle so render() can build
-     * the correct name="fields[handle][]" attribute.
-     */
-    private function makeFieldModel(): \App\Models\Field
-    {
-        return \App\Models\Field::factory()->make(['handle' => 'related_entries']);
     }
 }

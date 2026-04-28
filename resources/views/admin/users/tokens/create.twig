@@ -21,7 +21,8 @@
                             <a class="f-s-14 f-w-500" href="{{ route('users.edit', user) }}">{{ user.name }}</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('users.token.create', user) }}">Create User Token</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('users.token.create', user) }}">Create User
+                                Token</a>
                         </li>
                     </ul>
                 </div>
@@ -36,18 +37,21 @@
                     <h5>Create User Token</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('users.token.store', user) }}" class="row g-3 needs-validation" novalidate>
+                    <form method="POST" action="{{ route('users.token.store', user) }}" class="row g-3 needs-validation"
+                          novalidate>
                         {{ csrf_field() }}
                         <div class="col-md-12">
                             <label class="form-label" for="name">Name</label>
-                            <input class="form-control" id="name" required type="text" value="{{ old('name') }}" name="name">
+                            <input class="form-control" id="name" required type="text" value="{{ old('name') }}"
+                                   name="name">
                             {% if errors.has('name') %}
                                 <p class="text-danger">{{ errors.first('name') }}</p>
                             {% endif %}
                         </div>
                         <div class="col-md-12 dates">
                             <label class="form-label" for="expires_at">Expires</label>
-                            <input class="form-control basic-date" id="expires_at" required type="text" value="{{ old('expires_at') }}" name="expires_at" placeholder="YYYY-MM-DD">
+                            <input class="form-control basic-date" id="expires_at" required type="text"
+                                   value="{{ old('expires_at') }}" name="expires_at" placeholder="YYYY-MM-DD">
                             {% if errors.has('expires_at') %}
                                 <p class="text-danger">{{ errors.first('expires_at') }}</p>
                             {% endif %}

@@ -28,7 +28,7 @@ class ContentServiceProvider extends ServiceProvider
 
         $this->app->alias(ContentService::class, EntryService::class);
 
-        $this->app->singleton(EntryGroupService::class, fn ($app) => new EntryGroupService($app));
-        $this->app->singleton(EntryTypeService::class, fn ($app) => new EntryTypeService($app));
+        $this->app->singleton(EntryGroupService::class, fn($app) => new EntryGroupService($app));
+        $this->app->singleton(EntryTypeService::class, fn($app) => new EntryTypeService($app));
     }
 }

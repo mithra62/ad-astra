@@ -34,12 +34,13 @@ class EntryGroupSeeder extends Seeder
     }
 
     private function seedBlogGroup(
-        StatusGroup $publication,
-        FieldGroup $contentFields,
-        FieldGroup $seoFields,
-        FieldGroup $relationshipFields,
+        StatusGroup   $publication,
+        FieldGroup    $contentFields,
+        FieldGroup    $seoFields,
+        FieldGroup    $relationshipFields,
         CategoryGroup $topics,
-    ): void {
+    ): void
+    {
         $layout = $this->createLayout('Blog Layout', [
             'Content' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
@@ -70,12 +71,49 @@ class EntryGroupSeeder extends Seeder
         );
     }
 
+    /**
+     * Create a FieldLayout with named tabs, each containing field handles.
+     *
+     * @param array<string, string[]> $tabs Tab name => [field handles]
+     */
+    private function createLayout(string $name, array $tabs): FieldLayout
+    {
+        $layout = FieldLayout::create(['name' => $name]);
+
+        $tabOrder = 1;
+        foreach ($tabs as $tabName => $fieldHandles) {
+            $tab = Tab::create([
+                'field_layout_id' => $layout->id,
+                'name' => $tabName,
+                'sort_order' => $tabOrder++,
+            ]);
+
+            $elementOrder = 1;
+            foreach ($fieldHandles as $handle) {
+                $field = Field::where('handle', $handle)->first();
+                if (!$field) {
+                    continue;
+                }
+
+                TabElement::create([
+                    'field_layout_tab_id' => $tab->id,
+                    'field_id' => $field->id,
+                    'required' => false,
+                    'sort_order' => $elementOrder++,
+                ]);
+            }
+        }
+
+        return $layout;
+    }
+
     private function seedProductsGroup(
-        StatusGroup $publication,
-        FieldGroup $contentFields,
-        FieldGroup $seoFields,
+        StatusGroup   $publication,
+        FieldGroup    $contentFields,
+        FieldGroup    $seoFields,
         CategoryGroup $productCategories,
-    ): void {
+    ): void
+    {
         $layout = $this->createLayout('Products Layout', [
             'Description' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
@@ -103,41 +141,5 @@ class EntryGroupSeeder extends Seeder
                 'sort_order' => 1,
             ]
         );
-    }
-
-    /**
-     * Create a FieldLayout with named tabs, each containing field handles.
-     *
-     * @param  array<string, string[]>  $tabs  Tab name => [field handles]
-     */
-    private function createLayout(string $name, array $tabs): FieldLayout
-    {
-        $layout = FieldLayout::create(['name' => $name]);
-
-        $tabOrder = 1;
-        foreach ($tabs as $tabName => $fieldHandles) {
-            $tab = Tab::create([
-                'field_layout_id' => $layout->id,
-                'name' => $tabName,
-                'sort_order' => $tabOrder++,
-            ]);
-
-            $elementOrder = 1;
-            foreach ($fieldHandles as $handle) {
-                $field = Field::where('handle', $handle)->first();
-                if (! $field) {
-                    continue;
-                }
-
-                TabElement::create([
-                    'field_layout_tab_id' => $tab->id,
-                    'field_id' => $field->id,
-                    'required' => false,
-                    'sort_order' => $elementOrder++,
-                ]);
-            }
-        }
-
-        return $layout;
     }
 }

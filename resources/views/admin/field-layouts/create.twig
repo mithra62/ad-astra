@@ -33,14 +33,17 @@
                         <h5>Create Field Layout</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('field-layouts.store') }}" class="row g-3 needs-validation" novalidate>
+                        <form method="POST" action="{{ route('field-layouts.store') }}" class="row g-3 needs-validation"
+                              novalidate>
                             {{ csrf_field() }}
 
                             <div class="col-md-12">
                                 <label class="form-label" for="name">Name</label>
-                                <input class="form-control" id="name" required type="text" value="{{ old('name') }}" name="name"
+                                <input class="form-control" id="name" required type="text" value="{{ old('name') }}"
+                                       name="name"
                                        placeholder="e.g. Blog Post Layout">
-                                {% if errors.has('name') %}<p class="text-danger">{{ errors.first('name') }}</p>{% endif %}
+                                {% if errors.has('name') %}<p
+                                    class="text-danger">{{ errors.first('name') }}</p>{% endif %}
                             </div>
 
                             <div class="col-12">

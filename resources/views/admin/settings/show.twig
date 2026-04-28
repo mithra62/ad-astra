@@ -15,7 +15,8 @@
                         <a class="f-s-14 f-w-500" href="{{ route('settings') }}">Settings</a>
                     </li>
                     <li class="active">
-                        <a class="f-s-14 f-w-500" href="{{ route('settings.show', domain.handle) }}">{{ domain.name }}</a>
+                        <a class="f-s-14 f-w-500"
+                           href="{{ route('settings.show', domain.handle) }}">{{ domain.name }}</a>
                     </li>
                 </ul>
             </div>
@@ -65,7 +66,8 @@
                                                 {% endif %}
                                             </label>
                                             {% if field.instructions %}
-                                                <small class="text-secondary d-block mb-1">{{ field.instructions }}</small>
+                                                <small
+                                                    class="text-secondary d-block mb-1">{{ field.instructions }}</small>
                                             {% endif %}
 
                                             {% set val = field_values[field.handle] is defined ? field_values[field.handle] : (field.default ?? '') %}
@@ -77,7 +79,7 @@
                                                            name="{{ field.handle }}"
                                                            id="field_{{ field.handle }}"
                                                            value="1"
-                                                           {{ old(field.handle, val) ? 'checked' : '' }}>
+                                                        {{ old(field.handle, val) ? 'checked' : '' }}>
                                                     <label class="form-check-label" for="field_{{ field.handle }}">
                                                         Enable
                                                     </label>
@@ -88,7 +90,7 @@
                                                        name="{{ field.handle }}"
                                                        id="field_{{ field.handle }}"
                                                        value="{{ old(field.handle, val) }}"
-                                                       {{ field.type == 'float' ? 'step="any"' : 'step="1"' }}>
+                                                    {{ field.type == 'float' ? 'step="any"' : 'step="1"' }}>
                                             {% elseif field.type == 'textarea' %}
                                                 <textarea class="form-control"
                                                           name="{{ field.handle }}"

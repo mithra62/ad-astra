@@ -45,13 +45,6 @@ class Category extends Model
         return $this->belongsTo(self::class, 'parent_id');
     }
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(self::class, 'parent_id')
-            ->orderBy('sort_order')
-            ->orderBy('name');
-    }
-
     public function childrenRecursive(int $maxDepth = PHP_INT_MAX): HasMany
     {
         if ($maxDepth <= 0) {
@@ -59,6 +52,13 @@ class Category extends Model
         }
 
         return $this->children()->with('childrenRecursive');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_id')
+            ->orderBy('sort_order')
+            ->orderBy('name');
     }
 
     public function scopeRoots(Builder $query): Builder

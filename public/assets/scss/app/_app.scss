@@ -1,8 +1,9 @@
 // >>-- 07 App css start --<<
 
-.app-wrapper{
+.app-wrapper {
     display: flex;
-    .app-content{
+
+    .app-content {
         padding-left: var(--sidebar-width);
         // padding-top: 100px;
         padding-top: 45px;
@@ -12,11 +13,13 @@
         transition: var(--app-transition);
         box-shadow: var(--box-shadow);
         overflow: hidden;
-        .container-xxl{
+
+        .container-xxl {
             margin: 0 auto;
         }
-        .page-title{
-            h4{
+
+        .page-title {
+            h4 {
                 font-weight: 600;
             }
         }

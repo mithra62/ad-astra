@@ -22,9 +22,9 @@ class EntryTypeActionsTest extends TestCase
         $group = EntryGroup::factory()->create();
 
         $result = app(EntryTypeService::class)->create($group->id, [
-            'name'   => 'Blog Post',
+            'name' => 'Blog Post',
             'handle' => 'blog-post',
-            'class'  => 'App\\EntryTypes\\BlogPostEntryType',
+            'class' => 'App\\EntryTypes\\BlogPostEntryType',
         ]);
 
         $this->assertInstanceOf(EntryType::class, $result);
@@ -35,16 +35,16 @@ class EntryTypeActionsTest extends TestCase
         $group = EntryGroup::factory()->create();
 
         app(EntryTypeService::class)->create($group->id, [
-            'name'   => 'Page',
+            'name' => 'Page',
             'handle' => 'page',
-            'class'  => 'App\\EntryTypes\\PageEntryType',
+            'class' => 'App\\EntryTypes\\PageEntryType',
         ]);
 
         $this->assertDatabaseHas('entry_types', [
             'entry_group_id' => $group->id,
-            'name'           => 'Page',
-            'handle'         => 'page',
-            'class'          => 'App\\EntryTypes\\PageEntryType',
+            'name' => 'Page',
+            'handle' => 'page',
+            'class' => 'App\\EntryTypes\\PageEntryType',
         ]);
     }
 
@@ -53,9 +53,9 @@ class EntryTypeActionsTest extends TestCase
         $group = EntryGroup::factory()->create();
 
         $result = app(EntryTypeService::class)->create($group->id, [
-            'name'   => 'News',
+            'name' => 'News',
             'handle' => 'news',
-            'class'  => 'App\\EntryTypes\\NewsArticleEntryType',
+            'class' => 'App\\EntryTypes\\NewsArticleEntryType',
         ]);
 
         $this->assertEquals($group->id, $result->entry_group_id);
@@ -66,9 +66,9 @@ class EntryTypeActionsTest extends TestCase
         $group = EntryGroup::factory()->create();
 
         $result = app(EntryTypeService::class)->create($group, [
-            'name'   => 'Video',
+            'name' => 'Video',
             'handle' => 'video',
-            'class'  => 'App\\EntryTypes\\VideoEntryType',
+            'class' => 'App\\EntryTypes\\VideoEntryType',
         ]);
 
         $this->assertEquals($group->id, $result->entry_group_id);
@@ -79,9 +79,9 @@ class EntryTypeActionsTest extends TestCase
         $group = EntryGroup::factory()->create();
 
         $result = app(EntryTypeService::class)->create($group->id, [
-            'name'       => 'Event',
-            'handle'     => 'event',
-            'class'      => 'App\\EntryTypes\\EventEntryType',
+            'name' => 'Event',
+            'handle' => 'event',
+            'class' => 'App\\EntryTypes\\EventEntryType',
             'sort_order' => 4,
         ]);
 
@@ -93,9 +93,9 @@ class EntryTypeActionsTest extends TestCase
         $group = EntryGroup::factory()->create();
 
         $result = app(EntryTypeService::class)->create($group->id, [
-            'name'   => 'Job',
+            'name' => 'Job',
             'handle' => 'job',
-            'class'  => 'App\\EntryTypes\\JobListingEntryType',
+            'class' => 'App\\EntryTypes\\JobListingEntryType',
         ]);
 
         $this->assertEquals(0, $result->sort_order);
@@ -103,13 +103,13 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_create_stores_field_layout_id_when_provided(): void
     {
-        $group  = EntryGroup::factory()->create();
+        $group = EntryGroup::factory()->create();
         $layout = FieldLayout::factory()->create();
 
         $result = app(EntryTypeService::class)->create($group->id, [
-            'name'            => 'Product',
-            'handle'          => 'product',
-            'class'           => 'App\\EntryTypes\\ProductEntryType',
+            'name' => 'Product',
+            'handle' => 'product',
+            'class' => 'App\\EntryTypes\\ProductEntryType',
             'field_layout_id' => $layout->id,
         ]);
 
@@ -121,9 +121,9 @@ class EntryTypeActionsTest extends TestCase
         $group = EntryGroup::factory()->create();
 
         $result = app(EntryTypeService::class)->create($group->id, [
-            'name'   => 'Podcast',
+            'name' => 'Podcast',
             'handle' => 'podcast',
-            'class'  => 'App\\EntryTypes\\PodcastEpisodeEntryType',
+            'class' => 'App\\EntryTypes\\PodcastEpisodeEntryType',
         ]);
 
         $this->assertNull($result->field_layout_id);
@@ -138,9 +138,9 @@ class EntryTypeActionsTest extends TestCase
         $type = EntryType::factory()->create();
 
         $result = app(EntryTypeService::class)->update($type, [
-            'name'   => 'Updated',
+            'name' => 'Updated',
             'handle' => 'updated',
-            'class'  => $type->class,
+            'class' => $type->class,
         ]);
 
         $this->assertInstanceOf(EntryType::class, $result);
@@ -151,16 +151,16 @@ class EntryTypeActionsTest extends TestCase
         $type = EntryType::factory()->create(['name' => 'Old', 'handle' => 'old']);
 
         app(EntryTypeService::class)->update($type, [
-            'name'   => 'New Name',
+            'name' => 'New Name',
             'handle' => 'new-handle',
-            'class'  => 'App\\EntryTypes\\PageEntryType',
+            'class' => 'App\\EntryTypes\\PageEntryType',
         ]);
 
         $this->assertDatabaseHas('entry_types', [
-            'id'     => $type->id,
-            'name'   => 'New Name',
+            'id' => $type->id,
+            'name' => 'New Name',
             'handle' => 'new-handle',
-            'class'  => 'App\\EntryTypes\\PageEntryType',
+            'class' => 'App\\EntryTypes\\PageEntryType',
         ]);
     }
 
@@ -169,9 +169,9 @@ class EntryTypeActionsTest extends TestCase
         $type = EntryType::factory()->create(['sort_order' => 1]);
 
         $result = app(EntryTypeService::class)->update($type, [
-            'name'       => $type->name,
-            'handle'     => $type->handle,
-            'class'      => $type->class,
+            'name' => $type->name,
+            'handle' => $type->handle,
+            'class' => $type->class,
             'sort_order' => 8,
         ]);
 
@@ -181,12 +181,12 @@ class EntryTypeActionsTest extends TestCase
     public function test_edit_updates_field_layout_id(): void
     {
         $layout = FieldLayout::factory()->create();
-        $type   = EntryType::factory()->create();
+        $type = EntryType::factory()->create();
 
         $result = app(EntryTypeService::class)->update($type, [
-            'name'            => $type->name,
-            'handle'          => $type->handle,
-            'class'           => $type->class,
+            'name' => $type->name,
+            'handle' => $type->handle,
+            'class' => $type->class,
             'field_layout_id' => $layout->id,
         ]);
 
@@ -198,9 +198,9 @@ class EntryTypeActionsTest extends TestCase
         $type = EntryType::factory()->create(['name' => 'Before']);
 
         $result = app(EntryTypeService::class)->update($type, [
-            'name'   => 'After',
+            'name' => 'After',
             'handle' => 'after',
-            'class'  => $type->class,
+            'class' => $type->class,
         ]);
 
         $this->assertNotSame($type, $result);
@@ -212,9 +212,9 @@ class EntryTypeActionsTest extends TestCase
         $type = EntryType::factory()->create(['sort_order' => 3]);
 
         $result = app(EntryTypeService::class)->update($type, [
-            'name'   => $type->name,
+            'name' => $type->name,
             'handle' => $type->handle,
-            'class'  => $type->class,
+            'class' => $type->class,
         ]);
 
         $this->assertEquals(0, $result->sort_order);

@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Facades\Content;
 use App\Models\Category;
-use App\Models\Category\Group as CategoryGroup;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\User;
@@ -27,7 +26,7 @@ class FakeDataSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    private const USER_COUNT  = 1_000;
+    private const USER_COUNT = 1_000;
     private const ENTRY_COUNT = 1_000;
 
     // Weighted role pool: ~70 % user, ~25 % admin, ~5 % super admin
@@ -42,13 +41,13 @@ class FakeDataSeeder extends Seeder
     // so entry groups with a narrower set (e.g. no 'archived') are handled safely.
     private const STATUS_WEIGHTS = [
         'published' => 6,
-        'draft'     => 3,
-        'archived'  => 1,
+        'draft' => 3,
+        'archived' => 1,
     ];
 
     public function run(): void
     {
-        if (! app()->environment(['local', 'testing'])) {
+        if (!app()->environment(['local', 'testing'])) {
             $this->command->warn('FakeDataSeeder only runs in local/testing environments. Skipped.');
             return;
         }
@@ -72,21 +71,21 @@ class FakeDataSeeder extends Seeder
 
         $userService = app(UserService::class);
         $created = [];
-        $failed  = 0;
+        $failed = 0;
 
         for ($i = 0; $i < self::USER_COUNT; $i++) {
             $password = Str::random(10) . 'A1!'; // satisfies min:8 + complexity
 
             $data = [
-                'name'                  => fake()->name(),
-                'email'                 => fake()->unique()->safeEmail(),
-                'password'              => $password,
+                'name' => fake()->name(),
+                'email' => fake()->unique()->safeEmail(),
+                'password' => $password,
                 'password_confirmation' => $password,
-                'roles'                 => [fake()->randomElement(self::ROLE_POOL)],
-                'fields'                => $this->fakeUserFields(),
+                'roles' => [fake()->randomElement(self::ROLE_POOL)],
+                'fields' => $this->fakeUserFields(),
             ];
 
-            if (! $this->validateUser($data)) {
+            if (!$this->validateUser($data)) {
                 $failed++;
                 continue;
             }
@@ -109,21 +108,21 @@ class FakeDataSeeder extends Seeder
         // All fields are optional in UserSchema; randomise presence to exercise
         // both sparse and fully-populated profiles.
         return array_filter([
-            'first_name'      => fake()->firstName(),
-            'last_name'       => fake()->lastName(),
-            'gender'          => fake()->optional(0.65)->randomElement([
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'gender' => fake()->optional(0.65)->randomElement([
                 'male', 'female', 'non-binary', 'prefer not to say',
             ]),
-            'date_of_birth'   => fake()->optional(0.60)
+            'date_of_birth' => fake()->optional(0.60)
                 ->dateTimeBetween('-70 years', '-18 years')
                 ?->format('Y-m-d'),
-            'website'         => fake()->optional(0.35)->url(),
-            'bio'             => fake()->optional(0.50)->paragraphs(
+            'website' => fake()->optional(0.35)->url(),
+            'bio' => fake()->optional(0.50)->paragraphs(
                 fake()->numberBetween(1, 3), true
             ),
-            'social_twitter'  => fake()->optional(0.30)->userName(),
+            'social_twitter' => fake()->optional(0.30)->userName(),
             'social_linkedin' => fake()->optional(0.25)->url(),
-        ], fn ($v) => $v !== null);
+        ], fn($v) => $v !== null);
     }
 
     /**
@@ -134,13 +133,13 @@ class FakeDataSeeder extends Seeder
     private function validateUser(array $data): bool
     {
         $validator = Validator::make($data, [
-            'name'                  => ['required', 'string', 'max:255'],
-            'email'                 => ['required', 'email', 'unique:users,email'],
-            'password'              => ['required', 'string', 'min:8', 'confirmed'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'password_confirmation' => ['required'],
-            'roles'                 => ['required', 'array'],
-            'roles.*'               => ['string', 'exists:roles,name'],
-            'fields'                => ['nullable', 'array'],
+            'roles' => ['required', 'array'],
+            'roles.*' => ['string', 'exists:roles,name'],
+            'fields' => ['nullable', 'array'],
         ]);
 
         if ($validator->fails()) {
@@ -161,7 +160,7 @@ class FakeDataSeeder extends Seeder
         $this->command->info('Creating ' . self::ENTRY_COUNT . ' entries...');
 
         // Pre-load everything needed so we avoid N+1 inside the loop.
-        $allUsers   = collect(empty($users) ? User::all() : $users);
+        $allUsers = collect(empty($users) ? User::all() : $users);
         $entryTypes = EntryType::with('entryGroup.statusGroup.statuses')->get()->keyBy('handle');
 
         // Category ID pools keyed by entry-type handle
@@ -173,7 +172,7 @@ class FakeDataSeeder extends Seeder
         Auth::setUser($operator);
 
         $created = 0;
-        $failed  = 0;
+        $failed = 0;
 
         $typeHandles = $entryTypes->keys()->all();
 
@@ -182,25 +181,25 @@ class FakeDataSeeder extends Seeder
 
             /** @var \App\Models\EntryType|null $entryType */
             $entryType = $entryTypes->get($typeHandle);
-            if (! $entryType) {
+            if (!$entryType) {
                 $failed++;
                 continue;
             }
 
             $entryGroup = $entryType->entryGroup;
-            $status     = $this->pickStatus($entryGroup);
+            $status = $this->pickStatus($entryGroup);
 
             $data = [
-                'title'        => $this->fakeTitle($typeHandle),
-                'handle'       => $this->uniqueHandle(),
-                'status'       => $status,
+                'title' => $this->fakeTitle($typeHandle),
+                'handle' => $this->uniqueHandle(),
+                'status' => $status,
                 'published_at' => $this->fakePublishedAt($status),
-                'authors'      => $this->pickAuthorIds($allUsers),
-                'categories'   => $this->pickCategoryIds($typeHandle, $categoryPools),
-                'fields'       => $this->fakeEntryFields($typeHandle),
+                'authors' => $this->pickAuthorIds($allUsers),
+                'categories' => $this->pickCategoryIds($typeHandle, $categoryPools),
+                'fields' => $this->fakeEntryFields($typeHandle),
             ];
 
-            if (! $this->validateEntry($data, $entryGroup)) {
+            if (!$this->validateEntry($data, $entryGroup)) {
                 $failed++;
                 continue;
             }
@@ -231,7 +230,7 @@ class FakeDataSeeder extends Seeder
         // Load every category ID, grouped by their category-group ID.
         $categoryIdsByGroup = Category::all()
             ->groupBy('group_id')
-            ->map(fn ($cats) => $cats->pluck('id')->all());
+            ->map(fn($cats) => $cats->pluck('id')->all());
 
         // Load every entry type with its entry group and that group's category groups.
         $entryTypes = EntryType::with('entryGroup.categoryGroups')->get();
@@ -249,22 +248,6 @@ class FakeDataSeeder extends Seeder
         }
 
         return $pools;
-    }
-
-    private function uniqueHandle(): string
-    {
-        // Slug-style handle guaranteed unique by combining a short word and a
-        // random suffix — avoids DB constraint violations at scale.
-        return Str::slug(fake()->word()) . '-' . Str::random(8);
-    }
-
-    private function fakePublishedAt(string $status): ?\DateTimeInterface
-    {
-        return match ($status) {
-            'published' => fake()->dateTimeBetween('-2 years', 'now'),
-            'archived'  => fake()->dateTimeBetween('-3 years', '-6 months'),
-            default     => null,
-        };
     }
 
     /**
@@ -290,6 +273,43 @@ class FakeDataSeeder extends Seeder
         return fake()->randomElement($pool);
     }
 
+    private function fakeTitle(string $typeHandle): string
+    {
+        return match ($typeHandle) {
+            'blog_post' => Str::title(fake()->sentence(fake()->numberBetween(4, 8), false)),
+            'product' => Str::title(fake()->words(fake()->numberBetween(2, 4), true)),
+            'event' => Str::title(fake()->sentence(3, false)) . ' ' . fake()->year(),
+            'news_article' => Str::title(fake()->sentence(fake()->numberBetween(5, 10), false)),
+            'page' => Str::title(fake()->words(fake()->numberBetween(2, 5), true)),
+            'job_listing' => fake()->jobTitle() . ' — ' . fake()->city(),
+            'podcast_episode' => sprintf(
+                'Ep. %d: %s',
+                fake()->numberBetween(1, 300),
+                Str::title(fake()->sentence(4, false))
+            ),
+            'portfolio_item' => fake()->catchPhrase(),
+            'video' => Str::title(fake()->sentence(fake()->numberBetween(3, 7), false)),
+            'recipe' => Str::title(implode(' ', fake()->words(3))) . ' Recipe',
+            default => Str::title(fake()->sentence(5, false)),
+        };
+    }
+
+    private function uniqueHandle(): string
+    {
+        // Slug-style handle guaranteed unique by combining a short word and a
+        // random suffix — avoids DB constraint violations at scale.
+        return Str::slug(fake()->word()) . '-' . Str::random(8);
+    }
+
+    private function fakePublishedAt(string $status): ?\DateTimeInterface
+    {
+        return match ($status) {
+            'published' => fake()->dateTimeBetween('-2 years', 'now'),
+            'archived' => fake()->dateTimeBetween('-3 years', '-6 months'),
+            default => null,
+        };
+    }
+
     /** @return int[] */
     private function pickAuthorIds(\Illuminate\Support\Collection $users): array
     {
@@ -302,7 +322,7 @@ class FakeDataSeeder extends Seeder
     }
 
     /**
-     * @param  array<string, int[]>  $pools
+     * @param array<string, int[]> $pools
      * @return int[]
      */
     private function pickCategoryIds(string $typeHandle, array $pools): array
@@ -317,28 +337,7 @@ class FakeDataSeeder extends Seeder
             return [];
         }
 
-        return (array) fake()->randomElements($pool, $count);
-    }
-
-    private function fakeTitle(string $typeHandle): string
-    {
-        return match ($typeHandle) {
-            'blog_post'       => Str::title(fake()->sentence(fake()->numberBetween(4, 8), false)),
-            'product'         => Str::title(fake()->words(fake()->numberBetween(2, 4), true)),
-            'event'           => Str::title(fake()->sentence(3, false)) . ' ' . fake()->year(),
-            'news_article'    => Str::title(fake()->sentence(fake()->numberBetween(5, 10), false)),
-            'page'            => Str::title(fake()->words(fake()->numberBetween(2, 5), true)),
-            'job_listing'     => fake()->jobTitle() . ' — ' . fake()->city(),
-            'podcast_episode' => sprintf(
-                'Ep. %d: %s',
-                fake()->numberBetween(1, 300),
-                Str::title(fake()->sentence(4, false))
-            ),
-            'portfolio_item'  => fake()->catchPhrase(),
-            'video'           => Str::title(fake()->sentence(fake()->numberBetween(3, 7), false)),
-            'recipe'          => Str::title(implode(' ', fake()->words(3))) . ' Recipe',
-            default           => Str::title(fake()->sentence(5, false)),
-        };
+        return (array)fake()->randomElements($pool, $count);
     }
 
     private function fakeEntryFields(string $typeHandle): array
@@ -347,15 +346,15 @@ class FakeDataSeeder extends Seeder
         // excerpt lengths vary by type to reflect realistic content diversity.
         $paragraphCount = match ($typeHandle) {
             'page', 'portfolio_item' => fake()->numberBetween(4, 10),
-            'recipe'                 => fake()->numberBetween(3, 6),
-            'podcast_episode'        => fake()->numberBetween(2, 5),
-            default                  => fake()->numberBetween(2, 6),
+            'recipe' => fake()->numberBetween(3, 6),
+            'podcast_episode' => fake()->numberBetween(2, 5),
+            default => fake()->numberBetween(2, 6),
         };
 
         return [
-            'body'             => fake()->paragraphs($paragraphCount, true),
-            'excerpt'          => fake()->paragraph(),
-            'meta_title'       => Str::limit(fake()->sentence(5, false), 55),
+            'body' => fake()->paragraphs($paragraphCount, true),
+            'excerpt' => fake()->paragraph(),
+            'meta_title' => Str::limit(fake()->sentence(5, false), 55),
             'meta_description' => Str::limit(fake()->sentence(15, false), 155),
         ];
     }
@@ -370,15 +369,15 @@ class FakeDataSeeder extends Seeder
         $validStatuses = $entryGroup->statusGroup?->statuses->pluck('handle')->all() ?? [];
 
         $validator = Validator::make($data, [
-            'title'        => ['required', 'string', 'max:255'],
-            'handle'       => ['nullable', 'string', 'max:255'],
-            'status'       => ['nullable', 'string', 'max:100', Rule::in($validStatuses)],
+            'title' => ['required', 'string', 'max:255'],
+            'handle' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', 'string', 'max:100', Rule::in($validStatuses)],
             'published_at' => ['nullable', 'date'],
-            'authors'      => ['nullable', 'array'],
-            'authors.*'    => ['integer', 'exists:users,id'],
-            'categories'   => ['nullable', 'array'],
+            'authors' => ['nullable', 'array'],
+            'authors.*' => ['integer', 'exists:users,id'],
+            'categories' => ['nullable', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
-            'fields'       => ['nullable', 'array'],
+            'fields' => ['nullable', 'array'],
         ]);
 
         if ($validator->fails()) {

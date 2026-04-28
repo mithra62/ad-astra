@@ -11,7 +11,7 @@ class CreateTabElement extends AbstractAction
 {
     public function create(Tab $tab, array $input): TabElement
     {
-        $fieldId = (int) $input['field_id'];
+        $fieldId = (int)$input['field_id'];
 
         if ($tab->elements()->where('field_id', $fieldId)->exists()) {
             throw ValidationException::withMessages(['field_id' => 'That field is already in this tab.']);
@@ -21,7 +21,7 @@ class CreateTabElement extends AbstractAction
 
         return $tab->elements()->create([
             'field_id' => $fieldId,
-            'required' => (bool) ($input['required'] ?? false),
+            'required' => (bool)($input['required'] ?? false),
             'sort_order' => $input['sort_order'] ?? $nextSort,
         ]);
     }

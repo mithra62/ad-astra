@@ -21,7 +21,7 @@ class DeleteFieldGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'confirm_removal' => 'required'
+            'confirm_removal' => 'required',
         ];
     }
 

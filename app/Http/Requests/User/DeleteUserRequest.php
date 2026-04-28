@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests\User;
 
 use App\Http\Requests\FormRequest;
@@ -21,7 +22,7 @@ class DeleteUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'confirm_removal' => 'required'
+            'confirm_removal' => 'required',
         ];
     }
 

@@ -8,7 +8,6 @@ use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\Field\Group\DeleteFieldGroupRequest;
 use App\Http\Requests\Field\Group\EditFieldGroupRequest;
 use App\Http\Requests\Field\Group\StoreFieldGroupRequest;
-use App\Models\Field;
 use App\Models\Field\Group as FieldGroup;
 
 class Group extends Controller
@@ -23,14 +22,6 @@ class Group extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return $this->view('fields.groups.create');
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(StoreFieldGroupRequest $request)
@@ -38,6 +29,14 @@ class Group extends Controller
         $creator = app(CreateNewFieldGroup::class);
         $group = $creator->create($request->validated());
         return redirect()->route('fields.groups.show', $group->id)->with('status', trans('field.group.created'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return $this->view('fields.groups.create');
     }
 
     /**
@@ -62,19 +61,6 @@ class Group extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $group = FieldGroup::find($id);
-        if (!$group instanceof FieldGroup) {
-            abort(404);
-        }
-
-        return $this->view('fields.groups.edit', ['group' => $group]);
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(EditFieldGroupRequest $request, string $id)
@@ -87,6 +73,19 @@ class Group extends Controller
         }
 
         abort(404);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $group = FieldGroup::find($id);
+        if (!$group instanceof FieldGroup) {
+            abort(404);
+        }
+
+        return $this->view('fields.groups.edit', ['group' => $group]);
     }
 
     /**

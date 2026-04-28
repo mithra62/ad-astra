@@ -25,11 +25,6 @@ class Group extends Controller
         return $this->view('entries.groups.index', ['groups' => $groups]);
     }
 
-    public function create()
-    {
-        return $this->view('entries.groups.create', $this->formData());
-    }
-
     public function store(StoreEntryGroupRequest $request)
     {
         $group = EntryGroups::create($request->validated());
@@ -39,6 +34,21 @@ class Group extends Controller
             ->with('status', trans('entry.group.created'));
     }
 
+    public function create()
+    {
+        return $this->view('entries.groups.create', $this->formData());
+    }
+
+    private function formData(): array
+    {
+        return [
+            'status_groups' => StatusGroup::ordered()->get(),
+            'category_groups' => CategoryGroup::orderBy('name')->get(),
+            'field_groups' => FieldGroup::orderBy('name')->get(),
+            'field_layouts' => FieldLayout::orderBy('name')->get(),
+        ];
+    }
+
     public function show(string $id)
     {
         $group = EntryGroup::with([
@@ -46,19 +56,19 @@ class Group extends Controller
             'statusGroup.statuses',
         ])->find($id);
 
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
         $allGroups = EntryGroup::ordered()->get();
-        $entries   = $group->entries()
+        $entries = $group->entries()
             ->with(['entryType', 'creator', 'authors'])
             ->latest()
             ->paginate(20);
 
         return $this->view('entries.groups.view', [
-            'group'   => $group,
-            'groups'  => $allGroups,
+            'group' => $group,
+            'groups' => $allGroups,
             'entries' => $entries,
         ]);
     }
@@ -73,7 +83,7 @@ class Group extends Controller
             'fieldLayout',
         ])->find($id);
 
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
@@ -82,7 +92,7 @@ class Group extends Controller
         return $this->view('entries.groups.edit', array_merge(
             $this->formData(),
             [
-                'group'  => $group,
+                'group' => $group,
                 'groups' => $allGroups,
             ]
         ));
@@ -90,9 +100,9 @@ class Group extends Controller
 
     public function update(EditEntryGroupRequest $request, string $id)
     {
-        $group = EntryGroups::find((int) $id);
+        $group = EntryGroups::find((int)$id);
 
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
@@ -105,9 +115,9 @@ class Group extends Controller
 
     public function destroy(DeleteEntryGroupRequest $request, string $id)
     {
-        $group = EntryGroups::find((int) $id);
+        $group = EntryGroups::find((int)$id);
 
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             return redirect()
                 ->route('entries.groups')
                 ->with('failure', trans('entry.group.not_found'));
@@ -124,25 +134,15 @@ class Group extends Controller
     {
         $group = EntryGroup::withCount('entries')->find($id);
 
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             return redirect()->route('entries.groups')->with('failure', trans('entry.group.not_found'));
         }
 
         $allGroups = EntryGroup::ordered()->get();
 
         return $this->view('entries.groups.delete', [
-            'group'  => $group,
+            'group' => $group,
             'groups' => $allGroups,
         ]);
-    }
-
-    private function formData(): array
-    {
-        return [
-            'status_groups'   => StatusGroup::ordered()->get(),
-            'category_groups' => CategoryGroup::orderBy('name')->get(),
-            'field_groups'    => FieldGroup::orderBy('name')->get(),
-            'field_layouts'   => FieldLayout::orderBy('name')->get(),
-        ];
     }
 }

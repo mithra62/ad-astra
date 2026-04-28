@@ -23,7 +23,7 @@ class EntryType extends Model
         'max_depth',
         'allowed_parent_types',
         'class',
-        'sort_order'
+        'sort_order',
     ];
 
     protected $casts = [

@@ -33,6 +33,20 @@ class EntryTreeActionsTest extends TestCase
         $this->assertSame($childEntry->entryType->id, $child->entry->entryType->id);
     }
 
+    protected function makeTreeEntry(array $entryOverrides = [], array $typeOverrides = []): Entry
+    {
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->for($group)->create(array_merge([
+            'has_entry_tree' => true,
+            'default_template' => 'entries.page',
+        ], $typeOverrides));
+
+        return Entry::factory()
+            ->for($group)
+            ->for($type)
+            ->create($entryOverrides);
+    }
+
     public function test_create_entry_tree_node_rejects_invalid_handles(): void
     {
         $service = app(EntryService::class);
@@ -119,44 +133,30 @@ class EntryTreeActionsTest extends TestCase
     public function test_rebuild_entry_tree_uri_rejects_non_root_home_nodes(): void
     {
         $parent = EntryTree::create([
-            'entry_id'   => $this->makeTreeEntry()->id,
-            'parent_id'  => null,
-            'handle'     => 'parent',
-            'uri'        => 'parent',
-            'depth'      => 0,
+            'entry_id' => $this->makeTreeEntry()->id,
+            'parent_id' => null,
+            'handle' => 'parent',
+            'uri' => 'parent',
+            'depth' => 0,
             'sort_order' => 1,
-            'template'   => null,
-            'is_home'    => false,
+            'template' => null,
+            'is_home' => false,
         ]);
 
         $invalidHome = EntryTree::create([
-            'entry_id'   => $this->makeTreeEntry()->id,
-            'parent_id'  => $parent->id,
-            'handle'     => 'home',
-            'uri'        => '/',
-            'depth'      => 1,
+            'entry_id' => $this->makeTreeEntry()->id,
+            'parent_id' => $parent->id,
+            'handle' => 'home',
+            'uri' => '/',
+            'depth' => 1,
             'sort_order' => 1,
-            'template'   => null,
-            'is_home'    => true,
+            'template' => null,
+            'is_home' => true,
         ]);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The Entry Tree home node must remain at the root.');
 
         app(EntryService::class)->rebuildTreeUri($invalidHome);
-    }
-
-    protected function makeTreeEntry(array $entryOverrides = [], array $typeOverrides = []): Entry
-    {
-        $group = EntryGroup::factory()->create();
-        $type = EntryType::factory()->for($group)->create(array_merge([
-            'has_entry_tree' => true,
-            'default_template' => 'entries.page',
-        ], $typeOverrides));
-
-        return Entry::factory()
-            ->for($group)
-            ->for($type)
-            ->create($entryOverrides);
     }
 }

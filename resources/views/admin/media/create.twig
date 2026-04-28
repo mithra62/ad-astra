@@ -18,7 +18,8 @@
                             <a class="f-s-14 f-w-500" href="{{ route('media.libraries') }}">Media</a>
                         </li>
                         <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries.show', library) }}">{{ library.name }}</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('media.libraries.show', library) }}">{{ library.name }}</a>
                         </li>
                         <li class="active">
                             <a class="f-s-14 f-w-500" href="{{ route('media.create', library) }}">Upload Media</a>
@@ -37,7 +38,8 @@
                     <h5>Upload Media</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('media.libraries.upload', library) }}" class="row g-3 needs-validation"
+                    <form method="POST" action="{{ route('media.libraries.upload', library) }}"
+                          class="row g-3 needs-validation"
                           enctype="multipart/form-data"
                           novalidate>
                         {{ csrf_field() }}

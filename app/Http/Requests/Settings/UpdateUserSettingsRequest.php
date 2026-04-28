@@ -27,25 +27,6 @@ class UpdateUserSettingsRequest extends SettingFormRequest
         return $this->settingRulesFromFields($this->overridableFields());
     }
 
-    public function attributes(): array
-    {
-        return $this->settingAttributesFromFields($this->overridableFields());
-    }
-
-    /**
-     * Return the normalised payload containing only user-overridable fields.
-     *
-     * @return array<string, mixed>
-     */
-    public function settingsPayload(): array
-    {
-        return $this->normaliseFields($this->overridableFields());
-    }
-
-    // -------------------------------------------------------------------------
-    // Internals
-    // -------------------------------------------------------------------------
-
     /**
      * Collect every user-overridable field definition across all domains.
      *
@@ -65,5 +46,24 @@ class UpdateUserSettingsRequest extends SettingFormRequest
         }
 
         return $fields;
+    }
+
+    public function attributes(): array
+    {
+        return $this->settingAttributesFromFields($this->overridableFields());
+    }
+
+    // -------------------------------------------------------------------------
+    // Internals
+    // -------------------------------------------------------------------------
+
+    /**
+     * Return the normalised payload containing only user-overridable fields.
+     *
+     * @return array<string, mixed>
+     */
+    public function settingsPayload(): array
+    {
+        return $this->normaliseFields($this->overridableFields());
     }
 }

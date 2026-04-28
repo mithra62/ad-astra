@@ -16,56 +16,10 @@ class SettingsResolverTest extends TestCase
 
     private Settings $settings;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        Cache::flush();
-        $this->settings = new Settings;
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    /**
-     * Register a domain in config with a text "timezone" and integer "count" field,
-     * then create the matching SettingDomain DB row.
-     */
-    private function makeDomain(string $handle = 'test'): SettingDomain
-    {
-        config(["settings.{$handle}" => [
-            'name'   => ucfirst($handle),
-            'fields' => [
-                [
-                    'handle'          => "{$handle}_timezone",
-                    'label'           => 'Timezone',
-                    'type'            => 'text',
-                    'default'         => 'UTC',
-                    'user_overridable' => true,
-                    'hidden'          => false,
-                ],
-                [
-                    'handle'          => "{$handle}_count",
-                    'label'           => 'Count',
-                    'type'            => 'integer',
-                    'default'         => 10,
-                    'user_overridable' => false,
-                    'hidden'          => false,
-                ],
-            ],
-        ]]);
-
-        return SettingDomain::create(['name' => ucfirst($handle), 'handle' => $handle]);
-    }
-
-    // -------------------------------------------------------------------------
-    // get()
-    // -------------------------------------------------------------------------
-
     public function test_get_returns_null_when_no_value_and_no_default(): void
     {
         config(['settings.g1' => [
-            'name'   => 'G1',
+            'name' => 'G1',
             'fields' => [
                 // No 'default' key
                 ['handle' => 'g1_count', 'label' => 'Count', 'type' => 'integer', 'user_overridable' => false, 'hidden' => false],
@@ -78,6 +32,10 @@ class SettingsResolverTest extends TestCase
         $this->assertNull($result);
     }
 
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
     public function test_get_returns_config_default_when_no_db_value(): void
     {
         $this->makeDomain('g2');
@@ -85,6 +43,41 @@ class SettingsResolverTest extends TestCase
         $result = $this->settings->get('g2', 'g2_timezone');
 
         $this->assertSame('UTC', $result);
+    }
+
+    // -------------------------------------------------------------------------
+    // get()
+    // -------------------------------------------------------------------------
+
+    /**
+     * Register a domain in config with a text "timezone" and integer "count" field,
+     * then create the matching SettingDomain DB row.
+     */
+    private function makeDomain(string $handle = 'test'): SettingDomain
+    {
+        config(["settings.{$handle}" => [
+            'name' => ucfirst($handle),
+            'fields' => [
+                [
+                    'handle' => "{$handle}_timezone",
+                    'label' => 'Timezone',
+                    'type' => 'text',
+                    'default' => 'UTC',
+                    'user_overridable' => true,
+                    'hidden' => false,
+                ],
+                [
+                    'handle' => "{$handle}_count",
+                    'label' => 'Count',
+                    'type' => 'integer',
+                    'default' => 10,
+                    'user_overridable' => false,
+                    'hidden' => false,
+                ],
+            ],
+        ]]);
+
+        return SettingDomain::create(['name' => ucfirst($handle), 'handle' => $handle]);
     }
 
     public function test_get_returns_system_value_over_config_default(): void
@@ -108,10 +101,6 @@ class SettingsResolverTest extends TestCase
         $this->assertSame('fallback', $result);
     }
 
-    // -------------------------------------------------------------------------
-    // set()
-    // -------------------------------------------------------------------------
-
     public function test_set_creates_system_value_in_correct_typed_column(): void
     {
         $this->makeDomain('s1');
@@ -119,12 +108,16 @@ class SettingsResolverTest extends TestCase
         $this->settings->set('s1', 's1_timezone', 'Asia/Tokyo');
 
         $this->assertDatabaseHas('setting_values', [
-            'domain'       => 's1',
+            'domain' => 's1',
             'field_handle' => 's1_timezone',
-            'user_id'      => null,
-            'value_text'   => 'Asia/Tokyo',
+            'user_id' => null,
+            'value_text' => 'Asia/Tokyo',
         ]);
     }
+
+    // -------------------------------------------------------------------------
+    // set()
+    // -------------------------------------------------------------------------
 
     public function test_set_writes_integer_to_value_integer_column(): void
     {
@@ -133,9 +126,9 @@ class SettingsResolverTest extends TestCase
         $this->settings->set('s2', 's2_count', 42);
 
         $this->assertDatabaseHas('setting_values', [
-            'domain'        => 's2',
-            'field_handle'  => 's2_count',
-            'user_id'       => null,
+            'domain' => 's2',
+            'field_handle' => 's2_count',
+            'user_id' => null,
             'value_integer' => 42,
         ]);
     }
@@ -148,10 +141,10 @@ class SettingsResolverTest extends TestCase
         $this->settings->set('s3', 's3_timezone', 'America/Chicago', $user);
 
         $this->assertDatabaseHas('setting_values', [
-            'domain'       => 's3',
+            'domain' => 's3',
             'field_handle' => 's3_timezone',
-            'user_id'      => $user->id,
-            'value_text'   => 'America/Chicago',
+            'user_id' => $user->id,
+            'value_text' => 'America/Chicago',
         ]);
     }
 
@@ -189,10 +182,6 @@ class SettingsResolverTest extends TestCase
         $this->assertNull(Cache::get("settings.user.{$user->id}.s6"));
     }
 
-    // -------------------------------------------------------------------------
-    // all() / system() — resolution order
-    // -------------------------------------------------------------------------
-
     public function test_system_returns_config_defaults_when_no_db_rows(): void
     {
         $this->makeDomain('a1');
@@ -200,15 +189,19 @@ class SettingsResolverTest extends TestCase
         $result = $this->settings->system('a1');
 
         $this->assertSame('UTC', $result['a1_timezone']);
-        $this->assertSame(10,    $result['a1_count']);
+        $this->assertSame(10, $result['a1_count']);
     }
+
+    // -------------------------------------------------------------------------
+    // all() / system() — resolution order
+    // -------------------------------------------------------------------------
 
     public function test_all_user_override_takes_precedence_over_system(): void
     {
         $this->makeDomain('a2');
         $user = User::factory()->create();
 
-        SettingValue::create(['domain' => 'a2', 'field_handle' => 'a2_timezone', 'user_id' => null,      'value_text' => 'UTC']);
+        SettingValue::create(['domain' => 'a2', 'field_handle' => 'a2_timezone', 'user_id' => null, 'value_text' => 'UTC']);
         SettingValue::create(['domain' => 'a2', 'field_handle' => 'a2_timezone', 'user_id' => $user->id, 'value_text' => 'America/New_York']);
 
         $result = $this->settings->all('a2', $user);
@@ -240,24 +233,20 @@ class SettingsResolverTest extends TestCase
         $this->assertSame(42, $result['a4_count']);
     }
 
-    // -------------------------------------------------------------------------
-    // columnFor()
-    // -------------------------------------------------------------------------
-
     public function test_column_for_maps_all_types_correctly(): void
     {
-        $this->assertSame('value_text',    $this->settings->columnFor('text'));
-        $this->assertSame('value_text',    $this->settings->columnFor('email'));
-        $this->assertSame('value_text',    $this->settings->columnFor('textarea'));
-        $this->assertSame('value_text',    $this->settings->columnFor('unknown_type'));
+        $this->assertSame('value_text', $this->settings->columnFor('text'));
+        $this->assertSame('value_text', $this->settings->columnFor('email'));
+        $this->assertSame('value_text', $this->settings->columnFor('textarea'));
+        $this->assertSame('value_text', $this->settings->columnFor('unknown_type'));
         $this->assertSame('value_integer', $this->settings->columnFor('integer'));
-        $this->assertSame('value_float',   $this->settings->columnFor('float'));
+        $this->assertSame('value_float', $this->settings->columnFor('float'));
         $this->assertSame('value_boolean', $this->settings->columnFor('boolean'));
-        $this->assertSame('value_json',    $this->settings->columnFor('json'));
+        $this->assertSame('value_json', $this->settings->columnFor('json'));
     }
 
     // -------------------------------------------------------------------------
-    // Caching
+    // columnFor()
     // -------------------------------------------------------------------------
 
     public function test_system_values_are_cached_after_first_access(): void
@@ -269,6 +258,10 @@ class SettingsResolverTest extends TestCase
 
         $this->assertNotNull(Cache::get('settings.system.c1'));
     }
+
+    // -------------------------------------------------------------------------
+    // Caching
+    // -------------------------------------------------------------------------
 
     public function test_user_values_are_cached_after_first_access(): void
     {
@@ -282,10 +275,6 @@ class SettingsResolverTest extends TestCase
         $this->assertNotNull(Cache::get("settings.user.{$user->id}.c2"));
     }
 
-    // -------------------------------------------------------------------------
-    // bust() and bustDomain()
-    // -------------------------------------------------------------------------
-
     public function test_bust_clears_system_cache(): void
     {
         Cache::put('settings.system.bx', ['k' => 'v'], 3600);
@@ -294,6 +283,10 @@ class SettingsResolverTest extends TestCase
 
         $this->assertNull(Cache::get('settings.system.bx'));
     }
+
+    // -------------------------------------------------------------------------
+    // bust() and bustDomain()
+    // -------------------------------------------------------------------------
 
     public function test_bust_clears_user_cache(): void
     {
@@ -323,5 +316,12 @@ class SettingsResolverTest extends TestCase
         $this->assertNull(Cache::get('settings.system.bd'));
         $this->assertNull(Cache::get("settings.user.{$userA->id}.bd"));
         $this->assertNull(Cache::get("settings.user.{$userB->id}.bd"));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Cache::flush();
+        $this->settings = new Settings;
     }
 }

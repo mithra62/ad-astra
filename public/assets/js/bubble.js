@@ -71,8 +71,8 @@ const bubble1ChartOption = {
     },
 
     colors: [
-        getLocalStorageItem('color-primary','#0F626A'),
-        getLocalStorageItem('color-secondary','#626262'),
+        getLocalStorageItem('color-primary', '#0F626A'),
+        getLocalStorageItem('color-secondary', '#626262'),
         '#0AB964',
         '#E14E5A',
     ],

@@ -21,7 +21,9 @@
                             <a class="f-s-14 f-w-500" href="{{ route('users.edit', user) }}">{{ user.name }}</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('users.token.confirm', {id: user.id, token_id: token}) }}">Delete Token</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('users.token.confirm', {id: user.id, token_id: token}) }}">Delete
+                                Token</a>
                         </li>
                     </ul>
                 </div>
@@ -32,7 +34,8 @@
         <!-- Blank start -->
         <div class="row">
             <!-- Default Card start -->
-            <form method="POST" action="{{ route('users.token.destroy', {id: user.id, token_id: token}) }}" class="row g-3 needs-validation" novalidate>
+            <form method="POST" action="{{ route('users.token.destroy', {id: user.id, token_id: token}) }}"
+                  class="row g-3 needs-validation" novalidate>
                 {{ csrf_field() }}
                 {{ method_field('DELETE') }}
                 <div class="col-md-12">
@@ -45,7 +48,8 @@
                             <p class="text-secondary">Deletes cannot be reversed!</p>
                         </div>
                         <div class="card-footer">
-                            <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                            <div
+                                class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
                                 <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal"
                                        type="checkbox">
                                 <label for="confirm_removal">Confirm Removal</label>

@@ -21,7 +21,8 @@ function copyText(element) {
         style: {
             background: "rgba(var(--success),1)",
         },
-        onClick: function () {} // Callback after click
+        onClick: function () {
+        } // Callback after click
     }).showToast();
 }
 

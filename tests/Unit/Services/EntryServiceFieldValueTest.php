@@ -22,10 +22,13 @@ class EntryServiceFieldValueTest extends TestCase
 
     private EntryService $service;
 
-    protected function setUp(): void
+    public function test_get_field_value_returns_null_when_no_value_stored(): void
     {
-        parent::setUp();
-        $this->service = app(EntryService::class);
+        [$entry] = $this->makeEntryWithTextField('summary');
+
+        $result = $this->service->getFieldValue($entry, 'summary');
+
+        $this->assertNull($result);
     }
 
     // -------------------------------------------------------------------------
@@ -39,14 +42,14 @@ class EntryServiceFieldValueTest extends TestCase
     private function makeEntryWithTextField(string $handle = 'body'): array
     {
         $fieldType = Type::factory()->create(['object' => Text::class]);
-        $field     = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => $handle]);
+        $field = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => $handle]);
 
-        $layout  = FieldLayout::factory()->create();
-        $tab     = Tab::factory()->create(['field_layout_id' => $layout->id]);
+        $layout = FieldLayout::factory()->create();
+        $tab = Tab::factory()->create(['field_layout_id' => $layout->id]);
         TabElement::factory()->create(['field_layout_tab_id' => $tab->id, 'field_id' => $field->id]);
 
         $group = EntryGroup::factory()->create(['field_layout_id' => $layout->id]);
-        $type  = EntryType::factory()->create(['entry_group_id' => $group->id, 'field_layout_id' => null]);
+        $type = EntryType::factory()->create(['entry_group_id' => $group->id, 'field_layout_id' => null]);
         $entry = Entry::factory()->create(['entry_group_id' => $group->id, 'entry_type_id' => $type->id]);
 
         return [$entry, $field];
@@ -56,24 +59,15 @@ class EntryServiceFieldValueTest extends TestCase
     // getFieldValue()
     // -------------------------------------------------------------------------
 
-    public function test_get_field_value_returns_null_when_no_value_stored(): void
-    {
-        [$entry] = $this->makeEntryWithTextField('summary');
-
-        $result = $this->service->getFieldValue($entry, 'summary');
-
-        $this->assertNull($result);
-    }
-
     public function test_get_field_value_returns_stored_scalar_value(): void
     {
         [$entry, $field] = $this->makeEntryWithTextField('headline');
 
         FieldValue::create([
-            'field_id'        => $field->id,
-            'fieldable_id'    => $entry->id,
-            'fieldable_type'  => $entry->getMorphClass(),
-            'value_text'      => 'Breaking News',
+            'field_id' => $field->id,
+            'fieldable_id' => $entry->id,
+            'fieldable_type' => $entry->getMorphClass(),
+            'value_text' => 'Breaking News',
         ]);
 
         $result = $this->service->getFieldValue($entry, 'headline');
@@ -89,10 +83,10 @@ class EntryServiceFieldValueTest extends TestCase
         $bare = Entry::find($entry->id); // no eager-loads at all
 
         FieldValue::create([
-            'field_id'       => $field->id,
-            'fieldable_id'   => $bare->id,
+            'field_id' => $field->id,
+            'fieldable_id' => $bare->id,
             'fieldable_type' => $bare->getMorphClass(),
-            'value_text'     => 'Hello intro',
+            'value_text' => 'Hello intro',
         ]);
 
         $result = $this->service->getFieldValue($bare, 'intro');
@@ -109,10 +103,6 @@ class EntryServiceFieldValueTest extends TestCase
         $this->assertNull($result);
     }
 
-    // -------------------------------------------------------------------------
-    // setFieldValue()
-    // -------------------------------------------------------------------------
-
     public function test_set_field_value_persists_a_scalar_value(): void
     {
         [$entry, $field] = $this->makeEntryWithTextField('content');
@@ -120,12 +110,16 @@ class EntryServiceFieldValueTest extends TestCase
         $this->service->setFieldValue($entry, 'content', 'Hello World');
 
         $this->assertDatabaseHas('field_values', [
-            'field_id'       => $field->id,
-            'fieldable_id'   => $entry->id,
+            'field_id' => $field->id,
+            'fieldable_id' => $entry->id,
             'fieldable_type' => $entry->getMorphClass(),
-            'value_text'     => 'Hello World',
+            'value_text' => 'Hello World',
         ]);
     }
+
+    // -------------------------------------------------------------------------
+    // setFieldValue()
+    // -------------------------------------------------------------------------
 
     public function test_set_field_value_overwrites_existing_value(): void
     {
@@ -135,10 +129,10 @@ class EntryServiceFieldValueTest extends TestCase
         $this->service->setFieldValue($entry, 'teaser', 'Updated value');
 
         $this->assertDatabaseHas('field_values', [
-            'field_id'       => $field->id,
-            'fieldable_id'   => $entry->id,
+            'field_id' => $field->id,
+            'fieldable_id' => $entry->id,
             'fieldable_type' => $entry->getMorphClass(),
-            'value_text'     => 'Updated value',
+            'value_text' => 'Updated value',
         ]);
 
         // Only one row should exist — not two
@@ -168,5 +162,11 @@ class EntryServiceFieldValueTest extends TestCase
         $result = $this->service->getFieldValue($entry, 'blurb');
 
         $this->assertSame('Round-trip value', $result);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->service = app(EntryService::class);
     }
 }

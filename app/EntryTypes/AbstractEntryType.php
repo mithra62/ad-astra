@@ -8,7 +8,9 @@ use App\Models\EntryType as EntryTypeRecord;
 
 abstract class AbstractEntryType
 {
-    public function __construct(protected EntryTypeRecord $record) {}
+    public function __construct(protected EntryTypeRecord $record)
+    {
+    }
 
     public function getRecord(): EntryTypeRecord
     {
@@ -32,11 +34,21 @@ abstract class AbstractEntryType
 
     // Lifecycle hooks — override in concrete types for custom behaviour
 
-    public function beforeCreate(array $data): array { return $data; }
+    public function beforeCreate(array $data): array
+    {
+        return $data;
+    }
 
-    public function afterCreate(Entry $entry, array $data): void {}
+    public function afterCreate(Entry $entry, array $data): void
+    {
+    }
 
-    public function beforeUpdate(Entry $entry, array $data): array { return $data; }
+    public function beforeUpdate(Entry $entry, array $data): array
+    {
+        return $data;
+    }
 
-    public function afterUpdate(Entry $entry, array $data): void {}
+    public function afterUpdate(Entry $entry, array $data): void
+    {
+    }
 }

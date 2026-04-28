@@ -15,7 +15,7 @@ abstract class AbstractCollection extends ResourceCollection
     public function toArray(Request $request): array
     {
         $return = [];
-        if($this->collection) {
+        if ($this->collection) {
             $return = [
                 'data' => $this->collection, // The actual collection of transformed posts
             ];
@@ -27,9 +27,9 @@ abstract class AbstractCollection extends ResourceCollection
     /**
      * Customize the pagination information for the resource.
      *
-     * @param  Request  $request
-     * @param  array  $paginated
-     * @param  array  $default
+     * @param Request $request
+     * @param array $paginated
+     * @param array $default
      * @return array
      */
     public function paginationInformation($request, $paginated, $default)

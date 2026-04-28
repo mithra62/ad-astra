@@ -34,7 +34,7 @@ class FieldLayout extends Model
         $this->loadMissing('tabs.elements.field');
 
         return $this->tabs->flatMap(
-            fn ($tab) => $tab->elements->map(fn ($el) => $el->field)
+            fn($tab) => $tab->elements->map(fn($el) => $el->field)
         );
     }
 }

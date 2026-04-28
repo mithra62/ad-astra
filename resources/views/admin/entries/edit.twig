@@ -15,7 +15,8 @@
                         <a class="f-s-14 f-w-500" href="{{ route('entries.groups') }}">Entry Groups</a>
                     </li>
                     <li>
-                        <a class="f-s-14 f-w-500" href="{{ route('entries.groups.show', entry.entryGroup) }}">{{ entry.entryGroup.name }}</a>
+                        <a class="f-s-14 f-w-500"
+                           href="{{ route('entries.groups.show', entry.entryGroup) }}">{{ entry.entryGroup.name }}</a>
                     </li>
                     <li class="active">
                         <a class="f-s-14 f-w-500" href="{{ route('entries.edit', entry) }}">Edit Entry</a>
@@ -40,7 +41,7 @@
                               class="row g-3 needs-validation" novalidate>
                             {{ csrf_field() }}
                             {{ method_field('PUT') }}
-                            <input type="hidden" name="id" value="{{ entry.id }}" />
+                            <input type="hidden" name="id" value="{{ entry.id }}"/>
 
                             <!-- Core fields -->
                             <div class="col-md-12">
@@ -62,24 +63,27 @@
 
                             <!-- Status -->
                             {% if entry.entryGroup.statusGroup and entry.entryGroup.statusGroup.statuses.count >= 1 %}
-                            <div class="col-md-4">
-                                <label class="form-label" for="status">Status</label>
-                                <select class="form-select" id="status" name="status">
-                                    {% if entry.status_handle and not entry.entryGroup.statusGroup.statuses.firstWhere('handle', entry.status_handle) %}
-                                        <option value="{{ entry.status_handle }}" selected>{{ entry.status_handle }} (invalid for this group)</option>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="status">Status</label>
+                                    <select class="form-select" id="status" name="status">
+                                        {% if entry.status_handle and not entry.entryGroup.statusGroup.statuses.firstWhere('handle', entry.status_handle) %}
+                                            <option value="{{ entry.status_handle }}" selected>{{ entry.status_handle }}
+                                                (invalid for this group)
+                                            </option>
+                                        {% endif %}
+                                        {% for s in entry.entryGroup.statusGroup.statuses %}
+                                            <option value="{{ s.handle }}"
+                                                    {% if old('status', entry.status_handle) == s.handle %}selected{% endif %}>
+                                                {{ s.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <small class="text-secondary">Only statuses from
+                                        the {{ entry.entryGroup.statusGroup.name }} group are allowed.</small>
+                                    {% if errors.has('status') %}
+                                        <p class="text-danger">{{ errors.first('status') }}</p>
                                     {% endif %}
-                                    {% for s in entry.entryGroup.statusGroup.statuses %}
-                                        <option value="{{ s.handle }}"
-                                            {% if old('status', entry.status_handle) == s.handle %}selected{% endif %}>
-                                            {{ s.name }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <small class="text-secondary">Only statuses from the {{ entry.entryGroup.statusGroup.name }} group are allowed.</small>
-                                {% if errors.has('status') %}
-                                    <p class="text-danger">{{ errors.first('status') }}</p>
-                                {% endif %}
-                            </div>
+                                </div>
                             {% endif %}
 
                             <!-- Published At -->
@@ -102,9 +106,11 @@
                                     {% for element in tab.elements %}
                                         {% set field = element.field %}
                                         <div class="col-md-12">
-                                            <label class="form-label" for="field_{{ field.handle }}">{{ field.label }}</label>
+                                            <label class="form-label"
+                                                   for="field_{{ field.handle }}">{{ field.label }}</label>
                                             {% if field.instructions %}
-                                                <small class="text-secondary d-block mb-1">{{ field.instructions }}</small>
+                                                <small
+                                                    class="text-secondary d-block mb-1">{{ field.instructions }}</small>
                                             {% endif %}
                                             <div class="input-group has-validation">
                                                 {{ field.render({
@@ -129,9 +135,11 @@
                                     {% for element in tab.elements %}
                                         {% set field = element.field %}
                                         <div class="col-md-12">
-                                            <label class="form-label" for="field_{{ field.handle }}">{{ field.label }}</label>
+                                            <label class="form-label"
+                                                   for="field_{{ field.handle }}">{{ field.label }}</label>
                                             {% if field.instructions %}
-                                                <small class="text-secondary d-block mb-1">{{ field.instructions }}</small>
+                                                <small
+                                                    class="text-secondary d-block mb-1">{{ field.instructions }}</small>
                                             {% endif %}
                                             <div class="input-group has-validation">
                                                 {{ field.render({
@@ -150,14 +158,14 @@
 
                             <!-- Authors -->
                             {% if users.count >= 1 %}
-                            <div class="col-12"><h5 class="border-bottom pb-2">Authors</h5></div>
-                            <div class="col-md-12">
-                                <label class="form-label" for="authors">Authors</label>
-                                <select class="select-basic-multiple-four w-100 select_primary" multiple="multiple"
-                                        name="authors[]" id="authors">
-                                    {% for user in users %}
-                                        <option value="{{ user.id }}"
-                                            {% if old('authors') %}
+                                <div class="col-12"><h5 class="border-bottom pb-2">Authors</h5></div>
+                                <div class="col-md-12">
+                                    <label class="form-label" for="authors">Authors</label>
+                                    <select class="select-basic-multiple-four w-100 select_primary" multiple="multiple"
+                                            name="authors[]" id="authors">
+                                        {% for user in users %}
+                                            <option value="{{ user.id }}"
+                                                {% if old('authors') %}
                                                 {% for key, val in old('authors') %}
                                                     {% if old('authors.' ~ key) == user.id %}selected{% endif %}
                                                 {% endfor %}
@@ -165,46 +173,46 @@
                                                 {% for author in entry.authors %}
                                                     {% if author.id == user.id %}selected{% endif %}
                                                 {% endfor %}
-                                            {% endif %}>
-                                            {{ user.name }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                {% if errors.has('authors') %}
-                                    <p class="text-danger">{{ errors.first('authors') }}</p>
-                                {% endif %}
-                            </div>
+                                                {% endif %}>
+                                                {{ user.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if errors.has('authors') %}
+                                        <p class="text-danger">{{ errors.first('authors') }}</p>
+                                    {% endif %}
+                                </div>
                             {% endif %}
 
                             <!-- Categories -->
                             {% if entry.entryGroup.categoryGroups.count >= 1 %}
-                            <div class="col-12"><h5 class="border-bottom pb-2">Categories</h5></div>
-                            {% for catGroup in entry.entryGroup.categoryGroups %}
-                                {% if catGroup.categories.count >= 1 %}
-                                <div class="col-md-12">
-                                    <label class="form-label">{{ catGroup.name }}</label>
-                                    {% for category in catGroup.categories %}
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="categories[]" value="{{ category.id }}"
-                                                   id="cat_{{ category.id }}"
-                                                {% if old('categories') %}
-                                                    {% for key, val in old('categories') %}
-                                                        {% if old('categories.' ~ key) == category.id %}checked{% endif %}
-                                                    {% endfor %}
-                                                {% else %}
-                                                    {% for entryCat in entry.categories %}
-                                                        {% if entryCat.id == category.id %}checked{% endif %}
-                                                    {% endfor %}
-                                                {% endif %}>
-                                            <label class="form-check-label" for="cat_{{ category.id }}">
-                                                {{ category.name }}
-                                            </label>
+                                <div class="col-12"><h5 class="border-bottom pb-2">Categories</h5></div>
+                                {% for catGroup in entry.entryGroup.categoryGroups %}
+                                    {% if catGroup.categories.count >= 1 %}
+                                        <div class="col-md-12">
+                                            <label class="form-label">{{ catGroup.name }}</label>
+                                            {% for category in catGroup.categories %}
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="categories[]" value="{{ category.id }}"
+                                                           id="cat_{{ category.id }}"
+                                                        {% if old('categories') %}
+                                                        {% for key, val in old('categories') %}
+                                                            {% if old('categories.' ~ key) == category.id %}checked{% endif %}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        {% for entryCat in entry.categories %}
+                                                            {% if entryCat.id == category.id %}checked{% endif %}
+                                                        {% endfor %}
+                                                        {% endif %}>
+                                                    <label class="form-check-label" for="cat_{{ category.id }}">
+                                                        {{ category.name }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
                                         </div>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
                             {% endif %}
 
                             <div class="col-12">
@@ -222,26 +230,26 @@
                     <div class="card-body">
                         <table class="table table-sm mb-0">
                             <tbody>
-                                <tr>
-                                    <th class="text-secondary" style="width: 30%">Entry Group</th>
-                                    <td>{{ entry.entryGroup.name }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-secondary">Entry Type</th>
-                                    <td>{{ entry.entryType.name ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-secondary">Created By</th>
-                                    <td>{{ entry.creator.name ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-secondary">Created</th>
-                                    <td>{{ entry.created_at.format('F j, Y g:i A') }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-secondary">Last Modified</th>
-                                    <td>{{ entry.updated_at.format('F j, Y g:i A') }}</td>
-                                </tr>
+                            <tr>
+                                <th class="text-secondary" style="width: 30%">Entry Group</th>
+                                <td>{{ entry.entryGroup.name }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-secondary">Entry Type</th>
+                                <td>{{ entry.entryType.name ?? '—' }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-secondary">Created By</th>
+                                <td>{{ entry.creator.name ?? '—' }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-secondary">Created</th>
+                                <td>{{ entry.created_at.format('F j, Y g:i A') }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-secondary">Last Modified</th>
+                                <td>{{ entry.updated_at.format('F j, Y g:i A') }}</td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>

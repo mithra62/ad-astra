@@ -14,7 +14,7 @@ const pie1Options = {
             fontSize: '16px',
         },
     },
-    colors: [getLocalStorageItem('color-primary','#0F626A'),getLocalStorageItem('color-secondary','#626262'),'#0AB964','#E14E5A','#F9C123'],
+    colors: [getLocalStorageItem('color-primary', '#0F626A'), getLocalStorageItem('color-secondary', '#626262'), '#0AB964', '#E14E5A', '#F9C123'],
     labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
     legend: {
         position: 'bottom'
@@ -43,7 +43,7 @@ const pie9Options = {
         height: 340,
         type: 'donut',
     },
-    dataLabels: { enabled: false },
+    dataLabels: {enabled: false},
     markers: {
         colors: [
             getLocalStorageItem('color-primary', '#0F626A'),
@@ -67,8 +67,8 @@ const pie9Options = {
     responsive: [{
         breakpoint: 1366,
         options: {
-            chart: { height: 240 },
-            legend: { show: false }
+            chart: {height: 240},
+            legend: {show: false}
         }
     }],
     legend: {
@@ -76,8 +76,8 @@ const pie9Options = {
         offsetY: 0,
     },
     tooltip: {
-        x: { show: false },
-        style: { fontSize: '16px' }
+        x: {show: false},
+        style: {fontSize: '16px'}
     },
 };
 
@@ -136,12 +136,12 @@ const polarOptions = {
     legend: {
         position: 'bottom'
     },
-    colors: [getLocalStorageItem('color-primary','#106068'),getLocalStorageItem('color-secondary','#606060'), '#0bb462', '#db4d58', '#f2bc23'],
+    colors: [getLocalStorageItem('color-primary', '#106068'), getLocalStorageItem('color-secondary', '#606060'), '#0bb462', '#db4d58', '#f2bc23'],
     responsive: [{
         breakpoint: 1366,
         options: {
             chart: {
-                height:250,
+                height: 250,
             },
         }
     }]
@@ -222,7 +222,7 @@ const chart4Options = {
             },
         }
     }],
-    colors: [getLocalStorageItem('color-primary','#106068'),getLocalStorageItem('color-secondary','#606060'),'#0bb462','#db4d58','#f2bc23'],
+    colors: [getLocalStorageItem('color-primary', '#106068'), getLocalStorageItem('color-secondary', '#606060'), '#0bb462', '#db4d58', '#f2bc23'],
 };
 
 const chart4Chart = new ApexCharts(document.querySelector("#chart4"), chart4Options);
@@ -237,7 +237,7 @@ const chart5Options = {
         height: 340,
         type: 'pie',
     },
-    colors: [getLocalStorageItem('color-primary','#106068'),getLocalStorageItem('color-secondary','#606060'),'#0bb462','#db4d58','#f2bc23'],
+    colors: [getLocalStorageItem('color-primary', '#106068'), getLocalStorageItem('color-secondary', '#606060'), '#0bb462', '#db4d58', '#f2bc23'],
     fill: {
         type: 'image',
         opacity: 0.85,

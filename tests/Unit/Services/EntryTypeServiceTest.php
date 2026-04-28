@@ -15,16 +15,6 @@ class EntryTypeServiceTest extends TestCase
 
     private EntryTypeService $service;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->service = app(EntryTypeService::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // find()
-    // -------------------------------------------------------------------------
-
     public function test_find_returns_entry_type_when_it_exists(): void
     {
         $type = EntryType::factory()->create();
@@ -35,16 +25,16 @@ class EntryTypeServiceTest extends TestCase
         $this->assertEquals($type->id, $result->id);
     }
 
+    // -------------------------------------------------------------------------
+    // find()
+    // -------------------------------------------------------------------------
+
     public function test_find_returns_null_when_type_does_not_exist(): void
     {
         $result = $this->service->find(999999);
 
         $this->assertNull($result);
     }
-
-    // -------------------------------------------------------------------------
-    // get()
-    // -------------------------------------------------------------------------
 
     public function test_get_returns_entry_type_when_it_exists(): void
     {
@@ -56,16 +46,16 @@ class EntryTypeServiceTest extends TestCase
         $this->assertEquals($type->id, $result->id);
     }
 
+    // -------------------------------------------------------------------------
+    // get()
+    // -------------------------------------------------------------------------
+
     public function test_get_throws_when_type_does_not_exist(): void
     {
         $this->expectException(ModelNotFoundException::class);
 
         $this->service->get(999999);
     }
-
-    // -------------------------------------------------------------------------
-    // delete()
-    // -------------------------------------------------------------------------
 
     public function test_delete_removes_type_from_database(): void
     {
@@ -76,6 +66,10 @@ class EntryTypeServiceTest extends TestCase
         $this->assertDatabaseMissing('entry_types', ['id' => $type->id]);
     }
 
+    // -------------------------------------------------------------------------
+    // delete()
+    // -------------------------------------------------------------------------
+
     public function test_delete_returns_true_on_success(): void
     {
         $type = EntryType::factory()->create();
@@ -84,10 +78,6 @@ class EntryTypeServiceTest extends TestCase
 
         $this->assertTrue($result);
     }
-
-    // -------------------------------------------------------------------------
-    // create() with EntryGroup model (not just int)
-    // -------------------------------------------------------------------------
 
     public function test_create_accepts_entry_group_model_or_int_equivalently(): void
     {
@@ -104,5 +94,15 @@ class EntryTypeServiceTest extends TestCase
 
         $this->assertEquals($groupA->id, $byModel->entry_group_id);
         $this->assertEquals($groupB->id, $byInt->entry_group_id);
+    }
+
+    // -------------------------------------------------------------------------
+    // create() with EntryGroup model (not just int)
+    // -------------------------------------------------------------------------
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->service = app(EntryTypeService::class);
     }
 }

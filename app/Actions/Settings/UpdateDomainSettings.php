@@ -16,8 +16,8 @@ use App\Settings;
 class UpdateDomainSettings extends AbstractAction
 {
     /**
-     * @param  string               $handle  Domain handle (e.g. 'general', 'media').
-     * @param  array<string, mixed> $data    Normalised field values keyed by handle.
+     * @param string $handle Domain handle (e.g. 'general', 'media').
+     * @param array<string, mixed> $data Normalised field values keyed by handle.
      */
     public function execute(string $handle, array $data): void
     {

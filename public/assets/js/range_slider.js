@@ -22,11 +22,11 @@ const format = {
 noUiSlider.create(valuesSlider, {
     start: 0,
     connect: 'lower',
-    range: { min: 0, max: valuesForSlider.length - 1 },
+    range: {min: 0, max: valuesForSlider.length - 1},
     step: 2,
     tooltips: true,
     format: format,
-    pips: { mode: 'steps', format: format },
+    pips: {mode: 'steps', format: format},
 });
 valuesSlider.noUiSlider.set(5);
 
@@ -46,11 +46,11 @@ const arbitraryFormat = {
 noUiSlider.create(arbitraryValuesSlider, {
     start: ['1GB', '16GB'],
     connect: true,
-    range: { min: 0, max: arbitraryValuesForSlider.length - 1 },
+    range: {min: 0, max: arbitraryValuesForSlider.length - 1},
     step: 1,
     tooltips: false,
     format: arbitraryFormat,
-    pips: { mode: 'steps', format: arbitraryFormat, density: 50 },
+    pips: {mode: 'steps', format: arbitraryFormat, density: 50},
 });
 
 // 4. Tooltips slider
@@ -59,7 +59,7 @@ noUiSlider.create(sliderTooltip, {
     start: 20,
     tooltips: true,
     connect: 'lower',
-    range: { 'min': 0, 'max': 100 }
+    range: {'min': 0, 'max': 100}
 });
 
 // 5. HTML5 input
@@ -75,7 +75,7 @@ const html5Slider = document.getElementById('html-input');
 noUiSlider.create(html5Slider, {
     start: [10, 30],
     connect: true,
-    range: { 'min': -20, 'max': 40 }
+    range: {'min': -20, 'max': 40}
 });
 
 const inputNumber = document.getElementById('number-input');
@@ -102,7 +102,7 @@ noUiSlider.create(coloredSlider, {
     start: [20, 32, 50, 70, 80, 90],
     connect: true,
     tooltips: [false, true, true, true, true, true],
-    range: { 'min': 0, 'max': 100 }
+    range: {'min': 0, 'max': 100}
 });
 
 const sliderConnects = coloredSlider.querySelectorAll('.noUi-connect');
@@ -117,7 +117,7 @@ const primarySlider = document.getElementById('primary-slider');
 noUiSlider.create(primarySlider, {
     start: 40,
     connect: 'lower',
-    range: { 'min': 0, 'max': 100 }
+    range: {'min': 0, 'max': 100}
 });
 
 // 11. Secondary slider
@@ -125,7 +125,7 @@ const secondarySlider = document.getElementById('secondary-slider');
 noUiSlider.create(secondarySlider, {
     start: 40,
     connect: 'lower',
-    range: { 'min': 0, 'max': 100 }
+    range: {'min': 0, 'max': 100}
 });
 
 // 12. Success slider
@@ -133,7 +133,7 @@ const successSlider = document.getElementById('success-slider');
 noUiSlider.create(successSlider, {
     start: 40,
     connect: 'lower',
-    range: { 'min': 0, 'max': 100 }
+    range: {'min': 0, 'max': 100}
 });
 
 // 13. Danger slider
@@ -141,7 +141,7 @@ const dangerSlider = document.getElementById('danger-slider');
 noUiSlider.create(dangerSlider, {
     start: 40,
     connect: 'lower',
-    range: { 'min': 0, 'max': 100 }
+    range: {'min': 0, 'max': 100}
 });
 
 // 14. Warning slider
@@ -149,7 +149,7 @@ const warningSlider = document.getElementById('warning-slider');
 noUiSlider.create(warningSlider, {
     start: 40,
     connect: 'lower',
-    range: { 'min': 0, 'max': 100 }
+    range: {'min': 0, 'max': 100}
 });
 
 // 15. Info slider
@@ -157,7 +157,7 @@ const infoSlider = document.getElementById('info-slider');
 noUiSlider.create(infoSlider, {
     start: 40,
     connect: 'lower',
-    range: { 'min': 0, 'max': 100 }
+    range: {'min': 0, 'max': 100}
 });
 
 // 16. Light slider
@@ -165,7 +165,7 @@ const lightSlider = document.getElementById('light-slider');
 noUiSlider.create(lightSlider, {
     start: 40,
     connect: 'lower',
-    range: { 'min': 0, 'max': 100 }
+    range: {'min': 0, 'max': 100}
 });
 
 // 17. Dark slider
@@ -173,7 +173,7 @@ const darkSlider = document.getElementById('dark-slider');
 noUiSlider.create(darkSlider, {
     start: 40,
     connect: 'lower',
-    range: { 'min': 0, 'max': 100 }
+    range: {'min': 0, 'max': 100}
 });
 
 // 18. Vertical slider
@@ -182,7 +182,7 @@ noUiSlider.create(verticalSlider, {
     start: 20,
     connect: 'lower',
     orientation: "vertical",
-    range: { 'min': 0, 'max': 100 }
+    range: {'min': 0, 'max': 100}
 });
 
 // 19. Colorpicker slider
@@ -195,7 +195,7 @@ sliders.forEach((slider, index) => {
         start: 127,
         connect: [true, false],
         orientation: "vertical",
-        range: { 'min': 0, 'max': 255 },
+        range: {'min': 0, 'max': 255},
     });
     slider.noUiSlider.on('update', function () {
         colors[index] = slider.noUiSlider.get();
@@ -210,8 +210,8 @@ const toggleSlider = document.getElementById('toggle-slider');
 noUiSlider.create(toggleSlider, {
     orientation: "vertical",
     start: 0,
-    range: { 'min': [0, 1], 'max': 1 },
-    format: wNumb({ decimals: 0 })
+    range: {'min': [0, 1], 'max': 1},
+    format: wNumb({decimals: 0})
 });
 
 toggleSlider.noUiSlider.on('update', function (values, handle) {
@@ -250,14 +250,14 @@ function crossUpdate(value, slider) {
 noUiSlider.create(slider1, {
     start: 20,
     connect: 'lower',
-    range: { min: 10, max: 100 }
+    range: {min: 10, max: 100}
 });
 
 noUiSlider.create(slider2, {
     start: 60,
     connect: 'lower',
     animate: false,
-    range: { min: 50, max: 100 }
+    range: {min: 50, max: 100}
 });
 
 slider1.noUiSlider.on('update', function (values, handle) {

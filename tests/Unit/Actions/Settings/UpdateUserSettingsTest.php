@@ -14,100 +14,6 @@ class UpdateUserSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        Cache::flush();
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function action(): UpdateUserSettings
-    {
-        return app(UpdateUserSettings::class);
-    }
-
-    /**
-     * Register a domain with two fields — one overridable, one not — and create
-     * the matching DB row. Returns the domain model.
-     */
-    private function makeDomain(string $handle): SettingDomain
-    {
-        config(["settings.{$handle}" => [
-            'name'   => strtoupper($handle),
-            'fields' => [
-                [
-                    'handle'           => "{$handle}_tz",
-                    'label'            => 'Timezone',
-                    'type'             => 'text',
-                    'default'          => 'UTC',
-                    'user_overridable' => true,
-                    'hidden'           => false,
-                ],
-                [
-                    'handle'           => "{$handle}_site",
-                    'label'            => 'Site Name',
-                    'type'             => 'text',
-                    'default'          => '',
-                    'user_overridable' => false,
-                    'hidden'           => false,
-                ],
-            ],
-        ]]);
-
-        return SettingDomain::create(['name' => strtoupper($handle), 'handle' => $handle]);
-    }
-
-    /**
-     * Register a domain whose sole field is a boolean toggle, user-overridable.
-     */
-    private function makeBooleanDomain(string $handle): SettingDomain
-    {
-        config(["settings.{$handle}" => [
-            'name'   => strtoupper($handle),
-            'fields' => [
-                [
-                    'handle'           => "{$handle}_flag",
-                    'label'            => 'Flag',
-                    'type'             => 'boolean',
-                    'default'          => false,
-                    'user_overridable' => true,
-                    'hidden'           => false,
-                ],
-            ],
-        ]]);
-
-        return SettingDomain::create(['name' => strtoupper($handle), 'handle' => $handle]);
-    }
-
-    /**
-     * Register a domain with no user-overridable fields.
-     */
-    private function makeNonOverridableDomain(string $handle): SettingDomain
-    {
-        config(["settings.{$handle}" => [
-            'name'   => strtoupper($handle),
-            'fields' => [
-                [
-                    'handle'           => "{$handle}_admin_only",
-                    'label'            => 'Admin Only',
-                    'type'             => 'text',
-                    'default'          => '',
-                    'user_overridable' => false,
-                    'hidden'           => false,
-                ],
-            ],
-        ]]);
-
-        return SettingDomain::create(['name' => strtoupper($handle), 'handle' => $handle]);
-    }
-
-    // -------------------------------------------------------------------------
-    // Persistence — user scope
-    // -------------------------------------------------------------------------
-
     public function test_execute_saves_value_with_correct_user_id(): void
     {
         $this->makeDomain('us1');
@@ -116,11 +22,51 @@ class UpdateUserSettingsTest extends TestCase
         $this->action()->execute($user, ['us1_tz' => 'Asia/Tokyo']);
 
         $this->assertDatabaseHas('setting_values', [
-            'domain'       => 'us1',
+            'domain' => 'us1',
             'field_handle' => 'us1_tz',
-            'user_id'      => $user->id,
-            'value_text'   => 'Asia/Tokyo',
+            'user_id' => $user->id,
+            'value_text' => 'Asia/Tokyo',
         ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Register a domain with two fields — one overridable, one not — and create
+     * the matching DB row. Returns the domain model.
+     */
+    private function makeDomain(string $handle): SettingDomain
+    {
+        config(["settings.{$handle}" => [
+            'name' => strtoupper($handle),
+            'fields' => [
+                [
+                    'handle' => "{$handle}_tz",
+                    'label' => 'Timezone',
+                    'type' => 'text',
+                    'default' => 'UTC',
+                    'user_overridable' => true,
+                    'hidden' => false,
+                ],
+                [
+                    'handle' => "{$handle}_site",
+                    'label' => 'Site Name',
+                    'type' => 'text',
+                    'default' => '',
+                    'user_overridable' => false,
+                    'hidden' => false,
+                ],
+            ],
+        ]]);
+
+        return SettingDomain::create(['name' => strtoupper($handle), 'handle' => $handle]);
+    }
+
+    private function action(): UpdateUserSettings
+    {
+        return app(UpdateUserSettings::class);
     }
 
     public function test_execute_does_not_create_system_value(): void
@@ -132,7 +78,7 @@ class UpdateUserSettingsTest extends TestCase
 
         $this->assertDatabaseMissing('setting_values', [
             'field_handle' => 'us2_tz',
-            'user_id'      => null,
+            'user_id' => null,
         ]);
     }
 
@@ -144,16 +90,38 @@ class UpdateUserSettingsTest extends TestCase
         $this->action()->execute($user, ['us3_flag' => true]);
 
         $this->assertDatabaseHas('setting_values', [
-            'domain'        => 'us3',
-            'field_handle'  => 'us3_flag',
-            'user_id'       => $user->id,
+            'domain' => 'us3',
+            'field_handle' => 'us3_flag',
+            'user_id' => $user->id,
             'value_boolean' => true,
         ]);
     }
 
     // -------------------------------------------------------------------------
-    // Only overridable fields are written
+    // Persistence — user scope
     // -------------------------------------------------------------------------
+
+    /**
+     * Register a domain whose sole field is a boolean toggle, user-overridable.
+     */
+    private function makeBooleanDomain(string $handle): SettingDomain
+    {
+        config(["settings.{$handle}" => [
+            'name' => strtoupper($handle),
+            'fields' => [
+                [
+                    'handle' => "{$handle}_flag",
+                    'label' => 'Flag',
+                    'type' => 'boolean',
+                    'default' => false,
+                    'user_overridable' => true,
+                    'hidden' => false,
+                ],
+            ],
+        ]]);
+
+        return SettingDomain::create(['name' => strtoupper($handle), 'handle' => $handle]);
+    }
 
     public function test_execute_ignores_non_overridable_handles_in_data(): void
     {
@@ -162,13 +130,13 @@ class UpdateUserSettingsTest extends TestCase
 
         // us4_site is not overridable — it shouldn't be written even if present
         $this->action()->execute($user, [
-            'us4_tz'   => 'UTC',
+            'us4_tz' => 'UTC',
             'us4_site' => 'Should be ignored',
         ]);
 
         $this->assertDatabaseMissing('setting_values', [
             'field_handle' => 'us4_site',
-            'user_id'      => $user->id,
+            'user_id' => $user->id,
         ]);
     }
 
@@ -180,14 +148,36 @@ class UpdateUserSettingsTest extends TestCase
         $this->action()->execute($user, ['us5_admin_only' => 'attempt']);
 
         $this->assertDatabaseMissing('setting_values', [
-            'domain'  => 'us5',
+            'domain' => 'us5',
             'user_id' => $user->id,
         ]);
     }
 
     // -------------------------------------------------------------------------
-    // Multi-domain distribution
+    // Only overridable fields are written
     // -------------------------------------------------------------------------
+
+    /**
+     * Register a domain with no user-overridable fields.
+     */
+    private function makeNonOverridableDomain(string $handle): SettingDomain
+    {
+        config(["settings.{$handle}" => [
+            'name' => strtoupper($handle),
+            'fields' => [
+                [
+                    'handle' => "{$handle}_admin_only",
+                    'label' => 'Admin Only',
+                    'type' => 'text',
+                    'default' => '',
+                    'user_overridable' => false,
+                    'hidden' => false,
+                ],
+            ],
+        ]]);
+
+        return SettingDomain::create(['name' => strtoupper($handle), 'handle' => $handle]);
+    }
 
     public function test_execute_distributes_payload_across_multiple_domains(): void
     {
@@ -201,18 +191,22 @@ class UpdateUserSettingsTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('setting_values', [
-            'domain'       => 'us6a',
+            'domain' => 'us6a',
             'field_handle' => 'us6a_tz',
-            'user_id'      => $user->id,
-            'value_text'   => 'America/Denver',
+            'user_id' => $user->id,
+            'value_text' => 'America/Denver',
         ]);
         $this->assertDatabaseHas('setting_values', [
-            'domain'       => 'us6b',
+            'domain' => 'us6b',
             'field_handle' => 'us6b_tz',
-            'user_id'      => $user->id,
-            'value_text'   => 'Pacific/Auckland',
+            'user_id' => $user->id,
+            'value_text' => 'Pacific/Auckland',
         ]);
     }
+
+    // -------------------------------------------------------------------------
+    // Multi-domain distribution
+    // -------------------------------------------------------------------------
 
     public function test_execute_skips_domain_entirely_when_no_matching_handles_in_data(): void
     {
@@ -224,14 +218,10 @@ class UpdateUserSettingsTest extends TestCase
         $this->action()->execute($user, ['us7a_tz' => 'UTC']);
 
         $this->assertDatabaseMissing('setting_values', [
-            'domain'  => 'us7b',
+            'domain' => 'us7b',
             'user_id' => $user->id,
         ]);
     }
-
-    // -------------------------------------------------------------------------
-    // Upsert behaviour
-    // -------------------------------------------------------------------------
 
     public function test_execute_overwrites_existing_user_override(): void
     {
@@ -239,10 +229,10 @@ class UpdateUserSettingsTest extends TestCase
         $user = User::factory()->create();
 
         SettingValue::create([
-            'domain'       => 'us8',
+            'domain' => 'us8',
             'field_handle' => 'us8_tz',
-            'user_id'      => $user->id,
-            'value_text'   => 'UTC',
+            'user_id' => $user->id,
+            'value_text' => 'UTC',
         ]);
 
         $this->action()->execute($user, ['us8_tz' => 'Asia/Seoul']);
@@ -252,7 +242,7 @@ class UpdateUserSettingsTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Isolation between users
+    // Upsert behaviour
     // -------------------------------------------------------------------------
 
     public function test_execute_does_not_affect_another_users_settings(): void
@@ -262,23 +252,23 @@ class UpdateUserSettingsTest extends TestCase
         $userB = User::factory()->create();
 
         SettingValue::create([
-            'domain'       => 'us9',
+            'domain' => 'us9',
             'field_handle' => 'us9_tz',
-            'user_id'      => $userB->id,
-            'value_text'   => 'Europe/London',
+            'user_id' => $userB->id,
+            'value_text' => 'Europe/London',
         ]);
 
         $this->action()->execute($userA, ['us9_tz' => 'America/New_York']);
 
         $this->assertDatabaseHas('setting_values', [
             'field_handle' => 'us9_tz',
-            'user_id'      => $userB->id,
-            'value_text'   => 'Europe/London',
+            'user_id' => $userB->id,
+            'value_text' => 'Europe/London',
         ]);
     }
 
     // -------------------------------------------------------------------------
-    // Cache invalidation
+    // Isolation between users
     // -------------------------------------------------------------------------
 
     public function test_execute_busts_user_cache_for_affected_domain(): void
@@ -293,6 +283,10 @@ class UpdateUserSettingsTest extends TestCase
         $this->assertNull(Cache::get("settings.user.{$user->id}.us10"));
     }
 
+    // -------------------------------------------------------------------------
+    // Cache invalidation
+    // -------------------------------------------------------------------------
+
     public function test_execute_does_not_bust_another_users_cache(): void
     {
         $this->makeDomain('us11');
@@ -306,5 +300,11 @@ class UpdateUserSettingsTest extends TestCase
 
         $this->assertNull(Cache::get("settings.user.{$userA->id}.us11"));
         $this->assertNotNull(Cache::get("settings.user.{$userB->id}.us11"));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Cache::flush();
     }
 }

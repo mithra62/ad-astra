@@ -12,6 +12,24 @@ use Illuminate\Support\Facades\Log;
 class TokenRefreshService
 {
     /**
+     * Convenience method: refresh and swallow failures (optional).
+     */
+    public function tryRefresh(OauthToken $token, bool $force = false, int $leewaySeconds = 120): ?OauthToken
+    {
+        try {
+            return $this->refresh($token, $force, $leewaySeconds);
+        } catch (\Throwable $e) {
+            Log::warning('OAuth token refresh failed', [
+                'provider' => $token->provider,
+                'token_id' => $token->id,
+                'user_id' => $token->user_id,
+                'message' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
      * Refresh a token if needed (or forced).
      *
      * @throws TokenRefreshException
@@ -26,7 +44,7 @@ class TokenRefreshService
             throw TokenRefreshException::notRefreshable('missing refresh_token');
         }
 
-        if (! $force && $this->isStillValid($token, $leewaySeconds)) {
+        if (!$force && $this->isStillValid($token, $leewaySeconds)) {
             return $token; // no-op
         }
 
@@ -35,23 +53,23 @@ class TokenRefreshService
 
         // Allow OIDC or custom providers to set token endpoint via meta (recommended)
         $tokenUrl = $cfg['token_url'] ?? null;
-        if (! $tokenUrl) {
+        if (!$tokenUrl) {
             $tokenUrl = data_get($token->meta, 'token_endpoint')
                 ?: data_get($token->meta, 'discovery.token_endpoint');
         }
 
-        if (! $cfg) {
+        if (!$cfg) {
             throw TokenRefreshException::providerNotConfigured($provider);
         }
 
-        if (! $tokenUrl) {
+        if (!$tokenUrl) {
             throw TokenRefreshException::providerNotConfigured("{$provider} (missing token_url)");
         }
 
         $clientId = $cfg['client_id'] ?? null;
         $clientSecret = $cfg['client_secret'] ?? null;
 
-        if (! $clientId || ! $clientSecret) {
+        if (!$clientId || !$clientSecret) {
             throw TokenRefreshException::providerNotConfigured("{$provider} (missing client credentials)");
         }
 
@@ -63,7 +81,7 @@ class TokenRefreshService
         ], $cfg['extra'] ?? []);
 
         // Some providers support/require scope on refresh. If you stored scopes, you can pass them.
-        if (! empty($token->scopes) && is_array($token->scopes)) {
+        if (!empty($token->scopes) && is_array($token->scopes)) {
             // Many providers want space-delimited scopes
             $payload['scope'] = implode(' ', $token->scopes);
         }
@@ -75,23 +93,23 @@ class TokenRefreshService
                 ->asForm() // most token endpoints expect x-www-form-urlencoded
                 ->post($tokenUrl, $payload);
         } catch (\Illuminate\Http\Client\RequestException $e) {
-            throw TokenRefreshException::httpFailed($provider, $e->getCode() ?: $e->response->status(), (string) $e->response->body());
+            throw TokenRefreshException::httpFailed($provider, $e->getCode() ?: $e->response->status(), (string)$e->response->body());
         } catch (\Exception $e) {
             throw TokenRefreshException::httpFailed($provider, 0, $e->getMessage());
         }
 
-        if (! $response->successful()) {
-            throw TokenRefreshException::httpFailed($provider, $response->status(), (string) $response->body());
+        if (!$response->successful()) {
+            throw TokenRefreshException::httpFailed($provider, $response->status(), (string)$response->body());
         }
 
         $json = $response->json();
-        if (! is_array($json)) {
+        if (!is_array($json)) {
             throw TokenRefreshException::invalidResponse($provider, 'response was not JSON');
         }
 
         // Normalize common OAuth2 fields
         $accessToken = $json['access_token'] ?? null;
-        if (! is_string($accessToken) || $accessToken === '') {
+        if (!is_string($accessToken) || $accessToken === '') {
             throw TokenRefreshException::invalidResponse($provider, 'missing access_token');
         }
 
@@ -101,7 +119,7 @@ class TokenRefreshService
         $expiresIn = $json['expires_in'] ?? null; // seconds
         $expiresAt = null;
         if (is_numeric($expiresIn)) {
-            $expiresAt = now()->addSeconds((int) $expiresIn);
+            $expiresAt = now()->addSeconds((int)$expiresIn);
         }
 
         // Some OIDC providers may return a new id_token
@@ -127,24 +145,6 @@ class TokenRefreshService
         ])->save();
 
         return $token->refresh();
-    }
-
-    /**
-     * Convenience method: refresh and swallow failures (optional).
-     */
-    public function tryRefresh(OauthToken $token, bool $force = false, int $leewaySeconds = 120): ?OauthToken
-    {
-        try {
-            return $this->refresh($token, $force, $leewaySeconds);
-        } catch (\Throwable $e) {
-            Log::warning('OAuth token refresh failed', [
-                'provider' => $token->provider,
-                'token_id' => $token->id,
-                'user_id' => $token->user_id,
-                'message' => $e->getMessage(),
-            ]);
-            return null;
-        }
     }
 
     protected function isStillValid(OauthToken $token, int $leewaySeconds): bool

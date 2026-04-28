@@ -28,78 +28,31 @@ class TemplateController extends Controller
 
         $view = $this->viewName($group, $template);
 
-        if (! View::exists($view)) {
+        if (!View::exists($view)) {
             throw new NotFoundHttpException;
         }
 
         return $this->renderView($request, $view);
     }
 
-    public function renderGroupIndex(Request $request, string $group)
+    private function guard(string $group, ?string $template = null): void
     {
-        $this->guard($group);
-
-        $view = $this->viewName($group, 'index');
-
-        if (! View::exists($view)) {
+        if (in_array(strtolower($group), $this->reserved_groups, true)) {
             throw new NotFoundHttpException;
         }
 
-        return $this->renderView($request, $view);
+        foreach (array_filter([$group, $template]) as $seg) {
+            // Basic path traversal prevention
+            if (str_contains($seg, '..') || str_contains($seg, '/') || str_contains($seg, '\\')) {
+                throw new NotFoundHttpException;
+            }
+        }
     }
 
-    /**
-     * EE-style behavior:
-     * - if {group}/{second} template exists -> render it (action template)
-     * - else treat {second} as "handle" and render {group}/entry
-     */
-    public function renderGroupSecond(Request $request, string $group, string $second)
+    private function viewName(string $group, string $template): string
     {
-        $this->guard($group, $second);
-
-        // Prefer action template if it exists (EE: /blog/category)
-        $actionView = $this->viewName($group, $second);
-        if (View::exists($actionView)) {
-            return $this->renderView($request, $actionView, [
-                'handle' => null,
-            ]);
-        }
-
-        // Otherwise treat second segment as entry slug (EE: /blog/my-entry)
-        $entryView = $this->viewName($group, 'entry');
-        if (! View::exists($entryView)) {
-            throw new NotFoundHttpException;
-        }
-
-        return $this->renderView($request, $entryView, [
-            'handle' => $second,
-        ]);
-    }
-
-    /**
-     * /{group}/{template}/{tail...}
-     * Always treat as action template and pass tail segments.
-     *
-     * Example: /blog/category/laravel
-     *  - renders blog/category
-     *  - provides segment_3 = "laravel"
-     */
-    public function renderWithTail(Request $request, string $group, string $template, ?string $tail = null)
-    {
-        return $this->renderGroupSecond($request, $group, $template);
-        $this->guard($group, $template);
-
-        $view = $this->viewName($group, $template);
-        if (! View::exists($view)) {
-            throw new NotFoundHttpException;
-        }
-
-        print_r($tail);
-        exit;
-
-        return $this->renderView($request, $view, [
-            'tail' => $tail,
-        ]);
+        // TwigBridge supports dot notation: "blog.entry"
+        return "templates::{$group}.{$template}";
     }
 
     private function renderView(Request $request, string $view, array $extra = [])
@@ -109,7 +62,7 @@ class TemplateController extends Controller
         // segment_1, segment_2, ... like EE
         $segmentVars = [];
         foreach ($segments as $i => $seg) {
-            $segmentVars['segment_'.($i + 1)] = $seg;
+            $segmentVars['segment_' . ($i + 1)] = $seg;
         }
 
         // If you like EE-style key/value pairs after the template:
@@ -142,23 +95,70 @@ class TemplateController extends Controller
         return $out;
     }
 
-    private function viewName(string $group, string $template): string
+    public function renderGroupIndex(Request $request, string $group)
     {
-        // TwigBridge supports dot notation: "blog.entry"
-        return "templates::{$group}.{$template}";
-    }
+        $this->guard($group);
 
-    private function guard(string $group, ?string $template = null): void
-    {
-        if (in_array(strtolower($group), $this->reserved_groups, true)) {
+        $view = $this->viewName($group, 'index');
+
+        if (!View::exists($view)) {
             throw new NotFoundHttpException;
         }
 
-        foreach (array_filter([$group, $template]) as $seg) {
-            // Basic path traversal prevention
-            if (str_contains($seg, '..') || str_contains($seg, '/') || str_contains($seg, '\\')) {
-                throw new NotFoundHttpException;
-            }
+        return $this->renderView($request, $view);
+    }
+
+    /**
+     * /{group}/{template}/{tail...}
+     * Always treat as action template and pass tail segments.
+     *
+     * Example: /blog/category/laravel
+     *  - renders blog/category
+     *  - provides segment_3 = "laravel"
+     */
+    public function renderWithTail(Request $request, string $group, string $template, ?string $tail = null)
+    {
+        return $this->renderGroupSecond($request, $group, $template);
+        $this->guard($group, $template);
+
+        $view = $this->viewName($group, $template);
+        if (!View::exists($view)) {
+            throw new NotFoundHttpException;
         }
+
+        print_r($tail);
+        exit;
+
+        return $this->renderView($request, $view, [
+            'tail' => $tail,
+        ]);
+    }
+
+    /**
+     * EE-style behavior:
+     * - if {group}/{second} template exists -> render it (action template)
+     * - else treat {second} as "handle" and render {group}/entry
+     */
+    public function renderGroupSecond(Request $request, string $group, string $second)
+    {
+        $this->guard($group, $second);
+
+        // Prefer action template if it exists (EE: /blog/category)
+        $actionView = $this->viewName($group, $second);
+        if (View::exists($actionView)) {
+            return $this->renderView($request, $actionView, [
+                'handle' => null,
+            ]);
+        }
+
+        // Otherwise treat second segment as entry slug (EE: /blog/my-entry)
+        $entryView = $this->viewName($group, 'entry');
+        if (!View::exists($entryView)) {
+            throw new NotFoundHttpException;
+        }
+
+        return $this->renderView($request, $entryView, [
+            'handle' => $second,
+        ]);
     }
 }

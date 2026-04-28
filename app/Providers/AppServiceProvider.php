@@ -14,16 +14,16 @@ use App\Models\Status;
 use App\Models\User;
 use App\Observers\StatusObserver;
 use App\Rest\Api;
-use App\Settings;
+use App\Services\CategoryService;
 use App\Services\FieldService;
 use App\Services\FilesService;
-use App\Services\CategoryService;
 use App\Services\UserService;
+use App\Settings;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Bind by class name so constructor injection works in controllers,
         // then alias to 'settings' for backwards-compatible app('settings') calls.
-        $this->app->singleton(Settings::class, fn () => new Settings());
+        $this->app->singleton(Settings::class, fn() => new Settings());
         $this->app->alias(Settings::class, 'settings');
 
         $this->app->singleton('api', function ($app) {
@@ -61,15 +61,15 @@ class AppServiceProvider extends ServiceProvider
         // Decouple stored polymorphic type strings from class names so that
         // model renames do not silently orphan rows in polymorphic tables.
         Relation::morphMap([
-            'entry'          => Entry::class,
-            'entry_group'    => EntryGroup::class,
-            'entry_type'     => EntryType::class,
-            'category'       => Category::class,
+            'entry' => Entry::class,
+            'entry_group' => EntryGroup::class,
+            'entry_type' => EntryType::class,
+            'category' => Category::class,
             'category_group' => CategoryGroup::class,
-            'field_group'    => FieldGroup::class,
-            'media'           => Media::class,
-            'media_library'   => MediaLibrary::class,
-            'user'            => User::class,
+            'field_group' => FieldGroup::class,
+            'media' => Media::class,
+            'media_library' => MediaLibrary::class,
+            'user' => User::class,
         ]);
 
 //        Route::group([

@@ -16,10 +16,12 @@
                             <a class="f-s-14 f-w-500" href="{{ route('entries.groups') }}">Entry Groups</a>
                         </li>
                         <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups.edit', group) }}">{{ group.name }}</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('entries.groups.edit', group) }}">{{ group.name }}</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups.types.create', group) }}">Create Entry Type</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups.types.create', group) }}">Create
+                                Entry Type</a>
                         </li>
                     </ul>
                 </div>
@@ -42,23 +44,29 @@
 
                             <div class="col-md-12">
                                 <label class="form-label" for="name">Name</label>
-                                <input class="form-control" id="name" required type="text" value="{{ old('name') }}" name="name">
-                                {% if errors.has('name') %}<p class="text-danger">{{ errors.first('name') }}</p>{% endif %}
+                                <input class="form-control" id="name" required type="text" value="{{ old('name') }}"
+                                       name="name">
+                                {% if errors.has('name') %}<p
+                                    class="text-danger">{{ errors.first('name') }}</p>{% endif %}
                             </div>
                             <div class="col-md-8">
                                 <label class="form-label" for="handle">Handle</label>
-                                <input class="form-control" id="handle" required type="text" value="{{ old('handle') }}" name="handle">
+                                <input class="form-control" id="handle" required type="text" value="{{ old('handle') }}"
+                                       name="handle">
                                 <small class="text-secondary">Must be unique within this entry group.</small>
-                                {% if errors.has('handle') %}<p class="text-danger">{{ errors.first('handle') }}</p>{% endif %}
+                                {% if errors.has('handle') %}<p
+                                    class="text-danger">{{ errors.first('handle') }}</p>{% endif %}
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label" for="sort_order">Sort Order</label>
-                                <input class="form-control" id="sort_order" type="number" value="{{ old('sort_order', 0) }}" name="sort_order" min="0">
+                                <input class="form-control" id="sort_order" type="number"
+                                       value="{{ old('sort_order', 0) }}" name="sort_order" min="0">
                             </div>
 
                             <div class="col-md-12 main-switch main-switch-color switch-unchecked switch_border">
                                 <div class="switch-danger switch-unchecked-danger switch-border-danger my-3">
-                                    <input class="toggle switch-border-primary" name="has_entry_tree" id="has_entry_tree"
+                                    <input class="toggle switch-border-primary" name="has_entry_tree"
+                                           id="has_entry_tree"
                                            type="checkbox" value="1"
                                            {% if old('has_entry_tree') %}checked{% endif %}>
                                     <label for="has_entry_tree">Allow Entry Tree</label>
@@ -67,46 +75,53 @@
                             <!-- Class -->
                             <div class="col-12"><h5 class="border-bottom pb-2">Behavior</h5></div>
                             {% if type_classes.count >= 1 %}
-                            <div class="col-md-12">
-                                <label class="form-label" for="class">Behavior Type </label>
-                                <small class="text-secondary d-block mb-1">
-                                    Select the behavior that implements this entry type's lifecycle hooks.
-                                    Must extend <code>App\EntryTypes\AbstractEntryType</code>.
-                                </small>
-                                <select class="form-select" id="class" name="class" required>
-                                    <option value="">— Select a class —</option>
-                                    {% for cls in type_classes %}
-                                        <option value="{{ cls }}" {% if old('class') == cls %}selected{% endif %}>
-                                            {{ cls }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                {% if errors.has('class') %}<p class="text-danger">{{ errors.first('class') }}</p>{% endif %}
-                            </div>
+                                <div class="col-md-12">
+                                    <label class="form-label" for="class">Behavior Type </label>
+                                    <small class="text-secondary d-block mb-1">
+                                        Select the behavior that implements this entry type's lifecycle hooks.
+                                        Must extend <code>App\EntryTypes\AbstractEntryType</code>.
+                                    </small>
+                                    <select class="form-select" id="class" name="class" required>
+                                        <option value="">— Select a class —</option>
+                                        {% for cls in type_classes %}
+                                            <option value="{{ cls }}" {% if old('class') == cls %}selected{% endif %}>
+                                                {{ cls }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if errors.has('class') %}<p
+                                        class="text-danger">{{ errors.first('class') }}</p>{% endif %}
+                                </div>
                             {% else %}
-                            <div class="col-md-12">
-                                <label class="form-label" for="class">Entry Type Class</label>
-                                <input class="form-control" id="class" required type="text" value="{{ old('class') }}" name="class"
-                                       placeholder="App\EntryTypes\MyEntryType">
-                                <small class="text-secondary">Must extend <code>App\EntryTypes\AbstractEntryType</code>.</small>
-                                {% if errors.has('class') %}<p class="text-danger">{{ errors.first('class') }}</p>{% endif %}
-                            </div>
+                                <div class="col-md-12">
+                                    <label class="form-label" for="class">Entry Type Class</label>
+                                    <input class="form-control" id="class" required type="text"
+                                           value="{{ old('class') }}" name="class"
+                                           placeholder="App\EntryTypes\MyEntryType">
+                                    <small class="text-secondary">Must extend
+                                        <code>App\EntryTypes\AbstractEntryType</code>.</small>
+                                    {% if errors.has('class') %}<p
+                                        class="text-danger">{{ errors.first('class') }}</p>{% endif %}
+                                </div>
                             {% endif %}
 
                             <!-- Field Layout -->
                             <div class="col-12"><h5 class="border-bottom pb-2">Field Layout</h5></div>
                             <div class="col-md-12">
                                 <label class="form-label" for="field_layout_id">Field Layout</label>
-                                <small class="text-secondary d-block mb-1">Fields from this layout are specific to this entry type. Group-level fields are always included.</small>
+                                <small class="text-secondary d-block mb-1">Fields from this layout are specific to this
+                                    entry type. Group-level fields are always included.</small>
                                 <select class="form-select" id="field_layout_id" name="field_layout_id">
                                     <option value="">— None —</option>
                                     {% for layout in field_layouts %}
-                                        <option value="{{ layout.id }}" {% if old('field_layout_id') == layout.id %}selected{% endif %}>
+                                        <option value="{{ layout.id }}"
+                                                {% if old('field_layout_id') == layout.id %}selected{% endif %}>
                                             {{ layout.name }}
                                         </option>
                                     {% endfor %}
                                 </select>
-                                {% if errors.has('field_layout_id') %}<p class="text-danger">{{ errors.first('field_layout_id') }}</p>{% endif %}
+                                {% if errors.has('field_layout_id') %}<p
+                                    class="text-danger">{{ errors.first('field_layout_id') }}</p>{% endif %}
                             </div>
 
                             <div class="col-12">

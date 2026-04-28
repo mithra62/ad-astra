@@ -54,13 +54,6 @@ class EntryQueryBuilder
         return $this;
     }
 
-    public function withCategory(int $categoryId): static
-    {
-        $this->query->whereHas('categories', fn($q) => $q->where('categories.id', $categoryId));
-
-        return $this;
-    }
-
     public function where(string $column, mixed $operator, mixed $value = null): static
     {
         $value === null
@@ -70,9 +63,9 @@ class EntryQueryBuilder
         return $this;
     }
 
-    public function orderBy(string $column, string $direction = 'asc'): static
+    public function withCategory(int $categoryId): static
     {
-        $this->query->orderBy($column, $direction);
+        $this->query->whereHas('categories', fn($q) => $q->where('categories.id', $categoryId));
 
         return $this;
     }
@@ -82,9 +75,30 @@ class EntryQueryBuilder
         return $this->orderBy('created_at', 'desc');
     }
 
+    public function orderBy(string $column, string $direction = 'asc'): static
+    {
+        $this->query->orderBy($column, $direction);
+
+        return $this;
+    }
+
     public function get(): Collection
     {
         return $this->query->with($this->eagerLoad())->get();
+    }
+
+    private function eagerLoad(): array
+    {
+        return [
+            'entryGroup',
+            'entryType',
+            'creator',
+            'authors',
+            'categories',
+            'fieldValues.field.fieldType',
+            'entryRelationships.field',
+            'entryRelationships.relatedEntry',
+        ];
     }
 
     public function paginate(int $perPage = 15): LengthAwarePaginator
@@ -105,19 +119,5 @@ class EntryQueryBuilder
     public function count(): int
     {
         return $this->query->count();
-    }
-
-    private function eagerLoad(): array
-    {
-        return [
-            'entryGroup',
-            'entryType',
-            'creator',
-            'authors',
-            'categories',
-            'fieldValues.field.fieldType',
-            'entryRelationships.field',
-            'entryRelationships.relatedEntry',
-        ];
     }
 }

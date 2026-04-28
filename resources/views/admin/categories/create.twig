@@ -84,9 +84,11 @@
                                     {% for element in tab.elements %}
                                         {% set field = element.field %}
                                         <div class="col-md-12">
-                                            <label class="form-label" for="field_{{ field.handle }}">{{ field.label }}</label>
+                                            <label class="form-label"
+                                                   for="field_{{ field.handle }}">{{ field.label }}</label>
                                             {% if field.instructions %}
-                                                <small class="text-secondary d-block mb-1">{{ field.instructions }}</small>
+                                                <small
+                                                    class="text-secondary d-block mb-1">{{ field.instructions }}</small>
                                             {% endif %}
                                             <div class="input-group has-validation">
                                                 {{ field.render({

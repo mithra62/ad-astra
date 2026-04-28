@@ -36,7 +36,7 @@ class Field extends Controller
         $data = [
             'group' => $group,
             'groups' => $groups,
-            'field_types' => app('fields-service')->getFieldOptions()
+            'field_types' => app('fields-service')->getFieldOptions(),
         ];
 
         return $this->view('fields.create', $data);
@@ -67,41 +67,18 @@ class Field extends Controller
         $groups = FieldGroup::all();
         $active_group = $field->groups->first();
         $layouts = FieldLayoutModel::with(['entryGroups', 'entryTypes.entryGroup'])
-            ->whereHas('tabs.elements', fn ($q) => $q->where('field_id', $field->id))
+            ->whereHas('tabs.elements', fn($q) => $q->where('field_id', $field->id))
             ->orderBy('name')
             ->get();
 
         $data = [
-            'field'        => $field,
-            'groups'       => $groups,
+            'field' => $field,
+            'groups' => $groups,
             'active_group' => $active_group,
-            'layouts'      => $layouts,
+            'layouts' => $layouts,
         ];
 
         return $this->view('fields.show', $data);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $field = FieldModel::find($id);
-        if (!$field instanceof FieldModel) {
-            abort(404);
-        }
-
-        $groups = FieldGroup::all();
-        $active_group = $field->groups->first();
-        $data = [
-            'field'               => $field,
-            'groups'              => $groups,
-            'field_types'         => app('fields-service')->getFieldOptions(),
-            'active_group'        => $active_group,
-            'current_type_handle' => $field->fieldType?->instance()->handle(),
-        ];
-
-        return $this->view('fields.edit', $data);
     }
 
     /**
@@ -117,6 +94,29 @@ class Field extends Controller
         }
 
         abort(404);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $field = FieldModel::find($id);
+        if (!$field instanceof FieldModel) {
+            abort(404);
+        }
+
+        $groups = FieldGroup::all();
+        $active_group = $field->groups->first();
+        $data = [
+            'field' => $field,
+            'groups' => $groups,
+            'field_types' => app('fields-service')->getFieldOptions(),
+            'active_group' => $active_group,
+            'current_type_handle' => $field->fieldType?->instance()->handle(),
+        ];
+
+        return $this->view('fields.edit', $data);
     }
 
     /**

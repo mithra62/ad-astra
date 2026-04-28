@@ -18,10 +18,12 @@
                             <a class="f-s-14 f-w-500" href="{{ route('media.libraries') }}">Media Libraries</a>
                         </li>
                         <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries.show', library) }}">{{ library.name }}</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('media.libraries.show', library) }}">{{ library.name }}</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries.confirm', library) }}">Delete Media Library</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries.confirm', library) }}">Delete
+                                Media Library</a>
                         </li>
                     </ul>
                 </div>
@@ -33,7 +35,8 @@
         <!-- Blank start -->
         <div class="row">
             <!-- Default Card start -->
-            <form method="POST" action="{{ route('media.libraries.destroy', library) }}" class="row g-3 needs-validation" novalidate>
+            <form method="POST" action="{{ route('media.libraries.destroy', library) }}"
+                  class="row g-3 needs-validation" novalidate>
                 {{ csrf_field() }}
                 {{ method_field('DELETE') }}
                 <div class="col-md-12">
@@ -46,7 +49,8 @@
                             <p class="text-secondary"> Are you sure you want to remove this Media Library?</p>
                         </div>
                         <div class="card-footer">
-                            <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                            <div
+                                class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
                                 <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal"
                                        type="checkbox">
                                 <label for="confirm_removal">Confirm Removal</label>

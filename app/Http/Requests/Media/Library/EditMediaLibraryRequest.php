@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests\Media\Library;
 
 use Illuminate\Support\Facades\Auth;

@@ -152,14 +152,14 @@ class EntryTest extends TestCase
 
     public function test_field_returns_scalar_value_by_handle(): void
     {
-        $field = new class
-        {
+        $field = new class {
             public string $handle = 'body';
         };
 
-        $fieldValue = new class($field)
-        {
-            public function __construct(public readonly object $field) {}
+        $fieldValue = new class($field) {
+            public function __construct(public readonly object $field)
+            {
+            }
 
             public function resolvedValue(): mixed
             {
@@ -185,14 +185,14 @@ class EntryTest extends TestCase
 
     public function test_field_does_not_return_scalar_value_for_wrong_handle(): void
     {
-        $field = new class
-        {
+        $field = new class {
             public string $handle = 'title';
         };
 
-        $fieldValue = new class($field)
-        {
-            public function __construct(public readonly object $field) {}
+        $fieldValue = new class($field) {
+            public function __construct(public readonly object $field)
+            {
+            }
 
             public function resolvedValue(): mixed
             {
@@ -211,18 +211,18 @@ class EntryTest extends TestCase
     {
         $relatedEntry = new Entry(['title' => 'Related Entry']);
 
-        $field = new class
-        {
+        $field = new class {
             public string $handle = 'related_posts';
         };
 
-        $relationship = new class($field, $relatedEntry, 1)
-        {
+        $relationship = new class($field, $relatedEntry, 1) {
             public function __construct(
                 public readonly object $field,
-                public readonly Entry $relatedEntry,
-                public readonly int $sort_order,
-            ) {}
+                public readonly Entry  $relatedEntry,
+                public readonly int    $sort_order,
+            )
+            {
+            }
         };
 
         $entry = new Entry;
@@ -237,19 +237,19 @@ class EntryTest extends TestCase
 
     public function test_field_returns_null_when_relational_field_has_no_entries(): void
     {
-        $field = new class
-        {
+        $field = new class {
             public string $handle = 'related_posts';
         };
 
         /** Simulates a broken FK where relatedEntry is null. */
-        $relationship = new class($field, null, 1)
-        {
+        $relationship = new class($field, null, 1) {
             public function __construct(
                 public readonly object $field,
                 public readonly ?Entry $relatedEntry,
-                public readonly int $sort_order,
-            ) {}
+                public readonly int    $sort_order,
+            )
+            {
+            }
         };
 
         $entry = new Entry;
@@ -264,18 +264,18 @@ class EntryTest extends TestCase
         $first = new Entry(['title' => 'First']);
         $second = new Entry(['title' => 'Second']);
 
-        $field = new class
-        {
+        $field = new class {
             public string $handle = 'related_posts';
         };
 
-        $makeRel = fn (Entry $e, int $order) => new class($field, $e, $order)
-        {
+        $makeRel = fn(Entry $e, int $order) => new class($field, $e, $order) {
             public function __construct(
                 public readonly object $field,
-                public readonly Entry $relatedEntry,
-                public readonly int $sort_order,
-            ) {}
+                public readonly Entry  $relatedEntry,
+                public readonly int    $sort_order,
+            )
+            {
+            }
         };
 
         $entry = new Entry;

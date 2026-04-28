@@ -17,9 +17,10 @@
                         <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Field Groups</a>
                     </li>
                     {% if active_group %}
-                    <li>
-                        <a class="f-s-14 f-w-500" href="{{ route('fields.groups.show', active_group) }}">{{ active_group.name }}</a>
-                    </li>
+                        <li>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('fields.groups.show', active_group) }}">{{ active_group.name }}</a>
+                        </li>
                     {% endif %}
                     <li class="active">
                         <a class="f-s-14 f-w-500" href="{{ route('fields.show', field) }}">{{ field.name }}</a>
@@ -43,65 +44,65 @@
 
                         <table class="table table-borderless mb-0">
                             <tbody>
-                                <tr>
-                                    <th class="text-muted f-w-500" style="width: 28%;">Type</th>
-                                    <td>{{ field.fieldType.name }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted f-w-500">Name</th>
-                                    <td>{{ field.name }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted f-w-500">Handle</th>
-                                    <td><code>{{ field.handle }}</code></td>
-                                </tr>
-                                {% if field.label %}
+                            <tr>
+                                <th class="text-muted f-w-500" style="width: 28%;">Type</th>
+                                <td>{{ field.fieldType.name }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted f-w-500">Name</th>
+                                <td>{{ field.name }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted f-w-500">Handle</th>
+                                <td><code>{{ field.handle }}</code></td>
+                            </tr>
+                            {% if field.label %}
                                 <tr>
                                     <th class="text-muted f-w-500">Label</th>
                                     <td>{{ field.label }}</td>
                                 </tr>
-                                {% endif %}
-                                <tr>
-                                    <th class="text-muted f-w-500">Instructions</th>
-                                    <td>
-                                        {% if field.instructions %}
-                                            {{ field.instructions }}
-                                        {% else %}
-                                            <span class="text-muted">—</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted f-w-500">Visibility</th>
-                                    <td>
-                                        {% if field.hidden %}
-                                            <span class="badge bg-warning text-dark">Hidden</span>
-                                        {% else %}
-                                            <span class="badge bg-success">Visible</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted f-w-500">Groups</th>
-                                    <td>
-                                        {% if field.groups is not empty %}
-                                            {% for group in field.groups %}
-                                                <a href="{{ route('fields.groups.show', group) }}"
-                                                   class="badge bg-secondary text-decoration-none me-1">{{ group.name }}</a>
-                                            {% endfor %}
-                                        {% else %}
-                                            <span class="text-muted">—</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted f-w-500">Created</th>
-                                    <td>{{ field.created_at|date('M j, Y g:i A') }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted f-w-500">Last Updated</th>
-                                    <td>{{ field.updated_at|date('M j, Y g:i A') }}</td>
-                                </tr>
+                            {% endif %}
+                            <tr>
+                                <th class="text-muted f-w-500">Instructions</th>
+                                <td>
+                                    {% if field.instructions %}
+                                        {{ field.instructions }}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted f-w-500">Visibility</th>
+                                <td>
+                                    {% if field.hidden %}
+                                        <span class="badge bg-warning text-dark">Hidden</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Visible</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted f-w-500">Groups</th>
+                                <td>
+                                    {% if field.groups is not empty %}
+                                        {% for group in field.groups %}
+                                            <a href="{{ route('fields.groups.show', group) }}"
+                                               class="badge bg-secondary text-decoration-none me-1">{{ group.name }}</a>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted f-w-500">Created</th>
+                                <td>{{ field.created_at|date('M j, Y g:i A') }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted f-w-500">Last Updated</th>
+                                <td>{{ field.updated_at|date('M j, Y g:i A') }}</td>
+                            </tr>
                             </tbody>
                         </table>
 
@@ -166,7 +167,7 @@
             </div>
         </div>
 
-            </div>
+    </div>
 
 </main>
 {{ include('admin._inc._footer') }}

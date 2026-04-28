@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Spatie\Permission\Models\Role as RoleModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Permission\Models\Role as RoleModel;
 
 class Role extends RoleModel
 {
@@ -13,7 +13,7 @@ class Role extends RoleModel
      * @var array|int[]
      */
     protected array $locked = [
-        1, 2, 3
+        1, 2, 3,
     ];
 
     /**
@@ -21,6 +21,6 @@ class Role extends RoleModel
      */
     public function canDelete(): bool
     {
-        return ! in_array($this->id, $this->locked);
+        return !in_array($this->id, $this->locked);
     }
 }

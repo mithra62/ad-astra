@@ -19,42 +19,6 @@ class Client
     protected string $end_point = 'http://eric.laravel-dev.com/api';
 
     /**
-     * @param string $token
-     * @return $this
-     */
-    public function setToken(string $token): Client
-    {
-        $this->token = $token;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getToken(): string
-    {
-        return $this->token;
-    }
-
-    /**
-     * @param string $end_point
-     * @return $this
-     */
-    public function setEndPoint(string $end_point): Client
-    {
-        $this->end_point = $end_point;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEndPoint(): string
-    {
-        return $this->end_point;
-    }
-
-    /**
      * @return array
      */
     public function getCornRemittances(): array
@@ -63,31 +27,17 @@ class Client
     }
 
     /**
+     * @param string $path
      * @return array
      */
-    public function getSoybeanRemittances(): array
+    public function getAll(string $path): array
     {
-        return $this->getAll('remittances/soybeans');
-    }
+        $data = $this->get($path);
+        if (!$this->hasErrors($data)) {
+            //paginate!
+        }
 
-    /**
-     * @return array
-     */
-    public function getSubmissions(): array
-    {
-        return $this->getAll('submissions');
-    }
-
-    /**
-     * @return string[]
-     */
-    protected function headers(): array
-    {
-        return [
-            "client_name: Checkoff Pro",
-            "Authorization: Bearer " . $this->getToken(),
-            'Content-Type: application/json',
-        ];
+        return $data;
     }
 
     /**
@@ -111,6 +61,70 @@ class Client
     }
 
     /**
+     * @return string[]
+     */
+    protected function headers(): array
+    {
+        return [
+            "client_name: Checkoff Pro",
+            "Authorization: Bearer " . $this->getToken(),
+            'Content-Type: application/json',
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getToken(): string
+    {
+        return $this->token;
+    }
+
+    /**
+     * @param string $token
+     * @return $this
+     */
+    public function setToken(string $token): Client
+    {
+        $this->token = $token;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEndPoint(): string
+    {
+        return $this->end_point;
+    }
+
+    /**
+     * @param string $end_point
+     * @return $this
+     */
+    public function setEndPoint(string $end_point): Client
+    {
+        $this->end_point = $end_point;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSoybeanRemittances(): array
+    {
+        return $this->getAll('remittances/soybeans');
+    }
+
+    /**
+     * @return array
+     */
+    public function getSubmissions(): array
+    {
+        return $this->getAll('submissions');
+    }
+
+    /**
      * @param string $path
      * @param array $payload
      * @return array
@@ -127,19 +141,5 @@ class Client
         $resp = curl_exec($curl);
         curl_close($curl);
         return json_decode($resp, true);
-    }
-
-    /**
-     * @param string $path
-     * @return array
-     */
-    public function getAll(string $path): array
-    {
-        $data = $this->get($path);
-        if (!$this->hasErrors($data)) {
-            //paginate!
-        }
-
-        return $data;
     }
 }

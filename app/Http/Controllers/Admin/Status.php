@@ -15,7 +15,7 @@ class Status extends Controller
     public function create(string $group_id)
     {
         $group = StatusGroup::find($group_id);
-        if (! $group instanceof StatusGroup) {
+        if (!$group instanceof StatusGroup) {
             abort(404);
         }
 
@@ -26,19 +26,8 @@ class Status extends Controller
     public function store(StoreStatusRequest $request)
     {
         $creator = app(CreateNewStatus::class);
-        $status  = $creator->createByGroup($request->validated());
+        $status = $creator->createByGroup($request->validated());
         return redirect()->route('statuses.groups.show', $status->status_group_id)->with('status', trans('status.created'));
-    }
-
-    public function edit(string $id)
-    {
-        $status = StatusModel::with('group')->find($id);
-        if (! $status instanceof StatusModel) {
-            abort(404);
-        }
-
-        $groups = StatusGroup::ordered()->get();
-        return $this->view('statuses.edit', ['status' => $status, 'groups' => $groups]);
     }
 
     public function update(EditStatusRequest $request, string $id)
@@ -51,6 +40,17 @@ class Status extends Controller
         }
 
         abort(404);
+    }
+
+    public function edit(string $id)
+    {
+        $status = StatusModel::with('group')->find($id);
+        if (!$status instanceof StatusModel) {
+            abort(404);
+        }
+
+        $groups = StatusGroup::ordered()->get();
+        return $this->view('statuses.edit', ['status' => $status, 'groups' => $groups]);
     }
 
     public function destroy(DeleteStatusRequest $request, string $id)
@@ -68,7 +68,7 @@ class Status extends Controller
     public function confirm(string $id)
     {
         $status = StatusModel::with('group')->find($id);
-        if (! $status instanceof StatusModel) {
+        if (!$status instanceof StatusModel) {
             abort(404);
         }
 

@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Actions\Category\Group;
 
-use App\Models\Category\Group;
 use App\Actions\AbstractAction;
+use App\Models\Category\Group;
 use App\Models\FieldLayout;
 
 class CreateNewCategoryGroup extends AbstractAction

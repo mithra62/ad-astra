@@ -84,9 +84,11 @@
                                     {% for element in tab.elements %}
                                         {% set field = element.field %}
                                         <div class="col-md-12">
-                                            <label class="form-label" for="field_{{ field.handle }}">{{ field.label }}</label>
+                                            <label class="form-label"
+                                                   for="field_{{ field.handle }}">{{ field.label }}</label>
                                             {% if field.instructions %}
-                                                <small class="text-secondary d-block mb-1">{{ field.instructions }}</small>
+                                                <small
+                                                    class="text-secondary d-block mb-1">{{ field.instructions }}</small>
                                             {% endif %}
                                             <div class="input-group has-validation">
                                                 {{ field.render({
@@ -171,8 +173,9 @@
                             </div>
                         {% else %}
                             <p class="text-center">
-                                No Child Categories Created. <br />
-                                <a href="{{ route('categories.create', {group_id: category.group.id, parent_id: category.id}) }}" class="btn btn-outline-primary">Create Child Category</a>
+                                No Child Categories Created. <br/>
+                                <a href="{{ route('categories.create', {group_id: category.group.id, parent_id: category.id}) }}"
+                                   class="btn btn-outline-primary">Create Child Category</a>
                             </p>
                         {% endif %}
                     </div>
@@ -186,18 +189,18 @@
                     <div class="card-body">
                         <table class="table table-sm mb-0">
                             <tbody>
-                                <tr>
-                                    <th class="text-secondary" style="width: 30%">Group</th>
-                                    <td>{{ category.group.name }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-secondary">Created</th>
-                                    <td>{{ category.created_at.format('F j, Y g:i A') }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-secondary">Last Modified</th>
-                                    <td>{{ category.updated_at.format('F j, Y g:i A') }}</td>
-                                </tr>
+                            <tr>
+                                <th class="text-secondary" style="width: 30%">Group</th>
+                                <td>{{ category.group.name }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-secondary">Created</th>
+                                <td>{{ category.created_at.format('F j, Y g:i A') }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-secondary">Last Modified</th>
+                                <td>{{ category.updated_at.format('F j, Y g:i A') }}</td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>

@@ -1,14 +1,16 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 
-use App\Http\Controllers\Controller AS DefaultController;
+use App\Http\Controllers\Controller as DefaultController;
+
 abstract class Controller extends DefaultController
 {
     public function __construct()
     {
         parent::__construct();
-        if(!$this->can('access admin')) {
+        if (!$this->can('access admin')) {
             abort(403);
         }
     }

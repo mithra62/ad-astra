@@ -26,7 +26,7 @@ class Domain extends Controller
      */
     public function show(string $handle): View
     {
-        $domain     = SettingDomain::where('handle', $handle)->firstOrFail();
+        $domain = SettingDomain::where('handle', $handle)->firstOrFail();
         $allDomains = SettingDomain::ordered()->get();
 
         $groupedFields = $this->groupFields(
@@ -35,30 +35,12 @@ class Domain extends Controller
         );
 
         return $this->view('settings.show', [
-            'domain'         => $domain,
-            'domains'        => $allDomains,
+            'domain' => $domain,
+            'domains' => $allDomains,
             'grouped_fields' => $groupedFields,
-            'field_values'   => $this->settings->system($handle),
+            'field_values' => $this->settings->system($handle),
         ]);
     }
-
-    /**
-     * Persist system-level settings for a domain.
-     */
-    public function update(UpdateDomainSettingsRequest $request, string $handle): RedirectResponse
-    {
-        SettingDomain::where('handle', $handle)->firstOrFail();
-
-        app(UpdateDomainSettings::class)->execute($handle, $request->settingsPayload());
-
-        return redirect()
-            ->route('settings.show', $handle)
-            ->with('success', 'Settings saved.');
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
 
     /**
      * Group field definitions by their 'group' key.
@@ -77,5 +59,23 @@ class Domain extends Controller
         }
 
         return $grouped;
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Persist system-level settings for a domain.
+     */
+    public function update(UpdateDomainSettingsRequest $request, string $handle): RedirectResponse
+    {
+        SettingDomain::where('handle', $handle)->firstOrFail();
+
+        app(UpdateDomainSettings::class)->execute($handle, $request->settingsPayload());
+
+        return redirect()
+            ->route('settings.show', $handle)
+            ->with('success', 'Settings saved.');
     }
 }

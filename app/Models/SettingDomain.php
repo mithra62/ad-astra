@@ -35,16 +35,6 @@ class SettingDomain extends Model
     // -------------------------------------------------------------------------
 
     /**
-     * Return the raw field definitions for this domain from config/settings.php.
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    public function configFields(): array
-    {
-        return config("settings.{$this->handle}.fields", []);
-    }
-
-    /**
      * Return only the user-overridable field definitions for this domain.
      *
      * @return array<int, array<string, mixed>>
@@ -54,8 +44,18 @@ class SettingDomain extends Model
         return array_values(
             array_filter(
                 $this->configFields(),
-                fn (array $f) => ($f['user_overridable'] ?? false) && !($f['hidden'] ?? false)
+                fn(array $f) => ($f['user_overridable'] ?? false) && !($f['hidden'] ?? false)
             )
         );
+    }
+
+    /**
+     * Return the raw field definitions for this domain from config/settings.php.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function configFields(): array
+    {
+        return config("settings.{$this->handle}.fields", []);
     }
 }

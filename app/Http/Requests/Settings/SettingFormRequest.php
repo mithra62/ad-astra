@@ -19,6 +19,16 @@ abstract class SettingFormRequest extends FormRequest
     // -------------------------------------------------------------------------
 
     /**
+     * Return the normalised field payload ready for persistence.
+     *
+     * Subclasses must implement this so the controller can call a single
+     * method to obtain the fully prepared data array.
+     *
+     * @return array<string, mixed>
+     */
+    abstract public function settingsPayload(): array;
+
+    /**
      * Build a Laravel rules array from a flat list of field definitions.
      *
      * - Boolean fields are excluded (normalised to true/false, not validated).
@@ -26,7 +36,7 @@ abstract class SettingFormRequest extends FormRequest
      * - 'nullable' is auto-prepended for any field that does not declare 'required',
      *   so that optional fields accept empty submissions without failing validation.
      *
-     * @param  array<int, array<string, mixed>> $fields
+     * @param array<int, array<string, mixed>> $fields
      * @return array<string, array<string>>
      */
     protected function settingRulesFromFields(array $fields): array
@@ -43,7 +53,7 @@ abstract class SettingFormRequest extends FormRequest
                 continue;
             }
 
-            if (! in_array('required', $fieldRules, strict: true)) {
+            if (!in_array('required', $fieldRules, strict: true)) {
                 array_unshift($fieldRules, 'nullable');
             }
 
@@ -57,7 +67,7 @@ abstract class SettingFormRequest extends FormRequest
      * Build a custom attribute map so validation messages use the field label
      * ("Timezone") rather than the raw input key ("timezone").
      *
-     * @param  array<int, array<string, mixed>> $fields
+     * @param array<int, array<string, mixed>> $fields
      * @return array<string, string>
      */
     protected function settingAttributesFromFields(array $fields): array
@@ -76,13 +86,13 @@ abstract class SettingFormRequest extends FormRequest
      * definitions. Only handles present in $fields are extracted; boolean fields
      * are normalised from checkbox presence rather than submitted value.
      *
-     * @param  array<int, array<string, mixed>> $fields
+     * @param array<int, array<string, mixed>> $fields
      * @return array<string, mixed>
      */
     protected function normaliseFields(array $fields): array
     {
         $handles = array_column($fields, 'handle');
-        $data    = $this->only($handles);
+        $data = $this->only($handles);
 
         foreach ($fields as $field) {
             if (($field['type'] ?? 'text') === 'boolean') {
@@ -92,14 +102,4 @@ abstract class SettingFormRequest extends FormRequest
 
         return $data;
     }
-
-    /**
-     * Return the normalised field payload ready for persistence.
-     *
-     * Subclasses must implement this so the controller can call a single
-     * method to obtain the fully prepared data array.
-     *
-     * @return array<string, mixed>
-     */
-    abstract public function settingsPayload(): array;
 }

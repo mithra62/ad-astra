@@ -14,6 +14,16 @@ use Illuminate\Http\Request;
 
 class Entry extends Controller
 {
+    public function store(StoreEntryRequest $request)
+    {
+        $creator = app(CreateNewEntry::class);
+        $entry = $creator->create($request->validated());
+
+        return redirect()
+            ->route('entries.groups.show', $entry->entry_group_id)
+            ->with('status', trans('entry.created'));
+    }
+
     public function create(string $group_id, Request $request)
     {
         $group = EntryGroup::with([
@@ -23,7 +33,7 @@ class Entry extends Controller
             'categoryGroups.categories',
         ])->find($group_id);
 
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
@@ -33,40 +43,30 @@ class Entry extends Controller
         }
 
         $typeHandle = $request->query('type');
-        $entryType  = $typeHandle
+        $entryType = $typeHandle
             ? $group->entryTypes->firstWhere('handle', $typeHandle)
             : $group->entryTypes->first();
 
-        if (! $entryType) {
+        if (!$entryType) {
             abort(404);
         }
 
         $allGroups = EntryGroup::ordered()->get();
-        $users     = Users::getForDropdown(10);
+        $users = Users::getForDropdown(10);
 
         return $this->view('entries.create', [
-            'group'     => $group,
-            'groups'    => $allGroups,
+            'group' => $group,
+            'groups' => $allGroups,
             'entryType' => $entryType,
-            'users'     => $users,
+            'users' => $users,
         ]);
-    }
-
-    public function store(StoreEntryRequest $request)
-    {
-        $creator = app(CreateNewEntry::class);
-        $entry   = $creator->create($request->validated());
-
-        return redirect()
-            ->route('entries.groups.show', $entry->entry_group_id)
-            ->with('status', trans('entry.created'));
     }
 
     public function edit(string $id)
     {
-        $entry = Entries::get((int) $id);
+        $entry = Entries::get((int)$id);
 
-        if (! $entry) {
+        if (!$entry) {
             abort(404);
         }
 
@@ -79,28 +79,28 @@ class Entry extends Controller
         ]);
 
         $allGroups = EntryGroup::ordered()->get();
-        $users     = Users::getForDropdown(10);
+        $users = Users::getForDropdown(10);
 
         return $this->view('entries.edit', [
-            'entry'        => $entry,
-            'groups'       => $allGroups,
-            'users'        => $users,
+            'entry' => $entry,
+            'groups' => $allGroups,
+            'users' => $users,
             'field_values' => $entry->fieldArray(),
         ]);
     }
 
     public function update(EditEntryRequest $request, string $id)
     {
-        $entry = Entries::findMeta((int) $id);
+        $entry = Entries::findMeta((int)$id);
 
-        if (! $entry) {
+        if (!$entry) {
             abort(404);
         }
 
         $entry->loadMissing('entryGroup.statusGroup.statuses');
 
         $editor = app(UpdateEntry::class);
-        $entry  = $editor->update($entry, $request->validated());
+        $entry = $editor->update($entry, $request->validated());
 
         return redirect()
             ->route('entries.edit', $entry)
@@ -109,9 +109,9 @@ class Entry extends Controller
 
     public function destroy(DeleteEntryRequest $request, string $id)
     {
-        $entry = Entries::find((int) $id);
+        $entry = Entries::find((int)$id);
 
-        if (! $entry) {
+        if (!$entry) {
             abort(404);
         }
 
@@ -125,16 +125,16 @@ class Entry extends Controller
 
     public function confirm(string $id)
     {
-        $entry = Entries::findMeta((int) $id);
+        $entry = Entries::findMeta((int)$id);
 
-        if (! $entry) {
+        if (!$entry) {
             abort(404);
         }
 
         $allGroups = EntryGroup::ordered()->get();
 
         return $this->view('entries.delete', [
-            'entry'  => $entry,
+            'entry' => $entry,
             'groups' => $allGroups,
         ]);
     }

@@ -21,7 +21,7 @@ class PodcastEpisodeEntryType extends AbstractEntryType
      */
     public function beforeCreate(array $data): array
     {
-        if (! isset($data['fields']['episode_number'])) {
+        if (!isset($data['fields']['episode_number'])) {
             $groupId = $this->getRecord()->entry_group_id;
 
             // Lock the group row so concurrent episode creates serialize here.

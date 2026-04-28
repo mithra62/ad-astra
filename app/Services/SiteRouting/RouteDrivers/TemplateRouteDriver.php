@@ -16,7 +16,8 @@ class TemplateRouteDriver implements RouteDriverInterface
 
     public function __construct(
         protected Request $request
-    ) {
+    )
+    {
         View::replaceNamespace('admin', []);
     }
 
@@ -32,11 +33,11 @@ class TemplateRouteDriver implements RouteDriverInterface
         $group = $segments[0] ?? null;
         $second = $segments[1] ?? null;
 
-        if (! $group || ! $this->isAllowed($group, $second)) {
+        if (!$group || !$this->isAllowed($group, $second)) {
             return null;
         }
 
-        if (! $second) {
+        if (!$second) {
             return $this->resolveGroupIndex($group, $segments);
         }
 
@@ -47,45 +48,11 @@ class TemplateRouteDriver implements RouteDriverInterface
     {
         $view = config('site.templates.default_template', 'templates::site.index');
 
-        if (! View::exists($view)) {
+        if (!View::exists($view)) {
             return null;
         }
 
         return $this->result($view, []);
-    }
-
-    protected function resolveGroupIndex(string $group, array $segments): ?RouteResult
-    {
-        $view = $this->viewName($group, 'index');
-
-        if (! View::exists($view)) {
-            return null;
-        }
-
-        return $this->result($view, $segments);
-    }
-
-    protected function resolveGroupSecond(string $group, string $second, array $segments): ?RouteResult
-    {
-        $actionView = $this->viewName($group, $second);
-
-        if (View::exists($actionView)) {
-            return $this->result($actionView, $segments, [
-                'handle' => null,
-                'tail' => array_slice($segments, 2),
-            ]);
-        }
-
-        $entryView = $this->viewName($group, 'entry');
-
-        if (! View::exists($entryView)) {
-            return null;
-        }
-
-        return $this->result($entryView, $segments, [
-            'handle' => $second,
-            'tail' => array_slice($segments, 2),
-        ]);
     }
 
     protected function result(string $view, array $segments, array $extra = []): RouteResult
@@ -136,11 +103,6 @@ class TemplateRouteDriver implements RouteDriverInterface
         return $params;
     }
 
-    protected function viewName(string $group, string $template): string
-    {
-        return "templates::{$group}.{$template}";
-    }
-
     protected function isAllowed(string $group, ?string $template = null): bool
     {
         if (in_array(strtolower($group), $this->reservedGroups, true)) {
@@ -158,5 +120,44 @@ class TemplateRouteDriver implements RouteDriverInterface
         }
 
         return true;
+    }
+
+    protected function resolveGroupIndex(string $group, array $segments): ?RouteResult
+    {
+        $view = $this->viewName($group, 'index');
+
+        if (!View::exists($view)) {
+            return null;
+        }
+
+        return $this->result($view, $segments);
+    }
+
+    protected function viewName(string $group, string $template): string
+    {
+        return "templates::{$group}.{$template}";
+    }
+
+    protected function resolveGroupSecond(string $group, string $second, array $segments): ?RouteResult
+    {
+        $actionView = $this->viewName($group, $second);
+
+        if (View::exists($actionView)) {
+            return $this->result($actionView, $segments, [
+                'handle' => null,
+                'tail' => array_slice($segments, 2),
+            ]);
+        }
+
+        $entryView = $this->viewName($group, 'entry');
+
+        if (!View::exists($entryView)) {
+            return null;
+        }
+
+        return $this->result($entryView, $segments, [
+            'handle' => $second,
+            'tail' => array_slice($segments, 2),
+        ]);
     }
 }

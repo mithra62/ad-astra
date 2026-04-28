@@ -1,9 +1,9 @@
 <?php
+
 namespace App\Http\Requests\Media\Library;
 
 use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class DeleteMediaLibraryRequest extends FormRequest
 {
@@ -15,7 +15,7 @@ class DeleteMediaLibraryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'confirm_removal' => 'required'
+            'confirm_removal' => 'required',
         ];
     }
 

@@ -18,13 +18,6 @@ class EntryStatusValidationTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->withoutMiddleware(VerifyCsrfToken::class);
-    }
-
     public function test_store_accepts_status_from_entry_groups_status_group(): void
     {
         $user = $this->makeSuperAdmin();
@@ -47,6 +40,43 @@ class EntryStatusValidationTest extends TestCase
         $response->assertRedirect(route('entries.groups.show', $group->id));
         $this->assertNotNull($entry);
         $this->assertSame('published', $entry->status_handle);
+    }
+
+    protected function makeSuperAdmin(): User
+    {
+        $role = Role::query()->firstOrCreate([
+            'name' => 'super admin',
+            'guard_name' => 'web',
+        ]);
+
+        $user = User::factory()->create();
+        $user->assignRole($role);
+
+        return $user;
+    }
+
+    /**
+     * @return array{0: EntryGroup, 1: EntryType}
+     */
+    protected function makeEntryGroupAndTypeWithStatuses(): array
+    {
+        $statusGroup = StatusGroup::factory()->create();
+        Status::factory()->default()->create([
+            'status_group_id' => $statusGroup->id,
+            'handle' => 'draft',
+            'name' => 'Draft',
+        ]);
+
+        $group = EntryGroup::factory()->create([
+            'status_group_id' => $statusGroup->id,
+        ]);
+
+        $type = EntryType::factory()->create([
+            'entry_group_id' => $group->id,
+            'class' => PageEntryType::class,
+        ]);
+
+        return [$group, $type];
     }
 
     public function test_store_rejects_status_from_another_status_group(): void
@@ -140,40 +170,10 @@ class EntryStatusValidationTest extends TestCase
         $this->assertSame('draft', $entry->fresh()->status_handle);
     }
 
-    protected function makeSuperAdmin(): User
+    protected function setUp(): void
     {
-        $role = Role::query()->firstOrCreate([
-            'name' => 'super admin',
-            'guard_name' => 'web',
-        ]);
+        parent::setUp();
 
-        $user = User::factory()->create();
-        $user->assignRole($role);
-
-        return $user;
-    }
-
-    /**
-     * @return array{0: EntryGroup, 1: EntryType}
-     */
-    protected function makeEntryGroupAndTypeWithStatuses(): array
-    {
-        $statusGroup = StatusGroup::factory()->create();
-        Status::factory()->default()->create([
-            'status_group_id' => $statusGroup->id,
-            'handle' => 'draft',
-            'name' => 'Draft',
-        ]);
-
-        $group = EntryGroup::factory()->create([
-            'status_group_id' => $statusGroup->id,
-        ]);
-
-        $type = EntryType::factory()->create([
-            'entry_group_id' => $group->id,
-            'class' => PageEntryType::class,
-        ]);
-
-        return [$group, $type];
+        $this->withoutMiddleware(VerifyCsrfToken::class);
     }
 }

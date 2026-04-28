@@ -18,8 +18,8 @@ use App\Settings;
 class UpdateUserSettings extends AbstractAction
 {
     /**
-     * @param  User                 $user  The authenticated user whose overrides are being saved.
-     * @param  array<string, mixed> $data  Normalised overridable field values keyed by handle.
+     * @param User $user The authenticated user whose overrides are being saved.
+     * @param array<string, mixed> $data Normalised overridable field values keyed by handle.
      */
     public function execute(User $user, array $data): void
     {
@@ -38,7 +38,7 @@ class UpdateUserSettings extends AbstractAction
                 }
             }
 
-            if (! empty($toWrite)) {
+            if (!empty($toWrite)) {
                 app(Settings::class)->setMany($domain->handle, $toWrite, user: $user);
             }
         }

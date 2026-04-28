@@ -9,60 +9,66 @@ Ordered by dependency layer. Each layer must be complete before the next begins.
 Everything that needs flag-style fields (online events, free products, breaking news) is blocked until this exists.
 
 - [x] **Create** `app/Field/Types/Boolean.php`
-  - Extends `AbstractField`
-  - `storageColumn()` returns `'value_boolean'`
-  - `cast()` returns `(bool) $value`
+    - Extends `AbstractField`
+    - `storageColumn()` returns `'value_boolean'`
+    - `cast()` returns `(bool) $value`
 - [x] **Create** `resources/views/_fields/boolean.twig`
-  - Checkbox input with `name="fields[{{ field.handle }}]"` submitting `1`/`0`
+    - Checkbox input with `name="fields[{{ field.handle }}]"` submitting `1`/`0`
 - [x] **Modify** `database/seeders/FieldTypeSeeder.php`
-  - Add `Boolean` to the `$types` array
+    - Add `Boolean` to the `$types` array
 
 ---
 
 ## Layer 2 — New StatusGroups
 
-Jobs and Products have statuses that are meaningless on a blog post. They each need their own StatusGroup instead of sharing the global `publication` group.
+Jobs and Products have statuses that are meaningless on a blog post. They each need their own StatusGroup instead of
+sharing the global `publication` group.
 
 - [x] **Modify** `database/seeders/StatusGroupSeeder.php` — add two new groups:
-  - `job-status`: draft (default, not public), published (public), expired (not public), closed (not public)
-  - `product-status`: draft (default, not public), published (public), out-of-stock (not public), pre-order (public), discontinued (not public)
-  - Events stay on `publication` — `archived` covers past events
+    - `job-status`: draft (default, not public), published (public), expired (not public), closed (not public)
+    - `product-status`: draft (default, not public), published (public), out-of-stock (not public), pre-order (public),
+      discontinued (not public)
+    - Events stay on `publication` — `archived` covers past events
 
 ---
 
 ## Layer 3 — New CategoryGroups
 
-Must be seeded before entry group seeders reference them. Add as private methods in the existing seeder following the established pattern.
+Must be seeded before entry group seeders reference them. Add as private methods in the existing seeder following the
+established pattern.
 
 - [x] **Modify** `database/seeders/CategoryGroupSeeder.php` — add:
-  - `cuisines` — Italian, Mexican, Thai, Japanese, French, American, Indian, Mediterranean _(for Recipes)_
-  - `diet-types` — Vegan, Vegetarian, Gluten-Free, Dairy-Free, Keto, Paleo _(for Recipes)_
-  - `event-types` — Conference, Webinar, Workshop, Meetup, Course, Networking _(for Events)_
-  - `employment-types` — Full-Time, Part-Time, Contract, Freelance, Remote _(for Jobs)_
-  - `experience-levels` — Entry Level, Mid Level, Senior, Lead, Executive _(for Jobs)_
+    - `cuisines` — Italian, Mexican, Thai, Japanese, French, American, Indian, Mediterranean _(for Recipes)_
+    - `diet-types` — Vegan, Vegetarian, Gluten-Free, Dairy-Free, Keto, Paleo _(for Recipes)_
+    - `event-types` — Conference, Webinar, Workshop, Meetup, Course, Networking _(for Events)_
+    - `employment-types` — Full-Time, Part-Time, Contract, Freelance, Remote _(for Jobs)_
+    - `experience-levels` — Entry Level, Mid Level, Senior, Lead, Executive _(for Jobs)_
 
 ---
 
 ## Layer 4 — Domain FieldGroups
 
-Add one private seed method per group in the existing `FieldGroupSeeder.php`, following the `seedContentFields` / `seedSeoFields` pattern. Note: `is_online` depends on Boolean being seeded first (Layer 1). `reading_time` and `total_time` should be seeded with `hidden: true` — they are system-computed and must not appear as editable inputs.
+Add one private seed method per group in the existing `FieldGroupSeeder.php`, following the `seedContentFields` /
+`seedSeoFields` pattern. Note: `is_online` depends on Boolean being seeded first (Layer 1). `reading_time` and
+`total_time` should be seeded with `hidden: true` — they are system-computed and must not appear as editable inputs.
 
 - [ ] **Modify** `database/seeders/FieldGroupSeeder.php` — add:
 
-| Handle | Fields |
-|---|---|
-| `blog-fields` | `reading_time` (Number, hidden) |
-| `event-fields` | `start_date` (Date), `end_date` (Date), `location` (Text), `venue` (Text), `ticket_url` (Url), `registration_deadline` (Date), `capacity` (Number), `is_online` (Boolean) |
-| `job-fields` | `department` (Text), `location` (Text), `salary_min` (Number), `salary_max` (Number), `closing_date` (Date), `application_url` (Url), `application_email` (EmailAddress) |
-| `news-fields` | `source` (Text), `source_url` (Url), `dateline` (Text) |
-| `page-fields` | `layout` (Text), `cta_text` (Text), `cta_url` (Url) |
-| `podcast-fields` | `episode_number` (Number), `season_number` (Number), `episode_duration` (Number), `audio_url` (Url), `transcript` (Textarea), `guest_names` (Text), `sponsor` (Text) |
-| `portfolio-fields` | `client_name` (Text), `project_url` (Url), `project_date` (Date), `role` (Text), `technologies` (Text), `testimonial` (Textarea) |
-| `product-fields` | `sku` (Text), `price` (Number), `sale_price` (Number), `stock_quantity` (Number), `weight` (Number), `dimensions` (Text) |
-| `recipe-fields` | `prep_time` (Number), `cook_time` (Number), `total_time` (Number, hidden), `servings` (Number), `calories` (Number), `ingredients` (Textarea), `instructions` (Textarea) |
-| `video-fields` | `video_platform` (Text), `platform_id` (Text), `video_url` (Url), `video_duration` (Number), `transcript` (Textarea), `captions_url` (Url) |
+| Handle             | Fields                                                                                                                                                                    |
+|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `blog-fields`      | `reading_time` (Number, hidden)                                                                                                                                           |
+| `event-fields`     | `start_date` (Date), `end_date` (Date), `location` (Text), `venue` (Text), `ticket_url` (Url), `registration_deadline` (Date), `capacity` (Number), `is_online` (Boolean) |
+| `job-fields`       | `department` (Text), `location` (Text), `salary_min` (Number), `salary_max` (Number), `closing_date` (Date), `application_url` (Url), `application_email` (EmailAddress)  |
+| `news-fields`      | `source` (Text), `source_url` (Url), `dateline` (Text)                                                                                                                    |
+| `page-fields`      | `layout` (Text), `cta_text` (Text), `cta_url` (Url)                                                                                                                       |
+| `podcast-fields`   | `episode_number` (Number), `season_number` (Number), `episode_duration` (Number), `audio_url` (Url), `transcript` (Textarea), `guest_names` (Text), `sponsor` (Text)      |
+| `portfolio-fields` | `client_name` (Text), `project_url` (Url), `project_date` (Date), `role` (Text), `technologies` (Text), `testimonial` (Textarea)                                          |
+| `product-fields`   | `sku` (Text), `price` (Number), `sale_price` (Number), `stock_quantity` (Number), `weight` (Number), `dimensions` (Text)                                                  |
+| `recipe-fields`    | `prep_time` (Number), `cook_time` (Number), `total_time` (Number, hidden), `servings` (Number), `calories` (Number), `ingredients` (Textarea), `instructions` (Textarea)  |
+| `video-fields`     | `video_platform` (Text), `platform_id` (Text), `video_url` (Url), `video_duration` (Number), `transcript` (Textarea), `captions_url` (Url)                                |
 
-> `episode_duration` and `video_duration` are separate field records (not shared) so they can be placed in their respective layouts independently.
+> `episode_duration` and `video_duration` are separate field records (not shared) so they can be placed in their
+> respective layouts independently.
 
 ---
 
@@ -71,53 +77,56 @@ Add one private seed method per group in the existing `FieldGroupSeeder.php`, fo
 ### `database/seeders/EntryGroupSeeder.php`
 
 - [ ] **Blog group**
-  - Attach `blog-fields` via `syncWithoutDetaching`
-  - Add "Publishing" tab to layout containing `reading_time`
+    - Attach `blog-fields` via `syncWithoutDetaching`
+    - Add "Publishing" tab to layout containing `reading_time`
 - [ ] **Products group**
-  - Change `status_group_id` to use `product-status` instead of `publication`
-  - Attach `product-fields`
-  - Add "Pricing" tab to layout (`price`, `sale_price`, `sku`)
-  - Add "Inventory" tab to layout (`stock_quantity`, `weight`, `dimensions`)
+    - Change `status_group_id` to use `product-status` instead of `publication`
+    - Attach `product-fields`
+    - Add "Pricing" tab to layout (`price`, `sale_price`, `sku`)
+    - Add "Inventory" tab to layout (`stock_quantity`, `weight`, `dimensions`)
 
 ### `database/seeders/ExtendedEntryGroupSeeder.php`
 
 - [ ] **Events group**
-  - Attach `event-fields`
-  - Attach `event-types` CategoryGroup
-  - Add "Event Details" tab (`start_date`, `end_date`, `location`, `venue`, `is_online`, `ticket_url`, `registration_deadline`, `capacity`)
+    - Attach `event-fields`
+    - Attach `event-types` CategoryGroup
+    - Add "Event Details" tab (`start_date`, `end_date`, `location`, `venue`, `is_online`, `ticket_url`,
+      `registration_deadline`, `capacity`)
 - [ ] **News group**
-  - Attach `news-fields`
-  - Add "Attribution" tab (`source`, `source_url`, `dateline`)
+    - Attach `news-fields`
+    - Add "Attribution" tab (`source`, `source_url`, `dateline`)
 - [ ] **Pages group**
-  - Attach `page-fields`
-  - Add "Page Options" tab (`layout`, `cta_text`, `cta_url`)
+    - Attach `page-fields`
+    - Add "Page Options" tab (`layout`, `cta_text`, `cta_url`)
 - [ ] **Jobs group**
-  - Change `status_group_id` to `job-status`
-  - Attach `job-fields`
-  - Attach `employment-types` and `experience-levels` CategoryGroups
-  - Add "Role Details" tab (`department`, `location`, `salary_min`, `salary_max`, `closing_date`, `application_url`, `application_email`)
+    - Change `status_group_id` to `job-status`
+    - Attach `job-fields`
+    - Attach `employment-types` and `experience-levels` CategoryGroups
+    - Add "Role Details" tab (`department`, `location`, `salary_min`, `salary_max`, `closing_date`, `application_url`,
+      `application_email`)
 - [ ] **Podcast group**
-  - Attach `podcast-fields`
-  - Add "Episode" tab (`episode_number`, `season_number`, `audio_url`, `episode_duration`, `guest_names`, `sponsor`)
-  - Add "Transcript" tab (`transcript`)
+    - Attach `podcast-fields`
+    - Add "Episode" tab (`episode_number`, `season_number`, `audio_url`, `episode_duration`, `guest_names`, `sponsor`)
+    - Add "Transcript" tab (`transcript`)
 - [ ] **Portfolio group**
-  - Attach `portfolio-fields`
-  - Add "Project Details" tab (`client_name`, `project_date`, `role`, `technologies`, `project_url`, `testimonial`)
+    - Attach `portfolio-fields`
+    - Add "Project Details" tab (`client_name`, `project_date`, `role`, `technologies`, `project_url`, `testimonial`)
 - [ ] **Videos group**
-  - Attach `video-fields`
-  - Add "Video" tab (`video_platform`, `platform_id`, `video_url`, `video_duration`, `captions_url`)
-  - Add "Transcript" tab (`transcript`)
+    - Attach `video-fields`
+    - Add "Video" tab (`video_platform`, `platform_id`, `video_url`, `video_duration`, `captions_url`)
+    - Add "Transcript" tab (`transcript`)
 - [ ] **Recipes group**
-  - Attach `recipe-fields`
-  - Attach `cuisines` and `diet-types` CategoryGroups
-  - Add "Recipe Details" tab (`prep_time`, `cook_time`, `total_time`, `servings`, `calories`)
-  - Add "Content" tab (`ingredients`, `instructions`)
+    - Attach `recipe-fields`
+    - Attach `cuisines` and `diet-types` CategoryGroups
+    - Add "Recipe Details" tab (`prep_time`, `cook_time`, `total_time`, `servings`, `calories`)
+    - Add "Content" tab (`ingredients`, `instructions`)
 
 ---
 
 ## Layer 6 — AbstractEntryType: Safe Field Reading
 
-Lifecycle hooks cannot safely call `$entry->field()` because eager loading is not guaranteed on the `Entry` passed to `beforeUpdate`. Add one protected helper.
+Lifecycle hooks cannot safely call `$entry->field()` because eager loading is not guaranteed on the `Entry` passed to
+`beforeUpdate`. Add one protected helper.
 
 - [ ] **Modify** `app/EntryTypes/AbstractEntryType.php` — add `existingFieldValue()`:
 
@@ -140,7 +149,8 @@ protected function existingFieldValue(Entry $entry, string $handle): mixed
 
 ## Layer 7 — Validation Contract on AbstractEntryType
 
-Hooks currently throw exceptions for business rule violations, which propagates to a 500 unless the HTTP layer catches it. Add a formal opt-in validation method as a non-breaking complement that callers can invoke before create/update.
+Hooks currently throw exceptions for business rule violations, which propagates to a 500 unless the HTTP layer catches
+it. Add a formal opt-in validation method as a non-breaking complement that callers can invoke before create/update.
 
 - [ ] **Modify** `app/EntryTypes/AbstractEntryType.php` — add `validate()`:
 
@@ -166,43 +176,61 @@ public function validate(array $data, ?Entry $entry = null): array
 With the infrastructure above in place, each class can be updated.
 
 ### `BlogPostEntryType`
-- [ ] `beforeCreate` — stamp `published_at` to `now()` when `status === 'published'` and no date is set (matching `NewsArticleEntryType`)
-- [ ] `beforeCreate` / `beforeUpdate` — compute `reading_time` from `str_word_count($data['fields']['body'] ?? '') / 200` (rounded up) and inject into `$data['fields']['reading_time']`
+
+- [ ] `beforeCreate` — stamp `published_at` to `now()` when `status === 'published'` and no date is set (matching
+  `NewsArticleEntryType`)
+- [ ] `beforeCreate` / `beforeUpdate` — compute `reading_time` from
+  `str_word_count($data['fields']['body'] ?? '') / 200` (rounded up) and inject into `$data['fields']['reading_time']`
 
 ### `EventEntryType`
+
 - [ ] `beforeUpdate` — throw `InvalidArgumentException` when `end_date` is set and earlier than `start_date`
 - [ ] Existing `published_at` defaulting — no change
 
 ### `JobListingEntryType`
-- [ ] `beforeUpdate` — when `closing_date` field is past `now()`, inject `$data['status'] = 'expired'` (now valid because `expired` exists in `job-status`)
+
+- [ ] `beforeUpdate` — when `closing_date` field is past `now()`, inject `$data['status'] = 'expired'` (now valid
+  because `expired` exists in `job-status`)
 - [ ] `validate()` — return error when neither `application_url` nor `application_email` is present on publish
 - [ ] Existing `published_at` defaulting and expired/closed clearing — no change
 
 ### `NewsArticleEntryType`
+
 - [ ] Existing `published_at` stamping — no change
 - [ ] `validate()` — return error when `source_url` is set but `source` is empty
 
 ### `PageEntryType`
+
 - [ ] `beforeCreate` — default `published_at` to `now()`
 
 ### `PodcastEpisodeEntryType`
+
 - [ ] `beforeUpdate` — throw `InvalidArgumentException` when `episode_duration` is present and not a positive integer
-- [ ] Existing `episode_number` locking and `published_at` defaulting — no change; will now persist correctly once `episode_number` is seeded and in the layout (previously silently dropped)
+- [ ] Existing `episode_number` locking and `published_at` defaulting — no change; will now persist correctly once
+  `episode_number` is seeded and in the layout (previously silently dropped)
 
 ### `PortfolioItemEntryType`
+
 - [ ] `beforeCreate` — default `published_at` to `now()`
 
 ### `ProductEntryType`
+
 - [ ] `beforeCreate` / `beforeUpdate` — throw `InvalidArgumentException` when `price` is explicitly set and negative
-- [ ] `beforeCreate` / `beforeUpdate` — when `sale_price` is set and `price > 0`, throw `InvalidArgumentException` if `sale_price >= price`; when `price === 0`, strip `sale_price` and throw `InvalidArgumentException` with a clear message (do not silently discard)
-- [ ] `beforeUpdate` — when `stock_quantity` drops to zero, inject `$data['status'] = 'out-of-stock'`; use `existingFieldValue($entry, 'stock_quantity')` to read current stock when not present in `$data['fields']`
+- [ ] `beforeCreate` / `beforeUpdate` — when `sale_price` is set and `price > 0`, throw `InvalidArgumentException` if
+  `sale_price >= price`; when `price === 0`, strip `sale_price` and throw `InvalidArgumentException` with a clear
+  message (do not silently discard)
+- [ ] `beforeUpdate` — when `stock_quantity` drops to zero, inject `$data['status'] = 'out-of-stock'`; use
+  `existingFieldValue($entry, 'stock_quantity')` to read current stock when not present in `$data['fields']`
 - [ ] `validate()` — return error when `sku` is empty and status is `published`
 
 ### `RecipeEntryType`
+
 - [ ] `beforeCreate` — default `published_at` to `now()`
-- [ ] `beforeCreate` / `beforeUpdate` — compute `total_time` from `prep_time + cook_time` when either is present in `$data['fields']` and inject into `$data['fields']['total_time']`
+- [ ] `beforeCreate` / `beforeUpdate` — compute `total_time` from `prep_time + cook_time` when either is present in
+  `$data['fields']` and inject into `$data['fields']['total_time']`
 
 ### `VideoEntryType`
+
 - [ ] `beforeCreate` — default `published_at` to `now()`
 - [ ] `validate()` — return error when both `platform_id` and `video_url` are empty on publish
 
@@ -213,15 +241,16 @@ With the infrastructure above in place, each class can be updated.
 `download_count` and `view_count` do not belong in `field_values`. They need a dedicated table with their own read path.
 
 - [ ] **Create** migration `create_entry_metrics_table`:
-  - `entry_id` (FK → entries, cascade delete)
-  - `metric` (string — e.g. `'downloads'`, `'views'`, `'plays'`)
-  - `value` (unsignedBigInteger, default 0)
-  - `recorded_date` (date)
-  - Unique constraint on `[entry_id, metric, recorded_date]`
+    - `entry_id` (FK → entries, cascade delete)
+    - `metric` (string — e.g. `'downloads'`, `'views'`, `'plays'`)
+    - `value` (unsignedBigInteger, default 0)
+    - `recorded_date` (date)
+    - Unique constraint on `[entry_id, metric, recorded_date]`
 - [ ] **Create** `app/Models/EntryMetric.php` — standard model with the above fillable
 - [ ] **Add** `metrics(): HasMany` relationship to `app/Models/Entry.php`
 
-> Templates read metrics via `$entry->metrics->where('metric', 'downloads')->sum('value')`. No changes to `field_values` or any FieldLayout are involved.
+> Templates read metrics via `$entry->metrics->where('metric', 'downloads')->sum('value')`. No changes to `field_values`
+> or any FieldLayout are involved.
 
 ---
 
@@ -229,51 +258,67 @@ With the infrastructure above in place, each class can be updated.
 
 ## Layer 10 — Settings System
 
-Replace the existing flat key/value settings infrastructure with a typed, field-driven system that supports both system-wide and per-user overrides.
+Replace the existing flat key/value settings infrastructure with a typed, field-driven system that supports both
+system-wide and per-user overrides.
 
 ### Scrapped (remove these):
+
 - [ ] **Delete** `app/Settings.php` — service class
 - [ ] **Delete** `app/Models/Settings.php` — Eloquent model
 - [ ] **Delete** `database/migrations/2025_11_28_161734_create_settings_table.php`
 - [ ] **Delete** `database/migrations/2025_12_14_185751_create_user_settings_table.php`
 
 ### New infrastructure:
+
 - [ ] **Create** migration `create_setting_values_table`:
-  - `id` (primary)
-  - `domain` (string — e.g. `'general'`, `'media'`, `'email'`)
-  - `field_handle` (string)
-  - `user_id` (FK → users, nullable, cascade delete)
-  - `value` (text, nullable)
-  - Unique constraint on `[domain, field_handle, user_id]`
-  - Index on `[user_id, domain]` for user settings lookups
+    - `id` (primary)
+    - `domain` (string — e.g. `'general'`, `'media'`, `'email'`)
+    - `field_handle` (string)
+    - `user_id` (FK → users, nullable, cascade delete)
+    - `value` (text, nullable)
+    - Unique constraint on `[domain, field_handle, user_id]`
+    - Index on `[user_id, domain]` for user settings lookups
 - [ ] **Create** `app/Models/SettingValue.php` — Eloquent model with the above fillable
-- [ ] **Create** `app/Models/SettingsDomain.php` — implements `Fieldable` trait; one record per domain (general, media, email, etc.); carries `FieldLayout` for form rendering
-- [ ] **Create** `database/seeders/SettingsDomainSeeder.php` — seeds all domains and their field layouts using `firstOrCreate`
+- [ ] **Create** `app/Models/SettingsDomain.php` — implements `Fieldable` trait; one record per domain (general, media,
+  email, etc.); carries `FieldLayout` for form rendering
+- [ ] **Create** `database/seeders/SettingsDomainSeeder.php` — seeds all domains and their field layouts using
+  `firstOrCreate`
 - [ ] **Create** `app/Settings.php` (replacement) — `SettingsResolver` service:
-  - Constructed with optional `?User $user`
-  - `get(string $domain, string $handle, mixed $default = null): mixed` — resolves user override → system value → field default
-  - `set(string $domain, string $handle, mixed $value, ?User $user = null): void`
-  - `all(string $domain): array` — returns resolved key/value map for a full domain (used by form rendering)
-  - Registered as a scoped service in `AppServiceProvider` so the authenticated user is injected at request time
+    - Constructed with optional `?User $user`
+    - `get(string $domain, string $handle, mixed $default = null): mixed` — resolves user override → system value →
+      field default
+    - `set(string $domain, string $handle, mixed $value, ?User $user = null): void`
+    - `all(string $domain): array` — returns resolved key/value map for a full domain (used by form rendering)
+    - Registered as a scoped service in `AppServiceProvider` so the authenticated user is injected at request time
 
 ### Caching:
-- [ ] **Cache system settings per domain** — on `all($domain)` with `user_id = null`, cache the result under a key like `settings.{domain}`. TTL can be long (1 hour or indefinite until invalidated).
-- [ ] **Cache user settings per user per domain** — cache under `settings.user.{userId}.{domain}`. Loaded once per request via the scoped service; no repeated queries for the same domain.
-- [ ] **Invalidate on write** — `set()` must forget the relevant cache key(s) after persisting. System writes bust `settings.{domain}`; user writes bust `settings.user.{userId}.{domain}`.
-- [ ] **Warm on first load** — `all()` fetches `WHERE (user_id = ? OR user_id IS NULL) AND domain = ?` in a single query, resolves PHP-side precedence (user value wins), then caches the result. No per-field queries.
-- [ ] **Cache driver** — use whatever `CACHE_DRIVER` is configured; no special driver required. The key structure is flat and portable across file, Redis, and Memcached.
+
+- [ ] **Cache system settings per domain** — on `all($domain)` with `user_id = null`, cache the result under a key like
+  `settings.{domain}`. TTL can be long (1 hour or indefinite until invalidated).
+- [ ] **Cache user settings per user per domain** — cache under `settings.user.{userId}.{domain}`. Loaded once per
+  request via the scoped service; no repeated queries for the same domain.
+- [ ] **Invalidate on write** — `set()` must forget the relevant cache key(s) after persisting. System writes bust
+  `settings.{domain}`; user writes bust `settings.user.{userId}.{domain}`.
+- [ ] **Warm on first load** — `all()` fetches `WHERE (user_id = ? OR user_id IS NULL) AND domain = ?` in a single
+  query, resolves PHP-side precedence (user value wins), then caches the result. No per-field queries.
+- [ ] **Cache driver** — use whatever `CACHE_DRIVER` is configured; no special driver required. The key structure is
+  flat and portable across file, Redis, and Memcached.
 
 ### UI:
+
 - [ ] **Create** settings controller and routes — index lists domains, show renders the domain's `FieldLayout` as a form
 - [ ] **Create** settings form view — reuses existing field rendering pipeline (`_fields/*.twig` partials)
-- [ ] **Create** user settings page — filters to only `user_overridable` fields; renders override inputs alongside current system values
-- [ ] **Add** `user_overridable` boolean column to the `fields` table (default false) — controls which fields appear on the user settings page
+- [ ] **Create** user settings page — filters to only `user_overridable` fields; renders override inputs alongside
+  current system values
+- [ ] **Add** `user_overridable` boolean column to the `fields` table (default false) — controls which fields appear on
+  the user settings page
 
 ---
 
 ## DatabaseSeeder Load Order
 
-No new seeder classes are required — all additions go into existing files. The call order in `DatabaseSeeder.php` remains unchanged:
+No new seeder classes are required — all additions go into existing files. The call order in `DatabaseSeeder.php`
+remains unchanged:
 
 ```
 RolesPermissionsSeeder

@@ -8,4 +8,6 @@ namespace App\Services;
  * Use the Entries facade or EntryService directly for new code.
  * The Content facade resolves to this class so existing call-sites continue to work.
  */
-class ContentService extends EntryService {}
+class ContentService extends EntryService
+{
+}

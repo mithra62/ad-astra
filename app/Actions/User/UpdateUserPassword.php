@@ -2,12 +2,12 @@
 
 namespace App\Actions\User;
 
+use App\Actions\AbstractAction;
 use App\Models\User;
 use App\Services\UserService;
 use App\Traits\PasswordValidationRules;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\UpdatesUserPasswords;
-use App\Actions\AbstractAction;
 
 class UpdateUserPassword extends AbstractAction implements UpdatesUserPasswords
 {
@@ -16,7 +16,7 @@ class UpdateUserPassword extends AbstractAction implements UpdatesUserPasswords
     /**
      * Validate and update the user's password.
      *
-     * @param  array<string, string>  $input
+     * @param array<string, string> $input
      */
     public function update(User $user, array $input): void
     {

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Facades\Entries;
 use App\EntryTypes\PageEntryType;
+use App\Facades\Entries;
 use App\Models\Entry;
 use App\Models\EntryGroup;
 use App\Models\EntryTree;
@@ -163,6 +163,22 @@ class SandboxedEntryTreeSeeder extends Seeder
     }
 
     /**
+     * @param string[] $definitionKeys
+     */
+    protected function pruneSandboxEntries(EntryGroup $entryGroup, array $definitionKeys): void
+    {
+        $handles = collect($this->treeDefinitions())
+            ->only($definitionKeys)
+            ->pluck('entry_handle')
+            ->all();
+
+        Entry::query()
+            ->where('entry_group_id', $entryGroup->id)
+            ->whereNotIn('handle', $handles)
+            ->delete();
+    }
+
+    /**
      * @param array<string, array<string, mixed>> $definitions
      * @return array<string, Entry>
      */
@@ -224,21 +240,5 @@ class SandboxedEntryTreeSeeder extends Seeder
         }
 
         Entries::rebuildTreeUri($nodes['site']);
-    }
-
-    /**
-     * @param string[] $definitionKeys
-     */
-    protected function pruneSandboxEntries(EntryGroup $entryGroup, array $definitionKeys): void
-    {
-        $handles = collect($this->treeDefinitions())
-            ->only($definitionKeys)
-            ->pluck('entry_handle')
-            ->all();
-
-        Entry::query()
-            ->where('entry_group_id', $entryGroup->id)
-            ->whereNotIn('handle', $handles)
-            ->delete();
     }
 }

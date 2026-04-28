@@ -71,6 +71,43 @@ class ExtendedEntryGroupSeeder extends Seeder
         );
     }
 
+    /**
+     * Create a FieldLayout with named tabs, each containing field handles.
+     * Fields that don't exist in the database are silently skipped.
+     *
+     * @param array<string, string[]> $tabs Tab name => [field handles]
+     */
+    private function createLayout(string $name, array $tabs): FieldLayout
+    {
+        $layout = FieldLayout::create(['name' => $name]);
+        $tabOrder = 1;
+
+        foreach ($tabs as $tabName => $fieldHandles) {
+            $tab = Tab::create([
+                'field_layout_id' => $layout->id,
+                'name' => $tabName,
+                'sort_order' => $tabOrder++,
+            ]);
+
+            $elementOrder = 1;
+            foreach ($fieldHandles as $handle) {
+                $field = Field::where('handle', $handle)->first();
+                if (!$field) {
+                    continue;
+                }
+
+                TabElement::create([
+                    'field_layout_tab_id' => $tab->id,
+                    'field_id' => $field->id,
+                    'required' => false,
+                    'sort_order' => $elementOrder++,
+                ]);
+            }
+        }
+
+        return $layout;
+    }
+
     private function seedNewsGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
     {
         $layout = $this->createLayout('News Layout', [
@@ -287,42 +324,5 @@ class ExtendedEntryGroupSeeder extends Seeder
                 'has_entry_tree' => true,
             ]
         );
-    }
-
-    /**
-     * Create a FieldLayout with named tabs, each containing field handles.
-     * Fields that don't exist in the database are silently skipped.
-     *
-     * @param  array<string, string[]>  $tabs  Tab name => [field handles]
-     */
-    private function createLayout(string $name, array $tabs): FieldLayout
-    {
-        $layout = FieldLayout::create(['name' => $name]);
-        $tabOrder = 1;
-
-        foreach ($tabs as $tabName => $fieldHandles) {
-            $tab = Tab::create([
-                'field_layout_id' => $layout->id,
-                'name' => $tabName,
-                'sort_order' => $tabOrder++,
-            ]);
-
-            $elementOrder = 1;
-            foreach ($fieldHandles as $handle) {
-                $field = Field::where('handle', $handle)->first();
-                if (! $field) {
-                    continue;
-                }
-
-                TabElement::create([
-                    'field_layout_tab_id' => $tab->id,
-                    'field_id' => $field->id,
-                    'required' => false,
-                    'sort_order' => $elementOrder++,
-                ]);
-            }
-        }
-
-        return $layout;
     }
 }

@@ -15,8 +15,8 @@ class StoreElementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'field_id'   => ['required', 'integer', 'exists:fields,id'],
-            'required'   => ['nullable', 'boolean'],
+            'field_id' => ['required', 'integer', 'exists:fields,id'],
+            'required' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }

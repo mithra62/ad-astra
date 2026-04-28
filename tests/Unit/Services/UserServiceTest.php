@@ -22,16 +22,6 @@ class UserServiceTest extends TestCase
 
     private UserService $service;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->service = app(UserService::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // find()
-    // -------------------------------------------------------------------------
-
     public function test_find_returns_user_when_it_exists(): void
     {
         $user = User::factory()->create();
@@ -42,16 +32,16 @@ class UserServiceTest extends TestCase
         $this->assertEquals($user->id, $result->id);
     }
 
+    // -------------------------------------------------------------------------
+    // find()
+    // -------------------------------------------------------------------------
+
     public function test_find_returns_null_when_user_does_not_exist(): void
     {
         $result = $this->service->find(999999);
 
         $this->assertNull($result);
     }
-
-    // -------------------------------------------------------------------------
-    // get()
-    // -------------------------------------------------------------------------
 
     public function test_get_returns_user_when_it_exists(): void
     {
@@ -63,16 +53,16 @@ class UserServiceTest extends TestCase
         $this->assertEquals($user->id, $result->id);
     }
 
+    // -------------------------------------------------------------------------
+    // get()
+    // -------------------------------------------------------------------------
+
     public function test_get_throws_when_user_does_not_exist(): void
     {
         $this->expectException(ModelNotFoundException::class);
 
         $this->service->get(999999);
     }
-
-    // -------------------------------------------------------------------------
-    // paginate()
-    // -------------------------------------------------------------------------
 
     public function test_paginate_returns_length_aware_paginator(): void
     {
@@ -82,6 +72,10 @@ class UserServiceTest extends TestCase
 
         $this->assertInstanceOf(LengthAwarePaginator::class, $result);
     }
+
+    // -------------------------------------------------------------------------
+    // paginate()
+    // -------------------------------------------------------------------------
 
     public function test_paginate_respects_per_page_argument(): void
     {
@@ -110,10 +104,6 @@ class UserServiceTest extends TestCase
         $this->assertTrue($result->first()->relationLoaded('roles'));
     }
 
-    // -------------------------------------------------------------------------
-    // getForDropdown()
-    // -------------------------------------------------------------------------
-
     public function test_get_for_dropdown_returns_collection(): void
     {
         User::factory()->count(3)->create();
@@ -122,6 +112,10 @@ class UserServiceTest extends TestCase
 
         $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $result);
     }
+
+    // -------------------------------------------------------------------------
+    // getForDropdown()
+    // -------------------------------------------------------------------------
 
     public function test_get_for_dropdown_respects_limit(): void
     {
@@ -154,10 +148,6 @@ class UserServiceTest extends TestCase
         $this->assertEquals(['Alice', 'Mike', 'Zara'], $names);
     }
 
-    // -------------------------------------------------------------------------
-    // getTotalCount()
-    // -------------------------------------------------------------------------
-
     public function test_get_total_count_returns_correct_count(): void
     {
         User::factory()->count(7)->create();
@@ -165,14 +155,14 @@ class UserServiceTest extends TestCase
         $this->assertEquals(7, $this->service->getTotalCount());
     }
 
+    // -------------------------------------------------------------------------
+    // getTotalCount()
+    // -------------------------------------------------------------------------
+
     public function test_get_total_count_returns_zero_when_no_users(): void
     {
         $this->assertEquals(0, $this->service->getTotalCount());
     }
-
-    // -------------------------------------------------------------------------
-    // getLatestUsers()
-    // -------------------------------------------------------------------------
 
     public function test_get_latest_users_returns_collection(): void
     {
@@ -183,6 +173,10 @@ class UserServiceTest extends TestCase
             $this->service->getLatestUsers()
         );
     }
+
+    // -------------------------------------------------------------------------
+    // getLatestUsers()
+    // -------------------------------------------------------------------------
 
     public function test_get_latest_users_respects_limit(): void
     {
@@ -209,10 +203,6 @@ class UserServiceTest extends TestCase
         $this->assertEquals($older->id, $result->last()->id);
     }
 
-    // -------------------------------------------------------------------------
-    // firstOrCreateFromSocial()
-    // -------------------------------------------------------------------------
-
     public function test_first_or_create_from_social_creates_new_user_when_not_found(): void
     {
         $result = $this->service->firstOrCreateFromSocial('social@example.com', 'Social User');
@@ -220,9 +210,13 @@ class UserServiceTest extends TestCase
         $this->assertInstanceOf(User::class, $result);
         $this->assertDatabaseHas('users', [
             'email' => 'social@example.com',
-            'name'  => 'Social User',
+            'name' => 'Social User',
         ]);
     }
+
+    // -------------------------------------------------------------------------
+    // firstOrCreateFromSocial()
+    // -------------------------------------------------------------------------
 
     public function test_first_or_create_from_social_returns_existing_user_by_email(): void
     {
@@ -249,31 +243,31 @@ class UserServiceTest extends TestCase
         $this->assertNotNull($result->fresh()->password);
     }
 
-    // -------------------------------------------------------------------------
-    // create()
-    // -------------------------------------------------------------------------
-
     public function test_create_returns_user_instance(): void
     {
         $result = $this->service->create([
-            'name'     => 'Alice',
-            'email'    => 'alice@example.com',
+            'name' => 'Alice',
+            'email' => 'alice@example.com',
             'password' => 'Secret1234!',
         ]);
 
         $this->assertInstanceOf(User::class, $result);
     }
 
+    // -------------------------------------------------------------------------
+    // create()
+    // -------------------------------------------------------------------------
+
     public function test_create_persists_user_to_database(): void
     {
         $this->service->create([
-            'name'     => 'Bob',
-            'email'    => 'bob@example.com',
+            'name' => 'Bob',
+            'email' => 'bob@example.com',
             'password' => 'Secret1234!',
         ]);
 
         $this->assertDatabaseHas('users', [
-            'name'  => 'Bob',
+            'name' => 'Bob',
             'email' => 'bob@example.com',
         ]);
     }
@@ -281,8 +275,8 @@ class UserServiceTest extends TestCase
     public function test_create_hashes_the_password(): void
     {
         $this->service->create([
-            'name'     => 'Carol',
-            'email'    => 'carol@example.com',
+            'name' => 'Carol',
+            'email' => 'carol@example.com',
             'password' => 'PlainText1!',
         ]);
 
@@ -294,9 +288,9 @@ class UserServiceTest extends TestCase
     public function test_create_strips_password_confirmation_from_attributes(): void
     {
         $this->service->create([
-            'name'                  => 'Eve',
-            'email'                 => 'eve@example.com',
-            'password'              => 'Secret1234!',
+            'name' => 'Eve',
+            'email' => 'eve@example.com',
+            'password' => 'Secret1234!',
             'password_confirmation' => 'Secret1234!',
         ]);
 
@@ -307,12 +301,12 @@ class UserServiceTest extends TestCase
 
     public function test_create_syncs_roles_when_roles_key_is_provided(): void
     {
-        $role   = Role::factory()->create(['name' => 'editor']);
+        $role = Role::factory()->create(['name' => 'editor']);
         $result = $this->service->create([
-            'name'     => 'Frank',
-            'email'    => 'frank@example.com',
+            'name' => 'Frank',
+            'email' => 'frank@example.com',
             'password' => 'Secret1234!',
-            'roles'    => ['editor'],
+            'roles' => ['editor'],
         ]);
 
         $this->assertTrue($result->hasRole('editor'));
@@ -321,8 +315,8 @@ class UserServiceTest extends TestCase
     public function test_create_skips_role_sync_when_roles_key_is_absent(): void
     {
         $result = $this->service->create([
-            'name'     => 'Grace',
-            'email'    => 'grace@example.com',
+            'name' => 'Grace',
+            'email' => 'grace@example.com',
             'password' => 'Secret1234!',
         ]);
 
@@ -332,10 +326,10 @@ class UserServiceTest extends TestCase
     public function test_create_skips_role_sync_when_roles_array_is_empty(): void
     {
         $result = $this->service->create([
-            'name'     => 'Hank',
-            'email'    => 'hank@example.com',
+            'name' => 'Hank',
+            'email' => 'hank@example.com',
             'password' => 'Secret1234!',
-            'roles'    => [],
+            'roles' => [],
         ]);
 
         $this->assertEmpty($result->roles);
@@ -345,10 +339,10 @@ class UserServiceTest extends TestCase
     {
         // Passing an empty fields array hits the branch without needing real Field records.
         $result = $this->service->create([
-            'name'     => 'Iris',
-            'email'    => 'iris@example.com',
+            'name' => 'Iris',
+            'email' => 'iris@example.com',
             'password' => 'Secret1234!',
-            'fields'   => [],
+            'fields' => [],
         ]);
 
         $this->assertInstanceOf(User::class, $result);
@@ -357,8 +351,8 @@ class UserServiceTest extends TestCase
     public function test_create_skips_fields_when_key_is_absent(): void
     {
         $result = $this->service->create([
-            'name'     => 'Jack',
-            'email'    => 'jack@example.com',
+            'name' => 'Jack',
+            'email' => 'jack@example.com',
             'password' => 'Secret1234!',
         ]);
 
@@ -368,8 +362,8 @@ class UserServiceTest extends TestCase
     public function test_create_returns_refreshed_model(): void
     {
         $result = $this->service->create([
-            'name'     => 'Kira',
-            'email'    => 'kira@example.com',
+            'name' => 'Kira',
+            'email' => 'kira@example.com',
             'password' => 'Secret1234!',
         ]);
 
@@ -377,17 +371,17 @@ class UserServiceTest extends TestCase
         $this->assertNotNull($result->id);
     }
 
-    // -------------------------------------------------------------------------
-    // update()
-    // -------------------------------------------------------------------------
-
     public function test_update_returns_user_instance(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->service->update($user, ['name' => 'Updated']);
 
         $this->assertInstanceOf(User::class, $result);
     }
+
+    // -------------------------------------------------------------------------
+    // update()
+    // -------------------------------------------------------------------------
 
     public function test_update_persists_changed_attributes(): void
     {
@@ -432,7 +426,7 @@ class UserServiceTest extends TestCase
 
     public function test_update_processes_fields_key_when_present(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->service->update($user, ['fields' => []]);
 
         $this->assertInstanceOf(User::class, $result);
@@ -440,7 +434,7 @@ class UserServiceTest extends TestCase
 
     public function test_update_skips_fields_when_key_is_absent(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->service->update($user, ['name' => 'NoFields']);
 
         $this->assertInstanceOf(User::class, $result);
@@ -448,7 +442,7 @@ class UserServiceTest extends TestCase
 
     public function test_update_returns_model_with_updated_values(): void
     {
-        $user   = User::factory()->create(['name' => 'Before']);
+        $user = User::factory()->create(['name' => 'Before']);
         $result = $this->service->update($user, ['name' => 'After']);
 
         // refresh() returns $this, so the instance is the same object —
@@ -456,10 +450,6 @@ class UserServiceTest extends TestCase
         $this->assertEquals('After', $result->name);
         $this->assertDatabaseHas('users', ['id' => $user->id, 'name' => 'After']);
     }
-
-    // -------------------------------------------------------------------------
-    // delete()
-    // -------------------------------------------------------------------------
 
     public function test_delete_removes_user_from_database(): void
     {
@@ -470,17 +460,17 @@ class UserServiceTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
+    // -------------------------------------------------------------------------
+    // delete()
+    // -------------------------------------------------------------------------
+
     public function test_delete_returns_true_on_success(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->service->delete($user);
 
         $this->assertTrue($result);
     }
-
-    // -------------------------------------------------------------------------
-    // assignRoles()
-    // -------------------------------------------------------------------------
 
     public function test_assign_roles_adds_role_to_user(): void
     {
@@ -491,6 +481,10 @@ class UserServiceTest extends TestCase
 
         $this->assertTrue($user->hasRole('writer'));
     }
+
+    // -------------------------------------------------------------------------
+    // assignRoles()
+    // -------------------------------------------------------------------------
 
     public function test_assign_roles_accepts_a_string_role_name(): void
     {
@@ -518,15 +512,11 @@ class UserServiceTest extends TestCase
     public function test_assign_roles_returns_the_user(): void
     {
         Role::factory()->create(['name' => 'guest']);
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->service->assignRoles($user, 'guest');
 
         $this->assertSame($user, $result);
     }
-
-    // -------------------------------------------------------------------------
-    // syncRoles()
-    // -------------------------------------------------------------------------
 
     public function test_sync_roles_replaces_existing_roles(): void
     {
@@ -541,6 +531,10 @@ class UserServiceTest extends TestCase
         $this->assertTrue($user->fresh()->hasRole('editor'));
     }
 
+    // -------------------------------------------------------------------------
+    // syncRoles()
+    // -------------------------------------------------------------------------
+
     public function test_sync_roles_removes_all_roles_when_given_empty_array(): void
     {
         Role::factory()->create(['name' => 'admin']);
@@ -554,15 +548,11 @@ class UserServiceTest extends TestCase
 
     public function test_sync_roles_returns_the_user(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->service->syncRoles($user, []);
 
         $this->assertSame($user, $result);
     }
-
-    // -------------------------------------------------------------------------
-    // revokeRole()
-    // -------------------------------------------------------------------------
 
     public function test_revoke_role_removes_the_specified_role(): void
     {
@@ -574,6 +564,10 @@ class UserServiceTest extends TestCase
 
         $this->assertFalse($user->fresh()->hasRole('admin'));
     }
+
+    // -------------------------------------------------------------------------
+    // revokeRole()
+    // -------------------------------------------------------------------------
 
     public function test_revoke_role_leaves_other_roles_intact(): void
     {
@@ -599,10 +593,6 @@ class UserServiceTest extends TestCase
         $this->assertSame($user, $result);
     }
 
-    // -------------------------------------------------------------------------
-    // setPassword()
-    // -------------------------------------------------------------------------
-
     public function test_set_password_persists_new_password(): void
     {
         $user = User::factory()->create(['password' => Hash::make('OldPass1!')]);
@@ -611,6 +601,10 @@ class UserServiceTest extends TestCase
 
         $this->assertTrue(Hash::check('NewPass1!', $user->fresh()->password));
     }
+
+    // -------------------------------------------------------------------------
+    // setPassword()
+    // -------------------------------------------------------------------------
 
     public function test_set_password_invalidates_old_password(): void
     {
@@ -630,10 +624,6 @@ class UserServiceTest extends TestCase
         $this->assertNotEquals('PlainText1!', $user->fresh()->password);
     }
 
-    // -------------------------------------------------------------------------
-    // createToken()
-    // -------------------------------------------------------------------------
-
     public function test_create_token_returns_new_access_token(): void
     {
         $user = User::factory()->create();
@@ -643,6 +633,10 @@ class UserServiceTest extends TestCase
         $this->assertInstanceOf(NewAccessToken::class, $result);
     }
 
+    // -------------------------------------------------------------------------
+    // createToken()
+    // -------------------------------------------------------------------------
+
     public function test_create_token_persists_to_database(): void
     {
         $user = User::factory()->create();
@@ -651,13 +645,13 @@ class UserServiceTest extends TestCase
 
         $this->assertDatabaseHas('personal_access_tokens', [
             'tokenable_id' => $user->id,
-            'name'         => 'Stored Token',
+            'name' => 'Stored Token',
         ]);
     }
 
     public function test_create_token_with_expiry(): void
     {
-        $user      = User::factory()->create();
+        $user = User::factory()->create();
         $expiresAt = Carbon::now()->addDays(30);
 
         $token = $this->service->createToken($user, 'Expiring Token', ['*'], $expiresAt);
@@ -667,7 +661,7 @@ class UserServiceTest extends TestCase
 
     public function test_create_token_without_expiry_is_null(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $token = $this->service->createToken($user, 'No Expiry');
 
         $this->assertNull($token->accessToken->expires_at);
@@ -675,20 +669,16 @@ class UserServiceTest extends TestCase
 
     public function test_create_token_uses_given_abilities(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $token = $this->service->createToken($user, 'Limited', ['read']);
 
         $this->assertTrue($token->accessToken->can('read'));
         $this->assertFalse($token->accessToken->can('write'));
     }
 
-    // -------------------------------------------------------------------------
-    // getToken()
-    // -------------------------------------------------------------------------
-
     public function test_get_token_returns_token_when_found(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $token = $this->service->createToken($user, 'Findable Token');
 
         $result = $this->service->getToken($user, $token->accessToken->id);
@@ -696,6 +686,10 @@ class UserServiceTest extends TestCase
         $this->assertInstanceOf(PersonalAccessToken::class, $result);
         $this->assertEquals($token->accessToken->id, $result->id);
     }
+
+    // -------------------------------------------------------------------------
+    // getToken()
+    // -------------------------------------------------------------------------
 
     public function test_get_token_returns_null_when_not_found(): void
     {
@@ -713,29 +707,29 @@ class UserServiceTest extends TestCase
         $this->assertNull($this->service->getToken($userB, $token->accessToken->id));
     }
 
-    // -------------------------------------------------------------------------
-    // updateToken()
-    // -------------------------------------------------------------------------
-
     public function test_update_token_changes_token_name(): void
     {
-        $user    = User::factory()->create();
-        $token   = $this->service->createToken($user, 'Old Name');
+        $user = User::factory()->create();
+        $token = $this->service->createToken($user, 'Old Name');
         $updated = $this->service->updateToken($user, $token->accessToken->id, ['name' => 'New Name']);
 
         $this->assertInstanceOf(PersonalAccessToken::class, $updated);
         $this->assertEquals('New Name', $updated->name);
     }
 
+    // -------------------------------------------------------------------------
+    // updateToken()
+    // -------------------------------------------------------------------------
+
     public function test_update_token_persists_change_to_database(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $token = $this->service->createToken($user, 'Old Name');
 
         $this->service->updateToken($user, $token->accessToken->id, ['name' => 'Persisted']);
 
         $this->assertDatabaseHas('personal_access_tokens', [
-            'id'   => $token->accessToken->id,
+            'id' => $token->accessToken->id,
             'name' => 'Persisted',
         ]);
     }
@@ -747,13 +741,9 @@ class UserServiceTest extends TestCase
         $this->assertNull($this->service->updateToken($user, 999999, ['name' => 'Ghost']));
     }
 
-    // -------------------------------------------------------------------------
-    // revokeToken()
-    // -------------------------------------------------------------------------
-
     public function test_revoke_token_removes_token_from_database(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $token = $this->service->createToken($user, 'To Delete');
 
         $this->service->revokeToken($user, $token->accessToken->id);
@@ -761,9 +751,13 @@ class UserServiceTest extends TestCase
         $this->assertDatabaseMissing('personal_access_tokens', ['id' => $token->accessToken->id]);
     }
 
+    // -------------------------------------------------------------------------
+    // revokeToken()
+    // -------------------------------------------------------------------------
+
     public function test_revoke_token_returns_true_on_success(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $token = $this->service->createToken($user, 'Delete Me');
 
         $this->assertTrue($this->service->revokeToken($user, $token->accessToken->id));
@@ -776,18 +770,18 @@ class UserServiceTest extends TestCase
         $this->assertFalse($this->service->revokeToken($user, 999999));
     }
 
-    // -------------------------------------------------------------------------
-    // enableTwoFactor()
-    // -------------------------------------------------------------------------
-
     public function test_enable_two_factor_returns_array_with_required_keys(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->service->enableTwoFactor($user);
 
         $this->assertArrayHasKey('qr_code_svg', $result);
         $this->assertArrayHasKey('secret', $result);
     }
+
+    // -------------------------------------------------------------------------
+    // enableTwoFactor()
+    // -------------------------------------------------------------------------
 
     public function test_enable_two_factor_sets_secret_on_user(): void
     {
@@ -809,7 +803,7 @@ class UserServiceTest extends TestCase
 
     public function test_enable_two_factor_qr_code_is_a_non_empty_string(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->service->enableTwoFactor($user);
 
         $this->assertIsString($result['qr_code_svg']);
@@ -818,16 +812,12 @@ class UserServiceTest extends TestCase
 
     public function test_enable_two_factor_secret_is_a_non_empty_string(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->service->enableTwoFactor($user);
 
         $this->assertIsString($result['secret']);
         $this->assertNotEmpty($result['secret']);
     }
-
-    // -------------------------------------------------------------------------
-    // confirmTwoFactor()
-    // -------------------------------------------------------------------------
 
     public function test_confirm_two_factor_delegates_to_fortify_action(): void
     {
@@ -846,7 +836,7 @@ class UserServiceTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // disableTwoFactor()
+    // confirmTwoFactor()
     // -------------------------------------------------------------------------
 
     public function test_disable_two_factor_clears_two_factor_secret(): void
@@ -859,6 +849,10 @@ class UserServiceTest extends TestCase
         $this->assertNull($user->fresh()->two_factor_secret);
     }
 
+    // -------------------------------------------------------------------------
+    // disableTwoFactor()
+    // -------------------------------------------------------------------------
+
     public function test_disable_two_factor_clears_recovery_codes(): void
     {
         $user = User::factory()->create();
@@ -869,16 +863,16 @@ class UserServiceTest extends TestCase
         $this->assertNull($user->fresh()->two_factor_recovery_codes);
     }
 
-    // -------------------------------------------------------------------------
-    // hasTwoFactor()
-    // -------------------------------------------------------------------------
-
     public function test_has_two_factor_returns_false_when_not_confirmed(): void
     {
         $user = User::factory()->create();
 
         $this->assertFalse($this->service->hasTwoFactor($user));
     }
+
+    // -------------------------------------------------------------------------
+    // hasTwoFactor()
+    // -------------------------------------------------------------------------
 
     public function test_has_two_factor_returns_true_when_confirmed_at_is_set(): void
     {
@@ -889,16 +883,16 @@ class UserServiceTest extends TestCase
         $this->assertTrue($this->service->hasTwoFactor($user));
     }
 
-    // -------------------------------------------------------------------------
-    // getRecoveryCodes()
-    // -------------------------------------------------------------------------
-
     public function test_get_recovery_codes_returns_empty_array_when_no_2fa(): void
     {
         $user = User::factory()->create();
 
         $this->assertSame([], $this->service->getRecoveryCodes($user));
     }
+
+    // -------------------------------------------------------------------------
+    // getRecoveryCodes()
+    // -------------------------------------------------------------------------
 
     public function test_get_recovery_codes_returns_array_after_enabling_2fa(): void
     {
@@ -923,10 +917,6 @@ class UserServiceTest extends TestCase
         $this->assertCount(8, $codes);
     }
 
-    // -------------------------------------------------------------------------
-    // regenerateRecoveryCodes()
-    // -------------------------------------------------------------------------
-
     public function test_regenerate_recovery_codes_returns_an_array_of_codes(): void
     {
         $user = User::factory()->create();
@@ -938,32 +928,36 @@ class UserServiceTest extends TestCase
         $this->assertCount(8, $codes);
     }
 
+    // -------------------------------------------------------------------------
+    // regenerateRecoveryCodes()
+    // -------------------------------------------------------------------------
+
     public function test_regenerate_recovery_codes_produces_new_codes(): void
     {
         $user = User::factory()->create();
         $this->service->enableTwoFactor($user);
         $user->refresh();
 
-        $original    = $this->service->getRecoveryCodes($user);
+        $original = $this->service->getRecoveryCodes($user);
         $regenerated = $this->service->regenerateRecoveryCodes($user);
 
         // Extremely unlikely to produce the same 8 random codes
         $this->assertNotEquals($original, $regenerated);
     }
 
-    // -------------------------------------------------------------------------
-    // upsertOauthToken()
-    // -------------------------------------------------------------------------
-
     public function test_upsert_oauth_token_returns_oauth_token_instance(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->service->upsertOauthToken($user, 'google', [
             'access_token' => 'tok_abc',
         ]);
 
         $this->assertInstanceOf(OauthToken::class, $result);
     }
+
+    // -------------------------------------------------------------------------
+    // upsertOauthToken()
+    // -------------------------------------------------------------------------
 
     public function test_upsert_oauth_token_persists_to_database(): void
     {
@@ -974,18 +968,18 @@ class UserServiceTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('user_oauth_tokens', [
-            'user_id'      => $user->id,
-            'provider'     => 'github',
+            'user_id' => $user->id,
+            'provider' => 'github',
             'access_token' => 'gh_token',
         ]);
     }
 
     public function test_upsert_oauth_token_revokes_existing_active_token_for_same_provider(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $older = OauthToken::factory()->create([
-            'user_id'    => $user->id,
-            'provider'   => 'google',
+            'user_id' => $user->id,
+            'provider' => 'google',
             'revoked_at' => null,
         ]);
 
@@ -996,10 +990,10 @@ class UserServiceTest extends TestCase
 
     public function test_upsert_oauth_token_does_not_revoke_tokens_for_different_provider(): void
     {
-        $user    = User::factory()->create();
-        $github  = OauthToken::factory()->create([
-            'user_id'    => $user->id,
-            'provider'   => 'github',
+        $user = User::factory()->create();
+        $github = OauthToken::factory()->create([
+            'user_id' => $user->id,
+            'provider' => 'github',
             'revoked_at' => null,
         ]);
 
@@ -1008,16 +1002,12 @@ class UserServiceTest extends TestCase
         $this->assertNull($github->fresh()->revoked_at);
     }
 
-    // -------------------------------------------------------------------------
-    // getActiveOauthToken()
-    // -------------------------------------------------------------------------
-
     public function test_get_active_oauth_token_returns_token_when_active(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         OauthToken::factory()->create([
-            'user_id'    => $user->id,
-            'provider'   => 'google',
+            'user_id' => $user->id,
+            'provider' => 'google',
             'revoked_at' => null,
             'expires_at' => now()->addHour(),
         ]);
@@ -1026,6 +1016,10 @@ class UserServiceTest extends TestCase
 
         $this->assertInstanceOf(OauthToken::class, $result);
     }
+
+    // -------------------------------------------------------------------------
+    // getActiveOauthToken()
+    // -------------------------------------------------------------------------
 
     public function test_get_active_oauth_token_returns_null_when_none_exists(): void
     {
@@ -1038,20 +1032,16 @@ class UserServiceTest extends TestCase
     {
         $user = User::factory()->create();
         OauthToken::factory()->revoked()->create([
-            'user_id'  => $user->id,
+            'user_id' => $user->id,
             'provider' => 'google',
         ]);
 
         $this->assertNull($this->service->getActiveOauthToken($user, 'google'));
     }
 
-    // -------------------------------------------------------------------------
-    // revokeOauthToken()
-    // -------------------------------------------------------------------------
-
     public function test_revoke_oauth_token_sets_revoked_at(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $token = OauthToken::factory()->create(['user_id' => $user->id, 'revoked_at' => null]);
 
         $this->service->revokeOauthToken($token);
@@ -1059,9 +1049,13 @@ class UserServiceTest extends TestCase
         $this->assertNotNull($token->fresh()->revoked_at);
     }
 
+    // -------------------------------------------------------------------------
+    // revokeOauthToken()
+    // -------------------------------------------------------------------------
+
     public function test_revoke_oauth_token_makes_token_inactive(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $token = OauthToken::factory()->create(['user_id' => $user->id, 'revoked_at' => null]);
 
         $this->service->revokeOauthToken($token);
@@ -1069,15 +1063,11 @@ class UserServiceTest extends TestCase
         $this->assertFalse($token->fresh()->isActive());
     }
 
-    // -------------------------------------------------------------------------
-    // revokeAllOauthTokens()
-    // -------------------------------------------------------------------------
-
     public function test_revoke_all_oauth_tokens_revokes_all_active_tokens(): void
     {
         $user = User::factory()->create();
-        $t1   = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'google', 'revoked_at' => null]);
-        $t2   = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'github', 'revoked_at' => null]);
+        $t1 = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'google', 'revoked_at' => null]);
+        $t2 = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'github', 'revoked_at' => null]);
 
         $this->service->revokeAllOauthTokens($user);
 
@@ -1085,9 +1075,13 @@ class UserServiceTest extends TestCase
         $this->assertNotNull($t2->fresh()->revoked_at);
     }
 
+    // -------------------------------------------------------------------------
+    // revokeAllOauthTokens()
+    // -------------------------------------------------------------------------
+
     public function test_revoke_all_oauth_tokens_with_provider_filter_only_revokes_that_provider(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $google = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'google', 'revoked_at' => null]);
         $github = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'github', 'revoked_at' => null]);
 
@@ -1099,11 +1093,11 @@ class UserServiceTest extends TestCase
 
     public function test_revoke_all_oauth_tokens_leaves_already_revoked_tokens_untouched(): void
     {
-        $user  = User::factory()->create();
-        $past  = now()->subHour();
+        $user = User::factory()->create();
+        $past = now()->subHour();
         $token = OauthToken::factory()->revoked()->create([
-            'user_id'    => $user->id,
-            'provider'   => 'google',
+            'user_id' => $user->id,
+            'provider' => 'google',
             'revoked_at' => $past,
         ]);
 
@@ -1116,14 +1110,10 @@ class UserServiceTest extends TestCase
         );
     }
 
-    // -------------------------------------------------------------------------
-    // listOauthTokens()
-    // -------------------------------------------------------------------------
-
     public function test_list_oauth_tokens_returns_only_active_tokens(): void
     {
-        $user    = User::factory()->create();
-        $active  = OauthToken::factory()->create(['user_id' => $user->id, 'revoked_at' => null]);
+        $user = User::factory()->create();
+        $active = OauthToken::factory()->create(['user_id' => $user->id, 'revoked_at' => null]);
         $revoked = OauthToken::factory()->revoked()->create(['user_id' => $user->id]);
 
         $result = $this->service->listOauthTokens($user);
@@ -1132,9 +1122,13 @@ class UserServiceTest extends TestCase
         $this->assertFalse($result->contains('id', $revoked->id));
     }
 
+    // -------------------------------------------------------------------------
+    // listOauthTokens()
+    // -------------------------------------------------------------------------
+
     public function test_list_oauth_tokens_with_provider_filter_returns_only_that_providers_tokens(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $google = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'google', 'revoked_at' => null]);
         $github = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'github', 'revoked_at' => null]);
 
@@ -1146,7 +1140,7 @@ class UserServiceTest extends TestCase
 
     public function test_list_oauth_tokens_returns_results_ordered_newest_first(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $older = OauthToken::factory()->create(['user_id' => $user->id, 'revoked_at' => null, 'created_at' => now()->subDays(2)]);
         $newer = OauthToken::factory()->create(['user_id' => $user->id, 'revoked_at' => null, 'created_at' => now()]);
 
@@ -1165,5 +1159,11 @@ class UserServiceTest extends TestCase
         $result = $this->service->listOauthTokens($user);
 
         $this->assertCount(2, $result);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->service = app(UserService::class);
     }
 }

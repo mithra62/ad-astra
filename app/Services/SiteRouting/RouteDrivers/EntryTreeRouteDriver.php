@@ -22,7 +22,7 @@ class EntryTreeRouteDriver implements RouteDriverInterface
             })
             ->first();
 
-        if (! $node) {
+        if (!$node) {
             return null;
         }
 

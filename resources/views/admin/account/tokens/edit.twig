@@ -20,7 +20,8 @@
                         <a class="f-s-14 f-w-500" href="{{ route('account.tokens.index') }}">API Tokens</a>
                     </li>
                     <li class="active">
-                        <a class="f-s-14 f-w-500" href="{{ route('account.tokens.edit', {token_id: token}) }}">Edit API Token</a>
+                        <a class="f-s-14 f-w-500" href="{{ route('account.tokens.edit', {token_id: token}) }}">Edit API
+                            Token</a>
                     </li>
                 </ul>
             </div>
@@ -43,12 +44,14 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <form method="POST" action="{{ route('account.tokens.update', {token_id: token}) }}" class="row g-3 needs-validation" novalidate>
+                                <form method="POST" action="{{ route('account.tokens.update', {token_id: token}) }}"
+                                      class="row g-3 needs-validation" novalidate>
                                     {{ csrf_field() }}
                                     {{ method_field('PUT') }}
                                     <div class="col-md-12">
                                         <label class="form-label" for="name">Name</label>
-                                        <input class="form-control" id="name" required type="text" value="{{ old('name', token.name) }}" name="name">
+                                        <input class="form-control" id="name" required type="text"
+                                               value="{{ old('name', token.name) }}" name="name">
                                         {% if errors.has('name') %}
                                             <p class="text-danger">{{ errors.first('name') }}</p>
                                         {% endif %}
@@ -61,7 +64,6 @@
                         </div>
                     </div>
                     <!-- Change Token Management end -->
-
 
 
                 </div>

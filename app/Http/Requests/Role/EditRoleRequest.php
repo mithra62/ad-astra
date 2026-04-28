@@ -29,7 +29,7 @@ class EditRoleRequest extends FormRequest
                 'max:255',
                 Rule::unique('roles')->ignore($this->route()->parameter('role')),
             ],
-            'permissions' => 'required|array'
+            'permissions' => 'required|array',
         ];
     }
 }

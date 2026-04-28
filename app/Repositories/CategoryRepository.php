@@ -25,23 +25,6 @@ class CategoryRepository
         return $category->refresh();
     }
 
-    public function applyData(Category $category, array $data): Category
-    {
-        $this->applyCoreAttributes($category, $data);
-        $category->save();
-
-        if (array_key_exists('fields', $data)) {
-            $this->applyFieldValues($category, $data['fields']);
-        }
-
-        return $category->refresh();
-    }
-
-    public function delete(Category $category): bool
-    {
-        return (bool) $category->delete();
-    }
-
     private function applyCoreAttributes(Category $category, array $data): void
     {
         if (isset($data['name'])) {
@@ -51,66 +34,19 @@ class CategoryRepository
         $category->handle = $data['handle'] ?? Str::slug($category->name ?? '');
 
         if (array_key_exists('sort_order', $data)) {
-            $category->sort_order = (int) $data['sort_order'];
+            $category->sort_order = (int)$data['sort_order'];
         }
 
         if (array_key_exists('parent_id', $data)) {
             $parentId = $data['parent_id'] ?: null;
 
-            if ($parentId !== null && $category->exists && $this->wouldCreateCycle($category, (int) $parentId)) {
+            if ($parentId !== null && $category->exists && $this->wouldCreateCycle($category, (int)$parentId)) {
                 throw new InvalidArgumentException(
                     "Setting parent_id [{$parentId}] on category [{$category->id}] would create a circular reference."
                 );
             }
 
             $category->parent_id = $parentId;
-        }
-    }
-
-    private function applyFieldValues(Category $category, array $fields): void
-    {
-        if (empty($fields)) {
-            return;
-        }
-
-        $layoutFields = $this->resolveLayoutFields($category);
-
-        foreach ($fields as $handle => $value) {
-            $field = $layoutFields->firstWhere('handle', $handle);
-
-            if (! $field || ! $field->fieldType) {
-                continue;
-            }
-
-            $instance = $field->fieldType->instance();
-
-            $this->upsertFieldValue(
-                $field->getKey(),
-                $category->getKey(),
-                $category->getMorphClass(),
-                $instance->storageColumn(),
-                $value
-            );
-        }
-    }
-
-    private function upsertFieldValue(
-        int $fieldId,
-        int $fieldableId,
-        string $fieldableType,
-        string $column,
-        mixed $value,
-    ): void {
-        $key = ['field_id' => $fieldId, 'fieldable_id' => $fieldableId, 'fieldable_type' => $fieldableType];
-
-        try {
-            FieldValue::updateOrCreate($key, [$column => $value]);
-        } catch (QueryException $e) {
-            if ($e->getCode() !== '23000') {
-                throw $e;
-            }
-
-            FieldValue::updateOrCreate($key, [$column => $value]);
         }
     }
 
@@ -133,6 +69,33 @@ class CategoryRepository
         return false;
     }
 
+    private function applyFieldValues(Category $category, array $fields): void
+    {
+        if (empty($fields)) {
+            return;
+        }
+
+        $layoutFields = $this->resolveLayoutFields($category);
+
+        foreach ($fields as $handle => $value) {
+            $field = $layoutFields->firstWhere('handle', $handle);
+
+            if (!$field || !$field->fieldType) {
+                continue;
+            }
+
+            $instance = $field->fieldType->instance();
+
+            $this->upsertFieldValue(
+                $field->getKey(),
+                $category->getKey(),
+                $category->getMorphClass(),
+                $instance->storageColumn(),
+                $value
+            );
+        }
+    }
+
     public function resolveLayoutFields(Category $category): Collection
     {
         $category->loadMissing([
@@ -140,5 +103,43 @@ class CategoryRepository
         ]);
 
         return $category->group->fieldLayout?->fields() ?? collect();
+    }
+
+    private function upsertFieldValue(
+        int    $fieldId,
+        int    $fieldableId,
+        string $fieldableType,
+        string $column,
+        mixed  $value,
+    ): void
+    {
+        $key = ['field_id' => $fieldId, 'fieldable_id' => $fieldableId, 'fieldable_type' => $fieldableType];
+
+        try {
+            FieldValue::updateOrCreate($key, [$column => $value]);
+        } catch (QueryException $e) {
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+
+            FieldValue::updateOrCreate($key, [$column => $value]);
+        }
+    }
+
+    public function applyData(Category $category, array $data): Category
+    {
+        $this->applyCoreAttributes($category, $data);
+        $category->save();
+
+        if (array_key_exists('fields', $data)) {
+            $this->applyFieldValues($category, $data['fields']);
+        }
+
+        return $category->refresh();
+    }
+
+    public function delete(Category $category): bool
+    {
+        return (bool)$category->delete();
     }
 }

@@ -37,10 +37,12 @@
                                         <h5 class="mb-0">Entries</h5>
                                     </div>
                                     <div class="col-auto">
-                                        <a href="{{ route('entries.groups.edit', group) }}" class="btn btn-outline-secondary btn-sm me-2">
+                                        <a href="{{ route('entries.groups.edit', group) }}"
+                                           class="btn btn-outline-secondary btn-sm me-2">
                                             <i class="ti ti-settings"></i> Group Settings
                                         </a>
-                                        <a href="{{ route('entries.create', {group_id: group.id}) }}" class="btn btn-primary btn-sm">
+                                        <a href="{{ route('entries.create', {group_id: group.id}) }}"
+                                           class="btn btn-primary btn-sm">
                                             Create Entry
                                         </a>
                                     </div>
@@ -74,7 +76,8 @@
                                                         </td>
                                                         <td>
                                                             {% if entry.status.handle %}
-                                                                <span class="badge bg-secondary">{{ entry.status.handle }}</span>
+                                                                <span
+                                                                    class="badge bg-secondary">{{ entry.status.handle }}</span>
                                                             {% else %}
                                                                 <span class="text-secondary">—</span>
                                                             {% endif %}
@@ -118,8 +121,9 @@
                                         </div>
                                     {% else %}
                                         <p class="text-center">
-                                            No Entries Created. <br />
-                                            <a href="{{ route('entries.create', {group_id: group.id}) }}" class="btn btn-outline-primary">Create Entry</a>
+                                            No Entries Created. <br/>
+                                            <a href="{{ route('entries.create', {group_id: group.id}) }}"
+                                               class="btn btn-outline-primary">Create Entry</a>
                                         </p>
                                     {% endif %}
                                 </div>

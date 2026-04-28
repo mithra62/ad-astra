@@ -19,21 +19,21 @@ class EntryQueryBuilderTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function builder(): EntryQueryBuilder
-    {
-        return new EntryQueryBuilder($this->app->make(EntryRepository::class));
-    }
-
-    // -------------------------------------------------------------------------
-    // Fluent interface – all chainable methods must return the same instance
-    // -------------------------------------------------------------------------
-
     public function test_in_group_returns_self(): void
     {
         $group = EntryGroup::factory()->create();
         $builder = $this->builder();
 
         $this->assertSame($builder, $builder->inGroup($group));
+    }
+
+    // -------------------------------------------------------------------------
+    // Fluent interface – all chainable methods must return the same instance
+    // -------------------------------------------------------------------------
+
+    private function builder(): EntryQueryBuilder
+    {
+        return new EntryQueryBuilder($this->app->make(EntryRepository::class));
     }
 
     public function test_of_type_returns_self(): void
@@ -190,7 +190,7 @@ class EntryQueryBuilderTest extends TestCase
     {
         $published = Entry::factory()->create([
             'status_is_public' => true,
-            'published_at'     => now()->subHour(),
+            'published_at' => now()->subHour(),
         ]);
 
         $results = $this->builder()->published()->get();
@@ -202,7 +202,7 @@ class EntryQueryBuilderTest extends TestCase
     {
         $future = Entry::factory()->create([
             'status_is_public' => true,
-            'published_at'     => now()->addDay(),
+            'published_at' => now()->addDay(),
         ]);
 
         $results = $this->builder()->published()->get();
@@ -214,7 +214,7 @@ class EntryQueryBuilderTest extends TestCase
     {
         $draft = Entry::factory()->create([
             'status_is_public' => true,
-            'published_at'     => null,
+            'published_at' => null,
         ]);
 
         $results = $this->builder()->published()->get();
@@ -226,7 +226,7 @@ class EntryQueryBuilderTest extends TestCase
     {
         $private = Entry::factory()->create([
             'status_is_public' => false,
-            'published_at'     => now()->subHour(),
+            'published_at' => now()->subHour(),
         ]);
 
         $results = $this->builder()->published()->get();
@@ -378,7 +378,7 @@ class EntryQueryBuilderTest extends TestCase
     public function test_order_by_ascending_returns_entries_in_correct_order(): void
     {
         $second = Entry::factory()->create(['title' => 'Beta']);
-        $first  = Entry::factory()->create(['title' => 'Alpha']);
+        $first = Entry::factory()->create(['title' => 'Alpha']);
 
         $results = $this->builder()->orderBy('title', 'asc')->get();
 
@@ -389,7 +389,7 @@ class EntryQueryBuilderTest extends TestCase
     public function test_order_by_defaults_to_ascending(): void
     {
         $second = Entry::factory()->create(['title' => 'Beta']);
-        $first  = Entry::factory()->create(['title' => 'Alpha']);
+        $first = Entry::factory()->create(['title' => 'Alpha']);
 
         $results = $this->builder()->orderBy('title')->get();
 
@@ -399,7 +399,7 @@ class EntryQueryBuilderTest extends TestCase
 
     public function test_order_by_descending_returns_entries_in_correct_order(): void
     {
-        $first  = Entry::factory()->create(['title' => 'Alpha']);
+        $first = Entry::factory()->create(['title' => 'Alpha']);
         $second = Entry::factory()->create(['title' => 'Beta']);
 
         $results = $this->builder()->orderBy('title', 'desc')->get();
@@ -466,7 +466,7 @@ class EntryQueryBuilderTest extends TestCase
     public function test_get_eager_loads_entry_type_relation(): void
     {
         $group = EntryGroup::factory()->create();
-        $type  = EntryType::factory()->for($group)->create();
+        $type = EntryType::factory()->for($group)->create();
         Entry::factory()->for($group)->for($type)->create();
 
         $results = $this->builder()->inGroup($group)->get();
@@ -629,26 +629,26 @@ class EntryQueryBuilderTest extends TestCase
     public function test_multiple_filters_can_be_chained_together(): void
     {
         $group = EntryGroup::factory()->create();
-        $type  = EntryType::factory()->for($group)->create();
+        $type = EntryType::factory()->for($group)->create();
 
         $match = Entry::factory()->for($group)->for($type)->create([
-            'status_handle'    => 'active',
+            'status_handle' => 'active',
             'status_is_public' => true,
-            'published_at'     => now()->subHour(),
+            'published_at' => now()->subHour(),
         ]);
 
         // Same group + type, but not published
         Entry::factory()->for($group)->for($type)->create([
-            'status_handle'    => 'draft',
+            'status_handle' => 'draft',
             'status_is_public' => false,
-            'published_at'     => null,
+            'published_at' => null,
         ]);
 
         // Different group
         Entry::factory()->create([
-            'status_handle'    => 'active',
+            'status_handle' => 'active',
             'status_is_public' => true,
-            'published_at'     => now()->subHour(),
+            'published_at' => now()->subHour(),
         ]);
 
         $results = $this->builder()

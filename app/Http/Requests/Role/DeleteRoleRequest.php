@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests\Role;
 
 use App\Http\Requests\FormRequest;
@@ -20,7 +21,7 @@ class DeleteRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'confirm_removal' => 'required'
+            'confirm_removal' => 'required',
         ];
     }
 

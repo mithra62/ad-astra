@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests\Account\Token;
 
 use App\Http\Requests\FormRequest;

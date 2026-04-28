@@ -10,11 +10,9 @@ class UserSchema extends Model
 {
     use HasFieldLayout, HasFieldGroups;
 
-    protected $table = 'user_schema';
-
-    protected $fillable = ['field_layout_id'];
-
     private static ?self $resolved = null;
+    protected $table = 'user_schema';
+    protected $fillable = ['field_layout_id'];
 
     public static function instance(): static
     {

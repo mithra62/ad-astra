@@ -10,7 +10,7 @@ use Illuminate\Console\Command;
 
 class ValidateClassReferences extends Command
 {
-    protected $signature   = 'app:validate-class-references';
+    protected $signature = 'app:validate-class-references';
     protected $description = 'Verify that all class-name strings stored in the database still resolve to valid classes.';
 
     public function handle(): int
@@ -19,10 +19,10 @@ class ValidateClassReferences extends Command
 
         $this->info('Checking entry_types.class …');
         EntryType::all()->each(function (EntryType $type) use (&$errors) {
-            if (! class_exists($type->class)) {
+            if (!class_exists($type->class)) {
                 $this->error("  EntryType [{$type->handle}] → class [{$type->class}] does not exist.");
                 $errors++;
-            } elseif (! is_subclass_of($type->class, AbstractEntryType::class)) {
+            } elseif (!is_subclass_of($type->class, AbstractEntryType::class)) {
                 $this->error("  EntryType [{$type->handle}] → class [{$type->class}] does not extend AbstractEntryType.");
                 $errors++;
             } else {
@@ -33,10 +33,10 @@ class ValidateClassReferences extends Command
         $this->newLine();
         $this->info('Checking field_types.object …');
         FieldType::all()->each(function (FieldType $type) use (&$errors) {
-            if (! class_exists($type->object)) {
+            if (!class_exists($type->object)) {
                 $this->error("  FieldType [{$type->name}] → class [{$type->object}] does not exist.");
                 $errors++;
-            } elseif (! is_subclass_of($type->object, AbstractField::class)) {
+            } elseif (!is_subclass_of($type->object, AbstractField::class)) {
                 $this->error("  FieldType [{$type->name}] → class [{$type->object}] does not extend AbstractField.");
                 $errors++;
             } else {

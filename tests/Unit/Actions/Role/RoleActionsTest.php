@@ -14,17 +14,6 @@ class RoleActionsTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        // Clear the Spatie permission cache between tests
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-    }
-
-    // -------------------------------------------------------------------------
-    // CreateNewRole
-    // -------------------------------------------------------------------------
-
     public function test_create_returns_role_instance(): void
     {
         $action = app(CreateNewRole::class);
@@ -33,6 +22,10 @@ class RoleActionsTest extends TestCase
 
         $this->assertInstanceOf(SpatieRole::class, $result);
     }
+
+    // -------------------------------------------------------------------------
+    // CreateNewRole
+    // -------------------------------------------------------------------------
 
     public function test_create_persists_role_to_database(): void
     {
@@ -55,11 +48,11 @@ class RoleActionsTest extends TestCase
     public function test_create_grants_permissions_when_provided(): void
     {
         $permission = Permission::create(['name' => 'edit articles', 'guard_name' => 'web']);
-        $action     = app(CreateNewRole::class);
+        $action = app(CreateNewRole::class);
 
         $role = $action->create([
-            'name'        => 'Content Editor',
-            'guard_name'  => 'web',
+            'name' => 'Content Editor',
+            'guard_name' => 'web',
             'permissions' => ['edit articles'],
         ]);
 
@@ -73,8 +66,8 @@ class RoleActionsTest extends TestCase
         $action = app(CreateNewRole::class);
 
         $role = $action->create([
-            'name'        => 'Blogger',
-            'guard_name'  => 'web',
+            'name' => 'Blogger',
+            'guard_name' => 'web',
             'permissions' => ['view posts', 'create posts'],
         ]);
 
@@ -82,13 +75,9 @@ class RoleActionsTest extends TestCase
         $this->assertTrue($role->hasPermissionTo('create posts'));
     }
 
-    // -------------------------------------------------------------------------
-    // EditRole
-    // -------------------------------------------------------------------------
-
     public function test_edit_updates_role_name(): void
     {
-        $role   = Role::factory()->create(['name' => 'Old Role']);
+        $role = Role::factory()->create(['name' => 'Old Role']);
         $action = app(EditRole::class);
 
         $action->edit($role, ['name' => 'New Role', 'guard_name' => 'web']);
@@ -96,17 +85,21 @@ class RoleActionsTest extends TestCase
         $this->assertDatabaseHas('roles', ['id' => $role->id, 'name' => 'New Role']);
     }
 
+    // -------------------------------------------------------------------------
+    // EditRole
+    // -------------------------------------------------------------------------
+
     public function test_edit_syncs_permissions_when_provided(): void
     {
-        $perm1  = Permission::create(['name' => 'perm one', 'guard_name' => 'web']);
-        $perm2  = Permission::create(['name' => 'perm two', 'guard_name' => 'web']);
-        $role   = Role::factory()->create();
+        $perm1 = Permission::create(['name' => 'perm one', 'guard_name' => 'web']);
+        $perm2 = Permission::create(['name' => 'perm two', 'guard_name' => 'web']);
+        $role = Role::factory()->create();
         $role->givePermissionTo($perm1);
         $action = app(EditRole::class);
 
         $action->edit($role, [
-            'name'        => $role->name,
-            'guard_name'  => 'web',
+            'name' => $role->name,
+            'guard_name' => 'web',
             'permissions' => ['perm two'],
         ]);
 
@@ -117,8 +110,8 @@ class RoleActionsTest extends TestCase
 
     public function test_edit_does_not_sync_permissions_when_none_provided(): void
     {
-        $perm   = Permission::create(['name' => 'keep this', 'guard_name' => 'web']);
-        $role   = Role::factory()->create();
+        $perm = Permission::create(['name' => 'keep this', 'guard_name' => 'web']);
+        $role = Role::factory()->create();
         $role->givePermissionTo($perm);
         $action = app(EditRole::class);
 
@@ -130,19 +123,26 @@ class RoleActionsTest extends TestCase
 
     public function test_edit_does_not_sync_when_permissions_is_empty_array(): void
     {
-        $perm   = Permission::create(['name' => 'stays put', 'guard_name' => 'web']);
-        $role   = Role::factory()->create();
+        $perm = Permission::create(['name' => 'stays put', 'guard_name' => 'web']);
+        $role = Role::factory()->create();
         $role->givePermissionTo($perm);
         $action = app(EditRole::class);
 
         // An empty array means no permissions to sync — guard requires count >= 1
         $action->edit($role, [
-            'name'        => $role->name,
-            'guard_name'  => 'web',
+            'name' => $role->name,
+            'guard_name' => 'web',
             'permissions' => [],
         ]);
 
         // The action only syncs when count >= 1, so existing perms should remain
         $this->assertTrue($role->fresh()->hasPermissionTo('stays put'));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Clear the Spatie permission cache between tests
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
 }

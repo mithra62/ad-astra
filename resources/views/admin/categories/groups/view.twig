@@ -17,7 +17,8 @@
                         <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Category Groups</a>
                     </li>
                     <li class="active">
-                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups.show', group) }}">{{ group.name }}</a>
+                        <a class="f-s-14 f-w-500"
+                           href="{{ route('categories.groups.show', group) }}">{{ group.name }}</a>
                     </li>
                 </ul>
             </div>
@@ -37,7 +38,8 @@
                                 <h5>Categories</h5>
                                 <div class="col-12">
                                     <p class="float-right text-end">
-                                        <a href="{{ route('categories.create', {group_id: group.id}) }}" class="btn btn-primary">Create
+                                        <a href="{{ route('categories.create', {group_id: group.id}) }}"
+                                           class="btn btn-primary">Create
                                             Category</a>
                                     </p>
                                 </div>
@@ -94,8 +96,9 @@
                                         </div>
                                     {% else %}
                                         <p class="text-center">
-                                            No Categories Created. <br />
-                                            <a href="{{ route('categories.create', {group_id: group.id}) }}" class="btn btn-outline-primary">Create Category</a>
+                                            No Categories Created. <br/>
+                                            <a href="{{ route('categories.create', {group_id: group.id}) }}"
+                                               class="btn btn-outline-primary">Create Category</a>
                                         </p>
                                     {% endif %}
                                 </div>

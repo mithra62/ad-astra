@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\Media\EditMediaRequest;
 use App\Http\Requests\Media\DeleteMediaRequest;
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\Media\Library as LibraryModel;
+use App\Http\Requests\Media\EditMediaRequest;
 use App\Models\Media as MediaModel;
+use App\Models\Media\Library as LibraryModel;
 
 class Media extends Controller
 {
@@ -52,7 +51,7 @@ class Media extends Controller
     public function download(string $id)
     {
         $media = MediaModel::find($id);
-        if(!$media instanceof MediaModel) {
+        if (!$media instanceof MediaModel) {
             abort(404);
         }
 

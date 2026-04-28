@@ -9,7 +9,7 @@ class EditStatus extends AbstractAction
 {
     public function edit(Status $status, array $input): bool
     {
-        $input['is_default'] = ! empty($input['is_default']);
+        $input['is_default'] = !empty($input['is_default']);
 
         if ($input['is_default']) {
             Status::where('status_group_id', $status->status_group_id)

@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Actions\Role;
 
-use Spatie\Permission\Models\Role as RoleModel;
 use App\Actions\AbstractAction;
+use Spatie\Permission\Models\Role as RoleModel;
 
 class CreateNewRole extends AbstractAction
 {
@@ -10,7 +11,7 @@ class CreateNewRole extends AbstractAction
     {
         $role = RoleModel::create($input);
         if (!empty($input['permissions'])) {
-            foreach($input['permissions'] AS $permission) {
+            foreach ($input['permissions'] as $permission) {
                 $role->givePermissionTo($permission);
             }
         }

@@ -18,7 +18,8 @@
                             <a class="f-s-14 f-w-500" href="{{ route('statuses.groups') }}">Status Groups</a>
                         </li>
                         <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('statuses.groups.show', status.group) }}">{{ status.group.name }}</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('statuses.groups.show', status.group) }}">{{ status.group.name }}</a>
                         </li>
                         <li class="active">
                             <a class="f-s-14 f-w-500" href="{{ route('statuses.confirm', status) }}">Delete Status</a>
@@ -35,7 +36,8 @@
             {{ include('admin.statuses._sidebar', {active: status.status_group_id}) }}
             <div class="col-lg-8 col-xxl-9">
                 <!-- Default Card start -->
-                <form method="POST" action="{{ route('statuses.destroy', status) }}" class="row g-3 needs-validation" novalidate>
+                <form method="POST" action="{{ route('statuses.destroy', status) }}" class="row g-3 needs-validation"
+                      novalidate>
                     {{ csrf_field() }}
                     {{ method_field('DELETE') }}
                     <div class="col-md-12">
@@ -48,8 +50,10 @@
                                 <p class="text-secondary">This action cannot be undone.</p>
                             </div>
                             <div class="card-footer">
-                                <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
-                                    <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal"
+                                <div
+                                    class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                    <input class="toggle switch-border-primary" name="confirm_removal"
+                                           id="confirm_removal"
                                            type="checkbox">
                                     <label for="confirm_removal">Confirm Removal</label>
                                     {% if errors.has('confirm_removal') %}

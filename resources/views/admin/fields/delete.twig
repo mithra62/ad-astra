@@ -18,7 +18,8 @@
                             <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Field Groups</a>
                         </li>
                         <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups.show', active_group) }}">{{ active_group.name }}</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('fields.groups.show', active_group) }}">{{ active_group.name }}</a>
                         </li>
 
                         <li>
@@ -38,40 +39,44 @@
         <div class="row">
             {{ include('admin.fields._sidebar', {active: active_group.id}) }}
             <div class="col-lg-8 col-xxl-9">
-            <!-- Default Card start -->
-            <form method="POST" action="{{ route('fields.destroy', field) }}" class="row g-3 needs-validation" novalidate>
-                {{ csrf_field() }}
-                {{ method_field('DELETE') }}
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Delete Field</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6>Are you sure you want to remove this Field?</h6>
-                            <p class="text-secondary"> Are you sure you want to remove this Field?</p>
-                        </div>
-                        <div class="card-footer">
-                            <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
-                                <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal"
-                                       type="checkbox">
-                                <label for="confirm_removal">Confirm Removal</label>
-                                {% if errors.has('confirm_removal') %}
-                                    <p class="text-danger">{{ errors.first('confirm_removal') }}</p>
-                                {% endif %}
+                <!-- Default Card start -->
+                <form method="POST" action="{{ route('fields.destroy', field) }}" class="row g-3 needs-validation"
+                      novalidate>
+                    {{ csrf_field() }}
+                    {{ method_field('DELETE') }}
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Delete Field</h5>
+                            </div>
+                            <div class="card-body">
+                                <h6>Are you sure you want to remove this Field?</h6>
+                                <p class="text-secondary"> Are you sure you want to remove this Field?</p>
+                            </div>
+                            <div class="card-footer">
+                                <div
+                                    class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                    <input class="toggle switch-border-primary" name="confirm_removal"
+                                           id="confirm_removal"
+                                           type="checkbox">
+                                    <label for="confirm_removal">Confirm Removal</label>
+                                    {% if errors.has('confirm_removal') %}
+                                        <p class="text-danger">{{ errors.first('confirm_removal') }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-12 float-end">
+                                    <button class="btn btn-primary float-end" type="submit">Delete Field</button>
+                                </div>
                             </div>
 
-                            <div class="col-12 float-end">
-                                <button class="btn btn-primary float-end" type="submit">Delete Field</button>
-                            </div>
                         </div>
-
                     </div>
-                </div>
-            </form>
+                </form>
 
-            <!-- Default Card end -->
-            </div></div>
+                <!-- Default Card end -->
+            </div>
+        </div>
 
         <!-- Blank end -->
     </div>

@@ -28,6 +28,22 @@ class EntryTree extends Model
         'is_home' => 'boolean',
     ];
 
+    public static function validatedHandle(string $handle): string
+    {
+        $normalized = self::normalizeHandle($handle);
+
+        if ($normalized === '') {
+            throw new InvalidArgumentException('Entry Tree handles must contain at least one URL-safe character.');
+        }
+
+        return $normalized;
+    }
+
+    public static function normalizeHandle(string $handle): string
+    {
+        return Str::slug($handle);
+    }
+
     public function entry(): BelongsTo
     {
         return $this->belongsTo(Entry::class);
@@ -54,31 +70,15 @@ class EntryTree extends Model
         return $query->where('uri', self::normalizeUri($uri));
     }
 
-    public function getUrlAttribute(): string
-    {
-        return $this->uri === '/' ? '/' : '/' . $this->uri;
-    }
-
-    public static function normalizeHandle(string $handle): string
-    {
-        return Str::slug($handle);
-    }
-
-    public static function validatedHandle(string $handle): string
-    {
-        $normalized = self::normalizeHandle($handle);
-
-        if ($normalized === '') {
-            throw new InvalidArgumentException('Entry Tree handles must contain at least one URL-safe character.');
-        }
-
-        return $normalized;
-    }
-
     public static function normalizeUri(?string $uri): string
     {
         $uri = trim($uri ?: '/', '/');
 
         return $uri === '' ? '/' : $uri;
+    }
+
+    public function getUrlAttribute(): string
+    {
+        return $this->uri === '/' ? '/' : '/' . $this->uri;
     }
 }

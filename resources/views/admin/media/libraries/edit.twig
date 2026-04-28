@@ -18,7 +18,8 @@
                             <a class="f-s-14 f-w-500" href="{{ route('media.libraries') }}">Media Libraries</a>
                         </li>
                         <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries.show', library) }}">{{ library.name }}</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('media.libraries.show', library) }}">{{ library.name }}</a>
                         </li>
                         <li class="active">
                             <a class="f-s-14 f-w-500" href="{{ route('media.libraries.edit', library) }}">Edit Media
@@ -38,14 +39,16 @@
                     <h5>Edit Media Library</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('media.libraries.update', library) }}" class="row g-3 needs-validation"
+                    <form method="POST" action="{{ route('media.libraries.update', library) }}"
+                          class="row g-3 needs-validation"
                           novalidate>
                         {{ csrf_field() }}
                         {{ method_field('PUT') }}
-                        <input type="hidden" name="id" value="{{ library.id }}" />
+                        <input type="hidden" name="id" value="{{ library.id }}"/>
                         <div class="col-md-12">
                             <label class="form-label" for="name">Name</label>
-                            <input class="form-control" id="name" required type="text" value="{{ old('name', library.name) }}"
+                            <input class="form-control" id="name" required type="text"
+                                   value="{{ old('name', library.name) }}"
                                    name="name">
                             {% if errors.has('name') %}
                                 <p class="text-danger">{{ errors.first('name') }}</p>
@@ -53,7 +56,8 @@
                         </div>
                         <div class="col-md-12">
                             <label class="form-label" for="handle">Slug</label>
-                            <input class="form-control" id="handle" required type="text" value="{{ old('handle', library.handle) }}"
+                            <input class="form-control" id="handle" required type="text"
+                                   value="{{ old('handle', library.handle) }}"
                                    name="handle">
                             {% if errors.has('handle') %}
                                 <p class="text-danger">{{ errors.first('handle') }}</p>
@@ -63,7 +67,8 @@
                             <label class="form-label" for="storage">Storage</label>
                             <select class="form-select" id="storage" name="storage">
                                 {% for key, disk in disks %}
-                                    <option value="{{ key }}" {% if old('storage') == key %}selected{% endif %}>{{ disk.title }}</option>
+                                    <option value="{{ key }}"
+                                            {% if old('storage') == key %}selected{% endif %}>{{ disk.title }}</option>
                                 {% endfor %}
                             </select>
                             {% if errors.has('storage') %}
@@ -73,7 +78,8 @@
                         <div class="col-md-12">
                             <label class="form-label" for="adapter_settings[local][url]">Base URL</label>
                             <input class="form-control" id="adapter_settings[local][url]" required type="text"
-                                   value="{{ old('adapter_settings.local.url', library.adapter_settings.local.url) }}" name="adapter_settings[local][url]">
+                                   value="{{ old('adapter_settings.local.url', library.adapter_settings.local.url) }}"
+                                   name="adapter_settings[local][url]">
                             {% if errors.has('adapter_settings.local.url') %}
                                 <p class="text-danger">{{ errors.first('adapter_settings.local.url') }}</p>
                             {% endif %}
@@ -93,7 +99,8 @@
                                 <input aria-describedby="basic-addon2fd"
                                        aria-label="Recipient's username"
                                        class="form-control b-r-left"
-                                       type="text" name="max_size" id="max_size" value="{{ old('max_size', library.max_size) }}">
+                                       type="text" name="max_size" id="max_size"
+                                       value="{{ old('max_size', library.max_size) }}">
                                 <span class="input-group-text b-r-right text-bg-secondary" id="basic-addon2">MBs</span>
                             </div>
                             {% if errors.has('max_size') %}

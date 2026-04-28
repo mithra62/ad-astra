@@ -10,9 +10,9 @@ class EditField
     public function edit(Field $field, array $input): bool
     {
         // The form submits a type handle (e.g. 'text'); resolve it to field_type_id.
-        if (isset($input['type']) && ! isset($input['field_type_id'])) {
+        if (isset($input['type']) && !isset($input['field_type_id'])) {
             $resolved = FieldType::all()->first(
-                fn (FieldType $ft) => $ft->instance()->handle() === $input['type']
+                fn(FieldType $ft) => $ft->instance()->handle() === $input['type']
             );
 
             if ($resolved) {
@@ -25,7 +25,7 @@ class EditField
         if (
             isset($input['field_type_id']) &&
             $field->field_type_id !== null &&
-            (int) $input['field_type_id'] !== (int) $field->field_type_id &&
+            (int)$input['field_type_id'] !== (int)$field->field_type_id &&
             $field->fieldValues()->exists()
         ) {
             throw new \RuntimeException(

@@ -18,7 +18,8 @@
                             <a class="f-s-14 f-w-500" href="{{ route('statuses.groups') }}">Status Groups</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('statuses.groups.create') }}">Create Status Group</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('statuses.groups.create') }}">Create Status
+                                Group</a>
                         </li>
                     </ul>
                 </div>
@@ -34,25 +35,29 @@
                     <h5>Create Status Group</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('statuses.groups.store') }}" class="row g-3 needs-validation" novalidate>
+                    <form method="POST" action="{{ route('statuses.groups.store') }}" class="row g-3 needs-validation"
+                          novalidate>
                         {{ csrf_field() }}
                         <div class="col-md-12">
                             <label class="form-label" for="name">Name</label>
-                            <input class="form-control" id="name" required type="text" value="{{ old('name') }}" name="name">
+                            <input class="form-control" id="name" required type="text" value="{{ old('name') }}"
+                                   name="name">
                             {% if errors.has('name') %}
                                 <p class="text-danger">{{ errors.first('name') }}</p>
                             {% endif %}
                         </div>
                         <div class="col-md-12">
                             <label class="form-label" for="handle">Handle</label>
-                            <input class="form-control" id="handle" required type="text" value="{{ old('handle') }}" name="handle">
+                            <input class="form-control" id="handle" required type="text" value="{{ old('handle') }}"
+                                   name="handle">
                             {% if errors.has('handle') %}
                                 <p class="text-danger">{{ errors.first('handle') }}</p>
                             {% endif %}
                         </div>
                         <div class="col-md-4">
                             <label class="form-label" for="sort_order">Sort Order</label>
-                            <input class="form-control" id="sort_order" type="number" value="{{ old('sort_order', 0) }}" name="sort_order" min="0">
+                            <input class="form-control" id="sort_order" type="number" value="{{ old('sort_order', 0) }}"
+                                   name="sort_order" min="0">
                             {% if errors.has('sort_order') %}
                                 <p class="text-danger">{{ errors.first('sort_order') }}</p>
                             {% endif %}

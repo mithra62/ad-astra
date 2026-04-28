@@ -30,10 +30,10 @@
 
 
 // Delete button functionality
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const deleteButtons = document.querySelectorAll('.delete-btn');
     deleteButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const blogCard = this.closest('.col-md-6');
             if (blogCard) {
                 blogCard.remove();

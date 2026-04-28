@@ -7,15 +7,15 @@
             <div class="vertical-tab setting-tab">
                 <ul class="nav nav-tabs app-tabs-primary" id="v-bg" role="tablist">
                     {% for layout in layouts %}
-                    <li class="nav-item" role="presentation">
-                        <a aria-controls="layout-tab-pane" aria-selected="true"
-                           href="{{ route('field-layouts.edit', layout) }}"
-                           class="nav-link {% if active == layout.id %} active {% endif %}"
-                           id="layout-tab-{{ layout.id }}">
-                            <i class="ph-bold ph-layout pe-2"></i>
-                            {{ layout.name }}
-                        </a>
-                    </li>
+                        <li class="nav-item" role="presentation">
+                            <a aria-controls="layout-tab-pane" aria-selected="true"
+                               href="{{ route('field-layouts.edit', layout) }}"
+                               class="nav-link {% if active == layout.id %} active {% endif %}"
+                               id="layout-tab-{{ layout.id }}">
+                                <i class="ph-bold ph-layout pe-2"></i>
+                                {{ layout.name }}
+                            </a>
+                        </li>
                     {% endfor %}
                 </ul>
             </div>

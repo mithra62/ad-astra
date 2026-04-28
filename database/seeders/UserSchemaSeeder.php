@@ -133,7 +133,7 @@ class UserSchemaSeeder extends Seeder
     /**
      * Build a FieldLayout with named tabs, each containing field handles.
      *
-     * @param  array<string, string[]>  $tabs
+     * @param array<string, string[]> $tabs
      */
     private function buildLayout(array $tabs): FieldLayout
     {
@@ -150,7 +150,7 @@ class UserSchemaSeeder extends Seeder
             $elementOrder = 1;
             foreach ($handles as $handle) {
                 $field = Field::where('handle', $handle)->first();
-                if (! $field) {
+                if (!$field) {
                     continue;
                 }
 

@@ -8,36 +8,38 @@
 @mixin bg-colors($name, $stylename,$color,$max, $offset) {
     $i: .10;
     @while $i <= $max {
-      .bg-#{$name}-#{$i*1000} {
-        #{$stylename}: rgba(#{$color},#{$i}) !important;
-        color: rgba(var(--white),1);
-        &:hover,&:active ,&.active ,&.show,&:checked,&:focus {
-            color: rgba(var(--white),1);
-            transition: var(--app-transition);
-          }
-      }
+        .bg-#{$name}-#{$i*1000} {
+            #{$stylename}: rgba(#{$color},#{$i}) !important;
+            color: rgba(var(--white), 1);
 
-      $i: $i + $offset;
-    }
-  }
+            &:hover, &:active, &.active, &.show, &:checked, &:focus {
+                color: rgba(var(--white), 1);
+                transition: var(--app-transition);
+            }
+        }
 
-@mixin text-colors($name, $color, $max, $offset) {
-  $i: .30;
-  @while $i <= $max {
-    .text-#{$name}-#{$i*1000} {
-      color: rgba($color, $i) !important;
-      &:hover, &:active, &.active, &.show, &:checked, &:focus {
-        transition: var(--app-transition);
-      }
+        $i: $i + $offset;
     }
-    $i: $i + $offset;
-  }
 }
 
-  @each $name, $color in reboot.$colors {
-    @include bg-colors(""+$name, 'background-color',map.get(reboot.$colors, $name),.90,.10);
+@mixin text-colors($name, $color, $max, $offset) {
+    $i: .30;
+    @while $i <= $max {
+        .text-#{$name}-#{$i*1000} {
+            color: rgba($color, $i) !important;
+
+            &:hover, &:active, &.active, &.show, &:checked, &:focus {
+                transition: var(--app-transition);
+            }
+        }
+        $i: $i + $offset;
+    }
+}
+
+@each $name, $color in reboot.$colors {
+    @include bg-colors(""+$name, 'background-color', map.get(reboot.$colors, $name), .90, .10);
     @include text-colors(""+$name, map.get(reboot.$colors, $name), .90, .10);
-  }
+}
 
 .alert-outline-light,
 .alert-light-border-light,
@@ -48,14 +50,15 @@
 .btn-outline-light,
 .btn-light-light,
 .bg-light,
-.box-shadow-light{
-  color: rgba(var(--dark),1) !important;
+.box-shadow-light {
+    color: rgba(var(--dark), 1) !important;
 }
 
 
 .btn-white,
-.bg-white{
-  color: rgba(var(--dark),1) !important;
+.bg-white {
+    color: rgba(var(--dark), 1) !important;
 }
-  // >>-- 24 Background css end --<<
+
+// >>-- 24 Background css end --<<
 

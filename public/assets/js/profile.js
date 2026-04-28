@@ -3,7 +3,7 @@ function readURL(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
 
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             const imgPreview = $('#imgPreview');
             imgPreview.css('background-image', `url(${e.target.result})`);
             imgPreview.hide().fadeIn(650);
@@ -36,7 +36,7 @@ GLightbox({
 
 //  **-----post js**
 
-const pond= FilePond.create(
+const pond = FilePond.create(
     document.querySelector('.filepond-file'),
     {
         labelIdle: `<i class="fa-solid fa-cloud-upload fa-fw fs-4"></i> <div class="filepond--label-action text-decoration-none">Upload Your Files</div>`,

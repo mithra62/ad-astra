@@ -13,70 +13,70 @@
 - [Architecture at a Glance](#architecture-at-a-glance)
 - [Setup](#setup)
 - [Users, Roles, and Permissions](#users-roles-and-permissions)
-  - [Built-in Roles](#built-in-roles)
-  - [Built-in Permissions](#built-in-permissions)
-  - [Creating Users Programmatically](#creating-users-programmatically)
-  - [Checking Permissions](#checking-permissions)
-  - [Creating a New Permission and Role](#creating-a-new-permission-and-role)
+    - [Built-in Roles](#built-in-roles)
+    - [Built-in Permissions](#built-in-permissions)
+    - [Creating Users Programmatically](#creating-users-programmatically)
+    - [Checking Permissions](#checking-permissions)
+    - [Creating a New Permission and Role](#creating-a-new-permission-and-role)
 - [Field Types](#field-types)
-  - [Built-in Types](#built-in-types)
-  - [Creating a Custom Field Type](#creating-a-custom-field-type)
+    - [Built-in Types](#built-in-types)
+    - [Creating a Custom Field Type](#creating-a-custom-field-type)
 - [Field Groups and Fields](#field-groups-and-fields)
-  - [Creating a Field Group with Fields](#creating-a-field-group-with-fields)
+    - [Creating a Field Group with Fields](#creating-a-field-group-with-fields)
 - [Status Groups and Statuses](#status-groups-and-statuses)
-  - [Creating a Status Group](#creating-a-status-group)
-  - [How an Entry Stores its Status](#how-an-entry-stores-its-status)
-  - [StatusObserver — keeping status_is_public consistent](#statusobserver--keeping-status_is_public-consistent)
+    - [Creating a Status Group](#creating-a-status-group)
+    - [How an Entry Stores its Status](#how-an-entry-stores-its-status)
+    - [StatusObserver — keeping status_is_public consistent](#statusobserver--keeping-status_is_public-consistent)
 - [Category Groups and Categories](#category-groups-and-categories)
-  - [Creating a Category Group and Categories](#creating-a-category-group-and-categories)
-  - [Fetching Categories](#fetching-categories)
+    - [Creating a Category Group and Categories](#creating-a-category-group-and-categories)
+    - [Fetching Categories](#fetching-categories)
 - [Accessing Entry Categories via the Content Facade](#accessing-entry-categories-via-the-content-facade)
 - [Field Layouts](#field-layouts)
-  - [Building a Layout Programmatically](#building-a-layout-programmatically)
-  - [Getting All Fields from a Layout](#getting-all-fields-from-a-layout)
+    - [Building a Layout Programmatically](#building-a-layout-programmatically)
+    - [Getting All Fields from a Layout](#getting-all-fields-from-a-layout)
 - [Entry Groups and Entry Types](#entry-groups-and-entry-types)
-  - [Multiple Entry Types per Group](#multiple-entry-types-per-group)
-  - [Field Layering: Group Fields + Type Fields](#field-layering-group-fields--type-fields)
-  - [Setting Up Multiple Entry Types in One Group](#setting-up-multiple-entry-types-in-one-group)
-  - [Entry Type Classes Can Share Logic via a Base Class](#entry-type-classes-can-share-logic-via-a-base-class)
-  - [Lifecycle Hook Signatures](#lifecycle-hook-signatures)
-  - [Creating Entries of Each Type](#creating-entries-of-each-type)
-  - [Multiple Groups Sharing the Same Entry Type Class](#multiple-groups-sharing-the-same-entry-type-class)
-  - [Creating an Entry Group](#creating-an-entry-group)
-  - [Creating an Entry Type Class](#creating-an-entry-type-class)
-  - [Registering the Entry Type in the Database](#registering-the-entry-type-in-the-database)
+    - [Multiple Entry Types per Group](#multiple-entry-types-per-group)
+    - [Field Layering: Group Fields + Type Fields](#field-layering-group-fields--type-fields)
+    - [Setting Up Multiple Entry Types in One Group](#setting-up-multiple-entry-types-in-one-group)
+    - [Entry Type Classes Can Share Logic via a Base Class](#entry-type-classes-can-share-logic-via-a-base-class)
+    - [Lifecycle Hook Signatures](#lifecycle-hook-signatures)
+    - [Creating Entries of Each Type](#creating-entries-of-each-type)
+    - [Multiple Groups Sharing the Same Entry Type Class](#multiple-groups-sharing-the-same-entry-type-class)
+    - [Creating an Entry Group](#creating-an-entry-group)
+    - [Creating an Entry Type Class](#creating-an-entry-type-class)
+    - [Registering the Entry Type in the Database](#registering-the-entry-type-in-the-database)
 - [Creating and Updating Entries](#creating-and-updating-entries)
-  - [Creating an Entry](#creating-an-entry)
-  - [Updating an Entry](#updating-an-entry)
-  - [Using the Relationship Field](#using-the-relationship-field)
+    - [Creating an Entry](#creating-an-entry)
+    - [Updating an Entry](#updating-an-entry)
+    - [Using the Relationship Field](#using-the-relationship-field)
 - [Querying Entries](#querying-entries)
-  - [Reading Field Values](#reading-field-values)
-  - [Accessing Entry Authors](#accessing-entry-authors)
+    - [Reading Field Values](#reading-field-values)
+    - [Accessing Entry Authors](#accessing-entry-authors)
 - [Deleting Entries](#deleting-entries)
 - [User Extended Profile (UserSchema)](#user-extended-profile-userschema)
-  - [Setting Up the User Schema](#setting-up-the-user-schema)
-  - [Writing Field Values to a User](#writing-field-values-to-a-user)
-  - [Reading Field Values from a User](#reading-field-values-from-a-user)
-  - [Typical Controller Pattern](#typical-controller-pattern)
-  - [Comparison: Users vs Entries](#comparison-users-vs-entries)
+    - [Setting Up the User Schema](#setting-up-the-user-schema)
+    - [Writing Field Values to a User](#writing-field-values-to-a-user)
+    - [Reading Field Values from a User](#reading-field-values-from-a-user)
+    - [Typical Controller Pattern](#typical-controller-pattern)
+    - [Comparison: Users vs Entries](#comparison-users-vs-entries)
 - [System Health and Data Integrity](#system-health-and-data-integrity)
 - [UserService and the Users Facade](#userservice-and-the-users-facade)
-  - [CRUD](#crud)
-  - [Roles](#roles)
-  - [Custom Fields](#custom-fields)
-  - [Passwords](#passwords)
-  - [Two-Factor Authentication](#two-factor-authentication)
-  - [OAuth Token Management](#oauth-token-management)
-  - [Action Classes Inventory](#action-classes-inventory)
+    - [CRUD](#crud)
+    - [Roles](#roles)
+    - [Custom Fields](#custom-fields)
+    - [Passwords](#passwords)
+    - [Two-Factor Authentication](#two-factor-authentication)
+    - [OAuth Token Management](#oauth-token-management)
+    - [Action Classes Inventory](#action-classes-inventory)
 - [Custom Field Groups on Category Groups](#custom-field-groups-on-category-groups)
 - [Adding Custom Fields to Media Uploads](#adding-custom-fields-to-media-uploads)
-  - [How the Field Layer Works](#how-the-field-layer-works)
-  - [Step 1 — Add the Fieldable Trait to Media](#step-1--add-the-fieldable-trait-to-media)
-  - [Step 2 — Create Fields and a Field Layout](#step-2--create-fields-and-a-field-layout)
-  - [Step 3 — Write Field Values to a Media Item](#step-3--write-field-values-to-a-media-item)
-  - [Step 4 — Read Field Values from a Media Item](#step-4--read-field-values-from-a-media-item)
-  - [Step 5 — Attach Field Groups to a Library](#step-5--attach-field-groups-to-a-library)
-  - [Morph Map Note](#morph-map-note)
+    - [How the Field Layer Works](#how-the-field-layer-works)
+    - [Step 1 — Add the Fieldable Trait to Media](#step-1--add-the-fieldable-trait-to-media)
+    - [Step 2 — Create Fields and a Field Layout](#step-2--create-fields-and-a-field-layout)
+    - [Step 3 — Write Field Values to a Media Item](#step-3--write-field-values-to-a-media-item)
+    - [Step 4 — Read Field Values from a Media Item](#step-4--read-field-values-from-a-media-item)
+    - [Step 5 — Attach Field Groups to a Library](#step-5--attach-field-groups-to-a-library)
+    - [Morph Map Note](#morph-map-note)
 - [Site Routing (Public-Facing URLs)](#site-routing-public-facing-urls)
 - [Adding New Permissions](#adding-new-permissions)
 - [Adding a New Entry Type End-to-End](#adding-a-new-entry-type-end-to-end)
@@ -204,11 +204,11 @@ users can store custom field values polymorphically.
 
 ### Built-in Roles
 
-| Role | Access |
-|---|---|
-| `super admin` | Everything — bypasses all permission checks via `Gate::before` |
-| `admin` | Admin panel + full CRUD for users, user tokens, categories/category groups, media libraries, plus the `api` permission |
-| `user` | Admin panel access only (`access admin` permission only) |
+| Role          | Access                                                                                                                 |
+|---------------|------------------------------------------------------------------------------------------------------------------------|
+| `super admin` | Everything — bypasses all permission checks via `Gate::before`                                                         |
+| `admin`       | Admin panel + full CRUD for users, user tokens, categories/category groups, media libraries, plus the `api` permission |
+| `user`        | Admin panel access only (`access admin` permission only)                                                               |
 
 ### Built-in Permissions
 
@@ -301,28 +301,28 @@ which validates `class_exists()` and `is_subclass_of(AbstractField::class)`.
 
 `AbstractField` methods subclasses can override:
 
-| Method | Purpose |
-|---|---|
-| `storageColumn(): string` | Required. One of `value_text`, `value_integer`, `value_float`, `value_date`, `value_boolean`, `value_json`. |
-| `isRelational(): bool` | Default `false`. Return `true` to route writes to `entry_relationships`. |
-| `cast(mixed $value): mixed` | Default identity. Convert raw stored value before returning. |
-| `validate(mixed $value): bool\|string` | Default `true`. Return error string on failure. |
-| `render(array $params): string` | Render a Blade partial for the admin form. |
-| `getRules(): array` | Return Laravel validation rules. |
+| Method                                 | Purpose                                                                                                     |
+|----------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `storageColumn(): string`              | Required. One of `value_text`, `value_integer`, `value_float`, `value_date`, `value_boolean`, `value_json`. |
+| `isRelational(): bool`                 | Default `false`. Return `true` to route writes to `entry_relationships`.                                    |
+| `cast(mixed $value): mixed`            | Default identity. Convert raw stored value before returning.                                                |
+| `validate(mixed $value): bool\|string` | Default `true`. Return error string on failure.                                                             |
+| `render(array $params): string`        | Render a Blade partial for the admin form.                                                                  |
+| `getRules(): array`                    | Return Laravel validation rules.                                                                            |
 
 ### Built-in Types
 
-| Class | `storageColumn()` | Notes |
-|---|---|---|
-| `Text` | `value_text` | Single-line input |
-| `Textarea` | `value_text` | Multi-line |
-| `Number` | `value_integer` or `value_float` | Branches on `decimals` setting |
-| `Date` | `value_date` | Cast as `datetime`; reads return `Carbon` |
-| `EmailAddress` | `value_text` | |
-| `Url` | `value_text` | |
-| `Telephone` | `value_text` | |
-| `ColorPicker` | `value_text` | Hex value |
-| `Relationship` | *(unused)* | `isRelational() === true`; stores in `entry_relationships` |
+| Class          | `storageColumn()`                | Notes                                                      |
+|----------------|----------------------------------|------------------------------------------------------------|
+| `Text`         | `value_text`                     | Single-line input                                          |
+| `Textarea`     | `value_text`                     | Multi-line                                                 |
+| `Number`       | `value_integer` or `value_float` | Branches on `decimals` setting                             |
+| `Date`         | `value_date`                     | Cast as `datetime`; reads return `Carbon`                  |
+| `EmailAddress` | `value_text`                     |                                                            |
+| `Url`          | `value_text`                     |                                                            |
+| `Telephone`    | `value_text`                     |                                                            |
+| `ColorPicker`  | `value_text`                     | Hex value                                                  |
+| `Relationship` | *(unused)*                       | `isRelational() === true`; stores in `entry_relationships` |
 
 ### Creating a Custom Field Type
 
@@ -422,11 +422,11 @@ foreach ([
 The status is denormalised across three columns maintained together by
 `EntryRepository::applyStatus()`:
 
-| Column | Notes |
-|---|---|
-| `status_id` | nullable FK to `statuses.id`, `nullOnDelete` |
-| `status_handle` | indexed string for fast lookups |
-| `status_is_public` | indexed boolean |
+| Column             | Notes                                        |
+|--------------------|----------------------------------------------|
+| `status_id`        | nullable FK to `statuses.id`, `nullOnDelete` |
+| `status_handle`    | indexed string for fast lookups              |
+| `status_is_public` | indexed boolean                              |
 
 `Entry::scopePublished()` filters on `status_is_public = true AND published_at IS NOT NULL AND published_at <= now()`.
 
@@ -618,15 +618,15 @@ polymorphic FieldGroups.
 
 An **EntryType** row maps a group-scoped handle to a PHP class:
 
-| Column | Description |
-|---|---|
-| `entry_group_id` | FK to `entry_groups`, cascade on delete |
-| `field_layout_id` | Optional override layout for this type |
-| `name`, `handle` | `(entry_group_id, handle)` unique |
-| `class` | FQCN of an `AbstractEntryType` subclass |
-| `default_template` | Optional default template for SiteRouter |
-| `has_entry_tree`, `max_depth`, `allowed_parent_types` | Tree config |
-| `sort_order` | Display order within the group |
+| Column                                                | Description                              |
+|-------------------------------------------------------|------------------------------------------|
+| `entry_group_id`                                      | FK to `entry_groups`, cascade on delete  |
+| `field_layout_id`                                     | Optional override layout for this type   |
+| `name`, `handle`                                      | `(entry_group_id, handle)` unique        |
+| `class`                                               | FQCN of an `AbstractEntryType` subclass  |
+| `default_template`                                    | Optional default template for SiteRouter |
+| `has_entry_tree`, `max_depth`, `allowed_parent_types` | Tree config                              |
+| `sort_order`                                          | Display order within the group           |
 
 ### Field Layering: Group Fields + Type Fields
 
@@ -886,19 +886,19 @@ $entry = Entries::query()->inGroup('blog')->where('handle', 'my-post')->firstOrF
 
 ### Full `EntryQueryBuilder` surface
 
-| Method | Notes |
-|---|---|
-| `inGroup($group)` | `string\|int\|EntryGroup` |
-| `ofType($type)` | `string\|int\|EntryType` |
-| `published()` | `status_is_public = true AND published_at <= now()` |
-| `withStatus($handle)` | matches `status_handle` |
-| `withAuthor(int $userId)` | `whereHas('authors', users.id)` |
-| `withCategory(int $categoryId)` | `whereHas('categories', categories.id)` |
-| `where($column, $op, $value = null)` | passthrough to Eloquent Builder |
-| `orderBy($column, $direction = 'asc')` | passthrough |
-| `latest()` | `orderBy('created_at', 'desc')` |
-| `get()` / `paginate(int)` / `first()` / `firstOrFail()` | terminal; always eager-load |
-| `count()` | does **not** apply eager loads |
+| Method                                                  | Notes                                               |
+|---------------------------------------------------------|-----------------------------------------------------|
+| `inGroup($group)`                                       | `string\|int\|EntryGroup`                           |
+| `ofType($type)`                                         | `string\|int\|EntryType`                            |
+| `published()`                                           | `status_is_public = true AND published_at <= now()` |
+| `withStatus($handle)`                                   | matches `status_handle`                             |
+| `withAuthor(int $userId)`                               | `whereHas('authors', users.id)`                     |
+| `withCategory(int $categoryId)`                         | `whereHas('categories', categories.id)`             |
+| `where($column, $op, $value = null)`                    | passthrough to Eloquent Builder                     |
+| `orderBy($column, $direction = 'asc')`                  | passthrough                                         |
+| `latest()`                                              | `orderBy('created_at', 'desc')`                     |
+| `get()` / `paginate(int)` / `first()` / `firstOrFail()` | terminal; always eager-load                         |
+| `count()`                                               | does **not** apply eager loads                      |
 
 ### Reading Field Values
 
@@ -915,10 +915,10 @@ foreach ($related as $rel) {
 
 ### Accessing Entry Authors
 
-| Relationship | Type | Description |
-|---|---|---|
-| `creator` | `BelongsTo User` | User who created the record (`created_by_user_id`) |
-| `authors` | `BelongsToMany User` | Editorial byline, ordered by pivot `sort_order` |
+| Relationship | Type                 | Description                                        |
+|--------------|----------------------|----------------------------------------------------|
+| `creator`    | `BelongsTo User`     | User who created the record (`created_by_user_id`) |
+| `authors`    | `BelongsToMany User` | Editorial byline, ordered by pivot `sort_order`    |
 
 ```php
 $post = Content::query()->inGroup('blog')->where('handle', 'my-post')->firstOrFail();
@@ -962,10 +962,10 @@ UserSchema::flushResolved(); // clear cache (useful in tests)
 
 `UserSchemaSeeder` creates two FieldGroups and a two-tab layout:
 
-| FieldGroup | `handle` | Fields |
-|---|---|---|
+| FieldGroup   | `handle`       | Fields                                                          |
+|--------------|----------------|-----------------------------------------------------------------|
 | User Profile | `user-profile` | `first_name`, `last_name`, `gender`, `date_of_birth`, `website` |
-| User Bio | `user-bio` | `bio`, `social_twitter`, `social_linkedin` |
+| User Bio     | `user-bio`     | `bio`, `social_twitter`, `social_linkedin`                      |
 
 ```bash
 php artisan db:seed --class=UserSchemaSeeder
@@ -1070,13 +1070,13 @@ public function update(Request $request, User $user): void
 
 ### Comparison: Users vs Entries
 
-| | Entries | Users |
-|---|---|---|
-| Write API | `Content::create()` / `Content::update()` | `Users::create()` / `Users::update()` |
-| Read API | `$entry->field('handle')` | `$user->field('handle')` |
-| Schema | Per-group FieldLayout + per-type FieldLayout (merged) | Single `UserSchema` singleton |
-| Lifecycle hooks | `beforeCreate`, `afterCreate`, etc. on EntryType class | None |
-| Custom fields | Scalar + Relational | **Scalar only** |
+|                 | Entries                                                | Users                                 |
+|-----------------|--------------------------------------------------------|---------------------------------------|
+| Write API       | `Content::create()` / `Content::update()`              | `Users::create()` / `Users::update()` |
+| Read API        | `$entry->field('handle')`                              | `$user->field('handle')`              |
+| Schema          | Per-group FieldLayout + per-type FieldLayout (merged)  | Single `UserSchema` singleton         |
+| Lifecycle hooks | `beforeCreate`, `afterCreate`, etc. on EntryType class | None                                  |
+| Custom fields   | Scalar + Relational                                    | **Scalar only**                       |
 
 ---
 
@@ -1202,84 +1202,84 @@ $tokens = Users::listOauthTokens($user);
 
 **Entry** (`app/Actions/Entry/`)
 
-| Class | Method |
-|---|---|
-| `CreateNewEntry` | `create(array $input): Entry` — reads `$input['type_handle']`, delegates to `Content::create()` |
-| `UpdateEntry` | `update(Entry $entry, array $input): Entry` |
-| `Group/CreateNewEntryGroup` | `create(array $input): EntryGroup` |
-| `Group/EditEntryGroup` | `edit(EntryGroup $group, array $input): bool` |
-| `Type/CreateNewEntryType` | `create(array $input): EntryType` |
-| `Type/EditEntryType` | `edit(EntryType $type, array $input): bool` |
-| `Tree/CreateEntryTreeNode` | `create(Entry $entry, array $input): EntryTree` |
-| `Tree/MoveEntryTreeNode` | `move(EntryTree $node, array $input): EntryTree` |
-| `Tree/RebuildEntryTreeUri` | `rebuild(EntryTree $node): void` |
+| Class                       | Method                                                                                          |
+|-----------------------------|-------------------------------------------------------------------------------------------------|
+| `CreateNewEntry`            | `create(array $input): Entry` — reads `$input['type_handle']`, delegates to `Content::create()` |
+| `UpdateEntry`               | `update(Entry $entry, array $input): Entry`                                                     |
+| `Group/CreateNewEntryGroup` | `create(array $input): EntryGroup`                                                              |
+| `Group/EditEntryGroup`      | `edit(EntryGroup $group, array $input): bool`                                                   |
+| `Type/CreateNewEntryType`   | `create(array $input): EntryType`                                                               |
+| `Type/EditEntryType`        | `edit(EntryType $type, array $input): bool`                                                     |
+| `Tree/CreateEntryTreeNode`  | `create(Entry $entry, array $input): EntryTree`                                                 |
+| `Tree/MoveEntryTreeNode`    | `move(EntryTree $node, array $input): EntryTree`                                                |
+| `Tree/RebuildEntryTreeUri`  | `rebuild(EntryTree $node): void`                                                                |
 
 **Category** (`app/Actions/Category/`)
 
-| Class | Method |
-|---|---|
-| `CreateNewCategory` | `create(CategoryGroup $group, array $input): Category` |
-| `EditCategory` | `edit(Category $category, array $input): Category` |
-| `Group/CreateNewCategoryGroup` | `create(array $input): CategoryGroup` |
-| `Group/EditCategoryGroup` | `edit(CategoryGroup $group, array $input): bool` |
+| Class                          | Method                                                 |
+|--------------------------------|--------------------------------------------------------|
+| `CreateNewCategory`            | `create(CategoryGroup $group, array $input): Category` |
+| `EditCategory`                 | `edit(Category $category, array $input): Category`     |
+| `Group/CreateNewCategoryGroup` | `create(array $input): CategoryGroup`                  |
+| `Group/EditCategoryGroup`      | `edit(CategoryGroup $group, array $input): bool`       |
 
 **Field** (`app/Actions/Field/`)
 
-| Class | Method |
-|---|---|
-| `CreateNewField` | `create(array $input): Field` |
-| `EditField` | `edit(Field $field, array $input): bool` |
-| `Group/CreateNewFieldGroup` | `create(array $input): FieldGroup` |
-| `Group/EditFieldGroup` | `edit(FieldGroup $group, array $input): bool` |
+| Class                       | Method                                        |
+|-----------------------------|-----------------------------------------------|
+| `CreateNewField`            | `create(array $input): Field`                 |
+| `EditField`                 | `edit(Field $field, array $input): bool`      |
+| `Group/CreateNewFieldGroup` | `create(array $input): FieldGroup`            |
+| `Group/EditFieldGroup`      | `edit(FieldGroup $group, array $input): bool` |
 
 **FieldLayout** (`app/Actions/FieldLayout/`)
 
-| Class | Method |
-|---|---|
-| `CreateNewFieldLayout` | `create(array $input): FieldLayout` |
-| `EditFieldLayout` | `edit(FieldLayout $layout, array $input): bool` |
-| `DeleteFieldLayout` | `delete(FieldLayout $layout): bool` |
-| `Tab/CreateNewTab` | `create(FieldLayout $layout, array $input): Tab` |
-| `Tab/EditTab` | `edit(Tab $tab, array $input): bool` |
-| `Tab/DeleteTab` | `delete(Tab $tab): bool` |
-| `Tab/Element/CreateTabElement` | `create(Tab $tab, array $input): TabElement` |
-| `Tab/Element/EditTabElement` | `edit(TabElement $element, array $input): bool` |
-| `Tab/Element/DeleteTabElement` | `delete(TabElement $element): bool` |
+| Class                          | Method                                           |
+|--------------------------------|--------------------------------------------------|
+| `CreateNewFieldLayout`         | `create(array $input): FieldLayout`              |
+| `EditFieldLayout`              | `edit(FieldLayout $layout, array $input): bool`  |
+| `DeleteFieldLayout`            | `delete(FieldLayout $layout): bool`              |
+| `Tab/CreateNewTab`             | `create(FieldLayout $layout, array $input): Tab` |
+| `Tab/EditTab`                  | `edit(Tab $tab, array $input): bool`             |
+| `Tab/DeleteTab`                | `delete(Tab $tab): bool`                         |
+| `Tab/Element/CreateTabElement` | `create(Tab $tab, array $input): TabElement`     |
+| `Tab/Element/EditTabElement`   | `edit(TabElement $element, array $input): bool`  |
+| `Tab/Element/DeleteTabElement` | `delete(TabElement $element): bool`              |
 
 **Media** (`app/Actions/Media/Library/`)
 
-| Class | Method |
-|---|---|
-| `CreateNewMediaLibrary` | `create(array $input): Library` — attaches `$input['category_groups']` |
-| `EditMediaLibrary` | `edit(Library $library, array $input): bool` — re-syncs category groups and field groups |
-| `DeleteMediaLibrary` | `delete(Library $library): bool` |
-| `UploadMedia` | `upload(FormRequest $request, Library $library): Media` |
+| Class                   | Method                                                                                   |
+|-------------------------|------------------------------------------------------------------------------------------|
+| `CreateNewMediaLibrary` | `create(array $input): Library` — attaches `$input['category_groups']`                   |
+| `EditMediaLibrary`      | `edit(Library $library, array $input): bool` — re-syncs category groups and field groups |
+| `DeleteMediaLibrary`    | `delete(Library $library): bool`                                                         |
+| `UploadMedia`           | `upload(FormRequest $request, Library $library): Media`                                  |
 
 **Status** (`app/Actions/Status/`)
 
-| Class | Method |
-|---|---|
-| `CreateNewStatus` | `create(StatusGroup $group, array $input): Status` |
-| `EditStatus` | `edit(Status $status, array $input): bool` |
-| `Group/CreateNewStatusGroup` | `create(array $input): StatusGroup` |
-| `Group/EditStatusGroup` | `edit(StatusGroup $group, array $input): bool` |
+| Class                        | Method                                             |
+|------------------------------|----------------------------------------------------|
+| `CreateNewStatus`            | `create(StatusGroup $group, array $input): Status` |
+| `EditStatus`                 | `edit(Status $status, array $input): bool`         |
+| `Group/CreateNewStatusGroup` | `create(array $input): StatusGroup`                |
+| `Group/EditStatusGroup`      | `edit(StatusGroup $group, array $input): bool`     |
 
 **Role** (`app/Actions/Role/`)
 
-| Class | Method |
-|---|---|
-| `CreateNewRole` | `create(array $input): Role` |
-| `EditRole` | `edit(Role $role, array $input): bool` |
+| Class           | Method                                 |
+|-----------------|----------------------------------------|
+| `CreateNewRole` | `create(array $input): Role`           |
+| `EditRole`      | `edit(Role $role, array $input): bool` |
 
 **User** (`app/Actions/User/`)
 
-| Class | Method |
-|---|---|
-| `CreateNewUser` | `create(array $input): User` |
+| Class                          | Method                                                                   |
+|--------------------------------|--------------------------------------------------------------------------|
+| `CreateNewUser`                | `create(array $input): User`                                             |
 | `UpdateUserProfileInformation` | `update(User $user, array $input): void` — implements Fortify's contract |
-| `UpdateUserPassword` | `update(User $user, array $input): void` — verifies current password |
-| `ResetUserPassword` | `reset(User $user, array $input): void` — no current-password check |
-| `Token/CreateNewUserToken` | `create(User $user, array $input): NewAccessToken` |
+| `UpdateUserPassword`           | `update(User $user, array $input): void` — verifies current password     |
+| `ResetUserPassword`            | `reset(User $user, array $input): void` — no current-password check      |
+| `Token/CreateNewUserToken`     | `create(User $user, array $input): NewAccessToken`                       |
 
 ---
 
@@ -1625,12 +1625,12 @@ $view = app(SiteRouter::class)->render('/blog/my-post');
 Reserved first segments (`api`, `admin`, `login`, `logout`, `register`,
 `password`, `sanctum`, `storage`, `assets`, `vendor`) are blocked.
 
-| URL | Resolved view |
-|---|---|
-| `/` | `templates::site.index` |
-| `/blog` | `templates::blog.index` |
+| URL             | Resolved view                                        |
+|-----------------|------------------------------------------------------|
+| `/`             | `templates::site.index`                              |
+| `/blog`         | `templates::blog.index`                              |
 | `/blog/my-post` | `templates::blog.entry` (with `$handle = 'my-post'`) |
-| `/blog/archive` | `templates::blog.archive` (if the file exists) |
+| `/blog/archive` | `templates::blog.archive` (if the file exists)       |
 
 Key/value pairs after the second segment are parsed into `$params`:
 
@@ -1946,14 +1946,14 @@ entry_relationships  (relational fields only)
 
 ### Morph map aliases at a glance
 
-| Alias | Model | Fieldable |
-|---|---|---|
-| `entry` | `App\Models\Entry` | Scalar + Relational |
-| `user` | `App\Models\User` | Scalar only |
-| `category` | `App\Models\Category` | Scalar only |
-| `media` | `App\Models\Media` | Scalar only (after adding `Fieldable` trait) |
-| `entry_group` | `App\Models\EntryGroup` | No |
-| `entry_type` | `App\Models\EntryType` | No |
-| `category_group` | `App\Models\Category\Group` | No |
-| `field_group` | `App\Models\Field\Group` | No |
-| `media_library` | `App\Models\Media\Library` | No |
+| Alias            | Model                       | Fieldable                                    |
+|------------------|-----------------------------|----------------------------------------------|
+| `entry`          | `App\Models\Entry`          | Scalar + Relational                          |
+| `user`           | `App\Models\User`           | Scalar only                                  |
+| `category`       | `App\Models\Category`       | Scalar only                                  |
+| `media`          | `App\Models\Media`          | Scalar only (after adding `Fieldable` trait) |
+| `entry_group`    | `App\Models\EntryGroup`     | No                                           |
+| `entry_type`     | `App\Models\EntryType`      | No                                           |
+| `category_group` | `App\Models\Category\Group` | No                                           |
+| `field_group`    | `App\Models\Field\Group`    | No                                           |
+| `media_library`  | `App\Models\Media\Library`  | No                                           |

@@ -2,11 +2,24 @@
 
 namespace App\Services;
 
-use App\Models\Field\Type AS FieldType;
+use App\Models\Field\Type as FieldType;
 use Illuminate\Support\Collection;
 
 class FieldService extends AbstractService
 {
+    public function getFieldOptions(): array
+    {
+        $fields = $this->getAllFieldTypes();
+        $return = [];
+        foreach ($fields as $field) {
+            $return[$field->handle()] = $field->name();
+        }
+
+        ksort($return);
+
+        return $return;
+    }
+
     /**
      * @return Collection
      */
@@ -14,25 +27,12 @@ class FieldService extends AbstractService
     {
         $fields = FieldType::all();
         $return = [];
-        if($fields) {
-            foreach($fields AS $field) {
+        if ($fields) {
+            foreach ($fields as $field) {
                 $return[] = $field->instance();
             }
         }
 
         return collect($return);
-    }
-
-    public function getFieldOptions(): array
-    {
-        $fields = $this->getAllFieldTypes();
-        $return = [];
-        foreach($fields AS $field) {
-            $return[$field->handle()] = $field->name();
-        }
-
-        ksort($return);
-
-        return $return;
     }
 }

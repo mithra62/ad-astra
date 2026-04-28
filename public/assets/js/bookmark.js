@@ -6,7 +6,7 @@ function bookmarkContent() {
             <div class="card book-mark-card draggable-card">
                 <div class="card-body">
                     <div class="draggable-card-img">
-                        <img src=${files ? URL.createObjectURL(files[0]) : "" } alt="image" class="img-fluid" id="preview">
+                        <img src=${files ? URL.createObjectURL(files[0]) : ""} alt="image" class="img-fluid" id="preview">
                         <div class="video-transparent-box"></div>
                         <div class="draggable-card-icon">
                             <span class="bg-white h-35 w-35 mb-2 d-flex-center b-r-50 me-3">
@@ -75,8 +75,8 @@ function getActionsFeture() {
             });
         });
 
-        heartIcons.forEach(function(icon) {
-            icon.addEventListener('click', function(event) {
+        heartIcons.forEach(function (icon) {
+            icon.addEventListener('click', function (event) {
                 this.classList.toggle('ph-bold'); // Toggle between outline icon
                 this.classList.toggle('ph-fill'); // and filled icon
                 const heartBtn = this.closest(".col-xxl-4").cloneNode(true);
@@ -93,8 +93,8 @@ function getActionsFeture() {
             });
         });
 
-        shareIcons.forEach(function(icon) {
-            icon.addEventListener('click', function(event) {
+        shareIcons.forEach(function (icon) {
+            icon.addEventListener('click', function (event) {
                 this.classList.toggle('ph-bold'); // Toggle between outline icon
                 this.classList.toggle('ph-fill'); // and filled icon
                 const shareBtn = this.closest(".col-xxl-4").cloneNode(true);
@@ -111,8 +111,8 @@ function getActionsFeture() {
             });
         });
 
-        starIcons.forEach(function(icon) {
-            icon.addEventListener('click', function(event) {
+        starIcons.forEach(function (icon) {
+            icon.addEventListener('click', function (event) {
                 this.classList.toggle('ph-bold'); // Toggle between outline icon
                 this.classList.toggle('ph-fill'); // and filled icon
                 const starBtn = this.closest(".col-xxl-4").cloneNode(true);

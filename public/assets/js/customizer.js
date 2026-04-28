@@ -23,7 +23,7 @@ $(document).on("click", ".sidebar-option > li", function () {
         }
 
         setUpHorizontalHeader();
-    }catch (e) {
+    } catch (e) {
         console.log("Fail to change sidebar option");
     }
 });

@@ -29,7 +29,7 @@
         <!-- Custom Styles start -->
         <form method="POST" action="{{ route('roles.update', role) }}" class="row g-3 needs-validation" novalidate>
             {{ csrf_field() }}
-            <input type="hidden" name="id" value="{{ role.id }}" />
+            <input type="hidden" name="id" value="{{ role.id }}"/>
             {{ method_field('PUT') }}
             <div class="col-12">
                 <div class="card">
@@ -39,7 +39,8 @@
                     <div class="card-body">
                         <div class="col-md-12">
                             <label class="form-label" for="name">Name</label>
-                            <input class="form-control" id="name" required type="text" value="{{ old('name', role.name) }}"
+                            <input class="form-control" id="name" required type="text"
+                                   value="{{ old('name', role.name) }}"
                                    name="name">
                             {% if errors.has('name') %}
                                 <p class="text-danger">{{ errors.first('name') }}</p>
@@ -67,7 +68,8 @@
 
                             {% for permission in permissions %}
                                 <div class="col-md-6">
-                                    <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                    <div
+                                        class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
                                         <input
                                             class="toggle switch-border-primary"
                                             name="permissions[]"

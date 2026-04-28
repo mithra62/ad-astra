@@ -1,4 +1,4 @@
-{{ include('auth._header', {title: 'Login'})  }}
+{{ include('auth._header', {title: 'Login'}) }}
 <div class="form_container">
 
     <form method="POST" action="{{ route('login') }}" class="app-form">
@@ -25,7 +25,7 @@
             <label class="form-label" for="password">Password</label>
             <input class="form-control" id="password" type="password" name="password">
             {% if errors.has('password') %}
-            <p class="text-danger">{{ errors.first('password') }}</p>
+                <p class="text-danger">{{ errors.first('password') }}</p>
             {% endif %}
         </div>
         <div class="mb-3 form-check">
@@ -60,14 +60,14 @@
                         class="ti ti-brand-linkedin text-white"></i></a>
             </div>
         </div>
-{#
+        {#
         <div class="text-center">
         <a class="text-secondary text-decoration-underline"
         href="./terms_condition.html">Terms of use &amp;
         Conditions</a>
 </div>
-#}
-{{ include('_inc._bb')  }}
-</form>
+        #}
+        {{ include('_inc._bb') }}
+    </form>
 </div>
-{{ include('auth._footer')  }}
+{{ include('auth._footer') }}

@@ -18,44 +18,33 @@ class Group extends Controller
         return $this->view('statuses.groups.index', ['groups' => $groups]);
     }
 
+    public function store(StoreStatusGroupRequest $request)
+    {
+        $creator = app(CreateNewStatusGroup::class);
+        $group = $creator->create($request->validated());
+        return redirect()->route('statuses.groups.show', $group->id)->with('status', trans('status.group.created'));
+    }
+
     public function create()
     {
         return $this->view('statuses.groups.create');
     }
 
-    public function store(StoreStatusGroupRequest $request)
-    {
-        $creator = app(CreateNewStatusGroup::class);
-        $group   = $creator->create($request->validated());
-        return redirect()->route('statuses.groups.show', $group->id)->with('status', trans('status.group.created'));
-    }
-
     public function show(string $id)
     {
         $group = StatusGroup::find($id);
-        if (! $group instanceof StatusGroup) {
-            abort(404);
-        }
-
-        $groups   = StatusGroup::ordered()->get();
-        $statuses = $group->statuses()->orderBy('sort_order')->get();
-
-        return $this->view('statuses.groups.view', [
-            'group'    => $group,
-            'groups'   => $groups,
-            'statuses' => $statuses,
-        ]);
-    }
-
-    public function edit(string $id)
-    {
-        $group = StatusGroup::find($id);
-        if (! $group instanceof StatusGroup) {
+        if (!$group instanceof StatusGroup) {
             abort(404);
         }
 
         $groups = StatusGroup::ordered()->get();
-        return $this->view('statuses.groups.edit', ['group' => $group, 'groups' => $groups]);
+        $statuses = $group->statuses()->orderBy('sort_order')->get();
+
+        return $this->view('statuses.groups.view', [
+            'group' => $group,
+            'groups' => $groups,
+            'statuses' => $statuses,
+        ]);
     }
 
     public function update(EditStatusGroupRequest $request, string $id)
@@ -68,6 +57,17 @@ class Group extends Controller
         }
 
         abort(404);
+    }
+
+    public function edit(string $id)
+    {
+        $group = StatusGroup::find($id);
+        if (!$group instanceof StatusGroup) {
+            abort(404);
+        }
+
+        $groups = StatusGroup::ordered()->get();
+        return $this->view('statuses.groups.edit', ['group' => $group, 'groups' => $groups]);
     }
 
     public function destroy(DeleteStatusGroupRequest $request, string $id)
@@ -84,7 +84,7 @@ class Group extends Controller
     public function confirm(string $id)
     {
         $group = StatusGroup::find($id);
-        if (! $group instanceof StatusGroup) {
+        if (!$group instanceof StatusGroup) {
             return redirect()->route('statuses.groups')->with('failure', trans('status.group.not_found'));
         }
 

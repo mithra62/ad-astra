@@ -28,7 +28,7 @@ class NewsArticleEntryType extends AbstractEntryType
             isset($data['status']) &&
             $data['status'] === 'published' &&
             empty($data['published_at']) &&
-            ! $entry->published_at
+            !$entry->published_at
         ) {
             $data['published_at'] = now();
         }

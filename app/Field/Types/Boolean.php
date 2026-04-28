@@ -21,7 +21,7 @@ class Boolean extends AbstractField
 
     public function cast(mixed $value): bool
     {
-        return (bool) $value;
+        return (bool)$value;
     }
 
     public function render(array $params): string

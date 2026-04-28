@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
 use Spatie\Tags\HasTags;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 
 class Media extends BaseMedia

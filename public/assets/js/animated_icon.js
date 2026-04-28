@@ -10,8 +10,9 @@ function material_icon(element) {
             gravity: "top",
             position: "right",
             stopOnFocus: true,
-            style: { background: "rgba(var(--success),1)" },
-            onClick: function () {}
+            style: {background: "rgba(var(--success),1)"},
+            onClick: function () {
+            }
         }).showToast();
     }, 100);
 }

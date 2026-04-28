@@ -16,10 +16,13 @@
                             <a class="f-s-14 f-w-500" href="{{ route('entries.groups') }}">Entry Groups</a>
                         </li>
                         <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups.edit', group) }}">{{ group.name }}</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('entries.groups.edit', group) }}">{{ group.name }}</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups.types.confirm', {group_id: group.id, type_id: type.id}) }}">Delete Entry Type</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('entries.groups.types.confirm', {group_id: group.id, type_id: type.id}) }}">Delete
+                                Entry Type</a>
                         </li>
                     </ul>
                 </div>
@@ -31,7 +34,8 @@
         <div class="row">
             {{ include('admin.entries._sidebar', {active: group.id}) }}
             <div class="col-lg-8 col-xxl-9">
-                <form method="POST" action="{{ route('entries.groups.types.destroy', {group_id: group.id, type_id: type.id}) }}"
+                <form method="POST"
+                      action="{{ route('entries.groups.types.destroy', {group_id: group.id, type_id: type.id}) }}"
                       class="row g-3 needs-validation" novalidate>
                     {{ csrf_field() }}
                     {{ method_field('DELETE') }}
@@ -48,35 +52,38 @@
                                 </p>
                                 <table class="table table-sm mt-3 mb-0">
                                     <tbody>
-                                        <tr>
-                                            <th class="text-secondary" style="width:30%">Name</th>
-                                            <td>{{ type.name }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-secondary">Handle</th>
-                                            <td>{{ type.handle }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-secondary">Class</th>
-                                            <td><code>{{ type.class }}</code></td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-secondary">Field Layout</th>
-                                            <td>{{ type.fieldLayout.name ?? '—' }}</td>
-                                        </tr>
+                                    <tr>
+                                        <th class="text-secondary" style="width:30%">Name</th>
+                                        <td>{{ type.name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-secondary">Handle</th>
+                                        <td>{{ type.handle }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-secondary">Class</th>
+                                        <td><code>{{ type.class }}</code></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-secondary">Field Layout</th>
+                                        <td>{{ type.fieldLayout.name ?? '—' }}</td>
+                                    </tr>
                                     </tbody>
                                 </table>
                             </div>
                             <div class="card-footer">
-                                <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
-                                    <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal" type="checkbox">
+                                <div
+                                    class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                    <input class="toggle switch-border-primary" name="confirm_removal"
+                                           id="confirm_removal" type="checkbox">
                                     <label for="confirm_removal">Confirm Removal</label>
                                     {% if errors.has('confirm_removal') %}
                                         <p class="text-danger">{{ errors.first('confirm_removal') }}</p>
                                     {% endif %}
                                 </div>
                                 <div class="col-12 float-end">
-                                    <a href="{{ route('entries.groups.edit', group) }}" class="btn btn-secondary">Cancel</a>
+                                    <a href="{{ route('entries.groups.edit', group) }}"
+                                       class="btn btn-secondary">Cancel</a>
                                     <button class="btn btn-danger ms-2" type="submit">Delete Entry Type</button>
                                 </div>
                             </div>

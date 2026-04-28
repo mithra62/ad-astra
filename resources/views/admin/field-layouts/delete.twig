@@ -16,7 +16,8 @@
                             <a class="f-s-14 f-w-500" href="{{ route('field-layouts') }}">Field Layouts</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts.confirm', layout) }}">Delete Field Layout</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts.confirm', layout) }}">Delete Field
+                                Layout</a>
                         </li>
                     </ul>
                 </div>
@@ -28,7 +29,8 @@
         <div class="row">
             {{ include('admin.field-layouts._sidebar', {active: layout.id}) }}
             <div class="col-lg-8 col-xxl-9">
-                <form method="POST" action="{{ route('field-layouts.destroy', layout) }}" class="row g-3 needs-validation" novalidate>
+                <form method="POST" action="{{ route('field-layouts.destroy', layout) }}"
+                      class="row g-3 needs-validation" novalidate>
                     {{ csrf_field() }}
                     {{ method_field('DELETE') }}
                     <div class="col-md-12">
@@ -39,19 +41,25 @@
                             <div class="card-body">
                                 <h6>Are you sure you want to remove <strong>{{ layout.name }}</strong>?</h6>
                                 <p class="text-secondary">
-                                    This will permanently delete the field layout and all of its tabs and field assignments.
-                                    Any entry groups or entry types using this layout will lose their field layout reference.
+                                    This will permanently delete the field layout and all of its tabs and field
+                                    assignments.
+                                    Any entry groups or entry types using this layout will lose their field layout
+                                    reference.
                                     This action cannot be undone.
                                 </p>
                                 {% if layout.tabs_count > 0 %}
                                     <div class="alert alert-warning">
-                                        <strong>Warning:</strong> This layout contains {{ layout.tabs_count }} {{ layout.tabs_count == 1 ? 'tab' : 'tabs' }} that will also be deleted.
+                                        <strong>Warning:</strong> This layout
+                                        contains {{ layout.tabs_count }} {{ layout.tabs_count == 1 ? 'tab' : 'tabs' }}
+                                        that will also be deleted.
                                     </div>
                                 {% endif %}
                             </div>
                             <div class="card-footer">
-                                <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
-                                    <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal" type="checkbox">
+                                <div
+                                    class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                    <input class="toggle switch-border-primary" name="confirm_removal"
+                                           id="confirm_removal" type="checkbox">
                                     <label for="confirm_removal">Confirm Removal</label>
                                     {% if errors.has('confirm_removal') %}
                                         <p class="text-danger">{{ errors.first('confirm_removal') }}</p>

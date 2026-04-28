@@ -36,8 +36,8 @@ class LibraryTest extends TestCase
     public function test_casts_sort_order_to_integer(): void
     {
         $library = Library::create([
-            'name'       => 'Images',
-            'handle'     => 'images',
+            'name' => 'Images',
+            'handle' => 'images',
             'sort_order' => '5',
         ]);
 
@@ -48,8 +48,8 @@ class LibraryTest extends TestCase
     public function test_casts_adapter_settings_to_array(): void
     {
         $library = Library::create([
-            'name'             => 'Videos',
-            'handle'           => 'videos',
+            'name' => 'Videos',
+            'handle' => 'videos',
             'adapter_settings' => ['bucket' => 'my-bucket'],
         ]);
 
@@ -60,7 +60,7 @@ class LibraryTest extends TestCase
     public function test_adapter_settings_can_be_null(): void
     {
         $library = Library::create([
-            'name'   => 'Docs',
+            'name' => 'Docs',
             'handle' => 'docs',
         ]);
 
@@ -70,8 +70,8 @@ class LibraryTest extends TestCase
     public function test_casts_allowed_types_to_array(): void
     {
         $library = Library::create([
-            'name'          => 'Documents',
-            'handle'        => 'documents',
+            'name' => 'Documents',
+            'handle' => 'documents',
             'allowed_types' => ['pdf', 'docx'],
         ]);
 
@@ -83,7 +83,7 @@ class LibraryTest extends TestCase
     public function test_allowed_types_can_be_null(): void
     {
         $library = Library::create([
-            'name'   => 'Icons',
+            'name' => 'Icons',
             'handle' => 'icons',
         ]);
 
@@ -93,8 +93,8 @@ class LibraryTest extends TestCase
     public function test_casts_max_size_to_integer(): void
     {
         $library = Library::create([
-            'name'     => 'Assets',
-            'handle'   => 'assets',
+            'name' => 'Assets',
+            'handle' => 'assets',
             'max_size' => '20',
         ]);
 
@@ -139,7 +139,7 @@ class LibraryTest extends TestCase
     public function test_category_groups_can_be_attached_and_retrieved(): void
     {
         $library = Library::create(['name' => 'Gallery', 'handle' => 'gallery']);
-        $group   = CategoryGroup::factory()->create();
+        $group = CategoryGroup::factory()->create();
 
         $library->category_groups()->attach($group->id);
 
@@ -150,7 +150,7 @@ class LibraryTest extends TestCase
     public function test_field_groups_can_be_attached_and_retrieved(): void
     {
         $library = Library::create(['name' => 'Gallery', 'handle' => 'gallery']);
-        $group   = FieldGroup::factory()->create();
+        $group = FieldGroup::factory()->create();
 
         $library->field_groups()->attach($group->id);
 
@@ -198,10 +198,10 @@ class LibraryTest extends TestCase
     {
         $library = Library::create(['name' => 'Gallery', 'handle' => 'gallery']);
 
-        $attachedGroup   = CategoryGroup::factory()->create();
+        $attachedGroup = CategoryGroup::factory()->create();
         $unattachedGroup = CategoryGroup::factory()->create();
 
-        $attachedCat   = Category::factory()->for($attachedGroup, 'group')->create();
+        $attachedCat = Category::factory()->for($attachedGroup, 'group')->create();
         $unattachedCat = Category::factory()->for($unattachedGroup, 'group')->create();
 
         $library->category_groups()->attach($attachedGroup->id);

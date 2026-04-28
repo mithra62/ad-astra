@@ -37,7 +37,8 @@
                                 <h5>Statuses</h5>
                                 <div class="col-12">
                                     <p class="float-right text-end">
-                                        <a href="{{ route('statuses.create', {group_id: group.id}) }}" class="btn btn-primary">Create Status</a>
+                                        <a href="{{ route('statuses.create', {group_id: group.id}) }}"
+                                           class="btn btn-primary">Create Status</a>
                                     </p>
                                 </div>
                             </div>
@@ -63,7 +64,8 @@
                                                         <td class="text-secondary f-w-500">{{ status.handle }}</td>
                                                         <td>
                                                             {% if status.color %}
-                                                                <span class="badge" style="background-color: {{ status.color }}">{{ status.color }}</span>
+                                                                <span class="badge"
+                                                                      style="background-color: {{ status.color }}">{{ status.color }}</span>
                                                             {% else %}
                                                                 <span class="text-secondary">—</span>
                                                             {% endif %}
@@ -93,8 +95,9 @@
                                         </div>
                                     {% else %}
                                         <p class="text-center">
-                                            No Statuses Created. <br />
-                                            <a href="{{ route('statuses.create', {group_id: group.id}) }}" class="btn btn-outline-primary">Create Status</a>
+                                            No Statuses Created. <br/>
+                                            <a href="{{ route('statuses.create', {group_id: group.id}) }}"
+                                               class="btn btn-outline-primary">Create Status</a>
                                         </p>
                                     {% endif %}
                                 </div>

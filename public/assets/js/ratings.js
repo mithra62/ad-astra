@@ -1,5 +1,4 @@
-
-$(function() {
+$(function () {
     function ratingEnable() {
 
         $('#example-1to10').barrating('show', {
@@ -20,7 +19,7 @@ $(function() {
         showSelectedRating: false,
         allowEmpty: true,
         emptyValue: '-- no rating selected --',
-        onSelect: function(value, text) {
+        onSelect: function (value, text) {
 
         }
     });
@@ -65,10 +64,10 @@ updateRating(0);
 // Custom emoji js end //
 
 // Emoji progress start//
-const emojis = ['😠','😒','😧','😦','😑','😀','😆','😍','🤩','💙'];
-const text = ['1','2','3','4','5','6','7','8','9','10'];
+const emojis = ['😠', '😒', '😧', '😦', '😑', '😀', '😆', '😍', '🤩', '💙'];
+const text = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
 
-$("input").on("input", function() {
+$("input").on("input", function () {
     const i = $(this).val();
     $(".emoji").html(emojis[i]);
     $(".text").html(text[i]);

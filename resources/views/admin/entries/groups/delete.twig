@@ -16,7 +16,8 @@
                             <a class="f-s-14 f-w-500" href="{{ route('entries.groups') }}">Entry Groups</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups.confirm', group) }}">Delete Entry Group</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups.confirm', group) }}">Delete Entry
+                                Group</a>
                         </li>
                     </ul>
                 </div>
@@ -28,7 +29,8 @@
         <div class="row">
             {{ include('admin.entries._sidebar', {active: group.id}) }}
             <div class="col-lg-8 col-xxl-9">
-                <form method="POST" action="{{ route('entries.groups.destroy', group) }}" class="row g-3 needs-validation" novalidate>
+                <form method="POST" action="{{ route('entries.groups.destroy', group) }}"
+                      class="row g-3 needs-validation" novalidate>
                     {{ csrf_field() }}
                     {{ method_field('DELETE') }}
                     <div class="col-md-12">
@@ -44,13 +46,17 @@
                                 </p>
                                 {% if group.entries_count > 0 %}
                                     <div class="alert alert-warning">
-                                        <strong>Warning:</strong> This group contains {{ group.entries_count }} {{ group.entries_count == 1 ? 'entry' : 'entries' }} that will also be deleted.
+                                        <strong>Warning:</strong> This group
+                                        contains {{ group.entries_count }} {{ group.entries_count == 1 ? 'entry' : 'entries' }}
+                                        that will also be deleted.
                                     </div>
                                 {% endif %}
                             </div>
                             <div class="card-footer">
-                                <div class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
-                                    <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal" type="checkbox">
+                                <div
+                                    class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
+                                    <input class="toggle switch-border-primary" name="confirm_removal"
+                                           id="confirm_removal" type="checkbox">
                                     <label for="confirm_removal">Confirm Removal</label>
                                     {% if errors.has('confirm_removal') %}
                                         <p class="text-danger">{{ errors.first('confirm_removal') }}</p>

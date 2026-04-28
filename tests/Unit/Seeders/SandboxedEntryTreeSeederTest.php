@@ -54,7 +54,7 @@ class SandboxedEntryTreeSeederTest extends TestCase
 
         $this->assertCount(6, $entries);
         $this->assertCount(6, EntryTree::query()->get());
-        $this->assertTrue($entries->every(fn (Entry $entry) => $entry->created_by_user_id === $author->id));
+        $this->assertTrue($entries->every(fn(Entry $entry) => $entry->created_by_user_id === $author->id));
 
         $this->assertDatabaseHas('entry_trees', ['handle' => 'site', 'uri' => 'site', 'depth' => 0]);
         $this->assertDatabaseHas('entry_trees', ['handle' => 'about', 'uri' => 'site/about', 'depth' => 1]);

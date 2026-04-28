@@ -5,7 +5,6 @@ namespace Tests\Unit\Actions\Entry\Group;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\EntryGroup;
 use App\Models\Field\Group as FieldGroup;
-use App\Models\FieldLayout;
 use App\Models\StatusGroup;
 use App\Services\EntryGroupService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -29,17 +28,17 @@ class EntryGroupActionsTest extends TestCase
     public function test_create_persists_group_to_database(): void
     {
         app(EntryGroupService::class)->create([
-            'name'        => 'News',
-            'handle'      => 'news',
+            'name' => 'News',
+            'handle' => 'news',
             'description' => 'News section',
-            'sort_order'  => 2,
+            'sort_order' => 2,
         ]);
 
         $this->assertDatabaseHas('entry_groups', [
-            'name'        => 'News',
-            'handle'      => 'news',
+            'name' => 'News',
+            'handle' => 'news',
             'description' => 'News section',
-            'sort_order'  => 2,
+            'sort_order' => 2,
         ]);
     }
 
@@ -49,7 +48,7 @@ class EntryGroupActionsTest extends TestCase
 
         $this->assertNotNull($group->field_layout_id);
         $this->assertDatabaseHas('field_layouts', [
-            'id'   => $group->field_layout_id,
+            'id' => $group->field_layout_id,
             'name' => 'Events Entries',
         ]);
     }
@@ -59,8 +58,8 @@ class EntryGroupActionsTest extends TestCase
         $statusGroup = StatusGroup::factory()->create();
 
         $group = app(EntryGroupService::class)->create([
-            'name'            => 'Portfolio',
-            'handle'          => 'portfolio',
+            'name' => 'Portfolio',
+            'handle' => 'portfolio',
             'status_group_id' => $statusGroup->id,
         ]);
 
@@ -72,8 +71,8 @@ class EntryGroupActionsTest extends TestCase
         $catGroup = CategoryGroup::factory()->create();
 
         $group = app(EntryGroupService::class)->create([
-            'name'            => 'Articles',
-            'handle'          => 'articles',
+            'name' => 'Articles',
+            'handle' => 'articles',
             'category_groups' => [$catGroup->id],
         ]);
 
@@ -85,8 +84,8 @@ class EntryGroupActionsTest extends TestCase
         $fieldGroup = FieldGroup::factory()->create();
 
         $group = app(EntryGroupService::class)->create([
-            'name'         => 'Products',
-            'handle'       => 'products',
+            'name' => 'Products',
+            'handle' => 'products',
             'field_groups' => [$fieldGroup->id],
         ]);
 
@@ -110,7 +109,7 @@ class EntryGroupActionsTest extends TestCase
         $group = EntryGroup::factory()->create();
 
         $result = app(EntryGroupService::class)->update($group, [
-            'name'   => 'Updated',
+            'name' => 'Updated',
             'handle' => 'updated',
         ]);
 
@@ -124,8 +123,8 @@ class EntryGroupActionsTest extends TestCase
         app(EntryGroupService::class)->update($group, ['name' => 'New Name', 'handle' => 'new-name']);
 
         $this->assertDatabaseHas('entry_groups', [
-            'id'     => $group->id,
-            'name'   => 'New Name',
+            'id' => $group->id,
+            'name' => 'New Name',
             'handle' => 'new-name',
         ]);
     }
@@ -135,10 +134,10 @@ class EntryGroupActionsTest extends TestCase
         $group = EntryGroup::factory()->create();
 
         $result = app(EntryGroupService::class)->update($group, [
-            'name'        => $group->name,
-            'handle'      => $group->handle,
+            'name' => $group->name,
+            'handle' => $group->handle,
             'description' => 'New description',
-            'sort_order'  => 9,
+            'sort_order' => 9,
         ]);
 
         $this->assertEquals('New description', $result->description);
@@ -148,11 +147,11 @@ class EntryGroupActionsTest extends TestCase
     public function test_edit_updates_status_group_id(): void
     {
         $statusGroup = StatusGroup::factory()->create();
-        $group       = EntryGroup::factory()->create();
+        $group = EntryGroup::factory()->create();
 
         $result = app(EntryGroupService::class)->update($group, [
-            'name'            => $group->name,
-            'handle'          => $group->handle,
+            'name' => $group->name,
+            'handle' => $group->handle,
             'status_group_id' => $statusGroup->id,
         ]);
 
@@ -161,12 +160,12 @@ class EntryGroupActionsTest extends TestCase
 
     public function test_edit_syncs_category_groups(): void
     {
-        $group    = EntryGroup::factory()->create();
+        $group = EntryGroup::factory()->create();
         $catGroup = CategoryGroup::factory()->create();
 
         app(EntryGroupService::class)->update($group, [
-            'name'            => $group->name,
-            'handle'          => $group->handle,
+            'name' => $group->name,
+            'handle' => $group->handle,
             'category_groups' => [$catGroup->id],
         ]);
 
@@ -175,12 +174,12 @@ class EntryGroupActionsTest extends TestCase
 
     public function test_edit_syncs_field_groups(): void
     {
-        $group      = EntryGroup::factory()->create();
+        $group = EntryGroup::factory()->create();
         $fieldGroup = FieldGroup::factory()->create();
 
         app(EntryGroupService::class)->update($group, [
-            'name'         => $group->name,
-            'handle'       => $group->handle,
+            'name' => $group->name,
+            'handle' => $group->handle,
             'field_groups' => [$fieldGroup->id],
         ]);
 

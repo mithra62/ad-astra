@@ -32,12 +32,12 @@ class EntryTreeTest extends TestCase
     {
         $entry = Entry::factory()->create();
         $node = EntryTree::create([
-            'entry_id'   => $entry->id,
-            'handle'     => 'home',
-            'uri'        => '/',
-            'depth'      => 0,
+            'entry_id' => $entry->id,
+            'handle' => 'home',
+            'uri' => '/',
+            'depth' => 0,
             'sort_order' => 0,
-            'is_home'    => 1,
+            'is_home' => 1,
         ]);
 
         $this->assertIsBool($node->is_home);
@@ -48,10 +48,10 @@ class EntryTreeTest extends TestCase
     {
         $entry = Entry::factory()->create();
         $node = EntryTree::create([
-            'entry_id'   => $entry->id,
-            'handle'     => 'about',
-            'uri'        => 'about',
-            'depth'      => 0,
+            'entry_id' => $entry->id,
+            'handle' => 'about',
+            'uri' => 'about',
+            'depth' => 0,
             'sort_order' => 0,
         ]);
 
@@ -73,10 +73,10 @@ class EntryTreeTest extends TestCase
     {
         $entry = Entry::factory()->create();
         $node = EntryTree::create([
-            'entry_id'   => $entry->id,
-            'handle'     => 'about',
-            'uri'        => 'about',
-            'depth'      => 0,
+            'entry_id' => $entry->id,
+            'handle' => 'about',
+            'uri' => 'about',
+            'depth' => 0,
             'sort_order' => 0,
         ]);
 
@@ -93,22 +93,22 @@ class EntryTreeTest extends TestCase
     public function test_parent_relationship_returns_parent_node(): void
     {
         $parentEntry = Entry::factory()->create();
-        $childEntry  = Entry::factory()->create();
+        $childEntry = Entry::factory()->create();
 
         $parent = EntryTree::create([
-            'entry_id'   => $parentEntry->id,
-            'handle'     => 'blog',
-            'uri'        => 'blog',
-            'depth'      => 0,
+            'entry_id' => $parentEntry->id,
+            'handle' => 'blog',
+            'uri' => 'blog',
+            'depth' => 0,
             'sort_order' => 0,
         ]);
 
         $child = EntryTree::create([
-            'entry_id'   => $childEntry->id,
-            'parent_id'  => $parent->id,
-            'handle'     => 'post',
-            'uri'        => 'blog/post',
-            'depth'      => 1,
+            'entry_id' => $childEntry->id,
+            'parent_id' => $parent->id,
+            'handle' => 'post',
+            'uri' => 'blog/post',
+            'depth' => 1,
             'sort_order' => 0,
         ]);
 
@@ -119,10 +119,10 @@ class EntryTreeTest extends TestCase
     {
         $entry = Entry::factory()->create();
         $root = EntryTree::create([
-            'entry_id'   => $entry->id,
-            'handle'     => 'home',
-            'uri'        => '/',
-            'depth'      => 0,
+            'entry_id' => $entry->id,
+            'handle' => 'home',
+            'uri' => '/',
+            'depth' => 0,
             'sort_order' => 0,
         ]);
 
@@ -143,28 +143,28 @@ class EntryTreeTest extends TestCase
         $child2Entry = Entry::factory()->create();
 
         $parent = EntryTree::create([
-            'entry_id'   => $parentEntry->id,
-            'handle'     => 'blog',
-            'uri'        => 'blog',
-            'depth'      => 0,
+            'entry_id' => $parentEntry->id,
+            'handle' => 'blog',
+            'uri' => 'blog',
+            'depth' => 0,
             'sort_order' => 0,
         ]);
 
         EntryTree::create([
-            'entry_id'   => $child1Entry->id,
-            'parent_id'  => $parent->id,
-            'handle'     => 'post-one',
-            'uri'        => 'blog/post-one',
-            'depth'      => 1,
+            'entry_id' => $child1Entry->id,
+            'parent_id' => $parent->id,
+            'handle' => 'post-one',
+            'uri' => 'blog/post-one',
+            'depth' => 1,
             'sort_order' => 1,
         ]);
 
         EntryTree::create([
-            'entry_id'   => $child2Entry->id,
-            'parent_id'  => $parent->id,
-            'handle'     => 'post-two',
-            'uri'        => 'blog/post-two',
-            'depth'      => 1,
+            'entry_id' => $child2Entry->id,
+            'parent_id' => $parent->id,
+            'handle' => 'post-two',
+            'uri' => 'blog/post-two',
+            'depth' => 1,
             'sort_order' => 2,
         ]);
 
@@ -174,33 +174,33 @@ class EntryTreeTest extends TestCase
     public function test_children_are_ordered_by_sort_order(): void
     {
         $parentEntry = Entry::factory()->create();
-        $firstEntry  = Entry::factory()->create();
+        $firstEntry = Entry::factory()->create();
         $secondEntry = Entry::factory()->create();
 
         $parent = EntryTree::create([
-            'entry_id'   => $parentEntry->id,
-            'handle'     => 'section',
-            'uri'        => 'section',
-            'depth'      => 0,
+            'entry_id' => $parentEntry->id,
+            'handle' => 'section',
+            'uri' => 'section',
+            'depth' => 0,
             'sort_order' => 0,
         ]);
 
         // Insert second child first to ensure ordering is by sort_order, not insertion order.
         EntryTree::create([
-            'entry_id'   => $secondEntry->id,
-            'parent_id'  => $parent->id,
-            'handle'     => 'second',
-            'uri'        => 'section/second',
-            'depth'      => 1,
+            'entry_id' => $secondEntry->id,
+            'parent_id' => $parent->id,
+            'handle' => 'second',
+            'uri' => 'section/second',
+            'depth' => 1,
             'sort_order' => 2,
         ]);
 
         EntryTree::create([
-            'entry_id'   => $firstEntry->id,
-            'parent_id'  => $parent->id,
-            'handle'     => 'first',
-            'uri'        => 'section/first',
-            'depth'      => 1,
+            'entry_id' => $firstEntry->id,
+            'parent_id' => $parent->id,
+            'handle' => 'first',
+            'uri' => 'section/first',
+            'depth' => 1,
             'sort_order' => 1,
         ]);
 
@@ -214,10 +214,10 @@ class EntryTreeTest extends TestCase
     {
         $entry = Entry::factory()->create();
         $node = EntryTree::create([
-            'entry_id'   => $entry->id,
-            'handle'     => 'leaf',
-            'uri'        => 'leaf',
-            'depth'      => 0,
+            'entry_id' => $entry->id,
+            'handle' => 'leaf',
+            'uri' => 'leaf',
+            'depth' => 0,
             'sort_order' => 0,
         ]);
 
@@ -230,23 +230,23 @@ class EntryTreeTest extends TestCase
 
     public function test_scope_root_returns_nodes_with_null_parent_id(): void
     {
-        $rootEntry  = Entry::factory()->create();
+        $rootEntry = Entry::factory()->create();
         $childEntry = Entry::factory()->create();
 
         $root = EntryTree::create([
-            'entry_id'   => $rootEntry->id,
-            'handle'     => 'home',
-            'uri'        => '/',
-            'depth'      => 0,
+            'entry_id' => $rootEntry->id,
+            'handle' => 'home',
+            'uri' => '/',
+            'depth' => 0,
             'sort_order' => 0,
         ]);
 
         $child = EntryTree::create([
-            'entry_id'   => $childEntry->id,
-            'parent_id'  => $root->id,
-            'handle'     => 'about',
-            'uri'        => 'about',
-            'depth'      => 1,
+            'entry_id' => $childEntry->id,
+            'parent_id' => $root->id,
+            'handle' => 'about',
+            'uri' => 'about',
+            'depth' => 1,
             'sort_order' => 1,
         ]);
 
@@ -260,10 +260,10 @@ class EntryTreeTest extends TestCase
     {
         $entry = Entry::factory()->create();
         $node = EntryTree::create([
-            'entry_id'   => $entry->id,
-            'handle'     => 'about',
-            'uri'        => 'about',
-            'depth'      => 0,
+            'entry_id' => $entry->id,
+            'handle' => 'about',
+            'uri' => 'about',
+            'depth' => 0,
             'sort_order' => 0,
         ]);
 
@@ -277,10 +277,10 @@ class EntryTreeTest extends TestCase
     {
         $entry = Entry::factory()->create();
         $node = EntryTree::create([
-            'entry_id'   => $entry->id,
-            'handle'     => 'about',
-            'uri'        => 'about',
-            'depth'      => 0,
+            'entry_id' => $entry->id,
+            'handle' => 'about',
+            'uri' => 'about',
+            'depth' => 0,
             'sort_order' => 0,
         ]);
 
@@ -294,10 +294,10 @@ class EntryTreeTest extends TestCase
     {
         $entry = Entry::factory()->create();
         $node = EntryTree::create([
-            'entry_id'   => $entry->id,
-            'handle'     => 'home',
-            'uri'        => '/',
-            'depth'      => 0,
+            'entry_id' => $entry->id,
+            'handle' => 'home',
+            'uri' => '/',
+            'depth' => 0,
             'sort_order' => 0,
         ]);
 

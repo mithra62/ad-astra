@@ -16,10 +16,12 @@
                             <a class="f-s-14 f-w-500" href="{{ route('field-layouts') }}">Field Layouts</a>
                         </li>
                         <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
+                            <a class="f-s-14 f-w-500"
+                               href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
                         </li>
                         <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts.tabs.create', layout) }}">Add Tab</a>
+                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts.tabs.create', layout) }}">Add
+                                Tab</a>
                         </li>
                     </ul>
                 </div>
@@ -36,18 +38,22 @@
                         <h5>Add Tab — {{ layout.name }}</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('field-layouts.tabs.store', layout) }}" class="row g-3 needs-validation" novalidate>
+                        <form method="POST" action="{{ route('field-layouts.tabs.store', layout) }}"
+                              class="row g-3 needs-validation" novalidate>
                             {{ csrf_field() }}
 
                             <div class="col-md-8">
                                 <label class="form-label" for="name">Tab Name</label>
-                                <input class="form-control" id="name" required type="text" value="{{ old('name') }}" name="name"
+                                <input class="form-control" id="name" required type="text" value="{{ old('name') }}"
+                                       name="name"
                                        placeholder="e.g. Content, SEO, Settings">
-                                {% if errors.has('name') %}<p class="text-danger">{{ errors.first('name') }}</p>{% endif %}
+                                {% if errors.has('name') %}<p
+                                    class="text-danger">{{ errors.first('name') }}</p>{% endif %}
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label" for="sort_order">Sort Order</label>
-                                <input class="form-control" id="sort_order" type="number" value="{{ old('sort_order', 0) }}" name="sort_order" min="0">
+                                <input class="form-control" id="sort_order" type="number"
+                                       value="{{ old('sort_order', 0) }}" name="sort_order" min="0">
                             </div>
 
                             <div class="col-12">

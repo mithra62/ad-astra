@@ -67,7 +67,8 @@
                                     {% set field = element.field %}
                                     <div>
                                         <div class="col-md-12">
-                                            <label class="form-label" for="field_{{ field.handle }}">{{ field.label }}</label>
+                                            <label class="form-label"
+                                                   for="field_{{ field.handle }}">{{ field.label }}</label>
                                             {% if field.instructions %}
                                                 <small>{{ field.instructions }}</small>
                                             {% endif %}
@@ -188,35 +189,35 @@
                                     <tbody>
                                     {% if user.tokens.count >= 1 %}
                                         {% for token in user.tokens %}
-                                        <tr>
-                                            <td>{{ token.name }}</td>
-                                            <td class="f-w-500">
-                                                {% if token.expires_at %}
-                                                    {{ token.expires_at.format('F j, Y') }}
-                                                {% else %}
-                                                    Never
-                                                {% endif %}
-                                            </td>
-                                            <td class="text-secondary f-w-600">
-                                                {% if token.last_used_at %}
-                                                    {{ token.last_used_at.format('F j, Y') }}
-                                                {% else %}
-                                                    Never
-                                                {% endif %}
-                                            </td>
-                                            <td class="text-secondary f-w-600">{{ token.updated_at.format('F j, Y') }}</td>
-                                            <td>{{ token.created_at.format('F j, Y') }}</td>
-                                            <td>
-                                                <a class="btn btn-danger icon-btn b-r-4"
-                                                   href="{{ route('users.token.confirm', {id: user.id, token_id: token.id}) }}">
-                                                    <i class="ti ti-trash"></i>
-                                                </a>
-                                                <a class="btn btn-success icon-btn b-r-4"
-                                                   href="{{ route('users.token.edit', {id: user.id, token_id: token.id}) }}">
-                                                    <i class="ti ti-edit"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
+                                            <tr>
+                                                <td>{{ token.name }}</td>
+                                                <td class="f-w-500">
+                                                    {% if token.expires_at %}
+                                                        {{ token.expires_at.format('F j, Y') }}
+                                                    {% else %}
+                                                        Never
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-secondary f-w-600">
+                                                    {% if token.last_used_at %}
+                                                        {{ token.last_used_at.format('F j, Y') }}
+                                                    {% else %}
+                                                        Never
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-secondary f-w-600">{{ token.updated_at.format('F j, Y') }}</td>
+                                                <td>{{ token.created_at.format('F j, Y') }}</td>
+                                                <td>
+                                                    <a class="btn btn-danger icon-btn b-r-4"
+                                                       href="{{ route('users.token.confirm', {id: user.id, token_id: token.id}) }}">
+                                                        <i class="ti ti-trash"></i>
+                                                    </a>
+                                                    <a class="btn btn-success icon-btn b-r-4"
+                                                       href="{{ route('users.token.edit', {id: user.id, token_id: token.id}) }}">
+                                                        <i class="ti ti-edit"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
                                         {% endfor %}
                                     {% else %}
                                         <tr>

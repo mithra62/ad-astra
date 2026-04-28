@@ -22,7 +22,7 @@ class EditEntryRequest extends FormRequest
             ->with('entryGroup.statusGroup')
             ->findOrFail($this->route()->parameter('entry'));
         $groupSchema = EntryGroup::resolvedFields($entry->entry_group_id);
-        $typeSchema  = EntryType::resolvedFields($entry->entry_type_id);
+        $typeSchema = EntryType::resolvedFields($entry->entry_type_id);
 
         return array_merge(
             [
@@ -33,7 +33,7 @@ class EditEntryRequest extends FormRequest
                     'string',
                     'max:100',
                     Rule::exists('statuses', 'handle')->where(
-                        fn ($query) => $query->where('status_group_id', $entry->entryGroup->status_group_id)
+                        fn($query) => $query->where('status_group_id', $entry->entryGroup->status_group_id)
                     ),
                 ],
                 'published_at' => ['nullable', 'date'],
@@ -52,7 +52,7 @@ class EditEntryRequest extends FormRequest
     {
         $entry = Entry::query()->findOrFail($this->route()->parameter('entry'));
         $groupSchema = EntryGroup::resolvedFields($entry->entry_group_id);
-        $typeSchema  = EntryType::resolvedFields($entry->entry_type_id);
+        $typeSchema = EntryType::resolvedFields($entry->entry_type_id);
 
         return array_merge(
             $this->schemaFieldAttributes($groupSchema),

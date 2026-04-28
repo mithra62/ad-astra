@@ -16,8 +16,8 @@ class EditStatusGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'       => ['required', 'string', 'max:255'],
-            'handle'     => ['required', 'string', 'max:255', Rule::unique('status_groups')->ignore($this->route('group'))],
+            'name' => ['required', 'string', 'max:255'],
+            'handle' => ['required', 'string', 'max:255', Rule::unique('status_groups')->ignore($this->route('group'))],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }

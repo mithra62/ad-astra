@@ -15,7 +15,7 @@ class EditFieldLayoutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id'   => ['required', 'integer', 'exists:field_layouts,id'],
+            'id' => ['required', 'integer', 'exists:field_layouts,id'],
             'name' => ['required', 'string', 'max:255'],
         ];
     }

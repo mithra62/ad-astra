@@ -3,7 +3,6 @@
 namespace App\Actions\Entry\Type;
 
 use App\Actions\AbstractAction;
-use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Services\EntryTypeService;
 
@@ -12,10 +11,12 @@ use App\Services\EntryTypeService;
  */
 class CreateNewEntryType extends AbstractAction
 {
-    public function __construct(private readonly EntryTypeService $service) {}
+    public function __construct(private readonly EntryTypeService $service)
+    {
+    }
 
     public function create(string|int $groupId, array $input): EntryType
     {
-        return $this->service->create((int) $groupId, $input);
+        return $this->service->create((int)$groupId, $input);
     }
 }

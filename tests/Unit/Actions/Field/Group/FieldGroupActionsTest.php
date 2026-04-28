@@ -30,14 +30,14 @@ class FieldGroupActionsTest extends TestCase
         $action = app(CreateNewFieldGroup::class);
 
         $action->create([
-            'name'        => 'SEO Fields',
-            'handle'      => 'seo-fields',
+            'name' => 'SEO Fields',
+            'handle' => 'seo-fields',
             'description' => 'Search engine optimisation fields',
         ]);
 
         $this->assertDatabaseHas('field_groups', [
-            'name'        => 'SEO Fields',
-            'handle'      => 'seo-fields',
+            'name' => 'SEO Fields',
+            'handle' => 'seo-fields',
             'description' => 'Search engine optimisation fields',
         ]);
     }
@@ -67,7 +67,7 @@ class FieldGroupActionsTest extends TestCase
 
     public function test_edit_returns_true_on_success(): void
     {
-        $group  = Group::factory()->create(['name' => 'Old']);
+        $group = Group::factory()->create(['name' => 'Old']);
         $action = app(EditFieldGroup::class);
 
         $result = $action->edit($group, ['name' => 'New', 'handle' => 'new']);
@@ -77,38 +77,38 @@ class FieldGroupActionsTest extends TestCase
 
     public function test_edit_updates_name_and_handle(): void
     {
-        $group  = Group::factory()->create(['name' => 'Old Name', 'handle' => 'old-handle']);
+        $group = Group::factory()->create(['name' => 'Old Name', 'handle' => 'old-handle']);
         $action = app(EditFieldGroup::class);
 
         $action->edit($group, ['name' => 'Updated Name', 'handle' => 'updated-handle']);
 
         $this->assertDatabaseHas('field_groups', [
-            'id'     => $group->id,
-            'name'   => 'Updated Name',
+            'id' => $group->id,
+            'name' => 'Updated Name',
             'handle' => 'updated-handle',
         ]);
     }
 
     public function test_edit_updates_description(): void
     {
-        $group  = Group::factory()->create(['description' => 'Old description']);
+        $group = Group::factory()->create(['description' => 'Old description']);
         $action = app(EditFieldGroup::class);
 
         $action->edit($group, [
-            'name'        => $group->name,
-            'handle'      => $group->handle,
+            'name' => $group->name,
+            'handle' => $group->handle,
             'description' => 'New description',
         ]);
 
         $this->assertDatabaseHas('field_groups', [
-            'id'          => $group->id,
+            'id' => $group->id,
             'description' => 'New description',
         ]);
     }
 
     public function test_edit_persists_changes_to_the_model(): void
     {
-        $group  = Group::factory()->create(['name' => 'Before']);
+        $group = Group::factory()->create(['name' => 'Before']);
         $action = app(EditFieldGroup::class);
 
         $action->edit($group, ['name' => 'After', 'handle' => 'after']);

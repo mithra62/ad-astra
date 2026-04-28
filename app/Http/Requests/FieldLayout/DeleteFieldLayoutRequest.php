@@ -23,7 +23,7 @@ class DeleteFieldLayoutRequest extends FormRequest
     {
         return [
             'confirm_removal.required' => 'You must confirm the removal.',
-            'confirm_removal.accepted'  => 'You must confirm the removal.',
+            'confirm_removal.accepted' => 'You must confirm the removal.',
         ];
     }
 }

@@ -21,10 +21,24 @@ class UpdateDomainSettingsRequest extends SettingFormRequest
         return $this->settingRulesFromFields($this->domainFields());
     }
 
+    /**
+     * All field definitions for the domain identified by the route handle.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function domainFields(): array
+    {
+        return config("settings.{$this->route('handle')}.fields", []);
+    }
+
     public function attributes(): array
     {
         return $this->settingAttributesFromFields($this->domainFields());
     }
+
+    // -------------------------------------------------------------------------
+    // Internals
+    // -------------------------------------------------------------------------
 
     /**
      * Return the fully normalised field payload for this domain.
@@ -37,19 +51,5 @@ class UpdateDomainSettingsRequest extends SettingFormRequest
     public function settingsPayload(): array
     {
         return $this->normaliseFields($this->domainFields());
-    }
-
-    // -------------------------------------------------------------------------
-    // Internals
-    // -------------------------------------------------------------------------
-
-    /**
-     * All field definitions for the domain identified by the route handle.
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    private function domainFields(): array
-    {
-        return config("settings.{$this->route('handle')}.fields", []);
     }
 }

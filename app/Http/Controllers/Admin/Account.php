@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\User\UpdateUserProfileInformation;
-use App\Http\Controllers\Admin\Controller AS AdminController;
+use App\Http\Controllers\Admin\Controller as AdminController;
 use App\Http\Requests\Account\EditPasswordRequest;
 use App\Http\Requests\Account\EditUserRequest;
 use App\Models\UserSchema;
@@ -33,7 +33,7 @@ class Account extends AdminController
         $data = [
             'user' => $user,
             'schema' => $schema,
-            'field_values' => $user->fieldArray()
+            'field_values' => $user->fieldArray(),
         ];
         return $this->view('account.settings', $data);
     }

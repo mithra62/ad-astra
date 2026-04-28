@@ -13,16 +13,16 @@ use App\Http\Controllers\Admin\Field\Group as FieldGroup;
 use App\Http\Controllers\Admin\FieldLayout as FieldLayoutController;
 use App\Http\Controllers\Admin\FieldLayout\Tab as FieldLayoutTab;
 use App\Http\Controllers\Admin\FieldLayout\TabElement as FieldLayoutTabElement;
-use App\Http\Controllers\Admin\Media\Library;
 use App\Http\Controllers\Admin\Media;
+use App\Http\Controllers\Admin\Media\Library;
 use App\Http\Controllers\Admin\Role;
 use App\Http\Controllers\Admin\Settings\Domain as SettingsDomain;
 use App\Http\Controllers\Admin\Settings\UserSettings;
 use App\Http\Controllers\Admin\Status;
 use App\Http\Controllers\Admin\Status\Group as StatusGroup;
 use App\Http\Controllers\Admin\User;
+use App\Http\Controllers\Admin\User\Layout as UserLayout;
 use App\Http\Controllers\Admin\User\Token as UserTokens;
-use App\Http\Controllers\Admin\User\Layout AS UserLayout;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {

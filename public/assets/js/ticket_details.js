@@ -1,5 +1,3 @@
-
-
 // File upload js
 const fileInput = document.querySelector('.ticket-file-upload');
 

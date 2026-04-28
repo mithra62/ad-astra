@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Facades\Users;
+use App\Http\Controllers\Api\Controller;
 use App\Http\Resources\Api\UserCollection;
 use App\Http\Resources\Api\UserResource;
-use App\Http\Controllers\Api\Controller;
 use App\Models\User as UserModel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class User extends Controller
 {
@@ -79,7 +78,7 @@ class User extends Controller
      */
     public function index(Request $request)
     {
-        if (! $this->can('read users')) {
+        if (!$this->can('read users')) {
             return response()->json(['error' => 'Not Found'], 404);
         }
 
@@ -120,12 +119,12 @@ class User extends Controller
      */
     public function show($id)
     {
-        if (! $this->can('read users')) {
+        if (!$this->can('read users')) {
             return response()->json(['error' => 'Not Found'], 404);
         }
 
-        $user = Users::find((int) $id);
-        if (! $user instanceof UserModel) {
+        $user = Users::find((int)$id);
+        if (!$user instanceof UserModel) {
             return response()->json(['error' => 'Not Found'], 404);
         }
 

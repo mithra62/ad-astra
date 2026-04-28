@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\Api\v1\User;
-use App\Http\Controllers\Api\v1\Entries;
 use App\Http\Controllers\Api\v1\Account;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\v1\Entries;
+use App\Http\Controllers\Api\v1\User;
 use App\Http\Middleware\LogRequestResponse;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 

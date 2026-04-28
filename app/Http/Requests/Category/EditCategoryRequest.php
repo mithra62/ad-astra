@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Category;
 
 use App\Http\Requests\FormRequest;
-use App\Models\Category\Group as CategoryGroup;
 use App\Models\Category as Category;
+use App\Models\Category\Group as CategoryGroup;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 

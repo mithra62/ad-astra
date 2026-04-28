@@ -85,13 +85,15 @@
         }
     }
 }
-.active-device-session{
+
+.active-device-session {
     li {
-        .card{
-            &:hover{
+        .card {
+            &:hover {
                 border: 1px dashed rgba(var(--primary), 1) !important;
             }
         }
+
         .share-menu-active {
             border: 1px dashed rgba(var(--success), 1) !important;
         }
@@ -99,8 +101,8 @@
 }
 
 .account-security {
-    .account-security-img {  
-        text-align: end; 
+    .account-security-img {
+        text-align: end;
     }
 }
 
@@ -179,22 +181,26 @@
 
         align-items: normal;
     }
-    .privacy-content{
+
+    .privacy-content {
         display: flex;
         flex-direction: column;
     }
 }
-.team-accounts{
-    .privacy-content{
+
+.team-accounts {
+    .privacy-content {
         display: flex;
         flex-direction: column;
     }
 }
-.month-timeline{
-    .icon-direction{
+
+.month-timeline {
+    .icon-direction {
         direction: ltr;
     }
 }
+
 .notified-contet {
     li {
         .share-menu-item {
@@ -244,12 +250,13 @@
             margin: 0 0;
             box-shadow: none;
             background-color: unset;
-            input{
+
+            input {
                 background-color: rgba(var(--primary), .1);
 
                 &.app-small-touchspin {
                     height: 28px;
-                    
+
                 }
             }
         }
@@ -298,8 +305,8 @@
     }
 }
 
-.privacy-card{
-    .privacy-content{
+.privacy-card {
+    .privacy-content {
         display: flex;
         flex-direction: column;
     }
@@ -320,11 +327,12 @@
 }
 
 
-.app-timeline-box{
-    .timeline-border-box{
+.app-timeline-box {
+    .timeline-border-box {
         border: 1px dashed rgb(var(--dark), 0.2);
         padding: 10px;
         border-radius: 10px;
     }
 }
+
 // >>-- 111 Setting css end --<<

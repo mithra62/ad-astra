@@ -47,7 +47,7 @@ class FieldValue extends Model
     {
         $fieldType = $this->field?->fieldType;
 
-        if (! $fieldType) {
+        if (!$fieldType) {
             return $this->value_text;
         }
 

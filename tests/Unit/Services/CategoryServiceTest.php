@@ -18,10 +18,15 @@ class CategoryServiceTest extends TestCase
 
     private CategoryService $service;
 
-    protected function setUp(): void
+    public function test_create_returns_category_instance(): void
     {
-        parent::setUp();
-        $this->service = app(CategoryService::class);
+        $group = $this->makeGroup();
+        $result = $this->service->create($group, [
+            'name' => 'Vegetables',
+            'handle' => 'vegetables',
+        ]);
+
+        $this->assertInstanceOf(Category::class, $result);
     }
 
     // -------------------------------------------------------------------------
@@ -33,46 +38,30 @@ class CategoryServiceTest extends TestCase
         return CategoryGroup::factory()->create($attrs);
     }
 
-    private function makeCategory(array $attrs = []): Category
+    public function test_create_persists_category_to_database(): void
     {
-        return Category::factory()->create($attrs);
+        $group = $this->makeGroup();
+        $this->service->create($group, [
+            'name' => 'Fruits',
+            'handle' => 'fruits',
+        ]);
+
+        $this->assertDatabaseHas('categories', [
+            'group_id' => $group->id,
+            'name' => 'Fruits',
+            'handle' => 'fruits',
+        ]);
     }
 
     // -------------------------------------------------------------------------
     // create()
     // -------------------------------------------------------------------------
 
-    public function test_create_returns_category_instance(): void
-    {
-        $group  = $this->makeGroup();
-        $result = $this->service->create($group, [
-            'name'   => 'Vegetables',
-            'handle' => 'vegetables',
-        ]);
-
-        $this->assertInstanceOf(Category::class, $result);
-    }
-
-    public function test_create_persists_category_to_database(): void
-    {
-        $group = $this->makeGroup();
-        $this->service->create($group, [
-            'name'   => 'Fruits',
-            'handle' => 'fruits',
-        ]);
-
-        $this->assertDatabaseHas('categories', [
-            'group_id' => $group->id,
-            'name'     => 'Fruits',
-            'handle'   => 'fruits',
-        ]);
-    }
-
     public function test_create_accepts_group_as_model(): void
     {
-        $group  = $this->makeGroup();
+        $group = $this->makeGroup();
         $result = $this->service->create($group, [
-            'name'   => 'By Model',
+            'name' => 'By Model',
             'handle' => 'by-model',
         ]);
 
@@ -81,9 +70,9 @@ class CategoryServiceTest extends TestCase
 
     public function test_create_accepts_group_as_integer_id(): void
     {
-        $group  = $this->makeGroup();
+        $group = $this->makeGroup();
         $result = $this->service->create($group->id, [
-            'name'   => 'By Int',
+            'name' => 'By Int',
             'handle' => 'by-int',
         ]);
 
@@ -92,10 +81,10 @@ class CategoryServiceTest extends TestCase
 
     public function test_create_stores_sort_order(): void
     {
-        $group  = $this->makeGroup();
+        $group = $this->makeGroup();
         $result = $this->service->create($group, [
-            'name'       => 'Sorted',
-            'handle'     => 'sorted',
+            'name' => 'Sorted',
+            'handle' => 'sorted',
             'sort_order' => 7,
         ]);
 
@@ -104,12 +93,12 @@ class CategoryServiceTest extends TestCase
 
     public function test_create_stores_parent_id(): void
     {
-        $group  = $this->makeGroup();
+        $group = $this->makeGroup();
         $parent = $this->service->create($group, ['name' => 'Parent', 'handle' => 'parent']);
 
         $child = $this->service->create($group, [
-            'name'      => 'Child',
-            'handle'    => 'child',
+            'name' => 'Child',
+            'handle' => 'child',
             'parent_id' => $parent->id,
         ]);
 
@@ -118,9 +107,9 @@ class CategoryServiceTest extends TestCase
 
     public function test_create_processes_fields_key_when_present(): void
     {
-        $group  = $this->makeGroup();
+        $group = $this->makeGroup();
         $result = $this->service->create($group, [
-            'name'   => 'With Fields',
+            'name' => 'With Fields',
             'handle' => 'with-fields',
             'fields' => [],
         ]);
@@ -130,9 +119,9 @@ class CategoryServiceTest extends TestCase
 
     public function test_create_skips_fields_when_key_is_absent(): void
     {
-        $group  = $this->makeGroup();
+        $group = $this->makeGroup();
         $result = $this->service->create($group, [
-            'name'   => 'No Fields',
+            'name' => 'No Fields',
             'handle' => 'no-fields',
         ]);
 
@@ -144,7 +133,7 @@ class CategoryServiceTest extends TestCase
         $group = $this->makeGroup();
         // Passing fields to Category::create would throw — reaching here means it was stripped.
         $result = $this->service->create($group, [
-            'name'   => 'Strip Fields',
+            'name' => 'Strip Fields',
             'handle' => 'strip-fields',
             'fields' => [],
         ]);
@@ -154,23 +143,28 @@ class CategoryServiceTest extends TestCase
 
     public function test_create_returns_refreshed_model_with_id(): void
     {
-        $group  = $this->makeGroup();
+        $group = $this->makeGroup();
         $result = $this->service->create($group, ['name' => 'Fresh', 'handle' => 'fresh']);
 
         $this->assertNotNull($result->id);
     }
 
-    // -------------------------------------------------------------------------
-    // update()
-    // -------------------------------------------------------------------------
-
     public function test_update_returns_category_instance(): void
     {
         $category = $this->makeCategory();
-        $result   = $this->service->update($category, ['name' => 'Updated']);
+        $result = $this->service->update($category, ['name' => 'Updated']);
 
         $this->assertInstanceOf(Category::class, $result);
     }
+
+    private function makeCategory(array $attrs = []): Category
+    {
+        return Category::factory()->create($attrs);
+    }
+
+    // -------------------------------------------------------------------------
+    // update()
+    // -------------------------------------------------------------------------
 
     public function test_update_persists_changed_attributes(): void
     {
@@ -179,7 +173,7 @@ class CategoryServiceTest extends TestCase
         $this->service->update($category, ['name' => 'After', 'handle' => 'after']);
 
         $this->assertDatabaseHas('categories', [
-            'id'   => $category->id,
+            'id' => $category->id,
             'name' => 'After',
         ]);
     }
@@ -196,7 +190,7 @@ class CategoryServiceTest extends TestCase
     public function test_update_processes_fields_key_when_present(): void
     {
         $category = $this->makeCategory();
-        $result   = $this->service->update($category, ['fields' => []]);
+        $result = $this->service->update($category, ['fields' => []]);
 
         $this->assertInstanceOf(Category::class, $result);
     }
@@ -204,7 +198,7 @@ class CategoryServiceTest extends TestCase
     public function test_update_skips_fields_when_key_is_absent(): void
     {
         $category = $this->makeCategory();
-        $result   = $this->service->update($category, ['name' => 'No Fields Key']);
+        $result = $this->service->update($category, ['name' => 'No Fields Key']);
 
         $this->assertInstanceOf(Category::class, $result);
     }
@@ -218,10 +212,6 @@ class CategoryServiceTest extends TestCase
         $this->assertEquals('New', $result->name);
     }
 
-    // -------------------------------------------------------------------------
-    // delete()
-    // -------------------------------------------------------------------------
-
     public function test_delete_removes_category_from_database(): void
     {
         $category = $this->makeCategory();
@@ -231,6 +221,10 @@ class CategoryServiceTest extends TestCase
         $this->assertDatabaseMissing('categories', ['id' => $category->id]);
     }
 
+    // -------------------------------------------------------------------------
+    // delete()
+    // -------------------------------------------------------------------------
+
     public function test_delete_returns_true_on_success(): void
     {
         $category = $this->makeCategory();
@@ -238,25 +232,25 @@ class CategoryServiceTest extends TestCase
         $this->assertTrue($this->service->delete($category));
     }
 
-    // -------------------------------------------------------------------------
-    // move()
-    // -------------------------------------------------------------------------
-
     public function test_move_updates_parent_id(): void
     {
-        $group  = $this->makeGroup();
+        $group = $this->makeGroup();
         $parent = $this->makeCategory(['group_id' => $group->id]);
-        $child  = $this->makeCategory(['group_id' => $group->id]);
+        $child = $this->makeCategory(['group_id' => $group->id]);
 
         $result = $this->service->move($child, $parent->id);
 
         $this->assertEquals($parent->id, $result->fresh()->parent_id);
     }
 
+    // -------------------------------------------------------------------------
+    // move()
+    // -------------------------------------------------------------------------
+
     public function test_move_updates_sort_order(): void
     {
-        $group    = $this->makeGroup();
-        $parent   = $this->makeCategory(['group_id' => $group->id]);
+        $group = $this->makeGroup();
+        $parent = $this->makeCategory(['group_id' => $group->id]);
         $category = $this->makeCategory(['group_id' => $group->id]);
 
         $result = $this->service->move($category, $parent->id, 5);
@@ -266,9 +260,9 @@ class CategoryServiceTest extends TestCase
 
     public function test_move_to_null_promotes_to_root(): void
     {
-        $group  = $this->makeGroup();
+        $group = $this->makeGroup();
         $parent = $this->makeCategory(['group_id' => $group->id]);
-        $child  = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $parent->id]);
+        $child = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $parent->id]);
 
         $result = $this->service->move($child, null);
 
@@ -277,7 +271,7 @@ class CategoryServiceTest extends TestCase
 
     public function test_move_returns_category_instance(): void
     {
-        $group    = $this->makeGroup();
+        $group = $this->makeGroup();
         $category = $this->makeCategory(['group_id' => $group->id]);
 
         $result = $this->service->move($category, null);
@@ -287,7 +281,7 @@ class CategoryServiceTest extends TestCase
 
     public function test_move_defaults_sort_order_to_zero(): void
     {
-        $group    = $this->makeGroup();
+        $group = $this->makeGroup();
         $category = $this->makeCategory(['group_id' => $group->id]);
 
         $result = $this->service->move($category, null);
@@ -306,9 +300,9 @@ class CategoryServiceTest extends TestCase
 
     public function test_move_throws_when_moving_category_under_direct_child(): void
     {
-        $group  = $this->makeGroup();
+        $group = $this->makeGroup();
         $parent = $this->makeCategory(['group_id' => $group->id]);
-        $child  = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $parent->id]);
+        $child = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $parent->id]);
 
         $this->expectException(InvalidArgumentException::class);
 
@@ -318,10 +312,10 @@ class CategoryServiceTest extends TestCase
 
     public function test_move_throws_when_moving_category_under_grandchild(): void
     {
-        $group       = $this->makeGroup();
+        $group = $this->makeGroup();
         $grandparent = $this->makeCategory(['group_id' => $group->id]);
-        $parent      = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $grandparent->id]);
-        $grandchild  = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $parent->id]);
+        $parent = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $grandparent->id]);
+        $grandchild = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $parent->id]);
 
         $this->expectException(InvalidArgumentException::class);
 
@@ -330,18 +324,14 @@ class CategoryServiceTest extends TestCase
 
     public function test_move_does_not_throw_when_moving_to_unrelated_category(): void
     {
-        $group   = $this->makeGroup();
-        $catA    = $this->makeCategory(['group_id' => $group->id]);
-        $catB    = $this->makeCategory(['group_id' => $group->id]);
+        $group = $this->makeGroup();
+        $catA = $this->makeCategory(['group_id' => $group->id]);
+        $catB = $this->makeCategory(['group_id' => $group->id]);
 
         $result = $this->service->move($catA, $catB->id);
 
         $this->assertEquals($catB->id, $result->fresh()->parent_id);
     }
-
-    // -------------------------------------------------------------------------
-    // fieldArray()
-    // -------------------------------------------------------------------------
 
     public function test_field_array_returns_array(): void
     {
@@ -351,6 +341,10 @@ class CategoryServiceTest extends TestCase
 
         $this->assertIsArray($result);
     }
+
+    // -------------------------------------------------------------------------
+    // fieldArray()
+    // -------------------------------------------------------------------------
 
     public function test_field_array_returns_empty_array_when_no_field_values(): void
     {
@@ -370,22 +364,22 @@ class CategoryServiceTest extends TestCase
         $this->assertTrue($category->relationLoaded('fieldValues'));
     }
 
-    // -------------------------------------------------------------------------
-    // resolveLayout()
-    // -------------------------------------------------------------------------
-
     public function test_resolve_layout_returns_null_when_group_has_no_layout(): void
     {
-        $group    = $this->makeGroup(['field_layout_id' => null]);
+        $group = $this->makeGroup(['field_layout_id' => null]);
         $category = $this->makeCategory(['group_id' => $group->id]);
 
         $this->assertNull($this->service->resolveLayout($category));
     }
 
+    // -------------------------------------------------------------------------
+    // resolveLayout()
+    // -------------------------------------------------------------------------
+
     public function test_resolve_layout_returns_field_layout_when_group_has_one(): void
     {
-        $layout   = FieldLayout::create(['name' => 'Category Layout']);
-        $group    = $this->makeGroup(['field_layout_id' => $layout->id]);
+        $layout = FieldLayout::create(['name' => 'Category Layout']);
+        $group = $this->makeGroup(['field_layout_id' => $layout->id]);
         $category = $this->makeCategory(['group_id' => $group->id]);
 
         $result = $this->service->resolveLayout($category);
@@ -394,13 +388,9 @@ class CategoryServiceTest extends TestCase
         $this->assertEquals($layout->id, $result->id);
     }
 
-    // -------------------------------------------------------------------------
-    // resolveFieldGroups()
-    // -------------------------------------------------------------------------
-
     public function test_resolve_field_groups_returns_collection(): void
     {
-        $group    = $this->makeGroup();
+        $group = $this->makeGroup();
         $category = $this->makeCategory(['group_id' => $group->id]);
 
         $result = $this->service->resolveFieldGroups($category);
@@ -408,9 +398,13 @@ class CategoryServiceTest extends TestCase
         $this->assertInstanceOf(SupportCollection::class, $result);
     }
 
+    // -------------------------------------------------------------------------
+    // resolveFieldGroups()
+    // -------------------------------------------------------------------------
+
     public function test_resolve_field_groups_returns_empty_when_none_attached(): void
     {
-        $group    = $this->makeGroup();
+        $group = $this->makeGroup();
         $category = $this->makeCategory(['group_id' => $group->id]);
 
         $result = $this->service->resolveFieldGroups($category);
@@ -418,13 +412,9 @@ class CategoryServiceTest extends TestCase
         $this->assertEmpty($result);
     }
 
-    // -------------------------------------------------------------------------
-    // resolveFields()
-    // -------------------------------------------------------------------------
-
     public function test_resolve_fields_returns_collection(): void
     {
-        $group    = $this->makeGroup();
+        $group = $this->makeGroup();
         $category = $this->makeCategory(['group_id' => $group->id]);
 
         $result = $this->service->resolveFields($category);
@@ -432,9 +422,13 @@ class CategoryServiceTest extends TestCase
         $this->assertInstanceOf(SupportCollection::class, $result);
     }
 
+    // -------------------------------------------------------------------------
+    // resolveFields()
+    // -------------------------------------------------------------------------
+
     public function test_resolve_fields_returns_empty_when_group_has_no_layout(): void
     {
-        $group    = $this->makeGroup(['field_layout_id' => null]);
+        $group = $this->makeGroup(['field_layout_id' => null]);
         $category = $this->makeCategory(['group_id' => $group->id]);
 
         $result = $this->service->resolveFields($category);
@@ -444,18 +438,14 @@ class CategoryServiceTest extends TestCase
 
     public function test_resolve_fields_returns_collection_when_layout_exists(): void
     {
-        $layout   = FieldLayout::create(['name' => 'Fields Layout']);
-        $group    = $this->makeGroup(['field_layout_id' => $layout->id]);
+        $layout = FieldLayout::create(['name' => 'Fields Layout']);
+        $group = $this->makeGroup(['field_layout_id' => $layout->id]);
         $category = $this->makeCategory(['group_id' => $group->id]);
 
         $result = $this->service->resolveFields($category);
 
         $this->assertInstanceOf(SupportCollection::class, $result);
     }
-
-    // -------------------------------------------------------------------------
-    // tree()
-    // -------------------------------------------------------------------------
 
     public function test_tree_returns_collection(): void
     {
@@ -466,9 +456,13 @@ class CategoryServiceTest extends TestCase
         $this->assertInstanceOf(Collection::class, $result);
     }
 
+    // -------------------------------------------------------------------------
+    // tree()
+    // -------------------------------------------------------------------------
+
     public function test_tree_accepts_group_as_model(): void
     {
-        $group    = $this->makeGroup();
+        $group = $this->makeGroup();
         $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
 
         $result = $this->service->tree($group);
@@ -478,7 +472,7 @@ class CategoryServiceTest extends TestCase
 
     public function test_tree_accepts_group_as_integer_id(): void
     {
-        $group    = $this->makeGroup();
+        $group = $this->makeGroup();
         $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
 
         $result = $this->service->tree($group->id);
@@ -488,9 +482,9 @@ class CategoryServiceTest extends TestCase
 
     public function test_tree_returns_only_root_categories_at_top_level(): void
     {
-        $group  = $this->makeGroup();
-        $root   = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
-        $child  = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $root->id]);
+        $group = $this->makeGroup();
+        $root = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
+        $child = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $root->id]);
 
         $result = $this->service->tree($group);
 
@@ -502,7 +496,7 @@ class CategoryServiceTest extends TestCase
     public function test_tree_eager_loads_children_recursive(): void
     {
         $group = $this->makeGroup();
-        $root  = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
+        $root = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
 
         $result = $this->service->tree($group);
 
@@ -522,10 +516,6 @@ class CategoryServiceTest extends TestCase
         $this->assertEquals($groupA->id, $result->first()->group_id);
     }
 
-    // -------------------------------------------------------------------------
-    // flat()
-    // -------------------------------------------------------------------------
-
     public function test_flat_returns_collection(): void
     {
         $group = $this->makeGroup();
@@ -534,6 +524,10 @@ class CategoryServiceTest extends TestCase
 
         $this->assertInstanceOf(Collection::class, $result);
     }
+
+    // -------------------------------------------------------------------------
+    // flat()
+    // -------------------------------------------------------------------------
 
     public function test_flat_accepts_group_as_model(): void
     {
@@ -558,9 +552,9 @@ class CategoryServiceTest extends TestCase
 
     public function test_flat_returns_all_categories_including_nested(): void
     {
-        $group  = $this->makeGroup();
-        $root   = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
-        $child  = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $root->id]);
+        $group = $this->makeGroup();
+        $root = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
+        $child = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $root->id]);
 
         $result = $this->service->flat($group);
 
@@ -578,19 +572,25 @@ class CategoryServiceTest extends TestCase
         $result = $this->service->flat($groupA);
 
         $this->assertCount(2, $result);
-        $result->each(fn ($c) => $this->assertEquals($groupA->id, $c->group_id));
+        $result->each(fn($c) => $this->assertEquals($groupA->id, $c->group_id));
     }
 
     public function test_flat_orders_by_sort_order_then_name(): void
     {
         $group = $this->makeGroup();
-        $b     = $this->makeCategory(['group_id' => $group->id, 'sort_order' => 1, 'name' => 'Beta']);
-        $a     = $this->makeCategory(['group_id' => $group->id, 'sort_order' => 0, 'name' => 'Alpha']);
-        $c     = $this->makeCategory(['group_id' => $group->id, 'sort_order' => 2, 'name' => 'Gamma']);
+        $b = $this->makeCategory(['group_id' => $group->id, 'sort_order' => 1, 'name' => 'Beta']);
+        $a = $this->makeCategory(['group_id' => $group->id, 'sort_order' => 0, 'name' => 'Alpha']);
+        $c = $this->makeCategory(['group_id' => $group->id, 'sort_order' => 2, 'name' => 'Gamma']);
 
         $result = $this->service->flat($group);
-        $ids    = $result->pluck('id')->all();
+        $ids = $result->pluck('id')->all();
 
         $this->assertEquals([$a->id, $b->id, $c->id], $ids);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->service = app(CategoryService::class);
     }
 }

@@ -11,7 +11,9 @@ use App\Services\EntryTypeService;
  */
 class EditEntryType extends AbstractAction
 {
-    public function __construct(private readonly EntryTypeService $service) {}
+    public function __construct(private readonly EntryTypeService $service)
+    {
+    }
 
     public function edit(EntryType $type, array $input): EntryType
     {

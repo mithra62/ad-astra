@@ -44,24 +44,25 @@ Execute the below in the order provided
 `php artisan jwt:check`
 `php artisan jwt:blacklist`
 
-
 ### Log In
 
-3 users will be created with the data seed. Check the `users` table and use the password `password` to gain initial access. 
+3 users will be created with the data seed. Check the `users` table and use the password `password` to gain initial
+access.
 
 ## Data Import
 
-You'll have to edit your `.env` file to include a copy of the API key for the master/parent site. You'll get this from "someone". Update the `CRAFT_API_TOKEN` config value with the API key before proceeding. 
+You'll have to edit your `.env` file to include a copy of the API key for the master/parent site. You'll get this from "
+someone". Update the `CRAFT_API_TOKEN` config value with the API key before proceeding.
 
-Once that's done, execute the below command from the project woor. 
+Once that's done, execute the below command from the project woor.
 
 `php artisan app:sync-craft`
 
-The above will sync the local system data from the remote system. 
+The above will sync the local system data from the remote system.
 
 ## API Documentation
 
-Execute the below command to generate the API documentation. 
+Execute the below command to generate the API documentation.
 
 `php artisan l5-swagger:generate`
 

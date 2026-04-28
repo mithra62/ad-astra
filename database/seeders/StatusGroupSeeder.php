@@ -28,10 +28,20 @@ class StatusGroupSeeder extends Seeder
         );
 
         $this->seedStatuses($group, [
-            ['name' => 'Draft',     'handle' => 'draft',     'color' => '#9CA3AF', 'is_default' => true,  'is_public' => false, 'sort_order' => 1],
-            ['name' => 'Published', 'handle' => 'published', 'color' => '#10B981', 'is_default' => false, 'is_public' => true,  'sort_order' => 2],
-            ['name' => 'Archived',  'handle' => 'archived',  'color' => '#EF4444', 'is_default' => false, 'is_public' => false, 'sort_order' => 3],
+            ['name' => 'Draft', 'handle' => 'draft', 'color' => '#9CA3AF', 'is_default' => true, 'is_public' => false, 'sort_order' => 1],
+            ['name' => 'Published', 'handle' => 'published', 'color' => '#10B981', 'is_default' => false, 'is_public' => true, 'sort_order' => 2],
+            ['name' => 'Archived', 'handle' => 'archived', 'color' => '#EF4444', 'is_default' => false, 'is_public' => false, 'sort_order' => 3],
         ]);
+    }
+
+    private function seedStatuses(StatusGroup $group, array $statuses): void
+    {
+        foreach ($statuses as $status) {
+            Status::firstOrCreate(
+                ['status_group_id' => $group->id, 'handle' => $status['handle']],
+                array_merge($status, ['status_group_id' => $group->id])
+            );
+        }
     }
 
     private function seedJobStatusGroup(): void
@@ -42,12 +52,14 @@ class StatusGroupSeeder extends Seeder
         );
 
         $this->seedStatuses($group, [
-            ['name' => 'Draft',     'handle' => 'draft',     'color' => '#9CA3AF', 'is_default' => true,  'is_public' => false, 'sort_order' => 1],
-            ['name' => 'Published', 'handle' => 'published', 'color' => '#10B981', 'is_default' => false, 'is_public' => true,  'sort_order' => 2],
-            ['name' => 'Expired',   'handle' => 'expired',   'color' => '#F59E0B', 'is_default' => false, 'is_public' => false, 'sort_order' => 3],
-            ['name' => 'Closed',    'handle' => 'closed',    'color' => '#EF4444', 'is_default' => false, 'is_public' => false, 'sort_order' => 4],
+            ['name' => 'Draft', 'handle' => 'draft', 'color' => '#9CA3AF', 'is_default' => true, 'is_public' => false, 'sort_order' => 1],
+            ['name' => 'Published', 'handle' => 'published', 'color' => '#10B981', 'is_default' => false, 'is_public' => true, 'sort_order' => 2],
+            ['name' => 'Expired', 'handle' => 'expired', 'color' => '#F59E0B', 'is_default' => false, 'is_public' => false, 'sort_order' => 3],
+            ['name' => 'Closed', 'handle' => 'closed', 'color' => '#EF4444', 'is_default' => false, 'is_public' => false, 'sort_order' => 4],
         ]);
     }
+
+    // -------------------------------------------------------------------------
 
     private function seedProductStatusGroup(): void
     {
@@ -57,23 +69,11 @@ class StatusGroupSeeder extends Seeder
         );
 
         $this->seedStatuses($group, [
-            ['name' => 'Draft',        'handle' => 'draft',        'color' => '#9CA3AF', 'is_default' => true,  'is_public' => false, 'sort_order' => 1],
-            ['name' => 'Published',    'handle' => 'published',    'color' => '#10B981', 'is_default' => false, 'is_public' => true,  'sort_order' => 2],
+            ['name' => 'Draft', 'handle' => 'draft', 'color' => '#9CA3AF', 'is_default' => true, 'is_public' => false, 'sort_order' => 1],
+            ['name' => 'Published', 'handle' => 'published', 'color' => '#10B981', 'is_default' => false, 'is_public' => true, 'sort_order' => 2],
             ['name' => 'Out of Stock', 'handle' => 'out-of-stock', 'color' => '#F59E0B', 'is_default' => false, 'is_public' => false, 'sort_order' => 3],
-            ['name' => 'Pre-Order',    'handle' => 'pre-order',    'color' => '#6366F1', 'is_default' => false, 'is_public' => true,  'sort_order' => 4],
+            ['name' => 'Pre-Order', 'handle' => 'pre-order', 'color' => '#6366F1', 'is_default' => false, 'is_public' => true, 'sort_order' => 4],
             ['name' => 'Discontinued', 'handle' => 'discontinued', 'color' => '#EF4444', 'is_default' => false, 'is_public' => false, 'sort_order' => 5],
         ]);
-    }
-
-    // -------------------------------------------------------------------------
-
-    private function seedStatuses(StatusGroup $group, array $statuses): void
-    {
-        foreach ($statuses as $status) {
-            Status::firstOrCreate(
-                ['status_group_id' => $group->id, 'handle' => $status['handle']],
-                array_merge($status, ['status_group_id' => $group->id])
-            );
-        }
     }
 }

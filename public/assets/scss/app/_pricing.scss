@@ -28,7 +28,8 @@
 
 .simple-pricing-card {
     box-shadow: var(--box-shadow);
-    border: 1px solid rgba(var(--secondary),.2);
+    border: 1px solid rgba(var(--secondary), .2);
+
     .simple-price-body {
         .simple-price-value {
             color: #fff;
@@ -36,10 +37,12 @@
             width: 80%;
             padding: 10px;
         }
+
         .simple-price-content {
             p {
                 font-size: 14px !important;
             }
+
             button {
                 margin-top: 50px;
             }
@@ -55,9 +58,10 @@
         transform: rotateY(190deg);
         transition: transform 0.9s;
     }
-    .app-divider-v{
-        &:before{
-            border: 1px solid rgba(var(--secondary),.2);
+
+    .app-divider-v {
+        &:before {
+            border: 1px solid rgba(var(--secondary), .2);
         }
     }
 
@@ -75,10 +79,10 @@
             width: 100%;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
-        background-color: rgba(var(--white),1);
+            background-color: rgba(var(--white), 1);
             border-radius: 10px;
             padding: 6px 12px;
-            border: 1px solid rgba(var(--secondary),.2);
+            border: 1px solid rgba(var(--secondary), .2);
 
             .pricing-header {
                 margin-top: 20px;
@@ -120,9 +124,11 @@
         display: inline;
     }
 }
-.pricing-plan-section{
-    .pricing-cards{
-        border: 1px solid rgba(var(--secondary),.2);
+
+.pricing-plan-section {
+    .pricing-cards {
+        border: 1px solid rgba(var(--secondary), .2);
     }
 }
+
 // >>-- 52 Pricing css end --<<

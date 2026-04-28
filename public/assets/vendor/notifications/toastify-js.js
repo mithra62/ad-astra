@@ -11,7 +11,7 @@
  *
  * Copyright (C) 2018 Varun A P
  */
-! function (t, o) {
+!function (t, o) {
     "object" == typeof module && module.exports ? module.exports = o() : t.Toastify = o()
 }(this, (function (t) {
     var o = function (t) {
@@ -25,13 +25,15 @@
     function s(t, o) {
         return !(!t || "string" != typeof o) && !!(t.className && t.className.trim().split(/\s+/gi).indexOf(o) > -1)
     }
+
     return o.defaults = {
         oldestFirst: !0,
         text: "Toastify is awesome!",
         node: void 0,
         duration: 3e3,
         selector: void 0,
-        callback: function () {},
+        callback: function () {
+        },
         destination: void 0,
         newWindow: !1,
         close: !1,
@@ -42,7 +44,8 @@
         avatar: "",
         className: "",
         stopOnFocus: !0,
-        onClick: function () {},
+        onClick: function () {
+        },
         offset: {
             x: 0,
             y: 0
@@ -86,10 +89,10 @@
                 }))
             }
             if (void 0 !== this.options.destination && t.addEventListener("click", function (t) {
-                    t.stopPropagation(), !0 === this.options.newWindow ? window.open(this.options.destination, "_blank") : window.location = this.options.destination
-                }.bind(this)), "function" == typeof this.options.onClick && void 0 === this.options.destination && t.addEventListener("click", function (t) {
-                    t.stopPropagation(), this.options.onClick()
-                }.bind(this)), "object" == typeof this.options.offset) {
+                t.stopPropagation(), !0 === this.options.newWindow ? window.open(this.options.destination, "_blank") : window.location = this.options.destination
+            }.bind(this)), "function" == typeof this.options.onClick && void 0 === this.options.destination && t.addEventListener("click", function (t) {
+                t.stopPropagation(), this.options.onClick()
+            }.bind(this)), "object" == typeof this.options.offset) {
                 var l = i("x", this.options),
                     r = i("y", this.options),
                     p = "left" == this.options.position ? l : "-" + l,
@@ -116,15 +119,15 @@
         }
     }, o.reposition = function () {
         for (var t, o = {
-                top: 15,
-                bottom: 15
-            }, i = {
-                top: 15,
-                bottom: 15
-            }, e = {
-                top: 15,
-                bottom: 15
-            }, n = document.getElementsByClassName("toastify"), a = 0; a < n.length; a++) {
+            top: 15,
+            bottom: 15
+        }, i = {
+            top: 15,
+            bottom: 15
+        }, e = {
+            top: 15,
+            bottom: 15
+        }, n = document.getElementsByClassName("toastify"), a = 0; a < n.length; a++) {
             t = !0 === s(n[a], "toastify-top") ? "toastify-top" : "toastify-bottom";
             var l = n[a].offsetHeight;
             t = t.substr(9, t.length - 1);

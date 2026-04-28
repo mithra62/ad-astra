@@ -79,9 +79,14 @@ try {
 
 
 const mapConfigurations = [
-    { selector: '#g-map', lat: -12.043333, lng: -77.028333, clickMessage: 'You clicked marker' },
-    { selector: '#mapMarkers', lat: -12.043333, lng: -77.028333, clickMessage: 'You clicked marker' },
-    { selector: '#mapOverlays', lat: -12.043333, lng: -77.028333, overlayContent: '<div class="map-overlay">Map<div class="overlay-arrow above"></div></div>' }
+    {selector: '#g-map', lat: -12.043333, lng: -77.028333, clickMessage: 'You clicked marker'},
+    {selector: '#mapMarkers', lat: -12.043333, lng: -77.028333, clickMessage: 'You clicked marker'},
+    {
+        selector: '#mapOverlays',
+        lat: -12.043333,
+        lng: -77.028333,
+        overlayContent: '<div class="map-overlay">Map<div class="overlay-arrow above"></div></div>'
+    }
 ];
 
 mapConfigurations.forEach(config => {

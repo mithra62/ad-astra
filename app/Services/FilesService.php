@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 class FilesService
@@ -20,7 +21,7 @@ class FilesService
     public function compileMimeTypes(array $mime_types): string
     {
         $return = '';
-        foreach($mime_types AS $type) {
+        foreach ($mime_types as $type) {
             $return .= $this->mime_map[$type] . ',';
         }
 

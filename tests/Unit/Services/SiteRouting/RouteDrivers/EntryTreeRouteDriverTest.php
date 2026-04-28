@@ -43,6 +43,24 @@ class EntryTreeRouteDriverTest extends TestCase
         $this->assertSame($entry->entryType->id, $result->data['entryType']->id);
     }
 
+    protected function makePublishedTreeEntry(array $entryOverrides = [], array $typeOverrides = []): Entry
+    {
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->for($group)->create(array_merge([
+            'has_entry_tree' => true,
+            'default_template' => 'entries.show',
+        ], $typeOverrides));
+
+        return Entry::factory()
+            ->for($group)
+            ->for($type)
+            ->create(array_merge([
+                'status_handle' => 'published',
+                'status_is_public' => true,
+                'published_at' => now()->subHour(),
+            ], $entryOverrides));
+    }
+
     public function test_resolve_does_not_return_scheduled_entries(): void
     {
         $entry = $this->makePublishedTreeEntry([
@@ -65,23 +83,5 @@ class EntryTreeRouteDriverTest extends TestCase
         $result = app(EntryTreeRouteDriver::class)->resolve('future-entry');
 
         $this->assertNull($result);
-    }
-
-    protected function makePublishedTreeEntry(array $entryOverrides = [], array $typeOverrides = []): Entry
-    {
-        $group = EntryGroup::factory()->create();
-        $type = EntryType::factory()->for($group)->create(array_merge([
-            'has_entry_tree' => true,
-            'default_template' => 'entries.show',
-        ], $typeOverrides));
-
-        return Entry::factory()
-            ->for($group)
-            ->for($type)
-            ->create(array_merge([
-                'status_handle' => 'published',
-                'status_is_public' => true,
-                'published_at' => now()->subHour(),
-            ], $entryOverrides));
     }
 }
