@@ -55,6 +55,15 @@ class AbstractEntryTypeTest extends TestCase
     // existingFieldValue() — safe field reading
     // -------------------------------------------------------------------------
 
+    public function test_existing_field_value_returns_null_when_entry_is_null(): void
+    {
+        $type = $this->makeAnonymousEntryType();
+
+        $result = $this->callExistingFieldValue($type, null, 'anything');
+
+        $this->assertNull($result);
+    }
+
     public function test_existing_field_value_returns_null_when_field_has_no_value(): void
     {
         [$entry] = $this->makeEntryWithTextField('summary');
@@ -135,14 +144,14 @@ class AbstractEntryTypeTest extends TestCase
 
         return new class($record) extends AbstractEntryType {
             // Expose protected method for testing.
-            public function callExistingFieldValue(Entry $entry, string $handle): mixed
+            public function callExistingFieldValue(?Entry $entry, string $handle): mixed
             {
                 return $this->existingFieldValue($entry, $handle);
             }
         };
     }
 
-    private function callExistingFieldValue(AbstractEntryType $type, Entry $entry, string $handle): mixed
+    private function callExistingFieldValue(AbstractEntryType $type, ?Entry $entry, string $handle): mixed
     {
         // @phpstan-ignore-next-line
         return $type->callExistingFieldValue($entry, $handle);

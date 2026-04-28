@@ -77,15 +77,24 @@ abstract class AbstractEntryType
     // -------------------------------------------------------------------------
 
     /**
-     * Safely read a field value from an entry inside a lifecycle hook.
+     * Safely read a field value from an entry inside a lifecycle hook or validate().
+     *
+     * Accepts a nullable entry so that validate() can safely call this helper
+     * in both create contexts (entry = null) and update contexts (entry present).
+     * Returns null immediately when $entry is null, which callers treat as "no
+     * existing value."
      *
      * Callers cannot assume that the entry passed to beforeUpdate has its
      * field relations loaded. This helper calls loadMissing() (idempotent —
      * a no-op when the relation is already loaded) before delegating to
      * $entry->field().
      */
-    protected function existingFieldValue(Entry $entry, string $handle): mixed
+    protected function existingFieldValue(?Entry $entry, string $handle): mixed
     {
+        if ($entry === null) {
+            return null;
+        }
+
         $entry->loadMissing([
             'fieldValues.field.fieldType',
             'entryRelationships.field',
