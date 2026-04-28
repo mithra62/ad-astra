@@ -11,6 +11,7 @@ use App\Models\FieldLayout;
 use App\Repositories\EntryRepository;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 class EntryService extends AbstractService
@@ -32,6 +33,11 @@ class EntryService extends AbstractService
      * Update an entry's core attributes, authors, categories, and/or fields.
      * Only keys present in $data are touched.
      *
+     * Validation:
+     *   The entry type's `validate()` method is called before any writes. If it
+     *   returns a non-empty error array a ValidationException is thrown, which the
+     *   framework converts to a 422 response on HTTP requests.
+     *
      * Lifecycle hooks:
      *   The resolved entry type's `beforeUpdate(Entry $entry, array $data): array`
      *   hook runs before any attributes are written, allowing the type to modify
@@ -40,6 +46,14 @@ class EntryService extends AbstractService
      */
     public function update(Entry $entry, array $data = []): Entry
     {
+        $entry->loadMissing('entryType');
+        $entryType = $this->registry->resolveByRecord($entry->entryType);
+
+        $errors = $entryType->validate($data, $entry);
+        if (!empty($errors)) {
+            throw ValidationException::withMessages($errors);
+        }
+
         return $this->repository->applyData($entry, $data);
     }
 
@@ -322,13 +336,18 @@ class EntryService extends AbstractService
     }
 
     /**
-     * Create an entry of the given type handle.
+     * Create a new Entry of the given type handle.
      *
      * Accepted keys in $data:
      *   title, handle, status, published_at  — core attributes
      *   authors    (array)  — user IDs to sync as authors (keyed by sort order)
      *   categories (array)  — category IDs to sync
      *   fields     (array)  — ['handle' => value] field values (relational or scalar)
+     *
+     * Validation:
+     *   The entry type's `validate()` method is called before the repository is
+     *   touched. If it returns a non-empty error array a ValidationException is
+     *   thrown, which the framework converts to a 422 response on HTTP requests.
      *
      * Lifecycle hooks:
      *   The resolved entry type's `beforeCreate(array $data): array` hook runs
@@ -341,6 +360,11 @@ class EntryService extends AbstractService
     public function create(string $typeHandle, array $data = []): Entry
     {
         $entryType = $this->registry->resolveByHandle($typeHandle);
+
+        $errors = $entryType->validate($data);
+        if (!empty($errors)) {
+            throw ValidationException::withMessages($errors);
+        }
 
         return $this->repository->create($entryType, $data);
     }
