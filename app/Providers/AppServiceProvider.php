@@ -10,8 +10,10 @@ use App\Models\EntryType;
 use App\Models\Field\Group as FieldGroup;
 use App\Models\Media;
 use App\Models\Media\Library as MediaLibrary;
+use App\Models\EntryTree;
 use App\Models\Status;
 use App\Models\User;
+use App\Observers\EntryTreeObserver;
 use App\Observers\StatusObserver;
 use App\Rest\Api;
 use App\Services\CategoryService;
@@ -71,6 +73,10 @@ class AppServiceProvider extends ServiceProvider
             'media_library' => MediaLibrary::class,
             'user' => User::class,
         ]);
+
+        // Model observers
+        Status::observe(StatusObserver::class);
+        EntryTree::observe(EntryTreeObserver::class);
 
 //        Route::group([
 //            'namespace' => 'mithra62\Shop\Http\Controllers',

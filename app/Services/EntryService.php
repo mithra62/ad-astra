@@ -52,6 +52,21 @@ class EntryService extends AbstractService
     }
 
     /**
+     * Delete an Entry Tree node.
+     *
+     * Runs inside a transaction so that the EntryTreeObserver's post-delete
+     * URI rebuild either fully succeeds or the entire delete is rolled back.
+     *
+     * After deletion, `nullOnDelete` promotes direct children to root nodes.
+     * The observer automatically calls `rebuildTreeUri()` on each promoted child
+     * so that their `depth` and `uri` columns reflect their new position.
+     */
+    public function deleteTreeNode(EntryTree $node): bool
+    {
+        return DB::transaction(fn () => (bool) $node->delete());
+    }
+
+    /**
      * Fetch an entry by ID with standard eager-loads. Returns null if missing.
      */
     public function find(int $id): ?Entry
