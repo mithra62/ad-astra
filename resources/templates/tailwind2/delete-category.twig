@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Delete Category: Engineering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .nav-group input[type="checkbox"] { display: none; }
+        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
+        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
+        .nav-subitems { display: none; }
+        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
+        #sidebar-toggle { display: none; }
+        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
+        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
+        #secnav-toggle { display: none; }
+        #secnav-toggle:checked ~ .app-shell #secondary-nav-panel { display: block; }
+        #secnav-toggle:checked ~ .app-shell .secnav-chevron { transform: rotate(180deg); }
+        .secnav-chevron { transition: transform 0.15s ease; display: inline-block; }
+        /* Confirm input shake animation */
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+        .shake { animation: shake 0.4s ease; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+
+<input id="sidebar-toggle" type="checkbox">
+<input id="secnav-toggle"  type="checkbox">
+<label for="sidebar-toggle" class="sidebar-overlay fixed inset-0 z-20 hidden bg-slate-900/40" aria-hidden="true"></label>
+
+<div class="app-shell min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
+
+    <!-- Primary Sidebar -->
+    <aside id="primary-sidebar"
+           class="fixed inset-y-0 left-0 z-30 w-64 -translate-x-full overflow-y-auto
+                  border-r border-slate-200 bg-white px-5 py-6 transition-transform duration-200
+                  lg:relative lg:inset-auto lg:z-auto lg:w-auto lg:translate-x-0 lg:transition-none">
+        <div class="mb-4 flex items-center justify-between lg:block">
+            <a class="text-lg font-semibold tracking-tight" href="#">Admin</a>
+            <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Close menu">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </label>
+        </div>
+        <nav class="mt-2 space-y-1 text-sm font-medium lg:mt-8">
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Dashboard</a>
+            <div class="nav-group">
+                <input id="nav-content" type="checkbox" checked>
+                <label for="nav-content" class="flex cursor-pointer items-center justify-between rounded-md bg-emerald-50 px-3 py-2 text-emerald-700">
+                    <span>Content</span>
+                    <span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                </label>
+                <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Articles</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Pages</a></li>
+                    <li><a class="block rounded-md bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700" href="#">Categories</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Tags</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <input id="nav-media" type="checkbox">
+                <label for="nav-media" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100">
+                    <span>Media</span>
+                    <span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                </label>
+                <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Library</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Upload</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <input id="nav-users" type="checkbox">
+                <label for="nav-users" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100">
+                    <span>Users</span>
+                    <span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                </label>
+                <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">All Users</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Roles</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Invitations</a></li>
+                </ul>
+            </div>
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Settings</a>
+        </nav>
+    </aside>
+
+    <!-- Main column -->
+    <div class="flex min-w-0 flex-col">
+
+        <!-- Topbar -->
+        <div class="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex items-center gap-3">
+                <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Open menu">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </label>
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-800 sm:text-base">Delete Category</h4>
+                    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+                        <a class="hover:text-slate-800" href="#"><svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg> Dashboard</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <a class="hover:text-slate-800" href="categories.twig">Categories</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <a class="hover:text-slate-800" href="edit-category.twig">Engineering</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <span class="text-red-600">Delete</span>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile secnav toggle -->
+        <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 lg:hidden">
+            <span class="flex items-center gap-2"><svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/></svg> Section Navigation</span>
+            <span class="secnav-chevron text-slate-400"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
+        </label>
+        <div id="secondary-nav-panel" class="hidden border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+            <nav class="grid grid-cols-2 gap-1">
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="categories.twig">All Categories</a>
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="edit-category.twig">Edit Engineering</a>
+            </nav>
+        </div>
+
+        <!-- Body -->
+        <div class="flex flex-1 gap-6 p-4 sm:p-6 lg:grid lg:grid-cols-[14rem_1fr]">
+
+            <!-- Secondary nav card -->
+            <aside class="hidden h-fit lg:block">
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-4 py-3"><h5 class="text-sm font-semibold text-slate-700">Categories</h5></div>
+                    <nav class="p-2">
+                        <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="categories.twig">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/></svg> All Categories
+                        </a>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="create-category.twig">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg> New Category
+                        </a>
+                        <div class="my-2 border-t border-slate-100"></div>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="edit-category.twig">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit Engineering
+                        </a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Content -->
+            <div class="flex min-w-0 flex-col gap-5">
+
+                <!-- Page title -->
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Delete Category</h1>
+                        <p class="mt-1 text-sm text-slate-500">Review the impact before permanently deleting this category.</p>
+                    </div>
+                    <a href="categories.twig" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                        Cancel
+                    </a>
+                </div>
+
+                <!-- Warning banner -->
+                <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                        <div>
+                            <p class="text-sm font-semibold text-red-800">This action cannot be undone.</p>
+                            <p class="mt-1 text-sm text-red-700">Deleting <strong>Engineering</strong> will permanently remove the category and all its associations. Articles in this category will be uncategorised unless you reassign them below. Sub-categories will be promoted to top-level unless reassigned.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-4 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
+
+                    <!-- Left -->
+                    <div class="flex flex-col gap-4">
+
+                        <!-- Category summary -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">Category Being Deleted</h5>
+                            </div>
+                            <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                                <div class="flex items-center justify-between py-2.5">
+                                    <dt class="text-slate-500">Name</dt>
+                                    <dd class="font-semibold text-slate-900">Engineering</dd>
+                                </div>
+                                <div class="flex items-center justify-between py-2.5">
+                                    <dt class="text-slate-500">Slug</dt>
+                                    <dd class="font-mono text-xs text-slate-700">engineering</dd>
+                                </div>
+                                <div class="flex items-center justify-between py-2.5">
+                                    <dt class="text-slate-500">Status</dt>
+                                    <dd><span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">Active</span></dd>
+                                </div>
+                                <div class="flex items-center justify-between py-2.5">
+                                    <dt class="text-slate-500">Parent</dt>
+                                    <dd class="text-slate-700">None (top-level)</dd>
+                                </div>
+                                <div class="flex items-center justify-between py-2.5">
+                                    <dt class="text-slate-500">Articles</dt>
+                                    <dd class="font-semibold text-slate-900">47</dd>
+                                </div>
+                                <div class="flex items-center justify-between py-2.5">
+                                    <dt class="text-slate-500">Sub-categories</dt>
+                                    <dd class="font-semibold text-slate-900">2 (Backend, Frontend)</dd>
+                                </div>
+                                <div class="flex items-center justify-between py-2.5">
+                                    <dt class="text-slate-500">Created</dt>
+                                    <dd class="text-slate-700">Jan 3, 2023</dd>
+                                </div>
+                            </dl>
+                        </div>
+
+                        <!-- What will be removed -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">What Will Be Removed</h5>
+                            </div>
+                            <ul class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                                <li class="flex items-center gap-3 py-2.5">
+                                    <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    <span class="text-slate-700">The <strong>Engineering</strong> category record</span>
+                                </li>
+                                <li class="flex items-center gap-3 py-2.5">
+                                    <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    <span class="text-slate-700">Its SEO metadata (title, description, OG image)</span>
+                                </li>
+                                <li class="flex items-center gap-3 py-2.5">
+                                    <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    <span class="text-slate-700">Category-to-article associations (47 articles affected)</span>
+                                </li>
+                                <li class="flex items-center gap-3 py-2.5">
+                                    <svg class="h-4 w-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                                    <span class="text-slate-700">Sub-categories (<strong>Backend</strong>, <strong>Frontend</strong>) will be promoted unless reassigned</span>
+                                </li>
+                            </ul>
+                            <div class="border-t border-slate-100 bg-slate-50 px-5 py-3">
+                                <p class="text-xs text-slate-500"><strong>Note:</strong> Article content is not deleted. Only the category association is removed.</p>
+                            </div>
+                        </div>
+
+                        <!-- Reassignment options -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">Reassignment Options</h5>
+                                <p class="mt-0.5 text-xs text-slate-500">Decide what happens to articles and sub-categories that belong to this category.</p>
+                            </div>
+                            <div class="divide-y divide-slate-100">
+
+                                <!-- Articles -->
+                                <div class="px-5 py-5">
+                                    <p class="mb-3 text-sm font-medium text-slate-800">Articles (47)</p>
+                                    <div class="space-y-3">
+                                        <label class="flex items-start gap-3">
+                                            <input type="radio" name="article_action" value="uncategorise" checked
+                                                   class="mt-0.5 border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                            <span class="text-sm text-slate-700">
+                                                <span class="font-medium">Leave uncategorised</span>
+                                                <span class="block text-xs text-slate-500 mt-0.5">Articles remain but have no category assigned.</span>
+                                            </span>
+                                        </label>
+                                        <label class="flex items-start gap-3">
+                                            <input type="radio" name="article_action" value="reassign"
+                                                   class="mt-0.5 border-slate-300 text-emerald-600 focus:ring-emerald-500" id="reassign-radio">
+                                            <span class="text-sm text-slate-700">
+                                                <span class="font-medium">Reassign to another category</span>
+                                                <span class="block text-xs text-slate-500 mt-0.5">Move all 47 articles to a different category.</span>
+                                            </span>
+                                        </label>
+                                        <div id="reassign-select" class="ml-6 hidden">
+                                            <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                                    name="reassign_to">
+                                                <option value="">— Select a category —</option>
+                                                <option value="4">Product</option>
+                                                <option value="5">&nbsp;&nbsp;&nbsp;└ Features</option>
+                                                <option value="7">Company</option>
+                                                <option value="9">Operations</option>
+                                                <option value="10">Security</option>
+                                                <option value="11">Tutorials</option>
+                                                <option value="12">&nbsp;&nbsp;&nbsp;└ Getting Started</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sub-categories -->
+                                <div class="px-5 py-5">
+                                    <p class="mb-3 text-sm font-medium text-slate-800">Sub-categories (Backend, Frontend)</p>
+                                    <div class="space-y-3">
+                                        <label class="flex items-start gap-3">
+                                            <input type="radio" name="subcategory_action" value="promote" checked
+                                                   class="mt-0.5 border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                            <span class="text-sm text-slate-700">
+                                                <span class="font-medium">Promote to top-level</span>
+                                                <span class="block text-xs text-slate-500 mt-0.5">Backend and Frontend become independent top-level categories.</span>
+                                            </span>
+                                        </label>
+                                        <label class="flex items-start gap-3">
+                                            <input type="radio" name="subcategory_action" value="reparent"
+                                                   class="mt-0.5 border-slate-300 text-emerald-600 focus:ring-emerald-500" id="reparent-radio">
+                                            <span class="text-sm text-slate-700">
+                                                <span class="font-medium">Re-parent to another category</span>
+                                                <span class="block text-xs text-slate-500 mt-0.5">Move sub-categories under a different parent.</span>
+                                            </span>
+                                        </label>
+                                        <div id="reparent-select" class="ml-6 hidden">
+                                            <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                                    name="reparent_to">
+                                                <option value="">— Select a parent —</option>
+                                                <option value="4">Product</option>
+                                                <option value="7">Company</option>
+                                                <option value="9">Operations</option>
+                                                <option value="10">Security</option>
+                                                <option value="11">Tutorials</option>
+                                            </select>
+                                        </div>
+                                        <label class="flex items-start gap-3">
+                                            <input type="radio" name="subcategory_action" value="delete"
+                                                   class="mt-0.5 border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                            <span class="text-sm text-slate-700">
+                                                <span class="font-medium text-red-700">Delete sub-categories too</span>
+                                                <span class="block text-xs text-slate-500 mt-0.5">Backend and Frontend will also be permanently deleted.</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div><!-- /left -->
+
+                    <!-- Right: confirmation -->
+                    <div class="flex flex-col gap-4">
+
+                        <!-- Confirm card -->
+                        <div class="overflow-hidden rounded-lg border border-red-200 bg-white shadow-sm">
+                            <div class="border-b border-red-100 bg-red-50 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-red-800">Confirm Deletion</h5>
+                            </div>
+                            <form id="delete-form" method="POST" action="#" class="px-5 py-5">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <input type="hidden" name="category_id" value="1">
+
+                                <div class="mb-4 rounded-md bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                                    You are about to permanently delete the <strong>Engineering</strong> category and remove it from <strong>47 articles</strong>.
+                                </div>
+
+                                <div class="mb-5">
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="confirm_name">
+                                        Type <strong class="text-red-700">Engineering</strong> to confirm
+                                    </label>
+                                    <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                                           id="confirm_name" name="confirm_name" type="text"
+                                           placeholder="Engineering" autocomplete="off">
+                                    <p id="confirm-error" class="mt-1 hidden text-xs text-red-600">Name doesn't match. Please type "Engineering" exactly.</p>
+                                </div>
+
+                                <button type="submit" id="delete-btn"
+                                        class="w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        disabled>
+                                    Permanently Delete Category
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Cancel -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="px-5 py-4 text-center">
+                                <p class="mb-3 text-sm text-slate-500">Changed your mind?</p>
+                                <a href="edit-category.twig" class="block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                                    ← Back to Edit
+                                </a>
+                                <a href="categories.twig" class="mt-2 block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                                    All Categories
+                                </a>
+                            </div>
+                        </div>
+
+                    </div><!-- /right -->
+
+                </div><!-- /inner grid -->
+
+            </div><!-- /content -->
+        </div><!-- /body -->
+
+        <footer class="mt-auto border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-slate-400">&copy; 2026 Admin &mdash; All rights reserved.</p>
+                <nav class="flex items-center gap-4 text-xs text-slate-400">
+                    <a class="hover:text-slate-600" href="#">Documentation</a>
+                    <a class="hover:text-slate-600" href="#">Support</a>
+                    <a class="hover:text-slate-600" href="#">Privacy</a>
+                    <span class="text-slate-300">|</span><span>v1.0.0</span>
+                </nav>
+            </div>
+        </footer>
+
+    </div><!-- /main column -->
+</div><!-- /app-shell -->
+
+<script>
+(function () {
+    var REQUIRED = 'Engineering';
+    var confirmInput = document.getElementById('confirm_name');
+    var deleteBtn    = document.getElementById('delete-btn');
+    var confirmError = document.getElementById('confirm-error');
+
+    // Enable delete button only when name matches exactly
+    confirmInput.addEventListener('input', function () {
+        var match = this.value === REQUIRED;
+        deleteBtn.disabled = !match;
+        confirmError.classList.toggle('hidden', match || this.value === '');
+    });
+
+    // Shake on submit if somehow still disabled (safety net)
+    document.getElementById('delete-form').addEventListener('submit', function (e) {
+        if (confirmInput.value !== REQUIRED) {
+            e.preventDefault();
+            confirmInput.classList.add('shake', 'border-red-400');
+            confirmInput.addEventListener('animationend', function () {
+                confirmInput.classList.remove('shake');
+            }, { once: true });
+        }
+    });
+
+    // Show/hide reassign select
+    document.querySelectorAll('input[name="article_action"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            document.getElementById('reassign-select').classList.toggle('hidden', this.value !== 'reassign');
+        });
+    });
+
+    // Show/hide reparent select
+    document.querySelectorAll('input[name="subcategory_action"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            document.getElementById('reparent-select').classList.toggle('hidden', this.value !== 'reparent');
+        });
+    });
+})();
+</script>
+
+</body>
+</html>

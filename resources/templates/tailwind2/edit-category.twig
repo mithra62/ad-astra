@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Edit Category: Engineering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .nav-group input[type="checkbox"] { display: none; }
+        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
+        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
+        .nav-subitems { display: none; }
+        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
+        #sidebar-toggle { display: none; }
+        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
+        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
+        #secnav-toggle { display: none; }
+        #secnav-toggle:checked ~ .app-shell #secondary-nav-panel { display: block; }
+        #secnav-toggle:checked ~ .app-shell .secnav-chevron { transform: rotate(180deg); }
+        .secnav-chevron { transition: transform 0.15s ease; display: inline-block; }
+        .unsaved-bar { display: none; }
+        .unsaved-bar.visible { display: flex; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+
+<input id="sidebar-toggle" type="checkbox">
+<input id="secnav-toggle"  type="checkbox">
+<label for="sidebar-toggle" class="sidebar-overlay fixed inset-0 z-20 hidden bg-slate-900/40" aria-hidden="true"></label>
+
+<div class="app-shell min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
+
+    <!-- Primary Sidebar -->
+    <aside id="primary-sidebar"
+           class="fixed inset-y-0 left-0 z-30 w-64 -translate-x-full overflow-y-auto
+                  border-r border-slate-200 bg-white px-5 py-6 transition-transform duration-200
+                  lg:relative lg:inset-auto lg:z-auto lg:w-auto lg:translate-x-0 lg:transition-none">
+        <div class="mb-4 flex items-center justify-between lg:block">
+            <a class="text-lg font-semibold tracking-tight" href="#">Admin</a>
+            <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Close menu">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </label>
+        </div>
+        <nav class="mt-2 space-y-1 text-sm font-medium lg:mt-8">
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Dashboard</a>
+            <div class="nav-group">
+                <input id="nav-content" type="checkbox" checked>
+                <label for="nav-content" class="flex cursor-pointer items-center justify-between rounded-md bg-emerald-50 px-3 py-2 text-emerald-700">
+                    <span>Content</span>
+                    <span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                </label>
+                <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Articles</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Pages</a></li>
+                    <li><a class="block rounded-md bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700" href="#">Categories</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Tags</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <input id="nav-media" type="checkbox">
+                <label for="nav-media" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100">
+                    <span>Media</span>
+                    <span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                </label>
+                <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Library</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Upload</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <input id="nav-users" type="checkbox">
+                <label for="nav-users" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100">
+                    <span>Users</span>
+                    <span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                </label>
+                <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">All Users</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Roles</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Invitations</a></li>
+                </ul>
+            </div>
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Settings</a>
+        </nav>
+    </aside>
+
+    <!-- Main column -->
+    <div class="flex min-w-0 flex-col">
+
+        <!-- Topbar -->
+        <div class="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex items-center gap-3">
+                <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Open menu">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </label>
+                <div class="flex-1">
+                    <h4 class="text-sm font-semibold text-slate-800 sm:text-base">Edit Category</h4>
+                    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+                        <a class="hover:text-slate-800" href="#"><svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg> Dashboard</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <a class="hover:text-slate-800" href="categories.twig">Categories</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <span class="text-slate-800">Engineering</span>
+                    </nav>
+                </div>
+                <!-- Prev / Next category nav -->
+                <div class="hidden items-center gap-1 sm:flex">
+                    <a href="#" class="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50" title="Previous category">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> Prev
+                    </a>
+                    <a href="#" class="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50" title="Next category">
+                        Next <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unsaved-changes sticky bar -->
+        <div id="unsaved-bar" class="unsaved-bar items-center justify-between border-b border-amber-200 bg-amber-50 px-4 py-2 sm:px-6">
+            <span class="flex items-center gap-2 text-sm text-amber-800">
+                <svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                You have unsaved changes.
+            </span>
+            <div class="flex items-center gap-2">
+                <button type="button" id="discard-btn" class="rounded-md border border-amber-300 bg-white px-3 py-1 text-xs font-medium text-amber-800 hover:bg-amber-100">Discard</button>
+                <button type="submit" form="edit-form" class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Save Now</button>
+            </div>
+        </div>
+
+        <!-- Mobile secnav toggle -->
+        <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 lg:hidden">
+            <span class="flex items-center gap-2"><svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/></svg> Section Navigation</span>
+            <span class="secnav-chevron text-slate-400"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
+        </label>
+        <div id="secondary-nav-panel" class="hidden border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+            <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="categories.twig">All Categories</a>
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="create-category.twig">New Category</a>
+                <a class="flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="#">Engineering</a>
+            </nav>
+        </div>
+
+        <!-- Body -->
+        <div class="flex flex-1 gap-6 p-4 sm:p-6 lg:grid lg:grid-cols-[14rem_1fr]">
+
+            <!-- Secondary nav card -->
+            <aside class="hidden h-fit lg:block">
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-4 py-3"><h5 class="text-sm font-semibold text-slate-700">Categories</h5></div>
+                    <nav class="p-2">
+                        <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="categories.twig">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/></svg> All Categories
+                        </a>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="create-category.twig">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg> New Category
+                        </a>
+                        <div class="my-2 border-t border-slate-100"></div>
+                        <p class="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Editing</p>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="#">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Engineering
+                        </a>
+                        <div class="my-2 border-t border-slate-100"></div>
+                        <p class="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Children</p>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 pl-5" href="#">
+                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg> Backend
+                        </a>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 pl-5" href="#">
+                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg> Frontend
+                        </a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Form content -->
+            <div class="flex min-w-0 flex-col gap-5">
+
+                <!-- Page title row -->
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <div class="flex items-center gap-2.5">
+                            <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Engineering</h1>
+                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">Active</span>
+                        </div>
+                        <p class="mt-1 text-sm text-slate-500">47 articles &nbsp;·&nbsp; 2 sub-categories &nbsp;·&nbsp; Created Jan 3, 2023</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 self-start">
+                        <a href="#" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            View on site
+                        </a>
+                        <a href="delete-category.twig" class="inline-flex items-center gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-100">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            Delete
+                        </a>
+                        <a href="categories.twig" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                            Back
+                        </a>
+                    </div>
+                </div>
+
+                <form id="edit-form" method="POST" action="#" class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
+
+                    <!-- Left: main fields -->
+                    <div class="flex flex-col gap-4">
+
+                        <!-- Basic Details -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">Basic Details</h5>
+                            </div>
+                            <div class="space-y-4 px-5 py-5">
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
+                                    <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                           id="name" name="name" type="text" value="Engineering" required>
+                                </div>
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="slug">Slug</label>
+                                    <div class="flex rounded-md shadow-sm">
+                                        <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-xs text-slate-500">/category/</span>
+                                        <input class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                               id="slug" name="slug" type="text" value="engineering">
+                                    </div>
+                                    <p class="mt-1 text-xs text-slate-400">Changing the slug will break existing links to this category.</p>
+                                </div>
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="parent_id">Parent Category</label>
+                                    <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                            id="parent_id" name="parent_id">
+                                        <option value="" selected>— None (top-level) —</option>
+                                        <option value="4">Product</option>
+                                        <option value="5">&nbsp;&nbsp;&nbsp;└ Features</option>
+                                        <option value="6">&nbsp;&nbsp;&nbsp;└ Roadmap</option>
+                                        <option value="7">Company</option>
+                                        <option value="8">&nbsp;&nbsp;&nbsp;└ Announcements</option>
+                                        <option value="9">Operations</option>
+                                        <option value="10">Security</option>
+                                        <option value="11">Tutorials</option>
+                                        <option value="12">&nbsp;&nbsp;&nbsp;└ Getting Started</option>
+                                    </select>
+                                    <p class="mt-1 text-xs text-slate-400">This category is excluded from its own dropdown to prevent circular nesting.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">Description</h5>
+                            </div>
+                            <div class="px-5 py-5">
+                                <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                          id="description" name="description" rows="4">All things engineering &amp; software development.</textarea>
+                                <p class="mt-1 text-xs text-slate-400">Some themes display this description on the category archive page.</p>
+                            </div>
+                        </div>
+
+                        <!-- SEO -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">SEO</h5>
+                            </div>
+                            <div class="space-y-4 px-5 py-5">
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="meta_title">Meta Title</label>
+                                    <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                           id="meta_title" name="meta_title" type="text"
+                                           value="Engineering Articles &amp; Tutorials"
+                                           maxlength="70">
+                                    <p class="mt-1 flex justify-between text-xs text-slate-400">
+                                        <span>Recommended: 50–60 characters.</span>
+                                        <span id="meta-title-count" class="tabular-nums">35 / 70</span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="meta_description">Meta Description</label>
+                                    <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                              id="meta_description" name="meta_description" rows="3"
+                                              maxlength="160">Explore in-depth engineering articles covering backend, frontend, DevOps, and software architecture.</textarea>
+                                    <p class="mt-1 flex justify-between text-xs text-slate-400">
+                                        <span>Recommended: 120–158 characters.</span>
+                                        <span id="meta-desc-count" class="tabular-nums">95 / 160</span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="mb-2 text-xs font-medium text-slate-600">SERP Preview</p>
+                                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                                        <p id="serp-title" class="truncate text-sm font-medium text-blue-700">Engineering Articles &amp; Tutorials</p>
+                                        <p id="serp-url" class="mt-0.5 truncate text-xs text-green-700">https://example.com/category/engineering</p>
+                                        <p id="serp-desc" class="mt-1 text-xs text-slate-500 line-clamp-2">Explore in-depth engineering articles covering backend, frontend, DevOps, and software architecture.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Articles in this category -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="flex items-center justify-between border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">Articles in this Category</h5>
+                                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">47</span>
+                            </div>
+                            <div class="divide-y divide-slate-100">
+                                <div class="flex items-center justify-between px-5 py-3 text-sm">
+                                    <a href="#" class="font-medium text-slate-800 hover:text-emerald-700">How We Reduced API Latency by 60%</a>
+                                    <span class="shrink-0 text-xs text-slate-400">Published</span>
+                                </div>
+                                <div class="flex items-center justify-between px-5 py-3 text-sm">
+                                    <a href="#" class="font-medium text-slate-800 hover:text-emerald-700">Migrating 2 TB of Data Without Downtime</a>
+                                    <span class="shrink-0 text-xs text-slate-400">Published</span>
+                                </div>
+                                <div class="flex items-center justify-between px-5 py-3 text-sm">
+                                    <a href="#" class="font-medium text-slate-800 hover:text-emerald-700">A Deep Dive into Rust Async Runtimes</a>
+                                    <span class="shrink-0 text-xs text-slate-400">Draft</span>
+                                </div>
+                                <div class="flex items-center justify-between px-5 py-3 text-sm">
+                                    <a href="#" class="font-medium text-slate-800 hover:text-emerald-700">Building Resilient Queues with Redis</a>
+                                    <span class="shrink-0 text-xs text-slate-400">Published</span>
+                                </div>
+                                <div class="flex items-center justify-between px-5 py-3 text-sm">
+                                    <a href="#" class="font-medium text-slate-800 hover:text-emerald-700">Frontend Performance: The Hidden Culprits</a>
+                                    <span class="shrink-0 text-xs text-slate-400">Published</span>
+                                </div>
+                            </div>
+                            <div class="border-t border-slate-100 bg-slate-50 px-5 py-3">
+                                <a href="#" class="text-xs font-medium text-emerald-600 hover:underline">View all 47 articles in this category →</a>
+                            </div>
+                        </div>
+
+                    </div><!-- /left -->
+
+                    <!-- Right: options -->
+                    <div class="flex flex-col gap-4">
+
+                        <!-- Save -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">Save</h5>
+                            </div>
+                            <div class="space-y-3 px-5 py-5">
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status">Status</label>
+                                    <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                            id="status" name="status">
+                                        <option value="active" selected>Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="sort_order">Sort Order</label>
+                                    <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                           id="sort_order" name="sort_order" type="number" min="0" value="10">
+                                </div>
+                            </div>
+                            <div class="space-y-2 border-t border-slate-100 px-5 py-4">
+                                <button type="submit" class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                    Update Category
+                                </button>
+                                <a href="categories.twig" class="block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-50">
+                                    Discard Changes
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Featured image -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">Featured Image</h5>
+                            </div>
+                            <div class="px-5 py-4">
+                                <!-- Existing image preview -->
+                                <div class="relative mb-3 overflow-hidden rounded-md bg-slate-100">
+                                    <div class="flex h-28 items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
+                                        <svg class="h-10 w-10 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <button type="button" class="absolute right-2 top-2 rounded-full bg-white/80 p-1 text-slate-500 hover:bg-white hover:text-red-600 shadow" title="Remove image">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                                <label class="block cursor-pointer rounded-lg border border-dashed border-slate-300 p-3 text-center text-xs text-slate-500 hover:border-emerald-400 hover:bg-emerald-50/40 transition-colors" for="featured_image">
+                                    Replace image
+                                    <input id="featured_image" name="featured_image" type="file" accept="image/*" class="sr-only">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Advanced -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">Advanced</h5>
+                            </div>
+                            <div class="space-y-4 px-5 py-5">
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="template">Template Override</label>
+                                    <input class="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm shadow-sm placeholder:text-slate-400 placeholder:font-sans focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                           id="template" name="template" type="text" placeholder="categories/default">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-2.5 text-sm text-slate-700">
+                                        <input type="checkbox" name="show_in_nav" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" checked> Show in navigation
+                                    </label>
+                                    <label class="flex items-center gap-2.5 text-sm text-slate-700">
+                                        <input type="checkbox" name="include_in_sitemap" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" checked> Include in sitemap
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metadata card -->
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">Metadata</h5>
+                            </div>
+                            <dl class="divide-y divide-slate-100 px-5 py-2 text-xs">
+                                <div class="flex items-center justify-between py-2"><dt class="text-slate-500">ID</dt><dd class="font-medium text-slate-700">1</dd></div>
+                                <div class="flex items-center justify-between py-2"><dt class="text-slate-500">Created</dt><dd class="text-slate-700">Jan 3, 2023</dd></div>
+                                <div class="flex items-center justify-between py-2"><dt class="text-slate-500">Updated</dt><dd class="text-slate-700">Mar 18, 2025</dd></div>
+                                <div class="flex items-center justify-between py-2"><dt class="text-slate-500">Articles</dt><dd class="font-medium text-slate-700">47</dd></div>
+                                <div class="flex items-center justify-between py-2"><dt class="text-slate-500">Sub-categories</dt><dd class="font-medium text-slate-700">2</dd></div>
+                            </dl>
+                        </div>
+
+                    </div><!-- /right -->
+
+                </form>
+
+            </div><!-- /content -->
+        </div><!-- /body -->
+
+        <footer class="mt-auto border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-slate-400">&copy; 2026 Admin &mdash; All rights reserved.</p>
+                <nav class="flex items-center gap-4 text-xs text-slate-400">
+                    <a class="hover:text-slate-600" href="#">Documentation</a>
+                    <a class="hover:text-slate-600" href="#">Support</a>
+                    <a class="hover:text-slate-600" href="#">Privacy</a>
+                    <span class="text-slate-300">|</span><span>v1.0.0</span>
+                </nav>
+            </div>
+        </footer>
+
+    </div><!-- /main column -->
+</div><!-- /app-shell -->
+
+<script>
+(function () {
+    var form = document.getElementById('edit-form');
+    var unsavedBar = document.getElementById('unsaved-bar');
+    var discardBtn = document.getElementById('discard-btn');
+    var isDirty = false;
+    var originalData = new FormData(form);
+
+    function markDirty() {
+        if (!isDirty) {
+            isDirty = true;
+            unsavedBar.classList.add('visible');
+        }
+    }
+
+    form.querySelectorAll('input, select, textarea').forEach(function (el) {
+        el.addEventListener('input', markDirty);
+        el.addEventListener('change', markDirty);
+    });
+
+    form.addEventListener('submit', function () {
+        isDirty = false;
+        unsavedBar.classList.remove('visible');
+    });
+
+    discardBtn.addEventListener('click', function () {
+        if (confirm('Discard all unsaved changes?')) {
+            form.reset();
+            isDirty = false;
+            unsavedBar.classList.remove('visible');
+        }
+    });
+
+    // Char counters
+    function bindCount(id, countId, max) {
+        var el = document.getElementById(id);
+        var counter = document.getElementById(countId);
+        if (!el || !counter) return;
+        function update() {
+            var len = el.value.length;
+            counter.textContent = len + ' / ' + max;
+            counter.className = 'tabular-nums ' + (len > max * 0.9 ? 'text-amber-600' : 'text-slate-400');
+        }
+        el.addEventListener('input', update);
+        update();
+    }
+    bindCount('meta_title', 'meta-title-count', 70);
+    bindCount('meta_description', 'meta-desc-count', 160);
+
+    // Live SERP
+    document.getElementById('meta_title').addEventListener('input', function () {
+        document.getElementById('serp-title').textContent = this.value || document.getElementById('name').value || 'Category name';
+    });
+    document.getElementById('meta_description').addEventListener('input', function () {
+        document.getElementById('serp-desc').textContent = this.value || 'Meta description.';
+    });
+    document.getElementById('slug').addEventListener('input', function () {
+        document.getElementById('serp-url').textContent = 'https://example.com/category/' + (this.value || 'engineering');
+    });
+
+    // Warn on unload if dirty
+    window.addEventListener('beforeunload', function (e) {
+        if (isDirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+})();
+</script>
+
+</body>
+</html>
