@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Edit User</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .nav-group input[type="checkbox"] { display: none; }
+        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
+        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
+        .nav-subitems { display: none; }
+        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
+        #sidebar-toggle { display: none; }
+        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
+        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
+        #secnav-toggle { display: none; }
+        #secnav-toggle:checked ~ .app-shell #secondary-nav-panel { display: block; }
+        #secnav-toggle:checked ~ .app-shell .secnav-chevron { transform: rotate(180deg); }
+        .secnav-chevron { transition: transform 0.15s ease; display: inline-block; }
+        .unsaved-bar { display: none; }
+        .unsaved-bar.visible { display: flex; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+
+<input id="sidebar-toggle" type="checkbox">
+<input id="secnav-toggle" type="checkbox">
+<label for="sidebar-toggle" class="sidebar-overlay fixed inset-0 z-20 hidden bg-slate-900/40" aria-hidden="true"></label>
+
+<div class="app-shell min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
+    <aside id="primary-sidebar" class="fixed inset-y-0 left-0 z-30 w-64 -translate-x-full overflow-y-auto border-r border-slate-200 bg-white px-5 py-6 transition-transform duration-200 lg:relative lg:inset-auto lg:z-auto lg:w-auto lg:translate-x-0 lg:transition-none">
+        <div class="mb-4 flex items-center justify-between lg:block">
+            <a class="text-lg font-semibold tracking-tight" href="#">Admin</a>
+            <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Close menu"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></label>
+        </div>
+        <nav class="mt-2 space-y-1 text-sm font-medium lg:mt-8">
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="home.twig">Dashboard</a>
+            <div class="nav-group">
+                <input id="nav-content" type="checkbox">
+                <label for="nav-content" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100"><span>Content</span><span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span></label>
+                <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Articles</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Pages</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <input id="nav-users" type="checkbox" checked>
+                <label for="nav-users" class="flex cursor-pointer items-center justify-between rounded-md bg-emerald-50 px-3 py-2 text-emerald-700"><span>Users</span><span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span></label>
+                <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                    <li><a class="block rounded-md bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700" href="users.twig">All Users</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="create-user.twig">New User</a></li>
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="user-roles.twig">Roles</a></li>
+                </ul>
+            </div>
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Settings</a>
+        </nav>
+    </aside>
+
+    <div class="flex min-w-0 flex-col">
+        <div class="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex items-center gap-3">
+                <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Open menu"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg></label>
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-800 sm:text-base">Edit User</h4>
+                    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+                        <a class="hover:text-slate-800" href="#">Dashboard</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <a class="hover:text-slate-800" href="users.twig">Users</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <span class="text-slate-800">Jane Smith</span>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div id="unsaved-bar" class="unsaved-bar items-center justify-between border-b border-amber-200 bg-amber-50 px-4 py-2 sm:px-6">
+            <span class="flex items-center gap-2 text-sm text-amber-800"><svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>You have unsaved changes.</span>
+            <button type="submit" form="user-form" class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Save Now</button>
+        </div>
+
+        <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 lg:hidden">
+            <span class="flex items-center gap-2">Section Navigation</span>
+            <span class="secnav-chevron text-slate-400"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
+        </label>
+        <div id="secondary-nav-panel" class="hidden border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+            <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
+                <a class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="users.twig">All Users</a>
+                <a class="rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="edit-user.twig">Edit User</a>
+                <a class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="delete-user.twig">Delete</a>
+            </nav>
+        </div>
+
+        <div class="flex flex-1 gap-6 p-4 sm:p-6 lg:grid lg:grid-cols-[14rem_1fr]">
+            <aside class="hidden h-fit lg:block">
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-4 py-3"><h5 class="text-sm font-semibold text-slate-700">Jane Smith</h5></div>
+                    <nav class="p-2">
+                        <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="view-user.twig">Profile</a>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="edit-user.twig">Edit User</a>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50" href="delete-user.twig">Delete User</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <div class="flex min-w-0 flex-col gap-5">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white">JS</div>
+                            <div>
+                                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Jane Smith</h1>
+                                <p class="mt-1 text-sm text-slate-500">jane@example.com</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 self-start">
+                        <a href="view-user.twig" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">View</a>
+                        <a href="users.twig" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Back</a>
+                    </div>
+                </div>
+
+                <form id="user-form" method="POST" action="#" class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
+                    <div class="flex min-w-0 flex-col gap-4">
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Profile</h5></div>
+                            <div class="space-y-4 px-5 py-5">
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="first_name">First Name</label><input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="first_name" name="first_name" type="text" value="Jane"></div>
+                                    <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="last_name">Last Name</label><input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="last_name" name="last_name" type="text" value="Smith"></div>
+                                </div>
+                                <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="email">Email Address</label><input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="email" name="email" type="email" value="jane@example.com"><p class="mt-1 text-xs text-slate-400">Changing this will require verification.</p></div>
+                                <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="bio">Bio</label><textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="bio" name="bio" rows="4">Senior editor with a focus on technology and culture.</textarea></div>
+                            </div>
+                        </div>
+
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Assigned Roles</h5></div>
+                            <div class="grid grid-cols-1 gap-3 px-5 py-5 sm:grid-cols-2 xl:grid-cols-3">
+                                {% set roles = [
+                                    {name: 'Administrator', selected: true, description: 'Full access to all admin features.'},
+                                    {name: 'Editor', selected: true, description: 'Manage content and publish articles.'},
+                                    {name: 'Author', selected: false, description: 'Create and manage assigned articles.'},
+                                    {name: 'Media Manager', selected: false, description: 'Upload and organize media libraries.'},
+                                    {name: 'Support', selected: false, description: 'View users and operational logs.'},
+                                    {name: 'Viewer', selected: false, description: 'Read-only administrative access.'}
+                                ] %}
+                                {% for role in roles %}
+                                <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50/30">
+                                    <input type="checkbox" name="roles[]" value="{{ role.name|lower|replace({' ': '-'}) }}" class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if role.selected %}checked{% endif %}>
+                                    <span><span class="block text-sm font-medium text-slate-800">{{ role.name }}</span><span class="mt-0.5 block text-xs leading-5 text-slate-500">{{ role.description }}</span></span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex min-w-0 flex-col gap-4">
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Account</h5></div>
+                            <div class="space-y-4 px-5 py-5">
+                                <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="status">Status</label><select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="status" name="status"><option selected>Active</option><option>Suspended</option><option>Invited</option></select></div>
+                                <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="timezone">Timezone</label><select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="timezone" name="timezone"><option>UTC</option><option selected>America/New_York</option><option>America/Phoenix</option><option>Europe/London</option></select></div>
+                                <label class="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700"><input type="checkbox" name="require_2fa" checked class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">Require two-factor authentication</label>
+                            </div>
+                            <div class="space-y-2 border-t border-slate-100 px-5 py-4">
+                                <button type="submit" class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Update User</button>
+                                <a href="users.twig" class="block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-50">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <footer class="mt-auto border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"><p class="text-xs text-slate-400">&copy; 2026 Admin &mdash; All rights reserved.</p><nav class="flex items-center gap-4 text-xs text-slate-400"><a class="hover:text-slate-600" href="#">Documentation</a><a class="hover:text-slate-600" href="#">Support</a><a class="hover:text-slate-600" href="#">Privacy</a><span class="text-slate-300">|</span><span>v1.0.0</span></nav></div>
+        </footer>
+    </div>
+</div>
+
+<script>
+(function () {
+    var form = document.getElementById('user-form');
+    var bar = document.getElementById('unsaved-bar');
+    form.querySelectorAll('input, select, textarea').forEach(function (el) {
+        el.addEventListener('input', function () { bar.classList.add('visible'); });
+        el.addEventListener('change', function () { bar.classList.add('visible'); });
+    });
+})();
+</script>
+</body>
+</html>

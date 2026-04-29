@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>View User</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .nav-group input[type="checkbox"] { display: none; }
+        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
+        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
+        .nav-subitems { display: none; }
+        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
+        #sidebar-toggle { display: none; }
+        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
+        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+<input id="sidebar-toggle" type="checkbox">
+<label for="sidebar-toggle" class="sidebar-overlay fixed inset-0 z-20 hidden bg-slate-900/40" aria-hidden="true"></label>
+<div class="app-shell min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
+    <aside id="primary-sidebar" class="fixed inset-y-0 left-0 z-30 w-64 -translate-x-full overflow-y-auto border-r border-slate-200 bg-white px-5 py-6 transition-transform duration-200 lg:relative lg:inset-auto lg:z-auto lg:w-auto lg:translate-x-0 lg:transition-none">
+        <div class="mb-4 flex items-center justify-between lg:block"><a class="text-lg font-semibold tracking-tight" href="#">Admin</a><label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Close menu"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></label></div>
+        <nav class="mt-2 space-y-1 text-sm font-medium lg:mt-8">
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="home.twig">Dashboard</a>
+            <div class="nav-group"><input id="nav-users" type="checkbox" checked><label for="nav-users" class="flex cursor-pointer items-center justify-between rounded-md bg-emerald-50 px-3 py-2 text-emerald-700"><span>Users</span><span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span></label><ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3"><li><a class="block rounded-md bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700" href="users.twig">All Users</a></li><li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="create-user.twig">New User</a></li><li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="user-roles.twig">Roles</a></li></ul></div>
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Settings</a>
+        </nav>
+    </aside>
+    <div class="flex min-w-0 flex-col">
+        <div class="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex items-center gap-3"><label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Open menu"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg></label><div><h4 class="text-sm font-semibold text-slate-800 sm:text-base">View User</h4><nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm"><a class="hover:text-slate-800" href="#">Dashboard</a><svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><a class="hover:text-slate-800" href="users.twig">Users</a><svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><span class="text-slate-800">Jane Smith</span></nav></div></div>
+        </div>
+        <div class="flex flex-1 p-4 sm:p-6">
+            <div class="flex min-w-0 flex-1 flex-col gap-5">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-lg font-semibold text-white">JS</div>
+                        <div><h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Jane Smith</h1><p class="mt-1 text-sm text-slate-500">jane@example.com</p><div class="mt-2 flex flex-wrap gap-1.5"><span class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Active</span><span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">Administrator</span><span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">Editor</span></div></div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 self-start"><a href="edit-user.twig" class="rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">Edit User</a><a href="delete-user.twig" class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-100">Delete</a></div>
+                </div>
+                <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
+                    <div class="flex flex-col gap-5">
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"><div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Profile</h5></div><dl class="divide-y divide-slate-100 px-5 py-2 text-sm"><div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]"><dt class="text-slate-500">Name</dt><dd class="font-medium text-slate-900">Jane Smith</dd></div><div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]"><dt class="text-slate-500">Email</dt><dd class="text-slate-700">jane@example.com</dd></div><div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]"><dt class="text-slate-500">Bio</dt><dd class="text-slate-700">Senior editor with a focus on technology and culture.</dd></div><div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]"><dt class="text-slate-500">Timezone</dt><dd class="text-slate-700">America/New_York</dd></div></dl></div>
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"><div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Recent Activity</h5></div><div class="divide-y divide-slate-100"><div class="px-5 py-3 text-sm"><p class="font-medium text-slate-800">Published "Quarterly Product Notes"</p><p class="text-xs text-slate-400">2 hours ago</p></div><div class="px-5 py-3 text-sm"><p class="font-medium text-slate-800">Updated media library permissions</p><p class="text-xs text-slate-400">Yesterday</p></div><div class="px-5 py-3 text-sm"><p class="font-medium text-slate-800">Approved 4 comments</p><p class="text-xs text-slate-400">Apr 26, 2026</p></div></div></div>
+                    </div>
+                    <div class="flex flex-col gap-5">
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"><div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Metadata</h5></div><dl class="divide-y divide-slate-100 px-5 py-2 text-xs"><div class="flex items-center justify-between py-2.5"><dt class="text-slate-500">ID</dt><dd class="font-medium text-slate-700">42</dd></div><div class="flex items-center justify-between py-2.5"><dt class="text-slate-500">Created</dt><dd class="text-slate-700">Jan 12, 2023</dd></div><div class="flex items-center justify-between py-2.5"><dt class="text-slate-500">Last login</dt><dd class="text-slate-700">2 hours ago</dd></div><div class="flex items-center justify-between py-2.5"><dt class="text-slate-500">2FA</dt><dd class="text-emerald-700">Enabled</dd></div></dl></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="mt-auto border-t border-slate-200 bg-white px-4 py-3 sm:px-6"><div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"><p class="text-xs text-slate-400">&copy; 2026 Admin &mdash; All rights reserved.</p><nav class="flex items-center gap-4 text-xs text-slate-400"><a class="hover:text-slate-600" href="#">Documentation</a><a class="hover:text-slate-600" href="#">Support</a><a class="hover:text-slate-600" href="#">Privacy</a><span class="text-slate-300">|</span><span>v1.0.0</span></nav></div></footer>
+    </div>
+</div>
+</body>
+</html>
