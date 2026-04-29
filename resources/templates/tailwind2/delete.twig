@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="{{ app().getLocale()|replace({'_': '-'}) }}">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Remove Article</title>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+<div class="min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
+    <aside class="border-r border-slate-200 bg-white px-5 py-6">
+        <a class="text-lg font-semibold tracking-tight" href="#">Admin</a>
+        <nav class="mt-8 space-y-1 text-sm font-medium">
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Dashboard</a>
+            <a class="block rounded-md bg-emerald-50 px-3 py-2 text-emerald-700" href="#">Articles</a>
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Media</a>
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Settings</a>
+        </nav>
+    </aside>
+
+    <main class="px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-4xl">
+            <nav class="flex gap-2 text-sm text-slate-500">
+                <a class="hover:text-slate-900" href="#">Dashboard</a>
+                <span>/</span>
+                <a class="hover:text-slate-900" href="#">Articles</a>
+                <span>/</span>
+                <span class="text-slate-900">Remove</span>
+            </nav>
+
+            <form class="mt-6 rounded-lg border border-red-200 bg-white shadow-sm" method="POST" action="#">
+                {{ csrf_field() }}
+                {{ method_field('DELETE') }}
+
+                <div class="border-b border-red-100 bg-red-50 px-6 py-5">
+                    <p class="text-sm font-semibold uppercase tracking-wide text-red-700">Confirm Removal</p>
+                    <h1 class="mt-2 text-3xl font-semibold tracking-tight text-red-950">Remove Article</h1>
+                </div>
+
+                <div class="grid gap-6 p-6">
+                    <div>
+                        <h2 class="text-lg font-semibold">Are you sure you want to remove "{{ article.title }}"?</h2>
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">This will permanently remove the article record, its ordering position, and any attached article metadata. This action cannot be undone.</p>
+                    </div>
+
+                    <dl class="grid gap-4 rounded-md border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Title</dt>
+                            <dd class="mt-1 text-sm font-medium text-slate-900">{{ article.title }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Slug</dt>
+                            <dd class="mt-1 text-sm font-medium text-slate-900">{{ article.slug }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</dt>
+                            <dd class="mt-1 text-sm font-medium text-slate-900">{{ article.status|title }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Created</dt>
+                            <dd class="mt-1 text-sm font-medium text-slate-900">{{ article.created_at.format('F j, Y') }}</dd>
+                        </div>
+                    </dl>
+
+                    <label class="flex items-start gap-3 rounded-md border border-slate-200 p-4 text-sm">
+                        <input class="mt-0.5 h-4 w-4 rounded border-slate-300 text-red-600 focus:ring-red-500" id="confirm_removal" name="confirm_removal" required type="checkbox" value="1">
+                        <span>
+                            <span class="block font-semibold text-slate-900">I understand this article will be permanently removed.</span>
+                            {% if errors.has('confirm_removal') %}
+                                <span class="mt-2 block text-red-600">{{ errors.first('confirm_removal') }}</span>
+                            {% endif %}
+                        </span>
+                    </label>
+                </div>
+
+                <div class="flex flex-col-reverse gap-3 border-t border-slate-200 px-6 py-4 sm:flex-row sm:justify-end">
+                    <a class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50" href="#">Cancel</a>
+                    <button class="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" type="submit">Remove Article</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+</body>
+</html>
