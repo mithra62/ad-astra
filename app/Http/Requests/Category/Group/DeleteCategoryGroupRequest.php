@@ -12,7 +12,7 @@ class DeleteCategoryGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->can('delete field group');
+        return Auth::user()->can('delete category group');
     }
 
     /**
