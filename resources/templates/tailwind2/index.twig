@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="{{ app().getLocale()|replace({'_': '-'}) }}">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Articles</title>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+<div class="min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
+    <aside class="border-r border-slate-200 bg-white px-5 py-6">
+        <a class="text-lg font-semibold tracking-tight" href="#">Admin</a>
+        <nav class="mt-8 space-y-1 text-sm font-medium">
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Dashboard</a>
+            <a class="block rounded-md bg-emerald-50 px-3 py-2 text-emerald-700" href="#">Articles</a>
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Media</a>
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Settings</a>
+        </nav>
+    </aside>
+
+    <main class="px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+            <div class="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <nav class="flex gap-2 text-sm text-slate-500">
+                        <a class="hover:text-slate-900" href="#">Dashboard</a>
+                        <span>/</span>
+                        <span class="text-slate-900">Articles</span>
+                    </nav>
+                    <h1 class="mt-3 text-3xl font-semibold tracking-tight">Articles</h1>
+                    <p class="mt-2 text-sm text-slate-500">Manage drafts, scheduled posts, and published article content.</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50" href="#">Reorder</a>
+                    <a class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" href="#">Create Article</a>
+                </div>
+            </div>
+
+            <section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Total Articles</p>
+                    <p class="mt-2 text-3xl font-semibold">24</p>
+                </div>
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Published</p>
+                    <p class="mt-2 text-3xl font-semibold">16</p>
+                </div>
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Drafts</p>
+                    <p class="mt-2 text-3xl font-semibold">6</p>
+                </div>
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Scheduled</p>
+                    <p class="mt-2 text-3xl font-semibold">2</p>
+                </div>
+            </section>
+
+            <section class="mt-8 rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="grid gap-4 border-b border-slate-200 px-6 py-5 lg:grid-cols-[1fr_12rem_12rem] lg:items-center">
+                    <div>
+                        <h2 class="text-base font-semibold">Article List</h2>
+                        <p class="mt-1 text-sm text-slate-500">Static sample content for an administrative list view.</p>
+                    </div>
+                    <select class="rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        <option>All statuses</option>
+                        <option>Published</option>
+                        <option>Draft</option>
+                        <option>Scheduled</option>
+                    </select>
+                    <input class="rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Search articles" type="search">
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <tr>
+                            <th class="px-6 py-3" scope="col">Title</th>
+                            <th class="px-6 py-3" scope="col">Category</th>
+                            <th class="px-6 py-3" scope="col">Status</th>
+                            <th class="px-6 py-3" scope="col">Author</th>
+                            <th class="px-6 py-3" scope="col">Updated</th>
+                            <th class="px-6 py-3 text-right" scope="col">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white">
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4">
+                                <p class="font-medium text-slate-900">Launching the Editorial Calendar</p>
+                                <p class="mt-1 text-slate-500">launching-the-editorial-calendar</p>
+                            </td>
+                            <td class="px-6 py-4 text-slate-700">Operations</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800">Published</span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-700">Avery Stone</td>
+                            <td class="px-6 py-4 text-slate-500">Apr 24, 2026</td>
+                            <td class="px-6 py-4">
+                                <div class="flex justify-end gap-2">
+                                    <a class="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50" href="#">View</a>
+                                    <a class="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50" href="#">Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4">
+                                <p class="font-medium text-slate-900">How We Review Product Updates</p>
+                                <p class="mt-1 text-slate-500">how-we-review-product-updates</p>
+                            </td>
+                            <td class="px-6 py-4 text-slate-700">Product</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800">Draft</span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-700">Morgan Lee</td>
+                            <td class="px-6 py-4 text-slate-500">Apr 22, 2026</td>
+                            <td class="px-6 py-4">
+                                <div class="flex justify-end gap-2">
+                                    <a class="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50" href="#">View</a>
+                                    <a class="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50" href="#">Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4">
+                                <p class="font-medium text-slate-900">Customer Support Metrics That Matter</p>
+                                <p class="mt-1 text-slate-500">customer-support-metrics-that-matter</p>
+                            </td>
+                            <td class="px-6 py-4 text-slate-700">Support</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-800">Scheduled</span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-700">Riley Chen</td>
+                            <td class="px-6 py-4 text-slate-500">Apr 20, 2026</td>
+                            <td class="px-6 py-4">
+                                <div class="flex justify-end gap-2">
+                                    <a class="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50" href="#">View</a>
+                                    <a class="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50" href="#">Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4">
+                                <p class="font-medium text-slate-900">Building a Cleaner Release Process</p>
+                                <p class="mt-1 text-slate-500">building-a-cleaner-release-process</p>
+                            </td>
+                            <td class="px-6 py-4 text-slate-700">Engineering</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800">Published</span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-700">Jordan Kim</td>
+                            <td class="px-6 py-4 text-slate-500">Apr 18, 2026</td>
+                            <td class="px-6 py-4">
+                                <div class="flex justify-end gap-2">
+                                    <a class="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50" href="#">View</a>
+                                    <a class="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50" href="#">Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-sm text-slate-500">Showing 4 of 24 articles</p>
+                    <div class="flex gap-2">
+                        <button class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-500" type="button">Previous</button>
+                        <button class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" type="button">Next</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+</body>
+</html>
