@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Order General Items</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <style>
+        .nav-group input[type="checkbox"] { display: none; }
+        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
+        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
+        .nav-subitems { display: none; }
+        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
+        #sidebar-toggle { display: none; }
+        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
+        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
+        .drag-handle { cursor: grab; }
+        .drag-handle:active { cursor: grabbing; }
+        .sortable-ghost { opacity: 0.45; background: #f0fdf4; }
+        .position-changed { background-color: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+
+<input id="sidebar-toggle" type="checkbox">
+<label for="sidebar-toggle" class="sidebar-overlay fixed inset-0 z-20 hidden bg-slate-900/40" aria-hidden="true"></label>
+
+<div class="app-shell min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
+    <aside id="primary-sidebar" class="fixed inset-y-0 left-0 z-30 w-64 -translate-x-full overflow-y-auto border-r border-slate-200 bg-white px-5 py-6 transition-transform duration-200 lg:relative lg:inset-auto lg:z-auto lg:w-auto lg:translate-x-0 lg:transition-none">
+        <div class="mb-4 flex items-center justify-between lg:block">
+            <a class="text-lg font-semibold tracking-tight" href="#">Admin</a>
+            <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Close menu">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </label>
+        </div>
+        <nav class="mt-2 space-y-1 text-sm font-medium lg:mt-8">
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Dashboard</a>
+            <div class="nav-group">
+                <input id="nav-content" type="checkbox" checked>
+                <label for="nav-content" class="flex cursor-pointer items-center justify-between rounded-md bg-emerald-50 px-3 py-2 text-emerald-700">
+                    <span>Content</span>
+                    <span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                </label>
+                <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Articles</a></li>
+                    <li><a class="block rounded-md bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700" href="general-index.twig">General Items</a></li>
+                </ul>
+            </div>
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Settings</a>
+        </nav>
+    </aside>
+
+    <div class="flex min-w-0 flex-col">
+        <div class="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex items-center gap-3">
+                <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Open menu">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </label>
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-800 sm:text-base">Order General Items</h4>
+                    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+                        <a class="hover:text-slate-800" href="#"><svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg> Dashboard</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <a class="hover:text-slate-800" href="general-index.twig">General Items</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <span class="text-slate-800">Order</span>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-1 gap-6 p-4 sm:p-6 lg:grid lg:grid-cols-[14rem_1fr]">
+            <aside class="hidden h-fit lg:block">
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-4 py-3"><h5 class="text-sm font-semibold text-slate-700">General</h5></div>
+                    <nav class="p-2">
+                        <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="general-index.twig">All Items</a>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="general-edit.twig">Edit Item</a>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="general-order-items.twig">Order Items</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <div class="flex min-w-0 flex-col gap-5">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Order General Items</h1>
+                        <p class="mt-1 text-sm text-slate-500">Drag items or use arrow controls to set display order.</p>
+                    </div>
+                    <a href="general-index.twig" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                        Back to Items
+                    </a>
+                </div>
+
+                <div id="toast" class="hidden rounded-lg border px-4 py-3 text-sm shadow-sm"></div>
+
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h5 class="text-sm font-semibold text-slate-700">Status Items</h5>
+                                <p class="mt-0.5 text-xs text-slate-500">Only items matching the selected type are shown.</p>
+                            </div>
+                            <select class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                <option selected>Status</option>
+                                <option>Field</option>
+                                <option>Option</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <ul id="sortable-list" class="divide-y divide-slate-100">
+                        {% set items = [
+                            {id: 1, name: 'Draft', handle: 'draft', color: 'slate', status: 'Active'},
+                            {id: 2, name: 'In Review', handle: 'in-review', color: 'sky', status: 'Active'},
+                            {id: 3, name: 'Published', handle: 'published', color: 'emerald', status: 'Active'},
+                            {id: 4, name: 'Archived', handle: 'archived', color: 'amber', status: 'Inactive'}
+                        ] %}
+                        {% for item in items %}
+                        <li class="item-row flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50/60" data-id="{{ item.id }}" data-original-index="{{ loop.index0 }}">
+                            <span class="drag-handle shrink-0 text-slate-300 hover:text-slate-500" title="Drag to reorder">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+                            </span>
+                            <span class="position-badge inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">{{ loop.index }}</span>
+                            <span class="h-3 w-3 shrink-0 rounded-full bg-{{ item.color }}-500"></span>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-medium text-slate-900">{{ item.name }}</p>
+                                <p class="truncate font-mono text-xs text-slate-400">{{ item.handle }} / {{ item.status }}</p>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-1">
+                                <button type="button" class="move-up rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600" aria-label="Move up"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg></button>
+                                <button type="button" class="move-down rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600" aria-label="Move down"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></button>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="flex flex-col-reverse gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-2 text-xs text-slate-500">
+                            <span id="no-changes-label">No changes</span>
+                            <span id="changed-count" class="hidden rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700"></span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="button" id="reset-btn" class="hidden rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Reset</button>
+                            <button type="button" id="save-btn" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">Save Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-auto border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-slate-400">&copy; 2026 Admin &mdash; All rights reserved.</p>
+                <nav class="flex items-center gap-4 text-xs text-slate-400"><a class="hover:text-slate-600" href="#">Documentation</a><a class="hover:text-slate-600" href="#">Support</a><a class="hover:text-slate-600" href="#">Privacy</a><span class="text-slate-300">|</span><span>v1.0.0</span></nav>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<script>
+(function () {
+    var list = document.getElementById('sortable-list');
+    var resetBtn = document.getElementById('reset-btn');
+    var changedCount = document.getElementById('changed-count');
+    var noChangesLabel = document.getElementById('no-changes-label');
+    var toast = document.getElementById('toast');
+    var originalOrder = Array.from(list.querySelectorAll('.item-row')).map(function (row) { return row.dataset.id; });
+
+    Sortable.create(list, {
+        handle: '.drag-handle',
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        onEnd: function () {
+            refresh();
+            updateDirtyState();
+        }
+    });
+
+    list.addEventListener('click', function (e) {
+        var btn = e.target.closest('.move-up, .move-down');
+        if (!btn) return;
+        var row = btn.closest('.item-row');
+        var rows = Array.from(list.querySelectorAll('.item-row'));
+        var index = rows.indexOf(row);
+        if (btn.classList.contains('move-up') && index > 0) list.insertBefore(row, rows[index - 1]);
+        if (btn.classList.contains('move-down') && index < rows.length - 1) list.insertBefore(rows[index + 1], row);
+        refresh();
+        updateDirtyState();
+    });
+
+    function refresh() {
+        Array.from(list.querySelectorAll('.item-row')).forEach(function (row, index) {
+            var badge = row.querySelector('.position-badge');
+            badge.textContent = index + 1;
+            badge.classList.toggle('position-changed', originalOrder.indexOf(row.dataset.id) !== index);
+        });
+    }
+
+    function updateDirtyState() {
+        var current = Array.from(list.querySelectorAll('.item-row')).map(function (row) { return row.dataset.id; });
+        var moved = current.filter(function (id, index) { return id !== originalOrder[index]; }).length;
+        resetBtn.classList.toggle('hidden', moved === 0);
+        changedCount.classList.toggle('hidden', moved === 0);
+        noChangesLabel.classList.toggle('hidden', moved > 0);
+        changedCount.textContent = moved + ' item' + (moved === 1 ? '' : 's') + ' moved';
+    }
+
+    resetBtn.addEventListener('click', function () {
+        var rowMap = {};
+        Array.from(list.querySelectorAll('.item-row')).forEach(function (row) { rowMap[row.dataset.id] = row; });
+        originalOrder.forEach(function (id) { list.appendChild(rowMap[id]); });
+        refresh();
+        updateDirtyState();
+        showToast('Order reset.');
+    });
+
+    document.getElementById('save-btn').addEventListener('click', function () {
+        originalOrder = Array.from(list.querySelectorAll('.item-row')).map(function (row) { return row.dataset.id; });
+        refresh();
+        updateDirtyState();
+        showToast('General item order saved successfully.');
+    });
+
+    function showToast(message) {
+        toast.className = 'rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 shadow-sm';
+        toast.textContent = message;
+        setTimeout(function () { toast.classList.add('hidden'); }, 4000);
+    }
+})();
+</script>
+
+</body>
+</html>
