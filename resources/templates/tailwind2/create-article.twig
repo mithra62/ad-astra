@@ -20,8 +20,8 @@
 
         /* ── Mobile: secondary nav accordion ─────────────────────────── */
         #secnav-toggle { display: none; }
-        #secnav-toggle:checked ~ #secondary-nav-panel { display: block; }
-        #secnav-toggle:checked ~ label .secnav-chevron { transform: rotate(180deg); }
+        #secnav-toggle:checked ~ .app-shell #secondary-nav-panel { display: block; }
+        #secnav-toggle:checked ~ .app-shell .secnav-chevron { transform: rotate(180deg); }
         .secnav-chevron { transition: transform 0.15s ease; display: inline-block; }
     </style>
 </head>
@@ -498,6 +498,20 @@
 
         </div>
         <!-- /main body -->
+
+        <!-- Footer -->
+        <footer class="mt-auto border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-slate-400">&copy; 2026 Admin &mdash; All rights reserved.</p>
+                <nav class="flex items-center gap-4 text-xs text-slate-400">
+                    <a class="hover:text-slate-600" href="#">Documentation</a>
+                    <a class="hover:text-slate-600" href="#">Support</a>
+                    <a class="hover:text-slate-600" href="#">Privacy</a>
+                    <span class="text-slate-300">|</span>
+                    <span>v1.0.0</span>
+                </nav>
+            </div>
+        </footer>
 
     </div>
     <!-- /page area -->
