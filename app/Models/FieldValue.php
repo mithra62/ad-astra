@@ -43,6 +43,9 @@ class FieldValue extends Model
         return $this->belongsTo(Field::class);
     }
 
+    /**
+     * @return mixed
+     */
     public function resolvedValue(): mixed
     {
         $fieldType = $this->field?->fieldType;
@@ -53,6 +56,8 @@ class FieldValue extends Model
 
         $column = $fieldType->instance()->storageColumn();
 
-        return $this->{$column};
+        return $this->field->fieldType
+            ->instance()->value($this->{$column});
+        //return $this->{$column};
     }
 }

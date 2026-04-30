@@ -120,4 +120,9 @@ abstract class AbstractField
     {
         return $this->name;
     }
+
+    public function value($value)
+    {
+        return $value;
+    }
 }

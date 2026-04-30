@@ -12,19 +12,16 @@ Search configuration lives on `field_layout_tab_elements`, not on `Field`. A
 layout, and a Category layout. The `TabElement` is the "field in context" junction
 -- the right place to say "in this layout, this field is searchable at weight 3."
 
-The Indexer is completely model-agnostic. Every Searchable model exposes three
-methods; the Indexer calls them without knowing what type it is working with.
-Adding a new Fieldable type to search means applying a trait and overriding one
-to three methods -- no changes to the Indexer, jobs, or schema.
+The Indexer is completely model-agnostic. Every Searchable model implements a
+small, explicit contract; the Indexer calls it without knowing the model type.
+Adding a new Fieldable type to search means applying the trait and overriding the
+relevant methods -- no changes to the Indexer, jobs, or schema.
 
 ---
 
 ## 1. Data Model
 
 ### 1.1 `field_layout_tab_elements` additions
-
-Search configuration sits here rather than on `fields`. This lets the same field
-carry different searchability and weight depending on which layout it appears in.
 
 ```
 field_layout_tab_elements (additions)
@@ -33,7 +30,8 @@ is_searchable    boolean default false
 search_weight    tinyInteger unsigned default 1    range 1-10
 ```
 
-No changes to the `fields` table.
+No changes to the `fields` table. The same field carries different searchability
+and weight depending on which layout's `TabElement` it appears in.
 
 ### 1.2 `search_index`
 
@@ -44,9 +42,9 @@ search_index
 --------------------------------------------------
 id
 indexable_id        unsignedBigInteger
-indexable_type      string              morph alias ('entry', 'user', 'category', 'media', ...)
-owner_id            unsignedBigInteger nullable    generic scope; see note below
-owner_type          string nullable                morph alias of the owner ('entry_group', 'category_group', ...)
+indexable_type      string              morph alias ('entry', 'user', 'category', ...)
+owner_id            unsignedBigInteger nullable
+owner_type          string nullable                morph alias of the owning scope
 subtype_id          unsignedBigInteger nullable    entry_type_id equivalent; null for non-Entry types
 keywords            mediumText          FULLTEXT indexed
 search_updated_at   timestamp
@@ -58,15 +56,16 @@ index   (owner_type, owner_id, subtype_id)
 FULLTEXT (keywords)
 ```
 
-`owner_id` / `owner_type` replace the previous `entry_group_id` / `entry_type_id`
-columns with a generic pair that works for any Fieldable type:
+`owner_id` / `owner_type` are nullable here because `search_index` has no unique
+key across those columns; NULLs are safe. The collection scopes table uses sentinel
+values instead -- see section 1.4.
 
-| Indexable type | owner_type       | owner_id              | subtype_id        |
-|----------------|------------------|-----------------------|-------------------|
-| `entry`        | `entry_group`    | `entry_groups.id`     | `entry_types.id`  |
-| `user`         | null             | null                  | null              |
-| `category`     | `category_group` | `category_groups.id`  | null              |
-| `media`        | `media_library`  | `media_libraries.id`  | null              |
+| Indexable type | owner_type       | owner_id              | subtype_id       |
+|----------------|------------------|-----------------------|------------------|
+| `entry`        | `entry_group`    | `entry_groups.id`     | `entry_types.id` |
+| `user`         | null             | null                  | null             |
+| `category`     | `category_group` | `category_groups.id`  | null             |
+| `media`        | `media_library`  | (future)              | null             |
 
 ### 1.3 `search_collections`
 
@@ -83,26 +82,25 @@ timestamps
 
 ### 1.4 `search_collection_scopes` (pivot)
 
-Each row says "include this type of content, optionally within this owner scope,
-optionally filtered to these subtypes." A collection with no type restriction
-on `subtype_ids` includes all subtypes within the owner.
+MySQL permits multiple rows with NULL in unique-indexed columns, so nullable
+`owner_type` / `owner_id` would allow duplicate global scopes (e.g. two rows
+for `user` with no owner) to slip through. Use sentinel values instead:
+`owner_type` is `NOT NULL DEFAULT ''` and `owner_id` is `NOT NULL DEFAULT 0`.
+A User scope row stores `owner_type = ''`, `owner_id = 0`.
 
 ```
 search_collection_scopes
 --------------------------------------------------
 id
 search_collection_id    fk -> search_collections (cascadeOnDelete)
-indexable_type          string          ('entry', 'user', 'category', 'media')
-owner_id                nullable        null = include all instances of this type
-owner_type              nullable
-subtype_ids             json nullable   e.g. [3, 7] restricts to these entry_type ids
+indexable_type          string NOT NULL
+owner_type              string NOT NULL DEFAULT ''
+owner_id                unsignedBigInteger NOT NULL DEFAULT 0
+subtype_ids             json nullable       e.g. [3,7] restricts to these subtype IDs; null = all
 timestamps
 
 unique (search_collection_id, indexable_type, owner_type, owner_id)
 ```
-
-A collection covering "Blog entries + all Users + Press Release categories"
-is three rows in this table.
 
 ### 1.5 `entry_groups` addition
 
@@ -118,83 +116,124 @@ Holds per-group weight overrides for Entry synthetic sources:
 { "title_weight": 5, "handle_weight": 0, "category_weight": 3 }
 ```
 
-Weight `0` excludes that source. Absent keys fall back to `config('search.weights.*')`.
+Weight `0` excludes that source. Absent or null keys fall back to
+`config('search.weights.*')`.
 
 ---
 
-## 2. The `Searchable` Trait
+## 2. The `Searchable` Trait -- Full Contract
 
-Applied to any Fieldable model. Provides the index relation, dispatch helpers, and
-the three methods the Indexer calls. Models override only what differs from the
-defaults.
+Applied to any Fieldable model. All five methods have safe defaults; models
+override only what differs.
 
 ```php
 // App\Traits\Searchable
+
+// ------------------------------------------------------------------
+// Index relation and dispatch helpers
+// ------------------------------------------------------------------
 
 public function searchIndex(): MorphOne
 {
     return $this->morphOne(SearchIndex::class, 'indexable');
 }
 
-/**
- * Dispatch an async reindex job. Call this after ALL related writes have committed.
- */
 public function reindex(): void
 {
     IndexModelJob::dispatch($this->getMorphClass(), $this->getKey())
         ->onQueue(config('search.queue', 'search'));
 }
 
-/**
- * Remove this model's search row. Call explicitly from service/repository delete paths.
- */
 public function purgeSearchIndex(): void
 {
     $this->searchIndex()->delete();
 }
 
-/**
- * Return the TabElement objects for this model's effective field layout,
- * in traversal order. The Indexer reads is_searchable and search_weight
- * from each element.
- *
- * Default: reads from $this->fieldLayout (single-layout models).
- * Entry overrides this to merge type + group layout elements.
- */
-public function searchableElements(): Collection
-{
-    $this->loadMissing('fieldLayout.tabs.elements.field.fieldType');
+// ------------------------------------------------------------------
+// Contract methods -- implement or override in each model
+// ------------------------------------------------------------------
 
-    return $this->fieldLayout?->tabs->flatMap(fn($tab) => $tab->elements)
-        ?? collect();
+/**
+ * The FieldLayout whose TabElements carry this model's search configuration.
+ *
+ * Override this for single-layout models (User, Category, future Media).
+ * Entry overrides searchableElements() directly because it merges two layouts.
+ *
+ * Default: null (no fields indexed -- safe for models not yet configured).
+ */
+public function searchableLayout(): ?FieldLayout
+{
+    return null;
 }
 
 /**
- * Return synthetic text sources as [weight => text] pairs.
- * These are indexed regardless of field settings (title, handle, email, etc.)
+ * The TabElements to traverse when building the keyword blob.
+ * Each element must have is_searchable (bool) and search_weight (int) columns.
  *
- * Default: no synthetic sources. Models override to add their own.
+ * Default: reads from searchableLayout(). Entry overrides this directly.
  */
-public function searchableSyntheticText(): array
+public function searchableElements(): Collection
+{
+    $layout = $this->searchableLayout();
+    if (! $layout) {
+        return collect();
+    }
+
+    $layout->loadMissing('tabs.elements.field.fieldType');
+
+    return $layout->tabs->flatMap(fn($tab) => $tab->elements);
+}
+
+/**
+ * Non-field text sources to include regardless of field settings.
+ * Returns a list of ['weight' => int, 'text' => string] pairs.
+ *
+ * Using a list (not a keyed array) avoids silent key collisions when
+ * two sources resolve to the same weight.
+ *
+ * Default: no synthetic sources.
+ */
+public function searchableSyntheticSources(): array
 {
     return [];
 }
 
 /**
- * Return [owner_id, owner_type] for the search_index scope columns.
- * Default: [null, null] (no owner scope -- used for User and similar types).
+ * The [owner_id, owner_type] pair to store in search_index.
+ * Return [null, null] for models with no owner scope (e.g. User).
  */
 public function searchOwner(): array
 {
     return [null, null];
 }
+
+/**
+ * Subtype ID to store in search_index.subtype_id.
+ * Return null for models that have no subtype concept.
+ */
+public function searchSubtypeId(): ?int
+{
+    return null;
+}
+
+/**
+ * The model's DB column name that holds the owner foreign key.
+ * Used by ReindexOwnerJob to scope chunk queries correctly.
+ * Return null for models with no owner scope (e.g. User).
+ */
+public static function searchOwnerKey(): ?string
+{
+    return null;
+}
 ```
 
-### What each model overrides
+### Model implementations
 
-**`Entry`** -- all three methods:
+**`Entry`**
 
 ```php
+// searchableLayout() not used -- searchableElements() is overridden directly.
+
 public function searchableElements(): Collection
 {
     $this->loadMissing([
@@ -222,15 +261,36 @@ public function searchableElements(): Collection
         ->flatMap(fn($tab) => $tab->elements);
 }
 
-public function searchableSyntheticText(): array
+public function searchableSyntheticSources(): array
 {
     $s = $this->entryGroup->search_settings ?? [];
 
-    return array_filter([
-        ($s['title_weight']    ?? config('search.weights.title'))      => $this->title,
-        ($s['handle_weight']   ?? config('search.weights.handle'))     => $this->handle,
-        ($s['category_weight'] ?? config('search.weights.categories')) => $this->categoryNamesForIndex(),
-    ], fn($text) => $text !== null && $text !== '');
+    $sources = [];
+
+    if (($this->title ?? '') !== '') {
+        $sources[] = [
+            'weight' => (int) ($s['title_weight'] ?? config('search.weights.title', 5)),
+            'text'   => $this->title,
+        ];
+    }
+
+    if (($this->handle ?? '') !== '' && ($s['handle_weight'] ?? config('search.weights.handle', 1)) > 0) {
+        $sources[] = [
+            'weight' => (int) ($s['handle_weight'] ?? config('search.weights.handle', 1)),
+            'text'   => $this->handle,
+        ];
+    }
+
+    $this->loadMissing('categories');
+    $categoryText = $this->categories->pluck('name')->filter()->implode(' ');
+    if ($categoryText !== '' && ($s['category_weight'] ?? config('search.weights.categories', 2)) > 0) {
+        $sources[] = [
+            'weight' => (int) ($s['category_weight'] ?? config('search.weights.categories', 2)),
+            'text'   => $categoryText,
+        ];
+    }
+
+    return $sources;
 }
 
 public function searchOwner(): array
@@ -238,107 +298,135 @@ public function searchOwner(): array
     return [$this->entry_group_id, 'entry_group'];
 }
 
-private function categoryNamesForIndex(): ?string
+public function searchSubtypeId(): ?int
 {
-    $this->loadMissing('categories');
-    $names = $this->categories->pluck('name')->filter()->implode(' ');
-    return $names !== '' ? $names : null;
+    return $this->entry_type_id;
+}
+
+public static function searchOwnerKey(): ?string
+{
+    return 'entry_group_id';
 }
 ```
 
-**`User`** -- synthetic text and no owner scope needed:
+**`User`**
 
 ```php
-public function searchableSyntheticText(): array
+public function searchableLayout(): ?FieldLayout
 {
-    return array_filter([
-        config('search.weights.title')  => $this->name,
-        config('search.weights.handle') => $this->email,
-    ]);
+    return UserSchema::resolved()->fieldLayout;
 }
-// searchableElements() default works -- UserSchema::resolved() should be wired
-// into $this->fieldLayout via the UserSchema singleton. If not, override here.
+
+public function searchableSyntheticSources(): array
+{
+    return [
+        ['weight' => config('search.weights.title', 5),  'text' => $this->name],
+        ['weight' => config('search.weights.handle', 1), 'text' => $this->email],
+    ];
+}
+
 // searchOwner() default [null, null] is correct.
+// searchSubtypeId() default null is correct.
+// searchOwnerKey() default null is correct.
 ```
 
-**`Category`** -- synthetic text and group owner:
+**`Category`**
 
 ```php
-public function searchableSyntheticText(): array
+public function searchableLayout(): ?FieldLayout
 {
-    return [config('search.weights.title') => $this->name];
+    $this->loadMissing('group.fieldLayout.tabs.elements.field.fieldType');
+    return $this->group?->fieldLayout;
+}
+
+public function searchableSyntheticSources(): array
+{
+    return [
+        ['weight' => config('search.weights.title', 5), 'text' => $this->name],
+    ];
 }
 
 public function searchOwner(): array
 {
-    return [$this->category_group_id, 'category_group'];
+    return [$this->group_id, 'category_group'];
+}
+
+public static function searchOwnerKey(): ?string
+{
+    return 'group_id';
 }
 ```
 
-**`Media`** -- similar pattern; override `searchableSyntheticText()` to return
-filename, title, alt text, and `searchOwner()` to return the library.
+**Future Media**
 
-No other changes required to add a new type. The Indexer never branches on model
-class.
+When Media gains a field layout, adding it to search is:
+1. Apply `Searchable` trait.
+2. Override `searchableLayout()`, `searchableSyntheticSources()`, `searchOwner()`,
+   and `searchOwnerKey()`.
+3. Wire `reindex()` and `purgeSearchIndex()` in the Media write/delete paths.
+
+No schema changes, no Indexer changes, no new jobs.
 
 ---
 
 ## 3. Field Text Extraction
 
-Search configuration is on `TabElement`, but text extraction still needs to route
-correctly for scalar vs. relational field storage.
+The Indexer uses the existing `Fieldable` / `FieldValue` mechanism. It does not
+read storage columns directly or route by field type. The flow is:
+
+1. `$model->fieldValues` is eager-loaded with `field.fieldType`.
+2. For each searchable element, the Indexer finds the matching `FieldValue` by
+   `field_id` and calls `$fv->resolvedValue()`. This delegates to
+   `$fieldType->instance()->storageColumn()` and the existing cast -- the same
+   path every other part of the application uses.
+3. The resolved value is passed to `toSearchText()` on the field type instance,
+   which decides whether it contributes a string to the index.
 
 ### 3.1 `AbstractField::toSearchText()`
 
 ```php
 /**
- * Return indexable text for this field's value on the given model, or null to skip.
+ * Convert an already-resolved field value to indexable text.
  *
- * Default reads from field_values (scalar storage). Relational and custom types
- * override this.
+ * Receives the output of FieldValue::resolvedValue() -- already cast to the
+ * PHP type for this field (string, int, float, bool, Carbon, array, null).
+ *
+ * Return a string to include in the keyword blob, or null to skip this field.
+ * Default: stringify and strip HTML. Types that produce no useful search text
+ * override to return null.
  */
-public function toSearchText(Model $model, Field $field): ?string
+public function toSearchText(mixed $resolvedValue): ?string
 {
-    $fv = $model->fieldValues->first(fn($v) => $v->field_id === $field->id);
-    if (! $fv) {
+    if ($resolvedValue === null || $resolvedValue === '' || $resolvedValue === false) {
         return null;
     }
 
-    $raw = $fv->{$this->storageColumn()};
-    if ($raw === null || $raw === '' || $raw === false) {
-        return null;
-    }
+    $text = is_string($resolvedValue) ? $resolvedValue : (string) $resolvedValue;
+    $text = strip_tags($text);
 
-    $cast = $this->cast($raw);
-    return is_string($cast) ? strip_tags($cast) : (string) $cast;
+    return $text !== '' ? $text : null;
 }
 ```
 
 ### 3.2 Type overrides
 
-| Type           | Override behaviour |
-|----------------|--------------------|
-| `Relationship` | Read `entryRelationships` for this `field_id`, collect `relatedEntry->title`, join with space. |
-| `Boolean`      | Return null (true/false tokens add noise). |
-| `Date`         | Return null by default. |
-| `ColorPicker`  | Return null. |
-| `Json`         | Return null by default; override to extract relevant keys per field. |
+Only types that should contribute nothing to the index need to override:
 
-### 3.3 Indexer call site
+| Type           | Override |
+|----------------|----------|
+| `Boolean`      | `return null;` -- true/false tokens add noise. |
+| `Date`         | `return null;` -- date strings rarely help FULLTEXT ranking. |
+| `ColorPicker`  | `return null;` -- hex values are meaningless tokens. |
 
-```php
-// App\Search\Indexer::extractText(Model $model, Field $field): ?string
-$instance = $field->fieldType?->instance();
-return $instance ? $instance->toSearchText($model, $field) : null;
-```
-
-The Indexer never reads `field_values` or `entry_relationships` directly.
+All text-bearing types (`Text`, `Textarea`, `EmailAddress`, `Telephone`, `Url`,
+etc.) use the default implementation and need no override. `Relationship` fields
+are not indexed at this stage.
 
 ---
 
 ## 4. The Indexer
 
-Completely model-agnostic. Requires only that the model uses `Searchable`.
+Completely model-agnostic. Calls the five contract methods and nothing else.
 
 ```php
 // App\Search\Indexer::index(Model $model): void
@@ -347,16 +435,18 @@ public function index(Model $model): void
 {
     $segments = [];
 
-    // Synthetic sources (title, handle, email, etc.)
-    foreach ($model->searchableSyntheticText() as $weight => $text) {
-        if ($text && (int)$weight > 0) {
-            $segments[] = $this->repeat(strip_tags((string)$text), (int)$weight);
+    // Synthetic sources
+    foreach ($model->searchableSyntheticSources() as $source) {
+        $weight = (int) ($source['weight'] ?? 0);
+        $text   = trim((string) ($source['text'] ?? ''));
+        if ($text !== '' && $weight > 0) {
+            $segments[] = $this->repeat(strip_tags($text), $weight);
         }
     }
 
     // Field elements
     $elements = $model->searchableElements();
-    $model->loadMissing(['fieldValues.field.fieldType', 'entryRelationships.relatedEntry']);
+    $model->loadMissing('fieldValues.field.fieldType');
 
     foreach ($elements as $element) {
         if (! $element->is_searchable) {
@@ -370,8 +460,12 @@ public function index(Model $model): void
             continue;
         }
 
-        $text = $this->extractText($model, $field);
-        if ($text !== null) {
+        // Use the existing FieldValue resolution path -- same mechanism as
+        // everywhere else in the application.
+        $fv   = $model->fieldValues->first(fn($v) => $v->field_id === $field->id);
+        $text = $field->fieldType->instance()->toSearchText($fv?->resolvedValue());
+
+        if ($text !== null && $text !== '') {
             $segments[] = $this->repeat($text, $weight);
         }
     }
@@ -386,7 +480,7 @@ public function index(Model $model): void
         [
             'owner_id'          => $ownerId,
             'owner_type'        => $ownerType,
-            'subtype_id'        => $model->getAttribute('entry_type_id'),
+            'subtype_id'        => $model->searchSubtypeId(),
             'keywords'          => implode(' ', $segments),
             'search_updated_at' => now(),
         ]
@@ -402,83 +496,9 @@ private function repeat(string $text, int $times): string
 
 ---
 
-## 5. Dispatch Points
+## 5. Jobs
 
-The `Searchable` trait exposes `reindex()` and `purgeSearchIndex()`, but wires
-no model observers. Dispatch is the responsibility of the service and repository
-layer for every type, because write paths for all Fieldable models follow the same
-pattern: the model row is saved first, then related data (fields, roles, categories)
-is written after.
-
-### 5.1 Entry -- `EntryRepository`
-
-```php
-// create() -- after $entryType->afterCreate()
-$entry->reindex();
-return $entry;
-
-// applyData() -- after $typeObject->afterUpdate()
-$entry->reindex();
-return $entry->refresh();
-
-// setFieldValue() -- at its end
-$entry->reindex();
-
-// delete()
-$entry->purgeSearchIndex();
-return (bool) $entry->delete();
-```
-
-### 5.2 User -- `UserService`
-
-```php
-// create() -- end of method
-return tap($user->refresh(), fn($u) => $u->reindex());
-
-// update() -- end of method
-return tap($user->refresh(), fn($u) => $u->reindex());
-
-// delete()
-$user->purgeSearchIndex();
-return (bool) $user->delete();
-```
-
-### 5.3 Category, Media, and future types
-
-Same pattern: call `$model->reindex()` at the end of each write method in the
-relevant service or repository, after all related data has been committed. Call
-`$model->purgeSearchIndex()` in the delete path.
-
-### 5.4 Owner-level cascade cleanup
-
-When an owner (EntryGroup, CategoryGroup, etc.) is deleted, its members are
-removed by a DB-level cascade that fires no Eloquent events on the child models.
-An observer on the owner model handles cleanup before the cascade fires, using
-the `owner_id` / `owner_type` columns already in the index:
-
-```php
-// App\Observers\EntryGroupObserver
-public function deleting(EntryGroup $group): void
-{
-    SearchIndex::where('owner_type', 'entry_group')
-               ->where('owner_id', $group->getKey())
-               ->delete();
-}
-
-// App\Observers\CategoryGroupObserver
-public function deleting(CategoryGroup $group): void
-{
-    SearchIndex::where('owner_type', 'category_group')
-               ->where('owner_id', $group->getKey())
-               ->delete();
-}
-```
-
----
-
-## 6. Jobs
-
-### 6.1 `IndexModelJob`
+### 5.1 `IndexModelJob`
 
 ```php
 public function handle(Indexer $indexer): void
@@ -508,55 +528,129 @@ public function handle(Indexer $indexer): void
 }
 ```
 
-Retries: 3, exponential backoff. Queue set via `->onQueue()` at dispatch time
-in `Searchable::reindex()`.
+Retries: 3, exponential backoff. Queue set via `->onQueue()` in `Searchable::reindex()`.
 
-### 6.2 `ReindexOwnerJob`
-
-Replaces the Entry-specific `ReindexGroupJob`. Accepts any `(indexable_type,
-owner_type, owner_id)` triple and chunks through the matching `search_index` rows
-to re-dispatch `IndexModelJob` for each.
+### 5.2 `ReindexOwnerJob`
 
 ```php
+public function __construct(
+    public readonly string  $morphClass,
+    public readonly ?int    $ownerId,     // null = reindex all of this type (e.g. all Users)
+    public readonly int     $chunkSize = 200,
+) {}
+
 public function handle(): void
 {
-    // Resolve model class from morph alias
-    $modelClass = Relation::getMorphedModel($this->indexableType);
+    $modelClass = Relation::getMorphedModel($this->morphClass);
+
+    if (! $modelClass || ! class_exists($modelClass)) {
+        $this->fail(new \RuntimeException("Unresolvable morph alias: {$this->morphClass}"));
+        return;
+    }
+
+    $ownerKey = $modelClass::searchOwnerKey();
+
+    if ($this->ownerId !== null && $ownerKey === null) {
+        $this->fail(new \RuntimeException(
+            "{$modelClass} has no searchOwnerKey() but ReindexOwnerJob received owner_id={$this->ownerId}"
+        ));
+        return;
+    }
 
     $modelClass::query()
-        ->when($this->ownerId, function ($q) use ($modelClass) {
-            // Use the model's natural FK column (entry_group_id, category_group_id, etc.)
-            // Each model registers this via a static searchOwnerKey() method.
-            $q->where($modelClass::searchOwnerKey(), $this->ownerId);
-        })
+        ->when($this->ownerId !== null, fn($q) => $q->where($ownerKey, $this->ownerId))
         ->select('id')
         ->chunkById($this->chunkSize, function ($chunk) {
             foreach ($chunk as $model) {
-                IndexModelJob::dispatch($this->indexableType, $model->id)
+                IndexModelJob::dispatch($this->morphClass, $model->id)
                     ->onQueue(config('search.queue', 'search'));
             }
         });
 }
 ```
 
-`searchOwnerKey()` is a static method on `Searchable` (defaulting to `null`) that
-Entry overrides to return `'entry_group_id'`, Category to `'category_group_id'`,
-etc. `ReindexOwnerJob` uses it to scope the chunk query correctly.
+### 5.3 `ReindexAllJob`
 
-### 6.3 `ReindexAllJob`
+Dispatches one `ReindexOwnerJob` per registered Searchable type. For owner-scoped
+types (Entry, Category) it fans out one job per owner (one per EntryGroup, one per
+CategoryGroup). For owner-less types (User) it dispatches a single job with
+`ownerId = null`.
 
-Iterates all registered Searchable types, retrieves all owners (or dispatches
-directly for owner-less types like User), and fans out `ReindexOwnerJob` calls.
+### 5.4 Owner-level cascade cleanup
+
+Owner models (EntryGroup, CategoryGroup) get observers that clean up `search_index`
+before the DB cascade removes their members:
+
+```php
+// App\Observers\EntryGroupObserver
+public function deleting(EntryGroup $group): void
+{
+    SearchIndex::where('owner_type', 'entry_group')
+               ->where('owner_id', $group->getKey())
+               ->delete();
+}
+
+// App\Observers\CategoryGroupObserver  (add when Category becomes Searchable)
+public function deleting(CategoryGroup $group): void
+{
+    SearchIndex::where('owner_type', 'category_group')
+               ->where('owner_id', $group->getKey())
+               ->delete();
+}
+```
+
+---
+
+## 6. Dispatch Points
+
+No model observers. Dispatch is explicit from service and repository layer.
+
+### 6.1 Entry -- `EntryRepository`
+
+```php
+// create()   -- after $entryType->afterCreate()
+$entry->reindex();
+return $entry;
+
+// applyData() -- after $typeObject->afterUpdate()
+$entry->reindex();
+return $entry->refresh();
+
+// setFieldValue() -- at its end
+$entry->reindex();
+
+// delete()
+$entry->purgeSearchIndex();
+return (bool) $entry->delete();
+```
+
+### 6.2 User -- `UserService`
+
+```php
+// create()
+return tap($user->refresh(), fn($u) => $u->reindex());
+
+// update()
+return tap($user->refresh(), fn($u) => $u->reindex());
+
+// delete()
+$user->purgeSearchIndex();
+return (bool) $user->delete();
+```
+
+### 6.3 Category and future types
+
+Same pattern: `reindex()` at the end of each write method after all related data
+has been committed; `purgeSearchIndex()` in the delete path.
 
 ---
 
 ## 7. Collections
 
-### 7.1 No field-weight overrides at the collection level
+### 7.1 No field-weight overrides at collection level
 
-Weights are editorial configuration set on `TabElement` within each layout.
-Collections are pure scoping constructs: "search these types, within these owners,
-optionally filtered to these subtypes." No weight overrides, no nondeterminism.
+Weights are set on `TabElement` within each layout -- one authoritative setting
+per field per context. Collections are pure scoping constructs.
 
 ### 7.2 Collection query
 
@@ -568,7 +662,7 @@ if ($term === '') {
     return collect();
 }
 
-$scopes = $collection->scopes; // eager-loaded scope rows
+$scopes = $collection->scopes; // eager-loaded
 
 return SearchIndex::query()
     ->whereRaw('MATCH(keywords) AGAINST(? IN BOOLEAN MODE)', [$term])
@@ -577,7 +671,8 @@ return SearchIndex::query()
             $query->orWhere(function ($q) use ($scope) {
                 $q->where('indexable_type', $scope->indexable_type);
 
-                if ($scope->owner_id) {
+                // owner_id 0 and owner_type '' are sentinels meaning "no owner"
+                if ($scope->owner_id > 0) {
                     $q->where('owner_type', $scope->owner_type)
                       ->where('owner_id', $scope->owner_id);
                 }
@@ -596,8 +691,7 @@ return SearchIndex::query()
     ->paginate($perPage);
 ```
 
-The outer `where(function(...))` groups all scope branches so they AND with MATCH
-rather than appending as independent top-level OR conditions.
+The outer `where(function(...))` groups all scope branches so they AND with MATCH.
 
 ---
 
@@ -608,24 +702,22 @@ rather than appending as independent top-level OR conditions.
 ```php
 public static function normaliseTerm(string $raw): string
 {
-    // Strip all FULLTEXT boolean-mode operators: + - > < ( ) ~ * " @
+    // Remove all FULLTEXT boolean-mode operators.
     $stripped = preg_replace('/[+\-><()~*"@]+/', ' ', $raw);
     return trim(preg_replace('/\s+/', ' ', $stripped));
 }
 ```
 
-Operators are removed, not escaped. This is the correct default for user-facing
-search. Wildcard and phrase queries are not available in this mode.
+Operators are removed, not escaped. No wildcard or phrase support in this mode.
 
 ### 8.2 Enhanced mode (opt-in)
 
 ```php
 public static function normaliseTermEnhanced(string $raw): string
 {
-    // Allow * (suffix wildcard) and " (phrase delimiter).
+    // Allow * (suffix wildcard) and paired " (phrase delimiter).
     $stripped = preg_replace('/[+\-><()~@]+/', ' ', $raw);
 
-    // Strip unpaired trailing quote.
     if (substr_count($stripped, '"') % 2 !== 0) {
         $stripped = rtrim($stripped, '"');
     }
@@ -634,7 +726,7 @@ public static function normaliseTermEnhanced(string $raw): string
 }
 ```
 
-Callers must explicitly use this method. The default is never implicitly promoted.
+Call sites must opt in explicitly.
 
 ---
 
@@ -645,14 +737,12 @@ return [
 
     'queue' => env('SEARCH_QUEUE', 'search'),
 
-    // Weights for synthetic sources. Entry Groups can override via search_settings.
     'weights' => [
         'title'      => 5,
         'handle'     => 1,
         'categories' => 2,
     ],
 
-    // Weight for a field element with no search_weight set.
     'default_field_weight' => 1,
 
     'reindex_chunk_size' => 200,
@@ -677,9 +767,9 @@ return [
 | Phase | Deliverable |
 |-------|-------------|
 | 1 | Migrations |
-| 2 | `config/search.php`; `SearchIndex` model; `Searchable` trait with all three methods; `Entry`, `User`, `Category` overrides |
+| 2 | `config/search.php`; `SearchIndex` model; `Searchable` trait with full contract; `Entry`, `User`, `Category` implementations |
 | 3 | `AbstractField::toSearchText()` + type overrides; `Indexer`; `IndexModelJob`; `ReindexOwnerJob`; `ReindexAllJob` |
-| 4 | Dispatch wired in `EntryRepository`, `UserService`, and category/media write paths; owner observer cleanup; `search:reindex` Artisan command |
+| 4 | Dispatch wired in `EntryRepository`, `UserService`, category write paths; owner observer cleanup; `search:reindex` Artisan command |
 | 5 | `Query` builder with `normaliseTerm()` and `forCollection()`; end-to-end keyword search |
 | 6 | `SearchCollection` + scopes model; collection-scoped search |
 | 7 | Admin UI: element-level search settings in layout editor; Collection management |
@@ -688,9 +778,10 @@ return [
 
 ## 12. Explicitly Out of Scope
 
-- Faceted aggregation -- query source models directly.
-- Typo tolerance / synonyms -- Meilisearch or Typesense can replace `Indexer` and
-  `Query` later without touching anything else.
-- Per-locale index -- add `locale` as a third unique key dimension when needed.
-- Relevance explanation UI -- `search_updated_at` shows freshness; weights are
-  visible in the layout editor.
+- **Media** -- the contract already accommodates it. When Media gains a field layout,
+  adding it to search is: apply trait, implement five methods, wire dispatch. No
+  schema or Indexer changes required.
+- **Faceted aggregation** -- query source models directly.
+- **Typo tolerance / synonyms** -- Meilisearch or Typesense can replace `Indexer`
+  and `Query` later without touching anything else.
+- **Per-locale index** -- add `locale` as a third unique key dimension when needed.
