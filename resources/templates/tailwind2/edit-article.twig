@@ -4,26 +4,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Edit Article</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* ── Primary sidebar submenu (CSS accordion) ─────────────────── */
-        .nav-group input[type="checkbox"] { display: none; }
-        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
-        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
-        .nav-subitems { display: none; }
-        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
-
-        /* ── Mobile: primary sidebar slide-in ────────────────────────── */
-        #sidebar-toggle { display: none; }
-        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
-        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
-
-        /* ── Mobile: secondary nav accordion ─────────────────────────── */
-        #secnav-toggle { display: none; }
-        #secnav-toggle:checked ~ .app-shell #secondary-nav-panel { display: block; }
-        #secnav-toggle:checked ~ .app-shell .secnav-chevron { transform: rotate(180deg); }
-        .secnav-chevron { transition: transform 0.15s ease; display: inline-block; }
-    </style>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
 
@@ -456,46 +437,6 @@
                                 <p class="mt-2 text-xs text-slate-400">Click a tag to select it. Selected tags are highlighted and submitted as hidden fields.</p>
                             </div>
                         </div>
-                        <script>
-                        (function () {
-                            var ALL_TAGS = ['announcement','api','bugfix','design','devops','editorial',
-                                            'engineering','feature','mobile','operations','performance',
-                                            'planning','product','release','security','support','tutorial','update'];
-                            var selected = new Set(['editorial','planning','operations']);
-                            var cloud  = document.getElementById('tag-cloud-edit');
-                            var inputs = document.getElementById('tag-inputs-edit');
-                            var search = document.getElementById('tag-search-edit');
-                            function render() {
-                                var f = search.value.toLowerCase();
-                                cloud.innerHTML = '';
-                                inputs.innerHTML = '';
-                                ALL_TAGS.forEach(function (tag) {
-                                    if (f && tag.indexOf(f) === -1) return;
-                                    var on = selected.has(tag);
-                                    var btn = document.createElement('button');
-                                    btn.type = 'button';
-                                    btn.textContent = tag;
-                                    btn.className = on
-                                        ? 'rounded-full px-2.5 py-1 text-xs font-medium bg-emerald-600 text-white ring-1 ring-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer'
-                                        : 'rounded-full px-2.5 py-1 text-xs font-medium bg-slate-100 text-slate-600 ring-1 ring-slate-200 hover:bg-slate-200 transition-colors cursor-pointer';
-                                    btn.addEventListener('click', function () {
-                                        if (selected.has(tag)) { selected.delete(tag); } else { selected.add(tag); }
-                                        render();
-                                    });
-                                    cloud.appendChild(btn);
-                                    if (on) {
-                                        var inp = document.createElement('input');
-                                        inp.type = 'hidden';
-                                        inp.name = 'tags[]';
-                                        inp.value = tag;
-                                        inputs.appendChild(inp);
-                                    }
-                                });
-                            }
-                            search.addEventListener('input', render);
-                            render();
-                        })();
-                        </script>
 
                         <!-- Entry meta info card (edit-only) -->
                         <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">

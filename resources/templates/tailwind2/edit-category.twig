@@ -4,23 +4,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Edit Category: Engineering</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .nav-group input[type="checkbox"] { display: none; }
-        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
-        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
-        .nav-subitems { display: none; }
-        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        #sidebar-toggle { display: none; }
-        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
-        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
-        #secnav-toggle { display: none; }
-        #secnav-toggle:checked ~ .app-shell #secondary-nav-panel { display: block; }
-        #secnav-toggle:checked ~ .app-shell .secnav-chevron { transform: rotate(180deg); }
-        .secnav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        .unsaved-bar { display: none; }
-        .unsaved-bar.visible { display: flex; }
-    </style>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
 
@@ -440,73 +424,6 @@
 
     </div><!-- /main column -->
 </div><!-- /app-shell -->
-
-<script>
-(function () {
-    var form = document.getElementById('edit-form');
-    var unsavedBar = document.getElementById('unsaved-bar');
-    var discardBtn = document.getElementById('discard-btn');
-    var isDirty = false;
-    var originalData = new FormData(form);
-
-    function markDirty() {
-        if (!isDirty) {
-            isDirty = true;
-            unsavedBar.classList.add('visible');
-        }
-    }
-
-    form.querySelectorAll('input, select, textarea').forEach(function (el) {
-        el.addEventListener('input', markDirty);
-        el.addEventListener('change', markDirty);
-    });
-
-    form.addEventListener('submit', function () {
-        isDirty = false;
-        unsavedBar.classList.remove('visible');
-    });
-
-    discardBtn.addEventListener('click', function () {
-        if (confirm('Discard all unsaved changes?')) {
-            form.reset();
-            isDirty = false;
-            unsavedBar.classList.remove('visible');
-        }
-    });
-
-    // Char counters
-    function bindCount(id, countId, max) {
-        var el = document.getElementById(id);
-        var counter = document.getElementById(countId);
-        if (!el || !counter) return;
-        function update() {
-            var len = el.value.length;
-            counter.textContent = len + ' / ' + max;
-            counter.className = 'tabular-nums ' + (len > max * 0.9 ? 'text-amber-600' : 'text-slate-400');
-        }
-        el.addEventListener('input', update);
-        update();
-    }
-    bindCount('meta_title', 'meta-title-count', 70);
-    bindCount('meta_description', 'meta-desc-count', 160);
-
-    // Live SERP
-    document.getElementById('meta_title').addEventListener('input', function () {
-        document.getElementById('serp-title').textContent = this.value || document.getElementById('name').value || 'Category name';
-    });
-    document.getElementById('meta_description').addEventListener('input', function () {
-        document.getElementById('serp-desc').textContent = this.value || 'Meta description.';
-    });
-    document.getElementById('slug').addEventListener('input', function () {
-        document.getElementById('serp-url').textContent = 'https://example.com/category/' + (this.value || 'engineering');
-    });
-
-    // Warn on unload if dirty
-    window.addEventListener('beforeunload', function (e) {
-        if (isDirty) { e.preventDefault(); e.returnValue = ''; }
-    });
-})();
-</script>
 
 </body>
 </html>

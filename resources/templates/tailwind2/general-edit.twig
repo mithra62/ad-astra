@@ -4,19 +4,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Edit General Item</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .nav-group input[type="checkbox"] { display: none; }
-        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
-        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
-        .nav-subitems { display: none; }
-        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        #sidebar-toggle { display: none; }
-        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
-        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
-        .unsaved-bar { display: none; }
-        .unsaved-bar.visible { display: flex; }
-    </style>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
 
@@ -206,28 +194,6 @@
         </footer>
     </div>
 </div>
-
-<script>
-(function () {
-    var form = document.getElementById('general-form');
-    var unsavedBar = document.getElementById('unsaved-bar');
-    var name = document.getElementById('name');
-    var handle = document.getElementById('handle');
-
-    form.querySelectorAll('input, select, textarea').forEach(function (el) {
-        el.addEventListener('input', function () { unsavedBar.classList.add('visible'); });
-        el.addEventListener('change', function () { unsavedBar.classList.add('visible'); });
-    });
-
-    name.addEventListener('input', function () {
-        var slug = this.value.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-        if (!handle.dataset.manual) handle.value = slug;
-        this.classList.toggle('border-red-300', this.value.trim() === '');
-        document.getElementById('name-error').classList.toggle('hidden', this.value.trim() !== '');
-    });
-    handle.addEventListener('input', function () { this.dataset.manual = '1'; });
-})();
-</script>
 
 </body>
 </html>

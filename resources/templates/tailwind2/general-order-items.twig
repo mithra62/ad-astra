@@ -4,22 +4,9 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Order General Items</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <style>
-        .nav-group input[type="checkbox"] { display: none; }
-        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
-        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
-        .nav-subitems { display: none; }
-        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        #sidebar-toggle { display: none; }
-        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
-        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
-        .drag-handle { cursor: grab; }
-        .drag-handle:active { cursor: grabbing; }
-        .sortable-ghost { opacity: 0.45; background: #f0fdf4; }
-        .position-changed { background-color: #d1fae5; color: #065f46; }
-    </style>
+
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
 
@@ -159,78 +146,6 @@
         </footer>
     </div>
 </div>
-
-<script>
-(function () {
-    var list = document.getElementById('sortable-list');
-    var resetBtn = document.getElementById('reset-btn');
-    var changedCount = document.getElementById('changed-count');
-    var noChangesLabel = document.getElementById('no-changes-label');
-    var toast = document.getElementById('toast');
-    var originalOrder = Array.from(list.querySelectorAll('.item-row')).map(function (row) { return row.dataset.id; });
-
-    Sortable.create(list, {
-        handle: '.drag-handle',
-        animation: 150,
-        ghostClass: 'sortable-ghost',
-        onEnd: function () {
-            refresh();
-            updateDirtyState();
-        }
-    });
-
-    list.addEventListener('click', function (e) {
-        var btn = e.target.closest('.move-up, .move-down');
-        if (!btn) return;
-        var row = btn.closest('.item-row');
-        var rows = Array.from(list.querySelectorAll('.item-row'));
-        var index = rows.indexOf(row);
-        if (btn.classList.contains('move-up') && index > 0) list.insertBefore(row, rows[index - 1]);
-        if (btn.classList.contains('move-down') && index < rows.length - 1) list.insertBefore(rows[index + 1], row);
-        refresh();
-        updateDirtyState();
-    });
-
-    function refresh() {
-        Array.from(list.querySelectorAll('.item-row')).forEach(function (row, index) {
-            var badge = row.querySelector('.position-badge');
-            badge.textContent = index + 1;
-            badge.classList.toggle('position-changed', originalOrder.indexOf(row.dataset.id) !== index);
-        });
-    }
-
-    function updateDirtyState() {
-        var current = Array.from(list.querySelectorAll('.item-row')).map(function (row) { return row.dataset.id; });
-        var moved = current.filter(function (id, index) { return id !== originalOrder[index]; }).length;
-        resetBtn.classList.toggle('hidden', moved === 0);
-        changedCount.classList.toggle('hidden', moved === 0);
-        noChangesLabel.classList.toggle('hidden', moved > 0);
-        changedCount.textContent = moved + ' item' + (moved === 1 ? '' : 's') + ' moved';
-    }
-
-    resetBtn.addEventListener('click', function () {
-        var rowMap = {};
-        Array.from(list.querySelectorAll('.item-row')).forEach(function (row) { rowMap[row.dataset.id] = row; });
-        originalOrder.forEach(function (id) { list.appendChild(rowMap[id]); });
-        refresh();
-        updateDirtyState();
-        showToast('Order reset.');
-    });
-
-    document.getElementById('save-btn').addEventListener('click', function () {
-        originalOrder = Array.from(list.querySelectorAll('.item-row')).map(function (row) { return row.dataset.id; });
-        refresh();
-        updateDirtyState();
-        showToast('General item order saved successfully.');
-    });
-
-    function showToast(message) {
-        toast.className = 'rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 shadow-sm';
-        toast.textContent = message;
-        setTimeout(function () { toast.classList.add('hidden'); }, 4000);
-    }
-})();
-</script>
 
 </body>
 </html>

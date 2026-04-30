@@ -1,4 +1,5 @@
 import './bootstrap';
+import '../templates/tailwind2/tailwind2.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const panel = document.querySelector('[data-vite-action="panel"]');

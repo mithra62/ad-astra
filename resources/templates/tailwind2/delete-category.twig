@@ -4,24 +4,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Delete Category: Engineering</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .nav-group input[type="checkbox"] { display: none; }
-        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
-        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
-        .nav-subitems { display: none; }
-        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        #sidebar-toggle { display: none; }
-        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
-        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
-        #secnav-toggle { display: none; }
-        #secnav-toggle:checked ~ .app-shell #secondary-nav-panel { display: block; }
-        #secnav-toggle:checked ~ .app-shell .secnav-chevron { transform: rotate(180deg); }
-        .secnav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        /* Confirm input shake animation */
-        @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-        .shake { animation: shake 0.4s ease; }
-    </style>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
 
@@ -397,47 +380,6 @@
 
     </div><!-- /main column -->
 </div><!-- /app-shell -->
-
-<script>
-(function () {
-    var REQUIRED = 'Engineering';
-    var confirmInput = document.getElementById('confirm_name');
-    var deleteBtn    = document.getElementById('delete-btn');
-    var confirmError = document.getElementById('confirm-error');
-
-    // Enable delete button only when name matches exactly
-    confirmInput.addEventListener('input', function () {
-        var match = this.value === REQUIRED;
-        deleteBtn.disabled = !match;
-        confirmError.classList.toggle('hidden', match || this.value === '');
-    });
-
-    // Shake on submit if somehow still disabled (safety net)
-    document.getElementById('delete-form').addEventListener('submit', function (e) {
-        if (confirmInput.value !== REQUIRED) {
-            e.preventDefault();
-            confirmInput.classList.add('shake', 'border-red-400');
-            confirmInput.addEventListener('animationend', function () {
-                confirmInput.classList.remove('shake');
-            }, { once: true });
-        }
-    });
-
-    // Show/hide reassign select
-    document.querySelectorAll('input[name="article_action"]').forEach(function (radio) {
-        radio.addEventListener('change', function () {
-            document.getElementById('reassign-select').classList.toggle('hidden', this.value !== 'reassign');
-        });
-    });
-
-    // Show/hide reparent select
-    document.querySelectorAll('input[name="subcategory_action"]').forEach(function (radio) {
-        radio.addEventListener('change', function () {
-            document.getElementById('reparent-select').classList.toggle('hidden', this.value !== 'reparent');
-        });
-    });
-})();
-</script>
 
 </body>
 </html>

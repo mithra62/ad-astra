@@ -4,26 +4,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Delete Article</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* ── Primary sidebar submenu (CSS accordion) ─────────────────── */
-        .nav-group input[type="checkbox"] { display: none; }
-        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
-        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
-        .nav-subitems { display: none; }
-        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
-
-        /* ── Mobile: primary sidebar slide-in ────────────────────────── */
-        #sidebar-toggle { display: none; }
-        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
-        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
-
-        /* ── Mobile: secondary nav accordion ─────────────────────────── */
-        #secnav-toggle { display: none; }
-        #secnav-toggle:checked ~ .app-shell #secondary-nav-panel { display: block; }
-        #secnav-toggle:checked ~ .app-shell .secnav-chevron { transform: rotate(180deg); }
-        .secnav-chevron { transition: transform 0.15s ease; display: inline-block; }
-    </style>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
 

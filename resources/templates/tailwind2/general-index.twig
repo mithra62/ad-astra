@@ -4,23 +4,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>General Items</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .nav-group input[type="checkbox"] { display: none; }
-        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
-        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
-        .nav-subitems { display: none; }
-        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        #sidebar-toggle { display: none; }
-        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
-        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
-        #secnav-toggle { display: none; }
-        #secnav-toggle:checked ~ .app-shell #secondary-nav-panel { display: block; }
-        #secnav-toggle:checked ~ .app-shell .secnav-chevron { transform: rotate(180deg); }
-        .secnav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        .row-actions { opacity: 0; transition: opacity 0.1s; }
-        tr:hover .row-actions { opacity: 1; }
-    </style>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
 
@@ -227,41 +211,6 @@
         </footer>
     </div>
 </div>
-
-<script>
-(function () {
-    var search = document.getElementById('item-search');
-    var type = document.getElementById('type-filter');
-    var selectAll = document.getElementById('select-all');
-    var rowCbs = document.querySelectorAll('.row-cb');
-
-    function filterRows() {
-        var q = search.value.toLowerCase();
-        var t = type.value;
-        var visible = 0;
-        document.querySelectorAll('#item-tbody tr').forEach(function (row) {
-            var show = (!q || (row.dataset.name || '').indexOf(q) !== -1) && (!t || row.dataset.type === t);
-            row.style.display = show ? '' : 'none';
-            if (show) visible++;
-        });
-        document.getElementById('row-count').textContent = 'Showing ' + visible + ' item' + (visible === 1 ? '' : 's');
-    }
-
-    search.addEventListener('input', filterRows);
-    type.addEventListener('change', filterRows);
-    selectAll.addEventListener('change', function () {
-        rowCbs.forEach(function (cb) { cb.checked = selectAll.checked; });
-    });
-
-    window.applyBulk = function () {
-        var action = document.getElementById('bulk-action').value;
-        var checked = Array.from(document.querySelectorAll('.row-cb:checked'));
-        if (!action) { alert('Please select an action.'); return; }
-        if (!checked.length) { alert('Please select at least one item.'); return; }
-        alert(action.charAt(0).toUpperCase() + action.slice(1) + ' ' + checked.length + ' item' + (checked.length === 1 ? '' : 's') + ' (stub).');
-    };
-})();
-</script>
 
 </body>
 </html>

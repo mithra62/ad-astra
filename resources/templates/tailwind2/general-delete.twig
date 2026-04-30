@@ -4,19 +4,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Delete General Item</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .nav-group input[type="checkbox"] { display: none; }
-        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
-        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
-        .nav-subitems { display: none; }
-        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        #sidebar-toggle { display: none; }
-        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
-        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
-        @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-        .shake { animation: shake 0.4s ease; }
-    </style>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
 
@@ -161,27 +149,6 @@
         </footer>
     </div>
 </div>
-
-<script>
-(function () {
-    var required = 'Published';
-    var input = document.getElementById('confirm_name');
-    var button = document.getElementById('delete-btn');
-    var error = document.getElementById('confirm-error');
-    input.addEventListener('input', function () {
-        var match = input.value === required;
-        button.disabled = !match;
-        error.classList.toggle('hidden', match || input.value === '');
-    });
-    document.getElementById('delete-form').addEventListener('submit', function (e) {
-        if (input.value !== required) {
-            e.preventDefault();
-            input.classList.add('shake', 'border-red-400');
-            input.addEventListener('animationend', function () { input.classList.remove('shake'); }, { once: true });
-        }
-    });
-})();
-</script>
 
 </body>
 </html>

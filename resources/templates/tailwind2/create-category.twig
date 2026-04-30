@@ -4,21 +4,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Create Category</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .nav-group input[type="checkbox"] { display: none; }
-        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
-        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
-        .nav-subitems { display: none; }
-        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        #sidebar-toggle { display: none; }
-        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
-        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
-        #secnav-toggle { display: none; }
-        #secnav-toggle:checked ~ .app-shell #secondary-nav-panel { display: block; }
-        #secnav-toggle:checked ~ .app-shell .secnav-chevron { transform: rotate(180deg); }
-        .secnav-chevron { transition: transform 0.15s ease; display: inline-block; }
-    </style>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
 
@@ -354,49 +340,6 @@
 
     </div><!-- /main column -->
 </div><!-- /app-shell -->
-
-<script>
-(function () {
-    // Auto-slug
-    document.getElementById('name').addEventListener('input', function () {
-        var slug = this.value.toLowerCase().trim()
-            .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-        var slugEl = document.getElementById('slug');
-        if (!slugEl.dataset.manual) slugEl.value = slug;
-        var serpTitle = document.getElementById('serp-title');
-        var metaTitle = document.getElementById('meta_title');
-        if (!metaTitle.value) serpTitle.textContent = this.value || 'Category name will appear here';
-        document.getElementById('serp-url').textContent = 'https://example.com/category/' + (slug || 'your-slug');
-    });
-    document.getElementById('slug').addEventListener('input', function () {
-        this.dataset.manual = '1';
-        document.getElementById('serp-url').textContent = 'https://example.com/category/' + (this.value || 'your-slug');
-    });
-
-    // Char counters
-    function bindCount(id, countId, max) {
-        var el = document.getElementById(id);
-        var counter = document.getElementById(countId);
-        if (!el || !counter) return;
-        el.addEventListener('input', function () {
-            var len = this.value.length;
-            counter.textContent = len + ' / ' + max;
-            counter.className = 'tabular-nums ' + (len > max * 0.9 ? 'text-amber-600' : 'text-slate-400');
-        });
-    }
-    bindCount('meta_title', 'meta-title-count', 70);
-    bindCount('meta_description', 'meta-desc-count', 160);
-
-    document.getElementById('meta_title').addEventListener('input', function () {
-        document.getElementById('serp-title').textContent =
-            this.value || document.getElementById('name').value || 'Category name will appear here';
-    });
-    document.getElementById('meta_description').addEventListener('input', function () {
-        document.getElementById('serp-desc').textContent =
-            this.value || 'Your meta description will appear here.';
-    });
-})();
-</script>
 
 </body>
 </html>

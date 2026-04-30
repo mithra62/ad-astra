@@ -4,25 +4,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Categories</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .nav-group input[type="checkbox"] { display: none; }
-        .nav-group input[type="checkbox"]:checked ~ .nav-subitems { display: block; }
-        .nav-group input[type="checkbox"]:checked ~ label .nav-chevron { transform: rotate(90deg); }
-        .nav-subitems { display: none; }
-        .nav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        #sidebar-toggle { display: none; }
-        #sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
-        #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
-        #secnav-toggle { display: none; }
-        #secnav-toggle:checked ~ .app-shell #secondary-nav-panel { display: block; }
-        #secnav-toggle:checked ~ .app-shell .secnav-chevron { transform: rotate(180deg); }
-        .secnav-chevron { transition: transform 0.15s ease; display: inline-block; }
-        .child-row td:first-child { padding-left: 2.5rem; }
-        tr.selected { background-color: #f0fdf4; }
-        .row-actions { opacity: 0; transition: opacity 0.1s; }
-        tr:hover .row-actions { opacity: 1; }
-    </style>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
 
@@ -485,68 +467,6 @@
 
     </div><!-- /main column -->
 </div><!-- /app-shell -->
-
-<script>
-(function () {
-    // Select-all checkbox
-    var selectAll = document.getElementById('select-all');
-    var rowCbs = document.querySelectorAll('.row-cb');
-    var selectedCount = document.getElementById('selected-count');
-    var selectedNum = document.getElementById('selected-num');
-
-    function updateSelectedCount() {
-        var n = document.querySelectorAll('.row-cb:checked').length;
-        selectedNum.textContent = n;
-        selectedCount.classList.toggle('hidden', n === 0);
-    }
-
-    selectAll.addEventListener('change', function () {
-        rowCbs.forEach(function (cb) { cb.checked = selectAll.checked; });
-        updateSelectedCount();
-    });
-    rowCbs.forEach(function (cb) {
-        cb.addEventListener('change', function () {
-            selectAll.checked = Array.from(rowCbs).every(function (c) { return c.checked; });
-            selectAll.indeterminate = !selectAll.checked && Array.from(rowCbs).some(function (c) { return c.checked; });
-            updateSelectedCount();
-        });
-    });
-
-    // Live search filter
-    document.getElementById('cat-search').addEventListener('input', function () {
-        var q = this.value.toLowerCase();
-        var rows = document.querySelectorAll('#cat-tbody tr');
-        var visible = 0;
-        rows.forEach(function (row) {
-            var name = (row.dataset.name || '').toLowerCase();
-            var show = !q || name.indexOf(q) !== -1;
-            row.style.display = show ? '' : 'none';
-            if (show) visible++;
-        });
-        document.getElementById('row-count').textContent = 'Showing ' + visible + ' categor' + (visible === 1 ? 'y' : 'ies');
-    });
-
-    // Auto-slug from name
-    document.getElementById('cat_name').addEventListener('input', function () {
-        var slug = this.value.toLowerCase().trim()
-            .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-        var slugEl = document.getElementById('cat_slug');
-        if (!slugEl.dataset.manual) slugEl.value = slug;
-    });
-    document.getElementById('cat_slug').addEventListener('input', function () {
-        this.dataset.manual = '1';
-    });
-
-    // Bulk action stub
-    window.applyBulk = function () {
-        var action = document.getElementById('bulk-action').value;
-        var checked = Array.from(document.querySelectorAll('.row-cb:checked')).map(function (cb) { return cb.value; });
-        if (!action) { alert('Please select an action.'); return; }
-        if (!checked.length) { alert('Please select at least one category.'); return; }
-        alert(action.charAt(0).toUpperCase() + action.slice(1) + ' ' + checked.length + ' categor' + (checked.length === 1 ? 'y' : 'ies') + ' (stub).');
-    };
-})();
-</script>
 
 </body>
 </html>
