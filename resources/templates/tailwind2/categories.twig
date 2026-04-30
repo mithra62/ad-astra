@@ -154,65 +154,8 @@
                     </a>
                 </div>
 
-                <!-- Split layout: quick-add left, table right -->
-                <div class="flex flex-col gap-5 lg:grid lg:grid-cols-[22rem_1fr] lg:items-start">
-
-                    <!-- ── Quick Add card ──────────────────────────────── -->
-                    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                        <div class="border-b border-slate-200 px-5 py-4">
-                            <h3 class="text-sm font-semibold text-slate-800">Add New Category</h3>
-                            <p class="mt-0.5 text-xs text-slate-500">Quick-add a category without leaving this page.</p>
-                        </div>
-                        <form id="quick-add-form" method="POST" action="#" class="divide-y divide-slate-100">
-                            <div class="px-5 py-4">
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="cat_name">Name <span class="text-red-500">*</span></label>
-                                <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                                       id="cat_name" name="name" type="text" placeholder="e.g. Engineering" required>
-                                <p class="mt-1 text-xs text-slate-400">The name is how it appears on your site.</p>
-                            </div>
-                            <div class="px-5 py-4">
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="cat_slug">Slug</label>
-                                <div class="flex rounded-md shadow-sm">
-                                    <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-xs text-slate-500">/category/</span>
-                                    <input class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                                           id="cat_slug" name="slug" type="text" placeholder="engineering">
-                                </div>
-                                <p class="mt-1 text-xs text-slate-400">Auto-generated from name. Lowercase, hyphens only.</p>
-                            </div>
-                            <div class="px-5 py-4">
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="cat_parent">Parent Category</label>
-                                <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                                        id="cat_parent" name="parent_id">
-                                    <option value="">— None (top-level) —</option>
-                                    <option value="1">Engineering</option>
-                                    <option value="2">Product</option>
-                                    <option value="3">Company</option>
-                                    <option value="4">Operations</option>
-                                    <option value="5">Security</option>
-                                    <option value="6">Tutorials</option>
-                                </select>
-                                <p class="mt-1 text-xs text-slate-400">Unlike tags, categories can have a hierarchy.</p>
-                            </div>
-                            <div class="px-5 py-4">
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="cat_desc">Description</label>
-                                <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                                          id="cat_desc" name="description" rows="3"
-                                          placeholder="Optional description for this category…"></textarea>
-                                <p class="mt-1 text-xs text-slate-400">The description is not prominent by default, but some themes may display it.</p>
-                            </div>
-                            <div class="bg-slate-50 px-5 py-4">
-                                <button type="submit" class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-                                    Add New Category
-                                </button>
-                                <p class="mt-2 text-center text-xs text-slate-400">
-                                    Need more options? <a href="create-category.twig" class="text-emerald-600 hover:underline">Use the full form →</a>
-                                </p>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- ── Category table ─────────────────────────────── -->
-                    <div class="flex flex-col gap-3">
+                <!-- Category table -->
+                <div class="flex flex-col gap-3">
 
                         <!-- Table toolbar -->
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -446,9 +389,8 @@
                             </div>
                         </div>
 
-                    </div><!-- /table column -->
+                </div><!-- /category table -->
 
-                </div><!-- /split layout -->
 
             </div><!-- /content -->
         </div><!-- /body -->

@@ -10,6 +10,9 @@
     var rowCbs = document.querySelectorAll('.row-cb');
     var selectedCount = document.getElementById('selected-count');
     var selectedNum = document.getElementById('selected-num');
+    var categorySearch = document.getElementById('cat-search');
+
+    if (!selectAll || !selectedCount || !selectedNum || !categorySearch) return;
 
     function updateSelectedCount() {
         var n = document.querySelectorAll('.row-cb:checked').length;
@@ -30,7 +33,7 @@
     });
 
     // Live search filter
-    document.getElementById('cat-search').addEventListener('input', function () {
+    categorySearch.addEventListener('input', function () {
         var q = this.value.toLowerCase();
         var rows = document.querySelectorAll('#cat-tbody tr');
         var visible = 0;
@@ -43,17 +46,6 @@
         document.getElementById('row-count').textContent = 'Showing ' + visible + ' categor' + (visible === 1 ? 'y' : 'ies');
     });
 
-    // Auto-slug from name
-    document.getElementById('cat_name').addEventListener('input', function () {
-        var slug = this.value.toLowerCase().trim()
-            .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-        var slugEl = document.getElementById('cat_slug');
-        if (!slugEl.dataset.manual) slugEl.value = slug;
-    });
-    document.getElementById('cat_slug').addEventListener('input', function () {
-        this.dataset.manual = '1';
-    });
-
     // Bulk action stub
     window.applyBulk = function () {
         var action = document.getElementById('bulk-action').value;
@@ -62,6 +54,20 @@
         if (!checked.length) { alert('Please select at least one category.'); return; }
         alert(action.charAt(0).toUpperCase() + action.slice(1) + ' ' + checked.length + ' categor' + (checked.length === 1 ? 'y' : 'ies') + ' (stub).');
     };
+
+    // Auto-slug from name when the quick-add form exists.
+    var categoryName = document.getElementById('cat_name');
+    var categorySlug = document.getElementById('cat_slug');
+    if (categoryName && categorySlug) {
+        categoryName.addEventListener('input', function () {
+            var slug = this.value.toLowerCase().trim()
+                .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+            if (!categorySlug.dataset.manual) categorySlug.value = slug;
+        });
+        categorySlug.addEventListener('input', function () {
+            this.dataset.manual = '1';
+        });
+    }
 })();
     } catch (error) {
         // Page-specific block did not apply to this template.
