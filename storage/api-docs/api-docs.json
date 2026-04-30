@@ -839,18 +839,28 @@
                 ]
             }
         },
-        "/api/v1/entries": {
+        "/api/v1/entry-groups/{group_id}/entries": {
             "get": {
                 "tags": [
                     "Entries"
                 ],
-                "summary": "Get a paginated list of Entries",
-                "operationId": "getAllEntries",
+                "summary": "List entries in a group",
+                "description": "Returns a paginated list of entries belonging to the specified entry group.",
+                "operationId": "getEntries",
                 "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the entry group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
                     {
                         "name": "limit",
                         "in": "query",
-                        "description": "Number of items per page",
+                        "description": "Results per page (max 100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -860,7 +870,7 @@
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Starting page number",
+                        "description": "Page number",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -868,9 +878,33 @@
                         }
                     },
                     {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
                         "name": "created_after",
                         "in": "query",
-                        "description": "Retrieve submissions that were created after a specific date",
+                        "description": "Filter to entries created after this date",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -880,31 +914,11 @@
                     {
                         "name": "created_before",
                         "in": "query",
-                        "description": "Retrieve submissions that were before after a specific date",
+                        "description": "Filter to entries created before this date",
                         "required": false,
                         "schema": {
                             "type": "string",
                             "format": "date"
-                        }
-                    },
-                    {
-                        "name": "sort",
-                        "in": "query",
-                        "description": "How you want to order results",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "created_at"
-                        }
-                    },
-                    {
-                        "name": "direction",
-                        "in": "query",
-                        "description": "The direction for sorted orders (asc, desc)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "asc"
                         }
                     }
                 ],
@@ -916,28 +930,469 @@
                                 "schema": {
                                     "properties": {
                                         "data": {
-                                            "description": "Users",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/Entry"
                                             }
                                         },
                                         "meta": {
-                                            "description": "",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/Meta"
                                             }
                                         },
                                         "links": {
-                                            "description": "",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/Links"
                                             }
                                         },
                                         "pagination_info": {
-                                            "description": "",
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PaginationInfo"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Entry group not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Entries"
+                ],
+                "summary": "Create a new entry",
+                "description": "Creates an entry within the specified entry group. Field validation rules are resolved dynamically from the group and entry type schemas. The type_handle must belong to this group.",
+                "operationId": "createEntry",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the entry group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type_handle",
+                                    "title"
+                                ],
+                                "properties": {
+                                    "type_handle": {
+                                        "description": "Handle of the entry type (must belong to this group)",
+                                        "type": "string",
+                                        "example": "article"
+                                    },
+                                    "title": {
+                                        "description": "Entry title",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "My First Post"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier within the group",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "status": {
+                                        "description": "Status handle (must exist in the group status group)",
+                                        "type": "string",
+                                        "example": "draft",
+                                        "nullable": true
+                                    },
+                                    "published_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "nullable": true
+                                    },
+                                    "authors": {
+                                        "description": "User IDs to assign as authors",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "categories": {
+                                        "description": "Category IDs to assign",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "description": "Dynamic field values keyed by field handle",
+                                        "type": "object",
+                                        "nullable": true,
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Entry created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Entry"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/entry-groups/{group_id}/entries/{entry}": {
+            "get": {
+                "tags": [
+                    "Entries"
+                ],
+                "summary": "Get a single entry",
+                "operationId": "getEntry",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the entry group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "entry",
+                        "in": "path",
+                        "description": "ID of the entry",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Entry"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Entries"
+                ],
+                "summary": "Update an entry",
+                "description": "Updates an entry's core fields and/or dynamic field values. Field validation rules are resolved dynamically from the entry's group and type.",
+                "operationId": "updateEntry",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the entry group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "entry",
+                        "in": "path",
+                        "description": "ID of the entry to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Updated Title"
+                                    },
+                                    "handle": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "status": {
+                                        "description": "Status handle",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "published_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "nullable": true
+                                    },
+                                    "authors": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "categories": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "type": "object",
+                                        "nullable": true,
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Entry updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Entry"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Entries"
+                ],
+                "summary": "Delete an entry",
+                "description": "Permanently deletes the entry and its field values.",
+                "operationId": "deleteEntry",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the entry group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "entry",
+                        "in": "path",
+                        "description": "ID of the entry to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/entry-groups": {
+            "get": {
+                "tags": [
+                    "Entry Groups"
+                ],
+                "summary": "List all entry groups",
+                "description": "Returns a paginated list of entry groups including entry and entry-type counts.",
+                "operationId": "getEntryGroups",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Results per page (max 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/EntryGroup"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Meta"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Links"
+                                            }
+                                        },
+                                        "pagination_info": {
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/PaginationInfo"
@@ -958,20 +1413,124 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Entry Groups"
+                ],
+                "summary": "Create a new entry group",
+                "operationId": "createEntryGroup",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle",
+                                    "status_group_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Human-readable name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Blog Posts"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "blog-posts"
+                                    },
+                                    "description": {
+                                        "description": "Optional description",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "description": "Display sort position",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "status_group_id": {
+                                        "description": "ID of the status group to use",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "field_layout_id": {
+                                        "description": "ID of an optional field layout",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "category_groups": {
+                                        "description": "IDs of category groups to attach",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "field_groups": {
+                                        "description": "IDs of field groups to attach",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Entry group created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/EntryGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
-        "/api/v1/entries/{id}": {
+        "/api/v1/entry-groups/{group}": {
             "get": {
                 "tags": [
-                    "Entries"
+                    "Entry Groups"
                 ],
-                "summary": "Get details on a specific Entry",
-                "operationId": "getEntry",
+                "summary": "Get a single entry group",
+                "operationId": "getEntryGroup",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "group",
                         "in": "path",
-                        "description": "ID of the entry to retrieve",
+                        "description": "ID of the entry group",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -984,13 +1543,168 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Entry"
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/EntryGroup"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
                     "404": {
-                        "description": "User not found"
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Entry Groups"
+                ],
+                "summary": "Update an entry group",
+                "operationId": "updateEntryGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the entry group to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle",
+                                    "status_group_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Blog Posts"
+                                    },
+                                    "handle": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "blog-posts"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "status_group_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "field_layout_id": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "category_groups": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "field_groups": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Entry group updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/EntryGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Entry Groups"
+                ],
+                "summary": "Delete an entry group",
+                "description": "Permanently deletes the entry group and all of its entries.",
+                "operationId": "deleteEntryGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the entry group to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
                     }
                 },
                 "security": [
@@ -1759,13 +2473,14 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Get a paginated list of Users",
-                "operationId": "getAllUsers",
+                "summary": "List users",
+                "description": "Returns a paginated list of users including their roles and custom field values.",
+                "operationId": "getUsers",
                 "parameters": [
                     {
                         "name": "limit",
                         "in": "query",
-                        "description": "Number of items per page",
+                        "description": "Results per page (max 100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1775,7 +2490,7 @@
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Starting page number",
+                        "description": "Page number",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1783,9 +2498,33 @@
                         }
                     },
                     {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
                         "name": "created_after",
                         "in": "query",
-                        "description": "Retrieve submissions that were created after a specific date",
+                        "description": "Filter to users created after this date",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1795,31 +2534,11 @@
                     {
                         "name": "created_before",
                         "in": "query",
-                        "description": "Retrieve submissions that were before after a specific date",
+                        "description": "Filter to users created before this date",
                         "required": false,
                         "schema": {
                             "type": "string",
                             "format": "date"
-                        }
-                    },
-                    {
-                        "name": "sort",
-                        "in": "query",
-                        "description": "How you want to order results",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "created_at"
-                        }
-                    },
-                    {
-                        "name": "direction",
-                        "in": "query",
-                        "description": "The direction for sorted orders (asc, desc)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "asc"
                         }
                     }
                 ],
@@ -1831,28 +2550,24 @@
                                 "schema": {
                                     "properties": {
                                         "data": {
-                                            "description": "Users",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/User"
                                             }
                                         },
                                         "meta": {
-                                            "description": "",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/Meta"
                                             }
                                         },
                                         "links": {
-                                            "description": "",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/Links"
                                             }
                                         },
                                         "pagination_info": {
-                                            "description": "",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/PaginationInfo"
@@ -1873,20 +2588,122 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create a new user",
+                "description": "Creates a user account and optionally assigns roles and custom field values.",
+                "operationId": "createUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Display name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Jane Smith"
+                                    },
+                                    "email": {
+                                        "description": "Email address (must be unique)",
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255,
+                                        "example": "jane@example.com"
+                                    },
+                                    "password": {
+                                        "description": "Password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "secret1234"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Must match password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret1234"
+                                    },
+                                    "roles": {
+                                        "description": "Role names to assign",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "editor"
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "description": "Custom field values keyed by handle",
+                                        "type": "object",
+                                        "nullable": true,
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
-        "/api/v1/users/{id}": {
+        "/api/v1/users/{user}": {
             "get": {
                 "tags": [
                     "Users"
                 ],
-                "summary": "Get details on a specific User",
+                "summary": "Get a single user",
                 "operationId": "getUser",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "user",
                         "in": "path",
-                        "description": "ID of the user to retrieve",
+                        "description": "ID of the user",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -1899,13 +2716,166 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
                     "404": {
-                        "description": "User not found"
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update a user",
+                "description": "Updates a user's name, email, password, roles, and/or custom field values. Only provided keys are changed.",
+                "operationId": "updateUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID of the user to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Jane Smith"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255,
+                                        "example": "jane@example.com"
+                                    },
+                                    "password": {
+                                        "description": "Leave blank to keep existing password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "nullable": true
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "nullable": true
+                                    },
+                                    "roles": {
+                                        "description": "Replaces all current roles",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "type": "object",
+                                        "nullable": true,
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete a user",
+                "description": "Permanently deletes the user. A user cannot delete their own account.",
+                "operationId": "deleteUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID of the user to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
                     }
                 },
                 "security": [
@@ -2110,30 +3080,137 @@
                 },
                 "type": "object"
             },
-            "Entry": {
-                "title": "Entry Details",
-                "description": "entry model",
+            "EntryGroup": {
+                "title": "Entry Group",
+                "description": "A named collection of entries sharing a status group, field layout, and category groups.",
                 "properties": {
                     "id": {
-                        "description": "",
+                        "description": "Primary key",
                         "type": "integer",
                         "format": "int64"
                     },
                     "name": {
-                        "description": "",
+                        "description": "Human-readable name",
                         "type": "string"
                     },
-                    "email": {
-                        "description": "",
+                    "handle": {
+                        "description": "URL-safe identifier (unique)",
                         "type": "string"
+                    },
+                    "description": {
+                        "description": "Optional description",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "sort_order": {
+                        "description": "Display sort position",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "status_group_id": {
+                        "description": "ID of the associated status group",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "field_layout_id": {
+                        "description": "ID of the associated field layout",
+                        "type": "integer",
+                        "format": "int64",
+                        "nullable": true
+                    },
+                    "entries_count": {
+                        "description": "Total number of entries in this group (present when counted)",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "entry_types_count": {
+                        "description": "Total number of entry types in this group (present when counted)",
+                        "type": "integer",
+                        "nullable": true
                     },
                     "created_at": {
-                        "description": "",
                         "type": "string",
                         "format": "date-time"
                     },
                     "updated_at": {
-                        "description": "",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Entry": {
+                "title": "Entry",
+                "description": "A content entry belonging to an entry group.",
+                "properties": {
+                    "id": {
+                        "description": "Primary key",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "entry_group_id": {
+                        "description": "ID of the entry group this entry belongs to",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "entry_type_id": {
+                        "description": "ID of the entry type for this entry",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "title": {
+                        "description": "Human-readable title",
+                        "type": "string"
+                    },
+                    "handle": {
+                        "description": "URL-safe identifier within the group",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status_handle": {
+                        "description": "Handle of the current status",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status_is_public": {
+                        "description": "Whether the current status is publicly visible",
+                        "type": "boolean"
+                    },
+                    "published_at": {
+                        "description": "Date/time the entry was published",
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "fields": {
+                        "description": "Dynamic custom field values keyed by field handle",
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "authors": {
+                        "description": "Users assigned as authors (included when eager-loaded)",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RelatedItem"
+                        },
+                        "nullable": true
+                    },
+                    "categories": {
+                        "description": "Categories assigned to this entry (included when eager-loaded)",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RelatedItem"
+                        },
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
                         "type": "string",
                         "format": "date-time"
                     }
@@ -2227,29 +3304,49 @@
                 "type": "object"
             },
             "User": {
-                "title": "User Details",
-                "description": "user model",
+                "title": "User",
+                "description": "A user account.",
                 "properties": {
                     "id": {
-                        "description": "",
+                        "description": "Primary key",
                         "type": "integer",
                         "format": "int64"
                     },
                     "name": {
-                        "description": "",
+                        "description": "Display name",
                         "type": "string"
                     },
                     "email": {
-                        "description": "",
-                        "type": "string"
+                        "description": "Email address (unique)",
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "roles": {
+                        "description": "Role names assigned to this user",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "avatar": {
+                        "description": "Avatar URL",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "fields": {
+                        "description": "Dynamic custom field values keyed by field handle",
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
                     },
                     "created_at": {
-                        "description": "",
                         "type": "string",
                         "format": "date-time"
                     },
                     "updated_at": {
-                        "description": "",
                         "type": "string",
                         "format": "date-time"
                     }
@@ -2276,6 +3373,14 @@
             "description": "Manage category groups. A category group is a named container for a set of categories and defines the field layout that all categories in the group share."
         },
         {
+            "name": "Entries",
+            "description": "Manage content entries within an entry group. Entries support dynamic field values, authors, categories, and status."
+        },
+        {
+            "name": "Entry Groups",
+            "description": "Manage entry groups. An entry group is a named collection of entries with a shared status group, field layout, and optional category groups."
+        },
+        {
             "name": "Status Groups",
             "description": "Manage status groups. A status group is a named collection of statuses (e.g. \"Publishing Workflow\") that can be assigned to entry groups."
         },
@@ -2284,16 +3389,12 @@
             "description": "Manage individual statuses within a status group. Setting is_default=true on a status will automatically unset the previous default in the same group."
         },
         {
+            "name": "Users",
+            "description": "Manage user accounts, roles, and custom field values."
+        },
+        {
             "name": "Account",
             "description": "Account"
-        },
-        {
-            "name": "Entries",
-            "description": "Entries"
-        },
-        {
-            "name": "Users",
-            "description": "Users"
         }
     ]
 }

@@ -15,10 +15,12 @@ class EditEntryGroupRequest extends FormRequest
 
     public function rules(): array
     {
+        // Support both admin routes ({id}) and API routes ({group})
+        $ignore = $this->route()->parameter('group') ?? $this->route()->parameter('id');
+
         return [
-            'id' => ['required'],
             'name' => ['required', 'string', 'max:255'],
-            'handle' => ['required', 'string', 'max:255', Rule::unique('entry_groups', 'handle')->ignore($this->route('id'))],
+            'handle' => ['required', 'string', 'max:255', Rule::unique('entry_groups', 'handle')->ignore($ignore)],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'status_group_id' => ['required', 'integer', 'exists:status_groups,id'],

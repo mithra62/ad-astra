@@ -10,7 +10,7 @@ class Html extends AbstractField
     protected string $name = 'HTML';
 
     protected array $rules = [
-        'numeric',
+        'nullable',
     ];
 
     public function storageColumn(): string
