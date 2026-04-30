@@ -35,6 +35,810 @@
                 ]
             }
         },
+        "/api/v1/category-groups/{group_id}/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "List categories in a group",
+                "description": "Returns a paginated list of categories belonging to the specified group. Root categories only by default; pass ?all=1 to include all levels.",
+                "operationId": "getCategories",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the category group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "all",
+                        "in": "query",
+                        "description": "Pass 1 to return all categories regardless of depth (not just roots)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "enum": [
+                                0,
+                                1
+                            ]
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results per page (max 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "created_after",
+                        "in": "query",
+                        "description": "Filter to categories created after this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "created_before",
+                        "in": "query",
+                        "description": "Filter to categories created before this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Category"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Meta"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Links"
+                                            }
+                                        },
+                                        "pagination_info": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PaginationInfo"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Category group not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Create a new category",
+                "description": "Creates a category inside the specified group. The `fields` object accepts dynamic field values keyed by handle.",
+                "operationId": "createCategory",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the category group the new category will belong to",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Display name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "PHP"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier (auto-generated from name when omitted)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "php",
+                                        "nullable": true
+                                    },
+                                    "parent_id": {
+                                        "description": "ID of the parent category for hierarchical nesting",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "description": "Display sort position among siblings",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "description": "Dynamic field values keyed by handle (e.g. {\"colour\": \"#ff0000\", \"summary\": \"The PHP language\"})",
+                                        "type": "object",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Category created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Category"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Category group not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/category-groups/{group_id}/categories/{category}": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get a single category",
+                "description": "Returns a category with its dynamic field values and immediate children.",
+                "operationId": "getCategory",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the category group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "ID of the category",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Category"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Update a category",
+                "description": "Updates a category's core attributes and/or its dynamic field values. Any `fields` keys sent will overwrite the stored value for that handle; omit a key to leave it unchanged.",
+                "operationId": "updateCategory",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the category group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "ID of the category to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Display name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "PHP"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "parent_id": {
+                                        "description": "ID of the parent category (cannot be a descendant of this category)",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "description": "Display sort position",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "description": "Dynamic field values keyed by handle",
+                                        "type": "object",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Category updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Category"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Delete a category",
+                "description": "Permanently deletes the category. Child categories are not automatically deleted; reassign or delete them first.",
+                "operationId": "deleteCategory",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the category group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "ID of the category to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/category-groups": {
+            "get": {
+                "tags": [
+                    "Category Groups"
+                ],
+                "summary": "List all category groups",
+                "description": "Returns a paginated list of category groups, each including the total number of categories it contains.",
+                "operationId": "getCategoryGroups",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results per page (max 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CategoryGroup"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Meta"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Links"
+                                            }
+                                        },
+                                        "pagination_info": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PaginationInfo"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Category Groups"
+                ],
+                "summary": "Create a new category group",
+                "description": "Creates a category group along with its backing field layout. Optionally attach existing field groups to define custom fields for categories in this group.",
+                "operationId": "createCategoryGroup",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Human-readable name (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Blog Tags"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "blog-tags"
+                                    },
+                                    "field_groups": {
+                                        "description": "IDs of field groups whose fields should be available on categories in this group",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Category group created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CategoryGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/category-groups/{group}": {
+            "get": {
+                "tags": [
+                    "Category Groups"
+                ],
+                "summary": "Get a single category group",
+                "operationId": "getCategoryGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the category group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CategoryGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Category Groups"
+                ],
+                "summary": "Update a category group",
+                "operationId": "updateCategoryGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the category group to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Human-readable name (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Blog Tags"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "blog-tags"
+                                    },
+                                    "field_groups": {
+                                        "description": "IDs of field groups to sync (replaces existing assignment)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Category group updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CategoryGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Category Groups"
+                ],
+                "summary": "Delete a category group",
+                "description": "Permanently deletes the category group. All categories belonging to this group will also be deleted.",
+                "operationId": "deleteCategoryGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the category group to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/entries": {
             "get": {
                 "tags": [
@@ -457,6 +1261,101 @@
                 },
                 "type": "object"
             },
+            "CategoryGroup": {
+                "title": "Category Group",
+                "description": "A category group that contains categories",
+                "properties": {
+                    "id": {
+                        "description": "Primary key",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "Human-readable name",
+                        "type": "string"
+                    },
+                    "handle": {
+                        "description": "URL-safe unique identifier",
+                        "type": "string"
+                    },
+                    "sort_order": {
+                        "description": "Display sort position",
+                        "type": "integer"
+                    },
+                    "categories_count": {
+                        "description": "Total number of categories in this group",
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Category": {
+                "title": "Category",
+                "description": "A category belonging to a category group. Categories support hierarchical nesting via parent_id and carry optional dynamic field values defined by the group's field layout.",
+                "properties": {
+                    "id": {
+                        "description": "Primary key",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "group_id": {
+                        "description": "ID of the category group this category belongs to",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "parent_id": {
+                        "description": "ID of the parent category, or null for root categories",
+                        "type": "integer",
+                        "format": "int64",
+                        "nullable": true
+                    },
+                    "name": {
+                        "description": "Human-readable display name",
+                        "type": "string"
+                    },
+                    "handle": {
+                        "description": "URL-safe unique identifier within the group",
+                        "type": "string"
+                    },
+                    "sort_order": {
+                        "description": "Display sort position among siblings",
+                        "type": "integer"
+                    },
+                    "fields": {
+                        "description": "Dynamic custom field values keyed by field handle. The available field handles and their value types are defined by the category group's field layout.",
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "children": {
+                        "description": "Immediate child categories, included only when the children relation is loaded (i.e. on show requests)",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Category"
+                        }
+                    },
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "Entry": {
                 "title": "Entry Details",
                 "description": "entry model",
@@ -528,6 +1427,14 @@
         }
     },
     "tags": [
+        {
+            "name": "Categories",
+            "description": "Manage categories within a category group. Categories support hierarchical nesting (parent_id) and carry optional dynamic custom fields defined by the group's field layout."
+        },
+        {
+            "name": "Category Groups",
+            "description": "Manage category groups. A category group is a named container for a set of categories and defines the field layout that all categories in the group share."
+        },
         {
             "name": "Account",
             "description": "Account"
