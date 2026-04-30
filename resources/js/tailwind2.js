@@ -69,6 +69,20 @@
         });
     }
 })();
+
+// Auth templates
+(function () {
+    document.querySelectorAll('[data-auth-password-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var input = document.getElementById(button.getAttribute('data-auth-password-toggle'));
+            if (!input) return;
+
+            var isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+        });
+    });
+})();
     } catch (error) {
         // Page-specific block did not apply to this template.
     }
