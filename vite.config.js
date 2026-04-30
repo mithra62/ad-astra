@@ -11,6 +11,7 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
+        host: 'eric.laravel-dev.com',
         cors: {
             origin: [
                 'http://127.0.0.1:8000',
@@ -19,7 +20,7 @@ export default defineConfig({
             ],
         },
         hmr: {
-            host: '127.0.0.1',
+            host: 'eric.laravel-dev.com',
             protocol: 'ws',
         },
     },
