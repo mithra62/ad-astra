@@ -67,7 +67,7 @@ timestamps
 
 ### 5.2 `search_documents`
 
-The polymorphic index. One row per (searchable, locale). The three FULLTEXT columns are intentional — proper per-bucket weighting in MySQL requires separate columns, not a single concatenated `content` field with delimiters.
+The polymorphic index. **One row per indexable content unit** — a Field's value, a synthetic title, a handle, a category name, a related Entry's title — not one row per searchable model. This decomposition is what makes per-Field weighting at the Collection level possible: weights are JOINed at query time, not baked into the document.
 
 ```
 search_documents
@@ -81,9 +81,13 @@ entry_group_id            unsignedBigInteger nullable    null for non-Entry rows
 entry_type_id             unsignedBigInteger nullable
 locale                    string(8)               'en', 'fr', ...
 
-search_title              varchar(500)            high-weight bucket
-search_body               mediumText              primary-weight bucket
-search_meta               mediumText              low-weight bucket: categories, related titles, tags
+source_kind               enum('title','handle','field','category','related','tag','custom')
+field_id                  unsignedBigInteger NOT NULL default 0     references fields.id; 0 sentinel for synthetic rows. NO DB-LEVEL FK — see note below.
+source_id                 unsignedBigInteger NOT NULL default 0     references the source object's id (categories.id, entries.id, tags.id) per source_type; 0 sentinel for synthetic rows. NO DB-LEVEL FK — see note below.
+source_type               string nullable          informational morph alias for source_id ('category','entry','tag', ...); used by observers to route cleanup
+source_handle             string(64) nullable      diagnostic only — denormalized human-readable label for searchExplain()
+
+search_content            mediumText              the text to be FULLTEXT-tokenized
 
 status_handle             string nullable
 is_public                 boolean default false
@@ -93,15 +97,60 @@ search_payload            json                    arbitrary searchable + facetab
 search_indexed_at         timestamp
 timestamps
 
-unique  (searchable_id, searchable_type, locale)
-index   (tenant_id, searchable_type, is_public, published_at)
-index   (entry_group_id, locale)
-fulltext (search_title)
-fulltext (search_body)
-fulltext (search_meta)
+unique   (searchable_id, searchable_type, locale, source_kind, field_id, source_id)
+index    (tenant_id, searchable_type, is_public, published_at)
+index    (entry_group_id, locale)
+index    (field_id)
+index    (source_type, source_id)               supports reverse-lookups (e.g., "all rows pointing at this Entry")
+fulltext (search_content)
 ```
 
-The unique key on `(searchable_id, searchable_type, locale)` makes `updateOrInsert` safe under concurrent indexing.
+This shape solves several problems at once:
+
+- **Collection-specific weight overrides become a query-time JOIN**, not an index-time decision. Two Collections with different weights for the same Field on the same Entry just produce two different `ORDER BY` expressions over the same rows — neither one mutates the index.
+- **Reverse-relationship and category staleness become localized**. When Entry B's title changes, only the `source_kind='related'` rows pointing at B (`source_id = B.id`) need updating, not the entire denormalized blob. When a Category is renamed, only the `source_kind='category'` rows with that `source_id` change. Each fix is one targeted UPDATE, not a full reindex of the affected Entries.
+- **Configuration changes mostly stop triggering reindexes**. Per-Group or per-Collection weight changes are pure query-time concerns and require no document writes. Only changes that affect *content presence* — `is_searchable` toggling, a Field being added/removed from a layout, a category attach/detach — produce row inserts/deletes.
+
+The unique key — `(searchable_id, searchable_type, locale, source_kind, field_id, source_id)` — uses **stable foreign-key ids, not handles**. This is deliberate: handles are mutable (a Field's handle can be edited; a Category's handle is unique only per `category_groups.id` per the existing `cat_group_handle_unique` constraint, not globally), so a unique key built on them would let collisions slip in. With ids, the key disambiguates correctly:
+
+- Two Relationship fields (`field_id` differs) on the same Entry pointing at the same related Entry (`source_id` same) → two distinct rows.
+- Two same-handle Categories from different category groups attached to the same Entry → distinct rows because `source_id` differs.
+- Synthetic kinds (`title`, `handle`) → `field_id=0` and `source_id=0` (not NULL — MySQL's UNIQUE allows multiple NULLs and would silently let duplicate title rows in). The 0 sentinel makes the constraint enforce "exactly one title row per (searchable, locale)".
+
+`source_type` and `source_handle` are kept for diagnostic and `searchExplain()` output but play no part in uniqueness.
+
+### 5.2.0 Why no DB-level FK on `field_id` / `source_id`
+
+`field_id` and `source_id` are **not** declared as MySQL foreign keys despite naming an id column from another table. The reason is that the same column carries a sentinel `0` value for synthetic rows where no source object exists (`source_kind='title'`, `source_kind='handle'`, etc.). A real FK constraint would reject those inserts because no `fields` row has id `0` and no `categories`/`entries`/`tags` row has id `0`.
+
+This matches Laravel's existing convention for polymorphic columns — `field_values.fieldable_id`, `categorizables.categorizable_id`, and the morph `*_id` columns elsewhere in this codebase carry no DB-level FK either. Referential integrity is the application's job.
+
+The Search layer maintains it through observers, declared in §9.1:
+
+- `Field::deleting` → `DELETE FROM search_documents WHERE field_id = :id` (covers `source_kind='field'` rows AND `source_kind='related'` rows that used the deleted Relationship field).
+- `Category::deleting` → `DELETE FROM search_documents WHERE source_type='category' AND source_id = :id`.
+- `Tag::deleting` → `DELETE FROM search_documents WHERE source_type='tag' AND source_id = :id`.
+- `Entry::deleting` → `DELETE FROM search_documents WHERE source_type='entry' AND source_id = :id` (purges `source_kind='related'` rows in *other* Entries that pointed at the one being deleted), in addition to deleting the Entry's own `searchable_id`-keyed rows.
+
+These observer cleanups are part of Phase 4's deliverable. They are explicitly listed in the Phase 4 test cases. Implementers should not attempt to add DB-level FK constraints on these columns; the migration must omit them.
+
+Alternative design that *could* preserve FKs — `field_id` and `source_id` declared `nullable` (with FKs) plus generated non-null columns `field_id_key BIGINT AS (COALESCE(field_id, 0)) STORED` and `source_id_key BIGINT AS (COALESCE(source_id, 0)) STORED` participating in the unique key — was considered and rejected. It doubles the column count, complicates inserts, and produces no operational benefit since cleanup paths still need to fire on related-Entry deletes (FK cascade only handles direct deletes, not the `source_kind='related'` rows that point to the deleted Entry from other Entries' index data).
+
+### 5.2.1 Synthetic source_kinds
+
+Some content units don't correspond to a Field. They get fixed `source_kind` values and their default weights live in `config/search.php` (overridable per-Group via JSON in `entry_group_search_configs`):
+
+| `source_kind` | Produced by | Default weight | `field_id` | `source_id` | `source_type` |
+|---|---|---|---|---|---|
+| `title` | Entry/User core attribute | 2.0 | 0 | 0 | null |
+| `handle` | Entry core attribute | 0.5 | 0 | 0 | null |
+| `field` | a `FieldValue` (any non-relational type) | from cascade | the Field id | 0 | null |
+| `category` | a Category attached to an Entry | 0.6 | 0 | `categories.id` | `'category'` |
+| `related` | a related Entry's title (Relationship field) | 0.5 | the Relationship Field id | `entries.id` (the related Entry) | `'entry'` |
+| `tag` | Spatie tag attached to a User | 0.7 | 0 | `tags.id` | `'tag'` |
+| `custom` | extension hook | configurable | extension-defined | extension-defined | extension-defined |
+
+The `source_kind` enum is the seam an extension uses to add new indexable concepts without touching the core indexer. New extensions choose stable id columns for `field_id` / `source_id` so the unique key continues to enforce one-row-per-content-unit.
 
 ### 5.3 `entry_group_search_configs`
 
@@ -126,7 +175,7 @@ timestamps
 
 ### 5.4 `entry_group_search_field_priorities`
 
-Per-Group, per-Field weight + bucket. The original-docs split between an "is enabled" boolean and a separate weight is collapsed: `search_weight = 0` means disabled. One axis, one place to look.
+Per-Group, per-Field weight. Read at query time only — no bucket column because per-Field rows replaced the bucket concept (each Field is its own row; weight is applied to the row's MATCH score directly).
 
 ```
 entry_group_search_field_priorities
@@ -135,10 +184,11 @@ id
 entry_group_id      fk cascadeOnDelete
 field_id            fk cascadeOnDelete
 search_weight       decimal(4,2) default 1.00
-search_bucket       enum('title','body','meta') default 'body'
 timestamps
 unique (entry_group_id, field_id)
 ```
+
+A `search_weight = 0` row means "this Field's text is in the index for this Group, but contributes 0 to relevance." To exclude the Field's text from the index entirely, set `fields.is_searchable = false` (one source of truth: presence in the index follows the Field-instance / Field-type cascade, not the Group/Collection cascade).
 
 ### 5.5 `search_collections`
 
@@ -148,15 +198,20 @@ A named, composable search scope.
 search_collections
 ─────────────────────────────
 id
-tenant_id        fk nullable
+tenant_id        fk nullable                       null until tenancy lands (forward-compat per TenantModel.md)
 name             string
 handle           string
 description      text nullable
-locale           string(8) nullable      null = all locales
+locale           string(8) nullable                null = all locales
 is_active        boolean default true
 timestamps
-unique (tenant_id, handle)
+
+unique ((COALESCE(tenant_id, 0)), handle)         functional unique index, MySQL 8.0.13+
 ```
+
+The unique constraint cannot be a plain `unique (tenant_id, handle)`: MySQL's UNIQUE allows multiple rows with `tenant_id IS NULL`, which would silently let two pre-tenancy collections share the same handle. The functional unique index on `COALESCE(tenant_id, 0)` collapses NULL to a sentinel `0` for the purposes of uniqueness only, while leaving the column genuinely nullable for the FK semantics that arrive when tenancy lands. Equivalent on older MySQL: a `STORED` generated column (`tenant_scope_key BIGINT AS (COALESCE(tenant_id, 0)) STORED`) with `unique (tenant_scope_key, handle)`.
+
+The same NULL-uniqueness trap applies anywhere a unique key includes a nullable column — `search_documents` is already protected by NOT NULL+sentinel on `field_id` and `source_id` (§5.2). Verify when adding any new unique constraint to a Search-layer table.
 
 ### 5.6 `search_collection_entry_groups`
 
@@ -185,10 +240,11 @@ search_collection_id   fk cascadeOnDelete
 entry_group_id         fk cascadeOnDelete
 field_id               fk cascadeOnDelete
 search_weight          decimal(4,2)
-search_bucket          enum('title','body','meta') nullable    null = inherit Group bucket
 timestamps
 unique (search_collection_id, entry_group_id, field_id)
 ```
+
+These rows are read by the QueryBuilder when a search runs inside a Collection scope, JOINed against `search_documents.field_id`. Adding, removing, or changing a row here triggers no reindex — only the next query sees the new weight.
 
 ### 5.8 `search_collection_searchable_types`
 
@@ -216,6 +272,19 @@ fields (additions)
 + search_weight       decimal(4,2) nullable
 ```
 
+### 5.10 `users` (extension)
+
+User search is opt-in (see decision in §14). The opt-in lives on the `users` row itself, not on a separate config table — Users have no equivalent of EntryGroup, so the per-instance flag is the cleanest source of truth for `UserSearchable::searchShouldIndex()`.
+
+```
+users (additions)
+─────────────────────────────
++ is_searchable       boolean default false   default off; admins flip on per-user or in bulk
++ search_weight       decimal(4,2) nullable    optional per-user override
+```
+
+A future "User Group" abstraction, if it lands, would gain its own `Search\Config` row analogous to `EntryGroup`'s — but until then, per-User opt-in is sufficient and avoids designing a config layer for a single-instance type.
+
 ## 6. Class Structure
 
 ### 6.1 `App\Search\AbstractSearchable`
@@ -241,7 +310,7 @@ abstract class AbstractSearchable
     public function handle(): string;
     public function name(): string;
 
-    /** Should the given model be indexed at all right now? Status, soft-delete, public flag. */
+    /** Should the given model be indexed at all right now? Status, public flag, opt-in flag. */
     abstract public function searchShouldIndex(Model $model): bool;
 
     /** Locales this model should produce documents for. Default ['en']; translatable models override. */
@@ -250,13 +319,31 @@ abstract class AbstractSearchable
     /** The Field models whose values participate in indexing. Implementations resolve from layout. */
     abstract public function searchFieldsFor(Model $model): Collection;
 
-    /** Build a single document row for (model, locale). Returns array shaped to search_documents. */
-    abstract public function searchToDocument(Model $model, string $locale): array;
+    /**
+     * Yield one row per content unit for (model, locale). Each row is an array shaped to search_documents
+     * with at minimum: source_kind, field_id, source_id, source_type, source_handle, search_content.
+     *
+     * Default implementation calls searchTitleRows / searchHandleRows / searchFieldRows /
+     * searchRelatedRows / searchCategoryRows / searchTagRows in order and yields from each.
+     * Subclasses extend by overriding individual hook methods rather than the full producer.
+     */
+    public function searchToDocuments(Model $model, string $locale): iterable;
 
-    /** Hook for subclasses to layer on category names, related entry titles, tags, etc. */
-    protected function searchAdditionalMeta(Model $model, string $locale): array;
+    // --- per-kind hook methods (override what applies to your model) -------------
+
+    protected function searchTitleRows(Model $model, string $locale): iterable;
+    protected function searchHandleRows(Model $model, string $locale): iterable;
+    protected function searchFieldRows(Model $model, string $locale): iterable;
+    protected function searchRelatedRows(Model $model, string $locale): iterable;
+    protected function searchCategoryRows(Model $model, string $locale): iterable;
+    protected function searchTagRows(Model $model, string $locale): iterable;
+    protected function searchCustomRows(Model $model, string $locale): iterable;
 }
 ```
+
+The hook methods return empty by default; concrete subclasses override only the ones that apply. `EntrySearchable` overrides title/handle/field/related/category. `UserSearchable` overrides title/field/tag (no handle, no categories, no relational fields). A future `CategorySearchable` might override only title/field. This is the strategy pattern — the indexer iterates the abstract contract; subclasses contribute by extending.
+
+Returning `iterable` (rather than `array`) lets implementations use `yield` for memory efficiency on Entries with many fields/relations, while remaining trivially testable with array-shaped fixtures.
 
 ### 6.2 `App\Search\Types\EntrySearchable`
 
@@ -270,12 +357,16 @@ class EntrySearchable extends \App\Search\AbstractSearchable
 
     public function searchShouldIndex(Model $entry): bool;
     public function searchFieldsFor(Model $entry): Collection;       // delegates to EntryRepository::resolveLayoutFields
-    public function searchToDocument(Model $entry, string $locale): array;
-    protected function searchAdditionalMeta(Model $entry, string $locale): array;
+
+    protected function searchTitleRows(Model $entry, string $locale): iterable;     // one row, source_kind='title'
+    protected function searchHandleRows(Model $entry, string $locale): iterable;    // one row if include_handle
+    protected function searchFieldRows(Model $entry, string $locale): iterable;     // one row per searchable Field
+    protected function searchRelatedRows(Model $entry, string $locale): iterable;   // one row per (Relationship field, related Entry)
+    protected function searchCategoryRows(Model $entry, string $locale): iterable;  // one row per attached Category
 }
 ```
 
-`searchFieldsFor()` reuses the existing `EntryRepository::resolveLayoutFields()` so the same precedence (EntryType layout > EntryGroup layout) that drives field persistence drives indexing. Relational fields are pulled via `Entry::field($handle)`, which already returns a Collection of related Entries; their titles are flattened into the `meta` bucket.
+`searchFieldsFor()` reuses the existing `EntryRepository::resolveLayoutFields()` so the same precedence (EntryType layout > EntryGroup layout) that drives field persistence drives indexing. `searchRelatedRows()` walks `Entry::field($handle)` for each Relationship-typed field and yields one row per (parent, Relationship field, related Entry) combination, with `field_id = relationshipFieldId`, `source_id = relatedEntry.id`, `source_type = 'entry'`. The reverse-Relationship trigger in §9.1 finds these rows by `(source_type='entry', source_id=B.id)` and refreshes their `search_content` when B's title changes — that's why `source_id`/`source_type` are stable foreign-key references rather than handle strings.
 
 ### 6.3 `App\Search\Types\UserSearchable`
 
@@ -287,11 +378,16 @@ class UserSearchable extends \App\Search\AbstractSearchable
     protected string $handle = 'user';
     protected string $name = 'User';
 
-    public function searchShouldIndex(Model $user): bool;
+    public function searchShouldIndex(Model $user): bool;            // gates on users.is_searchable
     public function searchFieldsFor(Model $user): Collection;        // pulls from Fieldable
-    public function searchToDocument(Model $user, string $locale): array;
+
+    protected function searchTitleRows(Model $user, string $locale): iterable;      // 'name' in title; 'email' as a separate row
+    protected function searchFieldRows(Model $user, string $locale): iterable;
+    protected function searchTagRows(Model $user, string $locale): iterable;        // Spatie tags, source_id = tag.id, source_type = 'tag'
 }
 ```
+
+`UserSearchable` deliberately leaves `searchHandleRows`, `searchRelatedRows`, `searchCategoryRows` as the abstract base's empty defaults — Users have none of those concepts. Adding a future `CategorySearchable` is the same exercise: subclass, override the hooks that apply, leave the rest empty.
 
 ### 6.4 `App\Field\AbstractField` — extension
 
@@ -304,27 +400,26 @@ abstract class AbstractField
 
     public function searchIsSearchable(): bool;             // default false
     public function searchDefaultWeight(): float;            // default 1.0
-    public function searchDefaultBucket(): string;           // default 'body'
     public function searchToString(mixed $value): ?string;   // default null
 }
 ```
 
 Recommended per-type defaults:
 
-| Type | Searchable | Bucket | Weight |
-|---|---|---|---|
-| `Text` | yes | body | 1.0 |
-| `Textarea` | yes | body | 1.0 |
-| `EmailAddress` | yes | meta | 0.5 |
-| `Url` | yes | meta | 0.3 |
-| `Telephone` | yes | meta | 0.3 |
-| `Relationship` | yes | meta | 0.5 |
-| `Number` | no | — | — |
-| `Date` | no | — | — |
-| `Boolean` | no | — | — |
-| `ColorPicker` | no | — | — |
+| Type | Searchable | Default weight |
+|---|---|---|
+| `Text` | yes | 1.0 |
+| `Textarea` | yes | 1.0 |
+| `EmailAddress` | yes | 0.5 |
+| `Url` | yes | 0.3 |
+| `Telephone` | yes | 0.3 |
+| `Relationship` | yes | 0.5 |
+| `Number` | no | — |
+| `Date` | no | — |
+| `Boolean` | no | — |
+| `ColorPicker` | no | — |
 
-Non-searchable types are still queryable as facets via `search_payload` JSON; they just don't get FULLTEXT-tokenized.
+Non-searchable types are still queryable as facets via `search_payload` JSON; they just don't get FULLTEXT-tokenized. The "bucket" concept is dropped — it was a workaround for storing multiple weighted text streams in one row, and the per-content-unit document model in §5.2 makes it unnecessary.
 
 ### 6.5 `App\Models\Search\Type`
 
@@ -363,13 +458,15 @@ class Document extends Model
     public function searchable(): MorphTo;
     public function searchType(): BelongsTo;
     public function entryGroup(): BelongsTo;
+    public function field(): BelongsTo;                            // nullable: only set for source_kind='field'
 
     public function scopeSearchForTenant(Builder $q, ?int $tenantId): Builder;
     public function scopeSearchForLocale(Builder $q, string $locale): Builder;
     public function scopeSearchOfType(Builder $q, string $typeHandle): Builder;
     public function scopeSearchInGroup(Builder $q, int|string|EntryGroup $g): Builder;
+    public function scopeSearchOfSourceKind(Builder $q, string $kind): Builder;
     public function scopeSearchPublic(Builder $q): Builder;
-    public function scopeSearchMatch(Builder $q, string $kw, array $weights): Builder;
+    public function scopeSearchMatch(Builder $q, string $kw): Builder;     // emits MATCH(search_content) AGAINST(? IN BOOLEAN MODE)
 }
 ```
 
@@ -453,7 +550,7 @@ trait HasSearchConfig
     public function searchFieldPriorities(): HasMany;
     public function searchEnsureConfig(): \App\Models\Search\Config;
     public function searchResolvedFields(): Collection;
-    public function searchFieldPriorityFor(Field $f): array;     // ['weight' => ..., 'bucket' => ...]
+    public function searchFieldPriorityFor(Field $f): ?float;    // returns the Group-level weight or null
     public function searchReindexAll(bool $queue = true): int;
 }
 ```
@@ -471,9 +568,9 @@ trait HasSearchableGroups
     public function searchDetachGroup(EntryGroup $g): static;
     public function searchAttachType(Search\Type $t, float $weight = 1.0): static;
     public function searchDetachType(Search\Type $t): static;
-    public function searchSetFieldWeight(EntryGroup $g, Field $f, float $weight, ?string $bucket = null): static;
+    public function searchSetFieldWeight(EntryGroup $g, Field $f, float $weight): static;
     public function searchClearFieldWeight(EntryGroup $g, Field $f): static;
-    public function searchResolvedFieldWeight(EntryGroup $g, Field $f): array;
+    public function searchResolvedFieldWeight(EntryGroup $g, Field $f): float;
 }
 ```
 
@@ -547,7 +644,7 @@ class KeywordParser
 
 ```
 app/Observers/Search/
-  EntryObserver.php                   saved/deleted/restoring
+  EntryObserver.php                   saved/deleted, plus reverse-Relationship lookup
   UserObserver.php
   FieldValueObserver.php              bubbles up to fieldable owner
   EntryRelationshipObserver.php       bubbles up to parent entry
@@ -567,67 +664,193 @@ app/Console/Commands/Search/
 
 ## 7. Configuration Cascade
 
-Resolution order, **highest priority wins**:
+Two cascades, with different resolution timings.
+
+### 7.1 Inclusion cascade — index-time
+
+Determines whether a Field's value is *present* in the index at all. Resolved at index time and baked into the document by row presence/absence.
+
+```
+1. Field instance override   (fields.is_searchable)
+        ↓ null
+2. Field type default         (AbstractField::searchIsSearchable())
+```
+
+Per-Group and per-Collection levels do **not** affect inclusion. To suppress a Field's contribution in a specific Group or Collection, set its weight to `0` at that level (see §7.2). This keeps inclusion a single source of truth and avoids an explosion of reindex triggers when admins fiddle with Group/Collection settings.
+
+### 7.2 Weight cascade — query-time
+
+Determines how much a Field's text contributes to relevance for a given search. Resolved at query time via JOINs in the QueryBuilder. **Highest priority wins**:
 
 ```
 1. Search\Collection field-priority override   (search_collection_field_priorities)
         ↓ no row
 2. EntryGroup field-priority override           (entry_group_search_field_priorities)
         ↓ no row
-3. Field instance override                      (fields.is_searchable + fields.search_weight)
+3. Field instance override                      (fields.search_weight)
         ↓ null
-4. Field type default                           (AbstractField::searchDefault*())
+4. Field type default                           (AbstractField::searchDefaultWeight())
 ```
 
-Four levels. Mirrors how field validation, rendering, and storage already cascade through `Field` → `Field\Type` → concrete `AbstractField` subclass — the same mental model applies.
+Resolving weights at query time is the change that fixes the multi-Collection conflict: two Collections can apply different weights to the same Field on the same Entry without mutating the index. The cost is one or two LEFT JOINs per query, which MySQL handles cleanly because the priority tables are tiny (rows count in hundreds, not millions).
 
-The cascade is **resolved at index time** and the resulting weight + bucket assignment is *baked into* `search_documents`. Query-time scoring does not re-walk the cascade — it reads the FULLTEXT columns. This avoids per-query joins against config tables and gives stable performance under load.
+**What this means for reindex triggers:** weight changes at any level produce zero document writes. The next query simply picks up the new weight. The reindex pipeline only fires for changes that affect content presence (inclusion cascade, content edits, or row-level facets like status/published_at).
 
-The cost is that *changes to the cascade trigger reindexing*. That's why every level in the cascade has an observer: a row added to `search_collection_field_priorities` queues a reindex of every Entry in every affected Group; a Field's `search_weight` change queues a reindex of every Group that uses that Field. This is acceptable because admin-driven config changes are rare relative to content edits.
+## 8. Weighting
 
-## 8. Buckets and Weighting
+Each row in `search_documents` is a single content unit with a single FULLTEXT column. A keyword search runs MATCH against every row, multiplies each row's match score by its resolved weight, then SUMs per searchable to produce final relevance.
 
-Three buckets, three FULLTEXT columns, three weights.
+The QueryBuilder emits one of two query shapes depending on whether the caller scoped to a Search Collection. The shapes are different — not the same query with optional joins — because Collection scope **restricts** the result set, not just the weight cascade.
 
-- **`search_title`** — short, high-impact. Default weight `2.0`.
-- **`search_body`** — primary content. Default weight `1.0`.
-- **`search_meta`** — categories, related-entry titles, tags, secondary identifiers. Default weight `0.5`.
+### 8.1 Direct query — `Search::entries()` / `Search::ofType()` / model-side `::search()`
 
-Query-time relevance is a single weighted MATCH:
+No Collection scope. Weight cascade has only three levels (group, field-instance, field-type default).
 
 ```sql
-ORDER BY
-    MATCH(search_title) AGAINST(? IN BOOLEAN MODE) * :w_title +
-    MATCH(search_body)  AGAINST(?)                * :w_body +
-    MATCH(search_meta)  AGAINST(?)                * :w_meta
-DESC
+SELECT
+    d.searchable_id,
+    d.searchable_type,
+    SUM(
+        MATCH(d.search_content) AGAINST(:keyword IN BOOLEAN MODE)
+        * COALESCE(
+            egfp.search_weight,                      -- group-level override
+            f.search_weight,                         -- field-instance override
+            CASE d.source_kind
+                WHEN 'title'    THEN :w_title
+                WHEN 'handle'   THEN :w_handle
+                WHEN 'category' THEN :w_category
+                WHEN 'related'  THEN :w_related
+                WHEN 'tag'      THEN :w_tag
+                ELSE :w_field_default                -- looked up via field_id → field_type
+            END
+        )
+        * :status_multiplier
+        * :freshness_multiplier
+    ) AS relevance
+FROM search_documents d
+LEFT JOIN fields f
+    ON d.field_id = f.id AND d.field_id <> 0
+LEFT JOIN entry_group_search_field_priorities egfp
+    ON egfp.entry_group_id = d.entry_group_id
+   AND egfp.field_id       = d.field_id
+WHERE (d.tenant_id IS NULL OR d.tenant_id = :tenant_id)
+  AND d.locale = :locale
+  AND MATCH(d.search_content) AGAINST(:keyword IN BOOLEAN MODE)
+  -- ... additional facet filters from searchWherePayload, status, etc.
+GROUP BY d.searchable_id, d.searchable_type
+ORDER BY relevance DESC
+LIMIT :per_page OFFSET :offset
 ```
 
-This is the only correct way to do per-bucket boosting in MySQL — concatenated content with literal delimiters does not survive tokenization, the delimiters become noise, and you lose the ability to weight differently across the segments.
+### 8.2 Collection-scoped query — `Search::collection()`
 
-Optional multipliers, applied after the weighted MATCH:
+Restricts results to:
 
-- **Freshness decay** — `1.0 + 0.5 * exp(-days_since_published / half_life)`, capped at `1.5x`. Off by default; configured per-Group.
-- **Status multiplier** — configurable map: `published 1.0`, `featured 1.5`, `archived 0.3`, others `0.5`. Configured globally in `config/search.php` with optional per-Group override via JSON column.
+1. The Collection's allowed Searchable Types (via `INNER JOIN search_collection_searchable_types`).
+2. For Entry-typed rows: the Collection's attached Entry Groups (via `LEFT JOIN search_collection_entry_groups` plus a WHERE clause that lets through type-less rows like Users while requiring an attached-group match for Entry rows).
 
-Both multipliers are applied *in the database*, not in PHP — the QueryBuilder emits a `CASE` expression for status and an arithmetic expression for freshness. No N+1 PHP scoring loop.
+Adds the four-level weight cascade (collection > group > field-instance > type default) and the inter-type modifier from `search_collection_searchable_types.search_weight`.
+
+```sql
+SELECT
+    d.searchable_id,
+    d.searchable_type,
+    SUM(
+        MATCH(d.search_content) AGAINST(:keyword IN BOOLEAN MODE)
+        * COALESCE(
+            ccfp.search_weight,                      -- collection-level override
+            egfp.search_weight,                      -- group-level override
+            f.search_weight,                         -- field-instance override
+            CASE d.source_kind
+                WHEN 'title'    THEN :w_title
+                WHEN 'handle'   THEN :w_handle
+                WHEN 'category' THEN :w_category
+                WHEN 'related'  THEN :w_related
+                WHEN 'tag'      THEN :w_tag
+                ELSE :w_field_default
+            END
+        )
+        * scst.search_weight                         -- inter-type modifier from the Collection
+        * :status_multiplier
+        * :freshness_multiplier
+    ) AS relevance
+FROM search_documents d
+INNER JOIN search_collection_searchable_types scst
+    ON scst.search_collection_id = :collection_id
+   AND scst.search_type_id        = d.search_type_id
+LEFT JOIN search_collection_entry_groups scg
+    ON scg.search_collection_id = :collection_id
+   AND scg.entry_group_id        = d.entry_group_id
+LEFT JOIN fields f
+    ON d.field_id = f.id AND d.field_id <> 0
+LEFT JOIN entry_group_search_field_priorities egfp
+    ON egfp.entry_group_id = d.entry_group_id
+   AND egfp.field_id       = d.field_id
+LEFT JOIN search_collection_field_priorities ccfp
+    ON ccfp.search_collection_id = :collection_id
+   AND ccfp.entry_group_id       = d.entry_group_id
+   AND ccfp.field_id             = d.field_id
+WHERE (d.tenant_id IS NULL OR d.tenant_id = :tenant_id)
+  AND d.locale = :locale
+  AND (d.entry_group_id IS NULL OR scg.id IS NOT NULL)    -- Entry rows must match an attached group; type-less rows pass
+  AND MATCH(d.search_content) AGAINST(:keyword IN BOOLEAN MODE)
+GROUP BY d.searchable_id, d.searchable_type
+ORDER BY relevance DESC
+LIMIT :per_page OFFSET :offset
+```
+
+The `INNER JOIN` to `search_collection_searchable_types` is the key correctness piece — without it, `Search::collection('site-search')` would scan every Entry and User in the index while only borrowing the Collection's field-weight overrides. The INNER JOIN restricts the candidate set to types the Collection actually allows.
+
+`CollectionResolver` is responsible for rejecting inactive Collections (`is_active = false`) and for resolving the locale binding: if `search_collections.locale` is set, that's the bound `:locale`; otherwise the QueryBuilder's `searchLocale()` (or the request locale) is bound. `is_active` is a service-layer concern, not a query-layer one — searching against an inactive Collection should fail loudly at resolution time, not return zero rows from a successful query.
+
+### 8.3 Notes on both queries
+
+- All `MATCH … AGAINST` calls use `IN BOOLEAN MODE` consistently. The `KeywordParser` produces boolean-mode terms; the WHERE clause and the SELECT clause must agree on the mode or scoring is meaningless.
+- The inner `WHERE … MATCH` is the FULLTEXT pre-filter — MySQL only computes the SELECT-side MATCH on rows that already passed the WHERE. Per-row scoring is therefore bounded by the keyword's selectivity, not by total table size.
+- `:w_field_default` resolves through a small lookup against the Field's type. This can be a JOIN to a `search_type_default_weights` view or, for simplicity, baked into a CASE expression generated from `config/search.php`.
+- The `LEFT JOIN fields f ON d.field_id = f.id AND d.field_id <> 0` clause uses the `<> 0` predicate to skip the sentinel — synthetic rows have `field_id = 0` (no `fields` row exists with id 0), so the JOIN naturally produces a NULL `f.search_weight` and the COALESCE falls through to the source-kind CASE. Without the `<> 0` predicate the join would still LEFT-NULL but would scan the `fields` table looking for id 0 on every row.
+- **The tenant clause is parenthesized.** `(d.tenant_id IS NULL OR d.tenant_id = :tenant_id)` is wrapped because in SQL `AND` binds tighter than `OR`; without the parens, every tenantless row would short-circuit past the locale, MATCH, and facet predicates. The QueryBuilder must always emit the parens, and both engines (single-tenant fixture and multi-tenant fixture) must be exercised in the test suite. As an alternative that sidesteps the precedence trap entirely, the QueryBuilder may emit two distinct WHERE shapes — `d.tenant_id = :tenant_id AND ...` for tenant-scoped queries and `d.tenant_id IS NULL AND ...` for super-admin / pre-tenancy queries — chosen by the caller's context. Either is acceptable; mixing them in one expression without parens is not.
+
+Optional multipliers:
+
+- **Freshness decay** — `1.0 + 0.5 * exp(-days_since_published / half_life)`, capped at `1.5x`. Off by default; configured per-Group via `entry_group_search_configs.search_apply_freshness` + `search_freshness_half_life`. Applied in the SELECT as a column expression on `published_at`.
+- **Status multiplier** — configurable map: `published 1.0`, `featured 1.5`, `archived 0.3`, others `0.5`. Configured globally in `config/search.php`, with per-Group override via `entry_group_search_configs.search_status_multipliers` JSON. Applied as a `CASE` on `status_handle`.
+
+Both multipliers run inside the SQL, not in a PHP scoring loop.
 
 ## 9. Indexing Pipeline
 
-Triggers — these are the *correct* hooks, the ones that catch real edits:
+Triggers — these are the *correct* hooks, the ones that catch real edits. The list separates **content** triggers (which write rows) from **config** triggers (which mostly invalidate caches now that weight resolution is query-time).
 
-1. `Entry` `saved` / `deleted` / `restoring` → reindex the Entry.
-2. `User` `saved` / `deleted` → reindex the User.
-3. `FieldValue` `saved` / `deleted` → resolve the fieldable owner via morphTo, reindex it. *This is the most important hook* — almost all content edits flow through `FieldValue`, and an observer on `Entry` alone misses every one of them.
-4. `EntryRelationship` `saved` / `deleted` → reindex the parent Entry (so `meta` reflects current relationships).
-5. `Search\Config` `saved` (per-Group config) → reindex every Entry in the Group.
-6. `Search\Collection` `saved` / pivot changes → invalidate `CollectionResolver` cache; collection priority changes also queue affected Group reindexes.
-7. `Field` `is_searchable` or `search_weight` changed → queue reindex of every Group that uses the Field.
-8. Status transition to non-public OR soft-delete → call `searchUnindex()` and remove documents.
+### 9.1 Content triggers (write `search_documents` rows)
 
-All triggers default to queuing (`SEARCH_QUEUE=true`, configurable). Single-record reindex is idempotent: it computes the new document and `updateOrInsert`s on the unique `(searchable_id, searchable_type, locale)` key. Batch reindex chunks by ID range and is interrupt-safe — reruns resume cleanly.
+1. `Entry::saved` / `deleted` → reindex the Entry's own rows (title, handle, category links, relational denormalizations, field-source rows). Hard delete only — Entry does not use `SoftDeletes`. If `SoftDeletes` is added later, the observer also handles `restored` / `forceDeleted`; this is a one-line change.
+2. `User::saved` / `deleted` → reindex the User. Reads `users.is_searchable` to decide whether to index at all (see §5.10).
+3. `FieldValue::saved` / `deleted` → resolve the fieldable owner via morphTo, refresh that owner's `source_kind='field'` row for the affected field. *This is the most important hook* — almost all content edits flow through `FieldValue`, and an observer on `Entry` alone misses every one of them.
+4. `EntryRelationship::saved` / `deleted` → refresh the parent Entry's `source_kind='related'` rows for that Relationship field. If the Relationship type contributes a `source_kind='field'` row of its own (per `Relationship::searchToString()`), refresh that too.
+5. **Reverse-Relationship trigger** — `Entry::saved` (additionally): look up `entry_relationships WHERE related_entry_id = $entry->id`, and for each parent Entry, refresh the corresponding `source_kind='related'` row. This is the fix for "Entry A indexes Entry B's title; B's title changes; A's index now stale." A query keyed by `related_entry_id` returns the small set of parents that need touching; only their `related` rows update, not the whole document.
+6. **Category::saved / deleted** — when a Category is renamed: `UPDATE search_documents SET search_content = :new_name WHERE source_kind = 'category' AND source_type = 'category' AND source_id = :category_id`. Targeted, no per-Entry reindex needed for a rename. On Category delete: same `WHERE` clause with `DELETE`.
+7. **Categorizable attach/detach** — explicit, **not** implicit. The current write path is `$entry->categories()->sync($categoryIds)` in `EntryRepository::syncCategories()`, and `HasCategories` is a plain `morphToMany` with no `using()` declaration. Eloquent's pivot events (`pivotAttached` / `pivotDetached`) only fire when a custom Pivot class is in use, so subscribing to them today would be a silent no-op. Two acceptable paths, in order of preference:
+   - **Repository hook** — extend `EntryRepository::syncCategories()` to compute the attached/detached id diffs from the `sync()` return value (`['attached' => [...], 'detached' => [...], 'updated' => [...]]`) and dispatch a typed `CategoriesSynced` domain event after the sync. The search observer subscribes to this event and applies row inserts/deletes.
+   - **Custom Pivot model** (future option) — introduce `App\Models\Categorizable` with `using()` on the morph relation, register a model observer on it, and let Eloquent fire pivot events naturally. Heavier, but the right move if other concerns also need pivot-side state (timestamps, ordering, audit).
+   The first path is recommended for now — minimal surface change, no behavior shift in the existing repository semantics, and verifiable in a unit test against the actual `sync()` return shape rather than assumed framework events.
+8. Status transition to a non-public status → call `searchUnindex()` (removes all rows for that searchable). Hard delete of the Entry/User → same.
+9. **Cleanup-on-source-delete** — because `field_id` and `source_id` carry no DB-level FK constraints (§5.2.0), the search system is responsible for purging rows whose source object no longer exists. Four observer hooks cover the cases:
+   - `Field::deleting` → `DELETE FROM search_documents WHERE field_id = :id` (covers both `source_kind='field'` rows and `source_kind='related'` rows whose Relationship field was deleted).
+   - `Category::deleting` → `DELETE FROM search_documents WHERE source_type = 'category' AND source_id = :id`.
+   - `Tag::deleting` → `DELETE FROM search_documents WHERE source_type = 'tag' AND source_id = :id`.
+   - `Entry::deleting` (in addition to triggers 1 and 5) → `DELETE FROM search_documents WHERE source_type = 'entry' AND source_id = :id`. This purges `source_kind='related'` rows in *other* Entries that pointed at the one being deleted; the Entry's own rows are removed by trigger 1's standard `searchUnindex()` call.
 
-Concurrency: a `searchable_id`-keyed Redis lock with a 30s TTL wraps the per-model indexer to prevent duplicate work when multiple jobs are queued for the same target. (The unique key already protects correctness; the lock is for efficiency.)
+### 9.2 Config triggers (cache invalidation, occasional reindex)
+
+9. `Search\Config` saved (per-Group toggles) → if `is_indexable` flipped, reindex/unindex the whole Group; if `include_categories` / `include_related` / `include_handle` changed, reindex (these affect row presence). If only freshness/status/locale changed, no reindex — query-time concerns.
+10. `Search\Collection` saved / pivot changes → invalidate `CollectionResolver` cache. **No reindex** — Collection field-priority overrides are query-time only (this is the §7 design choice that fixes the multi-Collection conflict).
+11. `Field::is_searchable` changed → reindex Groups that use this Field (rows added or removed). `Field::search_weight` changed → no reindex; query-time.
+12. `entry_group_search_field_priorities` row added/changed/removed → if it's a weight change, no reindex; query-time. (There is no bucket column here anymore, so there's no row-presence-affecting axis at this level.)
+
+All write-triggering paths default to queuing (`SEARCH_QUEUE=true`, configurable). Single-record reindex is idempotent: it computes the new rows and `updateOrInsert`s on the unique `(searchable_id, searchable_type, locale, source_kind, field_id, source_id)` key per row. Batch reindex chunks by ID range and is interrupt-safe — reruns resume cleanly.
+
+Concurrency: a `searchable_id`-keyed Redis lock with a 30s TTL wraps the per-model indexer to prevent duplicate work when multiple jobs are queued for the same target. The unique key already protects correctness; the lock is for efficiency.
 
 ## 10. Query Layer
 
@@ -674,24 +897,50 @@ This eliminates the boolean-mode injection surface that ad-hoc concatenation cre
 
 Each phase is an independently shippable increment. The phases are sequenced so that stopping after any one of them leaves a coherent, working system at that scope.
 
-### Phase 0 — Spike (1–2 days)
+### Phase 0 — Spike (2–3 days)
 
-Confirm MySQL FULLTEXT viability against current content shapes:
+**This is the key decision point for the entire plan.** The per-content-unit document model is more internally consistent for Collection weighting than the original three-bucket idea, but it is a bigger query-design commitment: the production query path is `MATCH … AGAINST` plus a four-table LEFT JOIN cascade plus `SUM` plus `GROUP BY`. Before any migrations land, the spike must prove that shape works at projected scale. If it doesn't, every later phase rests on a foundation that needs replacing.
 
-- Verify InnoDB FULLTEXT support; tune `innodb_ft_min_token_size` if 3-letter terms (`php`, `sql`) are needed.
-- Build a throwaway 3-bucket FULLTEXT table, populate from current Entries + Field Values via a one-off script, measure relevance and latency on a representative query mix.
-- **Decision gate**: continue with native MySQL FULLTEXT, or jump to Meilisearch from the start. Default recommendation: native FULLTEXT, defer Meilisearch to Phase 10.
+What the spike must produce:
+
+- A throwaway `search_documents`-shaped table (per §5.2 columns and indexes, including the FULLTEXT on `search_content` and the composite `(source_type, source_id)` index used for reverse-Relationship lookups).
+- Throwaway `entry_group_search_field_priorities` and `search_collection_field_priorities` tables populated with realistic priority overrides.
+- A populator script that walks current Entries + FieldValues + EntryRelationships + Categorizables and produces representative content-unit rows. **Target row counts**: 10K Entries × ~12 rows = 120K rows; 100K Entries × ~12 rows = 1.2M rows. Run both.
+- The literal production query — `MATCH(d.search_content) AGAINST(:kw IN BOOLEAN MODE)` in WHERE *and* in SELECT, with the full `COALESCE(ccfp.weight, egfp.weight, f.weight, default)` cascade, `SUM` aggregation, `GROUP BY (searchable_id, searchable_type)`, status multiplier `CASE`, freshness expression on `published_at`, paginated.
+- Latency measurements at p50 / p95 / p99 for: single-term, two-term, four-term, four-term + status filter + facet filter from `search_payload`, four-term + Collection scope (extra JOIN), four-term + Collection scope on a 1.2M-row table.
+
+InnoDB-specific homework done in the same window:
+
+- Confirm InnoDB FULLTEXT is enabled.
+- Tune `innodb_ft_min_token_size` if 3-letter terms (`php`, `sql`, `c++`) are needed for the corpus.
+- Decide on stop-word policy (use the InnoDB default list, or replace with a custom one).
+- Verify `MATCH AGAINST` behavior under multi-byte/UTF-8 collations matching current Entry titles.
+
+**Decision gate** — explicit thresholds before Phase 1 begins:
+
+| Measurement | Target | If exceeded |
+|---|---|---|
+| p95 latency at 1.2M rows, single term | ≤ 100 ms | Profile JOIN + GROUP BY plan; consider denormalizing the priority resolution into a generated column. |
+| p95 latency at 1.2M rows, four-term + Collection scope | ≤ 250 ms | Same. |
+| p99 latency on either of the above | ≤ 500 ms | If still over after profiling, **abort native FULLTEXT path and pivot to Meilisearch from Phase 1.** Plan the swap before any production migrations exist; this is the cheapest moment to change direction. |
+| Reindex throughput, populator script | ≥ 5K rows/sec | Below this, batch reindex jobs in Phase 4 may not keep up with realistic edit rates; tune the indexer or accept queue lag. |
+
+The Meilisearch fallback is not a defeat — it's the same data model expressed against an engine that handles the JOIN-and-SUM pattern natively (per-attribute weighting, query-time `attributesToSearchOn` overrides, no SQL gymnastics). The phasing in §11 is engine-agnostic from Phase 1 onward; only the QueryBuilder implementation in Phase 5 differs. What Phase 0 buys is the right to commit to native FULLTEXT — or to know early that we shouldn't.
 
 ### Phase 1 — Foundation (week 1)
 
 A registry, a Document, a trait skeleton — no live indexing yet.
 
-- Migrations: `search_types`, `search_documents`, `add_search_columns_to_fields_table`.
+- Migrations:
+  - `create_search_types_table`
+  - `create_search_documents_table` (per-content-unit shape from §5.2)
+  - `add_search_columns_to_fields_table` (`is_searchable`, `search_weight`)
+  - `add_search_columns_to_users_table` (`is_searchable` default `false`, `search_weight`) — User search is opt-in (§5.10, §14)
 - Models: `Search\Type`, `Search\Document`.
 - Abstract: `Search\AbstractSearchable`.
 - Trait skeleton: `Searchable`.
 - Seeder: `SearchTypeSeeder` registers `entry` and `user`.
-- Tests: model relations, Document scopes, factories.
+- Tests: model relations, Document scopes, factories, `users.is_searchable` default behavior.
 
 **Done = a `Search\Document` row can be created by hand, related to either an Entry or a User, and queried via the Document scopes.**
 
@@ -713,19 +962,38 @@ An Entry or User can produce a document. Nothing reads it yet.
 - `Search\Types\UserSearchable`.
 - `Search\Indexer` and `Search\TypeRegistry`.
 - `Searchable` trait applied to `Entry` and `User`.
-- Tests: indexed content lands in the right buckets; relational fields contribute related entry titles to `meta`; non-searchable fields are excluded.
+- Tests: indexed content lands in the right `source_kind` rows with the right `field_id` / `source_id` / `source_type`; relational fields produce `source_kind='related'` rows carrying the related Entry's title and a stable `(source_type='entry', source_id=...)` reference; non-searchable Field types are excluded.
 
 **Done = `Search::entries()->searchIndex($entry)` writes a correct row.**
 
 ### Phase 4 — Observer pipeline (week 2–3)
 
-Indexes stay in sync with live data — *every* edit path.
+Indexes stay in sync with live data — *every* edit path, including the reverse-direction ones.
 
 - `Observers\Search\EntryObserver`, `UserObserver`, `FieldValueObserver`, `EntryRelationshipObserver`.
+- `Observers\Search\CategoryObserver` — Category rename → targeted UPDATE on `source_kind='category'` rows; Category `deleting` → targeted DELETE on rows keyed by `(source_type='category', source_id=$category->id)`. The DELETE is the §5.2.0 referential-integrity contract — no DB FK does this for us.
+- `Observers\Search\FieldObserver` — Field `deleting` → `DELETE FROM search_documents WHERE field_id = :id`. Covers both the Field's own `source_kind='field'` rows and any `source_kind='related'` rows that used this Field as a Relationship.
+- `Observers\Search\TagObserver` — Tag `deleting` → `DELETE FROM search_documents WHERE source_type = 'tag' AND source_id = :id`.
+- `EntryObserver::deleting` extension — beyond the standard `searchUnindex()` for the deleted Entry's own rows, also `DELETE FROM search_documents WHERE source_type = 'entry' AND source_id = :id` to purge `source_kind='related'` rows in *other* Entries that pointed at the one being deleted.
+- **Explicit categorizable hook in `EntryRepository::syncCategories()`** — read the `attached`/`detached`/`updated` arrays from `sync()`'s return value and dispatch a `CategoriesSynced` domain event. Search observer subscribes and applies row inserts/deletes. *Do not* rely on Eloquent pivot events — `HasCategories` declares no `using()` class, so they don't fire.
+- Reverse-Relationship hook in `EntryObserver::saved` — `SELECT entry_id FROM entry_relationships WHERE related_entry_id = $entry->id`, then for each parent and each Relationship field, refresh the corresponding `source_kind='related'` row by `(source_type='entry', source_id=$entry->id, field_id=$field->id)`.
 - `Jobs\Search\ReindexModel`.
-- Tests: editing a `FieldValue` updates the document; soft-delete unindexes; status change to non-public unindexes; `EntryRelationship` add/remove updates parent `meta`.
+- Tests covering each trigger plus the unique-key collision cases and source-delete cleanup the new schema is designed to enforce:
+  - Editing a `FieldValue` updates the field's row.
+  - Status change to non-public unindexes.
+  - Hard-deleting an Entry removes all of its rows AND every `source_kind='related'` row in other Entries that pointed at it (`Entry::deleting` cleanup hook).
+  - `EntryRelationship` add/remove updates parent's `related` rows.
+  - Changing Entry B's title updates Entry A's `related` row when A references B (reverse-trigger smoke test).
+  - Renaming a Category updates every `category` row pointing at that `category_id` — confirms the source-id-based update keeps working when handles are non-unique across groups.
+  - **Deleting a Field cascades to all `field`-kind rows AND all `related`-kind rows whose Relationship field was the deleted one** (no DB FK does this for us, so the observer must).
+  - **Deleting a Category cascades to all `category`-kind rows pointing at that category_id.**
+  - **Deleting a Tag cascades to all `tag`-kind rows pointing at that tag_id.**
+  - Toggling `users.is_searchable` adds/removes that User's documents.
+  - **Two Relationship fields on the same Entry both pointing at the same related Entry produce two distinct rows (no unique-key collision).**
+  - **Two same-handle Categories from different Category Groups attached to the same Entry produce two distinct rows.**
+  - **`CategoriesSynced` event fires from `EntryRepository::syncCategories()` with correct attached/detached id arrays** — verifies the explicit hook, since the implicit pivot-event path is intentionally not used.
 
-**Done = no edit path leaves the index stale.**
+**Done = no edit path leaves the index stale, including the reverse-direction edits and the categorical collisions the original design missed.**
 
 ### Phase 5 — Query layer (week 3)
 
@@ -742,15 +1010,15 @@ Working keyword search with proper weighting.
 
 ### Phase 6 — EntryGroup configuration (week 4)
 
-Per-Group field weights, buckets, and toggles via admin UI.
+Per-Group field weights and toggles via admin UI.
 
 - Migrations: `entry_group_search_configs`, `entry_group_search_field_priorities`.
 - Models: `Search\Config`, `Search\FieldPriority`.
 - Trait: `HasSearchConfig` applied to `EntryGroup`.
-- `Observers\Search\ConfigObserver` queues full-group reindex on config change.
-- Indexer respects per-Group overrides.
+- `Observers\Search\ConfigObserver` queues full-group reindex only when row-presence-affecting flags change (`is_indexable`, `include_categories`, `include_related`, `include_handle`); pure weight-config changes invalidate cache only.
+- QueryBuilder JOINs against `entry_group_search_field_priorities` for weight cascade resolution.
 - Admin UI: per-Group field-priority editor (mirrors FieldLayout admin UX).
-- Tests: weight cascade resolution, bucket override, disabled-field exclusion, reindex-on-config-change.
+- Tests: weight cascade resolution; weight = 0 contributes 0 to relevance but row stays in index; flipping `is_indexable` removes/restores all rows for the Group; weight-only changes do not trigger reindex.
 
 **Done = admins can configure search per Entry Group without code.**
 
@@ -761,13 +1029,19 @@ Composable, multi-Group, multi-Type search scopes with priority overrides.
 - Migrations: 4 collection tables.
 - Models: `Search\Collection`, `Search\Collection\Group`, `Search\Collection\FieldPriority`, `Search\Collection\Type`.
 - Trait: `HasSearchableGroups`.
-- `Search\CollectionResolver` (cached, invalidated by `CollectionObserver`).
-- `SearchService::collection()` + QueryBuilder `searchInCollection()`.
-- Multi-type query merge (one query per searchable type, sorted by computed relevance × inter-type weight).
+- `Search\CollectionResolver` (cached, invalidated by `CollectionObserver`). Resolver rejects inactive Collections at lookup time, throws `InactiveCollectionException`. Resolver also resolves the locale binding (collection.locale wins over caller-supplied locale; falls back to request locale).
+- `SearchService::collection()` + QueryBuilder `searchInCollection()`. QueryBuilder emits the §8.2 query shape — INNER JOIN through `search_collection_searchable_types` and the `(d.entry_group_id IS NULL OR scg.id IS NOT NULL)` predicate that restricts Entry rows to the Collection's attached Groups while letting type-less rows (Users) pass.
 - Admin UI: collection CRUD, group attachment with sort order, Type attachment, weight override editor.
-- Tests: cross-group weight isolation; multi-type result merge; locale filtering; collection vs group precedence.
+- Tests covering correctness of the Collection scope, not just the weight cascade:
+  - **A document whose Entry Group is NOT attached to the Collection does NOT appear in the result set**, even if its `search_content` matches the keyword. Confirms the `INNER JOIN scst` + group-presence predicate actually restrict, not just borrow weights.
+  - **A document whose Searchable Type is NOT attached to the Collection does NOT appear**. (Add Entry to Collection but not User; search a keyword that matches both an Entry and a User; only the Entry returns.)
+  - **Inactive Collection raises at the resolver, not at the query layer** — `Search::collection('disabled-handle')` throws before any SQL runs.
+  - Cross-Group weight isolation: same Field used in two Groups inside one Collection accepts independent override weights via the `(collection_id, entry_group_id, field_id)` key.
+  - Multi-type result merge: an Entry and a User both matching the same keyword rank together, with the inter-type modifier from `search_collection_searchable_types.search_weight` applied.
+  - Locale filtering: a Collection with `locale='en'` returns only `en` documents; a Collection with `locale=NULL` returns documents in any locale.
+  - Collection-level field-weight override beats Group-level beats Field-instance beats Field-type default — full cascade verified at query time, with the same Field instance scoring differently in two Collections that include the same Group.
 
-**Done = the user-facing requirement for composable Collections is delivered.**
+**Done = the user-facing requirement for composable Collections is delivered, and the Collection scope provably restricts the result set rather than just decorating it with weights.**
 
 ### Phase 8 — API endpoints (week 5)
 
@@ -802,12 +1076,10 @@ Three admin areas, mirroring patterns already in the codebase.
 
 A new tab on the existing EntryGroup edit screen. UI shows the group's resolved field layout with:
 
-- Toggle: **searchable** yes/no (translates to `search_weight = 0` or row removal).
-- Weight slider/input (`0.0` – `5.0`, step `0.25`).
-- Bucket selector (`title` / `body` / `meta`).
+- Weight slider/input per Field (`0.0` – `5.0`, step `0.25`). A weight of `0` keeps the field in the index but contributes nothing to relevance for this Group; to remove the field from the index entirely, the admin sets `is_searchable = no` on the Field instance itself (see §12.3).
 - Inline indicator: "inherits from field type default" vs. "overridden here".
 
-Plus group-level toggles: master kill-switch, freshness decay (with half-life input), default locale, status-multiplier overrides.
+Plus group-level toggles: master kill-switch (`is_indexable`), freshness decay (with half-life input), default locale, status-multiplier overrides, and the inclusion checkboxes from §5.3 (`include_title`, `include_handle`, `include_categories`, `include_related`).
 
 ### 12.2 `/admin/search/collections`
 
@@ -817,7 +1089,7 @@ Per-Collection edit screen has three tabs:
 
 1. **General** — name, handle, description, locale, active flag.
 2. **Sources** — attached Entry Groups (sortable by `sort_order`), attached Searchable Types (Entry, User), per-type weight.
-3. **Field Priorities** — per-(Group, Field) override editor; defaults to "inherit" with an explicit "override" toggle. Disabled (greyed) for any field the Group itself has disabled, with hover text explaining why.
+3. **Field Priorities** — per-(Group, Field) weight override editor; defaults to "inherit" with an explicit "override" toggle. Greyed out for any field that has `is_searchable = false` at the Field-instance or Field-type level (no row exists in the index, so a Collection-level weight override would have nothing to weight).
 
 ### 12.3 Field instance override
 
@@ -827,10 +1099,10 @@ Two new inputs added to the existing Field edit screen: **searchable (override)*
 
 Pyramid by phase. Every phase ships with tests that cover its delta.
 
-- **Unit** — every model, trait method, service method; every `AbstractField` subclass override; every `QueryBuilder` method; every `KeywordParser` allowlist edge case.
-- **Feature** — full save → observer → index round-trip; edit → update → search hit; soft-delete → unindex; configuration cascade resolution.
-- **Integration** — per-phase smoke tests against a seeded fixture (one EntryGroup, three Entries with mixed field types, three Users, one Collection composing multiple Groups).
-- **Performance** — at end of Phase 5, baseline keyword query latency at 10K and 100K rows. Gate proceeding past Phase 7 on this number.
+- **Unit** — every model, trait method, service method; every `AbstractField` subclass override; every `QueryBuilder` method; every `KeywordParser` allowlist edge case; weight-cascade resolver with all four levels populated.
+- **Feature** — full save → observer → index round-trip; edit → update → search hit; hard-delete → unindex; configuration cascade resolution; reverse-Relationship staleness fix; Category-rename propagation; opt-in/out via `users.is_searchable`.
+- **Integration** — per-phase smoke tests against a seeded fixture (one EntryGroup, three Entries with mixed field types — one of which has a Relationship pointing at another, and shared Categories — three Users, one Collection composing multiple Groups with override weights set).
+- **Performance** — at end of Phase 5, baseline keyword query latency at 10K and 100K rows on the per-content-unit shape (which produces ~10–15× the row count of the original per-model shape but only one MATCH per row). Gate proceeding past Phase 7 on this number.
 
 ## 14. Open Decisions
 
@@ -841,13 +1113,14 @@ These need a call before Phase 1 starts.
 3. **Translatable fields.** If `spatie/laravel-translatable` is going to be turned on for Entry titles and text fields in the near term, build per-locale documents from Phase 1. If not, default-locale only and revisit in Phase 9.
 4. **Status multipliers — global config or per-group config.** Recommended: global default in `config/search.php`, per-Group override via `entry_group_search_configs.search_status_multipliers` JSON. Keeps Phase 6 simple while leaving room for tuning.
 5. **Whether `User` is searchable by default.** Users carry private data. Recommended: User searchability is opt-in via a `users.is_searchable` flag and gated by a permission check in QueryBuilder so that admin search ≠ public search.
-6. **Concurrency model for reindexing.** With unique key on `(searchable_id, searchable_type, locale)`, `updateOrInsert` is correct. But duplicate work across queue workers is wasteful — recommend a `searchable_id`-keyed Redis lock with 30s TTL inside the Indexer.
+6. **Concurrency model for reindexing.** With the composite unique key on `(searchable_id, searchable_type, locale, source_kind, field_id, source_id)`, `updateOrInsert` is correct per content unit even under concurrent indexing of the same model. Two workers reindexing the same Entry will land on the same rows and the second will UPDATE instead of INSERT. Correctness is protected; what's wasted is duplicate work. Recommendation: a `(searchable_type:searchable_id)`-keyed Redis lock with 30s TTL inside the Indexer, so only one worker per model is computing rows at a time. The lock is for efficiency, not correctness — a Redis outage degrades to "may do duplicate work" rather than "may corrupt the index."
 
 ## 15. Risks
 
-- **Index bloat** — native FULLTEXT indexes grow `1.5x – 3x` source content. Phase 5 baseline measurements gate Phase 7+.
-- **Reindex storms** — a Field weight change in a 1M-row group triggers a 1M-row reindex. Mitigated by chunked, queued, resumable batch jobs and admin-visible progress.
-- **Status multiplier interactions** — if `archived = 0.3x` is too low, archived content effectively never surfaces. Configurable, with a "minimum visible relevance" threshold so 0.3x doesn't always rank below excluded.
+- **Row count expansion** — per-content-unit decomposition multiplies row count by approximately the number of indexable Fields per Entry plus a handful of synthetic rows (title, handle, categories, related). For a typical Entry with 6 searchable Fields and 3 categories that's roughly 12 rows per Entry per locale. At 100K Entries × 1 locale that's ~1.2M index rows; at 1M Entries it's ~12M. MySQL FULLTEXT handles 12M rows comfortably; Phase 5 baseline measurements gate proceeding past Phase 7.
+- **GROUP BY on FULLTEXT result sets** — the per-row scoring + SUM aggregation requires a GROUP BY, which on large result sets can spill to disk. Mitigations: the FULLTEXT WHERE pre-filters before GROUP BY (so the aggregated set is bounded by keyword selectivity), and the QueryBuilder caps `LIMIT * 10` candidates pre-aggregation when relevance ordering is requested.
+- **Reverse-Relationship trigger fan-out** — saving an Entry that is referenced by many other Entries triggers a refresh of every parent's `related` row. Bounded by the count of inbound relationships, which is typically small. Capped and queued; if the parent count exceeds a threshold, the work is dispatched as a `ReindexBatch` job rather than inline.
+- **Status multiplier interactions** — if `archived = 0.3x` is too low, archived content effectively never surfaces. Configurable, with a "minimum visible relevance" threshold so `0.3x` doesn't always rank below excluded.
 - **Boolean-mode parser drift** — user-supplied operators are seductive for power users and dangerous for everyone else. Strict allowlist; advanced syntax behind a flag.
 - **Trait method collisions** — the `Search` prefix mitigates, but `search()` static and `searchDocuments()` relation are short enough to occasionally collide. Names chosen to be unambiguous in their host-model contexts.
 
