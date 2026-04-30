@@ -1000,6 +1000,760 @@
                 ]
             }
         },
+        "/api/v1/status-groups": {
+            "get": {
+                "tags": [
+                    "Status Groups"
+                ],
+                "summary": "List all status groups",
+                "description": "Returns a paginated list of status groups, each including the total number of statuses it contains.",
+                "operationId": "getStatusGroups",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Results per page (max 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/StatusGroup"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Meta"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Links"
+                                            }
+                                        },
+                                        "pagination_info": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PaginationInfo"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Status Groups"
+                ],
+                "summary": "Create a new status group",
+                "operationId": "createStatusGroup",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Human-readable name (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Publishing Workflow"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "publishing-workflow"
+                                    },
+                                    "sort_order": {
+                                        "description": "Display sort position",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Status group created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/StatusGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/status-groups/{group}": {
+            "get": {
+                "tags": [
+                    "Status Groups"
+                ],
+                "summary": "Get a single status group",
+                "operationId": "getStatusGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the status group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/StatusGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Status Groups"
+                ],
+                "summary": "Update a status group",
+                "operationId": "updateStatusGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the status group to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Publishing Workflow"
+                                    },
+                                    "handle": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "publishing-workflow"
+                                    },
+                                    "sort_order": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status group updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/StatusGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Status Groups"
+                ],
+                "summary": "Delete a status group",
+                "description": "Permanently deletes the status group and all of its statuses.",
+                "operationId": "deleteStatusGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the status group to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/statuses": {
+            "get": {
+                "tags": [
+                    "Statuses"
+                ],
+                "summary": "List statuses",
+                "description": "Returns a paginated list of statuses. Filter by status group using the status_group_id query parameter.",
+                "operationId": "getStatuses",
+                "parameters": [
+                    {
+                        "name": "status_group_id",
+                        "in": "query",
+                        "description": "Filter results to a specific status group",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Results per page (max 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "created_after",
+                        "in": "query",
+                        "description": "Filter to statuses created after this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "created_before",
+                        "in": "query",
+                        "description": "Filter to statuses created before this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Status"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Meta"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Links"
+                                            }
+                                        },
+                                        "pagination_info": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PaginationInfo"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Statuses"
+                ],
+                "summary": "Create a new status",
+                "description": "Creates a status within the specified status group. If is_default is true, the previous default in the same group is automatically cleared.",
+                "operationId": "createStatus",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle",
+                                    "status_group_id"
+                                ],
+                                "properties": {
+                                    "status_group_id": {
+                                        "description": "ID of the status group this status belongs to",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "description": "Display name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Draft"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier, unique within the group",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "draft"
+                                    },
+                                    "color": {
+                                        "description": "Optional display colour",
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "example": "#aaaaaa",
+                                        "nullable": true
+                                    },
+                                    "is_default": {
+                                        "description": "Set as the default status for the group (clears any existing default)",
+                                        "type": "boolean",
+                                        "example": false,
+                                        "nullable": true
+                                    },
+                                    "is_public": {
+                                        "description": "Whether this status is publicly visible",
+                                        "type": "boolean",
+                                        "example": false,
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "description": "Sort position within the group",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Status created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Status"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/statuses/{status}": {
+            "get": {
+                "tags": [
+                    "Statuses"
+                ],
+                "summary": "Get a single status",
+                "operationId": "getStatus",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "path",
+                        "description": "ID of the status",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Status"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Statuses"
+                ],
+                "summary": "Update a status",
+                "description": "Updates a status. If is_default is set to true, the previous default in the same group is automatically cleared.",
+                "operationId": "updateStatus",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "path",
+                        "description": "ID of the status to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Published"
+                                    },
+                                    "handle": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "published"
+                                    },
+                                    "color": {
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "example": "#22c55e",
+                                        "nullable": true
+                                    },
+                                    "is_default": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                    },
+                                    "is_public": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Status"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Statuses"
+                ],
+                "summary": "Delete a status",
+                "description": "Permanently deletes the status.",
+                "operationId": "deleteStatus",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "path",
+                        "description": "ID of the status to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/users": {
             "get": {
                 "tags": [
@@ -1386,6 +2140,92 @@
                 },
                 "type": "object"
             },
+            "StatusGroup": {
+                "title": "Status Group",
+                "description": "A named collection of statuses shared across entries or other models.",
+                "properties": {
+                    "id": {
+                        "description": "Primary key",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "Human-readable name",
+                        "type": "string"
+                    },
+                    "handle": {
+                        "description": "URL-safe unique identifier",
+                        "type": "string"
+                    },
+                    "sort_order": {
+                        "description": "Display sort position",
+                        "type": "integer"
+                    },
+                    "statuses_count": {
+                        "description": "Total number of statuses in this group",
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Status": {
+                "title": "Status",
+                "description": "A status option belonging to a status group.",
+                "properties": {
+                    "id": {
+                        "description": "Primary key",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "status_group_id": {
+                        "description": "ID of the status group this status belongs to",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "Human-readable display name",
+                        "type": "string"
+                    },
+                    "handle": {
+                        "description": "URL-safe identifier, unique within its group",
+                        "type": "string"
+                    },
+                    "color": {
+                        "description": "Optional display colour (e.g. #ff5733)",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "is_default": {
+                        "description": "Whether this is the default status in its group",
+                        "type": "boolean"
+                    },
+                    "is_public": {
+                        "description": "Whether this status is publicly visible",
+                        "type": "boolean"
+                    },
+                    "sort_order": {
+                        "description": "Display sort position within the group",
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "User": {
                 "title": "User Details",
                 "description": "user model",
@@ -1434,6 +2274,14 @@
         {
             "name": "Category Groups",
             "description": "Manage category groups. A category group is a named container for a set of categories and defines the field layout that all categories in the group share."
+        },
+        {
+            "name": "Status Groups",
+            "description": "Manage status groups. A status group is a named collection of statuses (e.g. \"Publishing Workflow\") that can be assigned to entry groups."
+        },
+        {
+            "name": "Statuses",
+            "description": "Manage individual statuses within a status group. Setting is_default=true on a status will automatically unset the previous default in the same group."
         },
         {
             "name": "Account",

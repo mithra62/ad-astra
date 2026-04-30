@@ -17,7 +17,7 @@ class StoreStatusRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'handle' => ['required', 'string', 'max:255', new UniqueHandleByGroup(['group_id' => $this->route('group_id')])],
+            'handle' => ['required', 'string', 'max:255', new UniqueHandleByGroup(['group_id' => $this->route('group_id') ?? $this->input('status_group_id')])],
             'color' => ['nullable', 'string', 'max:20'],
             'is_default' => ['nullable', 'boolean'],
             'is_public' => ['nullable', 'boolean'],

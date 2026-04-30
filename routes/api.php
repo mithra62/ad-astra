@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\v1\Account;
 use App\Http\Controllers\Api\v1\Categories;
 use App\Http\Controllers\Api\v1\CategoryGroups;
 use App\Http\Controllers\Api\v1\Entries;
+use App\Http\Controllers\Api\v1\Statuses;
+use App\Http\Controllers\Api\v1\StatusGroups;
 use App\Http\Controllers\Api\v1\User;
 use App\Http\Middleware\LogRequestResponse;
 use Illuminate\Support\Facades\Route;
@@ -31,5 +33,16 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
     Route::apiResource('category-groups.categories', Categories::class, ['names' => 'api.v1.category-groups.categories'])
         ->parameters(['category-groups' => 'group_id', 'categories' => 'category'])
+        ->middleware(LogRequestResponse::class);
+
+    // Status Groups + flat Statuses
+    // Parameter names aligned with existing admin FormRequests:
+    //   {group}  → matches EditStatusGroupRequest::route('group')
+    //   {status} → matches EditStatusRequest::route('status')
+    Route::apiResource('status-groups', StatusGroups::class, ['names' => 'api.v1.status-groups'])
+        ->parameters(['status-groups' => 'group'])
+        ->middleware(LogRequestResponse::class);
+
+    Route::apiResource('statuses', Statuses::class, ['names' => 'api.v1.statuses'])
         ->middleware(LogRequestResponse::class);
 });
