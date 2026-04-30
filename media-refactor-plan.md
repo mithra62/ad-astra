@@ -1102,3 +1102,1466 @@ binding. The interface contract above covers the common operations across Interv
 3. Implement `dispatch()` to call the library and write to `Storage::disk()` — the path
    is already computed and stored on the `Transformation` record
 4. Done — zero changes to models, traits, or callers
+
+---
+
+---
+
+# File Upload Field Type — Implementation Plan
+
+## Overview
+
+`FileUpload` is a first-class field type in the Field layer, equal in standing to `Text`,
+`Relationship`, and every other type. It can be added to any FieldGroup, placed in any
+FieldLayout tab, and attached to any model that uses the `Fieldable` trait — Entries,
+Categories, Users, and Media items themselves.
+
+When a FileUpload field value is saved, the selected media IDs are stored in `value_json`
+on the `field_values` row (the normal scalar path). A `FieldValueObserver` then keeps the
+`mediables` pivot in sync so that `Media::usages()` always reflects every model that
+references a given file, including which specific field made the reference.
+
+---
+
+## How It Fits the Existing Pipeline
+
+```
+Field (field_type_id → FileUpload Type)
+  └── FieldValue (value_json = [3, 7, 12])   ← normal scalar storage
+        └── resolvedValue()
+              └── FileUpload::value($ids)
+                    └── returns Collection<Media>   ← what callers receive
+
+FieldValueObserver (on saved / deleted)
+  └── syncs mediables pivot
+        └── (media_id, mediable_type, mediable_id, field_id, sort_order)
+```
+
+The `Relationship` field type diverges from the scalar path entirely (`isRelational = true`,
+data in `entry_relationships`). FileUpload does **not** do this — it stays on the normal
+`value_json` path. The `mediables` pivot is a derived index maintained by the observer,
+not the primary store.
+
+---
+
+## Schema Changes Required by This Feature
+
+### Update `mediables` — add `field_id`
+
+The `mediables` pivot already tracks which model instances reference which media. But a
+single model could have both a `hero_image` field and a `gallery` field — two different
+FileUpload fields pointing to different sets of media. Without `field_id` on the pivot,
+syncing one field's selection would destroy the other's.
+
+```php
+Schema::table('mediables', function (Blueprint $table) {
+    $table->foreignId('field_id')
+        ->nullable()
+        ->after('mediable_id')
+        ->constrained('fields')
+        ->nullOnDelete();
+});
+```
+
+Updated unique constraint:
+
+```php
+// Drop old unique, add new one that includes field_id
+$table->dropUnique('mediables_unique');
+$table->unique(
+    ['media_id', 'mediable_type', 'mediable_id', 'field_id'],
+    'mediables_unique'
+);
+```
+
+**Semantics:**
+- `field_id = null` → media attached directly to a model (avatar, library browser, etc.)
+- `field_id = X` → media attached via a specific FileUpload field on that model
+
+This distinction lets `HasMedia::media()` and `HasMedia::mediaForField()` both work without
+ambiguity.
+
+---
+
+## The Field Type Class
+
+### `App\Field\Types\FileUpload`
+
+```php
+namespace App\Field\Types;
+
+use App\Field\AbstractField;
+use App\Models\Media;
+use Illuminate\Support\Collection;
+
+class FileUpload extends AbstractField
+{
+    protected string $handle = 'file_upload';
+    protected string $name   = 'File Upload';
+
+    /**
+     * Scalar storage — selected media IDs are kept in value_json.
+     * The mediables pivot is a derived index; it is NOT the primary store.
+     */
+    public function storageColumn(): string
+    {
+        return 'value_json';
+    }
+
+    /**
+     * Not relational in the Entry::field() sense — does not use entry_relationships.
+     * Stays on the normal fieldValues path so it works identically on Entry,
+     * Category, User, and Media without any model-specific special-casing.
+     */
+    public function isRelational(): bool
+    {
+        return false;
+    }
+
+    // ── Validation ─────────────────────────────────────────────────────────
+
+    public function validate(mixed $value): bool|string
+    {
+        $ids = $this->normaliseIds($value);
+        $min = (int) $this->getSetting('min', 0);
+        $max = $this->getSetting('max');          // null = unlimited
+
+        if ($min > 0 && count($ids) < $min) {
+            $noun = $min === 1 ? 'file' : 'files';
+            return "At least {$min} {$noun} must be selected.";
+        }
+
+        if ($max !== null && count($ids) > (int) $max) {
+            $noun = (int) $max === 1 ? 'file' : 'files';
+            return "No more than {$max} {$noun} may be selected.";
+        }
+
+        return true;
+    }
+
+    // ── Type contract ───────────────────────────────────────────────────────
+
+    /**
+     * Cast raw stored value to a plain array of integer IDs.
+     * Called internally; callers receive resolved Media models via value().
+     */
+    public function cast(mixed $value): array
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? array_map('intval', $decoded) : [];
+        }
+
+        if (is_array($value)) {
+            return array_map('intval', $value);
+        }
+
+        return [];
+    }
+
+    /**
+     * Resolve stored IDs to Media models, preserving saved sort order.
+     * This is what fieldValues->resolvedValue() ultimately returns to callers.
+     *
+     * Eager-load note: this produces one query per FileUpload field resolved.
+     * In list contexts, pre-load via MediaRepository::forFieldValues() to batch.
+     */
+    public function value(mixed $raw): Collection
+    {
+        $ids = $this->cast($raw);
+
+        if (empty($ids)) {
+            return collect();
+        }
+
+        return Media::whereIn('id', $ids)
+            ->get()
+            ->sortBy(fn($m) => array_search($m->id, $ids))
+            ->values();
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────────
+
+    /**
+     * Normalise any incoming value format to a flat array of integer IDs.
+     * Used by the observer and validator to avoid duplicating cast logic.
+     */
+    public function normaliseIds(mixed $value): array
+    {
+        if ($value instanceof Collection) {
+            return $value->pluck('id')->map('intval')->all();
+        }
+
+        return $this->cast($value);
+    }
+}
+```
+
+**Settings stored in the `fields.settings` JSON column:**
+
+| Key | Type | Default | Purpose |
+|---|---|---|---|
+| `library_id` | int\|null | null | Restrict picker to a specific library by ID |
+| `library_handle` | string\|null | null | Alternative to `library_id`; portable across environments |
+| `min` | int | 0 | Minimum number of files required |
+| `max` | int\|null | null | Maximum files (null = unlimited; 1 = single-file mode) |
+| `allowed_types` | array\|null | null | Override library MIME restrictions at field level |
+| `show_preview` | bool | true | Whether the UI renders an inline preview |
+
+---
+
+## FieldValue Observer
+
+The observer is the single point responsible for keeping the `mediables` pivot truthful.
+Nothing else should write to that pivot for FileUpload field references.
+
+### `App\Observers\FieldValueObserver`
+
+```php
+namespace App\Observers;
+
+use App\Field\Types\FileUpload;
+use App\Models\FieldValue;
+use App\Models\Field\Type as FieldType;
+use Illuminate\Support\Facades\DB;
+
+class FieldValueObserver
+{
+    /**
+     * After a FieldValue is created or updated, sync mediables if FileUpload.
+     */
+    public function saved(FieldValue $fieldValue): void
+    {
+        if (!$this->isFileUpload($fieldValue)) {
+            return;
+        }
+
+        $this->syncMediables($fieldValue);
+    }
+
+    /**
+     * After a FieldValue is deleted, remove its mediables rows.
+     */
+    public function deleted(FieldValue $fieldValue): void
+    {
+        if (!$this->isFileUpload($fieldValue)) {
+            return;
+        }
+
+        DB::table('mediables')
+            ->where('mediable_type', $fieldValue->fieldable_type)
+            ->where('mediable_id',   $fieldValue->fieldable_id)
+            ->where('field_id',      $fieldValue->field_id)
+            ->delete();
+    }
+
+    // ── Internals ──────────────────────────────────────────────────────────
+
+    private function isFileUpload(FieldValue $fieldValue): bool
+    {
+        // field and fieldType are always eager-loaded (see Field model $with)
+        return $fieldValue->field?->fieldType?->object === FileUpload::class;
+    }
+
+    private function syncMediables(FieldValue $fieldValue): void
+    {
+        $type     = $fieldValue->fieldable_type;
+        $id       = $fieldValue->fieldable_id;
+        $fieldId  = $fieldValue->field_id;
+
+        // Resolve the new set of media IDs from stored value_json
+        $instance = $fieldValue->field->fieldType->instance();
+        $newIds   = $instance->cast($fieldValue->value_json);
+
+        // Remove pivot rows for this model+field that are no longer selected
+        DB::table('mediables')
+            ->where('mediable_type', $type)
+            ->where('mediable_id',   $id)
+            ->where('field_id',      $fieldId)
+            ->whereNotIn('media_id', $newIds)
+            ->delete();
+
+        // Upsert rows for newly selected media (preserves sort order)
+        foreach ($newIds as $sortOrder => $mediaId) {
+            DB::table('mediables')->upsert(
+                [
+                    'media_id'      => $mediaId,
+                    'mediable_type' => $type,
+                    'mediable_id'   => $id,
+                    'field_id'      => $fieldId,
+                    'sort_order'    => $sortOrder,
+                    'created_at'    => now(),
+                    'updated_at'    => now(),
+                ],
+                ['media_id', 'mediable_type', 'mediable_id', 'field_id'],
+                ['sort_order', 'updated_at']
+            );
+        }
+    }
+}
+```
+
+Register in `AppServiceProvider::boot()`:
+
+```php
+\App\Models\FieldValue::observe(\App\Observers\FieldValueObserver::class);
+```
+
+---
+
+## `HasMedia` Trait — Enriched for Field-Scoped Queries
+
+Add `mediaForField()` to the existing `HasMedia` trait so callers can retrieve media
+attached specifically by a named field, separately from directly attached media (avatars,
+library browser selections, etc.).
+
+```php
+// Add to App\Traits\HasMedia
+
+use App\Models\Field;
+
+/**
+ * Return media attached to this model via a specific FileUpload field.
+ *
+ * @param  string|int  $field  Field handle (string) or field ID (int)
+ */
+public function mediaForField(string|int $field): MorphToMany
+{
+    $fieldId = is_int($field)
+        ? $field
+        : Field::where('handle', $field)->value('id');
+
+    return $this->morphToMany(Media::class, 'mediable', 'mediables')
+                ->wherePivot('field_id', $fieldId)
+                ->withTimestamps()
+                ->withPivot('sort_order', 'field_id')
+                ->orderByPivot('sort_order');
+}
+
+/**
+ * Return media attached directly (field_id IS NULL) — avatars, browser picks, etc.
+ */
+public function directMedia(): MorphToMany
+{
+    return $this->morphToMany(Media::class, 'mediable', 'mediables')
+                ->wherePivotNull('field_id')
+                ->withTimestamps()
+                ->withPivot('sort_order')
+                ->orderByPivot('sort_order');
+}
+```
+
+The existing `media()` relationship (no filter on `field_id`) continues to return everything
+— useful for usage counts and bulk operations.
+
+---
+
+## `Media` Model — Inverse Usage Relationship
+
+The `usages()` method already planned in the main refactor returns all `mediables` rows.
+Add a `fieldUsages()` scope for querying specifically which field-driven references exist:
+
+```php
+// Add to App\Models\Media
+
+use App\Models\Field;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
+/**
+ * Mediables rows that came from a FileUpload field (field_id IS NOT NULL).
+ */
+public function fieldUsages(): \Illuminate\Database\Eloquent\Builder
+{
+    return \DB::table('mediables')
+        ->where('media_id', $this->id)
+        ->whereNotNull('field_id')
+        ->join('fields', 'fields.id', '=', 'mediables.field_id')
+        ->select('mediables.*', 'fields.name as field_name', 'fields.handle as field_handle');
+}
+
+/**
+ * Convenience: is this media used by any field on any model?
+ */
+public function isReferencedByField(): bool
+{
+    return \DB::table('mediables')
+        ->where('media_id', $this->id)
+        ->whereNotNull('field_id')
+        ->exists();
+}
+```
+
+---
+
+## FieldTypeSeeder Update
+
+```php
+// In database/seeders/FieldTypeSeeder.php — add to the $types array:
+
+['name' => 'File Upload', 'object' => \App\Field\Types\FileUpload::class],
+```
+
+---
+
+## Example Field Seeds
+
+These demonstrate FileUpload fields across all four model contexts. Add a
+`MediaFieldGroupSeeder` that runs after `FieldTypeSeeder`:
+
+```php
+namespace Database\Seeders;
+
+use App\Field\Types\FileUpload;
+use App\Models\Field;
+use App\Models\Field\Group as FieldGroup;
+use App\Models\Field\Type as FieldType;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class MediaFieldGroupSeeder extends Seeder
+{
+    use WithoutModelEvents;
+
+    private FieldType $fileUpload;
+
+    public function run(): void
+    {
+        $this->fileUpload = FieldType::where('object', FileUpload::class)->firstOrFail();
+
+        $this->seedUserMediaFields();
+        $this->seedEntryMediaFields();
+        $this->seedCategoryMediaFields();
+        $this->seedMediaMetaFields();
+    }
+
+    // ── User ───────────────────────────────────────────────────────────────
+
+    private function seedUserMediaFields(): void
+    {
+        $group = FieldGroup::firstOrCreate(
+            ['handle' => 'user-media-fields'],
+            ['name' => 'User Media', 'description' => 'File fields for user profiles.']
+        );
+
+        $this->attachFields($group, [
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Profile Photo',
+                'handle'        => 'profile_photo',
+                'label'         => 'Profile Photo',
+                'instructions'  => 'Upload a profile photo. Used in place of Gravatar when set.',
+                'settings'      => [
+                    'library_handle' => 'avatars',
+                    'max'            => 1,
+                    'allowed_types'  => ['image/jpeg', 'image/png', 'image/webp'],
+                    'show_preview'   => true,
+                ],
+            ],
+        ]);
+    }
+
+    // ── Entry ──────────────────────────────────────────────────────────────
+
+    private function seedEntryMediaFields(): void
+    {
+        $group = FieldGroup::firstOrCreate(
+            ['handle' => 'entry-media-fields'],
+            ['name' => 'Entry Media', 'description' => 'Common media fields for entries.']
+        );
+
+        $this->attachFields($group, [
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Hero Image',
+                'handle'        => 'hero_image',
+                'label'         => 'Hero Image',
+                'instructions'  => 'Primary image displayed at the top of the entry.',
+                'settings'      => [
+                    'max'           => 1,
+                    'allowed_types' => ['image/jpeg', 'image/png', 'image/webp'],
+                    'show_preview'  => true,
+                ],
+            ],
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Gallery',
+                'handle'        => 'gallery',
+                'label'         => 'Gallery',
+                'instructions'  => 'Additional images displayed in a gallery.',
+                'settings'      => [
+                    'allowed_types' => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+                    'show_preview'  => true,
+                ],
+            ],
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Attachments',
+                'handle'        => 'attachments',
+                'label'         => 'Attachments',
+                'instructions'  => 'Downloadable files attached to this entry.',
+                'settings'      => [],   // no type restriction — library controls it
+            ],
+        ]);
+    }
+
+    // ── Category ───────────────────────────────────────────────────────────
+
+    private function seedCategoryMediaFields(): void
+    {
+        $group = FieldGroup::firstOrCreate(
+            ['handle' => 'category-media-fields'],
+            ['name' => 'Category Media', 'description' => 'Image fields for categories.']
+        );
+
+        $this->attachFields($group, [
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Category Image',
+                'handle'        => 'category_image',
+                'label'         => 'Category Image',
+                'instructions'  => 'Displayed when this category is shown in lists or headers.',
+                'settings'      => [
+                    'max'           => 1,
+                    'allowed_types' => ['image/jpeg', 'image/png', 'image/webp'],
+                    'show_preview'  => true,
+                ],
+            ],
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Category Icon',
+                'handle'        => 'category_icon',
+                'label'         => 'Icon',
+                'instructions'  => 'Small icon used in navigation or tag lists.',
+                'settings'      => [
+                    'max'           => 1,
+                    'allowed_types' => ['image/svg+xml', 'image/png', 'image/webp'],
+                    'show_preview'  => true,
+                ],
+            ],
+        ]);
+    }
+
+    // ── Media (fields on Media items themselves) ───────────────────────────
+
+    private function seedMediaMetaFields(): void
+    {
+        $group = FieldGroup::firstOrCreate(
+            ['handle' => 'media-meta-fields'],
+            ['name' => 'Media Meta', 'description' => 'Custom fields for media items — related files, variant packs, etc.']
+        );
+
+        $this->attachFields($group, [
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Related Files',
+                'handle'        => 'related_files',
+                'label'         => 'Related Files',
+                'instructions'  => 'Other media items associated with this file (e.g. print-ready version, source file).',
+                'settings'      => [],
+            ],
+        ]);
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+
+    private function attachFields(FieldGroup $group, array $fields): void
+    {
+        foreach ($fields as $data) {
+            $field = Field::firstOrCreate(['handle' => $data['handle']], $data);
+            $group->fields()->syncWithoutDetaching([$field->id]);
+        }
+    }
+}
+```
+
+---
+
+## Wiring FileUpload Fields into FieldLayouts
+
+Use the existing `BuildsLayouts` concern (already in `database/seeders/Concerns/`)
+unchanged. FileUpload field handles slot into `createLayout()` and `addTabIfMissing()`
+exactly like any other field handle:
+
+```php
+// In EntryGroupSeeder or ExtendedEntryGroupSeeder:
+$this->createLayout('Blog Post', [
+    'Content' => ['body', 'excerpt'],
+    'Media'   => ['hero_image', 'gallery'],     // FileUpload fields drop in here
+    'SEO'     => ['meta_title', 'meta_description'],
+]);
+
+// In UserSchemaSeeder (or equivalent):
+$this->addTabIfMissing($layout->id, 'Profile', ['profile_photo'], sortOrder: 1);
+```
+
+No changes to `BuildsLayouts`, `FieldLayout`, `Tab`, or `TabElement` are required.
+
+---
+
+## How Callers Use It
+
+### Entry (via `Fieldable` trait + `Entry::field()` override)
+
+```php
+// Returns Collection<Media> — resolved by FileUpload::value()
+$heroImages = $entry->field('hero_image');
+$gallery    = $entry->field('gallery');
+
+// Direct pivot query (via HasMedia::mediaForField)
+$heroImages = $entry->mediaForField('hero_image')->get();
+
+// All media on this entry regardless of field
+$allMedia   = $entry->media()->get();
+```
+
+### User
+
+```php
+// Via the Fieldable trait — same as Entry
+$photo = $user->field('profile_photo')?->first();
+
+// Or via the dedicated avatar() method which wraps this
+$avatarUrl = $user->avatar();
+```
+
+### Category
+
+```php
+$image = $category->field('category_image')?->first();
+$icon  = $category->field('category_icon')?->first();
+```
+
+### Media (field on a Media item itself)
+
+```php
+// A media item's own related-files field
+$related = $mediaItem->field('related_files');
+```
+
+### Media usage index (inverse)
+
+```php
+// "Which fields on which models use this file?"
+$usageRows = $mediaItem->fieldUsages()->get();
+// Returns: mediable_type, mediable_id, field_id, field_name, field_handle, sort_order
+
+// "Is this file referenced anywhere via a field?"
+$isInUse = $mediaItem->isReferencedByField();
+```
+
+---
+
+## Eager-Loading to Avoid N+1
+
+`FileUpload::value()` runs one `Media::whereIn()` query per resolved field. In list
+views with many items this becomes expensive. Batch it:
+
+```php
+// In a repository or service layer — batch-load media for all entries at once
+
+$entryIds = $entries->pluck('id');
+
+// 1. Load all field values for all entries in one query
+$fieldValues = FieldValue::whereIn('fieldable_id', $entryIds)
+    ->where('fieldable_type', 'entry')
+    ->with('field.fieldType')
+    ->get()
+    ->groupBy('fieldable_id');
+
+// 2. Collect all media IDs across all FileUpload values
+$allMediaIds = $fieldValues->flatten()
+    ->filter(fn($fv) => $fv->field?->fieldType?->object === FileUpload::class)
+    ->flatMap(fn($fv) => json_decode($fv->value_json ?? '[]', true))
+    ->unique();
+
+// 3. Load all media in one query, key by ID
+$mediaById = Media::whereIn('id', $allMediaIds)->get()->keyBy('id');
+
+// 4. Attach to entries — no further queries
+foreach ($entries as $entry) {
+    $entry->setRelation('preloadedMedia', $mediaById);
+}
+```
+
+For smaller contexts (single entry edit, user profile) the per-field query is fine.
+
+---
+
+## Testing Approach
+
+```php
+// Feature test outline
+
+it('stores media IDs in value_json and resolves to Media models', function () {
+    $library = MediaLibrary::factory()->create(['adapter' => 'local']);
+    $media   = Media::factory()->for($library)->createMany(3);
+    $field   = Field::factory()->fileUpload()->create();
+    $entry   = Entry::factory()->create();
+
+    // Save field value
+    FieldValue::create([
+        'field_id'      => $field->id,
+        'fieldable_id'  => $entry->id,
+        'fieldable_type'=> 'entry',
+        'value_json'    => $media->pluck('id')->toJson(),
+    ]);
+
+    // Resolved value returns Collection<Media>
+    $resolved = $entry->fresh(['fieldValues.field.fieldType'])->field($field->handle);
+    expect($resolved)->toHaveCount(3);
+    expect($resolved->first())->toBeInstanceOf(Media::class);
+});
+
+it('syncs mediables pivot on save', function () {
+    // … create FieldValue with media IDs, assert mediables rows exist …
+    // … update with fewer IDs, assert removed rows are gone …
+});
+
+it('removes mediables rows on field value delete', function () {
+    // … create, then delete FieldValue, assert pivot rows gone …
+});
+
+it('mediaForField scopes correctly with multiple FileUpload fields', function () {
+    // … entry with hero_image (1 file) and gallery (3 files) …
+    // … assert mediaForField('hero_image') returns 1, gallery returns 3 …
+    // … assert media() returns all 4 …
+});
+
+it('works identically on Category, User, and Media models', function () {
+    // Same assertions repeated for each model type
+});
+```
+
+---
+
+## Implementation Order for This Feature
+
+These steps run after the core media refactor (Phases 1–10) is complete.
+
+1. **`mediables` migration update** — add nullable `field_id`, update unique constraint
+2. **`FileUpload` class** — `App\Field\Types\FileUpload`
+3. **`FieldValueObserver`** — register in `AppServiceProvider::boot()`
+4. **`HasMedia` trait update** — `mediaForField()`, `directMedia()`
+5. **`Media` model update** — `fieldUsages()`, `isReferencedByField()`
+6. **`FieldTypeSeeder`** — add FileUpload row
+7. **`MediaFieldGroupSeeder`** — add to `DatabaseSeeder` after `FieldTypeSeeder`
+8. **`BuildsLayouts` usage** — add `hero_image`, `gallery`, `profile_photo` to relevant existing layout seeders
+9. **Tests**
+
+---
+
+---
+
+# File Upload Field Type — Implementation Plan
+
+## Overview
+
+`FileUpload` is a first-class field type in the Field layer, equal in standing to `Text`,
+`Relationship`, and every other type. It can be added to any FieldGroup, placed in any
+FieldLayout tab, and attached to any model that uses the `Fieldable` trait — Entries,
+Categories, Users, and Media items themselves.
+
+When a FileUpload field value is saved, the selected media IDs are stored in `value_json`
+on the `field_values` row (the normal scalar path). A `FieldValueObserver` then keeps the
+`mediables` pivot in sync so that `Media::usages()` always reflects every model that
+references a given file, including which specific field made the reference.
+
+---
+
+## How It Fits the Existing Pipeline
+
+```
+Field (field_type_id → FileUpload Type)
+  └── FieldValue (value_json = [3, 7, 12])   ← normal scalar storage
+        └── resolvedValue()
+              └── FileUpload::value($ids)
+                    └── returns Collection<Media>   ← what callers receive
+
+FieldValueObserver (on saved / deleted)
+  └── syncs mediables pivot
+        └── (media_id, mediable_type, mediable_id, field_id, sort_order)
+```
+
+The `Relationship` field type diverges from the scalar path entirely (`isRelational = true`,
+data in `entry_relationships`). FileUpload does **not** do this — it stays on the normal
+`value_json` path. The `mediables` pivot is a derived index maintained by the observer,
+not the primary store.
+
+---
+
+## Schema Changes Required by This Feature
+
+### Update `mediables` — add `field_id`
+
+The `mediables` pivot already tracks which model instances reference which media. But a
+single model could have both a `hero_image` field and a `gallery` field — two different
+FileUpload fields pointing to different sets of media. Without `field_id` on the pivot,
+syncing one field's selection would destroy the other's.
+
+```php
+Schema::table('mediables', function (Blueprint $table) {
+    $table->foreignId('field_id')
+        ->nullable()
+        ->after('mediable_id')
+        ->constrained('fields')
+        ->nullOnDelete();
+
+    // Drop old unique, replace with one that includes field_id
+    $table->dropUnique('mediables_unique');
+    $table->unique(
+        ['media_id', 'mediable_type', 'mediable_id', 'field_id'],
+        'mediables_unique'
+    );
+});
+```
+
+**Semantics of `field_id`:**
+- `null` → media attached directly to a model (avatar upload, library browser selection, etc.)
+- `N` → media attached via a specific FileUpload field on that model
+
+This lets `HasMedia::media()`, `HasMedia::directMedia()`, and `HasMedia::mediaForField()`
+all coexist without collision.
+
+---
+
+## The Field Type Class
+
+### `App\Field\Types\FileUpload`
+
+```php
+namespace App\Field\Types;
+
+use App\Field\AbstractField;
+use App\Models\Media;
+use Illuminate\Support\Collection;
+
+class FileUpload extends AbstractField
+{
+    protected string $handle = 'file_upload';
+    protected string $name   = 'File Upload';
+
+    /**
+     * Scalar storage — selected media IDs live in value_json.
+     * The mediables pivot is a derived index; it is NOT the primary store.
+     */
+    public function storageColumn(): string
+    {
+        return 'value_json';
+    }
+
+    /**
+     * Not relational in the Entry sense — does not use entry_relationships.
+     * Stays on the normal fieldValues path so it works identically on Entry,
+     * Category, User, and Media without any model-specific special-casing.
+     */
+    public function isRelational(): bool
+    {
+        return false;
+    }
+
+    // ── Validation ─────────────────────────────────────────────────────
+
+    public function validate(mixed $value): bool|string
+    {
+        $ids = $this->normaliseIds($value);
+        $min = (int) $this->getSetting('min', 0);
+        $max = $this->getSetting('max');          // null = unlimited
+
+        if ($min > 0 && count($ids) < $min) {
+            $noun = $min === 1 ? 'file' : 'files';
+            return "At least {$min} {$noun} must be selected.";
+        }
+
+        if ($max !== null && count($ids) > (int) $max) {
+            $noun = (int) $max === 1 ? 'file' : 'files';
+            return "No more than {$max} {$noun} may be selected.";
+        }
+
+        return true;
+    }
+
+    // ── Type contract ───────────────────────────────────────────────────
+
+    /**
+     * Cast raw stored JSON to a plain array of integer IDs.
+     */
+    public function cast(mixed $value): array
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? array_map('intval', $decoded) : [];
+        }
+
+        if (is_array($value)) {
+            return array_map('intval', $value);
+        }
+
+        return [];
+    }
+
+    /**
+     * Resolve stored IDs to Media models, preserving saved sort order.
+     * This is what FieldValue::resolvedValue() ultimately returns to callers —
+     * so $entry->field('gallery') returns Collection<Media>, not raw IDs.
+     *
+     * Eager-load note: produces one Media query per FileUpload field resolved.
+     * Batch via MediaRepository::forFieldValues() in list contexts.
+     */
+    public function value(mixed $raw): Collection
+    {
+        $ids = $this->cast($raw);
+
+        if (empty($ids)) {
+            return collect();
+        }
+
+        return Media::whereIn('id', $ids)
+            ->get()
+            ->sortBy(fn($m) => array_search($m->id, $ids))
+            ->values();
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────
+
+    /**
+     * Normalise any incoming value format to a flat array of integer IDs.
+     * Shared by the observer and validator to avoid duplicating cast logic.
+     */
+    public function normaliseIds(mixed $value): array
+    {
+        if ($value instanceof Collection) {
+            return $value->pluck('id')->map('intval')->all();
+        }
+        return $this->cast($value);
+    }
+}
+```
+
+**Settings stored in `fields.settings` JSON:**
+
+| Key | Type | Default | Purpose |
+|---|---|---|---|
+| `library_id` | int\|null | null | Restrict picker to a specific library by ID |
+| `library_handle` | string\|null | null | Alternative to `library_id`; portable across environments |
+| `min` | int | 0 | Minimum files required (0 = optional) |
+| `max` | int\|null | null | Maximum files (null = unlimited; 1 = single-file mode) |
+| `allowed_types` | array\|null | null | Override library MIME types at field level |
+| `show_preview` | bool | true | Whether the UI renders an inline file preview |
+
+---
+
+## FieldValue Observer
+
+The observer is the single point responsible for keeping the `mediables` pivot truthful.
+Nothing else should write field-scoped rows to that pivot.
+
+### `App\Observers\FieldValueObserver`
+
+```php
+namespace App\Observers;
+
+use App\Field\Types\FileUpload;
+use App\Models\FieldValue;
+use Illuminate\Support\Facades\DB;
+
+class FieldValueObserver
+{
+    /**
+     * After a FieldValue is created or updated, sync mediables if FileUpload.
+     */
+    public function saved(FieldValue $fieldValue): void
+    {
+        if (!$this->isFileUpload($fieldValue)) {
+            return;
+        }
+
+        $this->syncMediables($fieldValue);
+    }
+
+    /**
+     * After a FieldValue is deleted, remove its mediables rows.
+     */
+    public function deleted(FieldValue $fieldValue): void
+    {
+        if (!$this->isFileUpload($fieldValue)) {
+            return;
+        }
+
+        DB::table('mediables')
+            ->where('mediable_type', $fieldValue->fieldable_type)
+            ->where('mediable_id',   $fieldValue->fieldable_id)
+            ->where('field_id',      $fieldValue->field_id)
+            ->delete();
+    }
+
+    // ── Internals ──────────────────────────────────────────────────────
+
+    private function isFileUpload(FieldValue $fieldValue): bool
+    {
+        // field and fieldType are always eager-loaded via Field model's $with
+        return $fieldValue->field?->fieldType?->object === FileUpload::class;
+    }
+
+    private function syncMediables(FieldValue $fieldValue): void
+    {
+        $type    = $fieldValue->fieldable_type;
+        $id      = $fieldValue->fieldable_id;
+        $fieldId = $fieldValue->field_id;
+
+        $instance = $fieldValue->field->fieldType->instance();
+        $newIds   = $instance->cast($fieldValue->value_json);
+
+        // Remove pivot rows for this model+field that are no longer selected
+        DB::table('mediables')
+            ->where('mediable_type', $type)
+            ->where('mediable_id',   $id)
+            ->where('field_id',      $fieldId)
+            ->whereNotIn('media_id', $newIds)
+            ->delete();
+
+        // Upsert rows for newly selected media (preserves sort order position)
+        foreach ($newIds as $sortOrder => $mediaId) {
+            DB::table('mediables')->upsert(
+                [
+                    'media_id'      => $mediaId,
+                    'mediable_type' => $type,
+                    'mediable_id'   => $id,
+                    'field_id'      => $fieldId,
+                    'sort_order'    => $sortOrder,
+                    'created_at'    => now(),
+                    'updated_at'    => now(),
+                ],
+                ['media_id', 'mediable_type', 'mediable_id', 'field_id'],
+                ['sort_order', 'updated_at']
+            );
+        }
+    }
+}
+```
+
+Register in `AppServiceProvider::boot()`:
+
+```php
+\App\Models\FieldValue::observe(\App\Observers\FieldValueObserver::class);
+```
+
+---
+
+## `HasMedia` Trait — Field-Scoped Additions
+
+Add to `App\Traits\HasMedia` alongside the existing `media()` and `attachMedia()` methods:
+
+```php
+use App\Models\Field;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+
+/**
+ * Media attached via a specific FileUpload field on this model.
+ *
+ * @param  string|int  $field  Field handle or ID
+ */
+public function mediaForField(string|int $field): MorphToMany
+{
+    $fieldId = is_int($field)
+        ? $field
+        : Field::where('handle', $field)->value('id');
+
+    return $this->morphToMany(Media::class, 'mediable', 'mediables')
+                ->wherePivot('field_id', $fieldId)
+                ->withTimestamps()
+                ->withPivot('sort_order', 'field_id')
+                ->orderByPivot('sort_order');
+}
+
+/**
+ * Media attached directly to this model — not via any field.
+ * Covers avatars, browser selections, and any direct attachMedia() call.
+ */
+public function directMedia(): MorphToMany
+{
+    return $this->morphToMany(Media::class, 'mediable', 'mediables')
+                ->wherePivotNull('field_id')
+                ->withTimestamps()
+                ->withPivot('sort_order')
+                ->orderByPivot('sort_order');
+}
+```
+
+The existing `media()` (no filter) continues to return everything — useful for usage
+totals and bulk operations.
+
+---
+
+## `Media` Model — Inverse Field-Usage Queries
+
+Add to `App\Models\Media`:
+
+```php
+/**
+ * Raw query of mediables rows that came from a FileUpload field.
+ * Returns: media_id, mediable_type, mediable_id, field_id, field_name, field_handle
+ */
+public function fieldUsages(): \Illuminate\Support\Collection
+{
+    return \DB::table('mediables')
+        ->where('media_id', $this->id)
+        ->whereNotNull('field_id')
+        ->join('fields', 'fields.id', '=', 'mediables.field_id')
+        ->select(
+            'mediables.mediable_type',
+            'mediables.mediable_id',
+            'mediables.field_id',
+            'mediables.sort_order',
+            'fields.name as field_name',
+            'fields.handle as field_handle',
+        )
+        ->get();
+}
+
+/**
+ * Quick check: is this file referenced by any FileUpload field on any model?
+ * Useful before soft-deleting to warn the user of active references.
+ */
+public function isReferencedByField(): bool
+{
+    return \DB::table('mediables')
+        ->where('media_id', $this->id)
+        ->whereNotNull('field_id')
+        ->exists();
+}
+```
+
+---
+
+## FieldTypeSeeder Update
+
+```php
+// database/seeders/FieldTypeSeeder.php — add to $types array:
+
+['name' => 'File Upload', 'object' => \App\Field\Types\FileUpload::class],
+```
+
+---
+
+## Example Field Groups Seeder
+
+Add `database/seeders/MediaFieldGroupSeeder.php`:
+
+```php
+namespace Database\Seeders;
+
+use App\Field\Types\FileUpload;
+use App\Models\Field;
+use App\Models\Field\Group as FieldGroup;
+use App\Models\Field\Type as FieldType;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class MediaFieldGroupSeeder extends Seeder
+{
+    use WithoutModelEvents;
+
+    private FieldType $fileUpload;
+
+    public function run(): void
+    {
+        $this->fileUpload = FieldType::where('object', FileUpload::class)->firstOrFail();
+
+        $this->seedUserMediaFields();
+        $this->seedEntryMediaFields();
+        $this->seedCategoryMediaFields();
+        $this->seedMediaItemFields();
+    }
+
+    private function seedUserMediaFields(): void
+    {
+        $group = FieldGroup::firstOrCreate(
+            ['handle' => 'user-media-fields'],
+            ['name' => 'User Media', 'description' => 'File fields for user profiles.']
+        );
+
+        $this->attachFields($group, [
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Profile Photo',
+                'handle'        => 'profile_photo',
+                'label'         => 'Profile Photo',
+                'instructions'  => 'Shown in place of Gravatar when set.',
+                'settings'      => [
+                    'library_handle' => 'avatars',
+                    'max'            => 1,
+                    'allowed_types'  => ['image/jpeg', 'image/png', 'image/webp'],
+                    'show_preview'   => true,
+                ],
+            ],
+        ]);
+    }
+
+    private function seedEntryMediaFields(): void
+    {
+        $group = FieldGroup::firstOrCreate(
+            ['handle' => 'entry-media-fields'],
+            ['name' => 'Entry Media', 'description' => 'Common media fields for entries.']
+        );
+
+        $this->attachFields($group, [
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Hero Image',
+                'handle'        => 'hero_image',
+                'label'         => 'Hero Image',
+                'instructions'  => 'Primary image displayed at the top of the entry.',
+                'settings'      => [
+                    'max'           => 1,
+                    'allowed_types' => ['image/jpeg', 'image/png', 'image/webp'],
+                    'show_preview'  => true,
+                ],
+            ],
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Gallery',
+                'handle'        => 'gallery',
+                'label'         => 'Gallery',
+                'instructions'  => 'Additional images displayed in an inline gallery.',
+                'settings'      => [
+                    'allowed_types' => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+                    'show_preview'  => true,
+                ],
+            ],
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Attachments',
+                'handle'        => 'attachments',
+                'label'         => 'Attachments',
+                'instructions'  => 'Downloadable files attached to this entry.',
+                'settings'      => [],  // no MIME restriction — inherits from library
+            ],
+        ]);
+    }
+
+    private function seedCategoryMediaFields(): void
+    {
+        $group = FieldGroup::firstOrCreate(
+            ['handle' => 'category-media-fields'],
+            ['name' => 'Category Media', 'description' => 'Image fields for categories.']
+        );
+
+        $this->attachFields($group, [
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Category Image',
+                'handle'        => 'category_image',
+                'label'         => 'Category Image',
+                'instructions'  => 'Displayed when this category appears in lists or headers.',
+                'settings'      => [
+                    'max'           => 1,
+                    'allowed_types' => ['image/jpeg', 'image/png', 'image/webp'],
+                    'show_preview'  => true,
+                ],
+            ],
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Category Icon',
+                'handle'        => 'category_icon',
+                'label'         => 'Icon',
+                'instructions'  => 'Small icon for navigation or tag lists.',
+                'settings'      => [
+                    'max'           => 1,
+                    'allowed_types' => ['image/svg+xml', 'image/png', 'image/webp'],
+                    'show_preview'  => true,
+                ],
+            ],
+        ]);
+    }
+
+    private function seedMediaItemFields(): void
+    {
+        // FileUpload fields on Media items themselves — for associating related files
+        $group = FieldGroup::firstOrCreate(
+            ['handle' => 'media-item-fields'],
+            ['name' => 'Media Item Fields', 'description' => 'Custom fields on individual media items.']
+        );
+
+        $this->attachFields($group, [
+            [
+                'field_type_id' => $this->fileUpload->id,
+                'name'          => 'Related Files',
+                'handle'        => 'related_files',
+                'label'         => 'Related Files',
+                'instructions'  => 'Other files associated with this item (e.g. print-ready version, source file).',
+                'settings'      => [],
+            ],
+        ]);
+    }
+
+    private function attachFields(FieldGroup $group, array $fields): void
+    {
+        foreach ($fields as $data) {
+            $field = Field::firstOrCreate(['handle' => $data['handle']], $data);
+            $group->fields()->syncWithoutDetaching([$field->id]);
+        }
+    }
+}
+```
+
+Add to `DatabaseSeeder` after `FieldTypeSeeder`:
+
+```php
+$this->call([
+    FieldTypeSeeder::class,
+    MediaFieldGroupSeeder::class,  // add here
+    FieldGroupSeeder::class,
+    // ...
+]);
+```
+
+---
+
+## Wiring into FieldLayouts
+
+`BuildsLayouts` requires no changes. FileUpload field handles slot in exactly like
+any other handle:
+
+```php
+// EntryGroupSeeder / ExtendedEntryGroupSeeder
+$this->createLayout('Blog Post', [
+    'Content' => ['body', 'excerpt'],
+    'Media'   => ['hero_image', 'gallery', 'attachments'],
+    'SEO'     => ['meta_title', 'meta_description'],
+]);
+
+// UserSchemaSeeder (or wherever user layout is built)
+$this->addTabIfMissing($layout->id, 'Profile', ['profile_photo'], sortOrder: 1);
+
+// CategoryGroupSeeder
+$this->createLayout('Blog Category', [
+    'Details' => ['category_image', 'category_icon'],
+]);
+
+// MediaLibrary layout seeder (new — controls what meta fields appear on media items)
+$this->createLayout('Media Library Fields', [
+    'Meta' => ['related_files'],
+]);
+```
+
+---
+
+## How Callers Use It
+
+```php
+// Entry — via Fieldable::field() → FieldValue::resolvedValue() → FileUpload::value()
+$hero    = $entry->field('hero_image')?->first();     // ?Media
+$gallery = $entry->field('gallery');                   // Collection<Media>
+
+// Scoped via HasMedia::mediaForField() — direct pivot query, no field_values involved
+$gallery = $entry->mediaForField('gallery')->get();
+
+// All media on this entry regardless of how it got there
+$all = $entry->media()->get();
+
+// Only directly-attached media (not via fields)
+$direct = $entry->directMedia()->get();
+
+// User
+$photo     = $user->field('profile_photo')?->first();
+$avatarUrl = $user->avatar();   // uses firstMedia('avatars') fallback logic
+
+// Category
+$image = $category->field('category_image')?->first();
+$icon  = $category->field('category_icon')?->first();
+
+// Media item — a file's own related-files field
+$related = $mediaItem->field('related_files');
+
+// Inverse — "who is using this file via a field?"
+$usages  = $mediaItem->fieldUsages();
+$inUse   = $mediaItem->isReferencedByField();
+```
+
+---
+
+## Eager-Loading in List Contexts
+
+`FileUpload::value()` issues one `Media::whereIn()` per field resolved. Batch it in
+services or repositories that render lists:
+
+```php
+// Collect all media IDs across all FileUpload values for a set of entries
+$allMediaIds = $entries
+    ->flatMap->fieldValues
+    ->filter(fn($fv) => $fv->field?->fieldType?->object === FileUpload::class)
+    ->flatMap(fn($fv) => json_decode($fv->value_json ?? '[]', true))
+    ->unique()
+    ->values();
+
+$mediaById = Media::whereIn('id', $allMediaIds)->get()->keyBy('id');
+// Distribute $mediaById to the view — no further queries needed per entry
+```
+
+For single-record views (entry edit, user profile) the per-field query is fine.
+
+---
+
+## Testing Approach
+
+```php
+it('stores media IDs in value_json and resolves to Media models', function () {
+    $media = Media::factory()->createMany(3);
+    $field = Field::factory()->fileUpload()->create();
+    $entry = Entry::factory()->create();
+
+    FieldValue::create([
+        'field_id'       => $field->id,
+        'fieldable_id'   => $entry->id,
+        'fieldable_type' => 'entry',
+        'value_json'     => $media->pluck('id')->toJson(),
+    ]);
+
+    $resolved = $entry->fresh(['fieldValues.field.fieldType'])->field($field->handle);
+    expect($resolved)->toHaveCount(3)->each->toBeInstanceOf(Media::class);
+});
+
+it('syncs the mediables pivot when a FileUpload FieldValue is saved', function () {
+    // Create FieldValue with 3 media IDs, assert 3 mediables rows exist
+    // Update to 2 IDs, assert removed row is gone, 2 remain
+});
+
+it('clears mediables rows when a FileUpload FieldValue is deleted', function () {
+    // Create FieldValue, assert pivot rows, delete FieldValue, assert rows gone
+});
+
+it('mediaForField scopes correctly when multiple FileUpload fields exist', function () {
+    // Entry with hero_image (1 file) and gallery (3 files)
+    // mediaForField('hero_image') returns 1
+    // mediaForField('gallery') returns 3
+    // media() returns all 4
+    // directMedia() returns 0
+});
+
+it('works on Category', function () { /* same pattern */ });
+it('works on User',     function () { /* same pattern */ });
+it('works on Media',    function () { /* same pattern — field on a media item */ });
+
+it('respects min/max validation settings', function () {
+    $type = new FileUpload(['min' => 1, 'max' => 3], null);
+    expect($type->validate([]))->toBeString();          // fails — below min
+    expect($type->validate([1, 2, 3, 4]))->toBeString(); // fails — above max
+    expect($type->validate([1, 2]))->toBeTrue();         // passes
+});
+```
+
+---
+
+## Implementation Order for This Feature
+
+Run after the core media refactor (Phases 1–10) is complete:
+
+1. **`mediables` alter migration** — add nullable `field_id`, rebuild unique constraint
+2. **`App\Field\Types\FileUpload`** — the field type class
+3. **`App\Observers\FieldValueObserver`** — register in `AppServiceProvider::boot()`
+4. **`HasMedia` additions** — `mediaForField()`, `directMedia()`
+5. **`Media` model additions** — `fieldUsages()`, `isReferencedByField()`
+6. **`FieldTypeSeeder`** — add the FileUpload row
+7. **`MediaFieldGroupSeeder`** — add, wire into `DatabaseSeeder`
+8. **Layout seeders** — add `hero_image`, `gallery`, `profile_photo`, etc. to existing layouts
+9. **Tests**
