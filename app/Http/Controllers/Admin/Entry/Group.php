@@ -20,7 +20,7 @@ class Group extends Controller
         $groups = EntryGroup::withCount(['entries', 'entryTypes'])
             ->with('statusGroup')
             ->ordered()
-            ->paginate(3);
+            ->paginate($this->total_per_page);
 
         return $this->view('entries.groups.index', ['groups' => $groups]);
     }

@@ -12,9 +12,12 @@ abstract class Controller
      */
     protected Settings $settings;
 
+    protected int $total_per_page = 10;
+
     public function __construct()
     {
-        $this->settings = app('settings');
+        $this->settings = app(Settings::class);
+        $this->total_per_page = $this->settings->get('general', 'items_per_page', $this->total_per_page);
     }
 
     /**
