@@ -89,7 +89,7 @@ class AppServiceProvider extends ServiceProvider
         //setup template routing
         View::addNamespace('templates', resource_path('templates'));
         View::addNamespace('admin', resource_path('views/admin'));
-        Paginator::useBootstrapFive();
+        Paginator::useTailwind();
         Gate::before(function ($user, $ability) {
             return $user->hasRole('super admin') ? true : null;
         });

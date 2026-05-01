@@ -27,8 +27,8 @@
         </div>
 
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-700 leading-5 dark:text-gray-400">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <span class="text-xs text-slate-500">Showing 1-6 of 42 items</span>
                     {!! __('Showing') !!}
                     @if ($paginator->firstItem())
                         <span class="font-medium">{{ $paginator->firstItem() }}</span>
