@@ -137,6 +137,7 @@
                     {% endif %}
 
                     <div class="flex min-w-0 flex-col gap-5">
+                        {{ include('admin._inc._message') }}
                         {% block content %}{% endblock %}
                     </div>
                 </div>

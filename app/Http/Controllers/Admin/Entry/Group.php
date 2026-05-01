@@ -31,7 +31,7 @@ class Group extends Controller
 
         return redirect()
             ->route('entries.groups.show', $group->id)
-            ->with('status', trans('entry.group.created'));
+            ->with('success', trans('entry.group.created'));
     }
 
     public function create()
