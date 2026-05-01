@@ -22,7 +22,7 @@ class Group extends Controller
     {
         $creator = app(CreateNewStatusGroup::class);
         $group = $creator->create($request->validated());
-        return redirect()->route('statuses.groups.show', $group->id)->with('status', trans('status.group.created'));
+        return redirect()->route('statuses.groups.show', $group->id)->with('success', trans('status.group.created'));
     }
 
     public function create()
