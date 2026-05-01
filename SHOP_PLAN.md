@@ -26,7 +26,8 @@
 14. [Tenancy Considerations](#14-tenancy-considerations)
 15. [Database Schema Additions](#15-database-schema-additions)
 16. [Implementation Roadmap](#16-implementation-roadmap)
-17. [Open Questions & Concerns](#17-open-questions--concerns)
+17. [Corrections Applied (v2 Review)](#17-corrections-applied-v2-review)
+18. [Open Questions & Concerns](#18-open-questions--concerns)
 
 ---
 
@@ -170,7 +171,9 @@ mithra72/Shop/
     └── ShopServiceProvider.php   # Registers everything; boots field types, entry types
 ```
 
-The `ShopServiceProvider` should be auto-discovered via Laravel's package discovery or explicitly added to `bootstrap/providers.php`. It registers the `GatewayManager`, `CartManager`, and `TaxEngine` as singletons, seeds default statuses and entry group/type definitions on first boot, and registers all custom field types with the `field_types` table.
+The `ShopServiceProvider` should be auto-discovered via Laravel's package discovery or explicitly added to `bootstrap/providers.php`. It registers the `GatewayManager`, `CartManager`, and `TaxEngine` as container bindings, and registers all custom field types with the field type registry (in-memory only — no DB writes in `boot()`).
+
+> **Do not seed from a service provider's `boot()` method.** The provider runs during every `artisan` command, queue worker boot, and test setup — often before migrations have run. Seeding `field_types`, status groups, entry groups, and entry types belongs in a dedicated `ShopInstallCommand` (artisan command) and a `ShopSeeder` class that is called explicitly during deployment or first-run setup. This makes installs idempotent, debuggable, and decoupled from the request lifecycle.
 
 ---
 
@@ -323,11 +326,12 @@ Discounts are applied automatically when cart conditions are met. No code requir
 | `minimum_quantity` | Number (int) | Cart item quantity threshold |
 | `customer_group` | Select | `all`, `registered`, `wholesale` |
 | `usage_limit` | Number (int) | Total redemptions allowed; 0 = unlimited |
-| `usage_count` | Number (int) | Auto-incremented |
 | `starts_at` | Date | |
 | `expires_at` | Date | Nullable |
 | `priority` | Number (int) | Higher = evaluated first |
 | `stackable` | Boolean | Can stack with other discounts? |
+
+> **`usage_count` is intentionally absent as a field.** Redemption tracking must not live in `field_values`. Under concurrent checkout, two requests could both read `usage_count = 9`, both pass the `< 10` check, and both commit — over-redeeming the discount. Redemption counts are tracked in a dedicated `discount_redemptions` table (see Section 15) with a database-level unique constraint on `(discount_entry_id, user_id)` for per-customer caps. The `DiscountEngine` checks this table with a locking read (`SELECT ... FOR UPDATE`) before applying any coupon or discount.
 
 ### 3.7 CouponEntryType
 
@@ -340,8 +344,6 @@ Extends discount logic but requires a customer-entered code.
 | `code` | Text | Unique per tenant; uppercase enforced |
 | `usage_limit_per_customer` | Number (int) | Per-customer cap |
 | `first_time_only` | Boolean | Only for new customers |
-
-> Both Discount and Coupon entries share a `DiscountSettings` custom field type (similar to CartThrob's approach) that bundles all the rule configuration into a single structured JSON field. The `DiscountEngine` reads this at runtime.
 
 ### 3.8 TaxRateEntryType
 
@@ -422,7 +424,9 @@ A specialised Matrix for defining variant axes. Each row is a variant dimension 
 ]
 ```
 
-The `ProductEntryType` reads this field in `afterCreate`/`afterUpdate` to generate or sync variant entries (or rows in a `variants` Matrix field on the same entry). The combinatorial explosion (Size × Color = up to 24 variants) needs lazy-generation — only create variant rows when a customer first selects that combination, or eagerly at product creation with a UI "generate variants" button.
+The `ProductEntryType` reads this field in `afterCreate`/`afterUpdate` to generate or sync variant entries (or rows in a `variants` Matrix field on the same entry). Variant generation must be **eager** (at product save time), not lazy.
+
+> **Why lazy generation is wrong:** If variants don't exist until a customer selects them, merchants cannot set per-variant inventory, pricing, or SKUs ahead of time. A merchant with 50 blue XL shirts cannot enter that stock level until someone tries to order one — which inverts the entire purpose of inventory management. Lazy generation also creates a race condition where two customers simultaneously "discover" the same unborn variant and both create it. The "generate variants" button (or auto-generation on save) is the correct UX. A hard cap on variants per product (suggested: 500 combinations) handles the combinatorial explosion concern without sacrificing pre-purchase inventory control.
 
 ### 4.3 Money
 
@@ -472,24 +476,9 @@ A CartThrob-inspired field that stores an array of option/price pairs — the or
 
 This is distinct from `ProductAttributes` (which generates variants) — `PriceModifier` is for ancillary choices a customer makes at add-to-cart time that modify the line item price without creating separate inventory.
 
-### 4.6 DiscountSettings
+### ~~4.6 DiscountSettings~~ — Removed
 
-A structured field that bundles all discount rule configuration into a single JSON value. Behaves like a mini-form-within-a-form in the UI. Stored in `value_json`. The `DiscountEngine` reads this field to determine how to apply a discount.
-
-```json
-{
-  "type": "percentage",
-  "value": 15.0,
-  "conditions": {
-    "minimum_order": 5000,
-    "applies_to": "order",
-    "customer_group": "all",
-    "stackable": false,
-    "priority": 10,
-    "date_range": { "start": "2026-11-28", "end": "2026-11-30" }
-  }
-}
-```
+> **Why this was cut:** The original plan proposed a `DiscountSettings` JSON blob field alongside the individual fields already defined on `DiscountEntryType` (Section 3.6). These two approaches are contradictory — the `DiscountEngine` cannot read from both, and duplicating the configuration in two places guarantees drift. The CartThrob `DiscountSettings` field made sense in ExpressionEngine because EE had no structured multi-column field system. This platform has the Matrix field and individual typed fields, which are strictly superior: they are individually queryable, get proper validation, and are editable in isolation. The individual fields on `DiscountEntryType` are the authoritative configuration surface. `DiscountSettings` as a custom field type is not needed.
 
 ---
 
@@ -524,7 +513,9 @@ Two concrete implementations behind one interface:
 
 ### 5.3 CartManager
 
-The primary service. Registered as a singleton in `ShopServiceProvider`.
+The primary service. Registered as a **scoped** binding (`$this->app->scoped(...)`) in `ShopServiceProvider` — not a singleton.
+
+> **Why not a singleton:** A singleton in Laravel is resolved once per container lifetime. In FPM this is per-request, which is fine. But under Laravel Octane, Swoole, or queue workers, a singleton `CartManager` that holds a reference to the current user's session or cart state will leak between requests — user A's cart can bleed into user B's context. Scoped bindings are reset per request/job. The `CartManager` must derive all stateful context (current cart, current user) fresh on each resolution, not cache it on construction.
 
 ```php
 interface CartManagerContract
@@ -544,14 +535,18 @@ interface CartManagerContract
 
 ### 5.4 CartCalculator
 
-Computes the `CartTotals` value object. The calculation pipeline is:
+Computes the `CartTotals` value object. The calculation pipeline requires two discount passes to handle the free-shipping circular dependency:
 
 1. Sum `unit_price × quantity` for all items → **subtotal**
-2. Pass cart through `DiscountEngine` → **discount_total** (automatic discounts only)
-3. Apply any coupon codes → **coupon_total**
-4. Look up chosen shipping method and zone → **shipping_total**
-5. Pass `(subtotal - discounts + shipping)` through `TaxEngine` → **tax_total**
+2. Pass cart through `DiscountEngine` (item + order discounts only) → **item_discount_total**
+3. Look up chosen shipping method and zone → **shipping_total** (gross)
+4. Second `DiscountEngine` pass for `FreeShipping` discounts → **shipping_discount_total** (zeroes or reduces `shipping_total`)
+5. Pass each **line item** (not the cart total) through `TaxEngine` with its own tax class → **tax_total** (summed per item; see note below)
 6. Sum everything → **grand_total**
+
+> **Why two discount passes:** Free-shipping discounts can only be evaluated after a shipping total is known, but other discounts (percentage, fixed) must be applied before shipping to get an accurate taxable base. Merging both into one pass creates a dependency loop. The two-pass approach is how WooCommerce, Magento, and most mature cart implementations resolve this. The `DiscountEngine.evaluate()` method accepts a `$phase` parameter (`item` or `shipping`) to make this explicit.
+
+> **Why tax operates per line item:** If the cart contains items with different tax classes (e.g., clothing exempt + electronics taxable + food zero-rated), applying one tax rate to the aggregate subtotal produces wrong results. The `TaxEngine` receives a `TaxableItem[]` collection and returns a `TaxResult` with per-item breakdowns. This also handles tax-inclusive pricing correctly — each item's embedded tax is extracted individually before discounts are applied to the net, then the tax is recalculated on the discounted net.
 
 This pipeline must be deterministic and side-effect-free — the same inputs always produce the same outputs. Critically, it must be called both in the cart view (for display) and again at checkout (to prevent price manipulation between cart and order creation).
 
@@ -569,21 +564,25 @@ Using Laravel's `Pipeline` to make the checkout process composable and testable:
 
 ```
 ValidateCartNotEmpty
-→ ValidateInventory           (decrement reservations)
+→ ValidateInventory           (soft-reserve stock — see note below)
 → ApplyDiscountsAndCoupons
 → ResolveShippingMethod
 → CalculateTax
 → FreezeLineTotals
-→ ProcessPayment              (calls GatewayManager)
-→ CreateOrderEntry            (writes Entry + OrderItems)
-→ DecrementInventory          (commit stock reduction)
+→ CreateOrderEntry            (writes Entry + OrderItems; status = pending_payment)
+→ ProcessPayment              (calls GatewayManager; passes order number as reference)
+→ ConfirmOrderPaid            (transitions status to paid; commits stock decrement)
 → SendOrderConfirmation
 → ClearCart
 → HandleDigitalDelivery       (if any digital items)
 → HandleSubscriptionActivation (if any subscription items)
 ```
 
-Each pipe is a class implementing `handle(CheckoutContext $context, Closure $next)`. `CheckoutContext` is a mutable value object carrying the cart, customer, addresses, chosen shipping, gateway, payment token, and the resulting order. If any pipe throws, the pipeline halts, inventory reservations are released, and the payment is voided.
+Each pipe is a class implementing `handle(CheckoutContext $context, Closure $next)`. `CheckoutContext` is a mutable value object carrying the cart, customer, addresses, chosen shipping, gateway, payment token, and the resulting order.
+
+> **Why order creation must precede payment:** The original plan had `ProcessPayment` before `CreateOrderEntry`. This is wrong in both directions. First, if the write fails after a successful charge, you have charged the customer with no order record — unrecoverable without manual intervention. Second, you cannot pass a meaningful order reference to the gateway (for webhook correlation, metadata, or idempotency keys) until the order row exists. The order starts in `pending_payment`; payment transitions it to `paid`. If any post-payment pipe throws, the pipeline logs the failure and queues a reconciliation job rather than attempting a void — voiding a captured payment is not always possible and introduces its own failure modes.
+
+**Inventory reservation note:** `ValidateInventory` does a *soft reservation* by incrementing a `reserved_quantity` column (see Section 15 schema additions). This prevents two concurrent checkouts from both succeeding on the last unit without permanently decrementing stock before payment. `ConfirmOrderPaid` converts the reservation to a permanent decrement (`stock_quantity -= qty; reserved_quantity -= qty`). If payment fails, the reservation is released. Reservations older than a configurable TTL (default 30 minutes) are released by a scheduled command.
 
 ### 6.2 OrderNumberGenerator
 
@@ -594,11 +593,12 @@ Generates human-readable, sequential, tenant-scoped order numbers. Default forma
 Status transitions are guarded. Not every status is reachable from every other status. The state machine is defined as a map of `[current_status => [allowed_next_statuses]]` and enforced in `OrderEntryType::validate()`.
 
 ```
-pending_payment → paid, cancelled
-paid            → processing, refunded, cancelled
-processing      → shipped, partially_shipped, on_hold
-shipped         → delivered, partially_refunded
-delivered       → refunded, partially_refunded
+pending_payment  → paid, payment_failed, cancelled
+payment_failed   → paid, cancelled           (re-attempt or abandon)
+paid             → processing, refunded, cancelled
+processing       → shipped, partially_shipped, on_hold
+shipped          → delivered, partially_refunded
+delivered        → refunded, partially_refunded
 ```
 
 Transitions fire domain events: `OrderPaid`, `OrderShipped`, `OrderRefunded`, etc. These events are hookable by other modules (subscriptions, loyalty points, analytics).
@@ -613,11 +613,11 @@ Partial and full refunds are supported. A refund is recorded by creating a `Refu
 
 The `product_type` Select field on a Product entry drives behaviour. All product types share the same `ProductEntryType` class — the type determines which checkout pipeline steps apply.
 
-### 7.1 Simple Product
+> **Type model correction:** The original draft listed `simple`, `physical`, `digital`, `subscription` as the four types. `simple` is not a real delivery type — it's the absence of configuration, not a category of its own. A physical product with no variants is just a physical product. Keeping `simple` as a value creates edge cases (what happens when `product_type = simple` and a user adds a weight field? Does shipping apply?). The correct model separates two orthogonal concerns: **delivery method** (`physical`, `digital`, `none`) and **billing model** (`one_time`, `subscription`). The `has_variants` boolean on the Product entry (true when `attributes` Matrix has rows) handles the simple/optioned distinction without needing a separate type value.
 
-A product with no variants, no shipping weight required, no downloads. The baseline. Price is a single `Money` field.
+The `product_type` field values are therefore: `physical`, `digital`, `subscription`, `service` (no shipping, no download — e.g. a consultation booking). The checkout pipeline gates on these cleanly.
 
-### 7.2 Physical Product
+### 7.1 Physical Product
 
 Has weight, dimensions, and stock quantity. Inventory is decremented on order creation and can be restocked on refund or manual admin action. Triggers the `ResolveShippingMethod` pipeline step. The `ShippingAddress` is required at checkout.
 
@@ -781,7 +781,7 @@ class OmnipayGateway extends AbstractPaymentGateway
     public function charge(PaymentRequest $request): PaymentResult
     {
         $response = $this->omnipayGateway->purchase([
-            'amount'    => number_format($request->amountCents / 100, 2, '.', ''),
+            'amount'    => $this->formatAmount($request->amountCents, $request->currency),
             'currency'  => $request->currency,
             'token'     => $request->paymentToken,
             'returnUrl' => route('shop.checkout.return'),
@@ -795,6 +795,23 @@ class OmnipayGateway extends AbstractPaymentGateway
             errorMessage:  $response->getMessage(),
             rawResponse:   $response->getData(),
         );
+    }
+
+    /**
+     * Zero-decimal currencies (JPY, KRW, VND, etc.) must be passed as whole
+     * integers to gateways, not divided by 100. Passing ¥1000 as "10.00"
+     * charges ¥10. The Money field type stores all values as the smallest
+     * unit, so for JPY that IS the yen; for USD it is cents.
+     */
+    private function formatAmount(int $smallestUnit, string $currency): string
+    {
+        $zeroDecimal = ['BIF','CLP','DJF','GNF','ISK','JPY','KMF','KRW',
+                        'MGA','PYG','RWF','UGX','UYI','VND','VUV','XAF',
+                        'XOF','XPF'];
+
+        return in_array(strtoupper($currency), $zeroDecimal)
+            ? (string) $smallestUnit
+            : number_format($smallestUnit / 100, 2, '.', '');
     }
 }
 ```
@@ -1071,9 +1088,36 @@ applied_to       enum('items','shipping','both')
 created_at
 ```
 
+### `discount_redemptions`
+```
+id                  bigint PK
+tenant_id           bigint nullable FK → tenants.id
+discount_entry_id   bigint FK → entries.id cascade delete
+user_id             bigint nullable FK → users.id  -- null for guest redemptions
+order_entry_id      bigint FK → entries.id
+redeemed_at         timestamp
+unique: (discount_entry_id, user_id)  -- enforces per-customer cap at DB level
+index: (discount_entry_id)            -- for fast total redemption count queries
+```
+
+> This table replaces the `usage_count` field on `DiscountEntryType`. Total usage is `SELECT COUNT(*) FROM discount_redemptions WHERE discount_entry_id = ?`. Per-customer usage is a direct unique constraint violation on insert. The `DiscountEngine` wraps the insert in a transaction with a locking read to prevent race conditions.
+
 ### Existing table additions
 
-**`entries`** — no schema change needed. The `product_type`, `order_number`, and all other commerce fields live in `field_values` and `entry_relationships` per the existing pattern.
+**`entries`** — add `reserved_quantity` (integer, nullable, default 0) as a migration on the `field_values` table for product entries, **or** as a standalone `product_inventory` table (recommended for queryability):
+
+```
+product_inventory
+id                  bigint PK
+entry_id            bigint unique FK → entries.id cascade delete
+stock_quantity      int unsigned default 0
+reserved_quantity   int unsigned default 0   -- soft-reserved during active checkouts
+low_stock_threshold int unsigned default 0
+allow_backorders    boolean default false
+updated_at
+```
+
+Storing inventory separately from `field_values` avoids the unique-per-field constraint problem, allows atomic `UPDATE ... SET reserved_quantity = reserved_quantity + 1 WHERE stock_quantity - reserved_quantity >= ?` queries, and keeps the entries table clean.
 
 **`users`** — add `tax_exempt boolean default false` and `tax_exempt_id string nullable` via UserSchema fields (no migration needed if using the existing user schema system).
 
@@ -1086,19 +1130,21 @@ Work in order. Each phase is shippable and independently testable.
 ### Phase 1 — Foundation (Week 1-2)
 - [ ] Scaffold `mithra62/Shop/` directory and `ShopServiceProvider`
 - [ ] Register `ShopServiceProvider` in `bootstrap/providers.php`
-- [ ] Implement `Money` field type + `MoneyValue` value object
+- [ ] Implement `Money` field type + `MoneyValue` value object (with zero-decimal currency awareness)
 - [ ] Implement `Select` field type
 - [ ] Implement `Matrix` field type + `MatrixValue` collection
 - [ ] Implement `ProductAttributes` field type (extends Matrix)
 - [ ] Implement `PriceModifier` field type
-- [ ] Seed shop field types into `field_types` table
+- [ ] Write `ShopInstallCommand` artisan command to seed field types, statuses, entry groups
+- [ ] Write `ShopSeeder` for deployment/test use
 
 ### Phase 2 — Product Catalogue (Week 3-4)
+- [ ] `product_inventory` migration (separate from `field_values`)
 - [ ] Extend `ProductEntryType` with all new fields (via FieldLayout migration/seeder)
 - [ ] Implement `SubscriptionPlanEntryType`
 - [ ] Implement `TaxClassEntryType` and `TaxRateEntryType`
 - [ ] Implement `ShippingZoneEntryType` and `ShippingRateEntryType`
-- [ ] Seed default entry groups: `shop_products`, `shop_orders`, `shop_subscriptions`, `shop_discounts`
+- [ ] Seed default entry groups: `shop_products`, `shop_orders`, `shop_subscriptions`, `shop_discounts` (via `ShopSeeder`)
 
 ### Phase 3 — Cart (Week 5)
 - [ ] `CartItem` value object
@@ -1117,12 +1163,12 @@ Work in order. Each phase is shippable and independently testable.
 - [ ] `AdHocPaymentService` standalone wrapper
 
 ### Phase 5 — Discounts & Coupons (Week 8)
-- [ ] `DiscountSettings` field type
+- [ ] `discount_redemptions` migration (replaces `usage_count` field)
 - [ ] `DiscountEntryType` and `CouponEntryType`
 - [ ] `AbstractDiscount` + five discount type classes
 - [ ] `AbstractRule` + rule classes
-- [ ] `DiscountEngine`
-- [ ] `CouponValidator`
+- [ ] `DiscountEngine` with two-pass evaluation (item phase + shipping phase)
+- [ ] `CouponValidator` with locking read for concurrency safety
 - [ ] Wire `CartCalculator` to `DiscountEngine`
 
 ### Phase 6 — Tax Engine (Week 9)
@@ -1175,7 +1221,26 @@ Work in order. Each phase is shippable and independently testable.
 
 ---
 
-## 17. Open Questions & Concerns
+## 17. Corrections Applied (v2 Review)
+
+The following issues were identified in the first draft and corrected inline throughout this document. Listed here for traceability.
+
+1. **Payment before order creation (§6.1)** — Fatal. `ProcessPayment` was placed before `CreateOrderEntry`. Reversed: order is created first in `pending_payment` status, then payment is attempted. If payment fails, the order transitions to `payment_failed` (a new status), not deleted.
+2. **Missing `payment_failed` status (§6.3)** — The state machine had no path for a declined card, forcing a failed payment to stay `pending_payment` indefinitely or go straight to `cancelled`. `payment_failed` added with transitions to `paid` (retry) and `cancelled`.
+3. **`CartManager` registered as singleton (§5.3)** — Changed to scoped binding. A singleton holding session/user state leaks between requests under Octane/Swoole and queue workers.
+4. **`usage_count` as a `field_value` (§3.6)** — Race condition under concurrent checkout. Moved to a dedicated `discount_redemptions` table with a DB-level unique constraint and locking reads in `DiscountEngine`.
+5. **`DiscountSettings` field type vs individual fields contradiction (§3.6, §4.6)** — The plan specified both. Dropped `DiscountSettings` as a custom field type; the individual fields on `DiscountEntryType` are authoritative and superior (queryable, validated, individually editable).
+6. **`Simple` product type (§7)** — Not a real delivery type. Removed `simple` from the `product_type` enum. The simple/optioned distinction is handled by whether `attributes` Matrix has rows (`has_variants` boolean). Updated types: `physical`, `digital`, `subscription`, `service`.
+7. **Lazy variant generation (§4.2)** — Recommended lazy generation breaks inventory management (merchants can't pre-set stock for variants that don't exist). Changed to eager generation with a hard cap per product.
+8. **Free-shipping discount circular dependency (§5.4)** — `FreeShipping` discounts can only be evaluated after a shipping total exists, but the single-pass discount engine ran before shipping was calculated. `CartCalculator` now uses two discount passes: item/order discounts first, then shipping calculation, then free-shipping discounts.
+9. **Tax calculated on cart total instead of per line item (§5.4)** — Mixed tax classes (clothing exempt + electronics taxable) produce wrong totals when tax is applied to the aggregate. `TaxEngine` now receives a `TaxableItem[]` collection and operates per line item.
+10. **`ShopServiceProvider::boot()` seeding (§2)** — Seeding in `boot()` runs during every artisan command and queue worker, often before migrations. Moved to `ShopInstallCommand` and `ShopSeeder`.
+11. **Zero-decimal currency handling in `OmnipayGateway` (§10.4)** — Dividing JPY by 100 and passing "10.00" when you meant ¥1000 charges the wrong amount. Added `formatAmount()` with a zero-decimal currency list.
+12. **`reserved_quantity` not in schema (§15)** — The pipeline referenced inventory reservations but no `reserved_quantity` column existed. Added `product_inventory` table with `stock_quantity`, `reserved_quantity`, `low_stock_threshold`, and `allow_backorders`.
+
+---
+
+## 18. Open Questions & Concerns
 
 **Currency handling.** A multi-currency storefront is significantly more complex than single-currency. The `Money` field type stores one currency per product. If you need multi-currency, you'll need a `CurrencyConverter` service and a decision about whether prices are stored in multiple currencies or converted at display/checkout time. Recommend single-currency per tenant for v1.
 
