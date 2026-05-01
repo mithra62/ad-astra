@@ -123,10 +123,14 @@
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700"
                                for="description">Description</label>
-                        <textarea
-                            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                            id="description" name="description" rows="4"
-                            placeholder="Optional internal description...">{{ old('description') }}</textarea>
+                        {{ forms.toggle(
+                            'require_2fa',
+                            'Require two-factor authentication',
+                            true,
+                            'Require this user to complete a second authentication step when signing in.',
+                            '1',
+                            'require_2fa'
+                        ) }}
                     </div>
 
                 </div>

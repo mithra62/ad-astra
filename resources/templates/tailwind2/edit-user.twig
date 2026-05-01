@@ -1,3 +1,5 @@
+{% import 'templates::tailwind2._form-fields' as forms %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -110,11 +112,19 @@
                             <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Profile</h5></div>
                             <div class="space-y-4 px-5 py-5">
                                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="first_name">First Name</label><input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="first_name" name="first_name" type="text" value="Jane"></div>
-                                    <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="last_name">Last Name</label><input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="last_name" name="last_name" type="text" value="Smith"></div>
+                                    {{ forms.input('first_name', 'First Name', 'Jane', 'text', null, null, 'first_name') }}
+                                    {{ forms.input('last_name', 'Last Name', 'Smith', 'text', null, null, 'last_name') }}
                                 </div>
-                                <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="email">Email Address</label><input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="email" name="email" type="email" value="jane@example.com"><p class="mt-1 text-xs text-slate-400">Changing this will require verification.</p></div>
-                                <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="bio">Bio</label><textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="bio" name="bio" rows="4">Senior editor with a focus on technology and culture.</textarea></div>
+                                {{ forms.input('email', 'Email Address', 'jane@example.com', 'email', 'Changing this will require verification.', null, 'email') }}
+                                {{ forms.textarea('bio', 'Bio', 'Senior editor with a focus on technology and culture.', 4, null, null, 'bio') }}
+                                {{ forms.file(
+                                    'avatar',
+                                    'Profile Image',
+                                    'Upload a square JPG, PNG, or WebP image. Maximum size 2MB.',
+                                    'image/png,image/jpeg,image/webp',
+                                    false,
+                                    'avatar'
+                                ) }}
                             </div>
                         </div>
 
@@ -130,10 +140,14 @@
                                     {name: 'Viewer', selected: false, description: 'Read-only administrative access.'}
                                 ] %}
                                 {% for role in roles %}
-                                <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50/30">
-                                    <input type="checkbox" name="roles[]" value="{{ role.name|lower|replace({' ': '-'}) }}" class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if role.selected %}checked{% endif %}>
-                                    <span><span class="block text-sm font-medium text-slate-800">{{ role.name }}</span><span class="mt-0.5 block text-xs leading-5 text-slate-500">{{ role.description }}</span></span>
-                                </label>
+                                    {{ forms.checkbox_card(
+                                        'roles[]',
+                                        role.name|lower|replace({' ': '-'}),
+                                        role.name,
+                                        role.description,
+                                        role.selected,
+                                        'role_' ~ role.name|lower|replace({' ': '_'})
+                                    ) }}
                                 {% endfor %}
                             </div>
                         </div>
@@ -143,9 +157,97 @@
                         <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                             <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Account</h5></div>
                             <div class="space-y-4 px-5 py-5">
-                                <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="status">Status</label><select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="status" name="status"><option selected>Active</option><option>Suspended</option><option>Invited</option></select></div>
-                                <div><label class="mb-1.5 block text-sm font-medium text-slate-700" for="timezone">Timezone</label><select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="timezone" name="timezone"><option>UTC</option><option selected>America/New_York</option><option>America/Phoenix</option><option>Europe/London</option></select></div>
-                                <label class="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700"><input type="checkbox" name="require_2fa" checked class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">Require two-factor authentication</label>
+                                {{ forms.select('status', 'Status', [
+                                    {value: 'active', label: 'Active'},
+                                    {value: 'suspended', label: 'Suspended'},
+                                    {value: 'invited', label: 'Invited'}
+                                ], 'active', null, 'status') }}
+                                {{ forms.select('timezone', 'Timezone', [
+                                    {value: 'UTC', label: 'UTC'},
+                                    {value: 'America/New_York', label: 'America/New_York'},
+                                    {value: 'America/Phoenix', label: 'America/Phoenix'},
+                                    {value: 'Europe/London', label: 'Europe/London'}
+                                ], 'America/New_York', null, 'timezone') }}
+                                {{ forms.color(
+                                    'accent_color',
+                                    'Accent Color',
+                                    '#10b981',
+                                    'Used for this user avatar, labels, and personalized admin highlights.',
+                                    'accent_color'
+                                ) }}
+                                {{ forms.password(
+                                    'new_password',
+                                    'New Password',
+                                    '',
+                                    'Leave blank to keep the current password.',
+                                    'Enter a new password',
+                                    'new_password'
+                                ) }}
+                                {{ forms.password(
+                                    'new_password_confirmation',
+                                    'Confirm Password',
+                                    '',
+                                    'Repeat the new password before saving.',
+                                    'Confirm the new password',
+                                    'new_password_confirmation'
+                                ) }}
+                                {{ forms.slider(
+                                    'session_timeout',
+                                    'Session Timeout',
+                                    45,
+                                    5,
+                                    120,
+                                    5,
+                                    'Automatically sign this user out after a period of inactivity.',
+                                    'session_timeout',
+                                    'm'
+                                ) }}
+                                {{ forms.slider(
+                                    'upload_limit',
+                                    'Upload Limit',
+                                    25,
+                                    1,
+                                    100,
+                                    1,
+                                    'Maximum file size this user can upload to media libraries.',
+                                    'upload_limit',
+                                    'MB'
+                                ) }}
+                                {{ forms.slider(
+                                    'notification_digest',
+                                    'Digest Frequency',
+                                    12,
+                                    1,
+                                    24,
+                                    1,
+                                    'How often this user receives bundled activity notifications.',
+                                    'notification_digest',
+                                    'h'
+                                ) }}
+                                {{ forms.toggle(
+                                    'require_2fa',
+                                    'Require two-factor authentication',
+                                    true,
+                                    'Require this user to complete a second authentication step when signing in.',
+                                    '1',
+                                    'require_2fa'
+                                ) }}
+                                {{ forms.toggle(
+                                    'send_security_notifications',
+                                    'Send security notifications',
+                                    true,
+                                    'Email this user when their password, email, or authentication settings change.',
+                                    '1',
+                                    'send_security_notifications'
+                                ) }}
+                                {{ forms.toggle(
+                                    'allow_api_access',
+                                    'Allow API access',
+                                    false,
+                                    'Permit this user to create and use personal API tokens.',
+                                    '1',
+                                    'allow_api_access'
+                                ) }}
                             </div>
                             <div class="space-y-2 border-t border-slate-100 px-5 py-4">
                                 <button type="submit" class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Update User</button>
@@ -163,5 +265,7 @@
     </div>
 </div>
 
+{{ forms.slider_scripts() }}
+{{ forms.password_scripts() }}
 </body>
 </html>
