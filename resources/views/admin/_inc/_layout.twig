@@ -22,7 +22,7 @@
     <aside id="primary-sidebar"
            class="fixed inset-y-0 left-0 z-30 w-64 -translate-x-full overflow-y-auto border-r border-slate-200 bg-white px-5 py-6 transition-transform duration-200 lg:relative lg:inset-auto lg:z-40 lg:w-auto lg:translate-x-0 lg:overflow-visible lg:transition-none {{ primary_nav_sticky ? 'lg:sticky lg:top-0 lg:h-screen' : '' }}">
         <div class="mb-4 flex items-center justify-between lg:block">
-            <a class="text-lg font-semibold tracking-tight" href="{{ dashboard_url|default('home.twig') }}">{{ app_name|default('Admin') }}</a>
+            <a class="text-lg font-semibold tracking-tight" href="{{ route('dashboard') }}">{{ app_name|default('Admin') }}</a>
             <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Close menu">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </label>
@@ -30,7 +30,7 @@
 
         <nav class="mt-2 space-y-1 text-sm font-medium lg:mt-8">
             {% block primary_navigation %}
-                <a class="block rounded-md px-3 py-2 {{ active_nav == 'dashboard' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ dashboard_url|default('home.twig') }}">Dashboard</a>
+                <a class="block rounded-md px-3 py-2 {{ active_nav == 'dashboard' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('dashboard') }}">Dashboard</a>
 
                 <div class="nav-group">
                     <input id="nav-content" type="checkbox" {{ active_nav in ['content', 'articles', 'categories', 'field-layouts'] ? 'checked' : '' }}>
@@ -40,10 +40,14 @@
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </span>
                     </label>
+
                     <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'articles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ articles_url|default('index.twig') }}">Articles</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'categories' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ categories_url|default('categories.twig') }}">Categories</a></li>
-                        <li class="nav-group nav-tertiary-group">
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'articles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('entries.groups') }}">Entries</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'categories' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('categories.groups') }}">Categories</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'categories' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('statuses.groups') }}">Statuses</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'categories' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('media.libraries') }}">Media</a></li>
+
+                        {# <li class="nav-group nav-tertiary-group">
                             <input id="nav-entries-tertiary" type="checkbox" {{ active_nav in ['entries', 'entries-published', 'entries-drafts', 'entries-archived'] ? 'checked' : '' }}>
                             <label for="nav-entries-tertiary" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-1.5 {{ active_nav in ['entries', 'entries-published', 'entries-drafts', 'entries-archived'] ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}">
                                 <span>Entries</span>
@@ -57,6 +61,7 @@
                                 <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'entries-archived' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" href="{{ entries_archived_url|default('#') }}">Archived</a></li>
                             </ul>
                         </li>
+
                         <li class="nav-popout-group relative">
                             <a class="flex items-center justify-between rounded-md px-3 py-1.5 {{ active_nav in ['collections', 'collections-news', 'collections-guides', 'collections-releases'] ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ collections_url|default('#') }}">
                                 <span>Collections</span>
@@ -69,34 +74,36 @@
                             </ul>
                         </li>
                         <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'field-layouts' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ field_layouts_url|default('edit-field-layout.twig') }}">Field Layouts</a></li>
+                        #}
                     </ul>
                 </div>
 
                 <div class="nav-group">
                     <input id="nav-media" type="checkbox" {{ active_nav in ['media', 'media-libraries'] ? 'checked' : '' }}>
                     <label for="nav-media" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['media', 'media-libraries'] ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                        <span>Media</span>
+                        <span>Members</span>
                         <span class="nav-chevron">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </span>
                     </label>
                     <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'media-libraries' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ media_libraries_url|default('media-libraries.twig') }}">Libraries</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'media' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ media_url|default('media-library.twig') }}">Files</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'media-libraries' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('users.index') }}">Users</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'media' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('roles.index') }}">Roles</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'media' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('users.layouts.show') }}">Fields</a></li>
                     </ul>
                 </div>
 
                 <div class="nav-group">
                     <input id="nav-users" type="checkbox" {{ active_nav in ['users', 'roles'] ? 'checked' : '' }}>
                     <label for="nav-users" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['users', 'roles'] ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                        <span>Users</span>
+                        <span>Account</span>
                         <span class="nav-chevron">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </span>
                     </label>
                     <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'users' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ users_url|default('users.twig') }}">All Users</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'roles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ roles_url|default('user-roles.twig') }}">Roles</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'users' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('account.settings') }}">Profile</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'roles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('settings.user') }}">Settings</a></li>
                     </ul>
                 </div>
 
@@ -149,7 +156,7 @@
                         <a class="hover:text-slate-600" href="{{ support_url|default('#') }}">Support</a>
                         <a class="hover:text-slate-600" href="{{ privacy_url|default('#') }}">Privacy</a>
                         <span class="text-slate-300">|</span>
-                        <span>{{ app_version|default('v1.0.0') }}</span>
+                        <span>{{ app_version|default('v0.0.12') }}</span>
                     </nav>
                 </div>
             {% endblock %}
