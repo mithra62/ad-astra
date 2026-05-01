@@ -14,7 +14,7 @@ class Group extends Controller
 {
     public function index()
     {
-        $groups = StatusGroup::withCount('statuses')->ordered()->paginate(20);
+        $groups = StatusGroup::withCount('statuses')->withCount('entryGroups')->ordered()->paginate(20);
         return $this->view('statuses.groups.index', ['groups' => $groups]);
     }
 

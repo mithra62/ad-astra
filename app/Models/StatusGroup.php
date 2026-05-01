@@ -21,6 +21,11 @@ class StatusGroup extends Model
         return $this->hasMany(Status::class)->orderBy('sort_order');
     }
 
+    public function entryGroups(): HasMany
+    {
+        return $this->hasMany(EntryGroup::class);
+    }
+
     public function defaultStatus(): HasOne
     {
         return $this->hasOne(Status::class)->where('is_default', true);
