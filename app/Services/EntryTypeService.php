@@ -53,7 +53,7 @@ class EntryTypeService extends AbstractService
             'sort_order' => $data['sort_order'] ?? 0,
             'field_layout_id' => $data['field_layout_id'] ?? null,
             'has_entry_tree' => $data['has_entry_tree'] ?? false,
-            'default_template' => $data['default_template'] ?? null,ll,
+            'default_template' => $data['default_template'] ?? null,
             'max_depth' => $data['max_depth'] ?? 0,
             'allowed_parent_types' => $data['allowed_parent_types'] ?? [],
         ]);
