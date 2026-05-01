@@ -22,6 +22,10 @@ class StoreEntryTypeRequest extends FormRequest
             'class' => ['required', 'string', 'max:255', new ExtendsClass(AbstractEntryType::class)],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'field_layout_id' => ['nullable', 'integer', 'exists:field_layouts,id'],
+            'has_entry_tree' => ['nullable', 'boolean'],
+            'max_depth' => ['nullable', 'integer', 'min:0', 'max:10'],
+            'allowed_parent_types' => 'nullable|array',
+            'default_template' => 'nullable|string|max:255'
         ];
     }
 }

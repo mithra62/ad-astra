@@ -23,11 +23,12 @@ class Type extends Controller
             abort(404);
         }
 
+
         EntryTypes::create((int)$group_id, $request->validated());
 
         return redirect()
             ->route('entries.groups.edit', $group_id)
-            ->with('status', trans('entry.type.created'));
+            ->with('success', trans('entry.type.created'));
     }
 
     public function create(string $group_id)

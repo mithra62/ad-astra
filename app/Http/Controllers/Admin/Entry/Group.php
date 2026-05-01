@@ -60,7 +60,7 @@ class Group extends Controller
             abort(404);
         }
 
-        $allGroups = EntryGroup::ordered()->get();
+        $allGroups = EntryGroup::with('entries')->ordered()->get();
         $entries = $group->entries()
             ->with(['entryType', 'creator', 'authors'])
             ->latest()
@@ -81,13 +81,14 @@ class Group extends Controller
             'categoryGroups',
             'fieldGroups',
             'fieldLayout',
+
         ])->find($id);
 
         if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
-        $allGroups = EntryGroup::ordered()->get();
+        $allGroups = EntryGroup::with('entries')->ordered()->get();
 
         return $this->view('entries.groups.edit', array_merge(
             $this->formData(),
@@ -138,7 +139,7 @@ class Group extends Controller
             return redirect()->route('entries.groups')->with('failure', trans('entry.group.not_found'));
         }
 
-        $allGroups = EntryGroup::ordered()->get();
+        $allGroups = EntryGroup::with('entries')->ordered()->get();
 
         return $this->view('entries.groups.delete', [
             'group' => $group,
