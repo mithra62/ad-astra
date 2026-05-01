@@ -19,7 +19,10 @@
 
 #sidebar-toggle { display: none; }
 
-#sidebar-toggle:checked ~ .app-shell #primary-sidebar { transform: translateX(0); }
+#sidebar-toggle:checked ~ .app-shell #primary-sidebar {
+    --tw-translate-x: 0;
+    transform: translateX(0);
+}
 
 #sidebar-toggle:checked ~ .sidebar-overlay { display: block; }
 
