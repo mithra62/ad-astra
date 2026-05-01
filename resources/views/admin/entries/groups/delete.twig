@@ -97,14 +97,12 @@
                     {{ method_field('DELETE') }}
                     <input type="hidden" name="_method" value="DELETE">
                     <div class="mb-4 rounded-md bg-slate-50 px-4 py-3 text-sm text-slate-700">Select the toggle to confirm deletion of <strong>Jane Smith</strong>.</div>
-                    <label class="flex cursor-pointer items-center justify-between gap-4 rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                    <label class="flex cursor-pointer items-center justify-between gap-4 rounded-md border  {% if errors.has('confirm_removal') %} bg-red-300 border-red-300{% else %}bg-slate-50 border-slate-200{% endif %} px-4 py-3">
                         <span class="text-sm font-medium text-slate-700">I understand this user will be permanently deleted</span>
+
                         <input class="peer sr-only" type="checkbox" name="confirm_removal" required>
                         <span class="h-6 w-11 shrink-0 rounded-full bg-slate-300 after:mt-1 after:ml-1 after:block after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow after:transition after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-red-500"></span>
                     </label>
-                    {% if errors.has('confirm_removal') %}
-                        <p id="confirm_removal-error" class="mt-1 text-xs text-red-600">{{ errors.first('confirm_removal') }}</p>
-                    {% endif %}
                     <button id="delete-btn" type="submit" class="mt-5 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Permanently Delete User</button>
                     <a href="edit-user.twig" class="mt-2 block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">Back to Edit</a>
                 </form>
