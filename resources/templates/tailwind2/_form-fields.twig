@@ -247,25 +247,39 @@
     </script>
 {% endmacro %}
 
-{% macro toggle(name, label, checked, description, value, id, error_key) %}
+{% macro toggle(name, label, checked, description, value, id, error_key, copy_align) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set field_value = value|default('1') %}
     {% set checked_state = old(field_error_key) is not null ? old(field_error_key) : checked %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
+    {% set toggle_layout = copy_align|default('left') %}
+    {% set text_first = toggle_layout != 'right' and toggle_layout != 'inline' %}
+    {% set is_inline = toggle_layout == 'inline' %}
+    {% set copy %}
+        <span class="{% if is_inline %}shrink-0 text-left{% else %}min-w-0{% endif %} {% if not text_first and not is_inline %}text-right{% endif %}">
+            <span class="block text-sm font-medium text-slate-700">{{ label }}</span>
+            {% if description %}
+                <span class="mt-0.5 block text-xs leading-5 text-slate-500">{{ description }}</span>
+            {% endif %}
+        </span>
+    {% endset %}
+    {% set control %}
+        <span class="shrink-0">
+            <input type="hidden" name="{{ name }}" value="0">
+            <input id="{{ field_id }}" class="peer sr-only" type="checkbox" name="{{ name }}" value="{{ field_value }}" {% if checked_state %}checked{% endif %} {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
+            <span class="relative block h-6 w-11 rounded-full bg-slate-300 transition after:absolute after:left-1 after:top-1 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow after:transition after:content-[''] peer-checked:bg-emerald-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-emerald-500"></span>
+        </span>
+    {% endset %}
     <div>
-        <label class="flex cursor-pointer items-center justify-between gap-4 rounded-md border px-4 py-3 transition {% if has_error %}border-red-300 bg-red-50 hover:border-red-400{% else %}border-slate-200 bg-slate-50 hover:border-emerald-300 hover:bg-emerald-50/30{% endif %}" for="{{ field_id }}">
-            <span class="min-w-0">
-                <span class="block text-sm font-medium text-slate-700">{{ label }}</span>
-                {% if description %}
-                    <span class="mt-0.5 block text-xs leading-5 text-slate-500">{{ description }}</span>
-                {% endif %}
-            </span>
-            <span class="shrink-0">
-                <input type="hidden" name="{{ name }}" value="0">
-                <input id="{{ field_id }}" class="peer sr-only" type="checkbox" name="{{ name }}" value="{{ field_value }}" {% if checked_state %}checked{% endif %} {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
-                <span class="relative block h-6 w-11 rounded-full bg-slate-300 transition after:absolute after:left-1 after:top-1 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow after:transition after:content-[''] peer-checked:bg-emerald-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-emerald-500"></span>
-            </span>
+        <label class="flex cursor-pointer items-center gap-4 rounded-md border px-4 py-3 transition {% if is_inline %}justify-start{% else %}justify-between{% endif %} {% if has_error %}border-red-300 bg-red-50 hover:border-red-400{% else %}border-slate-200 bg-slate-50 hover:border-emerald-300 hover:bg-emerald-50/30{% endif %}" for="{{ field_id }}">
+            {% if text_first %}
+                {{ copy }}
+                {{ control }}
+            {% else %}
+                {{ control }}
+                {{ copy }}
+            {% endif %}
         </label>
         {% if has_error %}
             <p id="{{ field_id }}_error" class="mt-1 text-xs text-red-600">{{ errors.first(field_error_key) }}</p>

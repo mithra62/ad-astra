@@ -105,33 +105,59 @@
                     </div>
 
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status_group_id">Status
-                            Group</label>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="class">Behavior {{ old('class') }}</label>
                         <select
-                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm {% if errors.has('status_group_id') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
-                            id="status_group_id" name="status_group_id">
-                            {% for sg in status_groups %}
-                                <option value="{{ sg.id }}"
-                                        {% if old('status_group_id') == sg.id %}selected{% endif %}>
-                                    {{ sg.name }}
+                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm {% if errors.has('class') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                            id="class" name="class">
+                            {% for cls in type_classes %}
+                                <option value="{{ cls }}" {% if old('class') == cls %}selected{% endif %}>
+                                    {{ cls }}
                                 </option>
                             {% endfor %}
                         </select>
                         {% if errors.has('status_group_id') %}
                             <p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('status_group_id') }}</p>
                         {% endif %}
+                        <small class="text-secondary d-block mb-1">
+                            Select the behavior that implements this entry type's lifecycle hooks.
+                            Must extend <code>App\EntryTypes\AbstractEntryType</code>.
+                        </small>
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                               for="description">Description</label>
+                               for="has_entry_tree">Allow Entry Tree</label>
                         {{ forms.toggle(
-                            'require_2fa',
-                            'Require two-factor authentication',
-                            true,
-                            'Require this user to complete a second authentication step when signing in.',
+                            'has_entry_tree',
+                            'Allow Entry Tree',
+                            false,
+                            'Allow Entries assigned to this Entry Type to have parent / child relationships.',
                             '1',
-                            'require_2fa'
+                            'has_entry_tree',
+                            null,
+                            'inline'
                         ) }}
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status_group_id">Field Layout</label>
+                        <select
+                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm {% if errors.has('status_group_id') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                            id="field_layout_id" name="field_layout_id">
+                            <option value="">— None —</option>
+                            {% for layout in field_layouts %}
+                                <option value="{{ layout.id }}"
+                                        {% if old('field_layout_id') == layout.id %}selected{% endif %}>
+                                    {{ layout.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.has('field_layout_id') %}
+                            <p id="field_layout_id-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>
+                        {% endif %}
+                        <small class="text-secondary d-block mb-1">
+                            Fields from this layout are specific to this
+                            entry type. Group-level fields are always included.</code>.
+                        </small>
                     </div>
 
                 </div>
