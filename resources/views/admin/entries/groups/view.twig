@@ -59,7 +59,7 @@
                     {% for status in group.statusGroup.statuses %}
                     <div class="p-4 sm:p-5">
                         <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ status.name }}</p>
-                        <p class="mt-1.5 text-3xl font-semibold text-slate-900">{{ status.entries.count }}</p>
+                        <p class="mt-1.5 text-3xl font-semibold text-slate-900">{{ group.entries().where('status_id', status.id).count() }}</p>
                     </div>
                     {% endfor %}
                 {% endif %}
