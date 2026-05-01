@@ -1,7 +1,7 @@
-{% extends 'admin._inc._layout' %}
+{% extends 'templates::tailwind2.layout' %}
 
-{% set page_title = 'Create Entry Group' %}
-{% set page_heading = 'Create Entry Group' %}
+{% set page_title = 'Create General Item' %}
+{% set page_heading = 'Create General Item' %}
 {% set active_nav = 'content' %}
 {% set has_secondary_sidebar = false %}
 
@@ -16,13 +16,11 @@
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('entries.groups') }}">
-            Entry Groups
-        </a>
+        <a class="hover:text-slate-800" href="general-index-no-sidebar.twig">General Items</a>
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <span class="text-slate-800">Create Entry Group</span>
+        <span class="text-slate-800">Create</span>
     </nav>
 {% endblock %}
 
@@ -47,12 +45,23 @@
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                 </svg>
-                Back to Entry Groups
+                Back to Items
             </a>
         </div>
 
-        <form id="general-create-form" method="POST" action="{{ route('entries.groups.store') }}" class="flex w-full min-w-0 flex-col gap-5">
-            {{ csrf_field() }}
+        <div class="rounded-lg border border-sky-200 bg-sky-50 p-4">
+            <div class="flex items-start gap-3">
+                <svg class="mt-0.5 h-5 w-5 shrink-0 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div>
+                    <p class="text-sm font-semibold text-sky-800">Create a new reusable item.</p>
+                    <p class="mt-1 text-sm text-sky-700">Handles should be stable once this item is used by content or templates.</p>
+                </div>
+            </div>
+        </div>
+
+        <form id="general-create-form" method="POST" action="#" class="flex w-full min-w-0 flex-col gap-5">
             <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                 <div class="border-b border-slate-200 px-5 py-3">
                     <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
@@ -60,8 +69,9 @@
                 <div class="space-y-5 px-5 py-5">
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
-                        <input value="{{ old('name') }}" class="w-full rounded-md border border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 {% if errors.has('name') %}focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
-                        {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
+                        <input class="w-full rounded-md border border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20" id="name" name="name" type="text" value="" placeholder="e.g. Published" required aria-invalid="true" aria-describedby="name-error">
+                        <p id="name-error" class="mt-1 text-xs text-red-600">Name is required.</p>
+                        <p class="mt-1 text-xs text-slate-400">Use a short, human-readable label.</p>
                     </div>
 
                     <div>
