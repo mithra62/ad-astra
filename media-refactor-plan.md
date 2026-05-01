@@ -1,5 +1,74 @@
 # Media Layer Refactor Plan
 
+---
+
+## ⚠ Review Notes
+*Added 2026-05-01. These must be resolved before implementation begins.*
+
+### 🔴 Critical — Bugs / Blockers
+
+**1. `Media\Library` model is missing `$table = 'media_libraries'` (Phase 2.3)**
+The plan's rewrite of `App\Models\Media\Library` omits `protected $table = 'media_libraries'`. Without it, Eloquent defaults to `libraries` and every query fails. The current model already has this property; the plan's replacement drops it. Add `protected $table = 'media_libraries';` to the Phase 2.3 class body before anything else runs.
+
+**2. `FieldValue::resolvedValue()` is incomplete in the live codebase**
+The actual file (`app/Models/FieldValue.php`) ends at line 58, mid-method — the body after `$column = $fieldType->instance()->storageColumn();` is missing. The method has never been able to return a resolved value for any field type. This must be implemented as part of Phase 9, not treated as a pre-existing working baseline.
+
+**3. `FieldValue::resolvedValue()` pipeline gap for `FileUpload` (Phase 7 / FileUpload section)**
+The plan defines `value(mixed $raw): Collection` on `FileUpload` and states it is "what `FieldValue::resolvedValue()` ultimately returns to callers." But `resolvedValue()` reads the raw column value — since `value_json` is cast to `array` by Eloquent, `$entry->field('gallery')` would return `[3, 7, 12]` (raw IDs), not `Collection<Media>`. The plan must explicitly show the change to `resolvedValue()` so that, when the field type instance has a `value()` method, it calls `$instance->value($rawValue)` instead of returning the raw column. This is not automatic.
+
+**4. "File Upload Field Type — Implementation Plan" section is duplicated**
+The section appears nearly verbatim twice — first at roughly line 1110 and again at roughly line 1855. The two copies differ in method name (`resolve()` in the first, `value()` in the second) and in minor implementation details. The first copy must be removed. The second version (using `value()`) is the canonical one and is the one referenced by the rest of the plan.
+
+**5. `Media::usages()` relationship is semantically broken (Phase 2.1)**
+`morphedByMany(Media::class, 'mediable', 'mediables', 'media_id')` tells Eloquent the related type is always `Media`, so it only returns pivot rows where `mediable_type = 'App\Models\Media'`. All `User`, `Entry`, and other rows are silently dropped. The plan's own note acknowledges this is a stub to refine, but the implementation as written will mislead. Replace the relationship body with a note pointing directly to `MediaUsageRepository::forMedia()` and do not leave a broken Eloquent relationship in place.
+
+**6. No `DeleteMedia` action exists**
+Phase 9.2 references `App\Actions\Media\DeleteMedia`, but only `App\Actions\Media\Library\DeleteMediaLibrary` exists in the codebase. A new `DeleteMedia` action (for soft-deleting individual media items) must be created as part of Phase 9.
+
+---
+
+### 🟠 Missing Pieces — Must Be Addressed Before or During Implementation
+
+**7. `User` model uses `spatie/laravel-tags` (`HasTags`) — no replacement specified**
+`App\Models\User` uses the `HasTags` trait from `spatie/laravel-tags`. Phase 10 removes both Spatie packages, but the plan is silent on what replaces user tagging. Before `composer remove spatie/laravel-tags` runs, a replacement must be identified and the `User` model updated, or the remove command will break the model.
+
+**8. Library deletion does not handle orphaned media**
+`DeleteMediaLibrary::delete()` currently carries a `@todo` about the job queue and simply calls `$library->delete()`. The `media.library_id` FK is `nullOnDelete()`, so deleting a library sets all child `media.library_id` values to null — those records become orphans the `PurgeDeletedMedia` job will never find or clean up. The plan must specify the deletion policy: (a) cascade-soft-delete all media items first, (b) prohibit deletion if media items exist, or (c) accept orphaned records and add a separate orphan-purge query to the job.
+
+**9. `ProcessMediaLibraryRemoval` job is an empty stub**
+The job (`app/Jobs/ProcessMediaLibraryRemoval.php`) has a completely empty `handle()` body. Phase 9.3 says to update it but provides no implementation. A concrete body is required — at minimum it should call `purgeMedia()` on each item belonging to a deleted library.
+
+**10. `StoreMediaLibraryFormRequest` uses field name `'storage'`, not `'adapter'`**
+The existing form request validates a field named `'storage'`, but the `media_libraries` model column is `'adapter'`. Phase 9 must update this request (and the create/edit views) to use `'adapter'` so form submissions actually populate the correct column.
+
+---
+
+### 🟡 Code-Level Issues — Fix Before Merging
+
+**11. `Transformation::markComplete()` uses non-nullable typed int parameters with null defaults**
+`public function markComplete(string $path, int $size, int $width = null, int $height = null)` — a non-nullable `int` cannot default to `null`. This is a PHP fatal error at call time. Change to `?int $width = null, ?int $height = null`.
+
+**12. `Library::activeMedia()` is redundant (Phase 2.3)**
+`SoftDeletes` adds a global scope that automatically excludes `deleted_at IS NOT NULL` records. The `activeMedia()` method adds a redundant `->whereNull('deleted_at')` on top of a relationship that already excludes soft-deleted rows. Remove the method or rename it to `withTrashedMedia()` with `->withTrashed()` if explicitly needed.
+
+**13. `HasMediaItems::sort_order` increment is not atomic (Phase 3.1)**
+`(int) ($this->media()->max('sort_order') ?? 0) + 1` is a read-then-increment that races under concurrent uploads and will produce duplicate sort orders. Wrap in a transaction or use a DB-level `SELECT FOR UPDATE`.
+
+**14. `mediaForField()` runs an unbatched DB query on every call (FileUpload section)**
+`Field::where('handle', $field)->value('id')` fires a query on every `mediaForField()` call. In list views with many models this becomes N queries. Cache the field ID lookup (e.g., `once()`) or require an `int` argument in batch contexts.
+
+**15. `App\Traits\HasMedia` namespace collision risk during transition**
+`Spatie\MediaLibrary\HasMedia` is an interface; the new `App\Traits\HasMedia` is a trait with the same short name. Any model that previously did `implements HasMedia` or `use InteractsWithMedia` (currently `Media\Library`) needs explicit import cleanup before the new trait is applied in Phase 3, or PHP will resolve the wrong symbol.
+
+---
+
+### 🔵 Decisions / Behavior Changes to Flag Explicitly
+
+**16. `User::avatar()` changes from Gravatar URL to Laravolt base64 inline data URI (Phase 8.2)**
+The current method returns a Gravatar URL keyed on `$this->email`. The plan replaces it with `\Laravolt\Avatar\Facade::create($this->name)->toBase64()` — a base64-encoded inline image, keyed on name, with no external request. This is a meaningful UX and frontend change (img `src` type changes). Flag for frontend/API review before merging.
+
+---
+
 ## Overview
 
 Replace Spatie's individual Media item handling with a fully native Laravel implementation,
