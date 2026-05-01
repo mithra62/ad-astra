@@ -28,6 +28,7 @@
 16. [Implementation Roadmap](#16-implementation-roadmap)
 17. [Corrections Applied (v2 Review)](#17-corrections-applied-v2-review)
 18. [Open Questions & Concerns](#18-open-questions--concerns)
+19. [Corrections Applied (v3 Review)](#19-corrections-applied-v3-review)
 
 ---
 
@@ -209,6 +210,8 @@ The existing `ProductEntryType` handles price validation and stock status, but n
 
 `beforeCreate`/`beforeUpdate` should build a variant table from `attributes` if present, generating child entries (or JSON rows in the Matrix field) for each variant combination. This is the most complex part of product modelling — see Section 7.
 
+> **SKU-required-on-publish vs. configurable parents.** The existing `ProductEntryType::validate()` requires a SKU before a product can be published. Under variant Approach A (Section 7.4), each variant child entry has its own SKU but the parent ("configurable") product doesn't sell directly — its SKU is meaningless. Two clean options: (a) treat the parent's SKU as a *master SKU* (e.g. `SHIRT-001`) and require it like any other product, with variants using `SHIRT-001-S-RED`, `SHIRT-001-M-RED`, etc. — keeps the validate rule untouched and gives merchants a useful product-family identifier; or (b) add a `has_variants` boolean (already implied by §7) and skip the SKU requirement for parents that have at least one variant. Adopt (a) — it's a smaller change to `ProductEntryType::validate()` and matches Magento/Shopify conventions for configurable products.
+
 ### 3.2 OrderEntryType
 
 Orders are Entries. The `title` field is the human-readable order number (e.g., `ORD-2026-00042`). Status transitions are the core workflow.
@@ -243,10 +246,10 @@ Recommended statuses: `pending_payment`, `paid`, `processing`, `partially_shippe
 
 **`OrderEntryType` lifecycle concerns:**
 
-- `beforeCreate`: Generate `order_number` via `OrderNumberGenerator`; freeze pricing (copy product prices into line items so price changes don't mutate historical orders).
-- `afterCreate`: Fire `OrderCreated` event; trigger confirmation email; decrement product `stock_quantity`.
-- `beforeUpdate`: If status changes to `refunded`, trigger refund flow via gateway.
-- `afterUpdate`: Fire `OrderStatusChanged` event; update subscription state if applicable.
+- `beforeCreate`: Validate that `order_number` and frozen pricing are present in `$data`. The actual generation and freeze happens in the `CreateOrderEntry` checkout pipe before the entry is created — the pipe owns the cart context and can build a complete payload; the lifecycle hook only sees `$data` and cannot reach back into the cart. Hooks transform/validate; pipes orchestrate.
+- `afterCreate`: Fire `OrderCreated` event. Stock decrement is **not** done here — see §6.1: stock is soft-reserved in `ValidateInventory` and converted to a permanent decrement by `ConfirmOrderPaid` after payment succeeds.
+- `beforeUpdate`: Validate state-machine transitions (see §6.3). **Do not call the payment gateway here.** The `EntryRepository::create`/`update` lifecycle wraps `before*` hooks in a `DB::transaction`; calling an external gateway API inside that transaction holds row locks across an HTTP round-trip and can desynchronise local state from gateway state if either side fails. Refunds are initiated by `OrderService::refund(Order $order, int $amountCents)`, which calls the gateway, then updates the entry status on success.
+- `afterUpdate`: Fire `OrderStatusChanged` event; update subscription state if applicable. This hook runs outside the transaction, so non-trivial side effects are safe here.
 - `validate`: Require all address fields when status moves to `processing` or beyond.
 
 ### 3.3 OrderItemEntryType
@@ -270,6 +273,8 @@ Each line item in an order is its own Entry, related back to the Order via the `
 | `fulfillment_status` | Select | `pending`, `fulfilled`, `refunded` |
 
 > **Concern:** If order line items as full Entries feels too heavy for your use case, an alternative is to store them as a JSON blob in a `line_items` Matrix field on the Order entry itself. This is simpler to query but loses the per-item editability. Recommend starting with full Entries — you can always denormalise later.
+
+> **Handle uniqueness — required `beforeCreate` hook:** the `entries` table has a `unique(entry_group_id, handle)` constraint and `EntryRepository` defaults handle to `Str::slug($title)`. OrderItem entries don't have a meaningful title, so left to its own devices the repository will generate colliding empty/duplicate slugs. `OrderItemEntryType::beforeCreate` must set an explicit handle — recommended format `oi-{order_number}-{line_index}-{ulid_suffix}` — to guarantee uniqueness without leaking sequential information.
 
 ### 3.4 SubscriptionPlanEntryType
 
@@ -332,6 +337,8 @@ Discounts are applied automatically when cart conditions are met. No code requir
 | `stackable` | Boolean | Can stack with other discounts? |
 
 > **`usage_count` is intentionally absent as a field.** Redemption tracking must not live in `field_values`. Under concurrent checkout, two requests could both read `usage_count = 9`, both pass the `< 10` check, and both commit — over-redeeming the discount. Redemption counts are tracked in a dedicated `discount_redemptions` table (see Section 15) with a database-level unique constraint on `(discount_entry_id, user_id)` for per-customer caps. The `DiscountEngine` checks this table with a locking read (`SELECT ... FOR UPDATE`) before applying any coupon or discount.
+
+> **Guest checkout caveat for per-customer caps.** Both MySQL and PostgreSQL allow multiple NULL values inside a unique index, so `unique(discount_entry_id, user_id)` does **not** enforce per-customer redemption caps for guest checkouts (where `user_id` is null). Two enforceable options: (a) require an account for any coupon flagged `usage_limit_per_customer > 0` or `first_time_only = true`, and reject the redemption at validation time for guests; or (b) add a `redeemer_email` text column to `discount_redemptions`, populate it with the order's billing email for guests, and add a partial/conditional unique index `(discount_entry_id, redeemer_email) WHERE user_id IS NULL`. Option (a) is simpler and fits the typical merchant policy for capped coupons; option (b) preserves the guest experience but is a weaker guarantee (email is forgeable). The plan adopts (a) by default; tenants who need (b) can enable it via a `shop.coupons.allow_guest_capped_redemption` setting.
 
 ### 3.7 CouponEntryType
 
@@ -671,7 +678,7 @@ Configured on `SubscriptionPlan.trial_days`. During trial, no payment is taken. 
 
 ## 9. Discounts & Coupons
 
-Following CartThrob's model: discounts and coupons are Entries, and the settings that define their behaviour are stored in a `DiscountSettings` custom field. The `DiscountEngine` evaluates all active discounts and valid coupons against the cart at calculation time.
+Following CartThrob's spirit: discounts and coupons are Entries. The settings that define their behaviour are stored as **individual typed fields** on the `DiscountEntryType` / `CouponEntryType` (see §3.6 and §3.7) — *not* in a single `DiscountSettings` JSON blob. The `DiscountSettings` field type was rejected in §4.6; this section uses the individual-field model throughout. The `DiscountEngine` evaluates all active discounts and valid coupons against the cart at calculation time.
 
 ### 9.1 DiscountEngine
 
@@ -697,9 +704,9 @@ The engine:
 
 **FreeShipping** — zeroes out shipping total. Stackable with other discount types.
 
-**BuyXGetY** — buy N of product A, get M of product B free (or at a percentage off). Requires `buy_quantity`, `buy_product_ids`, `get_quantity`, `get_product_ids`, `get_discount_type`, `get_discount_value` on the DiscountSettings JSON.
+**BuyXGetY** — buy N of product A, get M of product B free (or at a percentage off). Adds the following fields to `DiscountEntryType` (or a `BuyXGetYDiscountEntryType` subtype): `buy_quantity` (int), `buy_product_ids` (Relationship), `get_quantity` (int), `get_product_ids` (Relationship), `get_discount_type` (Select: `free`, `percentage`, `fixed`), `get_discount_value` (Number/Money depending on type).
 
-**VolumeDiscount** — tiered pricing: buy 1-4 at full price, 5-9 at 10% off, 10+ at 20% off. Tiers stored as a Matrix sub-field within DiscountSettings.
+**VolumeDiscount** — tiered pricing: buy 1-4 at full price, 5-9 at 10% off, 10+ at 20% off. Tiers stored in a `tiers` Matrix field on the discount entry, with columns `min_quantity` (int), `max_quantity` (int, nullable for open-ended top tier), `discount_type` (Select), `discount_value` (Number).
 
 ### 9.3 Coupon Validation
 
@@ -966,9 +973,11 @@ Customers can request a new token from their account (if download limit or expir
 
 ## 14. Tenancy Considerations
 
+> **Status note.** `TenantPlan.md` is a *plan*, not implemented code. The `tenants` table, `BelongsToTenant` trait, `ResolveTenant` middleware, `TenantManager`, and tenant-scoped settings storage do not yet exist in the codebase. This section therefore describes a forward-compatible design: shop tables are designed *as if* tenancy existed, with a `tenant_id` column included from day one and defaulted to `1` (a single seeded "default tenant" row in a stub `tenants` table). The shop must either (a) wait for `TenantPlan.md` to land before Phase 11 work, or (b) ship a minimal stub: a `tenants` table with one row, a no-op `BelongsToTenant` trait that just adds the column to fillable and a global scope that filters `tenant_id = 1`. Option (b) is recommended — it keeps the shop unblocked and means the migration to real tenancy is a matter of replacing the trait's body, not retrofitting columns into populated tables. Likewise, the `setting_values` table currently has no `tenant_id`; per-tenant gateway/shipping config either waits for that schema change or is stored in a shop-owned `tenant_shop_settings` table that the shop manages itself until the platform-wide settings layer grows tenant scoping.
+
 ### 14.1 With Tenancy (SaaS mode)
 
-Per the existing `TenantPlan.md`, all new shop tables receive a `tenant_id` column. The `BelongsToTenant` trait is applied to all shop models (Cart, CartItem, Order, DownloadToken, etc.).
+Per the (planned) `TenantPlan.md`, all new shop tables receive a `tenant_id` column. The `BelongsToTenant` trait is applied to all shop models (Cart, CartItem, Order, DownloadToken, etc.).
 
 Each tenant configures its own:
 - Enabled payment gateways (from their tenant settings)
@@ -987,21 +996,34 @@ This means the architecture is identical in both modes — swapping in real tena
 
 ### 14.3 Per-Tenant Shop Settings
 
-Stored under the existing `settings` table using the domain/key pattern already in the platform:
+The platform's settings system is **config-driven**, not free-form key/value: domains and their fields are declared in `config/settings.php`, and values land in `setting_values` keyed by `(domain, field_handle, user_id)` with typed columns (`value_text`, `value_integer`, `value_float`, `value_boolean`, `value_json`). Adding a `shop` domain therefore means publishing a `config/settings/shop.php` (or extending `config/settings.php`) with explicit field definitions:
 
+```php
+'shop' => [
+    'name'        => 'Shop',
+    'description' => 'Storefront and commerce configuration.',
+    'icon'        => 'ti-shopping-cart',
+    'sort_order'  => 50,
+    'fields' => [
+        ['handle' => 'currency',            'type' => 'text',    'default' => 'USD',  'rules' => ['required','string','size:3']],
+        ['handle' => 'weight_unit',         'type' => 'text',    'default' => 'oz',   'rules' => ['required','in:oz,g,lb,kg']],
+        ['handle' => 'dimension_unit',      'type' => 'text',    'default' => 'in',   'rules' => ['required','in:in,cm']],
+        ['handle' => 'prices_include_tax',  'type' => 'boolean', 'default' => false],
+        ['handle' => 'order_prefix',        'type' => 'text',    'default' => 'ORD'],
+        ['handle' => 'low_stock_threshold', 'type' => 'integer', 'default' => 5],
+        ['handle' => 'guest_checkout',      'type' => 'boolean', 'default' => true],
+        ['handle' => 'shipping_origin_address', 'type' => 'json'],
+        // gateway *config* (publishable keys, mode flags) goes here;
+        // gateway *secrets* do NOT — see security note below.
+    ],
+],
 ```
-shop.currency           → USD
-shop.weight_unit        → oz
-shop.dimension_unit     → in
-shop.prices_include_tax → false
-shop.order_prefix       → ORD
-shop.low_stock_threshold → 5
-shop.guest_checkout     → true
-shop.gateway.stripe.publishable_key → pk_live_...
-shop.gateway.stripe.secret_key      → sk_live_...
-shop.gateway.stripe.webhook_secret  → whsec_...
-shop.shipping.origin_address        → {...}
-```
+
+Run `SettingsDomainSeeder` after deployment to register the domain row; values then resolve through `app(\App\Settings::class)->get('shop', 'currency')`.
+
+> **Secrets do not belong in `setting_values`.** The platform's setting columns are plaintext. Storing `stripe.secret_key`, `webhook_secret`, or any vault-grade credential there gives every staff member with `settings.read` permission, every database backup viewer, and every `setting_values` SQL dump consumer the keys to the merchant's money. Two acceptable storage options for gateway secrets: (a) `.env` per environment (single-tenant install mode), resolved via `config('services.stripe.secret')`; (b) a dedicated `gateway_credentials` table — `(tenant_id, gateway_handle, key_name, encrypted_value)` — using Laravel's `encrypted` cast so values are encrypted at rest with the app's `APP_KEY`. The settings UI surfaces only the *non-secret* gateway config (mode, publishable key, display name); secret keys are entered through a separate, write-only credentials form that never reads them back.
+
+> **Multi-tenant settings are blocked on `setting_values.tenant_id`.** The current `setting_values` schema is keyed only by `(domain, field_handle, user_id)`. Until the platform's settings layer grows tenant scoping (or a `tenant_id` column), per-tenant shop config can't actually be stored there in SaaS mode without collisions. Until then: (a) single-tenant installs use the system row (`user_id = NULL`) as expected; (b) SaaS mode requires the shop to own a `tenant_shop_settings` table for now, then migrate into the platform's settings table once it gains a `tenant_id` column.
 
 ---
 
@@ -1121,6 +1143,12 @@ Storing inventory separately from `field_values` avoids the unique-per-field con
 
 **`users`** — add `tax_exempt boolean default false` and `tax_exempt_id string nullable` via UserSchema fields (no migration needed if using the existing user schema system).
 
+### Platform constraints the shop must work around
+
+> **`entries.created_by_user_id` is `NOT NULL` with `restrictOnDelete`.** Every `entries` row requires a real user. Order entries created during *guest* checkout have no authenticated user — without intervention the insert fails. Solution: seed a deterministic system user (`shop@system.local`, role `shop-system`, password disabled) at install time and use its ID as `created_by_user_id` for every guest-checkout Order and OrderItem. The `customer_id` Relationship field on `OrderEntryType` (which *is* nullable) carries the actual customer when present. Add a `ShopSystemUserSeeder` to Phase 1 of the roadmap.
+
+> **Hard-deleting a Product cascades through `entry_relationships`.** The `entry_relationships` table cascades on both `entry_id` and `related_entry_id`. When a Product entry is hard-deleted, every OrderItem→Product relationship row is deleted with it. The OrderItem's snapshot fields (`product_title`, `sku`, `unit_price`) survive in `field_values` and are sufficient for display, but the audit link from a historical line item back to the originating product is broken. Two complementary fixes: (a) introduce soft-deletes on `entries` (add `deleted_at` and `SoftDeletes` trait on the Entry model — a platform-level change worth doing anyway) and use those for products and orders; (b) until that lands, `ProductEntryType::beforeDelete` (a new lifecycle hook the shop adds via the existing service layer, *not* a DB trigger) checks `entry_relationships` for any inbound link from an OrderItem entry and refuses the delete with a `CannotDeleteReferencedProductException`, advising the merchant to mark the product as unpublished/archived instead. Either way, hard-delete-while-orders-exist must be made impossible.
+
 ---
 
 ## 16. Implementation Roadmap
@@ -1135,12 +1163,18 @@ Work in order. Each phase is shippable and independently testable.
 - [ ] Implement `Matrix` field type + `MatrixValue` collection
 - [ ] Implement `ProductAttributes` field type (extends Matrix)
 - [ ] Implement `PriceModifier` field type
-- [ ] Write `ShopInstallCommand` artisan command to seed field types, statuses, entry groups
+- [ ] Add `shop` domain to `config/settings.php` (or `config/settings/shop.php` merged in) with all non-secret config fields
+- [ ] Add `gateway_credentials` migration with `encrypted` cast for secret values; build `GatewayCredentialStore` facade
+- [ ] `ShopSystemUserSeeder` — deterministic system user used as `created_by_user_id` for guest-checkout entries
+- [ ] Stub `BelongsToTenant` trait (no-op until `TenantPlan.md` lands) + seeded default tenant row
+- [ ] Write `ShopInstallCommand` artisan command to seed field types, statuses, entry groups, system user, default tenant
 - [ ] Write `ShopSeeder` for deployment/test use
 
 ### Phase 2 — Product Catalogue (Week 3-4)
 - [ ] `product_inventory` migration (separate from `field_values`)
 - [ ] Extend `ProductEntryType` with all new fields (via FieldLayout migration/seeder)
+- [ ] Add `EntryQueryBuilder::whereField($handle, $operator, $value)` — minimal field-value join via `field_values` for the storage column declared by the field type. Required for storefront product browsing (price filters, in-stock, attribute filtering). The richer `product_search_index` table can come later, but a basic `whereField` cannot wait until Phase 10+ as the original draft assumed.
+- [ ] Soft-delete support on `entries` (or, as an interim, a `ProductEntryType::beforeDelete` guard that refuses hard-delete of products referenced by OrderItem entries)
 - [ ] Implement `SubscriptionPlanEntryType`
 - [ ] Implement `TaxClassEntryType` and `TaxRateEntryType`
 - [ ] Implement `ShippingZoneEntryType` and `ShippingRateEntryType`
@@ -1158,8 +1192,9 @@ Work in order. Each phase is shippable and independently testable.
 - [ ] `AbstractPaymentGateway` + `PaymentRequest` + `PaymentResult`
 - [ ] `GatewayManager` registry
 - [ ] `OmnipayGateway` wrapper
+- [ ] `StripeDirectGateway` using the official `stripe-php` SDK (per §18 — Omnipay's Stripe adapter lags; doing Stripe direct from day one is the recommendation)
 - [ ] `payment_methods` migration + saved-method flow
-- [ ] Tenant-scoped gateway config resolution
+- [ ] Tenant-scoped gateway config resolution; secrets loaded via `GatewayCredentialStore` (encrypted-at-rest), never `setting_values`
 - [ ] `AdHocPaymentService` standalone wrapper
 
 ### Phase 5 — Discounts & Coupons (Week 8)
@@ -1188,11 +1223,11 @@ Work in order. Each phase is shippable and independently testable.
 
 ### Phase 8 — Orders & Checkout (Week 11-12)
 - [ ] `OrderEntryType` with all fields and status group
-- [ ] `OrderItemEntryType`
+- [ ] `OrderItemEntryType` — including the `beforeCreate` handle-uniqueness hook (`oi-{order_number}-{idx}-{ulid}`)
 - [ ] `OrderNumberGenerator` + `sequences` migration
 - [ ] `OrderStateMachine`
 - [ ] `CheckoutPipeline` with all pipe classes
-- [ ] `OrderService`
+- [ ] `OrderService` — including `refund(Order, int $amountCents)` (refund logic lives here, **not** in `OrderEntryType::beforeUpdate`)
 - [ ] Inventory decrement + reservation logic
 - [ ] Order confirmation email (use existing notification/mail infrastructure)
 
@@ -1207,8 +1242,8 @@ Work in order. Each phase is shippable and independently testable.
 - [ ] `SubscriptionEntryType` with all fields and status group
 - [ ] `SubscriptionService`
 - [ ] `HandleSubscriptionActivation` checkout pipe
-- [ ] Webhook processing (Spatie webhook client) for Stripe subscription events
-- [ ] Self-managed billing fallback (scheduled command)
+- [ ] Webhook processing (Spatie webhook client) for Stripe subscription events; per-tenant webhook URLs (`/shop/webhooks/stripe/{tenantId}`) so signature verification can use the right `webhook_secret`
+- [ ] Self-managed billing fallback (scheduled command). Use `withoutOverlapping()` and `lockForUpdate()` on the row selection; otherwise concurrent workers will double-charge.
 - [ ] Dunning retry logic
 - [ ] Upgrade/downgrade + proration
 
@@ -1256,7 +1291,7 @@ The following issues were identified in the first draft and corrected inline thr
 
 **Refund accounting.** The current plan creates refund records but doesn't address double-entry bookkeeping, revenue recognition, or accounting software integration. If merchants need to export to QuickBooks/Xero/etc., a `BookkeepingAdapter` abstraction should be added to Phase 10+.
 
-**Search and filtering.** Product browsing typically needs price-range filtering, attribute filtering, and full-text search — none of which the current `EntryQueryBuilder` supports directly (it queries `entries` columns, not `field_values`). Recommend a `ProductIndexer` that flattens product field values into a `product_search_index` table (or Meilisearch/Typesense) for queryable fields. This is Phase 10+ work.
+**Search and filtering.** Product browsing needs price-range filtering, attribute filtering, in-stock filtering, and full-text search — none of which the current `EntryQueryBuilder` supports directly (it queries `entries` columns only, not `field_values`). The original draft deferred this to Phase 10+; that's wrong. A storefront with no price or attribute filtering is not a storefront. The minimum viable answer — a `whereField($handle, $operator, $value)` extension on `EntryQueryBuilder` that joins `field_values` and dispatches by storage column — is **Phase 2** work and now appears there. The richer answer (a denormalised `product_search_index` table, or Meilisearch/Typesense for full-text) can wait until catalogue size or query patterns demand it; until then, indexed `field_values(field_id, value_integer)` joins are adequate for the typical filter set.
 
 **Email templates.** Order confirmation, shipping notification, refund receipt, subscription renewal, and failed payment emails all need templated content. The existing platform's Twig templating is a natural fit. A `ShopMailer` service with per-tenant Twig templates (stored in the database or as files) should be part of Phase 8.
 
@@ -1265,6 +1300,44 @@ The following issues were identified in the first draft and corrected inline thr
 ---
 
 *This document represents a first-pass architecture. Many details will be refined as implementation progresses. The CartThrob philosophy — using your content management primitives (Entries, Field Types, Statuses) as the backbone of commerce data — is deeply sound and should be held firmly as complexity grows.*
+
+---
+
+## 19. Corrections Applied (v3 Review)
+
+A second pass against the actual codebase (not the v1 brief) surfaced the following real issues. Each is corrected inline above; this section is for traceability and so the next reviewer can see what changed.
+
+1. **`entries.created_by_user_id` is `NOT NULL` (§15).** The platform's `entries` table requires a user FK with `restrictOnDelete`. Guest-checkout Order/OrderItem entries have no authenticated user, so the insert would fail. Added `ShopSystemUserSeeder` to Phase 1 — a deterministic system user used as `created_by_user_id` for guest-originated entries; the actual customer is carried on the `customer_id` Relationship field, which is nullable.
+
+2. **Refund logic in `OrderEntryType::beforeUpdate` ran inside a DB transaction (§3.2).** `EntryRepository::create`/`update` wraps `before*` hooks in `DB::transaction`. Calling the gateway's refund API inside that transaction holds row locks across an external HTTP round-trip and desynchronises local state from gateway state on either-side failure. Moved the refund flow into `OrderService::refund(Order, int $amountCents)` — gateway call first, entry status update on success.
+
+3. **`unique(discount_entry_id, user_id)` does not enforce per-customer caps for guests (§3.6, §15).** Both MySQL and PostgreSQL allow multiple NULL values inside a unique index, so guest checkouts can re-redeem capped or first-time-only coupons indefinitely. Default policy added: capped/first-time coupons require an account; guests are rejected at validation. Optional opt-in to a `redeemer_email`-keyed partial unique index for tenants that need to allow guest redemption.
+
+4. **API secrets stored in plaintext `setting_values` (§14.3).** `setting_values.value_text` has no encryption. Storing `stripe.secret_key` / `webhook_secret` there is a real security exposure (DB dumps, backups, broad read permissions). Split: non-secret config stays in the settings system; secrets move to a `gateway_credentials` table with Laravel's `encrypted` cast, surfaced through a write-only `GatewayCredentialStore`.
+
+5. **Hard-deleting a Product cascades through `entry_relationships` (§15).** Both `entry_id` and `related_entry_id` cascade — deleting a Product wipes every OrderItem→Product relation row. Snapshots survive in `field_values`, but the audit link breaks. Two-track fix: (a) introduce `SoftDeletes` on the Entry model (a platform-level improvement worth doing); (b) until that ships, a `ProductEntryType::beforeDelete` guard refuses hard-delete of any product referenced by an OrderItem entry.
+
+6. **Tenancy infrastructure does not exist yet (§14).** `TenantPlan.md` is a plan; no `tenants` table, `BelongsToTenant` trait, `ResolveTenant` middleware, `TenantManager`, or tenant-scoped settings exist. The shop plan was written as if they did. Reframed §14 to acknowledge tenancy is a forward dependency. Recommended approach: ship a stub `BelongsToTenant` (no-op + global scope on `tenant_id = 1`) and a single seeded default tenant, so the migration to real tenancy is just a body change rather than retrofitting columns into populated tables.
+
+7. **Settings storage is config-driven, not free-form key/value (§14.3).** The original §14.3 listed `shop.currency`, `shop.weight_unit`, etc. as if they were arbitrary keys. The platform requires a domain entry in `config/settings.php` with explicit field definitions (handle, type, default, rules, …); values then resolve through `App\Settings::get()`. Rewrote §14.3 with the real format.
+
+8. **`EntryQueryBuilder` cannot filter by field values, but storefront browsing requires it (moved from §18 to Phase 2).** Original draft deferred this to "Phase 10+" — but a storefront with no price/attribute/in-stock filtering is not a storefront. Added a `whereField($handle, $operator, $value)` extension to Phase 2 (joins `field_values` by storage column declared on the field type). The richer denormalised search index can wait.
+
+9. **`OrderItemEntryType` would collide on `entries.handle` (§3.3).** `entries` has `unique(entry_group_id, handle)` and the repository defaults handle to `Str::slug($title)`. OrderItems have no meaningful title, so duplicate empty slugs would be near-instantly guaranteed. `OrderItemEntryType::beforeCreate` must set an explicit collision-resistant handle (`oi-{order_number}-{idx}-{ulid}`).
+
+10. **`ProductEntryType::validate()` requires a SKU on publish, conflicting with parent products under variant Approach A (§3.1, §7.4).** Each variant child entry has its own SKU, but the parent doesn't sell directly. Adopted the master-SKU convention (parent gets `SHIRT-001`, variants get `SHIRT-001-S-RED`); leaves the existing validation rule intact and matches Magento/Shopify expectations.
+
+11. **§3.2 `afterCreate` decrement vs. §6.1 `ConfirmOrderPaid` decrement (internal contradiction).** §3.2 said `afterCreate` decrements stock; §6.1 (correctly) said the `ConfirmOrderPaid` checkout pipe does it after payment confirms. Removed the §3.2 statement; stock follows the §6.1 reservation→commit flow.
+
+12. **§9 still referenced `DiscountSettings` JSON blob after §4.6 killed it.** Stale residue from v1: BuyXGetY and VolumeDiscount descriptions referred to fields "on the DiscountSettings JSON" and a Matrix sub-field "within DiscountSettings." Rewrote both to use individual typed fields on the discount entry (the §3.6/§4.6 model).
+
+13. **Self-managed subscription billing scheduler had no concurrency guard (§16, Phase 10).** Two queue workers running the daily renewal command will double-charge. Added `withoutOverlapping()` + `lockForUpdate` on the row selection.
+
+14. **Per-tenant Stripe webhook routing wasn't specified (§16, Phase 10).** Each tenant has a different `webhook_secret`; signature verification needs to know the tenant before validating. Added a tenant-scoped URL pattern (`/shop/webhooks/stripe/{tenantId}`).
+
+15. **Stripe-direct gateway recommended in §18 but missing from Phase 4 roadmap.** Added `StripeDirectGateway` (using `stripe-php`) to Phase 4 alongside the Omnipay wrapper, matching the §18 advice that Omnipay's Stripe adapter lags the API.
+
+These are the corrections the codebase forced. The architectural skeleton survived the audit — entries-as-commerce-objects, two-pass discount/tax in `CartCalculator`, gateway abstraction usable standalone, soft-reservation inventory, the order-then-payment ordering — all hold up. The fixes above are about respecting the platform's specific shape (FK constraints, lifecycle-hook transaction boundaries, config-driven settings) rather than reworking the design.
 
 ---
 
