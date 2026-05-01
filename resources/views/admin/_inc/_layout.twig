@@ -33,7 +33,7 @@
                 <a class="block rounded-md px-3 py-2 {{ active_nav == 'dashboard' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('dashboard') }}">Dashboard</a>
 
                 <div class="nav-group">
-                    <input id="nav-content" type="checkbox" {{ active_nav in ['content', 'articles', 'categories', 'field-layouts'] ? 'checked' : '' }}>
+                    <input id="nav-content" type="checkbox" {{ active_nav == 'content' ? 'checked' : '' }}>
                     <label for="nav-content" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['content', 'articles', 'categories', 'field-layouts'] ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}">
                         <span>Content</span>
                         <span class="nav-chevron">
@@ -42,7 +42,7 @@
                     </label>
 
                     <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'entries' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('entries.groups') }}">Entries</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'entries' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('entries.groups') }}">Entries</a></li>
                         <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'categories' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('categories.groups') }}">Categories</a></li>
                         <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'categories' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('statuses.groups') }}">Statuses</a></li>
                         <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'categories' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('media.libraries') }}">Media</a></li>

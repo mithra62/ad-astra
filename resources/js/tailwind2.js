@@ -1,6 +1,35 @@
 // Shared JS extracted from resources/templates/tailwind2 Twig templates.
 // Each source block is isolated so page-specific behavior can safely coexist.
 
+window.generateHandleValue = function (value) {
+    return String(value || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+};
+
+window.attachHandleGenerator = function (sourceId, targetId) {
+    var source = document.getElementById(sourceId);
+    var target = document.getElementById(targetId);
+
+    if (!source || !target || target.dataset.handleGeneratorAttached) return;
+
+    target.dataset.handleGeneratorAttached = '1';
+
+    source.addEventListener('input', function () {
+        if (target.dataset.manual) return;
+        target.value = window.generateHandleValue(source.value);
+    });
+
+    target.addEventListener('input', function () {
+        target.dataset.manual = '1';
+        target.value = window.generateHandleValue(target.value);
+    });
+};
+
 // Source: categories.twig
 (function () {
     try {
