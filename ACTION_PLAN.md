@@ -1,6 +1,6 @@
 # Pending Plans — Triage & Action Plan
 
-> Triage of `OVERVIEW.md`, `media-refactor-plan.md`, `SEARCH_PLAN_V2.md`, `SHOP_PLAN.md`, and `TenantPlan.md`. The recommendation below is an ordering with rationale, not a re-plan — each plan stands on its own; this file decides which one to start.
+> Triage of `OVERVIEW.md`, `media-refactor-plan.md`, `SEARCH_PLAN_V2.md`, `SHOP_PLAN.md`, `TenantPlan.md`, and `SEO_SCHEMA_PLAN.md`. The recommendation below is an ordering with rationale, not a re-plan — each plan stands on its own; this file decides which one to start.
 
 ---
 
@@ -13,6 +13,7 @@
 | `SEARCH_PLAN_V2.md` | Feature — `is_searchable`/`search_weight` on `field_layout_tab_elements`, a `search_index` table, `Searchable` trait, `Indexer`, jobs, collection scoping. 7 delivery phases. | Plan, V2. Not started. Media explicitly out of scope but accommodated by the contract. |
 | `SHOP_PLAN.md` | Feature — `mithra62/Shop` e-commerce module: products, cart, orders, payments, discounts, tax, shipping, subscriptions, digital delivery. 11 phases (~16 weeks). | Plan, v3. Not started. Phase 11 is "Tenancy Integration." |
 | `TenantPlan.md` | Foundation — multi-tenant SaaS via shared DB + `tenant_id` on every tenant-owned table; `BelongsToTenant` trait; `ResolveTenant` middleware; Spatie teams mode; queue/job tenancy; super-admin & impersonation; billing. 6 steps. | Plan. Not started. The biggest blast radius of the five. |
+| `SEO_SCHEMA_PLAN.md` | Feature — schema.org JSON-LD generation from the Entry layer; per-entry `schema_type`; field-to-schema-property mapping at the `FieldLayoutTabElement` level; `BreadcrumbList` from `EntryTree`; Twig rendering via `schema_json(entry)`. 9 delivery phases. | Plan. Not started. No blocking dependencies on other plans. |
 
 `OVERVIEW.md` is the **only** one that's not a plan. Everything in it that needs work is in *Known Gaps and Implementation Status* — eight small items that mostly affect the API layer and a few config flags that aren't being read.
 
@@ -40,6 +41,18 @@ Shop §3.1 wants `product_images` and `download_file` as media fields. If Media 
 **Shop ↔ Search.**
 Shop §18 (and §19 correction #8) explicitly pulled `EntryQueryBuilder::whereField()` into Shop Phase 2 — that's the *minimum* search needed for a storefront. Full keyword/relevance search (this is what `SEARCH_PLAN_V2.md` delivers) is a richer answer that the storefront and admin both want, but Shop has a working fallback. Search is a strong add-on for Shop, not a hard blocker.
 
+**SEO Schema ↔ everything else.**
+Minimal overlap. `field_layout_tab_elements` gains `schema_property` (SEO) alongside
+`is_searchable` and `search_weight` (Search V2) — separate migrations, no conflict.
+If Search V2 lands first, the `resolveLayoutElements` repository refactor (SEO Phase 2)
+may already be partially complete; check before duplicating. Tenancy adds `tenant_id`
+to `entries`, `entry_types`, and `field_layout_tab_elements` — the schema columns are
+nullable strings with no tenant logic and require no scoping changes. The media refactor
+upgrades `MediaField::schemaValue()` from null to a real `ImageObject` emitter as a
+byproduct of that work; no changes to the schema layer itself. Shop entries participate
+in schema output automatically once `schema_type` is set — no schema layer changes
+needed.
+
 **OVERVIEW gaps.**
 Independent of all of the above. Each can be knocked out in isolation — they're API-layer bugs and unread config flags.
 
@@ -53,6 +66,7 @@ Independent of all of the above. Each can be knocked out in isolation — they'r
 | Media refactor | Large — every upload point, every media UI surface, two Spatie deps removed | TenantPlan inherits "the most complex integration point in the entire system" | Loses transformations until a driver is chosen (the plan stubs this with `NullTransformationDriver`, so it's safe) | Removes 2 Spatie deps, unlocks `FileUpload` field type, gives MediaLibrary a field layout (→ searchable media) |
 | Search V2 | Medium — additive (new tables, new trait, new dispatch points in repos/services) | Storefront and admin search stay absent | Wrong weights baked in (mitigated: opt-in per element, easy to retune) | Required for Shop UX and admin productivity |
 | Shop | Largest in pure code volume; mostly *additive* under `mithra62/Shop/` | Revenue feature delayed | Order/payment correctness bugs are unforgiving | The reason for the project |
+| SEO Schema | Small — additive columns, new `App\Schema\` namespace, one Twig function | Public-facing pages lack structured data | Low — no correctness-critical paths | SEO quality; Google Rich Results eligibility |
 | OVERVIEW gaps | Small — API resources, permission strings, two unread config keys | Public API documentation lies a bit | Low | Quality polish |
 
 ---
@@ -65,6 +79,7 @@ Independent of all of the above. Each can be knocked out in isolation — they'r
 2. TenantPlan        (~6-8 weeks; Steps 1-5; defer Step 6 until just before Shop)
 3. Search V2         (~2-3 weeks)
 4. Shop              (~14-16 weeks; Phase 11 collapses because tenancy is already real)
+5. SEO Schema        (~2-3 weeks; no blocking dependencies on 1-4)
 ```
 
 ### Step 0 — OVERVIEW Known Gaps (warm-up, ~3-5 days)
@@ -169,10 +184,110 @@ These are flagged in the plans but easy to lose sight of when you're ordering th
 
 ---
 
+### Step 5 — SEO Schema (~2-3 weeks)
+
+**Why last.** This plan has no blocking dependencies on any of the prior steps and none
+of the prior steps depend on it. It is genuinely last rather than lowest-priority —
+the other plans are sequenced for technical reasons; this one is sequenced because it
+is standalone and can wait until the foundational work is settled.
+
+**What you get:**
+- Every public Entry can emit schema.org JSON-LD via a single Twig function call.
+- `BreadcrumbList` is derived automatically from the `EntryTree` hierarchy with no
+  configuration beyond the tree structure already being in place.
+- Field-to-schema-property mapping lives at the `FieldLayoutTabElement` level (the same
+  junction table as Search V2's `is_searchable` and `search_weight`), so the same field
+  can behave differently across layouts.
+- Google Rich Results eligibility for Article, BlogPosting, WebPage, and Event types
+  at launch, with additional types added by registering a new generator class.
+
+**Note on Search V2 overlap.** SEO Schema Phase 2 (the `resolveLayoutElements` repository
+refactor) and Search V2 Phase 1 both touch `field_layout_tab_elements` and both require
+that `resolveLayoutFields` be refactored to return `FieldLayoutTabElement` models. If
+Search V2 has already landed by the time this plan starts, Phase 2 of this plan may be
+partially or fully done. Verify before starting.
+
+**Note on media.** The media refactor (Step 1) upgrades `MediaField::schemaValue()` from
+null (the stub) to a real `ImageObject` emitter. If the media refactor has not landed,
+image schema properties will be absent or bare URL strings — valid per the spec, but not
+as rich. This is not a blocker; it is an automatic quality improvement when Step 1 is done.
+
+Run the SEO Schema plan in phase order (1: Migrations → 2: Repository refactor →
+3: Field layer → 4: Generator foundation → 5: Concrete generators → 6: BreadcrumbList
+→ 7: Twig layer → 8: Admin UI → 9: Tests and documentation).
+
+---
+
 ## Quick Reference — One-Line Summary Per Plan
 
 - **OVERVIEW.md** → reference doc. Eight small Known Gaps; fix as warm-up.
 - **media-refactor-plan.md** → replace Spatie MediaLibrary with native Laravel; do this **first** to spare TenantPlan its hardest integration point.
 - **TenantPlan.md** → multi-tenant foundation. Do **second** so Search and Shop are born tenant-aware.
 - **SEARCH_PLAN_V2.md** → keyword search via index-time weighting. Do **third**, tack Media on while you're there.
-- **SHOP_PLAN.md** → e-commerce module. Do **last**; Phase 11 (tenancy integration) collapses to nothing because tenancy is already real.
+- **SHOP_PLAN.md** → e-commerce module. Do **fourth**; Phase 11 (tenancy integration) collapses to nothing because tenancy is already real.
+- **SEO_SCHEMA_PLAN.md** → schema.org JSON-LD from the Entry layer. Do **last**; standalone, no dependencies on or from any other plan.
+
+---
+
+## Design Discussion Log
+
+> Architectural decisions made during planning conversations, recorded here to
+> preserve the rationale alongside the ordering.
+
+### SEO Schema — 2026-05-02
+
+**Context.** Designing a schema.org JSON-LD generation layer for the Entry system
+from scratch. No existing SEO infrastructure in the codebase.
+
+**`schema_type` on `entries`, not `entry_types`.**
+The initial proposal put `schema_type` on `entry_types` so all entries of a given
+type share a schema shape. This was revised: a "General Page" EntryType should be
+able to produce `Article` entries and `WebPage` entries without needing a separate
+type for each. Moving `schema_type` to `entries` gives per-entry control.
+`entry_types.default_schema_type` was retained as a seed value only — written to
+`entries.schema_type` at creation time, never read at generation time. At generation
+time only `entry.schema_type` is consulted; null means no schema emitted, with no
+fallback chain.
+
+**`schema_property` on `field_layout_tab_elements`, not on `fields`.**
+An early draft put `schema_property` on the `fields` table. This was revised after
+observing that the same field (e.g. `summary`) may need to map to `description` in
+one layout and `abstract` in another. The `FieldLayoutTabElement` is the "field in
+context" junction — the correct place for context-specific behaviour. This decision
+is reinforced by Search V2, which puts `is_searchable` and `search_weight` on the
+same table for exactly the same reason.
+
+**`resolveLayoutElements` added as a new method; `resolveLayoutFields` untouched.**
+The initial plan called for refactoring `resolveLayoutFields` to return
+`FieldLayoutTabElement` models. On review, that change has three live call sites
+(two internal to the repository, one public via `EntryService::resolveFields()`)
+and would break callers silently. More importantly, flat Field Collections from a
+layout are a genuinely useful primitive worth keeping. The decision was to add a
+parallel `resolveLayoutElements` to `EntryRepository` and a parallel `elements()`
+to `FieldLayout` (alongside the existing `fields()`). Schema and search use the new
+method; all existing callers of `resolveLayoutFields` are unchanged. Deduplication
+in the new method is on `field_id` rather than `id` to preserve type-over-group
+precedence correctly.
+
+**`schemaValue()` on `AbstractField`, not special-cased in generators.**
+Field types know their own storage format. Putting the schema rendering concern
+inside the field type means generators stay thin and output quality improves
+automatically as field types become richer (e.g. when `MediaField` lands and
+returns an `ImageObject`). The `Relationship` field type returns null from
+`schemaValue()` as a stub until its planned redesign.
+
+**BreadcrumbList is conditional on `entryTree` presence, not a separate generator.**
+If `$entry->entryTree` exists, `AbstractSchemaGenerator` appends a `BreadcrumbList`
+block to the output. If not, nothing is appended. No per-type or per-entry
+configuration required. The iterative parent walk (one query per level) is Phase 1;
+a recursive CTE replaces it if deep trees become common.
+
+**FAQPage deferred.**
+`FAQPage` requires `mainEntity` — a repeating array of structured `Question`/`Answer`
+objects. Flat field mapping cannot produce this shape. Deferred until a
+`RepeaterField` type exists whose `schemaValue()` can emit the structured array.
+
+**Twig rendering only; no REST API output.**
+Schema.org JSON-LD is a browser/crawler concern. Adding it to `EntryResource` would
+bloat the REST API with data that API consumers have no use for. A single Twig
+function `schema_json(entry)` is the only rendering surface.
