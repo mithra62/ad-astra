@@ -26,8 +26,10 @@ class Status extends Controller
     public function store(StoreStatusRequest $request)
     {
         $creator = app(CreateNewStatus::class);
-        $status = $creator->createByGroup($request->validated());
-        return redirect()->route('statuses.groups.show', $status->status_group_id)->with('status', trans('status.created'));
+        $data = $request->validated();
+        $data['status_group_id'] = $request->group_id;
+        $status = $creator->createByGroup($data);
+        return redirect()->route('statuses.groups.show', $status->status_group_id)->with('success', trans('status.created'));
     }
 
     public function update(EditStatusRequest $request, string $id)

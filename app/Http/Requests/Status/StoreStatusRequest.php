@@ -22,7 +22,7 @@ class StoreStatusRequest extends FormRequest
             'is_default' => ['nullable', 'boolean'],
             'is_public' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
-            'status_group_id' => ['required', 'integer', 'exists:status_groups,id'],
+            'status_group_id' => ['integer', 'exists:status_groups,id'],
         ];
     }
 }
