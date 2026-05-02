@@ -88,6 +88,7 @@ class Group extends Controller
             return redirect()->route('statuses.groups')->with('failure', trans('status.group.not_found'));
         }
 
-        return $this->view('statuses.groups.delete', ['group' => $group]);
+        $groups = StatusGroup::with('entryGroups')->ordered()->get();
+        return $this->view('statuses.groups.delete', ['groups' => $groups, 'group' => $group]);
     }
 }
