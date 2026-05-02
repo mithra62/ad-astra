@@ -37,7 +37,7 @@ class Group extends Controller
             abort(404);
         }
 
-        $groups = StatusGroup::ordered()->get();
+        $groups = StatusGroup::with('entryGroups')->ordered()->get();
         $statuses = $group->statuses()->orderBy('sort_order')->get();
 
         return $this->view('statuses.groups.view', [
