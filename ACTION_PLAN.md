@@ -1,10 +1,10 @@
 # Pending Plans — Triage & Action Plan
 
-> Triage of `OVERVIEW.md`, `media-refactor-plan.md`, `SEARCH_PLAN_V2.md`, `SHOP_PLAN.md`, `TenantPlan.md`, and `SEO_SCHEMA_PLAN.md`. The recommendation below is an ordering with rationale, not a re-plan — each plan stands on its own; this file decides which one to start.
+> Triage of `OVERVIEW.md`, `media-refactor-plan.md`, `SEARCH_PLAN_V2.md`, `SHOP_PLAN.md`, `TenantPlan.md`, `SEO_SCHEMA_PLAN.md`, and `DISCUSSION_LAYER_PLAN.md`. The recommendation below is an ordering with rationale, not a re-plan — each plan stands on its own; this file decides which one to start.
 
 ---
 
-## What These Five Files Are
+## What These Files Are
 
 | File | Type | Status |
 |---|---|---|
@@ -14,6 +14,7 @@
 | `SHOP_PLAN.md` | Feature — `mithra62/Shop` e-commerce module: products, cart, orders, payments, discounts, tax, shipping, subscriptions, digital delivery. 11 phases (~16 weeks). | Plan, v3. Not started. Phase 11 is "Tenancy Integration." |
 | `TenantPlan.md` | Foundation — multi-tenant SaaS via shared DB + `tenant_id` on every tenant-owned table; `BelongsToTenant` trait; `ResolveTenant` middleware; Spatie teams mode; queue/job tenancy; super-admin & impersonation; billing. 6 steps. | Plan. Not started. The biggest blast radius of the five. |
 | `SEO_SCHEMA_PLAN.md` | Feature — schema.org JSON-LD generation from the Entry layer; per-entry `schema_type`; field-to-schema-property mapping at the `FieldLayoutTabElement` level; `BreadcrumbList` from `EntryTree`; Twig rendering via `schema_json(entry)`. 9 delivery phases. | Plan. Not started. No blocking dependencies on other plans. |
+| `DISCUSSION_LAYER_PLAN.md` | Feature — discussion/commenting layer on the Entry layer. Scope and phases TBD. | Plan. Not yet written. Registered to hold its place in the sequence. |
 
 `OVERVIEW.md` is the **only** one that's not a plan. Everything in it that needs work is in *Known Gaps and Implementation Status* — eight small items that mostly affect the API layer and a few config flags that aren't being read.
 
@@ -74,12 +75,13 @@ Independent of all of the above. Each can be knocked out in isolation — they'r
 ## Recommended Ordering
 
 ```
-0. OVERVIEW gaps     (warm-up — ~3-5 days; or interleave throughout)
-1. Media refactor    (~3-5 weeks)
-2. TenantPlan        (~6-8 weeks; Steps 1-5; defer Step 6 until just before Shop)
-3. Search V2         (~2-3 weeks)
-4. Shop              (~14-16 weeks; Phase 11 collapses because tenancy is already real)
-5. SEO Schema        (~2-3 weeks; no blocking dependencies on 1-4)
+0. OVERVIEW gaps        (warm-up — ~3-5 days; or interleave throughout)
+1. Media refactor       (~3-5 weeks)
+2. TenantPlan           (~6-8 weeks; Steps 1-5; defer Step 6 until just before Shop)
+3. Search V2            (~2-3 weeks)
+4. SEO Schema           (~2-3 weeks)
+5. Discussion layer     (~TBD; DISCUSSION_LAYER_PLAN.md not yet written)
+6. Shop                 (~14-16 weeks; Phase 11 collapses because tenancy is already real)
 ```
 
 ### Step 0 — OVERVIEW Known Gaps (warm-up, ~3-5 days)
@@ -140,20 +142,78 @@ The plan's §11 delivery phases (1: Migrations → 2: Trait + model implementati
 
 **Optional during this step:** apply the `Searchable` trait to `Media` while you're in there — Media has a field layout now, and Search Plan §12 says this is a one-shot trait + implementation job. Cheap to do here, expensive to retrofit later.
 
-### Step 4 — Shop (~14-16 weeks)
+### Step 4 — SEO Schema (~2-3 weeks)
+
+**Why fourth.** With Search V2 in place, the `resolveLayoutElements` primitive (SEO
+Phase 2) may already exist — Search V2 needs the same method. Schema is entirely
+additive and isolated; landing it before the Discussion layer and Shop keeps the
+content foundation complete before the heavier feature work begins.
+
+**What you get:**
+- Every public Entry can emit schema.org JSON-LD via a single Twig function call.
+- `BreadcrumbList` is derived automatically from the `EntryTree` hierarchy with no
+  configuration beyond the tree structure already being in place.
+- Field-to-schema-property mapping lives at the `FieldLayoutTabElement` level, so
+  the same field can behave differently across layouts.
+- Google Rich Results eligibility for Article, BlogPosting, WebPage, and Event types
+  at launch, with additional types added by registering a new generator class.
+
+**Note on Search V2 overlap.** SEO Phase 2 (`FieldLayout::elements()` +
+`EntryRepository::resolveLayoutElements()`) is the same primitive Search V2 needs.
+If Search V2 has already landed, Phase 2 of this plan may be fully done — verify
+before starting.
+
+**Note on media.** The media refactor (Step 1) upgrades `MediaField::schemaValue()`
+from null to a real `ImageObject` emitter. If the media refactor has not landed,
+image schema properties will be absent or bare URL strings — valid per the spec, but
+not as rich. Not a blocker; an automatic quality improvement when Step 1 is done.
+
+Run the SEO Schema plan in phase order (1: Migrations → 2: Model and repository
+additions → 3: Field layer → 4: Generator foundation → 5: Concrete generators →
+6: BreadcrumbList → 7: Twig layer → 8: Admin UI → 9: Tests and documentation).
+
+### Step 5 — Discussion Layer (~TBD)
+
+Plan not yet written (`DISCUSSION_LAYER_PLAN.md`). Registered here to hold its
+place in the sequence. Sits after SEO Schema and before Shop because:
+
+- The Entry layer is fully stable by this point — Media, Tenancy, Search, and SEO
+  have all landed. The Discussion layer will almost certainly attach to entries and
+  users; having those foundations settled first avoids retrofitting.
+- Shop brings its own substantial data model and a long timeline. Landing Discussions
+  first keeps the two feature namespaces separate and independently deployable.
+
+Scope, phases, and duration to be determined when `DISCUSSION_LAYER_PLAN.md` is
+written. Do not start this step until the plan exists.
+
+### Step 6 — Shop (~14-16 weeks)
 
 **Why last.** By the time Shop starts:
 
-- Tenancy is real → Phase 11 collapses to "add `tenant_id` columns to new tables and add the trait" instead of "build a stub and migrate later." That alone is several days saved.
+- Tenancy is real → Phase 11 collapses to "add `tenant_id` columns to new tables
+  and add the trait" instead of "build a stub and migrate later." That alone is
+  several days saved.
 - `FileUpload` is a field type → `product_images` / `download_file` use it directly.
-- Search V2 exists → product browsing has full-text relevance ranking on top of the `whereField()` work Shop Phase 2 already plans. The §18 caveat *"a storefront with no price or attribute filtering is not a storefront"* gets resolved by the combination of `whereField()` + Search V2.
-- TenantPlan Step 6 (Cashier + Stripe) is in place → Shop's payment/subscription work plugs into existing infra rather than building parallel infra.
+- Search V2 exists → product browsing has full-text relevance ranking on top of the
+  `whereField()` work Shop Phase 2 already plans. The §18 caveat *"a storefront with
+  no price or attribute filtering is not a storefront"* gets resolved by the
+  combination of `whereField()` + Search V2.
+- TenantPlan Step 6 (Cashier + Stripe) is in place → Shop's payment/subscription
+  work plugs into existing infra rather than building parallel infra.
+- SEO Schema is live → product and event entries emit schema.org JSON-LD
+  automatically once `schema_type` is set; no extra Shop-specific work needed.
 
-Run the Shop plan in its own order (Phases 1-11). The `mithra62/Shop` namespace is already wired in `composer.json`; the work is greenfield under that namespace, which is why this plan is the largest by code volume but the *lowest* coupling risk to the rest of the codebase.
+Run the Shop plan in its own order (Phases 1-11). The `mithra62/Shop` namespace is
+already wired in `composer.json`; the work is greenfield under that namespace, which
+is why this plan is the largest by code volume but the *lowest* coupling risk to the
+rest of the codebase.
 
 **One ordering tweak inside Shop**, given the new context:
 
-- **Shop Phase 11 (Tenancy Integration) becomes Shop Phase 1.5.** Because Tenancy is already real when Shop starts, every new shop migration adds `tenant_id` from day one; every shop model gets `BelongsToTenant` from day one. There's no separate "tenancy integration" phase to defer — tenancy is the substrate.
+- **Shop Phase 11 (Tenancy Integration) becomes Shop Phase 1.5.** Because Tenancy
+  is already real when Shop starts, every new shop migration adds `tenant_id` from
+  day one; every shop model gets `BelongsToTenant` from day one. There's no separate
+  "tenancy integration" phase to defer — tenancy is the substrate.
 
 ---
 
@@ -184,48 +244,15 @@ These are flagged in the plans but easy to lose sight of when you're ordering th
 
 ---
 
-### Step 5 — SEO Schema (~2-3 weeks)
-
-**Why last.** This plan has no blocking dependencies on any of the prior steps and none
-of the prior steps depend on it. It is genuinely last rather than lowest-priority —
-the other plans are sequenced for technical reasons; this one is sequenced because it
-is standalone and can wait until the foundational work is settled.
-
-**What you get:**
-- Every public Entry can emit schema.org JSON-LD via a single Twig function call.
-- `BreadcrumbList` is derived automatically from the `EntryTree` hierarchy with no
-  configuration beyond the tree structure already being in place.
-- Field-to-schema-property mapping lives at the `FieldLayoutTabElement` level (the same
-  junction table as Search V2's `is_searchable` and `search_weight`), so the same field
-  can behave differently across layouts.
-- Google Rich Results eligibility for Article, BlogPosting, WebPage, and Event types
-  at launch, with additional types added by registering a new generator class.
-
-**Note on Search V2 overlap.** SEO Schema Phase 2 (the `resolveLayoutElements` repository
-refactor) and Search V2 Phase 1 both touch `field_layout_tab_elements` and both require
-that `resolveLayoutFields` be refactored to return `FieldLayoutTabElement` models. If
-Search V2 has already landed by the time this plan starts, Phase 2 of this plan may be
-partially or fully done. Verify before starting.
-
-**Note on media.** The media refactor (Step 1) upgrades `MediaField::schemaValue()` from
-null (the stub) to a real `ImageObject` emitter. If the media refactor has not landed,
-image schema properties will be absent or bare URL strings — valid per the spec, but not
-as rich. This is not a blocker; it is an automatic quality improvement when Step 1 is done.
-
-Run the SEO Schema plan in phase order (1: Migrations → 2: Repository refactor →
-3: Field layer → 4: Generator foundation → 5: Concrete generators → 6: BreadcrumbList
-→ 7: Twig layer → 8: Admin UI → 9: Tests and documentation).
-
----
-
 ## Quick Reference — One-Line Summary Per Plan
 
 - **OVERVIEW.md** → reference doc. Eight small Known Gaps; fix as warm-up.
 - **media-refactor-plan.md** → replace Spatie MediaLibrary with native Laravel; do this **first** to spare TenantPlan its hardest integration point.
-- **TenantPlan.md** → multi-tenant foundation. Do **second** so Search and Shop are born tenant-aware.
-- **SEARCH_PLAN_V2.md** → keyword search via index-time weighting. Do **third**, tack Media on while you're there.
-- **SHOP_PLAN.md** → e-commerce module. Do **fourth**; Phase 11 (tenancy integration) collapses to nothing because tenancy is already real.
-- **SEO_SCHEMA_PLAN.md** → schema.org JSON-LD from the Entry layer. Do **last**; standalone, no dependencies on or from any other plan.
+- **TenantPlan.md** → multi-tenant foundation. Do **second** so Search, SEO, Discussions, and Shop are born tenant-aware.
+- **SEARCH_PLAN_V2.md** → keyword search via index-time weighting. Do **third**; tack Media on while you're there.
+- **SEO_SCHEMA_PLAN.md** → schema.org JSON-LD from the Entry layer. Do **fourth**; additive and isolated, completes the content foundation before feature work begins.
+- **DISCUSSION_LAYER_PLAN.md** → discussion/commenting layer. Do **fifth**; plan not yet written — must exist before this step starts.
+- **SHOP_PLAN.md** → e-commerce module. Do **last**; Phase 11 (tenancy integration) collapses to nothing because tenancy is already real.
 
 ---
 
