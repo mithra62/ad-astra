@@ -15,4 +15,6 @@
 15. Super Admin Gate Bypass Has No Audit Trail
 16. api_logs Captures Full Response Bodies for All JSON Responses
 17. Finish up Custom Field layer and generate more internal fields like select and multiselect
-18. 
+18. Implement soft deletes for Entries and Categories
+19. Implement soft deletes for Users
+20. Implement soft deletes for Statuses
