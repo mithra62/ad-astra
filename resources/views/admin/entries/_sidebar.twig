@@ -33,11 +33,11 @@
             <h5 class="text-sm font-semibold text-slate-700">Articles</h5>
         </div>
         <nav class="p-2">
-            <a class="flex items-center gap-2 rounded-md  px-3 py-2 text-sm font-medium " href="index.twig">
+            <a class="flex items-center gap-2 rounded-md  px-3 py-2 text-sm font-medium " href="{{ route('entries.groups') }}">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
                 </svg>
-                All Entries
+                Entry Groups
             </a>
             {% for group in groups %}
             <a class="{% if active == group.id %} text-emerald-700 bg-emerald-50 {% endif %} mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('entries.groups.show', group) }}">

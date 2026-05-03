@@ -18,3 +18,6 @@
 18. Implement soft deletes for Entries and Categories
 19. Implement soft deletes for Users
 20. Implement soft deletes for Statuses
+21. Look into a user status system where users can be "banned"
+22. Implement a user activity log
+23. Implement a notification system for user actions
