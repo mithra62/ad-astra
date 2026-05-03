@@ -32,7 +32,7 @@ class User extends Controller
     {
         $creator = app(CreateNewUser::class);
         $user = $creator->create($request->validated());
-        return redirect()->route('users.show', $user->id)->with('status', trans('user.created'));
+        return redirect()->route('users.show', $user->id)->with('success', trans('user.created'));
     }
 
     /**

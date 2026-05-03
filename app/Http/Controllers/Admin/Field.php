@@ -51,7 +51,7 @@ class Field extends Controller
         $data = $request->validated();
         $data['group_id'] = $request->group_id;
         $group = $creator->createByGroup($data);
-        return redirect()->route('fields.show', $group->id)->with('status', trans('field.created'));
+        return redirect()->route('fields.show', $group->id)->with('success', trans('field.created'));
     }
 
     /**

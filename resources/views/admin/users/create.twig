@@ -1,139 +1,165 @@
-{{ include('admin._inc._header', {title: 'Create User'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb start -->
-        <div class="row m-1">
-            <div class="col-12 ">
-                <h5>Create User</h5>
-                <div class="col-6 ">
-                    <ul class="app-line-breadcrumbs mb-3">
-                        <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                                <span>
-                                    <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
-                                </span>
-                            </a>
-                        </li>
-                        <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('users.index') }}">Users</a>
-                        </li>
-                        <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('users.create') }}">Create User</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+{% extends 'admin._inc._layout' %}
+
+{% set page_title = 'Create User' %}
+{% set page_heading = 'Create User' %}
+{% set active_nav = 'users' %}
+{% set active_user_section = 'create' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="home.twig"><svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg> Dashboard</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <a class="hover:text-slate-800" href="users.twig">Users</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-slate-800">Create User</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.users._sidebar') }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Create User</h1>
+            <p class="mt-1 text-sm text-slate-500">Add a new user and assign one or more roles.</p>
         </div>
-        <!-- Breadcrumb end -->
-        {{ include('admin._inc._message') }}
-
-        <!-- Custom Styles start -->
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex flex-column gap-2">
-                    <h5>Create User</h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('users.store') }}" class="row g-3 needs-validation" novalidate>
-                        {{ csrf_field() }}
-                        <div class="col-md-12">
-                            <label class="form-label" for="validationCustom01">Name</label>
-                            <input class="form-control" id="validationCustom01" required type="text"
-                                   value="{{ old('name') }}" name="name">
-                            {% if errors.has('name') %}
-                                <p class="text-danger">{{ errors.first('name') }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label" for="validationCustomUsername">Email</label>
-                            <div class="input-group has-validation">
-                                <span class="input-group-text" id="inputGroupPrepend">@</span>
-                                <input aria-describedby="inputGroupPrepend" class="form-control"
-                                       id="validationCustomUsername"
-                                       required type="text" name="email" value="{{ old('email') }}">
-                            </div>
-                            {% if errors.has('email') %}
-                                <p class="text-danger">{{ errors.first('email') }}</p>
-                            {% endif %}
-                        </div>
-
-                        {% if schema.fieldLayout %}
-                            {% for tab in schema.fieldLayout.tabs %}
-                                <h4>{{ tab.name }}</h4>
-
-                                {% for element in tab.elements %}
-                                    {% set field = element.field %}
-                                    <div>
-                                        <div class="col-md-12">
-                                            <label class="form-label"
-                                                   for="field_{{ field.handle }}">{{ field.label }}</label>
-                                            {#                                                {% if field.instructions %} #}
-                                            {#                                                    <small>{{ field.instructions }}</small> #}
-                                            {#                                                {% endif %} #}
-                                            <div class="input-group has-validation">
-                                                {{ field.render({
-                                                    id: 'field_' ~ field.handle,
-                                                    class: 'form-control'
-                                                })|raw }}
-                                            </div>
-                                            {% if errors.has('fields.' ~ field.handle) %}
-                                                <p class="text-danger">{{ errors.first('fields.' ~ field.handle) }}</p>
-                                            {% endif %}
-                                        </div>
-
-                                    </div>
-                                {% endfor %}
-                            {% endfor %}
-                        {% endif %}
-
-                        <h4>Password</h4>
-                        <div class="col-md-12">
-                            <label class="form-label" for="password">Password</label>
-                            <input class="form-control" id="password" required type="password" value="" name="password">
-                            {% if errors.has('password') %}
-                                <p class="text-danger">{{ errors.first('password') }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label" for="password_confirmation">Confirm Password</label>
-                            <input class="form-control" id="password_confirmation" required type="password" value=""
-                                   name="password_confirmation">
-                            {% if errors.has('password_confirmation') %}
-                                <p class="text-danger">{{ errors.first('password_confirmation') }}</p>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-md-12">
-                            <label class="form-label" for="roles">Roles</label>
-                            <select class="select-basic-multiple-four w-100 select_primary" multiple="multiple"
-                                    name="roles[]">
-                                {% for role in roles %}
-                                    <option
-                                        {% if old('roles') %}
-                                            {% for key, field in old('roles') %}
-                                                {% if old('roles.' ~ key) == role.name %}selected{% endif %}
-                                            {% endfor %}
-                                        {% endif %}
-                                        value="{{ role.name }}"
-                                    >{{ role.name }}</option>
-                                {% endfor %}
-
-                            </select>
-                            {% if errors.has('roles') %}
-                                <p class="text-danger">{{ errors.first('roles') }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="col-12">
-                            <button class="btn btn-primary float-end" type="submit">Create User</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <!-- Custom Styles end -->
-
-
+        <a href="users.twig" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>Back to Users</a>
     </div>
-</main>
 
-{{ include('admin._inc._footer') }}
+    <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
+        <div class="flex items-start gap-3">
+            <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            <div><p class="text-sm font-semibold text-amber-800">Invitation email will be sent after save.</p><p class="mt-1 text-sm text-amber-700">Users can set their own password from the secure invite link.</p></div>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ route('users.store') }}" class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
+        {{ csrf_field() }}
+        <div class="flex min-w-0 flex-col gap-4">
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Profile</h5></div>
+                <div class="space-y-4 px-5 py-5">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="email">Email Address <span class="text-red-500">*</span></label>
+                        <input value="{{ old('email') }}" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="email" name="email" type="email" placeholder="jane@example.com">
+                        <p class="mt-1 text-xs text-slate-400">This is used for login and notifications.</p>
+                        {% if errors.has('email') %}<p id="email-error" class="mt-1 text-xs text-red-600">{{ errors.first('email') }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="username">Username</label>
+                        <div class="flex rounded-md shadow-sm">
+                            <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-xs text-slate-500">@</span>
+                            <input value="{{ old('name') }}" class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="name" name="name" type="text" placeholder="jane.smith">
+                        </div>
+                        {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            {% if schema.fieldLayout %}
+                {% for tab in schema.fieldLayout.tabs %}
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">{{ tab.name }}</h5></div>
+                    <div class="space-y-4 px-5 py-5">
+
+                    {% for element in tab.elements %}
+                        {% set field = element.field %}
+
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="field_{{ field.handle }}">{{ field.label }}<span class="text-red-500">*</span></label>
+                            {{ field.render({
+                                id: 'field_' ~ field.handle,
+                                class: 'w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20'
+                            })|raw }}
+                            {% if errors.has('fields.' ~ field.handle) %}
+                                <p id="email-error" class="mt-1 text-xs text-red-600">{{ errors.first('fields.' ~ field.handle) }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+
+            {% endif %}
+
+
+
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Password</h5></div>
+                <div class="space-y-4 px-5 py-5">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="email">Password <span class="text-red-500">*</span></label>
+                        <input value="" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="password" name="password" type="password">
+                        <p class="mt-1 text-xs text-slate-400">This is used for login and notifications.</p>
+                        {% if errors.has('password') %}<p id="password-error" class="mt-1 text-xs text-red-600">{{ errors.first('password') }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="username">Username</label>
+                        <div class="flex rounded-md shadow-sm">
+                            <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-xs text-slate-500">@</span>
+                            <input value="" class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="password_confirmation" name="password_confirmation" type="password">
+                        </div>
+                        {% if errors.has('password_confirmation') %}<p id="password_confirmation-error" class="mt-1 text-xs text-red-600">{{ errors.first('password_confirmation') }}</p>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Roles</h5></div>
+                <div class="grid grid-cols-1 gap-3 px-5 py-5 sm:grid-cols-2 xl:grid-cols-3">
+                    {% for role in roles %}
+                        <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50/30">
+                            <input type="checkbox" name="roles[]" value="{{ role.name }}"
+                                   class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                {% if old('roles') %}
+                                    {% for key, field in old('roles') %}
+                                        {% if old('roles.' ~ key) == role.name %}checked{% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            >
+                            <span>
+                            <span class="block text-sm font-medium text-slate-800">{{ role.name }}</span>
+                            <span class="mt-0.5 block text-xs leading-5 text-slate-500">{{ role.description }} fdsa</span>
+                        </span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="flex min-w-0 flex-col gap-4">
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Account</h5></div>
+                <div class="space-y-4 px-5 py-5">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status">Status</label>
+                        <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="status" name="status">
+                            <option value="active" selected>Active</option>
+                            <option value="invited">Invited</option>
+                            <option value="suspended">Suspended</option>
+                        </select>
+                    </div>
+                    <label class="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700">
+                        <input type="checkbox" name="send_invite" checked class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                        Send invite email
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700">
+                        <input type="checkbox" name="require_2fa" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                        Require two-factor authentication
+                    </label>
+                </div>
+                <div class="space-y-2 border-t border-slate-100 px-5 py-4">
+                    <button type="submit" class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Create User</button>
+                    <a href="users.twig" class="block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-50">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

@@ -79,7 +79,7 @@
                 </div>
 
                 <div class="nav-group">
-                    <input id="nav-media" type="checkbox" {{ active_nav in ['media', 'media-libraries'] ? 'checked' : '' }}>
+                    <input id="nav-media" type="checkbox" {{ active_nav in ['members'] ? 'checked' : '' }}>
                     <label for="nav-media" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['media', 'media-libraries'] ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}">
                         <span>Members</span>
                         <span class="nav-chevron">
@@ -87,14 +87,14 @@
                         </span>
                     </label>
                     <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'media-libraries' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('users.index') }}">Users</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'media' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('roles.index') }}">Roles</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'media' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('users.layouts.show') }}">Fields</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_user_section == 'users' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('users.index') }}">Users</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_user_section == 'media' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('roles.index') }}">Roles</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_user_section == 'media' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('users.layouts.show') }}">Field Layout</a></li>
                     </ul>
                 </div>
 
                 <div class="nav-group">
-                    <input id="nav-users" type="checkbox" {{ active_nav in ['users', 'roles'] ? 'checked' : '' }}>
+                    <input id="nav-users" type="checkbox" {{ active_nav in ['profile'] ? 'checked' : '' }}>
                     <label for="nav-users" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['users', 'roles'] ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}">
                         <span>Account</span>
                         <span class="nav-chevron">
@@ -103,11 +103,30 @@
                     </label>
                     <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
                         <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'users' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('account.settings') }}">Profile</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'roles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('settings.user') }}">Settings</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'roles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('settings.user') }}}">Preferences</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5"  href="{{ route('logout') }}"
+                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a></li>
                     </ul>
                 </div>
 
-                <a class="block rounded-md px-3 py-2 {{ active_nav == 'settings' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ settings_url|default('settings.twig') }}">Settings</a>
+                <div class="nav-group">
+                    <input id="nav-settings" type="checkbox" {{ active_nav in ['settings'] ? 'checked' : '' }}>
+                    <label for="nav-settings" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['settings'] ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}">
+                        <span>Settings</span>
+                        <span class="nav-chevron">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </span>
+                    </label>
+                    <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'users' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('account.settings') }}">System Settings</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'roles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('fields.groups') }}">Field Groups</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'roles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('settings.user') }}">Entry Types</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'roles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('field-layouts') }}">Field Layouts</a></li>
+                    </ul>
+                </div>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST">
+                    {{ csrf_field() }}
+                </form>
             {% endblock %}
         </nav>
     </aside>
