@@ -96,11 +96,11 @@
                     </div>
                     <div>
                         {{ forms.color(
-                            'color',
-                            'Color',
-                            old('color', '#10b981'),
-                            'Used for this user avatar, labels, and personalized admin highlights.',
-                            'accent_color'
+                            name: 'color',
+                            label: 'Color',
+                            value: '#10b981',
+                            description: 'Used for this user avatar, labels, and personalized admin highlights.',
+                            id: 'accent_color'
                         ) }}
 
                     </div>
@@ -108,28 +108,28 @@
                         <label class="mb-1.5 block text-sm font-medium text-slate-700"
                                for="has_entry_tree">Set as Default Status</label>
                         {{ forms.toggle(
-                            'is_default',
-                            'Set as Default Status',
-                            false,
-                            'The status the field will be set as if not set',
-                            '1',
-                            'is_default',
-                            'is_default',
-                            'inline'
+                            name: 'is_default',
+                            label: 'Set as Default Status',
+                            value: false,
+                            description: 'The status the field will be set as if not set',
+                            checked_value: '1',
+                            id: 'is_default',
+                            error_key: 'is_default',
+                            copy_align: 'inline'
                         ) }}
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700"
                                for="has_entry_tree">Publicly Visible</label>
                         {{ forms.toggle(
-                            'is_public',
-                            'Publicly Visible',
-                            false,
-                            'Entries with this status will appear in public-facing queries.',
-                            '1',
-                            'is_public',
-                            'is_public',
-                            'inline'
+                            name: 'is_public',
+                            label: 'Publicly Visible',
+                            value: false,
+                            description: 'Entries with this status will appear in public-facing queries.',
+                            checked_value: '1',
+                            id: 'is_public',
+                            error_key: 'is_public',
+                            copy_align: 'inline'
                         ) }}
                     </div>
                     <div>
@@ -148,6 +148,7 @@
 {% endblock %}
 
 {% block scripts %}
+    {{ forms.color_scripts() }}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             if (window.attachHandleGenerator) {
@@ -156,8 +157,6 @@
         });
     </script>
 {% endblock %}
-
-
 
 
 

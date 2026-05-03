@@ -30,6 +30,12 @@
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
+        <a class="hover:text-slate-800" href="{{ route('statuses.show', status) }}">
+            {{ status.name }}
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
         <span class="text-slate-800">Edit Status</span>
     </nav>
 {% endblock %}
@@ -97,11 +103,11 @@
                     </div>
                     <div>
                         {{ forms.color(
-                            'color',
-                            'Color',
-                            old('color', status.color),
-                            'Used for this user avatar, labels, and personalized admin highlights.',
-                            'accent_color'
+                            name: 'color',
+                            label: 'Color',
+                            value: status.color,
+                            description: 'Used for this user avatar, labels, and personalized admin highlights.',
+                            id: 'accent_color'
                         ) }}
 
                     </div>
@@ -109,28 +115,28 @@
                         <label class="mb-1.5 block text-sm font-medium text-slate-700"
                                for="has_entry_tree">Set as Default Status</label>
                         {{ forms.toggle(
-                            'is_default',
-                            'Set as Default Status',
-                            false,
-                            'The status the field will be set as if not set',
-                            '1',
-                            'is_default',
-                            'is_default',
-                            'inline'
+                            name: 'is_default',
+                            label: 'Set as Default Status',
+                            value: status.is_default,
+                            description: 'The status the field will be set as if not set',
+                            checked_value: '1',
+                            id: 'is_default',
+                            error_key: 'is_default',
+                            copy_align: 'inline'
                         ) }}
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700"
                                for="has_entry_tree">Publicly Visible</label>
                         {{ forms.toggle(
-                            'is_public',
-                            'Publicly Visible',
-                            false,
-                            'Entries with this status will appear in public-facing queries.',
-                            '1',
-                            'is_public',
-                            'is_public',
-                            'inline'
+                            name: 'is_public',
+                            label: 'Publicly Visible',
+                            value: status.is_public,
+                            description: 'Entries with this status will appear in public-facing queries.',
+                            checked_value: '1',
+                            id: 'is_public',
+                            error_key: 'is_public',
+                            copy_align: 'inline'
                         ) }}
                     </div>
                     <div>
@@ -142,13 +148,14 @@
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
                 <a href="{{ route('statuses.groups.show', status.group) }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Cancel</a>
-                <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Create Status</button>
+                <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Edit Status</button>
             </div>
         </form>
     </div>
 {% endblock %}
 
 {% block scripts %}
+    {{ forms.color_scripts() }}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             if (window.attachHandleGenerator) {
@@ -157,8 +164,6 @@
         });
     </script>
 {% endblock %}
-
-
 
 
 

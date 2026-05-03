@@ -128,14 +128,14 @@
                         <label class="mb-1.5 block text-sm font-medium text-slate-700"
                                for="has_entry_tree">Allow Entry Tree</label>
                         {{ forms.toggle(
-                            'has_entry_tree',
-                            'Allow Entry Tree',
-                            false,
-                            'Allow Entries assigned to this Entry Type to have parent / child relationships.',
-                            '1',
-                            'has_entry_tree',
-                            type.has_entry_tree,
-                            'inline'
+                            name: 'has_entry_tree',
+                            label: 'Allow Entry Tree',
+                            value: type.has_entry_tree,
+                            description: 'Allow Entries assigned to this Entry Type to have parent / child relationships.',
+                            checked_value: '1',
+                            id: 'has_entry_tree',
+                            error_key: 'has_entry_tree',
+                            copy_align: 'inline'
                         ) }}
                     </div>
 

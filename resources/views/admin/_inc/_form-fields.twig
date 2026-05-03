@@ -2,7 +2,7 @@
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set field_type = type|default('text') %}
-    {% set field_value = old(field_error_key, value) %}
+    {% set field_value = old(field_error_key, value|default('')) %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
@@ -19,11 +19,12 @@
 {% macro password(name, label, value, description, placeholder, id, error_key) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
+    {% set field_value = old(field_error_key, value|default('')) %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div data-password-field>
         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
         <div class="flex items-center rounded-md border bg-white shadow-sm transition focus-within:ring-2 {% if has_error %}border-red-300 focus-within:border-red-500 focus-within:ring-red-500/20{% else %}border-slate-300 focus-within:border-emerald-500 focus-within:ring-emerald-500/20{% endif %}">
-            <input class="min-w-0 flex-1 border-0 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-0" id="{{ field_id }}" name="{{ name }}" type="password" value="{{ value|default('') }}" placeholder="{{ placeholder|default('') }}" data-password-input {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
+            <input class="min-w-0 flex-1 border-0 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-0" id="{{ field_id }}" name="{{ name }}" type="password" value="{{ field_value }}" placeholder="{{ placeholder|default('') }}" data-password-input {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
             <button class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-r-md text-slate-400 hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" type="button" data-password-toggle aria-controls="{{ field_id }}" aria-label="Show password">
                 <svg class="h-4 w-4" data-password-show-icon fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                 <svg class="hidden h-4 w-4" data-password-hide-icon fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18"/><path stroke-linecap="round" stroke-linejoin="round" d="M10.585 10.587a2 2 0 102.828 2.826"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.88 4.24A10.95 10.95 0 0112 4c4.478 0 8.268 2.943 9.542 7a10.52 10.52 0 01-3.188 4.568M6.228 6.228A10.46 10.46 0 002.458 12c1.274 4.057 5.064 7 9.542 7 1.528 0 2.967-.343 4.248-.957"/></svg>
@@ -108,7 +109,7 @@
 {% macro textarea(name, label, value, rows, description, placeholder, id, error_key) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
-    {% set field_value = old(field_error_key, value) %}
+    {% set field_value = old(field_error_key, value|default('')) %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
@@ -122,10 +123,10 @@
     </div>
 {% endmacro %}
 
-{% macro select(name, label, options, selected, description, id, error_key) %}
+{% macro select(name, label, options, value, description, id, error_key) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
-    {% set selected_value = old(field_error_key, selected) %}
+    {% set selected_value = old(field_error_key, value|default('')) %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
@@ -149,12 +150,12 @@
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set field_value = old(field_error_key, value|default('#10b981')) %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
-    <div>
+    <div data-color-field>
         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
         <div class="flex items-center gap-3 rounded-md border bg-white px-3 py-2 shadow-sm transition focus-within:ring-2 {% if has_error %}border-red-300 focus-within:border-red-500 focus-within:ring-red-500/20{% else %}border-slate-300 focus-within:border-emerald-500 focus-within:ring-emerald-500/20{% endif %}">
-            <input id="{{ field_id }}" name="{{ name }}" type="color" value="{{ field_value }}" class="h-8 w-10 shrink-0 cursor-pointer rounded border-0 bg-transparent p-0">
-            <input name="{{ name }}_hex" type="text" value="{{ field_value }}" class="min-w-0 flex-1 border-0 bg-transparent p-0 font-mono text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0" {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
-            <span class="h-6 w-6 shrink-0 rounded-full border border-slate-200 shadow-sm" style="background-color: {{ field_value }}"></span>
+            <input id="{{ field_id }}" name="{{ name }}" type="color" value="{{ field_value }}" class="h-8 w-10 shrink-0 cursor-pointer rounded border-0 bg-transparent p-0" data-color-input>
+            <input name="{{ name }}_hex" type="text" value="{{ field_value }}" class="min-w-0 flex-1 border-0 bg-transparent p-0 font-mono text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0" data-color-hex {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
+            <span class="h-6 w-6 shrink-0 rounded-full border border-slate-200 shadow-sm" style="background-color: {{ field_value }}" data-color-swatch></span>
         </div>
         {% if description %}
             <p class="mt-1 text-xs leading-5 text-slate-400">{{ description }}</p>
@@ -163,6 +164,78 @@
             <p id="{{ field_id }}_error" class="mt-1 text-xs text-red-600">{{ errors.first(field_error_key) }}</p>
         {% endif %}
     </div>
+{% endmacro %}
+
+{% macro color_scripts() %}
+    <script>
+        (function () {
+            function normalizeHex(value) {
+                var hex = String(value || '').trim();
+
+                if (hex.charAt(0) !== '#') {
+                    hex = '#' + hex;
+                }
+
+                if (/^#[0-9a-fA-F]{6}$/.test(hex)) {
+                    return hex.toLowerCase();
+                }
+
+                return null;
+            }
+
+            function initColorFields() {
+                document.querySelectorAll('[data-color-field]').forEach(function (field) {
+                    if (field.dataset.colorReady === 'true') {
+                        return;
+                    }
+
+                    var input = field.querySelector('[data-color-input]');
+                    var hexInput = field.querySelector('[data-color-hex]');
+                    var swatch = field.querySelector('[data-color-swatch]');
+
+                    if (!input || !hexInput) {
+                        return;
+                    }
+
+                    var syncFromColorPicker = function () {
+                        hexInput.value = input.value;
+
+                        if (swatch) {
+                            swatch.style.backgroundColor = input.value;
+                        }
+                    };
+
+                    var syncFromHexInput = function () {
+                        var hex = normalizeHex(hexInput.value);
+
+                        if (!hex) {
+                            return;
+                        }
+
+                        input.value = hex;
+                        hexInput.value = hex;
+
+                        if (swatch) {
+                            swatch.style.backgroundColor = hex;
+                        }
+                    };
+
+                    input.addEventListener('input', syncFromColorPicker);
+                    input.addEventListener('change', syncFromColorPicker);
+                    hexInput.addEventListener('input', syncFromHexInput);
+                    hexInput.addEventListener('change', syncFromHexInput);
+                    field.dataset.colorReady = 'true';
+                    syncFromHexInput();
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initColorFields);
+            } else {
+                initColorFields();
+            }
+        })();
+    </script>
 {% endmacro %}
 
 {% macro slider(name, label, value, min, max, step, description, id, suffix, error_key) %}
@@ -247,11 +320,11 @@
     </script>
 {% endmacro %}
 
-{% macro toggle(name, label, checked, description, value, id, error_key, copy_align) %}
+{% macro toggle(name, label, value, description, checked_value, id, error_key, copy_align) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
-    {% set field_value = value|default('1') %}
-    {% set checked_state = old(field_error_key) is not null ? old(field_error_key) : checked %}
+    {% set field_value = checked_value|default('1') %}
+    {% set checked_state = old(field_error_key) is not null ? old(field_error_key) : value|default(false) %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     {% set toggle_layout = copy_align|default('left') %}
     {% set text_first = toggle_layout != 'right' and toggle_layout != 'inline' %}
@@ -287,15 +360,16 @@
     </div>
 {% endmacro %}
 
-{% macro checkbox_card(name, value, label, description, checked, id, error_key) %}
+{% macro checkbox_card(name, value, label, description, checked, id, error_key, checked_value) %}
     {% set field_id = id|default((name ~ '_' ~ value)|replace({'[': '_', ']': '', '.': '_', ' ': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set old_values = old(field_error_key) %}
-    {% set checked_state = old_values is not null ? value in old_values : checked %}
+    {% set checked_state = old_values is not null ? value in old_values : checked|default(false) %}
+    {% set field_value = checked_value|default(value) %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div>
         <label class="group flex cursor-pointer items-start gap-3 rounded-lg border bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50/30 has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50/60 {% if has_error %}border-red-300{% else %}border-slate-200{% endif %}" for="{{ field_id }}">
-            <input id="{{ field_id }}" type="checkbox" name="{{ name }}" value="{{ value }}" class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if checked_state %}checked{% endif %} {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
+            <input id="{{ field_id }}" type="checkbox" name="{{ name }}" value="{{ field_value }}" class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if checked_state %}checked{% endif %} {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
             <span class="min-w-0">
                 <span class="block text-sm font-medium text-slate-800">{{ label }}</span>
                 {% if description %}
