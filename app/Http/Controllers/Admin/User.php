@@ -130,7 +130,17 @@ class User extends Controller
         $password = app(UpdateUserPassword::class);
         $password->update($user, $request->validated());
 
-        return redirect()->route('users.index')->with('success', trans('user.password_changed'));
+        return redirect()->route('users.show', $user)->with('success', trans('user.password_changed'));
+    }
+
+    public function changePassword(string $id)
+    {
+        $user = Users::find((int)$id);
+        if (!$user instanceof UserModel) {
+            return redirect()->route('users.index')->with('failure', 'user.not_found');
+        }
+
+        return $this->view('users.password', ['user' => $user]);
     }
 
     /**

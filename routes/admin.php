@@ -30,6 +30,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     //users
     Route::get('users/{id}/confirm', [User::class, 'confirm'])->name('users.confirm');
     Route::put('users/{id}/password', [User::class, 'password'])->name('users.password');
+    Route::get('users/{id}/password', [User::class, 'changePassword'])->name('users.change_password');
     Route::get('users/layouts', [UserLayout::class, 'show'])->name('users.layouts.show');
     Route::resource('users', User::class);
     Route::get('users/{id}/tokens/create', [UserTokens::class, 'create'])->name('users.token.create');
