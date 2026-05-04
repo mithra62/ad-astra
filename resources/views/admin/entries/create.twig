@@ -1,243 +1,288 @@
-{{ include('admin._inc._header', {title: 'Create Entry'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb start -->
-        <div class="row m-1">
-            <div class="col-12 ">
-                <h5>Entry Groups</h5>
-                <div class="col-6 ">
-                    <ul class="app-line-breadcrumbs mb-3">
-                        <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                                <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
-                            </a>
-                        </li>
-                        <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('entries.groups') }}">Entry Groups</a>
-                        </li>
-                        <li>
-                            <a class="f-s-14 f-w-500"
-                               href="{{ route('entries.groups.show', group) }}">{{ group.name }}</a>
-                        </li>
-                        <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('entries.create', {group_id: group.id}) }}">Create
-                                Entry</a>
-                        </li>
-                    </ul>
-                </div>
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._form-fields' as forms %}
+
+{% set page_title = 'Create Entry' %}
+{% set page_heading = 'Create Entry - ' ~ entryType.name %}
+{% set active_nav = 'articles' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="#">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('entries.groups') }}">
+            Entry Groups
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('entries.groups.show', group) }}">{{ group.name }}</a>
+
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">Create Entry</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.entries._sidebar', {active: group.id}) }}
+{% endblock %}
+
+{% block content %}
+    <!-- ── Form content ─────────────────────────────────────────── -->
+    <div class="flex min-w-0 flex-col gap-5">
+
+        <!-- Page title + back link -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Create Entry - {{ entryType.name }}</h1>
+                <p class="mt-1 text-sm text-slate-500">Fill in the details below and save when ready.</p>
             </div>
+            <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto" href="#">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                Back to {{ entryType.name }} Entries
+            </a>
         </div>
-        <!-- Breadcrumb end -->
-        {{ include('admin._inc._message') }}
 
-        <div class="row">
-            {{ include('admin.entries._sidebar', {active: group.id}) }}
-            <div class="col-lg-8 col-xxl-9">
+        <!-- Two-column form -->
+        <form id="article-form" method="POST" action="{{ route('entries.store', {group_id: group.id}) }}"
+              class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
+            {{ csrf_field() }}
+            <input type="hidden" name="type_handle" value="{{ entryType.handle }}"/>
 
-                <!-- Type selector (only when group has multiple types) -->
-                {% if group.entryTypes.count > 1 %}
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h5>Entry Type</h5>
+            <!-- ── Left: tabbed content area ───────────────────── -->
+            <div class="flex flex-col gap-0 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+
+                <!-- Tab bar -->
+                <div class="border-b border-slate-200 bg-slate-50">
+                    <div class="flex overflow-x-auto" role="tablist" aria-label="Article sections">
+
+                        {% set layout = entryType.fieldLayout %}
+                        {% if layout and layout.tabs.count >= 1 %}
+                            {% for tab in layout.tabs %}
+                                <button type="button" role="tab" aria-selected="true"
+                                        class="tab-btn active" data-target="tab-{{ tab.hanle }}"
+                                        id="btn-{{ tab.hanle }}" aria-controls="tab-{{ tab.hanle }}">
+                                    <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    {{ tab.name }}fdsa
+                                    <span class="unsaved-dot"></span>
+                                </button>
+                            {% endfor %}
+                        {% endif %}
+
+                        <!-- Group-level Field Layout (shared fields) -->
+                        {% set groupLayout = group.fieldLayout %}
+                        {% if groupLayout and groupLayout.tabs.count >= 1 %}
+                            {% for tab in groupLayout.tabs %}
+                                <button type="button" role="tab" aria-selected="true"
+                                        class="tab-btn active" data-target="tab-{{ tab.hanle }}"
+                                        id="btn-{{ tab.hanle }}" aria-controls="tab-{{ tab.hanle }}">
+                                    <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    {{ tab.name }}
+                                    <span class="unsaved-dot"></span>
+                                </button>
+                            {% endfor %}
+                        {% endif %}
+
+                        {% if entryType.has_entry_tree %}
+                            <button type="button" role="tab" aria-selected="true"
+                                    class="tab-btn active" data-target="tab-structure"
+                                    id="btn-structure" aria-controls="tab-structure">
+                                <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                Structure
+                                <span class="unsaved-dot"></span>
+                            </button>
+                        {% endif %}
+
+                        <button type="button" role="tab" aria-selected="false"
+                                class="tab-btn" data-target="tab-taxonomy"
+                                id="btn-taxonomy" aria-controls="tab-taxonomy">
+                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a2 2 0 014-4z"/></svg>
+                            Taxonomy
+                            <span class="tab-badge" id="badge-taxonomy">0</span>
+                            <span class="unsaved-dot"></span>
+                        </button>
+
+
+                    </div>
+                </div><!-- /tab bar -->
+
+                <!-- ░░ TAB: Content ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+                <div id="tab-content" class="tab-panel active" role="tabpanel" aria-labelledby="btn-content">
+
+                    <!-- Title + slug -->
+                    <div class="border-b border-slate-100 px-5 py-5">
+                        <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Basic Details</h5>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="title">
+                                    Title <span class="text-red-500">*</span>
+                                </label>
+                                <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                       id="title" name="title" type="text"
+                                       placeholder="Enter article title" required
+                                       data-tab-dirty="content">
+                            </div>
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Slug</label>
+                                <div class="flex rounded-md shadow-sm">
+                                    <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-xs text-slate-500">/articles/</span>
+                                    <input class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                           id="handle" name="handle" type="text"
+                                           placeholder="auto-generated-from-title"
+                                           data-tab-dirty="content">
+                                </div>
+                                <p class="mt-1 text-xs text-slate-400">Leave blank to auto-generate from title.</p>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <form method="GET" action="{{ route('entries.create', {group_id: group.id}) }}">
-                                <div class="row align-items-end g-3">
-                                    <div class="col-md-8">
-                                        <label class="form-label" for="type">Select Entry Type</label>
-                                        <select class="form-select" id="type" name="type" onchange="this.form.submit()">
-                                            {% for type in group.entryTypes %}
-                                                <option value="{{ type.handle }}"
-                                                        {% if type.id == entryType.id %}selected{% endif %}>
-                                                    {{ type.name }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                            </form>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="border-b border-slate-100 px-5 py-5">
+                        <h5 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Body</h5>
+                        <div class="mb-2 flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5">
+                            <!-- Mini toolbar hint (decorative in mockup) -->
+                            <button type="button" class="rounded px-1.5 py-1 text-xs font-bold text-slate-600 hover:bg-slate-200" title="Bold">B</button>
+                            <button type="button" class="rounded px-1.5 py-1 text-xs italic text-slate-600 hover:bg-slate-200" title="Italic">I</button>
+                            <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200 underline" title="Underline">U</button>
+                            <span class="mx-1 h-4 w-px bg-slate-300"></span>
+                            <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200" title="Heading">H1</button>
+                            <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200" title="Heading 2">H2</button>
+                            <span class="mx-1 h-4 w-px bg-slate-300"></span>
+                            <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200" title="Unordered list">
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                            </button>
+                            <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200" title="Ordered list">
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7m0 0H5m2 0v2m0-2v2m10 10H5m14-4H5m14-4h-4"/></svg>
+                            </button>
+                            <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200" title="Link">
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                            </button>
+                            <button type="button" class="ml-auto rounded px-1.5 py-1 text-xs text-slate-500 hover:bg-slate-200" title="Fullscreen">
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                            </button>
                         </div>
+                        <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                  id="body" name="body" rows="16"
+                                  placeholder="Write your article content here…"
+                                  data-tab-dirty="content"></textarea>
+                        <p class="mt-1.5 text-xs text-slate-400">Plain text or Markdown supported.</p>
                     </div>
-                {% endif %}
 
-                <!-- Entry Form -->
-                <div class="card">
-                    <div class="card-header d-flex flex-column gap-2">
-                        <h5>Create Entry — {{ entryType.name }}</h5>
+                    <!-- Excerpt -->
+                    <div class="px-5 py-5">
+                        <h5 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Excerpt</h5>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="excerpt">Summary</label>
+                        <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                  id="excerpt" name="excerpt" rows="3"
+                                  placeholder="A short description shown in article listings…"
+                                  data-tab-dirty="content"></textarea>
+                        <p class="mt-1 text-xs text-slate-400">Used in article listings, social cards, and RSS feeds. Aim for 1–2 sentences.</p>
                     </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ route('entries.store', {group_id: group.id}) }}"
-                              class="row g-3 needs-validation" novalidate>
-                            {{ csrf_field() }}
-                            <input type="hidden" name="type_handle" value="{{ entryType.handle }}"/>
 
-                            <!-- Core fields -->
-                            <div class="col-md-12">
-                                <label class="form-label" for="title">Title</label>
-                                <input class="form-control" id="title" required type="text"
-                                       value="{{ old('title') }}" name="title">
-                                {% if errors.has('title') %}
-                                    <p class="text-danger">{{ errors.first('title') }}</p>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-8">
-                                <label class="form-label" for="handle">Slug</label>
-                                <input class="form-control" id="handle" type="text"
-                                       value="{{ old('handle') }}" name="handle"
-                                       placeholder="Leave blank to auto-generate from title">
-                                {% if errors.has('handle') %}
-                                    <p class="text-danger">{{ errors.first('handle') }}</p>
-                                {% endif %}
-                            </div>
+                </div><!-- /tab-content -->
 
-                            <!-- Status -->
-                            {% if group.statusGroup and group.statusGroup.statuses.count >= 1 %}
-                                <div class="col-md-4">
-                                    <label class="form-label" for="status">Status</label>
-                                    <select class="form-select" id="status" name="status">
-                                        <option value="">— Default —</option>
-                                        {% for s in group.statusGroup.statuses %}
-                                            <option value="{{ s.handle }}"
-                                                    {% if old('status') == s.handle %}selected{% endif %}>
-                                                {{ s.name }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                    <small class="text-secondary">Only statuses from the {{ group.statusGroup.name }}
-                                        group are allowed.</small>
-                                    {% if errors.has('status') %}
-                                        <p class="text-danger">{{ errors.first('status') }}</p>
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-
-                            <!-- Published At -->
-                            <div class="col-md-6">
-                                <label class="form-label" for="published_at">Publish Date</label>
-                                <input class="form-control" id="published_at" type="datetime-local"
-                                       value="{{ old('published_at') }}" name="published_at">
-                                <small class="text-secondary">Leave blank to keep as draft.</small>
-                                {% if errors.has('published_at') %}
-                                    <p class="text-danger">{{ errors.first('published_at') }}</p>
-                                {% endif %}
-                            </div>
-
-                            <!-- Field Layout (EntryType fields) -->
-                            {% set layout = entryType.fieldLayout %}
-                            {% if layout and layout.tabs.count >= 1 %}
-                                {% for tab in layout.tabs %}
-                                    <div class="col-12"><h5 class="border-bottom pb-2">{{ tab.name }}</h5></div>
-                                    {% for element in tab.elements %}
-                                        {% set field = element.field %}
-                                        <div class="col-md-12">
-                                            <label class="form-label"
-                                                   for="field_{{ field.handle }}">{{ field.label }}</label>
-                                            {% if field.instructions %}
-                                                <small
-                                                    class="text-secondary d-block mb-1">{{ field.instructions }}</small>
-                                            {% endif %}
-                                            <div class="input-group has-validation">
-                                                {{ field.render({
-                                                    id: 'field_' ~ field.handle,
-                                                    class: 'form-control'
-                                                })|raw }}
-                                            </div>
-                                            {% if errors.has('fields.' ~ field.handle) %}
-                                                <p class="text-danger">{{ errors.first('fields.' ~ field.handle) }}</p>
-                                            {% endif %}
-                                        </div>
-                                    {% endfor %}
-                                {% endfor %}
-                            {% endif %}
-
-                            <!-- Group-level Field Layout (shared fields) -->
-                            {% set groupLayout = group.fieldLayout %}
-                            {% if groupLayout and groupLayout.tabs.count >= 1 %}
-                                {% for tab in groupLayout.tabs %}
-                                    <div class="col-12"><h5 class="border-bottom pb-2">{{ tab.name }}</h5></div>
-                                    {% for element in tab.elements %}
-                                        {% set field = element.field %}
-                                        <div class="col-md-12">
-                                            <label class="form-label"
-                                                   for="field_{{ field.handle }}">{{ field.label }}</label>
-                                            {% if field.instructions %}
-                                                <small
-                                                    class="text-secondary d-block mb-1">{{ field.instructions }}</small>
-                                            {% endif %}
-                                            <div class="input-group has-validation">
-                                                {{ field.render({
-                                                    id: 'field_' ~ field.handle,
-                                                    class: 'form-control'
-                                                })|raw }}
-                                            </div>
-                                            {% if errors.has('fields.' ~ field.handle) %}
-                                                <p class="text-danger">{{ errors.first('fields.' ~ field.handle) }}</p>
-                                            {% endif %}
-                                        </div>
-                                    {% endfor %}
-                                {% endfor %}
-                            {% endif %}
-
-                            <!-- Authors -->
-                            {% if users.count >= 1 %}
-                                <div class="col-12"><h5 class="border-bottom pb-2">Authors</h5></div>
-                                <div class="col-md-12">
-                                    <label class="form-label" for="authors">Authors</label>
-                                    <select class="select-basic-multiple-four w-100 select_primary" multiple="multiple"
-                                            name="authors[]" id="authors">
-                                        {% for user in users %}
-                                            <option value="{{ user.id }}"
-                                                {% if old('authors') %}
-                                                {% for key, val in old('authors') %}
-                                                    {% if old('authors.' ~ key) == user.id %}selected{% endif %}
-                                                {% endfor %}
-                                                {% endif %}>
-                                                {{ user.name }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                    {% if errors.has('authors') %}
-                                        <p class="text-danger">{{ errors.first('authors') }}</p>
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-
-                            <!-- Categories -->
-                            {% if group.categoryGroups.count >= 1 %}
-                                <div class="col-12"><h5 class="border-bottom pb-2">Categories</h5></div>
-                                {% for catGroup in group.categoryGroups %}
-                                    {% if catGroup.categories.count >= 1 %}
-                                        <div class="col-md-12">
-                                            <label class="form-label">{{ catGroup.name }}</label>
-                                            {% for category in catGroup.categories %}
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox"
-                                                           name="categories[]" value="{{ category.id }}"
-                                                           id="cat_{{ category.id }}"
-                                                        {% if old('categories') %}
-                                                        {% for key, val in old('categories') %}
-                                                            {% if old('categories.' ~ key) == category.id %}checked{% endif %}
-                                                        {% endfor %}
-                                                        {% endif %}>
-                                                    <label class="form-check-label" for="cat_{{ category.id }}">
-                                                        {{ category.name }}
-                                                    </label>
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endif %}
-
-                            <div class="col-12">
-                                <button class="btn btn-primary float-end" type="submit">Create Entry</button>
-                            </div>
-                        </form>
-                    </div>
+                <!-- Tab footer: prev/next navigation -->
+                <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-5 py-3">
+                    <button type="button" id="tab-prev"
+                            class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                        Previous
+                    </button>
+                    <span id="tab-position" class="text-xs text-slate-400">1 / 4</span>
+                    <button type="button" id="tab-next"
+                            class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40">
+                        Next
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </button>
                 </div>
 
+            </div><!-- /tabbed card -->
+
+            <!-- ── Right: persistent publishing panel ──────────── -->
+            <div class="flex flex-col gap-4">
+
+                <!-- Publish settings -->
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">Publishing</h5>
+                    </div>
+                    <div class="space-y-4 px-5 py-5">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status">Status</label>
+                            <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                    id="status" name="status">
+                                <option value="draft" selected>Draft</option>
+                                <option value="published">Published</option>
+                                <option value="scheduled">Scheduled</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="published_at">Publish Date</label>
+                            <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                   id="published_at" name="published_at" type="datetime-local">
+                            <p class="mt-1 text-xs text-slate-400">Leave blank to save as draft.</p>
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="entry_type">Entry Type</label>
+                            <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                    id="entry_type" name="entry_type">
+                                <option>Standard Article</option>
+                                <option>Feature Story</option>
+                                <option>Press Release</option>
+                                <option>Opinion Piece</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="space-y-2 border-t border-slate-100 px-5 py-4">
+                        <button class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                                type="submit">
+                            Save Article
+                        </button>
+                        <button type="button"
+                                class="w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-50">
+                            Save as Draft
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Unsaved changes notice (hidden by default) -->
+                <div id="unsaved-notice"
+                     class="hidden rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                    <div class="flex items-start gap-2.5">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                        <p class="text-xs text-amber-800">You have unsaved changes. Remember to save before leaving.</p>
+                    </div>
+                </div>
+
+                <!-- Featured image -->
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">Featured Image</h5>
+                    </div>
+                    <div class="px-5 py-4">
+                        <label class="block cursor-pointer rounded-lg border-2 border-dashed border-slate-300 p-6 text-center hover:border-emerald-400 hover:bg-emerald-50/40 transition-colors" for="featured_image">
+                            <svg class="mx-auto h-8 w-8 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <p class="mt-2 text-xs font-medium text-slate-500">Click to upload</p>
+                            <p class="mt-0.5 text-xs text-slate-400">PNG, JPG, WebP up to 10 MB</p>
+                            <input id="featured_image" name="featured_image" type="file" accept="image/*" class="sr-only">
+                        </label>
+                    </div>
+                </div>
+
             </div>
-        </div>
+            <!-- /right -->
+
+        </form>
+
     </div>
-</main>
-{{ include('admin._inc._footer') }}
+    <!-- /form content -->
+{% endblock %}
