@@ -35,6 +35,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::resource('users', User::class);
     Route::get('users/{id}/tokens/create', [UserTokens::class, 'create'])->name('users.token.create');
     Route::post('users/{id}/tokens', [UserTokens::class, 'store'])->name('users.token.store');
+    Route::get('users/{id}/tokens', [UserTokens::class, 'index'])->name('users.token.index');
     Route::get('users/{id}/tokens/{token_id}/confirm', [UserTokens::class, 'confirm'])->name('users.token.confirm');
     Route::delete('users/{id}/tokens/{token_id}', [UserTokens::class, 'destroy'])->name('users.token.destroy');
     Route::get('users/{id}/tokens/{token_id}/edit', [UserTokens::class, 'edit'])->name('users.token.edit');

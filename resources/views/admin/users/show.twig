@@ -1,188 +1,108 @@
-{{ include('admin._inc._header', {title: 'View User'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb start -->
-        <div class="row m-1">
-            <div class="col-12">
-                <h5>View User</h5>
-                <div class="col-6">
-                    <ul class="app-line-breadcrumbs mb-3">
-                        <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                                <span>
-                                    <i class="ph-duotone ph-table f-s-16"></i> Dashboard
-                                </span>
-                            </a>
-                        </li>
-                        <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('users.index') }}">Users</a>
-                        </li>
-                        <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('users.show', user) }}">{{ user.name }}</a>
-                        </li>
-                    </ul>
+{% extends 'admin._inc._layout' %}
+
+{% set page_title = 'View User' %}
+{% set page_heading = 'View User' %}
+{% set active_nav = 'members' %}
+{% set active_user_section = 'users' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">Dashboard</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <a class="hover:text-slate-800" href="{{ route('users.index') }}">Users</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-slate-800">{{ user.name }}</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.users._sidebar', {'user': user}) }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex items-center gap-4">
+            <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-lg font-semibold text-white">JS</div>
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{{ user.name }}</h1>
+                <p class="mt-1 text-sm text-slate-500">{{ user.email }}</p>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                    {% for role in user.roles %}
+                        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">{{ role.name }}</span>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-        <!-- Breadcrumb end -->
-        {{ include('admin._inc._message') }}
-
-        <!-- Action bar -->
-        <div class="row mb-3">
-            <div class="col-12 d-flex gap-2 justify-content-end">
-                <a href="{{ route('users.edit', user) }}" class="btn btn-primary">
-                    <i class="ti ti-edit me-1"></i> Edit User
-                </a>
-                <a href="{{ route('users.confirm', user) }}" class="btn btn-danger">
-                    <i class="ti ti-trash me-1"></i> Delete User
-                </a>
-            </div>
+        <div class="flex flex-wrap items-center gap-2 self-start">
+            <a href="{{ route('users.edit', user) }}" class="rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">Edit User</a>
+            <a href="{{ route('users.confirm', user) }}" class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-100">Delete</a>
         </div>
-
-        <!-- Profile card start -->
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Profile</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <p class="text-muted f-s-12 mb-1">Name</p>
-                            <p class="f-w-500">{{ user.name }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="text-muted f-s-12 mb-1">Email</p>
-                            <p class="f-w-500">
-                                <a href="mailto:{{ user.email }}">{{ user.email }}</a>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="text-muted f-s-12 mb-1">Member Since</p>
-                            <p class="f-w-500">{{ user.created_at.format('F j, Y') }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="text-muted f-s-12 mb-1">Last Updated</p>
-                            <p class="f-w-500">{{ user.updated_at.format('F j, Y') }}</p>
-                        </div>
-                        <div class="col-md-12">
-                            <p class="text-muted f-s-12 mb-1">Roles</p>
-                            <div class="d-flex flex-wrap gap-1">
-                                {% if user.roles.count >= 1 %}
-                                    {% for role in user.roles %}
-                                        <span class="badge bg-primary-light text-primary">{{ role.name }}</span>
-                                    {% endfor %}
-                                {% else %}
-                                    <span class="text-secondary">No roles assigned</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Profile card end -->
-
-        <!-- Custom fields start -->
-        {% if field_values is not empty %}
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Custom Fields</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            {% for handle, value in field_values %}
-                                <div class="col-md-6">
-                                    <p class="text-muted f-s-12 mb-1">{{ handle }}</p>
-                                    <p class="f-w-500">{{ value is not empty ? value : '—' }}</p>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-        <!-- Custom fields end -->
-
-        <!-- Access tokens start -->
-        {% if user.can('api') %}
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h5 class="mb-0">Access Tokens</h5>
-                            </div>
-                            <div class="col-auto">
-                                <a href="{{ route('users.token.create', user) }}" class="btn btn-primary btn-sm">
-                                    <i class="ti ti-plus me-1"></i> Create Token
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table align-middle mb-0">
-                                <thead>
-                                <tr>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Expires</th>
-                                    <th scope="col">Last Used</th>
-                                    <th scope="col">Created</th>
-                                    <th scope="col"></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% if user.tokens.count >= 1 %}
-                                    {% for token in user.tokens %}
-                                        <tr>
-                                            <td class="f-w-500">{{ token.name }}</td>
-                                            <td>
-                                                {% if token.expires_at %}
-                                                    {{ token.expires_at.format('F j, Y') }}
-                                                {% else %}
-                                                    <span class="text-secondary">Never</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if token.last_used_at %}
-                                                    {{ token.last_used_at.format('F j, Y') }}
-                                                {% else %}
-                                                    <span class="text-secondary">Never</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ token.created_at.format('F j, Y') }}</td>
-                                            <td class="text-end">
-                                                <a class="btn btn-success icon-btn b-r-4"
-                                                   href="{{ route('users.token.edit', {id: user.id, token_id: token.id}) }}"
-                                                   title="Edit token">
-                                                    <i class="ti ti-edit"></i>
-                                                </a>
-                                                <a class="btn btn-danger icon-btn b-r-4"
-                                                   href="{{ route('users.token.confirm', {id: user.id, token_id: token.id}) }}"
-                                                   title="Revoke token">
-                                                    <i class="ti ti-trash"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                {% else %}
-                                    <tr>
-                                        <td colspan="5" class="text-center text-secondary py-3">
-                                            No tokens created.
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-        <!-- Access tokens end -->
-
     </div>
-</main>
-{{ include('admin._inc._footer') }}
+    <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
+        <div class="flex flex-col gap-5">
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3">
+                    <h5 class="text-sm font-semibold text-slate-700">Basic Details</h5>
+                </div>
+                <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                    <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                        <dt class="text-slate-500">Name</dt>
+                        <dd class="font-medium text-slate-900">{{ user.name }}</dd>
+                    </div>
+                    <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                        <dt class="text-slate-500">Email</dt>
+                        <dd class="text-slate-700">{{ user.email }}</dd>
+                    </div>
+                </dl>
+            </div>
+
+            {% if schema.fieldLayout %}
+                {% for tab in schema.fieldLayout.tabs %}
+                    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <dl class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                        <div class="border-b border-slate-200 px-5 py-3">
+                            <h5 class="text-sm font-semibold text-slate-700">{{ tab.name }}</h5>
+                        </div>
+                        <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+
+                        {% for element in tab.elements %}
+                            {% set field = element.field %}
+                            <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                                <dt class="text-slate-500">{{ field.label }}</dt>
+                                <dd class="text-slate-700">{{ field_values[field.handle]|raw }}</dd>
+                            </div>
+                        {% endfor %}
+                        </dl>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="flex flex-col gap-5">
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3">
+                    <h5 class="text-sm font-semibold text-slate-700">Metadata</h5>
+                </div>
+                <dl class="divide-y divide-slate-100 px-5 py-2 text-xs">
+                    <div class="flex items-center justify-between py-2.5">
+                        <dt class="text-slate-500">ID</dt>
+                        <dd class="font-medium text-slate-700">{{ user.id }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <dt class="text-slate-500">Created</dt>
+                        <dd class="text-slate-700">Jan 12, 2023</dd>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <dt class="text-slate-500">Last login</dt>
+                        <dd class="text-slate-700">2 hours ago</dd>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <dt class="text-slate-500">2FA</dt>
+                        <dd class="text-emerald-700">Enabled</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+{% endblock %}
