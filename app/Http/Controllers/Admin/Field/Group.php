@@ -17,7 +17,7 @@ class Group extends Controller
      */
     public function index()
     {
-        $groups = FieldGroup::with('fields')->paginate(20);
+        $groups = FieldGroup::with('fields')->paginate($this->total_per_page);
         return $this->view('fields.groups.index', ['groups' => $groups]);
     }
 
@@ -28,7 +28,7 @@ class Group extends Controller
     {
         $creator = app(CreateNewFieldGroup::class);
         $group = $creator->create($request->validated());
-        return redirect()->route('fields.groups.show', $group->id)->with('status', trans('field.group.created'));
+        return redirect()->route('fields.groups.show', $group->id)->with('success', trans('field.group.created'));
     }
 
     /**
