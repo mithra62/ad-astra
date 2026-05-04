@@ -125,6 +125,6 @@ class Token extends AdminController
             abort(404);
         }
 
-        return $this->view('users.tokens.delete', ['user' => $user, 'token' => $token_id]);
+        return $this->view('users.tokens.delete', ['user' => $user, 'token_id' => $token_id, 'token' => $token]);
     }
 }
