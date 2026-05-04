@@ -120,7 +120,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('statuses/{group_id}/create', [Status::class, 'create'])->name('statuses.create');
     Route::post('statuses/{group_id}/create', [Status::class, 'store'])->name('statuses.store');
     Route::get('statuses/{id}/confirm', [Status::class, 'confirm'])->name('statuses.confirm');
-    Route::resource('statuses', Status::class)->except(['index', 'create', 'store']);
+    Route::resource('statuses', Status::class)->except(['index', 'create', 'store', 'show']);
 
     //entries
     Route::get('entries/groups', [EntryGroup::class, 'index'])->name('entries.groups');

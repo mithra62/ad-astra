@@ -21,3 +21,4 @@
 21. Look into a user status system where users can be "banned"
 22. Implement a user activity log
 23. Implement a notification system for user actions
+24. Ensure deleting the default status isn't possible
