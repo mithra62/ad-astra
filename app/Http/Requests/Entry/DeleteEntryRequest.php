@@ -23,7 +23,6 @@ class DeleteEntryRequest extends FormRequest
     {
         return [
             'confirm_removal.required' => 'You must confirm removal.',
-            'confirm_removal.accepted' => 'You must confirm removal.',
         ];
     }
 }
