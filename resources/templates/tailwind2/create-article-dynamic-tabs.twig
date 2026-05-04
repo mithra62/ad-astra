@@ -1,8 +1,7 @@
-{% extends 'admin._inc._layout' %}
-{% import 'admin._inc._form-fields' as forms %}
+{% extends 'templates::tailwind2.layout' %}
 
-{% set page_title = 'Create Entry' %}
-{% set page_heading = 'Create Entry - ' ~ entryType.name %}
+{% set page_title = 'Create Article With Dynamic Tabs' %}
+{% set page_heading = 'Create Article' %}
 {% set active_nav = 'articles' %}
 {% set has_secondary_sidebar = true %}
 
@@ -12,89 +11,87 @@
         label: 'Basics',
         description: 'Core entry details and publishing identity.',
         fields: [
-        { id: 'dynamic_title', label: 'Title', name: 'title', type: 'text', placeholder: 'Enter article title' },
-        { id: 'dynamic_handle', label: 'Slug', name: 'handle', type: 'text', placeholder: 'auto-generated-from-title' }
-    ]
+            { id: 'dynamic_title', label: 'Title', name: 'title', type: 'text', placeholder: 'Enter article title' },
+            { id: 'dynamic_handle', label: 'Slug', name: 'handle', type: 'text', placeholder: 'auto-generated-from-title' }
+        ]
     },
     {
         handle: 'story',
         label: 'Story',
         description: 'Editorial content fields for this entry.',
         fields: [
-        { id: 'dynamic_summary', label: 'Summary', name: 'summary', type: 'textarea', placeholder: 'Short listing summary' },
-        { id: 'dynamic_body', label: 'Body', name: 'body', type: 'textarea', placeholder: 'Write the article body' }
-    ]
+            { id: 'dynamic_summary', label: 'Summary', name: 'summary', type: 'textarea', placeholder: 'Short listing summary' },
+            { id: 'dynamic_body', label: 'Body', name: 'body', type: 'textarea', placeholder: 'Write the article body' }
+        ]
     },
     {
         handle: 'media',
         label: 'Media',
         description: 'Media metadata and featured asset fields.',
         fields: [
-        { id: 'dynamic_featured_image', label: 'Featured image URL', name: 'featured_image', type: 'url', placeholder: 'https://example.com/image.jpg' },
-        { id: 'dynamic_caption', label: 'Caption', name: 'caption', type: 'text', placeholder: 'Image caption' }
-    ]
+            { id: 'dynamic_featured_image', label: 'Featured image URL', name: 'featured_image', type: 'url', placeholder: 'https://example.com/image.jpg' },
+            { id: 'dynamic_caption', label: 'Caption', name: 'caption', type: 'text', placeholder: 'Image caption' }
+        ]
     },
     {
         handle: 'taxonomy',
         label: 'Taxonomy',
         description: 'Categorization values for discovery.',
         fields: [
-        { id: 'dynamic_primary_category', label: 'Primary category', name: 'primary_category', type: 'text', placeholder: 'News' },
-        { id: 'dynamic_tags', label: 'Tags', name: 'tags', type: 'text', placeholder: 'release, product, guide' }
-    ]
+            { id: 'dynamic_primary_category', label: 'Primary category', name: 'primary_category', type: 'text', placeholder: 'News' },
+            { id: 'dynamic_tags', label: 'Tags', name: 'tags', type: 'text', placeholder: 'release, product, guide' }
+        ]
     },
     {
         handle: 'seo',
         label: 'SEO',
         description: 'Search and sharing metadata.',
         fields: [
-        { id: 'dynamic_meta_title', label: 'Meta title', name: 'meta_title', type: 'text', placeholder: 'Defaults to article title' },
-        { id: 'dynamic_meta_description', label: 'Meta description', name: 'meta_description', type: 'textarea', placeholder: 'Description shown in search results' }
-    ]
+            { id: 'dynamic_meta_title', label: 'Meta title', name: 'meta_title', type: 'text', placeholder: 'Defaults to article title' },
+            { id: 'dynamic_meta_description', label: 'Meta description', name: 'meta_description', type: 'textarea', placeholder: 'Description shown in search results' }
+        ]
     },
     {
         handle: 'review',
         label: 'Review',
         description: 'Final editorial checks before saving.',
         fields: [
-        { id: 'dynamic_review_notes', label: 'Review notes', name: 'review_notes', type: 'textarea', placeholder: 'Internal notes for editors' },
-        { id: 'dynamic_ready', label: 'Ready for review', name: 'ready_for_review', type: 'checkbox', placeholder: '' }
-    ]
+            { id: 'dynamic_review_notes', label: 'Review notes', name: 'review_notes', type: 'textarea', placeholder: 'Internal notes for editors' },
+            { id: 'dynamic_ready', label: 'Ready for review', name: 'ready_for_review', type: 'checkbox', placeholder: '' }
+        ]
     }
 ] %}
 
 {% block breadcrumbs %}
     <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="#">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard
-        </a>
+        <a class="hover:text-slate-800" href="home.twig">Dashboard</a>
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('entries.groups') }}">
-            Entry Groups
-        </a>
+        <a class="hover:text-slate-800" href="index.twig">Articles</a>
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('entries.groups.show', group) }}">{{ group.name }}</a>
-
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-slate-800">Create Entry</span>
+        <span class="text-slate-800">Dynamic Tabs</span>
     </nav>
 {% endblock %}
 
 {% block secondary_sidebar %}
-    {{ include('admin.entries._sidebar', {active: group.id}) }}
+    <aside class="hidden h-fit lg:block">
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-4 py-3">
+                <h5 class="text-sm font-semibold text-slate-700">Articles</h5>
+            </div>
+            <nav class="p-2">
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="index.twig">All Articles</a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="#">Dynamic Tabs</a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="create-article2.twig">Original Article Form</a>
+            </nav>
+        </div>
+    </aside>
 {% endblock %}
 
 {% block content %}
-    <!-- ── Form content ─────────────────────────────────────────── -->
     <div class="flex min-w-0 flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -111,46 +108,27 @@
             <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm" data-tabs>
                 <div class="border-b border-slate-200 bg-slate-50">
                     <div class="flex overflow-x-auto" role="tablist" aria-label="Article field layout tabs">
-                        {% set layout = entryType.fieldLayout %}
-                        {% if layout and layout.tabs.count >= 1 %}
-                            {% for tab in layout.tabs %}
-                                <button type="button"
-                                        id="dynamic-tab-{{ tab.name }}"
-                                        role="tab"
-                                        aria-controls="dynamic-panel-{{ tab.name }}"
-                                        aria-selected="{{ loop.first ? 'true' : 'false' }}"
-                                        data-tab-target="{{ tab.name }}"
-                                        class="inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-2.5 text-sm transition-colors {{ loop.first ? 'border-emerald-600 bg-white font-semibold text-emerald-700' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' }}">
-                                    {{ tab.name }}
-                                </button>
-                            {% endfor %}
-                        {% endif %}
-
-                        <!-- Group-level Field Layout (shared fields) -->
-                        {% set groupLayout = group.fieldLayout %}
-                        {% if groupLayout and groupLayout.tabs.count >= 1 %}
-                            {% for tab in groupLayout.tabs %}
-                                <button type="button"
-                                        id="dynamic-tab-{{ tab.name }}"
-                                        role="tab"
-                                        aria-controls="dynamic-panel-{{ tab.name }}"
-                                        aria-selected="{{ loop.first ? 'true' : 'false' }}"
-                                        data-tab-target="{{ tab.name }}"
-                                        class="inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-2.5 text-sm transition-colors {{ loop.first ? 'border-emerald-600 bg-white font-semibold text-emerald-700' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' }}">
-                                    {{ tab.name }}
-                                </button>
-                            {% endfor %}
-                        {% endif %}
+                        {% for tab in form_tabs %}
+                            <button type="button"
+                                    id="dynamic-tab-{{ tab.handle }}"
+                                    role="tab"
+                                    aria-controls="dynamic-panel-{{ tab.handle }}"
+                                    aria-selected="{{ loop.first ? 'true' : 'false' }}"
+                                    data-tab-target="{{ tab.handle }}"
+                                    class="inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-2.5 text-sm transition-colors {{ loop.first ? 'border-emerald-600 bg-white font-semibold text-emerald-700' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' }}">
+                                {{ tab.label }}
+                            </button>
+                        {% endfor %}
                     </div>
                 </div>
 
                 {% for tab in form_tabs %}
-                    <section id="dynamic-panel-{{ tab.name }}"
+                    <section id="dynamic-panel-{{ tab.handle }}"
                              role="tabpanel"
-                             aria-labelledby="dynamic-tab-{{ tab.name }}"
-                             data-tab-panel="{{ tab.name }}"
+                             aria-labelledby="dynamic-tab-{{ tab.handle }}"
+                             data-tab-panel="{{ tab.handle }}"
                              class="space-y-5 px-5 py-5"
-                        {{ not loop.first ? 'hidden' : '' }}>
+                             {{ not loop.first ? 'hidden' : '' }}>
                         <div>
                             <h2 class="text-base font-semibold text-slate-900">{{ tab.label }}</h2>
                             <p class="mt-1 text-sm text-slate-500">{{ tab.description }}</p>
@@ -222,5 +200,4 @@
             </div>
         </form>
     </div>
-    <!-- /form content -->
 {% endblock %}
