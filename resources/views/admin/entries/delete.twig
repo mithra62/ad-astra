@@ -1,8 +1,9 @@
 {% extends 'admin._inc._layout' %}
 
-{% set page_title = 'Delete Article' %}
-{% set page_heading = 'Delete Article' %}
-{% set active_nav = 'articles' %}
+{% set page_title = 'Delete Entry' %}
+{% set page_heading = 'Delete Entry' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'entries' %}
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
@@ -27,7 +28,7 @@
         </div>
         <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto" href="index.twig">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-            Back to Articles
+            Back to Entries
         </a>
     </div>
 
