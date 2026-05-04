@@ -13,11 +13,10 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravolt\Avatar\Avatar;
 use Spatie\Permission\Traits\HasRoles;
-use Spatie\Tags\HasTags;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens, HasRoles, HasTags, Fieldable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, Fieldable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.

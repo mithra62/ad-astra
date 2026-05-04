@@ -16,12 +16,14 @@ class Token extends AdminController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($id)
     {
-        echo __FILE__ . ':' . __LINE__;
-        exit;
-        $users = Users::paginate(20);
-        return view('users.index', ['users' => $users]);
+        $user = Users::find($id);
+        if (!$user instanceof UserModel) {
+            return redirect()->route('users.index')->with('failure', 'user.not_found');
+        }
+
+        return $this->view('users.tokens.index', ['user' => $user]);
     }
 
     public function store(StoreUserTokenRequest $request, string $id)

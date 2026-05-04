@@ -30,7 +30,7 @@ class UserService
      */
     public function find(int $id): ?User
     {
-        return User::find($id);
+        return User::with('tokens')->find($id);
     }
 
     /**
