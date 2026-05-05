@@ -19,6 +19,10 @@ class StoreCategoryGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'field_groups' => [
+                'nullable',
+                'array',
+            ],
             'name' => [
                 'required',
                 'string',
