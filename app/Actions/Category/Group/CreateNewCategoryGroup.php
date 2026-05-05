@@ -10,7 +10,7 @@ class CreateNewCategoryGroup extends AbstractAction
 {
     public function create(array $input): Group
     {
-        $layout = FieldLayout::create(['name' => $input['name'] . ' Layout cat']);
+        $layout = FieldLayout::create(['name' => $input['name'] . ' Layout cat', 'handle' => $input['handle'] . '-layout-cat']);
         $input['field_layout_id'] = $layout->id;
         $cat_group = Group::create($input);
         if (!empty($input['field_groups'])) {

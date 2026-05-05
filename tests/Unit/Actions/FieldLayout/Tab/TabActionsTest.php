@@ -19,7 +19,7 @@ class TabActionsTest extends TestCase
         $layout = FieldLayout::factory()->create();
         $action = app(CreateNewTab::class);
 
-        $tab = $action->create($layout, ['name' => 'My Tab', 'sort_order' => 2]);
+        $tab = $action->create($layout, ['name' => 'My Tab', 'sort_order' => 2, 'handle' => 'my-tab']);
 
         $this->assertInstanceOf(Tab::class, $tab);
         $this->assertDatabaseHas('field_layout_tabs', [
@@ -34,7 +34,7 @@ class TabActionsTest extends TestCase
         $layout = FieldLayout::factory()->create();
         $action = app(CreateNewTab::class);
 
-        $tab = $action->create($layout, ['name' => 'My Tab']);
+        $tab = $action->create($layout, ['name' => 'My Tab', 'handle' => 'my-tab']);
 
         $this->assertEquals(0, $tab->sort_order);
     }
@@ -44,7 +44,7 @@ class TabActionsTest extends TestCase
         $layout = FieldLayout::factory()->create();
         $action = app(CreateNewTab::class);
 
-        $tab = $action->create($layout, ['name' => 'My Tab']);
+        $tab = $action->create($layout, ['name' => 'My Tab', 'handle' => 'my-tab']);
 
         $this->assertEquals($layout->id, $tab->field_layout_id);
     }

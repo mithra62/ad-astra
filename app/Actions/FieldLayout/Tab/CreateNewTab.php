@@ -12,6 +12,7 @@ class CreateNewTab extends AbstractAction
     {
         return $layout->tabs()->create([
             'name' => $input['name'],
+            'handle' => $input['handle'],
             'sort_order' => $input['sort_order'] ?? 0,
         ]);
     }

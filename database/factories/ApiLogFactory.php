@@ -25,7 +25,6 @@ class ApiLogFactory extends Factory
             'method' => $this->faker->randomElement(['GET', 'POST', 'PUT', 'DELETE', 'PATCH']),
             'request_payload' => json_encode(['foo' => 'bar']),
             'request_headers' => json_encode(['Content-Type' => 'application/json']),
-            'response_payload' => json_encode(['success' => true]),
             'response_headers' => json_encode(['Content-Type' => 'application/json']),
             'response_status_code' => 200,
             'user_id' => User::factory(),

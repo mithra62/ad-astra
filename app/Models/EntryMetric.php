@@ -20,7 +20,7 @@ class EntryMetric extends Model
     ];
 
     protected $casts = [
-        'value'         => 'integer',
+        'value' => 'integer',
         'recorded_date' => 'date',
     ];
 

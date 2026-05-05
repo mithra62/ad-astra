@@ -41,7 +41,6 @@ class LogRequestResponseTest extends TestCase
 
         $requestPayload = json_decode($log->request_payload, true);
         $requestHeaders = json_decode($log->request_headers, true);
-        $responsePayload = json_decode($log->response_payload, true);
         $responseHeaders = json_decode($log->response_headers, true);
 
         $this->assertSame('[REDACTED]', $requestPayload['password']);
@@ -49,8 +48,6 @@ class LogRequestResponseTest extends TestCase
         $this->assertSame('user@example.com', $requestPayload['email']);
         $this->assertSame('[REDACTED]', $requestHeaders['authorization']);
         $this->assertSame('trace-123', $requestHeaders['x-trace-id'][0]);
-        $this->assertSame('[REDACTED]', $responsePayload['body']['access_token']);
-        $this->assertSame('ok', $responsePayload['body']['message']);
         $this->assertSame('[REDACTED]', $responseHeaders['set-cookie']);
         $this->assertSame(201, $log->response_status_code);
         $this->assertSame($user->id, $log->user_id);
@@ -76,6 +73,5 @@ class LogRequestResponseTest extends TestCase
         $log = ApiLog::query()->sole();
 
         $this->assertStringContainsString('[truncated]', $log->request_payload);
-        $this->assertStringContainsString('[truncated]', $log->response_payload);
     }
 }

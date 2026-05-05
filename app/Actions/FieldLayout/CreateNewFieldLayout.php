@@ -11,6 +11,7 @@ class CreateNewFieldLayout extends AbstractAction
     {
         return FieldLayout::create([
             'name' => $input['name'],
+            'handle' => $input['handle'],
         ]);
     }
 }

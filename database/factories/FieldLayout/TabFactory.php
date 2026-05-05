@@ -20,9 +20,9 @@ class TabFactory extends Factory
 
         return [
             'field_layout_id' => FieldLayout::factory(),
-            'name'            => $name,
-            'handle'          => Str::slug($name),
-            'sort_order'      => fake()->numberBetween(0, 100),
+            'name' => $name,
+            'handle' => Str::slug($name),
+            'sort_order' => fake()->numberBetween(0, 100),
         ];
     }
 }

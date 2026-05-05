@@ -27,11 +27,6 @@ return new class extends Migration {
             $table->timestamps();
             $table->unique(['name', 'handle']);
         });
-
-        Schema::table('media', function (Blueprint $table) {
-            $table->foreignId('library_id')->nullable()->after('collection_name')
-                ->constrained('media_libraries')->nullOnDelete();
-        });
     }
 
     /**

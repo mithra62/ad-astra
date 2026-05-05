@@ -21,10 +21,19 @@ class ApiLog extends Model
         'method',
         'request_payload',
         'request_headers',
-        'response_payload',
         'response_headers',
         'response_status_code',
         'user_id',
+    ];
+
+    /**
+     * @var string[]
+     */
+    protected $casts = [
+        'request_payload' => 'array',
+        'request_headers' => 'array',
+        'response_headers' => 'array',
+        'response_status_code' => 'integer',
     ];
 
     /**

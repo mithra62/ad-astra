@@ -22,7 +22,6 @@ class ApiLogTest extends TestCase
                 'method',
                 'request_payload',
                 'request_headers',
-                'response_payload',
                 'response_headers',
                 'response_status_code',
                 'user_id',

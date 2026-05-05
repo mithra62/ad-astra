@@ -16,7 +16,7 @@ class FieldLayoutActionsTest extends TestCase
     public function test_create_new_field_layout_creates_and_returns_layout(): void
     {
         $action = app(CreateNewFieldLayout::class);
-        $layout = $action->create(['name' => 'My Layout']);
+        $layout = $action->create(['name' => 'My Layout', 'handle' => 'my-layout']);
 
         $this->assertInstanceOf(FieldLayout::class, $layout);
         $this->assertDatabaseHas('field_layouts', ['name' => 'My Layout']);
@@ -24,7 +24,7 @@ class FieldLayoutActionsTest extends TestCase
 
     public function test_edit_field_layout_updates_name(): void
     {
-        $layout = FieldLayout::factory()->create(['name' => 'Old Name']);
+        $layout = FieldLayout::factory()->create(['name' => 'Old Name', 'handle' => 'old-name']);
         $action = app(EditFieldLayout::class);
 
         $result = $action->edit($layout, ['name' => 'New Name']);
@@ -35,7 +35,7 @@ class FieldLayoutActionsTest extends TestCase
 
     public function test_edit_field_layout_returns_fresh_model(): void
     {
-        $layout = FieldLayout::factory()->create(['name' => 'Old Name']);
+        $layout = FieldLayout::factory()->create(['name' => 'Old Name', 'handle' => 'old-name']);
         $action = app(EditFieldLayout::class);
 
         $result = $action->edit($layout, ['name' => 'New Name']);

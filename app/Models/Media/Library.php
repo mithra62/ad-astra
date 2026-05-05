@@ -7,13 +7,9 @@ use App\Models\Category\Group;
 use App\Models\Field\Group as FieldGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Library extends Model implements HasMedia
+class Library extends Model
 {
-    use InteractsWithMedia;
-
     protected $fillable = [
         'name',
         'handle',
