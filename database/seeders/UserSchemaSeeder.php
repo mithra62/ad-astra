@@ -13,6 +13,7 @@ use App\Models\FieldLayout\TabElement;
 use App\Models\UserSchema;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class UserSchemaSeeder extends Seeder
 {
@@ -137,14 +138,15 @@ class UserSchemaSeeder extends Seeder
      */
     private function buildLayout(array $tabs): FieldLayout
     {
-        $layout = FieldLayout::create(['name' => 'User Profile Layout']);
+        $layout = FieldLayout::create(['name' => 'User Profile Layout', 'handle' => 'user-profile-layout']);
         $tabOrder = 1;
 
         foreach ($tabs as $tabName => $handles) {
             $tab = Tab::create([
                 'field_layout_id' => $layout->id,
-                'name' => $tabName,
-                'sort_order' => $tabOrder++,
+                'name'            => $tabName,
+                'handle'          => Str::slug($tabName),
+                'sort_order'      => $tabOrder++,
             ]);
 
             $elementOrder = 1;

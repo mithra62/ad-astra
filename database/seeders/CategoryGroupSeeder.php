@@ -15,6 +15,7 @@ use App\Models\FieldLayout\TabElement;
 use App\Models\FieldValue;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class CategoryGroupSeeder extends Seeder
 {
@@ -87,12 +88,13 @@ class CategoryGroupSeeder extends Seeder
         // --- Field Layout ----------------------------------------------------
 
         if (!$group->field_layout_id) {
-            $layout = FieldLayout::create(['name' => 'Topics Layout']);
+            $layout = FieldLayout::create(['name' => 'Topics Layout', 'handle' => 'topics-layout']);
 
             $tab = Tab::create([
                 'field_layout_id' => $layout->id,
-                'name' => 'Details',
-                'sort_order' => 1,
+                'name'            => 'Details',
+                'handle'          => 'details',
+                'sort_order'      => 1,
             ]);
 
             foreach ([$description, $featuredLabel] as $order => $field) {
@@ -223,12 +225,13 @@ class CategoryGroupSeeder extends Seeder
         // --- Field Layout ----------------------------------------------------
 
         if (!$group->field_layout_id) {
-            $layout = FieldLayout::create(['name' => 'Product Categories Layout']);
+            $layout = FieldLayout::create(['name' => 'Product Categories Layout', 'handle' => 'product-categories-layout']);
 
             $tab = Tab::create([
                 'field_layout_id' => $layout->id,
-                'name' => 'Category Info',
-                'sort_order' => 1,
+                'name'            => 'Category Info',
+                'handle'          => 'category-info',
+                'sort_order'      => 1,
             ]);
 
             foreach ([$description, $displayName] as $order => $field) {

@@ -6,6 +6,7 @@ use App\Models\Field;
 use App\Models\FieldLayout;
 use App\Models\FieldLayout\Tab;
 use App\Models\FieldLayout\TabElement;
+use Illuminate\Support\Str;
 
 /**
  * Shared helper for seeders that build FieldLayout structures.
@@ -25,13 +26,14 @@ trait BuildsLayouts
      */
     private function createLayout(string $name, array $tabs): FieldLayout
     {
-        $layout   = FieldLayout::create(['name' => $name]);
+        $layout   = FieldLayout::create(['name' => $name, 'handle' => Str::slug($name)]);
         $tabOrder = 1;
 
         foreach ($tabs as $tabName => $fieldHandles) {
             $tab = Tab::create([
                 'field_layout_id' => $layout->id,
                 'name'            => $tabName,
+                'handle'          => Str::slug($tabName),
                 'sort_order'      => $tabOrder++,
             ]);
 
@@ -73,6 +75,7 @@ trait BuildsLayouts
         $tab = Tab::create([
             'field_layout_id' => $layoutId,
             'name'            => $tabName,
+            'handle'          => Str::slug($tabName),
             'sort_order'      => $sortOrder,
         ]);
 

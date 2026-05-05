@@ -14,7 +14,7 @@ class Tab extends Model
 
     protected $table = 'field_layout_tabs';
 
-    protected $fillable = ['field_layout_id', 'name', 'sort_order'];
+    protected $fillable = ['field_layout_id', 'name', 'handle', 'sort_order'];
 
     protected $casts = ['sort_order' => 'integer'];
 

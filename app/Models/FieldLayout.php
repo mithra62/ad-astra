@@ -12,7 +12,7 @@ class FieldLayout extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'handle'];
 
     public function tabs(): HasMany
     {

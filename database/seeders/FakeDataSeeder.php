@@ -26,7 +26,7 @@ class FakeDataSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    private const USER_COUNT = 1_000;
+    private const USER_COUNT = 1000;
     private const ENTRY_COUNT = 10_000;
 
     // Weighted role pool: ~70 % user, ~25 % admin, ~5 % super admin
@@ -351,12 +351,40 @@ class FakeDataSeeder extends Seeder
             default => fake()->numberBetween(2, 6),
         };
 
-        return [
-            'body' => fake()->paragraphs($paragraphCount, true),
-            'excerpt' => fake()->paragraph(),
-            'meta_title' => Str::limit(fake()->sentence(5, false), 55),
+        $fields = [
+            'body'             => fake()->paragraphs($paragraphCount, true),
+            'excerpt'          => fake()->paragraph(),
+            'meta_title'       => Str::limit(fake()->sentence(5, false), 55),
             'meta_description' => Str::limit(fake()->sentence(15, false), 155),
         ];
+
+        // Supply the fields required by each EntryType's validate() hook so
+        // that published entries always pass type-level validation.
+        $fields += match ($typeHandle) {
+            'product' => [
+                // ProductEntryType::validate() requires a SKU when published.
+                'sku'            => strtoupper(Str::random(4)) . '-' . fake()->numberBetween(1000, 9999),
+                'price'          => fake()->randomFloat(2, 1, 500),
+                'stock_quantity' => fake()->numberBetween(0, 200),
+            ],
+            'video' => [
+                // VideoEntryType::validate() requires platform_id OR video_url when published.
+                'video_url'      => fake()->url(),
+                'video_duration' => fake()->numberBetween(60, 7200),
+                'video_platform' => fake()->randomElement(['youtube', 'vimeo', 'other']),
+            ],
+            'job_listing' => [
+                // JobListingEntryType::validate() requires application_url OR application_email when published.
+                'application_url' => fake()->url(),
+                'department'      => fake()->randomElement([
+                    'Engineering', 'Marketing', 'Sales', 'Design', 'Operations', 'HR',
+                ]),
+                'job_location'    => fake()->city() . ', ' . fake()->stateAbbr(),
+            ],
+            default => [],
+        };
+
+        return $fields;
     }
 
     /**
