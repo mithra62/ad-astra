@@ -74,7 +74,6 @@
                         <input value="{{ old('name') }}" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
                         {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
                     </div>
-
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
                         <input class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" value="{{ old('handle') }}" >
@@ -83,7 +82,6 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Type <span class="text-red-500">*</span></label>
-
                         <select class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('field_type_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="field_type_id" name="field_type_id">
                             {% for type, name in field_types %}
                                 <option value="{{ type }}"
@@ -91,6 +89,18 @@
                             {% endfor %}
                         </select>
                         {% if errors.has('field_type_id') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_type_id') }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="meta_description">Meta Description</label>
+                        <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                  id="instructions" name="instructions" rows="3"
+                                  placeholder="A concise summary for search engines…" maxlength="160">{{ old('instructions') }}</textarea>
+                        {% if errors.has('instructions') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('instructions') }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Label</label>
+                        <input value="{{ old('label') }}" class="w-full rounded-md border {% if errors.has('label') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="label" name="label" type="text" placeholder="">
+                        {% if errors.has('label') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('label') }}</p>{% endif %}
                     </div>
                 </div>
             </div>

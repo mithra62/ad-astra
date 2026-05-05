@@ -24,6 +24,20 @@ class StoreFieldRequest extends FormRequest
                 'integer',
                 'max:255',
             ],
+            'label' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'instructions' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'hidden' => [
+                'nullable',
+                'boolean',
+            ],
             'name' => [
                 'required',
                 'string',

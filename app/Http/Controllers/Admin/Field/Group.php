@@ -69,7 +69,7 @@ class Group extends Controller
         if ($group instanceof FieldGroup) {
             $editor = app(EditFieldGroup::class);
             $editor->edit($group, $request->validated());
-            return redirect()->route('fields.groups')->with('success', trans('field.group.updated'));
+            return redirect()->route('fields.groups.show', $group)->with('success', trans('field.group.updated'));
         }
 
         abort(404);

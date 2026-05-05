@@ -25,7 +25,7 @@
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="">
+        <a class="hover:text-slate-800" href="{{ route('fields.groups.show', group) }}">
             {{ group.name }}
         </a>
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -83,6 +83,13 @@
                         <input value="{{ old('handle', group.handle) }}" class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" >
                         <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
                         {% if errors.has('handle') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="description">Description</label>
+                        <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                  id="description" name="description" rows="3"
+                                  placeholder="A concise summary for search engines…" maxlength="160">{{ old('description', group.description) }}</textarea>
+                        {% if errors.has('description') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('description') }}</p>{% endif %}
                     </div>
                 </div>
             </div>

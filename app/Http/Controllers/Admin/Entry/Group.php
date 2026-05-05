@@ -62,7 +62,7 @@ class Group extends Controller
 
         $allGroups = EntryGroup::with('entries')->ordered()->get();
         $entries = $group->entries()
-            ->with(['entryType', 'creator', 'authors', 'status', 'entryGroup'])
+            ->with(['authors', 'status', 'entryGroup'])
             ->latest()
             ->paginate(20);
 

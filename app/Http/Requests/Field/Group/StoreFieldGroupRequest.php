@@ -31,6 +31,10 @@ class StoreFieldGroupRequest extends FormRequest
                 'max:255',
                 Rule::unique('field_groups', 'handle')->ignore($this->data('id')),
             ],
+            'description' => [
+                'nullable',
+                'string',
+            ],
         ];
     }
 }
