@@ -15,6 +15,7 @@ return new class extends Migration {
                 ->cascadeOnDelete();
 
             $table->string('name');
+            $table->string('handle');
             $table->unsignedInteger('sort_order')->default(0);
 
             $table->timestamps();

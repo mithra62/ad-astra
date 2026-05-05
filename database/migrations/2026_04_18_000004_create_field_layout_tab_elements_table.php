@@ -19,6 +19,12 @@ return new class extends Migration {
                 ->cascadeOnDelete();
 
             $table->boolean('required')->default(false);
+            $table->boolean('hidden')->default(false);
+            $table->boolean('readonly')->default(false);
+            $table->boolean('disabled')->default(false);
+            $table->string('schema_property')->nullable();
+            $table->string('label')->nullable();
+            $table->string('instructions')->nullable();
             $table->unsignedInteger('sort_order')->default(0);
 
             $table->timestamps();

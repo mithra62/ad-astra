@@ -29,6 +29,7 @@ return new class extends Migration {
 
             $table->string('title');
             $table->string('handle');
+            $table->string('schema_type')->nullable();
             $table->string('status_handle')->nullable()->index();
             $table->boolean('status_is_public')->default(false)->index();
             $table->timestamp('published_at')->nullable();

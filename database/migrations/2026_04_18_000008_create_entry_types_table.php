@@ -21,6 +21,7 @@ return new class extends Migration {
 
             $table->string('name');
             $table->string('handle');
+            $table->string('default_schema_type')->nullable();
             $table->string('default_template')->nullable();
 
             $table->boolean('has_entry_tree')->default(false);
