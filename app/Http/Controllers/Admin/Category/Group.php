@@ -18,7 +18,7 @@ class Group extends Controller
      */
     public function index()
     {
-        $groups = CategoryGroup::with('categories')->paginate(20);
+        $groups = CategoryGroup::with('categories')->paginate($this->total_per_page);
         return $this->view('categories.groups.index', ['groups' => $groups]);
     }
 
@@ -55,7 +55,7 @@ class Group extends Controller
         }
 
         $groups = CategoryGroup::all();
-        $categories = $group->categories()->with('children')->whereNull('parent_id')->get();
+        $categories = $group->categories()->with('children')->whereNull('parent_id')->paginate($this->total_per_page);
         $data = [
             'group' => $group,
             'groups' => $groups,

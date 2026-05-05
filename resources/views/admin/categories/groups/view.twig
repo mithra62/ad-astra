@@ -1,114 +1,148 @@
-{{ include('admin._inc._header', {title: 'View Category Group'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb start -->
-        <div class="row m-1">
-            <div class="col-12 ">
-                <h4 class="main-title">Category Group</h4>
-                <ul class="app-line-breadcrumbs mb-3">
-                    <li class="">
-                        <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                                <span>
-                                    <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
-                                </span>
-                        </a>
-                    </li>
-                    <li class="">
-                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Category Groups</a>
-                    </li>
-                    <li class="active">
-                        <a class="f-s-14 f-w-500"
-                           href="{{ route('categories.groups.show', group) }}">{{ group.name }}</a>
-                    </li>
-                </ul>
+{% extends 'admin._inc._layout' %}
+
+{% set page_title = 'Category Groups' %}
+{% set page_heading = 'Category Groups' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'categories' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="#">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('categories.groups') }}">
+            Category Groups
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">{{ group.name }}</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.categories._sidebar', {active: group.id}) }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{{ group.name }}</h1>
+                <p class="mt-1 text-sm text-slate-500">Manage drafts, scheduled posts, and published article content.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                <a href="{{ route('categories.groups.edit', group.id) }}" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Edit Group
+                </a>
+                <a href="{{ route('categories.create', {group_id: group.id}) }}" class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Create Category
+                </a>
             </div>
         </div>
-        <!-- Breadcrumb end -->
-        {{ include('admin._inc._message') }}
-        <!-- setting-app start -->
-        <div class="row">
-            {{ include('admin.categories._sidebar', {active: group.id}) }}
-            <div class="col-lg-8 col-xxl-9">
-                <div class="tab-content">
-                    <div aria-labelledby="profile-tab" class="tab-pane fade active show"
-                         id="profile-tab-pane"
-                         role="tabpanel" tabindex="0">
-                        <div class="card setting-profile-tab">
-                            <div class="card-header">
-                                <h5>Categories</h5>
-                                <div class="col-12">
-                                    <p class="float-right text-end">
-                                        <a href="{{ route('categories.create', {group_id: group.id}) }}"
-                                           class="btn btn-primary">Create
-                                            Category</a>
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="profile-tab profile-container">
-                                    {% if categories.count >= 1 %}
-                                        <div class="table-responsive">
-                                            <table class="table align-middle mb-0">
-                                                <thead>
-                                                <tr>
-                                                    <th scope="col">Name</th>
-                                                    <th scope="col">Slug</th>
-                                                    <th scope="col">Children</th>
-                                                    <th scope="col">Last Modified</th>
-                                                    <th scope="col">Created</th>
-                                                    <th scope="col"></th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {% for category in categories %}
-                                                    <tr>
-                                                        <td>{{ category.name }}</td>
-                                                        <td class="f-w-500">
-                                                            {{ category.handle }}
-                                                        </td>
-                                                        <td class="text-secondary f-w-600">
-                                                            {{ category.children.count() }}
-                                                        </td>
-                                                        <td>
-                                                            {{ category.created_at.format('F j, Y') }}
-                                                        </td>
-                                                        <td>
-                                                            {{ category.created_at.format('F j, Y') }}
-                                                        </td>
-                                                        <td>
-                                                            <a class="btn btn-primary icon-btn b-r-4"
-                                                               href="{{ route('categories.show', category) }}">
-                                                                <i class="ti ti-eye"></i>
-                                                            </a>
-                                                            <a class="btn btn-success icon-btn b-r-4"
-                                                               href="{{ route('categories.edit', category) }}">
-                                                                <i class="ti ti-edit"></i>
-                                                            </a>
-                                                            <a class="btn btn-danger icon-btn b-r-4"
-                                                               href="{{ route('categories.confirm', category) }}">
-                                                                <i class="ti ti-trash"></i>
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    {% else %}
-                                        <p class="text-center">
-                                            No Categories Created. <br/>
-                                            <a href="{{ route('categories.create', {group_id: group.id}) }}"
-                                               class="btn btn-outline-primary">Create Category</a>
-                                        </p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
+
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-5 py-3">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h5 class="text-sm font-semibold text-slate-700">Category List</h5>
+                        <p class="mt-0.5 text-xs text-slate-500">No Categories match the current view.</p>
                     </div>
                 </div>
             </div>
+
+            {% if categories.count >= 1 %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <tr>
+                            <th class="px-5 py-3" scope="col">Name</th>
+                            <th class="hidden px-5 py-3 sm:table-cell" scope="col">Children</th>
+                            <th class="px-5 py-3" scope="col">Last Modified</th>
+                            <th class="hidden px-5 py-3 md:table-cell" scope="col">Created</th>
+                            <th class="px-5 py-3 text-right" scope="col">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white">
+                        {% for category in categories %}
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-5 py-3.5">
+                                    <p class="font-medium text-slate-900">{{ category.name }}</p>
+                                    <p class="mt-0.5 text-xs text-slate-400">{{ category.handle }}</p>
+                                </td>
+                                <td class="hidden px-5 py-3.5 text-slate-600 sm:table-cell">
+                                    {{ category.children.count() }}
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    {{ category.created_at.format('F j, Y') }}
+                                </td>
+                                <td class="hidden px-5 py-3.5 text-slate-400 lg:table-cell">{{ category.created_at.format('F j, Y') }}</td>
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <a class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" href="{{ route('categories.show', category) }}" title="View">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                            <span class="sr-only">View</span>
+                                        </a>
+                                        <a class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" href="{{ route('categories.edit', category) }}" title="Edit">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                            <span class="sr-only">Edit</span>
+                                        </a>
+                                        <a class="inline-flex items-center justify-center rounded-md border border-red-100 p-1.5 text-red-400 hover:border-red-300 hover:bg-red-50 hover:text-red-600" href="{{ route('categories.confirm', category) }}" title="Delete">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            <span class="sr-only">Delete</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="border-t border-slate-200 px-5 py-3">
+
+                    {{ categories.links() }}
+                </div>
+            {% else %}
+                <div class="flex min-h-80 items-center justify-center px-6 py-14">
+                    <div class="max-w-sm text-center">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                            </svg>
+                        </div>
+                        <h2 class="mt-4 text-base font-semibold text-slate-900">No Categories found</h2>
+                        <p class="mt-1 text-sm text-slate-500">Create your first entry or adjust the filters to broaden the list.</p>
+                        <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                            <a href="{{ route('categories.create', {group_id: group.id}) }}" class="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700" >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Create Category
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
-        <!--setting app end -->
     </div>
-</main>
-{{ include('admin._inc._footer') }}
+{% endblock %}
