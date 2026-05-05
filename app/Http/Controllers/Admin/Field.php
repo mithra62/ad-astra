@@ -124,10 +124,11 @@ class Field extends Controller
      */
     public function destroy(DeleteFieldRequest $request, string $id)
     {
-        $field = FieldModel::find($id);
+        $field = FieldModel::with('groups')->find($id);
         if ($field instanceof FieldModel) {
+            $group = $field->groups()->first();
             $field->delete();
-            return redirect()->route('fields.groups.show', $id)->with('success', trans('field.deleted'));
+            return redirect()->route('fields.groups.show', $group)->with('success', trans('field.deleted'));
         }
 
         abort(404);

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Category;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class DeleteCategoryRequest extends FormRequest
