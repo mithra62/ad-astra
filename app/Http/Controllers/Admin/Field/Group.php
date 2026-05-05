@@ -85,7 +85,8 @@ class Group extends Controller
             abort(404);
         }
 
-        return $this->view('fields.groups.edit', ['group' => $group]);
+        $groups = FieldGroup::all();
+        return $this->view('fields.groups.edit', ['group' => $group, 'groups' => $groups]);
     }
 
     /**
@@ -109,6 +110,7 @@ class Group extends Controller
             return redirect()->route('fields.groups')->with('failure', 'field.group.not_found');
         }
 
-        return $this->view('fields.groups.delete', ['group' => $group]);
+        $groups = FieldGroup::all();
+        return $this->view('fields.groups.delete', ['group' => $group, 'groups' => $groups]);
     }
 }

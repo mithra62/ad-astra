@@ -1,78 +1,130 @@
-{{ include('admin._inc._header', {title: 'Delete Field Group'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb start -->
-        <div class="row m-1">
-            <div class="col-12 ">
-                <h5>Field Groups</h5>
-                <div class="col-6 ">
-                    <ul class="app-line-breadcrumbs mb-3">
-                        <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                                <span>
-                                    <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups') }}">Field Groups</a>
-                        </li>
+{% extends 'admin._inc._layout' %}
 
-                        <li>
-                            <a class="f-s-14 f-w-500"
-                               href="{{ route('fields.groups.show', active_group) }}">{{ active_group.name }}</a>
-                        </li>
-                        <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('fields.groups.confirm', group) }}">Delete Field
-                                Group</a>
-                        </li>
-                    </ul>
+{% set page_title = 'Delete Status' %}
+{% set page_heading = 'Status Groups' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'statuses' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="#">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('fields.groups') }}">
+            Field Groups
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('fields.groups.show', group) }}">
+            {{ group.name }}
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('fields.groups.edit', group) }}">
+            {{ group.name }}
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">Delete Field Group</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.fields._sidebar', {active: status.group.id}) }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Delete Status</h1>
+            <p class="mt-1 text-sm text-slate-500">Review ownership and access before removing this account.</p>
+        </div>
+        <a href="{{ route('fields.edit', group) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">Cancel</a>
+    </div>
+
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div class="flex items-start gap-3">
+            <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            <div>
+                <p class="text-sm font-semibold text-red-800">This action cannot be undone.</p>
+                <p class="mt-1 text-sm text-red-700">Deleting {{ group.name}} removes all Statuses associated with the Status Group.</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ route('fields.groups.destroy', group) }}"
+          class="row g-3 needs-validation" novalidate>
+        {{ csrf_field() }}
+        {{ method_field('DELETE') }}
+        <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Field Group Being Deleted</h5></div>
+                    <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-slate-500">Name</dt>
+                            <dd class="font-semibold text-slate-900">{{ status.name }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-slate-500">handle</dt>
+                            <dd class="text-slate-700"><code>{{ status.handle }}</code></dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-slate-500">Type</dt>
+                            <dd class="text-slate-700">{{ status.color }}</dd>
+                        </div>
+                    </dl>
+                </div>
+                {#
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Content Reassignment</h5></div>
+                    <div class="space-y-4 px-5 py-5">
+                        <label class="flex items-start gap-3">
+                            <input type="radio" name="content_action" value="reassign" checked class="mt-0.5 border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                            <span class="text-sm text-slate-700"><span class="font-medium">Reassign authored content</span><span class="mt-0.5 block text-xs text-slate-500">Move articles and drafts to another user.</span></span>
+                        </label>
+                        <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <option>Morgan Lee</option>
+                            <option>Avery Stone</option>
+                            <option>Riley Chen</option>
+                        </select>
+                        <label class="flex items-start gap-3">
+                            <input type="radio" name="content_action" value="delete" class="mt-0.5 border-slate-300 text-red-600 focus:ring-red-500">
+                            <span class="text-sm text-slate-700"><span class="font-medium text-red-700">Delete user-owned drafts</span><span class="mt-0.5 block text-xs text-slate-500">Published content remains assigned to system.</span></span>
+                        </label>
+                    </div>
+                </div>
+                #}
+
+            </div>
+
+
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-red-200 bg-white shadow-sm">
+                    <div class="border-b border-red-100 bg-red-50 px-5 py-3"><h5 class="text-sm font-semibold text-red-800">Confirm Deletion</h5></div>
+                    <div class="mb-4 rounded-md bg-slate-50 px-4 py-3 text-sm text-slate-700">Select the toggle to confirm deletion of <strong>{{ group.name }}</strong>.</div>
+                    <label class="flex cursor-pointer items-center justify-between gap-4 rounded-md border  {% if errors.has('confirm_removal') %} bg-red-300 border-red-300{% else %}bg-slate-50 border-slate-200{% endif %} px-4 py-3">
+                        <span class="text-sm font-medium text-slate-700">I understand this Field Group will be permanently deleted</span>
+
+                        <input class="peer sr-only" type="checkbox" name="confirm_removal" required>
+                        <span class="h-6 w-11 shrink-0 rounded-full bg-slate-300 after:mt-1 after:ml-1 after:block after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow after:transition after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-red-500"></span>
+                    </label>
+                    <button id="delete-btn" type="submit" class="mt-5 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Permanently Delete Field Group</button>
+                    <a href="{{ route('fields.groups.edit', group) }}" class="mt-2 block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">Back to Edit</a>
+
                 </div>
             </div>
         </div>
-        <!-- Breadcrumb end -->
-        {{ include('admin._inc._message') }}
-
-        <!-- Blank start -->
-        <div class="row">
-            <!-- Default Card start -->
-            <form method="POST" action="{{ route('fields.groups.destroy', group) }}" class="row g-3 needs-validation"
-                  novalidate>
-                {{ csrf_field() }}
-                {{ method_field('DELETE') }}
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Delete Field Group</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6>Are you sure you want to remove this Field Group?</h6>
-                            <p class="text-secondary"> Are you sure you want to remove this Field Group?</p>
-                        </div>
-                        <div class="card-footer">
-                            <div
-                                class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
-                                <input class="toggle switch-border-primary" name="confirm_removal" id="confirm_removal"
-                                       type="checkbox">
-                                <label for="confirm_removal">Confirm Removal</label>
-                                {% if errors.has('confirm_removal') %}
-                                    <p class="text-danger">{{ errors.first('confirm_removal') }}</p>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-12 float-end">
-                                <button class="btn btn-primary float-end" type="submit">Delete Field Group</button>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </form>
-
-            <!-- Default Card end -->
-        </div>
-        <!-- Blank end -->
-    </div>
-</main>
-
-{{ include('admin._inc._footer') }}
+    </form>
+{% endblock %}
