@@ -17,7 +17,7 @@ use App\Http\Controllers\Admin\Media;
 use App\Http\Controllers\Admin\Media\Library;
 use App\Http\Controllers\Admin\Role;
 use App\Http\Controllers\Admin\Settings\Domain as SettingsDomain;
-use App\Http\Controllers\Admin\Settings\UserSettings;
+use App\Http\Controllers\Admin\Account\Settings AS UserSettings;
 use App\Http\Controllers\Admin\Status;
 use App\Http\Controllers\Admin\Status\Group as StatusGroup;
 use App\Http\Controllers\Admin\User;
@@ -48,6 +48,8 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     //account
     Route::get('/account', [Account::class, 'index'])->name('account');
     Route::get('/account/details', [Account::class, 'details'])->name('account.details');
+    Route::get('/account/settings', [UserSettings::class, 'show'])->name('account.settings');
+    Route::post('/account/settings', [UserSettings::class, 'update'])->name('account.edit_settings');
     Route::put('/account', [Account::class, 'update'])->name('account.edit');
     Route::put('/account/password', [Account::class, 'change_password'])->name('account.password.update');
     Route::get('/account/password', [Account::class, 'password'])->name('account.password');
