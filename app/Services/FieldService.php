@@ -11,11 +11,11 @@ class FieldService extends AbstractService
     {
         $fields = $this->getAllFieldTypes();
         $return = [];
-        foreach ($fields as $field) {
-            $return[$field->handle()] = $field->name();
+        foreach ($fields as $field_id => $field) {
+            $return[$field_id] = $field->name();
         }
 
-        ksort($return);
+        //sort($return);
 
         return $return;
     }
@@ -29,10 +29,15 @@ class FieldService extends AbstractService
         $return = [];
         if ($fields) {
             foreach ($fields as $field) {
-                $return[] = $field->instance();
+                $return[$field->id] = $field->instance();
             }
         }
 
         return collect($return);
+    }
+
+    public function getFieldType(string $handle): ?FieldType
+    {
+        return FieldType::where('handle', $handle)->first();
     }
 }

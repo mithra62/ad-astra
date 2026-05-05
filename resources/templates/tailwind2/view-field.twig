@@ -1,32 +1,74 @@
-{% extends 'admin._inc._layout' %}
+{% extends 'templates::tailwind2.layout' %}
 
+{% set field = field|default({
+    id: 42,
+    name: 'Featured Image',
+    handle: 'featured_image',
+    label: 'Featured Image',
+    instructions: 'Select the primary image shown in article lists and social previews.',
+    hidden: false,
+    required: true,
+    created_at: '2026-01-18 10:30:00',
+    updated_at: '2026-04-24 14:15:00',
+    fieldType: { name: 'Asset', handle: 'asset', class: 'App\\Field\\Types\\Asset' },
+    groups: [
+        { id: 1, name: 'Article Fields' },
+        { id: 2, name: 'Shared SEO' }
+    ]
+}) %}
+
+{% set layout = layout|default({
+    id: 7,
+    name: 'Article Layout',
+    handle: 'article_layout',
+    description: 'Default article editing layout.',
+    tabs: [
+        {
+            id: 1,
+            name: 'Content',
+            handle: 'content',
+            elements: [
+                { field: { handle: 'title', name: 'Title' }, required: true, hidden: false, width: 'full', instructions: '' },
+                { field: { handle: 'featured_image', name: 'Featured Image' }, required: true, hidden: false, width: 'full', instructions: 'Use a landscape image when possible.' },
+                { field: { handle: 'body', name: 'Body' }, required: false, hidden: false, width: 'full', instructions: '' }
+            ]
+        },
+        {
+            id: 2,
+            name: 'SEO',
+            handle: 'seo',
+            elements: [
+                { field: { handle: 'meta_title', name: 'Meta Title' }, required: false, hidden: false, width: 'half', instructions: '' },
+                { field: { handle: 'og_image', name: 'Open Graph Image' }, required: false, hidden: false, width: 'half', instructions: '' }
+            ]
+        },
+        {
+            id: 3,
+            name: 'Advanced',
+            handle: 'advanced',
+            elements: [
+                { field: { handle: 'canonical_url', name: 'Canonical URL' }, required: false, hidden: false, width: 'full', instructions: '' }
+            ]
+        }
+    ]
+}) %}
 
 {% set page_title = 'View Field' %}
-{% set page_heading = 'Field Groups' %}
-{% set active_nav = 'settings' %}
-{% set active_secondary_nav = 'field_groups' %}
+{% set page_heading = field.name %}
+{% set active_nav = 'field-layouts' %}
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
     <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard
-        </a>
+        <a class="hover:text-slate-800" href="home.twig">Dashboard</a>
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('fields.groups') }}">
-            Field Groups
-        </a>
+        <a class="hover:text-slate-800" href="edit-field-layout.twig">Field Layouts</a>
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('fields.groups.show', field.groups.first) }}">
-            {{ field.groups.first.name }}
-        </a>
+        <a class="hover:text-slate-800" href="field-layout-tab-fields.twig">{{ layout.name }}</a>
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
@@ -35,7 +77,36 @@
 {% endblock %}
 
 {% block secondary_sidebar %}
-    {{ include('admin.fields._sidebar', {active: field.groups.first.id}) }}
+    <aside class="hidden h-fit lg:block">
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-4 py-3">
+                <h5 class="text-sm font-semibold text-slate-700">{{ layout.name }}</h5>
+                <p class="mt-0.5 truncate font-mono text-xs text-slate-400">{{ layout.handle }}</p>
+            </div>
+            <nav class="p-2">
+                <a class="block rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="edit-field-layout.twig">Layout Details</a>
+                <a class="mt-0.5 block rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="field-layout-tab-fields.twig">Tab Fields</a>
+                <a class="mt-0.5 block rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="view-field.twig">View Field</a>
+                <a class="mt-0.5 block rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="create-field-layout-tab.twig">New Tab</a>
+
+                <div class="my-2 border-t border-slate-100"></div>
+                <p class="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Layout Tabs</p>
+
+                {% for tab in layout.tabs %}
+                    {% set contains_field = false %}
+                    {% for element in tab.elements %}
+                        {% if element.field.handle == field.handle %}
+                            {% set contains_field = true %}
+                        {% endif %}
+                    {% endfor %}
+                    <a class="mt-0.5 flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium {{ contains_field ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50' }}" href="#tab-{{ tab.handle }}">
+                        <span class="truncate">{{ tab.name }}</span>
+                        <span class="ml-2 rounded-full {{ contains_field ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }} px-2 py-0.5 text-xs">{{ tab.elements|length }}</span>
+                    </a>
+                {% endfor %}
+            </nav>
+        </div>
+    </aside>
 {% endblock %}
 
 {% block content %}
@@ -53,7 +124,7 @@
                 <a href="field-layout-tab-fields.twig" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
                     Back to Layout
                 </a>
-                <a href="{{ route('fields.edit', field) }}" class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                <a href="#" class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
                     Edit Field
                 </a>
             </div>
@@ -83,8 +154,8 @@
                             <dd class="text-slate-700">{{ field.instructions|default('None') }}</dd>
                         </div>
                         <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                            <dt class="text-slate-500">Type</dt>
-                            <dd class="break-all font-mono text-xs text-slate-700">{{ field.fieldType.name }}</dd>
+                            <dt class="text-slate-500">Type Class</dt>
+                            <dd class="break-all font-mono text-xs text-slate-700">{{ field.fieldType.class|default('Not configured') }}</dd>
                         </div>
                     </dl>
                 </div>

@@ -19,9 +19,9 @@ class StoreFieldRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => [
+            'field_type_id' => [
                 'required',
-                'string',
+                'integer',
                 'max:255',
             ],
             'name' => [

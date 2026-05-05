@@ -53,18 +53,18 @@
     <div class="flex w-full min-w-0 flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Edit Field</h1>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Edit Field Group</h1>
                 <p class="mt-1 text-sm text-slate-500">Create a reusable status, field, label, or option for content workflows.</p>
             </div>
-            <a href="" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+            <a href="{{ route('fields.groups.show', group) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                 </svg>
-                Back to {{ status.group.name }}
+                Back to {{ group.name }}
             </a>
         </div>
 
-        <form id="general-create-form" method="POST" action="" class="flex w-full min-w-0 flex-col gap-5">
+        <form id="general-create-form" method="POST" action="{{ route('fields.groups.update', group) }}" class="flex w-full min-w-0 flex-col gap-5">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
             <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -74,64 +74,22 @@
                 <div class="space-y-5 px-5 py-5">
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
-                        <input value="{{ old('name', status.name) }}" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
+                        <input value="{{ old('name', group.name) }}" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
                         {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
                     </div>
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
-                        <input value="{{ old('handle', status.handle) }}" class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" >
+                        <input value="{{ old('handle', group.handle) }}" class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" >
                         <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
                         {% if errors.has('handle') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>{% endif %}
-                    </div>
-                    <div>
-                        {{ forms.color(
-                            name: 'color',
-                            label: 'Color',
-                            value: status.color,
-                            description: 'Used for this user avatar, labels, and personalized admin highlights.',
-                            id: 'accent_color'
-                        ) }}
-
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                               for="has_entry_tree">Set as Default Status</label>
-                        {{ forms.toggle(
-                            name: 'is_default',
-                            label: 'Set as Default Status',
-                            value: status.is_default,
-                            description: 'The status the field will be set as if not set',
-                            checked_value: '1',
-                            id: 'is_default',
-                            error_key: 'is_default',
-                            copy_align: 'inline'
-                        ) }}
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                               for="has_entry_tree">Publicly Visible</label>
-                        {{ forms.toggle(
-                            name: 'is_public',
-                            label: 'Publicly Visible',
-                            value: status.is_public,
-                            description: 'Entries with this status will appear in public-facing queries.',
-                            checked_value: '1',
-                            id: 'is_public',
-                            error_key: 'is_public',
-                            copy_align: 'inline'
-                        ) }}
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="sort_order">Sort Order</label>
-                        <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="sort_order" name="sort_order" type="number" min="0" value="{{ old('sort_order', 0) }}">
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
                 <a href="" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Cancel</a>
-                <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Edit Status</button>
+                <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Edit Field Group</button>
             </div>
         </form>
     </div>

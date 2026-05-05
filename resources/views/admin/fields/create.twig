@@ -83,14 +83,14 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Type <span class="text-red-500">*</span></label>
-                        <select class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('type') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="type" name="type">
+
+                        <select class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('field_type_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="field_type_id" name="field_type_id">
                             {% for type, name in field_types %}
                                 <option value="{{ type }}"
                                         {% if old('type') == type %}selected{% elseif type == 'text' %}selected{% endif %}>{{ name }}</option>
                             {% endfor %}
                         </select>
-                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
-                        {% if errors.has('type') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('type') }}</p>{% endif %}
+                        {% if errors.has('field_type_id') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_type_id') }}</p>{% endif %}
                     </div>
                 </div>
             </div>
