@@ -16,7 +16,7 @@ class FieldLayoutTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $this->assertEquals(['name'], (new FieldLayout)->getFillable());
+        $this->assertEquals(['name', 'handle'], (new FieldLayout)->getFillable());
     }
 
     public function test_tabs_relationship_is_has_many(): void

@@ -38,7 +38,7 @@ class CategoryActionsTest extends TestCase
 
     private function makeGroup(): Group
     {
-        $layout = FieldLayout::create(['name' => 'Test Layout']);
+        $layout = FieldLayout::create(['name' => 'Test Layout', 'handle' => 'test-layout']);
         return Group::create([
             'name' => 'Test Group',
             'handle' => 'test-group',

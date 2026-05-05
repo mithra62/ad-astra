@@ -30,9 +30,9 @@ class FakeDataSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    private const USER_COUNT = 10;
+    private const USER_COUNT = 1000;
     private const CATEGORY_COUNT = 10000;
-    private const ENTRY_COUNT = 10;
+    private const ENTRY_COUNT = 10000;
 
     // Maximum nesting depth for generated category trees (1 = root only).
     private const MAX_CATEGORY_DEPTH = 10;

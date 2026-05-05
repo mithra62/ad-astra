@@ -379,7 +379,7 @@ class CategoryServiceTest extends TestCase
 
     public function test_resolve_layout_returns_field_layout_when_group_has_one(): void
     {
-        $layout = FieldLayout::create(['name' => 'Category Layout']);
+        $layout = FieldLayout::create(['name' => 'Category Layout', 'handle' => 'category-layout']);
         $group = $this->makeGroup(['field_layout_id' => $layout->id]);
         $category = $this->makeCategory(['group_id' => $group->id]);
 
@@ -439,7 +439,7 @@ class CategoryServiceTest extends TestCase
 
     public function test_resolve_fields_returns_collection_when_layout_exists(): void
     {
-        $layout = FieldLayout::create(['name' => 'Fields Layout']);
+        $layout = FieldLayout::create(['name' => 'Fields Layout', 'handle' => 'fields-layout']);
         $group = $this->makeGroup(['field_layout_id' => $layout->id]);
         $category = $this->makeCategory(['group_id' => $group->id]);
 
