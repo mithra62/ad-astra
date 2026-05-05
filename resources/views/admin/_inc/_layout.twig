@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>{% block title %}{{ page_title|default('Admin') }}{% endblock %}</title>
+    <title>{% block title %}{{ page_title|default('Admin') }}{% endblock %} - {{ config('app.name', 'Laravel') }}</title>
     {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
     {% block vendor_scripts %}{% endblock %}
 
