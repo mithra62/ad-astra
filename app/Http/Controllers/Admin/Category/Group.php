@@ -121,6 +121,7 @@ class Group extends Controller
             return redirect()->route('categories.groups')->with('failure', 'category.group.not_found');
         }
 
-        return $this->view('categories.groups.delete', ['group' => $group]);
+        $groups = CategoryGroup::all();
+        return $this->view('categories.groups.delete', ['group' => $group, 'groups' => $groups]);
     }
 }

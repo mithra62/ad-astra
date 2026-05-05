@@ -1,213 +1,268 @@
-{{ include('admin._inc._header', {title: 'Edit Category'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb start -->
-        <div class="row m-1">
-            <div class="col-12 ">
-                <h4 class="main-title">Category</h4>
-                <ul class="app-line-breadcrumbs mb-3">
-                    <li class="">
-                        <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                            <span>
-                                <i class="ph-duotone ph-table f-s-16"></i> Dashboard
-                            </span>
-                        </a>
-                    </li>
-                    <li class="">
-                        <a class="f-s-14 f-w-500" href="{{ route('categories.groups') }}">Category Groups</a>
-                    </li>
-                    <li>
-                        <a class="f-s-14 f-w-500"
-                           href="{{ route('categories.groups.show', category.group) }}">{{ category.group.name }}</a>
-                    </li>
-                    <li class="active">
-                        <a class="f-s-14 f-w-500" href="{{ route('categories.edit', category) }}">Edit Category</a>
-                    </li>
-                </ul>
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._form-fields' as forms %}
+
+{% set page_title = 'Category Groups' %}
+{% set page_heading = 'Category Groups' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'categories' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="#">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('categories.groups') }}">
+            Category Groups
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('categories.groups', category.group) }}">
+            {{ category.group.name }}
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">{{ category.name }}</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.categories._sidebar', {active: category.group.id}) }}
+{% endblock %}
+
+{% block content %}
+    <div id="unsaved-bar" class="unsaved-bar items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-2">
+        <span class="flex items-center gap-2 text-sm text-amber-800">
+            <svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            You have unsaved changes.
+        </span>
+        <button type="submit" form="general-create-form" class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Save Now</button>
+    </div>
+
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Edit Category</h1>
+                <p class="mt-1 text-sm text-slate-500">Create a reusable status, field, label, or option for content workflows.</p>
+            </div>
+            <a href="{{ route('categories.groups.show', category.group) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to {{ category.group.name }}
+            </a>
+        </div>
+
+        <div class="rounded-lg border border-sky-200 bg-sky-50 p-4">
+            <div class="flex items-start gap-3">
+                <svg class="mt-0.5 h-5 w-5 shrink-0 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div>
+                    <p class="text-sm font-semibold text-sky-800">Create a new reusable item.</p>
+                    <p class="mt-1 text-sm text-sky-700">Handles should be stable once this item is used by content or templates.</p>
+                </div>
             </div>
         </div>
-        <!-- Breadcrumb end -->
-        {{ include('admin._inc._message') }}
 
-        <div class="row">
-            {{ include('admin.categories._sidebar', {active: category.group.id}) }}
-            <div class="col-lg-8 col-xxl-9">
-
-                <!-- Category Form -->
-                <div class="card">
-                    <div class="card-header d-flex flex-column gap-2">
-                        <h5>Edit Category</h5>
+        <form id="general-create-form" method="POST" action="{{ route('categories.edit', category) }}" class="flex w-full min-w-0 flex-col gap-5">
+            {{ csrf_field() }}
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3">
+                    <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
+                </div>
+                <div class="space-y-5 px-5 py-5">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
+                        <input value="{{ old('name', category.name) }}" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
+                        {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
                     </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ route('categories.update', category.id) }}"
-                              class="row g-3 needs-validation" novalidate>
-                            {{ csrf_field() }}
-                            {{ method_field('PUT') }}
 
-                            <div class="col-md-12">
-                                <label class="form-label" for="name">Name</label>
-                                <input class="form-control" id="name" required type="text"
-                                       value="{{ old('name', category.name) }}" name="name">
-                                {% if errors.has('name') %}
-                                    <p class="text-danger">{{ errors.first('name') }}</p>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-12">
-                                <label class="form-label" for="handle">Slug</label>
-                                <input class="form-control" id="handle" type="text"
-                                       value="{{ old('handle', category.handle) }}" name="handle">
-                                {% if errors.has('handle') %}
-                                    <p class="text-danger">{{ errors.first('handle') }}</p>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-12">
-                                <label class="form-label" for="parent_id">Parent Category</label>
-                                <select class="form-select" id="parent_id" name="parent_id">
-                                    <option value="">— No Parent (top-level) —</option>
-                                    {% for cat in parent_categories %}
-                                        <option value="{{ cat.id }}"
-                                            {{ old('parent_id', category.parent_id) == cat.id ? 'selected' : '' }}>
-                                            {{ cat.label }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                {% if errors.has('parent_id') %}
-                                    <p class="text-danger">{{ errors.first('parent_id') }}</p>
-                                {% endif %}
-                            </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
+                        <input value="{{ old('handle', category.handle) }}" class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" >
+                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
+                        {% if errors.has('handle') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Parent Category</label>
+                        <select class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('parent_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="parent_id" name="parent_id">
+                            <option value="">— No Parent (top-level) —</option>
+                            {% for cat in parent_categories %}
+                                <option value="{{ cat.id }}"
+                                    {{ old('parent_id', category.parent_id) == cat.id ? 'selected' : '' }}>
+                                    {{ cat.label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.has('parent_id') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('parent_id') }}</p>{% endif %}
+                    </div>
 
-                            <!-- Group Field Layout -->
-                            {% set layout = category.group.fieldLayout %}
-                            {% if layout and layout.tabs.count >= 1 %}
-                                {% for tab in layout.tabs %}
-                                    <div class="col-12"><h5 class="border-bottom pb-2">{{ tab.name }}</h5></div>
-                                    {% for element in tab.elements %}
-                                        {% set field = element.field %}
-                                        <div class="col-md-12">
-                                            <label class="form-label"
-                                                   for="field_{{ field.handle }}">{{ field.label }}</label>
-                                            {% if field.instructions %}
-                                                <small
-                                                    class="text-secondary d-block mb-1">{{ field.instructions }}</small>
-                                            {% endif %}
-                                            <div class="input-group has-validation">
-                                                {{ field.render({
-                                                    value: field_values[field.handle],
-                                                    id: 'field_' ~ field.handle,
-                                                    class: 'form-control'
-                                                })|raw }}
-                                            </div>
-                                            {% if errors.has('fields.' ~ field.handle) %}
-                                                <p class="text-danger">{{ errors.first('fields.' ~ field.handle) }}</p>
-                                            {% endif %}
+                </div>
+            </div>
+
+            {% set layout = category.group.fieldLayout %}
+            {% if layout and layout.tabs.count >= 1 %}
+                {% for tab in layout.tabs %}
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">{{ tab.name }}</h5>
+                    </div>
+                    <div class="space-y-5 px-5 py-5">
+                        {% for element in tab.elements %}
+                            {% set field = element.field %}
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-slate-700"
+                                       for="field_{{ field.handle }}">{{ field.label }}</label>
+                                {% if field.instructions %}
+                                    <small
+                                        class="text-secondary d-block mb-1">{{ field.instructions }}</small>
+                                {% endif %}
+                                {{ field.render({
+                                    id: 'field_' ~ field.handle,
+                                    class: 'w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20'
+                                })|raw }}
+                                {% if errors.has('fields.' ~ field.handle) %}
+                                    <p class="mt-1 text-xs text-red-600">{{ errors.first('fields.' ~ field.handle) }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+            </div>
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <a href="{{ route('categories.show', category) }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Cancel</a>
+                <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Edit Category</button>
+            </div>
+        </form>
+
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-5 py-3">
+                <h5 class="text-sm font-semibold text-slate-700">Children</h5>
+            </div>
+            <div class="space-y-5 px-5 py-5">
+                {% if category.children.count >= 1 %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <tr>
+                                <th class="px-5 py-3" scope="col">Title</th>
+                                <th class="hidden px-5 py-3 sm:table-cell" scope="col">Children</th>
+                                <th class="hidden px-5 py-3 lg:table-cell" scope="col">Updated</th>
+                                <th class="px-5 py-3" scope="col">Created</th>
+                                <th class="px-5 py-3 text-right" scope="col">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-white">
+                            {% for child in category.children %}
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-5 py-3.5">
+                                        <a class="font-medium text-slate-900 hover:text-emerald-700" href="{{ route('categories.show', child) }}">{{ child.name }} <span class="mt-0.5 font-mono text-xs text-slate-400">{{ child.handle }}</span></a>
+                                        <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
+                                            <a href="{{ route('categories.show', child) }}" class="text-emerald-600 hover:underline">View</a>
+                                            <span class="text-slate-300">|</span>
+                                            <a href="{{ route('categories.edit', child) }}" class="text-emerald-600 hover:underline">Edit</a>
+                                            <span class="text-slate-300">|</span>
+                                            <a href="{{ route('categories.confirm', child) }}" class="text-red-500 hover:underline">Delete</a>
                                         </div>
-                                    {% endfor %}
-                                {% endfor %}
-                            {% endif %}
-
-                            <div class="col-12">
-                                <button class="btn btn-primary float-end" type="submit">Save Category</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Children card -->
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h5>Children</h5>
-                    </div>
-                    <div class="card-body">
-                        {% if category.children.count >= 1 %}
-                            <div class="table-responsive">
-                                <table class="table align-middle mb-0">
-                                    <thead>
-                                    <tr>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Slug</th>
-                                        <th scope="col">Children</th>
-                                        <th scope="col">Last Modified</th>
-                                        <th scope="col">Created</th>
-                                        <th scope="col"></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for child in category.children %}
-                                        <tr>
-                                            <td>{{ child.name }}</td>
-                                            <td class="f-w-500">
-                                                {{ child.handle }}
-                                            </td>
-                                            <td class="text-secondary f-w-600">
-                                                {{ child.children.count() }}
-                                            </td>
-                                            <td>
-                                                {{ child.updated_at.format('F j, Y') }}
-                                            </td>
-                                            <td>
-                                                {{ child.created_at.format('F j, Y') }}
-                                            </td>
-                                            <td>
-                                                <a class="btn btn-primary icon-btn b-r-4"
-                                                   href="{{ route('categories.show', child) }}">
-                                                    <i class="ti ti-eye"></i>
-                                                </a>
-                                                <a class="btn btn-secondary icon-btn b-r-4"
-                                                   href="{{ route('categories.create', {group_id: category.group.id, parent_id: child.id}) }}"
-                                                   title="Add child category">
-                                                    <i class="ti ti-plus"></i>
-                                                </a>
-                                                <a class="btn btn-success icon-btn b-r-4"
-                                                   href="{{ route('categories.edit', child) }}">
-                                                    <i class="ti ti-edit"></i>
-                                                </a>
-                                                <a class="btn btn-danger icon-btn b-r-4"
-                                                   href="{{ route('categories.confirm', child) }}">
-                                                    <i class="ti ti-trash"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        {% else %}
-                            <p class="text-center">
-                                No Child Categories Created. <br/>
-                                <a href="{{ route('categories.create', {group_id: category.group.id, parent_id: category.id}) }}"
-                                   class="btn btn-outline-primary">Create Child Category</a>
-                            </p>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Meta info card -->
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h5>Category Details</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-sm mb-0">
-                            <tbody>
-                            <tr>
-                                <th class="text-secondary" style="width: 30%">Group</th>
-                                <td>{{ category.group.name }}</td>
-                            </tr>
-                            <tr>
-                                <th class="text-secondary">Created</th>
-                                <td>{{ category.created_at.format('F j, Y g:i A') }}</td>
-                            </tr>
-                            <tr>
-                                <th class="text-secondary">Last Modified</th>
-                                <td>{{ category.updated_at.format('F j, Y g:i A') }}</td>
-                            </tr>
+                                    </td>
+                                    <td class="hidden px-5 py-3.5 text-slate-600 sm:table-cell">
+                                        {{ child.children.count() }}
+                                    </td>
+                                    <td class="px-5 py-3.5">
+                                        {{ child.updated_at.format('F j, Y') }}
+                                    </td>
+                                    <td class="hidden px-5 py-3.5 text-slate-400 lg:table-cell">{{ child.created_at.format('F j, Y') }}</td>
+                                    <td class="px-5 py-3.5">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <a href="{{ route('categories.create', {group_id: category.group.id, parent_id: child.id}) }}" class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" title="View">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                                <span class="sr-only">Create Child</span>
+                                            </a>
+                                            <a href="{{ route('categories.show', child) }}" class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" title="View">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                                <span class="sr-only">View</span>
+                                            </a>
+                                            <a href="{{ route('categories.edit', child) }}" class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" title="Edit">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                                <span class="sr-only">Edit</span>
+                                            </a>
+                                            <a href="{{ route('categories.confirm', child) }}" class="inline-flex items-center justify-center rounded-md border border-red-100 p-1.5 text-red-400 hover:border-red-300 hover:bg-red-50 hover:text-red-600" title="Delete">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                <span class="sr-only">Delete</span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                </div>
-
+                {% else %}
+                    <div class="flex min-h-80 items-center justify-center px-6 py-14">
+                        <div class="max-w-sm text-center">
+                            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                                </svg>
+                            </div>
+                            <h2 class="mt-4 text-base font-semibold text-slate-900">No Child Categories found</h2>
+                            <p class="mt-1 text-sm text-slate-500">Create your first entry or adjust the filters to broaden the list.</p>
+                            <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                                <a href="{{ route('categories.create', {group_id: category.group.id, parent_id: category.id}) }}" class="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Create Child Category
+                                </a>
+                                <a class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50" href="index.twig">Clear filters</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
-</main>
-{{ include('admin._inc._footer') }}
+{% endblock %}
+
+{% block scripts %}
+    {{ forms.color_scripts() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.attachHandleGenerator) {
+                window.attachHandleGenerator('name', 'handle');
+            }
+        });
+    </script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
