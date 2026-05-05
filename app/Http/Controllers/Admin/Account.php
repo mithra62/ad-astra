@@ -25,7 +25,7 @@ class Account extends AdminController
     /**
      * @return View
      */
-    public function settings(): View
+    public function details(): View
     {
         $schema = UserSchema::instance()->resolved();
         $user = Auth::user();
@@ -35,7 +35,7 @@ class Account extends AdminController
             'schema' => $schema,
             'field_values' => $user->fieldArray(),
         ];
-        return $this->view('account.settings', $data);
+        return $this->view('account.details', $data);
     }
 
     /**
@@ -50,7 +50,7 @@ class Account extends AdminController
             'password' => Hash::make($input['password']),
         ])->save();
 
-        return redirect()->route('account.settings')->with('success', trans('account.password_changed'));
+        return redirect()->route('account.details')->with('success', trans('account.password_changed'));
     }
 
     public function password()
@@ -63,6 +63,6 @@ class Account extends AdminController
         $user = Auth::user();
         $editor = app(UpdateUserProfileInformation::class);
         $user = $editor->update($user, $request->validated());
-        return redirect()->route('account.settings')->with('success', trans('account.updated'));
+        return redirect()->route('account.details')->with('success', trans('account.updated'));
     }
 }

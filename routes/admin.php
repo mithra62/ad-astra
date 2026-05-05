@@ -47,7 +47,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     //account
     Route::get('/account', [Account::class, 'index'])->name('account');
-    Route::get('/account/settings', [Account::class, 'settings'])->name('account.settings');
+    Route::get('/account/details', [Account::class, 'details'])->name('account.details');
     Route::put('/account', [Account::class, 'update'])->name('account.edit');
     Route::put('/account/password', [Account::class, 'change_password'])->name('account.password.update');
     Route::get('/account/password', [Account::class, 'password'])->name('account.password');
