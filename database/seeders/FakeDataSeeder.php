@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Facades\Categories;
 use App\Facades\Content;
 use App\Models\Category;
+use App\Models\Category\Group as CategoryGroup;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\User;
@@ -16,18 +18,27 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
- * Stress-test seeder: 1,000 users + 10,000 entries across all entry types.
+ * Stress-test seeder: users, categories, and entries across all types.
  * Only runs in local/testing environments.
  *
  * Data shape mirrors StoreUserRequest / StoreEntryRequest validation rules so
  * every record is verified against the same constraints the HTTP layer enforces.
+ * Categories are seeded before entries so the category ID pools used during
+ * entry creation include the full synthetic dataset.
  */
 class FakeDataSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    private const USER_COUNT = 1000;
-    private const ENTRY_COUNT = 10_000;
+    private const USER_COUNT = 10;
+    private const CATEGORY_COUNT = 10000;
+    private const ENTRY_COUNT = 10;
+
+    // Maximum nesting depth for generated category trees (1 = root only).
+    private const MAX_CATEGORY_DEPTH = 10;
+
+    // Cap on how many category groups are used; never exceeds the seeded total.
+    private const MAX_CATEGORY_GROUPS = 1000;
 
     // Weighted role pool: ~70 % user, ~25 % admin, ~5 % super admin
     private const ROLE_POOL = [
@@ -55,6 +66,7 @@ class FakeDataSeeder extends Seeder
         $this->command->info('FakeDataSeeder — starting');
 
         $users = $this->seedUsers();
+        $this->seedCategories();
         $this->seedEntries($users);
 
         $this->command->info('FakeDataSeeder — done');
@@ -151,6 +163,193 @@ class FakeDataSeeder extends Seeder
     }
 
     // =========================================================================
+    // Categories
+    // =========================================================================
+
+    private function seedCategories(): void
+    {
+        $this->command->info('Creating up to ' . self::CATEGORY_COUNT . ' categories...');
+
+        // Eager-load the full field layout chain so resolveGroupFieldDefs()
+        // can walk the tree without additional queries per group.
+        $groups = CategoryGroup::with('fieldLayout.tabs.elements.field.fieldType')
+            ->orderBy('sort_order')
+            ->limit(self::MAX_CATEGORY_GROUPS)
+            ->get();
+
+        if ($groups->isEmpty()) {
+            $this->command->warn('No category groups found; skipping category seeding.');
+            return;
+        }
+
+        // Distribute the total budget roughly evenly across all groups.
+        $perGroup = (int)ceil(self::CATEGORY_COUNT / $groups->count())*5;
+        $created = 0;
+        $failed = 0;
+
+        foreach ($groups as $group) {
+            $budget = $perGroup;
+            $fieldDefs = $this->resolveGroupFieldDefs($group);
+
+            // Each group gets several root categories; the recursive builder
+            // then branches out into subtrees, consuming from $budget.
+            $rootCount = fake()->numberBetween(30, 80);
+
+            for ($i = 0; $i < $rootCount && $budget > 0; $i++) {
+                $this->createCategoryNode($group, $fieldDefs, null, 1, $budget, $created, $failed);
+            }
+        }
+
+        $this->command->info(sprintf('Categories: %d created, %d failed.', $created, $failed));
+    }
+
+    /**
+     * Recursively create a single category node and its subtree.
+     *
+     * Child probability and maximum fanout both taper with depth so the tree
+     * is bushy near the roots and sparse near the leaf limit.
+     *
+     * @param array<int, array{handle: string, type: string}> $fieldDefs
+     */
+    private function createCategoryNode(
+        CategoryGroup $group,
+        array         $fieldDefs,
+        ?int          $parentId,
+        int           $depth,
+        int           &$budget,
+        int           &$created,
+        int           &$failed,
+    ): void
+    {
+        if ($budget <= 0 || $depth > self::MAX_CATEGORY_DEPTH) {
+            return;
+        }
+
+        try {
+            $category = Categories::create($group, [
+                'name' => ucwords(fake()->words(fake()->numberBetween(1, 3), true)),
+                'handle' => Str::slug(fake()->word()) . '-' . Str::random(6),
+                'sort_order' => fake()->numberBetween(1, 99),
+                'parent_id' => $parentId,
+                'fields' => $this->resolveFakeFieldValues($fieldDefs),
+            ]);
+            $created++;
+            $budget--;
+        } catch (\Throwable $e) {
+            $this->command->warn("Category creation failed ({$group->handle}): " . $e->getMessage());
+            $failed++;
+            $budget--;
+            return;
+        }
+
+        // Child probability drops by ~12 pp per depth level (75 % at depth 1,
+        // ~3 % at depth 6, never below 5 %).
+        $childProbability = max(5, 75 - ($depth * 12));
+
+        if (!fake()->boolean($childProbability) || $budget <= 0) {
+            return;
+        }
+
+        // Fanout also narrows with depth: up to 5 children at depth 1, 1 at depth 5+.
+        $maxChildren = max(1, 6 - $depth);
+        $childCount = fake()->numberBetween(1, $maxChildren);
+
+        for ($i = 0; $i < $childCount && $budget > 0; $i++) {
+            $this->createCategoryNode(
+                $group, $fieldDefs, $category->id,
+                $depth + 1, $budget, $created, $failed,
+            );
+        }
+    }
+
+    /**
+     * Pre-resolve the field definitions for a group's layout into a flat array
+     * of [handle, type] pairs so the recursive tree builder can generate fake
+     * values without re-querying the DB on every node.
+     *
+     * @return array<int, array{handle: string, type: string}>
+     */
+    private function resolveGroupFieldDefs(CategoryGroup $group): array
+    {
+        $layout = $group->fieldLayout;
+
+        if (!$layout) {
+            return [];
+        }
+
+        $defs = [];
+
+        foreach ($layout->tabs as $tab) {
+            foreach ($tab->elements as $element) {
+                $field = $element->field;
+
+                if (!$field || !$field->fieldType) {
+                    continue;
+                }
+
+                // Relational fields write to a separate table and require real
+                // related IDs — skip them in the fake data generator.
+                if ($field->fieldType->instance()->isRelational()) {
+                    continue;
+                }
+
+                $defs[] = ['handle' => $field->handle, 'type' => $field->fieldType->object];
+            }
+        }
+
+        return $defs;
+    }
+
+    /**
+     * Generate fake field values for a category, randomly omitting ~30 % of
+     * fields to produce realistic sparse records alongside fully-populated ones.
+     *
+     * @param array<int, array{handle: string, type: string}> $fieldDefs
+     * @return array<string, mixed>
+     */
+    private function resolveFakeFieldValues(array $fieldDefs): array
+    {
+        if (empty($fieldDefs)) {
+            return [];
+        }
+
+        $values = [];
+
+        foreach ($fieldDefs as $def) {
+            // Skip ~30 % of fields on any given category for sparse realism.
+            if (fake()->boolean(30)) {
+                continue;
+            }
+
+            $values[$def['handle']] = $this->fakeFieldValue($def['type']);
+        }
+
+        return $values;
+    }
+
+    /**
+     * Generate a single plausible fake value for a given field type class.
+     * Matched on the short class name so new types in App\Field\Types are
+     * covered by the default arm without requiring changes here.
+     */
+    private function fakeFieldValue(string $typeClass): mixed
+    {
+        return match (true) {
+            str_ends_with($typeClass, 'Textarea'),
+            str_ends_with($typeClass, 'Html') => fake()->paragraph(),
+            str_ends_with($typeClass, 'Text') => ucfirst(fake()->words(fake()->numberBetween(2, 4), true)),
+            str_ends_with($typeClass, 'Number') => fake()->numberBetween(1, 1000),
+            str_ends_with($typeClass, 'Boolean') => fake()->boolean(),
+            str_ends_with($typeClass, 'Date') => fake()->date(),
+            str_ends_with($typeClass, 'Url') => fake()->url(),
+            str_ends_with($typeClass, 'EmailAddress') => fake()->safeEmail(),
+            str_ends_with($typeClass, 'ColorPicker') => fake()->hexColor(),
+            str_ends_with($typeClass, 'Telephone') => fake()->phoneNumber(),
+            default => ucfirst(fake()->words(3, true)),
+        };
+    }
+
+    // =========================================================================
     // Entries
     // =========================================================================
 
@@ -163,7 +362,8 @@ class FakeDataSeeder extends Seeder
         $allUsers = collect(empty($users) ? User::all() : $users);
         $entryTypes = EntryType::with('entryGroup.statusGroup.statuses')->get()->keyBy('handle');
 
-        // Category ID pools keyed by entry-type handle
+        // Category ID pools keyed by entry-type handle — built after seedCategories()
+        // so the pools include all synthetic categories created above.
         $categoryPools = $this->buildCategoryPools();
 
         // Auth must be set for EntryRepository::create() to capture created_by_user_id.
@@ -352,9 +552,9 @@ class FakeDataSeeder extends Seeder
         };
 
         $fields = [
-            'body'             => fake()->paragraphs($paragraphCount, true),
-            'excerpt'          => fake()->paragraph(),
-            'meta_title'       => Str::limit(fake()->sentence(5, false), 55),
+            'body' => fake()->paragraphs($paragraphCount, true),
+            'excerpt' => fake()->paragraph(),
+            'meta_title' => Str::limit(fake()->sentence(5, false), 55),
             'meta_description' => Str::limit(fake()->sentence(15, false), 155),
         ];
 
@@ -363,23 +563,23 @@ class FakeDataSeeder extends Seeder
         $fields += match ($typeHandle) {
             'product' => [
                 // ProductEntryType::validate() requires a SKU when published.
-                'sku'            => strtoupper(Str::random(4)) . '-' . fake()->numberBetween(1000, 9999),
-                'price'          => fake()->randomFloat(2, 1, 500),
+                'sku' => strtoupper(Str::random(4)) . '-' . fake()->numberBetween(1000, 9999),
+                'price' => fake()->randomFloat(2, 1, 500),
                 'stock_quantity' => fake()->numberBetween(0, 200),
             ],
             'video' => [
                 // VideoEntryType::validate() requires platform_id OR video_url when published.
-                'video_url'      => fake()->url(),
+                'video_url' => fake()->url(),
                 'video_duration' => fake()->numberBetween(60, 7200),
                 'video_platform' => fake()->randomElement(['youtube', 'vimeo', 'other']),
             ],
             'job_listing' => [
                 // JobListingEntryType::validate() requires application_url OR application_email when published.
                 'application_url' => fake()->url(),
-                'department'      => fake()->randomElement([
+                'department' => fake()->randomElement([
                     'Engineering', 'Marketing', 'Sales', 'Design', 'Operations', 'HR',
                 ]),
-                'job_location'    => fake()->city() . ', ' . fake()->stateAbbr(),
+                'job_location' => fake()->city() . ', ' . fake()->stateAbbr(),
             ],
             default => [],
         };
