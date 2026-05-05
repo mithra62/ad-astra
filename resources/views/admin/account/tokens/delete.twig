@@ -1,94 +1,80 @@
-{{ include('admin._inc._header', {title: 'Delete API Token'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb start -->
-        <div class="row m-1">
-            <div class="col-12 ">
-                <h4 class="main-title">API Tokens</h4>
-                <ul class="app-line-breadcrumbs mb-3">
-                    <li class="">
-                        <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                            <span>
-                                <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
-                            </span>
-                        </a>
-                    </li>
-                    <li class="">
-                        <a class="f-s-14 f-w-500" href="{{ route('account.settings') }}">Account Settings</a>
-                    </li>
-                    <li class="">
-                        <a class="f-s-14 f-w-500" href="{{ route('account.tokens.index') }}">API Tokens</a>
-                    </li>
-                    <li class="active">
-                        <a class="f-s-14 f-w-500" href="{{ route('account.tokens.confirm', {token_id: token}) }}">Delete
-                            API Token</a>
-                    </li>
-                </ul>
+{% extends 'admin._inc._layout' %}
+
+{% set page_title = 'Access Tokens' %}
+{% set page_heading = 'Access Tokens' %}
+{% set active_nav = 'account' %}
+{% set active_secondary_nav = 'settings' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="#">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">Account Setting</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.account._sidebar', {active: 'tokens'}) }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Delete Access Token</h1>
+            <p class="mt-1 text-sm text-slate-500">Review ownership and access before removing this account.</p>
+        </div>
+        <a href="" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">Cancel</a>
+    </div>
+
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div class="flex items-start gap-3">
+            <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            <div>
+                <p class="text-sm font-semibold text-red-800">This action cannot be undone.</p>
+                <p class="mt-1 text-sm text-red-700">Deleting {{ token.name }} removes the Category from all Entries and Category Groups.</p>
             </div>
         </div>
-        <!-- Breadcrumb end -->
-        {{ include('admin._inc._message') }}
-        <!-- setting-app start -->
-        <div class="row">
-            {{ include('admin.account._sidebar', {active: 'tokens'}) }}
-
-            <div class="col-lg-8 col-xxl-9">
-                <div class="tab-content">
-
-                    <!-- Change Token Management start -->
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header d-flex flex-column gap-2">
-                                <div class="row">
-                                    <h5>Access Tokens</h5>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <form method="POST" action="{{ route('account.tokens.destroy', {token_id: token}) }}"
-                                      class="row g-3 needs-validation" novalidate>
-                                    {{ csrf_field() }}
-                                    {{ method_field('DELETE') }}
-                                    <div class="col-md-12">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <h5>Delete User Token</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <h6>Are you sure you want to remove this API token?</h6>
-                                                <p class="text-secondary">Deletes cannot be reversed!</p>
-                                            </div>
-                                            <div class="card-footer">
-                                                <div
-                                                    class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
-                                                    <input class="toggle switch-border-primary" name="confirm_removal"
-                                                           id="confirm_removal"
-                                                           type="checkbox">
-                                                    <label for="confirm_removal">Confirm Removal</label>
-                                                    {% if errors.has('confirm_removal') %}
-                                                        <p class="text-danger">{{ errors.first('confirm_removal') }}</p>
-                                                    {% endif %}
-                                                </div>
-
-                                                <div class="col-12 float-end">
-                                                    <button class="btn btn-primary float-end" type="submit">Delete API
-                                                        Token
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+    </div>
+    <form method="POST" action="{{ route('account.tokens.destroy', {token_id: token_id}) }}"
+          class="row g-3 needs-validation" novalidate>
+        {{ csrf_field() }}
+        {{ method_field('DELETE') }}
+        <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Access Token Being Deleted</h5></div>
+                    <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-slate-500">Name</dt>
+                            <dd class="font-semibold text-slate-900">{{ token.name }}</dd>
                         </div>
-                    </div>
-                    <!-- Change Token Management end -->
 
+                    </dl>
+                </div>
+            </div>
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-red-200 bg-white shadow-sm">
+                    <div class="border-b border-red-100 bg-red-50 px-5 py-3"><h5 class="text-sm font-semibold text-red-800">Confirm Deletion</h5></div>
+                    <div class="mb-4 rounded-md bg-slate-50 px-4 py-3 text-sm text-slate-700">Select the toggle to confirm deletion of <strong>{{ status.name }}</strong>.</div>
+                    <label class="flex cursor-pointer items-center justify-between gap-4 rounded-md border  {% if errors.has('confirm_removal') %} bg-red-300 border-red-300{% else %}bg-slate-50 border-slate-200{% endif %} px-4 py-3">
+                        <span class="text-sm font-medium text-slate-700">I understand this Status will be permanently deleted</span>
 
+                        <input class="peer sr-only" type="checkbox" name="confirm_removal" required>
+                        <span class="h-6 w-11 shrink-0 rounded-full bg-slate-300 after:mt-1 after:ml-1 after:block after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow after:transition after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-red-500"></span>
+                    </label>
+                    <button id="delete-btn" type="submit" class="mt-5 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Permanently Delete Access Token</button>
+                    <a href="" class="mt-2 block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">Back to Edit</a>
                 </div>
             </div>
         </div>
-        <!--setting app end -->
-    </div>
-</main>
-{{ include('admin._inc._footer') }}
+    </form>
+{% endblock %}
