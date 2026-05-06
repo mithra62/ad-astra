@@ -51,7 +51,7 @@ class Group extends Controller
 
     public function show(string $id)
     {
-        $group = EntryGroup::with([
+        $group = EntryGroup::withCount('entries')->with([
             'entryTypes',
             'statusGroup.statuses',
         ])->find($id);
@@ -60,16 +60,24 @@ class Group extends Controller
             abort(404);
         }
 
-        $allGroups = EntryGroup::with('entries')->ordered()->get();
+        // One query keyed by status_id — replaces per-status lazy queries in the view.
+        $statusCounts = $group->entries()
+            ->selectRaw('status_id, COUNT(*) as count')
+            ->groupBy('status_id')
+            ->pluck('count', 'status_id')
+            ->toArray();
+
+        $allGroups = EntryGroup::withCount('entries')->ordered()->get();
         $entries = $group->entries()
-            ->with(['authors', 'status', 'entryGroup'])
+            ->with(['authors', 'status', 'entryType'])
             ->latest()
             ->paginate(20);
 
         return $this->view('entries.groups.view', [
-            'group' => $group,
-            'groups' => $allGroups,
-            'entries' => $entries,
+            'group'        => $group,
+            'groups'       => $allGroups,
+            'entries'      => $entries,
+            'statusCounts' => $statusCounts,
         ]);
     }
 
@@ -88,7 +96,7 @@ class Group extends Controller
             abort(404);
         }
 
-        $allGroups = EntryGroup::with('entries')->ordered()->get();
+        $allGroups = EntryGroup::withCount('entries')->ordered()->get();
 
         return $this->view('entries.groups.edit', array_merge(
             $this->formData(),
@@ -139,7 +147,7 @@ class Group extends Controller
             return redirect()->route('entries.groups')->with('failure', trans('entry.group.not_found'));
         }
 
-        $allGroups = EntryGroup::with('entries')->ordered()->get();
+        $allGroups = EntryGroup::withCount('entries')->ordered()->get();
 
         return $this->view('entries.groups.delete', [
             'group' => $group,

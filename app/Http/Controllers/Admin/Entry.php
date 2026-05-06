@@ -51,7 +51,7 @@ class Entry extends Controller
             abort(404);
         }
 
-        $allGroups = EntryGroup::ordered()->get();
+        $allGroups = EntryGroup::withCount('entries')->ordered()->get();
         $users = Users::getForDropdown(10);
 
         return $this->view('entries.create', [
@@ -78,7 +78,7 @@ class Entry extends Controller
             'entryType.fieldLayout.tabs.elements.field.fieldType',
         ]);
 
-        $allGroups = EntryGroup::ordered()->get();
+        $allGroups = EntryGroup::withCount('entries')->ordered()->get();
         $users = Users::getForDropdown(10);
 
         return $this->view('entries.edit', [
@@ -131,7 +131,7 @@ class Entry extends Controller
             abort(404);
         }
 
-        $allGroups = EntryGroup::ordered()->get();
+        $allGroups = EntryGroup::withCount('entries')->ordered()->get();
 
         return $this->view('entries.delete', [
             'entry' => $entry,

@@ -63,13 +63,13 @@
                 <div class="flex w-full min-w-max divide-x divide-slate-200">
                     <div class="min-w-36 flex-1 p-4 sm:min-w-44 sm:p-5">
                         <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Total</p>
-                        <p class="mt-1.5 text-3xl font-semibold text-slate-900">{{ group.entries.count }}</p>
+                        <p class="mt-1.5 text-3xl font-semibold text-slate-900">{{ group.entries_count }}</p>
                     </div>
                     {% if group.statusGroup.statuses.count >= 1 %}
                         {% for status in group.statusGroup.statuses %}
                             <div class="min-w-36 flex-1 p-4 sm:min-w-44 sm:p-5">
                                 <p class="truncate text-xs font-medium uppercase tracking-wide text-slate-500" title="{{ status.name }}">{{ status.name }}</p>
-                                <p class="mt-1.5 text-3xl font-semibold text-slate-900">{{ group.entries().where('status_id', status.id).count() }}</p>
+                                <p class="mt-1.5 text-3xl font-semibold text-slate-900">{{ statusCounts[status.id]|default(0) }}</p>
                             </div>
                         {% endfor %}
                     {% endif %}
