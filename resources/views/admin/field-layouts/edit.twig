@@ -1,169 +1,244 @@
-{{ include('admin._inc._header', {title: 'Edit Field Layout'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb start -->
-        <div class="row m-1">
-            <div class="col-12">
-                <h5>Field Layouts</h5>
-                <div class="col-6">
-                    <ul class="app-line-breadcrumbs mb-3">
-                        <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                                <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts') }}">Field Layouts</a>
-                        </li>
-                        <li class="active">
-                            <a class="f-s-14 f-w-500"
-                               href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
-                        </li>
-                    </ul>
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._form-fields' as forms %}
+
+{% set page_title = 'Field Layouts' %}
+{% set page_heading = 'Field Layouts' %}
+{% set active_nav = 'settings' %}
+{% set active_secondary_nav = 'field_layouts' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="#">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('categories.groups') }}">
+            Field Layouts
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">{{ layout.name }}</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.field-layouts._sidebar', {active: category.group.id}) }}
+{% endblock %}
+
+{% block content %}
+    <div id="unsaved-bar" class="unsaved-bar items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-2">
+        <span class="flex items-center gap-2 text-sm text-amber-800">
+            <svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            You have unsaved changes.
+        </span>
+        <button type="submit" form="general-create-form" class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Save Now</button>
+    </div>
+
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Edit Field Layout</h1>
+                <p class="mt-1 text-sm text-slate-500">Create a reusable status, field, label, or option for content workflows.</p>
+            </div>
+            <a href="" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Field Layouts
+            </a>
+        </div>
+
+        <div class="rounded-lg border border-sky-200 bg-sky-50 p-4">
+            <div class="flex items-start gap-3">
+                <svg class="mt-0.5 h-5 w-5 shrink-0 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div>
+                    <p class="text-sm font-semibold text-sky-800">Create a new reusable item.</p>
+                    <p class="mt-1 text-sm text-sky-700">Handles should be stable once this item is used by content or templates.</p>
                 </div>
             </div>
         </div>
-        <!-- Breadcrumb end -->
-        {{ include('admin._inc._message') }}
 
-        <div class="row">
-            {{ include('admin.field-layouts._sidebar', {active: layout.id}) }}
-            <div class="col-lg-8 col-xxl-9">
-
-                <!-- Layout Settings Form -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5>Layout Settings</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ route('field-layouts.update', layout) }}"
-                              class="row g-3 needs-validation" novalidate>
-                            {{ csrf_field() }}
-                            {{ method_field('PUT') }}
-                            <input type="hidden" name="id" value="{{ layout.id }}"/>
-
-                            <div class="col-md-12">
-                                <label class="form-label" for="name">Name</label>
-                                <input class="form-control" id="name" required type="text"
-                                       value="{{ old('name', layout.name) }}" name="name">
-                                {% if errors.has('name') %}<p
-                                    class="text-danger">{{ errors.first('name') }}</p>{% endif %}
-                            </div>
-
-                            <div class="col-12">
-                                <button class="btn btn-primary float-end" type="submit">Save Layout</button>
-                            </div>
-                        </form>
-                    </div>
+        <form id="general-create-form" method="POST" action="{{ route('field-layouts.update', layout) }}" class="flex w-full min-w-0 flex-col gap-5">
+            {{ csrf_field() }}
+            {{ method_field('PUT') }}
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3">
+                    <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
                 </div>
+                <div class="space-y-5 px-5 py-5">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
+                        <input value="{{ old('name', layout.name) }}" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
+                        {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
+                    </div>
 
-                <!-- Used By -->
-                {% set usedByGroups = layout.entryGroups %}
-                {% set usedByTypes  = layout.entryTypes %}
-                {% if usedByGroups.count >= 1 or usedByTypes.count >= 1 %}
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">Used By</h5>
-                            <small class="text-secondary">Entry groups and types that use this field layout.</small>
-                        </div>
-                        <div class="card-body">
-                            {% if usedByGroups.count >= 1 %}
-                                <p class="mb-1"><strong>Entry Groups (shared layout):</strong></p>
-                                <ul class="mb-3">
-                                    {% for eg in usedByGroups %}
-                                        <li>
-                                            <a href="{{ route('entries.groups.edit', eg) }}">{{ eg.name }}</a>
-                                            <small class="text-secondary">({{ eg.handle }})</small>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                            {% if usedByTypes.count >= 1 %}
-                                <p class="mb-1"><strong>Entry Types (type-specific layout):</strong></p>
-                                <ul class="mb-0">
-                                    {% for et in usedByTypes %}
-                                        <li>
-                                            <a href="{{ route('entries.groups.types.edit', {group_id: et.entryGroup.id, type_id: et.id}) }}">{{ et.name }}</a>
-                                            <small class="text-secondary">in {{ et.entryGroup.name ?? '?' }}</small>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                        </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
+                        <input value="{{ old('handle', layout.handle) }}" class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" >
+                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
+                        {% if errors.has('handle') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>{% endif %}
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <a href="" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Cancel</a>
+                <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Edit Field Layout</button>
+            </div>
+        </form>
+
+        {% set usedByGroups = layout.entryGroups %}
+        {% set usedByTypes  = layout.entryTypes %}
+        {% if usedByGroups.count >= 1 or usedByTypes.count >= 1 %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Used By</h5>
+                    <small class="text-secondary">Entry groups and types that use this field layout.</small>
+                </div>
+                <div class="card-body">
+                    {% if usedByGroups.count >= 1 %}
+                        <p class="mb-1"><strong>Entry Groups (shared layout):</strong></p>
+                        <ul class="mb-3">
+                            {% for eg in usedByGroups %}
+                                <li>
+                                    <a href="{{ route('entries.groups.edit', eg) }}">{{ eg.name }}</a>
+                                    <small class="text-secondary">({{ eg.handle }})</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% if usedByTypes.count >= 1 %}
+                        <p class="mb-1"><strong>Entry Types (type-specific layout):</strong></p>
+                        <ul class="mb-0">
+                            {% for et in usedByTypes %}
+                                <li>
+                                    <a href="{{ route('entries.groups.types.edit', {group_id: et.entryGroup.id, type_id: et.id}) }}">{{ et.name }}</a>
+                                    <small class="text-secondary">in {{ et.entryGroup.name ?? '?' }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-warning mb-4">
+                <strong>This layout is not assigned anywhere.</strong>
+                Assign it to an <a href="{{ route('entries.groups') }}">entry group</a> or entry type to use it
+                on entry forms.
+            </div>
+        {% endif %}
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+
+            </div>
+            <a href="{{ route('field-layouts.tabs.create', layout) }}" class="inline-flex items-center gap-1.5 self-start rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 sm:self-auto">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                Create Tab
+            </a>
+        </div>
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-5 py-3">
+                <h5 class="text-sm font-semibold text-slate-700">Tabs</h5>
+            </div>
+            <div class="space-y-5 px-5 py-5">
+                {% if layout.tabs.count >= 1 %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <tr>
+                                <th class="px-5 py-3" scope="col">Name</th>
+                                <th class="hidden px-5 py-3 sm:table-cell" scope="col">Fields</th>
+                                <th class="hidden px-5 py-3 lg:table-cell" scope="col">Sort Order</th>
+                                <th class="px-5 py-3 text-right" scope="col">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-white">
+                            {% for tab in layout.tabs %}
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-5 py-3.5">
+                                        <a class="font-medium text-slate-900 hover:text-emerald-700" href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}">{{ tab.name }} <span class="mt-0.5 font-mono text-xs text-slate-400">{{ tab.handle }}</span></a>
+                                        <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
+                                            <a href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}" class="text-emerald-600 hover:underline">View</a>
+                                            <span class="text-slate-300">|</span>
+                                            <a href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}" class="text-emerald-600 hover:underline">Edit</a>
+                                            <span class="text-slate-300">|</span>
+                                            <a href="{{ route('field-layouts.tabs.confirm', {layout_id: layout.id, tab_id: tab.id}) }}" class="text-red-500 hover:underline">Delete</a>
+                                        </div>
+                                    </td>
+                                    <td class="hidden px-5 py-3.5 text-slate-600 sm:table-cell">
+                                        {{ tab.elements.count }}
+                                    </td>
+                                    <td class="px-5 py-3.5">
+                                        {{ tab.sort_order }}
+                                    </td>
+                                    <td class="px-5 py-3.5">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <a href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}" class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" title="Edit">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                                <span class="sr-only">Edit</span>
+                                            </a>
+                                            <a href="{{ route('field-layouts.tabs.confirm', {layout_id: layout.id, tab_id: tab.id}) }}" class="inline-flex items-center justify-center rounded-md border border-red-100 p-1.5 text-red-400 hover:border-red-300 hover:bg-red-50 hover:text-red-600" title="Delete">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                <span class="sr-only">Delete</span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 {% else %}
-                    <div class="alert alert-warning mb-4">
-                        <strong>This layout is not assigned anywhere.</strong>
-                        Assign it to an <a href="{{ route('entries.groups') }}">entry group</a> or entry type to use it
-                        on entry forms.
+                    <div class="flex min-h-80 items-center justify-center px-6 py-14">
+                        <div class="max-w-sm text-center">
+                            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                                </svg>
+                            </div>
+                            <h2 class="mt-4 text-base font-semibold text-slate-900">No Tabs found</h2>
+                            <p class="mt-1 text-sm text-slate-500">Create your first entry or adjust the filters to broaden the list.</p>
+                            <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                                <a href="" class="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Create Child Category
+                                </a>
+                                <a class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50" href="index.twig">Clear filters</a>
+                            </div>
+                        </div>
                     </div>
                 {% endif %}
-
-                <!-- Tabs Management -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h5 class="mb-0">Tabs</h5>
-                                <small class="text-secondary">Tabs group fields visually when editing an entry.</small>
-                            </div>
-                            <div class="col-auto">
-                                <a href="{{ route('field-layouts.tabs.create', layout) }}"
-                                   class="btn btn-primary btn-sm">
-                                    Add Tab
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table align-middle mb-0">
-                                <thead>
-                                <tr>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Fields</th>
-                                    <th scope="col">Sort Order</th>
-                                    <th scope="col"></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% if layout.tabs.count >= 1 %}
-                                    {% for tab in layout.tabs %}
-                                        <tr>
-                                            <td><strong>{{ tab.name }}</strong></td>
-                                            <td class="f-w-500">{{ tab.elements.count }}</td>
-                                            <td class="text-secondary">{{ tab.sort_order }}</td>
-                                            <td>
-                                                <a class="btn btn-success icon-btn b-r-4"
-                                                   href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}">
-                                                    <i class="ti ti-edit"></i>
-                                                </a>
-                                                <a class="btn btn-danger icon-btn b-r-4"
-                                                   href="{{ route('field-layouts.tabs.confirm', {layout_id: layout.id, tab_id: tab.id}) }}">
-                                                    <i class="ti ti-trash"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                {% else %}
-                                    <tr>
-                                        <td colspan="4">
-                                            <p class="text-center mb-0">
-                                                No tabs configured. <a
-                                                    href="{{ route('field-layouts.tabs.create', layout) }}">Add one
-                                                    now.</a>
-                                            </p>
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
-</main>
-{{ include('admin._inc._footer') }}
+{% endblock %}
+
+
+
+
+
+
+
+
+

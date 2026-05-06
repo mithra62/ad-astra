@@ -4,6 +4,7 @@ namespace App\Http\Requests\FieldLayout;
 
 use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class EditFieldLayoutRequest extends FormRequest
 {
@@ -15,8 +16,18 @@ class EditFieldLayoutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => ['required', 'integer', 'exists:field_layouts,id'],
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required',
+                'string',
+                'max:255'
+            ],
+            'handle' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('field_layouts', 'handle')->ignore($this->route()->parameter('id')),
+            ],
+
         ];
     }
 }
