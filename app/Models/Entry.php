@@ -150,6 +150,29 @@ class Entry extends Model
         return $this->hasOne(EntryTree::class);
     }
 
+    /**
+     * Return the fully-qualified public URL for this entry's tree node, or null
+     * if the entry has no tree node (i.e. the type does not use Entry Tree routing,
+     * or the node has not been created yet).
+     *
+     * Loads the entryTree relation on demand so it is safe to call on any entry
+     * instance regardless of how it was fetched — no prior eager-load required.
+     *
+     * Examples:
+     *   $entry->treeUrl()  // "https://example.com/about/team"
+     *   $entry->treeUrl()  // null  (non-tree entry or missing node)
+     */
+    public function treeUrl(): ?string
+    {
+        $this->loadMissing('entryTree');
+
+        if (! $this->entryTree) {
+            return null;
+        }
+
+        return url($this->entryTree->url);
+    }
+
     public function metrics(): HasMany
     {
         return $this->hasMany(EntryMetric::class);

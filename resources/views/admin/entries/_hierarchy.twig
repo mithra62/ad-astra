@@ -6,14 +6,14 @@
             <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Hierarchy</h5>
             <div class="space-y-4">
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="parent_entry">Parent Entry</label>
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="parent_id">Parent Entry</label>
                     <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                            id="parent_entry" name="parent_entry" data-tab-dirty="structure">
+                            id="parent_id" name="parent_id" data-tab-dirty="structure">
                         <option value="">— None (top-level) —</option>
-                        <option value="1">Getting Started</option>
-                        <option value="2">Product Updates</option>
-                        <option value="3">Engineering Blog</option>
-                        <option value="4">Company News</option>
+                        <option value="22060" {% if old('parent_id') == 22060 %} selected {% endif %}>Vel Fugiat Nemo Animi.</option>
+                        <option value="22004" {% if old('parent_id') == 22004 %} selected {% endif %}>Possimus Ut Architecto Ut Atque Fugit Est.</option>
+                        <option value="21970" {% if old('parent_id') == 21970 %} selected {% endif %}>Aut Soluta Dolor Nostrum Explicabo Et Aut.</option>
+                        <option value="21922" {% if old('parent_id') == 21922 %} selected {% endif %}>Ullam Id Corporis Rem Dolores Dolorem.</option>
                     </select>
                     <p class="mt-1 text-xs text-slate-400">Leave blank to place at the top level.</p>
                 </div>
