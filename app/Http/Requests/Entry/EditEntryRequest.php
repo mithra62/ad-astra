@@ -42,6 +42,13 @@ class EditEntryRequest extends FormRequest
                 'categories' => ['nullable', 'array'],
                 'categories.*' => ['integer', 'exists:categories,id'],
                 'fields' => ['nullable', 'array'],
+                // Entry Tree fields — only used when the entry's type has has_entry_tree = true.
+                // parent_id references the *entry* ID of the desired parent; the service
+                // resolves its tree node. Using entry_trees.entry_id ensures the parent
+                // entry actually has a tree node before we attempt to attach to it.
+                'parent_id' => ['nullable', 'integer', 'exists:entry_trees,entry_id'],
+                'template'  => ['nullable', 'string', 'max:255'],
+                'is_home'   => ['nullable', 'boolean'],
             ],
             $this->schemaFieldRules($groupSchema),
             $this->schemaFieldRules($typeSchema)

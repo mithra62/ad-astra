@@ -57,7 +57,16 @@ class EntryService extends AbstractService
             throw ValidationException::withMessages($errors);
         }
 
-        return $this->repository->applyData($entry, $data);
+        $entry = $this->repository->applyData($entry, $data);
+
+        // applyData calls refresh() which clears loaded relations — reload before tree sync.
+        $entry->loadMissing('entryType');
+        if ($entry->entryType->has_entry_tree) {
+            $entry->loadMissing('entryTree');
+            $this->syncTreeNode($entry, $data);
+        }
+
+        return $entry;
     }
 
     /**
@@ -421,7 +430,20 @@ class EntryService extends AbstractService
             throw ValidationException::withMessages($errors);
         }
 
-        return $this->repository->create($entryType, $data);
+        $entry = $this->repository->create($entryType, $data);
+
+        if ($entryType->getRecord()->has_entry_tree && filled($entry->handle)) {
+            $parentNode = $this->resolveTreeParentNode($data['parent_id'] ?? null);
+            $this->createTreeNode(
+                entry: $entry,
+                handle: $entry->handle,
+                parent: $parentNode,
+                template: $data['template'] ?? null,
+                isHome: (bool) ($data['is_home'] ?? false),
+            );
+        }
+
+        return $entry;
     }
 
     private function treeNextSortOrder(?EntryTree $parent): int
@@ -432,6 +454,88 @@ class EntryService extends AbstractService
     }
 
     // -- Tree helpers (private) ------------------------------------------------
+
+    /**
+     * Synchronise the Entry Tree node for an existing entry after an update.
+     *
+     * Three mutations are handled independently:
+     *   - Handle changed  → update node handle + rebuild URI for the whole subtree.
+     *   - Parent changed  → moveTreeNode (which rebalances siblings and rebuilds URIs).
+     *   - Template changed → direct column update.
+     *
+     * If no tree node exists yet, one is created (first save after has_entry_tree
+     * is enabled on the type, or a missed create).
+     */
+    private function syncTreeNode(Entry $entry, array $data): void
+    {
+        $node = $entry->entryTree;
+
+        if (! $node) {
+            if (! filled($entry->handle)) {
+                return;
+            }
+            $parentNode = $this->resolveTreeParentNode($data['parent_id'] ?? null);
+            $this->createTreeNode(
+                entry: $entry,
+                handle: $entry->handle,
+                parent: $parentNode,
+                template: $data['template'] ?? null,
+                isHome: (bool) ($data['is_home'] ?? false),
+            );
+            return;
+        }
+
+        $handleChanged = false;
+        $dirty         = false;
+
+        // Sync tree handle with the entry's (potentially renamed) handle.
+        $normalizedHandle = EntryTree::normalizeHandle($entry->handle);
+        if ($normalizedHandle !== '' && $node->handle !== $normalizedHandle) {
+            $node->handle = $normalizedHandle;
+            $handleChanged = true;
+            $dirty         = true;
+        }
+
+        // Sync template when the caller explicitly included the key.
+        if (array_key_exists('template', $data) && $node->template !== $data['template']) {
+            $node->template = $data['template'];
+            $dirty = true;
+        }
+
+        if ($dirty) {
+            $node->save();
+        }
+
+        // Sync parent — moveTreeNode rebalances siblings and rebuilds all URIs,
+        // so return early to avoid a redundant rebuildTreeUri call below.
+        if (array_key_exists('parent_id', $data)) {
+            $newParentNode = $this->resolveTreeParentNode($data['parent_id'] ?? null);
+            if ($node->parent_id !== $newParentNode?->id) {
+                $this->moveTreeNode($node->fresh(), $newParentNode);
+                return;
+            }
+        }
+
+        // If only the handle changed (no parent move), rebuild URIs for this
+        // node and every descendant so their stored `uri` values stay accurate.
+        if ($handleChanged) {
+            $this->rebuildTreeUri($node->fresh());
+        }
+    }
+
+    /**
+     * Resolve the EntryTree node belonging to a parent entry, identified by the
+     * parent entry's ID. Returns null when no ID is given or the entry has no
+     * tree node yet.
+     */
+    private function resolveTreeParentNode(?int $parentEntryId): ?EntryTree
+    {
+        if (! $parentEntryId) {
+            return null;
+        }
+
+        return Entry::find($parentEntryId)?->entryTree;
+    }
 
     private function treeBuildUri(EntryTree $node): string
     {
