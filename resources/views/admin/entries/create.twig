@@ -1,67 +1,9 @@
-{% extends 'admin._inc._layout' %}
-{% import 'admin._inc._form-fields' as forms %}
+{% extends 'templates::tailwind2.layout' %}
 
-{% set page_title = 'Create Entry' %}
-{% set page_heading = 'Create Entry - ' ~ entryType.name %}
+{% set page_title = 'Create Article' %}
+{% set page_heading = 'Create Article' %}
 {% set active_nav = 'articles' %}
 {% set has_secondary_sidebar = true %}
-
-{% set form_tabs = [
-    {
-        handle: 'basics',
-        label: 'Basics',
-        description: 'Core entry details and publishing identity.',
-        fields: [
-        { id: 'dynamic_title', label: 'Title', name: 'title', type: 'text', placeholder: 'Enter article title' },
-        { id: 'dynamic_handle', label: 'Slug', name: 'handle', type: 'text', placeholder: 'auto-generated-from-title' }
-    ]
-    },
-    {
-        handle: 'story',
-        label: 'Story',
-        description: 'Editorial content fields for this entry.',
-        fields: [
-        { id: 'dynamic_summary', label: 'Summary', name: 'summary', type: 'textarea', placeholder: 'Short listing summary' },
-        { id: 'dynamic_body', label: 'Body', name: 'body', type: 'textarea', placeholder: 'Write the article body' }
-    ]
-    },
-    {
-        handle: 'media',
-        label: 'Media',
-        description: 'Media metadata and featured asset fields.',
-        fields: [
-        { id: 'dynamic_featured_image', label: 'Featured image URL', name: 'featured_image', type: 'url', placeholder: 'https://example.com/image.jpg' },
-        { id: 'dynamic_caption', label: 'Caption', name: 'caption', type: 'text', placeholder: 'Image caption' }
-    ]
-    },
-    {
-        handle: 'taxonomy',
-        label: 'Taxonomy',
-        description: 'Categorization values for discovery.',
-        fields: [
-        { id: 'dynamic_primary_category', label: 'Primary category', name: 'primary_category', type: 'text', placeholder: 'News' },
-        { id: 'dynamic_tags', label: 'Tags', name: 'tags', type: 'text', placeholder: 'release, product, guide' }
-    ]
-    },
-    {
-        handle: 'seo',
-        label: 'SEO',
-        description: 'Search and sharing metadata.',
-        fields: [
-        { id: 'dynamic_meta_title', label: 'Meta title', name: 'meta_title', type: 'text', placeholder: 'Defaults to article title' },
-        { id: 'dynamic_meta_description', label: 'Meta description', name: 'meta_description', type: 'textarea', placeholder: 'Description shown in search results' }
-    ]
-    },
-    {
-        handle: 'review',
-        label: 'Review',
-        description: 'Final editorial checks before saving.',
-        fields: [
-        { id: 'dynamic_review_notes', label: 'Review notes', name: 'review_notes', type: 'textarea', placeholder: 'Internal notes for editors' },
-        { id: 'dynamic_ready', label: 'Ready for review', name: 'ready_for_review', type: 'checkbox', placeholder: '' }
-    ]
-    }
-] %}
 
 {% block breadcrumbs %}
     <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
@@ -74,153 +16,158 @@
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('entries.groups') }}">
-            Entry Groups
-        </a>
+        <a class="hover:text-slate-800" href="index.twig">Articles</a>
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('entries.groups.show', group) }}">{{ group.name }}</a>
-
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-slate-800">Create Entry</span>
+        <span class="text-slate-800">New Article</span>
     </nav>
 {% endblock %}
 
 {% block secondary_sidebar %}
-    {{ include('admin.entries._sidebar', {active: group.id}) }}
+    <!-- Desktop secondary nav card -->
+    <aside class="hidden h-fit lg:block">
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-4 py-3">
+                <h5 class="text-sm font-semibold text-slate-700">Articles</h5>
+            </div>
+            <nav class="p-2">
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="#">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/></svg>
+                    All Articles
+                </a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="#">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    New Article
+                </a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="#">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h10M7 11h6m-9 8h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    Categories
+                </a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="#">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a2 2 0 014-4z"/></svg>
+                    Tags
+                </a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="#">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    Authors
+                </a>
+                <div class="my-2 border-t border-slate-100"></div>
+                <p class="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Settings</p>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="#">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Edit Entry Group
+                </a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="#">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    Edit Entry Type
+                </a>
+            </nav>
+        </div>
+    </aside>
 {% endblock %}
 
 {% block content %}
     <!-- ── Form content ─────────────────────────────────────────── -->
     <div class="flex min-w-0 flex-col gap-5">
+
+        <!-- Page title + back link -->
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Create Article</h1>
-                <p class="mt-1 text-sm text-slate-500">This form renders six tabs from a Twig collection; the JavaScript works the same with any count.</p>
+                <p class="mt-1 text-sm text-slate-500">Fill in the details below and save when ready.</p>
             </div>
-            <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto" href="index.twig">
+            <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto" href="#">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                 Back to Articles
             </a>
         </div>
 
-        <form id="dynamic-article-form" method="POST" action="#" class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm" data-tabs>
-                <div class="border-b border-slate-200 bg-slate-50">
-                    <div class="flex overflow-x-auto" role="tablist" aria-label="Article field layout tabs">
-                        {% set layout = entryType.fieldLayout %}
-                        {% if layout and layout.tabs.count >= 1 %}
-                            {% for tab in layout.tabs %}
-                                <button type="button"
-                                        id="dynamic-tab-{{ tab.name }}"
-                                        role="tab"
-                                        aria-controls="dynamic-panel-{{ tab.name }}"
-                                        aria-selected="{{ loop.first ? 'true' : 'false' }}"
-                                        data-tab-target="{{ tab.name }}"
-                                        class="inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-2.5 text-sm transition-colors {{ loop.first ? 'border-emerald-600 bg-white font-semibold text-emerald-700' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' }}">
-                                    {{ tab.name }}
-                                </button>
-                            {% endfor %}
-                        {% endif %}
+        <!-- Two-column form -->
+        <form id="article-form" method="POST" action="#"
+              class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
 
-                        <!-- Group-level Field Layout (shared fields) -->
-                        {% set groupLayout = group.fieldLayout %}
-                        {% if groupLayout and groupLayout.tabs.count >= 1 %}
-                            {% for tab in groupLayout.tabs %}
-                                <button type="button"
-                                        id="dynamic-tab-{{ tab.name }}"
-                                        role="tab"
-                                        aria-controls="dynamic-panel-{{ tab.name }}"
-                                        aria-selected="{{ loop.first ? 'true' : 'false' }}"
-                                        data-tab-target="{{ tab.name }}"
-                                        class="inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-2.5 text-sm transition-colors {{ loop.first ? 'border-emerald-600 bg-white font-semibold text-emerald-700' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' }}">
-                                    {{ tab.name }}
-                                </button>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-                </div>
+            <!-- ── Left: tabbed content area ───────────────────── -->
+            <div class="flex flex-col gap-0 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
 
-                {% for tab in form_tabs %}
-                    <section id="dynamic-panel-{{ tab.name }}"
-                             role="tabpanel"
-                             aria-labelledby="dynamic-tab-{{ tab.name }}"
-                             data-tab-panel="{{ tab.name }}"
-                             class="space-y-5 px-5 py-5"
-                        {{ not loop.first ? 'hidden' : '' }}>
-                        <div>
-                            <h2 class="text-base font-semibold text-slate-900">{{ tab.label }}</h2>
-                            <p class="mt-1 text-sm text-slate-500">{{ tab.description }}</p>
-                        </div>
+                <!-- Tab bar -->
 
-                        <div class="grid gap-4">
-                            {% for field in tab.fields %}
-                                <div>
-                                    {% if field.type == 'checkbox' %}
-                                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700" for="{{ field.id }}">
-                                            <input id="{{ field.id }}" name="{{ field.name }}" type="checkbox" value="1" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                                            {{ field.label }}
-                                        </label>
-                                    {% else %}
-                                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field.id }}">{{ field.label }}</label>
-                                        {% if field.type == 'textarea' %}
-                                            <textarea id="{{ field.id }}" name="{{ field.name }}" rows="5" placeholder="{{ field.placeholder }}" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"></textarea>
-                                        {% else %}
-                                            <input id="{{ field.id }}" name="{{ field.name }}" type="{{ field.type }}" placeholder="{{ field.placeholder }}" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </section>
-                {% endfor %}
+fdsa
+                <!-- ░░ TAB: Content ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
 
-                <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-5 py-3">
-                    <button type="button" data-tab-prev class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40">
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                        Previous
-                    </button>
-                    <span data-tab-position class="text-xs text-slate-400">1 / {{ form_tabs|length }}</span>
-                    <button type="button" data-tab-next class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40">
-                        Next
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </button>
-                </div>
-            </div>
 
+                <!-- ░░ TAB: Structure ░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+                <!-- /tab-structure -->
+
+                <!-- ░░ TAB: Taxonomy ░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+                <!-- /tab-taxonomy -->
+
+                <!-- ░░ TAB: SEO ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+
+
+            </div><!-- /tabbed card -->
+
+            <!-- ── Right: persistent publishing panel ──────────── -->
             <div class="flex flex-col gap-4">
+
+                <!-- Publish settings -->
                 <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                     <div class="border-b border-slate-200 px-5 py-3">
                         <h5 class="text-sm font-semibold text-slate-700">Publishing</h5>
                     </div>
                     <div class="space-y-4 px-5 py-5">
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="dynamic_status">Status</label>
-                            <select id="dynamic_status" name="status" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status">Status</label>
+                            <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                    id="status" name="status">
                                 <option value="draft" selected>Draft</option>
                                 <option value="published">Published</option>
                                 <option value="scheduled">Scheduled</option>
                             </select>
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="dynamic_published_at">Publish Date</label>
-                            <input id="dynamic_published_at" name="published_at" type="datetime-local" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="published_at">Publish Date</label>
+                            <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                   id="published_at" name="published_at" type="datetime-local">
+                            <p class="mt-1 text-xs text-slate-400">Leave blank to save as draft.</p>
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="entry_type">Entry Type</label>
+                            <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                    id="entry_type" name="entry_type">
+                                <option>Standard Article</option>
+                                <option>Feature Story</option>
+                                <option>Press Release</option>
+                                <option>Opinion Piece</option>
+                            </select>
                         </div>
                     </div>
                     <div class="space-y-2 border-t border-slate-100 px-5 py-4">
-                        <button class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" type="submit">
+                        <button class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                                type="submit">
                             Save Article
                         </button>
-                        <button type="button" class="w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-50">
+                        <button type="button"
+                                class="w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-50">
                             Save as Draft
                         </button>
                     </div>
                 </div>
+
+                <!-- Unsaved changes notice (hidden by default) -->
+                <div id="unsaved-notice"
+                     class="hidden rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                    <div class="flex items-start gap-2.5">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                        <p class="text-xs text-amber-800">You have unsaved changes. Remember to save before leaving.</p>
+                    </div>
+                </div>
+
             </div>
+            <!-- /right -->
+
         </form>
+
     </div>
     <!-- /form content -->
 {% endblock %}

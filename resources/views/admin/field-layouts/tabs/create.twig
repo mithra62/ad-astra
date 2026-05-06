@@ -1,70 +1,119 @@
-{{ include('admin._inc._header', {title: 'Add Tab'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb start -->
-        <div class="row m-1">
-            <div class="col-12">
-                <h5>Field Layouts</h5>
-                <div class="col-6">
-                    <ul class="app-line-breadcrumbs mb-3">
-                        <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                                <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts') }}">Field Layouts</a>
-                        </li>
-                        <li>
-                            <a class="f-s-14 f-w-500"
-                               href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
-                        </li>
-                        <li class="active">
-                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts.tabs.create', layout) }}">Add
-                                Tab</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <!-- Breadcrumb end -->
-        {{ include('admin._inc._message') }}
+{% extends 'admin._inc._layout' %}
 
-        <div class="row">
-            {{ include('admin.field-layouts._sidebar', {active: layout.id}) }}
-            <div class="col-lg-8 col-xxl-9">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Add Tab — {{ layout.name }}</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ route('field-layouts.tabs.store', layout) }}"
-                              class="row g-3 needs-validation" novalidate>
-                            {{ csrf_field() }}
+{% set page_title = 'Field Layouts' %}
+{% set page_heading = 'Field Layouts' %}
+{% set active_nav = 'settings' %}
+{% set active_secondary_nav = 'field_layouts' %}
+{% set has_secondary_sidebar = true %}
 
-                            <div class="col-md-8">
-                                <label class="form-label" for="name">Tab Name</label>
-                                <input class="form-control" id="name" required type="text" value="{{ old('name') }}"
-                                       name="name"
-                                       placeholder="e.g. Content, SEO, Settings">
-                                {% if errors.has('name') %}<p
-                                    class="text-danger">{{ errors.first('name') }}</p>{% endif %}
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label" for="sort_order">Sort Order</label>
-                                <input class="form-control" id="sort_order" type="number"
-                                       value="{{ old('sort_order', 0) }}" name="sort_order" min="0">
-                            </div>
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="#">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('field-layouts') }}">
+            Field Layouts
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('field-layouts.edit', layout) }}">
+            {{ layout.name }}
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">Create Tab</span>
+    </nav>
+{% endblock %}
 
-                            <div class="col-12">
-                                <a href="{{ route('field-layouts.edit', layout) }}" class="btn btn-secondary">Cancel</a>
-                                <button class="btn btn-primary float-end" type="submit">Add Tab</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+{% block secondary_sidebar %}
+    {{ include('admin.field-layouts._sidebar', {active: group.id}) }}
+{% endblock %}
+
+{% block content %}
+    <div id="unsaved-bar" class="unsaved-bar items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-2">
+        <span class="flex items-center gap-2 text-sm text-amber-800">
+            <svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            You have unsaved changes.
+        </span>
+        <button type="submit" form="general-create-form" class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Save Now</button>
     </div>
-</main>
-{{ include('admin._inc._footer') }}
+
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Add Tab — {{ layout.name }}</h1>
+                <p class="mt-1 text-sm text-slate-500">Create a reusable status, field, label, or option for content workflows.</p>
+            </div>
+            <a href="{{ route('field-layouts.edit', layout) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to {{ layout.name }}
+            </a>
+        </div>
+
+        <form id="general-create-form" method="POST" action="{{ route('field-layouts.tabs.store', layout) }}" class="flex w-full min-w-0 flex-col gap-5">
+            {{ csrf_field() }}
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3">
+                    <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
+                </div>
+                <div class="space-y-5 px-5 py-5">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
+                        <input value="{{ old('name') }}" placeholder="e.g. Content, SEO, Settings" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text">
+                        {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
+                        <input class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" value="{{ old('handle') }}" >
+                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
+                        {% if errors.has('handle') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Sort Order</label>
+                        <input class="w-full rounded-md border {% if errors.has('sort_order') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="sort_order" name="sort_order" type="number" value="{{ old('sort_order', 0) }}" >
+                        {% if errors.has('sort_order') %}<p id="sort_order-error" class="mt-1 text-xs text-red-600">{{ errors.first('sort_order') }}</p>{% endif %}
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <a href="{{ route('field-layouts.edit', layout) }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Cancel</a>
+                <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Add Tab</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ forms.color_scripts() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.attachHandleGenerator) {
+                window.attachHandleGenerator('name', 'handle');
+            }
+        });
+    </script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
