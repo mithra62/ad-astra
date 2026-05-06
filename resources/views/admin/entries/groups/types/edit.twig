@@ -183,7 +183,8 @@
                                     {% if errors.has('allowed_parent_types') %}aria-invalid="true" aria-describedby="allowed_parent_types-error"{% endif %}>
                                     {% for cls in type_classes %}
                                         <option value="{{ cls }}"
-                                                {% if cls in allowed_parent_types %}selected{% endif %}
+                                            {% if cls in type.allowed_parent_types %}selected{% endif %}
+                                            {% if cls in allowed_parent_types %}selected{% endif %}
                                                 {% if old('class', type.class) == cls %}selected{% endif %}
                                         >
                                             {{ cls }}
