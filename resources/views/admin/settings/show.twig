@@ -3,8 +3,8 @@
 
 {% set page_title = 'Settings' %}
 {% set page_heading = 'Settings' %}
-{% set active_nav = 'account' %}
-{% set active_secondary_nav = 'settings' %}
+{% set active_nav = 'settings' %}
+{% set active_secondary_nav = 'system' %}
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
@@ -68,22 +68,26 @@
 
 
                 {% for groupName, fields in grouped_fields %}
-                    {% if groupName %}
-                        <div class="col-12">
-                            <h6 class="border-bottom pb-2 text-muted text-uppercase f-s-12 f-w-600">
-                                {{ groupName }}
-                            </h6>
-                        </div>
-                    {% endif %}
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">
+                            {% if groupName %}
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 text-muted text-uppercase f-s-12 f-w-600">
+                                        {{ groupName }}
+                                    </h6>
+                                </div>
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="space-y-5 px-5 py-5">
 
                     {% for field in fields %}
                         <div class="col-md-12">
                             <label class="form-label" for="field_{{ field.handle }}">
                                 {{ field.label }}
                                 {% if field.user_overridable %}
-                                    <span class="badge bg-light-primary text-primary ms-1 f-s-11">
-                                                        user overridable
-                                                    </span>
+                                    <span class="badge bg-light-primary text-primary ms-1 f-s-11">  user overridable</span>
                                 {% endif %}
                             </label>
                             {% if field.instructions %}
@@ -107,29 +111,31 @@
                                 </div>
                             {% elseif field.type == 'integer' or field.type == 'float' %}
                                 <input type="number"
-                                       class="form-control"
+                                       class="w-full rounded-md border {% if errors.has(field.handle) %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 "
                                        name="{{ field.handle }}"
                                        id="field_{{ field.handle }}"
                                        value="{{ old(field.handle, val) }}"
                                     {{ field.type == 'float' ? 'step="any"' : 'step="1"' }}>
                             {% elseif field.type == 'textarea' %}
-                                <textarea class="form-control"
+                                <textarea class="w-full rounded-md border {% if errors.has(field.handle) %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 "
                                           name="{{ field.handle }}"
                                           id="field_{{ field.handle }}"
                                           rows="4">{{ old(field.handle, val) }}</textarea>
                             {% else %}
                                 <input type="{{ field.type == 'email' ? 'email' : 'text' }}"
-                                       class="form-control"
+                                       class="w-full rounded-md border {% if errors.has(field.handle) %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 "
                                        name="{{ field.handle }}"
                                        id="field_{{ field.handle }}"
                                        value="{{ old(field.handle, val) }}">
                             {% endif %}
 
                             {% if errors.has(field.handle) %}
-                                <p class="text-danger mt-1">{{ errors.first(field.handle) }}</p>
+                                <p class="mt-1 text-xs text-red-600">{{ errors.first(field.handle) }}</p>
                             {% endif %}
                         </div>
                     {% endfor %}
+                    </div>
+                </div>
                 {% endfor %}
 
 

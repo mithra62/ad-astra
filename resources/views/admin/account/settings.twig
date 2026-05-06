@@ -3,7 +3,7 @@
 
 {% set page_title = 'Account' %}
 {% set page_heading = 'Account' %}
-{% set active_nav = 'settings' %}
+{% set active_nav = 'account' %}
 {% set active_secondary_nav = 'settings' %}
 {% set has_secondary_sidebar = true %}
 
@@ -23,7 +23,7 @@
 {% endblock %}
 
 {% block secondary_sidebar %}
-    {{ include('admin.settings._sidebar', {active: 'settings'}) }}
+    {{ include('admin.account._sidebar', {active: 'settings'}) }}
 {% endblock %}
 
 {% block content %}
@@ -58,7 +58,7 @@
         </div>
 
         {% if domains|length > 0 %}
-        <form id="general-create-form" method="POST" action="{{ route('settings.user.update') }}" class="flex w-full min-w-0 flex-col gap-5">
+        <form id="general-create-form" method="POST" action="{{ route('account.edit_settings') }}" class="flex w-full min-w-0 flex-col gap-5">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
 
@@ -67,7 +67,7 @@
 
             <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                 <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700"{{ domain.name }}</h5>
+                    <h5 class="text-sm font-semibold text-slate-700">{{ domain.name }}</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
                     {% for field in domainData.fields %}

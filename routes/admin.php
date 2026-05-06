@@ -49,7 +49,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/account', [Account::class, 'index'])->name('account');
     Route::get('/account/details', [Account::class, 'details'])->name('account.details');
     Route::get('/account/settings', [UserSettings::class, 'show'])->name('account.settings');
-    Route::post('/account/settings', [UserSettings::class, 'update'])->name('account.edit_settings');
+    Route::put('/account/settings', [UserSettings::class, 'update'])->name('account.edit_settings');
     Route::put('/account', [Account::class, 'update'])->name('account.edit');
     Route::put('/account/password', [Account::class, 'change_password'])->name('account.password.update');
     Route::get('/account/password', [Account::class, 'password'])->name('account.password');
