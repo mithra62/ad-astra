@@ -169,8 +169,6 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     // System settings
     Route::get('settings', [SettingsDomain::class, 'index'])->name('settings');
-    Route::get('settings/user', [UserSettings::class, 'show'])->name('settings.user');
-    Route::put('settings/user', [UserSettings::class, 'update'])->name('settings.user.update');
     Route::get('settings/{handle}', [SettingsDomain::class, 'show'])->name('settings.show');
     Route::put('settings/{handle}', [SettingsDomain::class, 'update'])->name('settings.update');
 

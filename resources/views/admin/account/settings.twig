@@ -3,7 +3,7 @@
 
 {% set page_title = 'Account' %}
 {% set page_heading = 'Account' %}
-{% set active_nav = 'account' %}
+{% set active_nav = 'settings' %}
 {% set active_secondary_nav = 'settings' %}
 {% set has_secondary_sidebar = true %}
 
@@ -23,7 +23,7 @@
 {% endblock %}
 
 {% block secondary_sidebar %}
-    {{ include('admin.account._sidebar', {active: 'settings'}) }}
+    {{ include('admin.settings._sidebar', {active: 'settings'}) }}
 {% endblock %}
 
 {% block content %}
