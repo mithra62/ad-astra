@@ -170,14 +170,20 @@ window.attachHandleGenerator = function (sourceId, targetId) {
     'use strict';
 
     /* ─── Tab switching ─────────────────────────────────────────────── */
-    var TABS = ['content', 'structure', 'taxonomy', 'seo'];
+    var tabsRoot = document.querySelector('[data-tabs]') || document;
+    var usesGenericTabs = tabsRoot !== document;
     var currentIdx = 0;
 
-    var buttons = document.querySelectorAll('.tab-btn');
-    var panels  = document.querySelectorAll('.tab-panel');
+    var buttons = tabsRoot.querySelectorAll('.tab-btn');
+    var panels  = tabsRoot.querySelectorAll('.tab-panel');
+    var TABS = Array.from(buttons).map(function (btn) {
+        return btn.getAttribute('data-tab-target') || btn.getAttribute('data-target') || btn.getAttribute('aria-controls');
+    });
     var prevBtn = document.getElementById('tab-prev');
     var nextBtn = document.getElementById('tab-next');
     var posEl   = document.getElementById('tab-position');
+
+    if (!buttons.length || !panels.length || !prevBtn || !nextBtn || !posEl) return;
 
     function activateTab(idx) {
         if (idx < 0 || idx >= TABS.length) return;
@@ -189,8 +195,11 @@ window.attachHandleGenerator = function (sourceId, targetId) {
             btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
         });
 
-        panels.forEach(function (panel, i) {
-            panel.classList.toggle('active', i === idx);
+        panels.forEach(function (panel) {
+            var panelTarget = panel.getAttribute('data-tab-panel') || panel.id;
+            var isActive = panelTarget === TABS[idx] || panel.id === TABS[idx];
+            panel.classList.toggle('active', isActive);
+            panel.hidden = !isActive;
         });
 
         prevBtn.disabled = (idx === 0);
@@ -198,14 +207,16 @@ window.attachHandleGenerator = function (sourceId, targetId) {
         posEl.textContent = (idx + 1) + ' / ' + TABS.length;
     }
 
-    buttons.forEach(function (btn, i) {
-        btn.addEventListener('click', function () { activateTab(i); });
-    });
+    if (!usesGenericTabs) {
+        buttons.forEach(function (btn, i) {
+            btn.addEventListener('click', function () { activateTab(i); });
+        });
 
-    prevBtn.addEventListener('click', function () { activateTab(currentIdx - 1); });
-    nextBtn.addEventListener('click', function () { activateTab(currentIdx + 1); });
+        prevBtn.addEventListener('click', function () { activateTab(currentIdx - 1); });
+        nextBtn.addEventListener('click', function () { activateTab(currentIdx + 1); });
 
-    activateTab(0);
+        activateTab(0);
+    }
 
     /* ─── Unsaved-changes dirty tracking ───────────────────────────── */
     var unsavedNotice = document.getElementById('unsaved-notice');
