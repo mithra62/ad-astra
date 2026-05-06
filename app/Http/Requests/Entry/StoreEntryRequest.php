@@ -42,6 +42,11 @@ class StoreEntryRequest extends FormRequest
                 'categories' => ['nullable', 'array'],
                 'categories.*' => ['integer', 'exists:categories,id'],
                 'fields' => ['nullable', 'array'],
+                'parent_id' => ['nullable', 'integer', 'exists:entries,id'],
+                'uri' => ['nullable', 'string', 'max:255', 'unique:entry_trees,uri'],
+                'depth' => ['nullable', 'integer', 'min:0'],
+                'sort_order' => ['nullable', 'integer', 'min:0'],
+                'template' => ['nullable', 'string', 'max:255'],
             ],
             $this->schemaFieldRules($groupSchema),
             $this->schemaFieldRules($typeSchema)

@@ -1,0 +1,80 @@
+<div id="tab-taxonomy" class="tab-panel" role="tabpanel" aria-labelledby="btn-taxonomy" data-tab-panel="taxonomy" hidden>
+
+    <div class="divide-y divide-slate-100">
+
+        <!-- Authors -->
+        <div class="px-5 py-5">
+            <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Authors</h5>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="authors">Assign Authors</label>
+            <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    id="authors" name="authors[]" multiple size="5" data-tab-dirty="taxonomy">
+                <option>Avery Stone</option>
+                <option>Morgan Lee</option>
+                <option>Riley Chen</option>
+                <option>Jordan Kim</option>
+                <option>Sam Patel</option>
+            </select>
+            <p class="mt-1 text-xs text-slate-400">Hold Ctrl / Cmd to select multiple authors.</p>
+        </div>
+
+        <!-- Categories -->
+        <div class="px-5 py-5">
+            <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Categories</h5>
+            <div class="grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-3">
+                <label class="flex items-center gap-2.5 py-2 text-sm text-slate-700">
+                    <input class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                           name="categories[]" type="checkbox" value="engineering"
+                           data-tab-dirty="taxonomy" data-badge="taxonomy"> Engineering
+                </label>
+                <label class="flex items-center gap-2.5 py-2 text-sm text-slate-700">
+                    <input class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                           name="categories[]" type="checkbox" value="product"
+                           data-tab-dirty="taxonomy" data-badge="taxonomy"> Product
+                </label>
+                <label class="flex items-center gap-2.5 py-2 text-sm text-slate-700">
+                    <input class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                           name="categories[]" type="checkbox" value="operations"
+                           data-tab-dirty="taxonomy" data-badge="taxonomy"> Operations
+                </label>
+                <label class="flex items-center gap-2.5 py-2 text-sm text-slate-700">
+                    <input class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                           name="categories[]" type="checkbox" value="support"
+                           data-tab-dirty="taxonomy" data-badge="taxonomy"> Support
+                </label>
+                <label class="flex items-center gap-2.5 py-2 text-sm text-slate-700">
+                    <input class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                           name="categories[]" type="checkbox" value="company"
+                           data-tab-dirty="taxonomy" data-badge="taxonomy"> Company
+                </label>
+                <label class="flex items-center gap-2.5 py-2 text-sm text-slate-700">
+                    <input class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                           name="categories[]" type="checkbox" value="tutorial"
+                           data-tab-dirty="taxonomy" data-badge="taxonomy"> Tutorial
+                </label>
+                <label class="flex items-center gap-2.5 py-2 text-sm text-slate-700">
+                    <input class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                           name="categories[]" type="checkbox" value="announcements"
+                           data-tab-dirty="taxonomy" data-badge="taxonomy"> Announcements
+                </label>
+                <label class="flex items-center gap-2.5 py-2 text-sm text-slate-700">
+                    <input class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                           name="categories[]" type="checkbox" value="security"
+                           data-tab-dirty="taxonomy" data-badge="taxonomy"> Security
+                </label>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="px-5 py-5">
+            <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Tags</h5>
+            <input id="tag-search"
+                   class="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                   type="text" placeholder="Filter tags…" autocomplete="off">
+            <div id="tag-cloud" class="mt-3 flex min-h-[2.5rem] flex-wrap gap-1.5"></div>
+            <div id="tag-inputs"></div>
+            <p class="mt-2 text-xs text-slate-400">Click a tag to select it. Selected tags are highlighted and submitted with the form.</p>
+        </div>
+
+    </div>
+
+</div>

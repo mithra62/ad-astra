@@ -81,6 +81,20 @@
                             {% endfor %}
                         {% endif %}
 
+                        {% if entryType.has_entry_tree %}
+                            {{ tabs.tabButton({
+                                handle: 'hierarchy',
+                                name: 'Hierarchy'
+                            }) }}
+                        {% endif %}
+
+                        {% if group.categoryGroups().count >= 1 %}
+                            {{ tabs.tabButton({
+                                handle: 'taxonomy',
+                                name: 'Taxonomy'
+                            }) }}
+                        {% endif %}
+
                     </div>
                 </div><!-- /tab bar -->
 
@@ -103,7 +117,13 @@
                     {% endfor %}
                 {% endif %}
 
+                {% if entryType.has_entry_tree %}
+                    {{ include('admin.entries._hierarchy', {active: group.id}) }}
+                {% endif %}
 
+                {% if group.categoryGroups().count >= 1 %}
+                    {{ include('admin.entries._taxonomy') }}
+                {% endif %}
 
                 <!-- Tab footer: prev/next navigation -->
                 <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-5 py-3">
