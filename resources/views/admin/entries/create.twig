@@ -166,8 +166,8 @@
                                             </option>
                                         {% endfor %}
                                     </select>
-                                    <small class="text-secondary">Only statuses from the {{ group.statusGroup.name }}
-                                        group are allowed.</small>
+                                    <p class="mt-1 text-xs text-slate-400">Only statuses from the {{ group.statusGroup.name }}
+                                        group are allowed.</p>
                                     {% if errors.has('status') %}
                                         <p class="text-danger">{{ errors.first('status') }}</p>
                                     {% endif %}
@@ -178,18 +178,18 @@
                             <label class="mb-1.5 block text-sm font-medium text-slate-700" for="published_at">Publish Date</label>
                             <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                    id="published_at" name="published_at" type="datetime-local">
-                            <p class="mt-1 text-xs text-slate-400">Leave blank to save as draft.</p>
+                            <p class="mt-1 text-xs text-slate-400">Leave blank to use status overrides.</p>
                         </div>
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="entry_type">Entry Type</label>
-                            <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                                    id="entry_type" name="entry_type">
-                                <option>Standard Article</option>
-                                <option>Feature Story</option>
-                                <option>Press Release</option>
-                                <option>Opinion Piece</option>
-                            </select>
-                        </div>
+{#                        <div>#}
+{#                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="entry_type">Entry Type</label>#}
+{#                            <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"#}
+{#                                    id="entry_type" name="entry_type">#}
+{#                                <option>Standard Article</option>#}
+{#                                <option>Feature Story</option>#}
+{#                                <option>Press Release</option>#}
+{#                                <option>Opinion Piece</option>#}
+{#                            </select>#}
+{#                        </div>#}
                     </div>
                     <div class="space-y-2 border-t border-slate-100 px-5 py-4">
                         <button class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
