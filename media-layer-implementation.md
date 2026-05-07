@@ -1,40 +1,123 @@
-# Media Layer — Implementation Plan (Clean Slate)
+# Media Layer — Implementation Plan
 
-*Written 2026-05-02. Assumes the Spatie media library has been removed and the `Media`
-model is a blank class. `Media\Library`, its table, actions, and form requests are
-already in place. All known plan bugs are corrected inline — no separate errata.*
+*Revised 2026-05-07. Written against the actual codebase state after Spatie
+MediaLibrary and Spatie Tags have been removed from `composer.json`. All step
+descriptions start from what literally exists in the files today.*
 
 ---
 
-## Starting Conditions
+## Actual Starting State
 
-**Already exists — do not touch yet:**
+### What is already in place
 
-- `app/Models/Media/Library.php` — keep `$table = 'media_libraries'` and all current columns
-- `database/migrations/2025_12_27_160903_create_media_library_table.php`
-- `app/Actions/Media/Library/` — all four actions (will update two of them in later steps)
-- `app/Http/Requests/Media/Library/` — all four requests (will fix one in a later step)
-- `app/Traits/HasFieldLayout.php`, `HasFieldGroups.php`, `HasCategoryGroups.php`
-- Field system: `AbstractField`, `FieldValue`, `Field`, `Field\Type`, `Fieldable` trait
-- `AppServiceProvider` morph map — `'media'` and `'media_library'` keys must be preserved
+**Database tables (confirmed by reading migrations):**
 
-**Assumed gone (clean slate):**
+`media` — current columns: `id`, `uuid` (nullable unique), `collection_name`,
+`name`, `file_name`, `mime_type`, `disk`, `size`, `order_column`,
+`created_at`, `updated_at`. No `library_id`, no `path`, no soft-delete column.
 
-- `spatie/laravel-medialibrary` and `spatie/laravel-tags` removed from `composer.json`
-- Old Spatie `media` table columns (`model_type`, `model_id`, `collection_name`,
-  `conversions_disk`, `manipulations`, `generated_conversions`, `responsive_images`,
-  `order_column`, `custom_properties`) — these will be replaced in Step 1
-- `app/Models/Media.php` — replaced from scratch in Step 5
+`media_libraries` — current columns: `id`, `name`, `handle`, `adapter`,
+`adapter_settings`, `allowed_types`, `max_size`, `sort_order`, `created_at`,
+`updated_at`. No `field_layout_id`.
 
-**Do not start two steps in parallel** — several steps have migrations and models that
-depend on each other. Follow the order below.
+No `mediables` table. No `media_transformations` table.
+
+**Models:**
+
+`app/Models/Media.php` — extends `Model`, but still carries a dead import:
+`use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;`
+(the package is gone; this will fatal if autoloaded without the vendor dir).
+Has a `media_library()` BelongsTo (wrong name, broken FK assumption) and a
+`categories()` MorphToMany. No traits, no storage helpers.
+
+`app/Models/Media/Library.php` — clean, no Spatie. Has `$table =
+'media_libraries'`. Has **inline** snake_case relations `category_groups()` and
+`field_groups()` implemented directly via `morphToMany()`, plus a manual
+`categories()` helper. Does **not** use `HasCategoryGroups`, `HasFieldGroups`,
+or `HasFieldLayout` traits even though those traits exist in `app/Traits/`.
+
+**Traits that already exist in `app/Traits/`:**
+`Fieldable`, `HasCategoryGroups`, `HasFieldGroups`, `HasFieldLayout`,
+`HasEntryTree`, `PersistsFieldValues`, `PasswordValidationRules`.
+
+**Traits that do not exist yet:**
+`HasTransformations`, `HasMediaItems`, `HasMedia`.
+
+**Actions:**
+
+`App\Actions\Media\Library\CreateNewMediaLibrary` — functional but uses
+`$library->category_groups()->attach()` (snake_case, matches current inline
+method on Library).
+
+`App\Actions\Media\Library\EditMediaLibrary` — functional but uses
+`$library->category_groups()->detach()/attach()` and
+`$library->field_groups()->detach()/attach()` (same snake_case issue).
+
+`App\Actions\Media\Library\DeleteMediaLibrary` — calls `$library->delete()`
+only; has a `@todo` comment about queue dispatch. No job is dispatched.
+
+`App\Actions\Media\Library\UploadMedia` — broken; calls
+`$library->addMedia($path)->toMediaCollection($library->handle)` which is the
+old Spatie API.
+
+No `App\Actions\Media\DeleteMedia` action yet.
+
+**Jobs:**
+
+`App\Jobs\ProcessMediaLibraryRemoval` — exists with an empty `handle()`.
+
+**Services / Interfaces:**
+None in `app/Services/Media/` — directory does not exist.
+
+**Observers:**
+`app/Observers/EntryTreeObserver.php` and `StatusObserver.php` exist.
+No `FieldValueObserver`.
+
+**Controllers:**
+
+`App\Http\Controllers\Admin\Media\Library` — full CRUD wired to the four
+Library actions. Uses `LibraryModel::with('category_groups')` (snake_case)
+in `create()` and `edit()`. All method bodies are functional.
+
+`App\Http\Controllers\Admin\Media` — mostly empty stubs. `download()` exists
+but just returns the model, not a file response.
+
+**Form Requests:**
+
+`StoreMediaLibraryFormRequest` — validates key `'storage'` instead of
+`'adapter'`; conditional block also keys on `'storage'`. No Blade views for
+media library forms exist yet, so only the PHP file needs updating.
+
+**`FieldValue::resolvedValue()`** — the method body instantiates
+`$fieldType->instance()` twice (once for `storageColumn()`, once for
+`value()`). It always calls `value()` unconditionally, which works today
+because the base `AbstractField::value()` is a pass-through. This is fragile
+and wastes a second instantiation.
+
+**`FieldTypeSeeder`** — has 10 entries; no `FileUpload` row.
+
+**`AppServiceProvider`** — morph map already contains both `'media'` and
+`'media_library'` keys. No media service, no transformation driver binding,
+no `FieldValueObserver` registration.
+
+**`User` model** — uses `Laravolt\Avatar\Facade` for a generated avatar
+fallback. Does **not** use `HasTags` or `HasMedia`. `laravolt/avatar` is in
+`composer.json`.
+
+---
+
+## Do not start two steps in parallel.
+
+Several steps share migrations and models. Follow the numbered order.
 
 ---
 
 ## Step 1 — Rewrite the `media` Table
 
-Create a new migration. Because the Spatie schema is gone, this drops the Spatie-specific
-columns and replaces them with the native schema. Run this before touching any model code.
+The current `media` table has two Spatie remnants (`collection_name`,
+`order_column`) and is missing the native columns the rest of this plan
+requires (`library_id`, `path`, `original_name`, `alt_text`, `title`,
+`sort_order`, `deleted_at`).
 
 **File:** `database/migrations/YYYY_MM_DD_000001_rewrite_media_table.php`
 
@@ -49,14 +132,18 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('media', function (Blueprint $table) {
-            // Remove Spatie columns
-            $table->dropColumn([
-                'model_type', 'model_id', 'collection_name',
-                'conversions_disk', 'manipulations', 'custom_properties',
-                'generated_conversions', 'responsive_images', 'order_column',
-            ]);
+            // Remove the two Spatie remnant columns that actually exist.
+            // Do NOT list any other columns — they were never added to this table.
+            $table->dropColumn(['collection_name', 'order_column']);
 
-            // Add native columns
+            // Link to the library that owns this file.
+            $table->foreignId('library_id')
+                  ->nullable()
+                  ->after('uuid')
+                  ->constrained('media_libraries')
+                  ->nullOnDelete();
+
+            // Native columns
             $table->string('original_name')->after('file_name');
             $table->string('path')->after('disk');
             $table->string('alt_text')->nullable()->after('path');
@@ -64,33 +151,36 @@ return new class extends Migration {
             $table->unsignedInteger('sort_order')->default(0)->after('title');
             $table->softDeletes()->after('updated_at');
         });
-
-        // The uuid and library_id columns already exist from the Spatie migration.
-        // The library_id FK was added in 2025_12_27_160903 — nothing to do here.
     }
 
     public function down(): void
     {
-        // Reverting this migration in production is destructive.
-        // Restore Spatie columns manually if needed.
+        Schema::table('media', function (Blueprint $table) {
+            $table->dropForeign(['library_id']);
+            $table->dropColumn([
+                'library_id', 'original_name', 'path',
+                'alt_text', 'title', 'sort_order', 'deleted_at',
+            ]);
+            $table->string('collection_name')->after('uuid');
+            $table->unsignedInteger('order_column')->nullable()->index()->after('size');
+        });
     }
 };
 ```
 
-> **Note:** If standing up a completely fresh database (e.g. in testing), you can instead
-> rewrite `2025_12_26_134324_create_media_table.php` directly to contain only the native
-> columns shown below. That is cleaner for green-field environments.
->
-> Final `media` table columns: `id`, `uuid` (nullable unique), `library_id` (FK → media_libraries
-> nullOnDelete), `name`, `file_name`, `original_name`, `mime_type`, `disk`, `path`, `size`,
-> `alt_text`, `title`, `sort_order`, `deleted_at`, `created_at`, `updated_at`.
+> **Final `media` column set after this migration:**
+> `id`, `uuid`, `library_id`, `name`, `file_name`, `original_name`,
+> `mime_type`, `disk`, `path`, `size`, `alt_text`, `title`, `sort_order`,
+> `created_at`, `updated_at`, `deleted_at`.
 
 ---
 
 ## Step 2 — Create the `mediables` Pivot Table
 
-This is the many-to-many link between any model and the media it references.
-One file can be attached to many models, and one model can hold many files.
+Many-to-many link between any model and the media it references.
+`field_id = null` means a direct attachment (avatar, library browser pick).
+`field_id = N` means it was attached through a specific FileUpload field,
+which lets `mediaForField()` and `directMedia()` coexist cleanly.
 
 **File:** `database/migrations/YYYY_MM_DD_000002_create_mediables_table.php`
 
@@ -107,8 +197,8 @@ return new class extends Migration {
         Schema::create('mediables', function (Blueprint $table) {
             $table->id();
             $table->foreignId('media_id')->constrained('media')->cascadeOnDelete();
-            $table->morphs('mediable');                  // mediable_type, mediable_id
-            $table->foreignId('field_id')                // null = direct attach; N = via FileUpload field
+            $table->morphs('mediable');                 // mediable_type, mediable_id
+            $table->foreignId('field_id')
                   ->nullable()
                   ->constrained('fields')
                   ->nullOnDelete();
@@ -130,17 +220,12 @@ return new class extends Migration {
 };
 ```
 
-> `field_id = null` means the media was attached directly (avatar upload, library browser).
-> `field_id = N` means it was attached through a specific FileUpload field on that model.
-> This distinction allows `mediaForField('gallery')` and `directMedia()` to coexist
-> without collision.
-
 ---
 
 ## Step 3 — Create the `media_transformations` Table
 
-Stores derived image variants (thumbnails, crops, etc.). The transformation library is
-not chosen yet — this table is library-agnostic.
+Stores derived image variants. The transformation library is not chosen yet;
+this schema is library-agnostic and the driver is swapped in Step 11.
 
 **File:** `database/migrations/YYYY_MM_DD_000003_create_media_transformations_table.php`
 
@@ -158,15 +243,15 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('media_id')->constrained('media')->cascadeOnDelete();
 
-            $table->string('key');                        // e.g. 'thumbnail', 'hero_2x'
+            $table->string('key');                       // e.g. 'thumbnail', 'hero_2x'
             $table->string('disk');
             $table->string('path');
             $table->string('mime_type')->nullable();
             $table->unsignedBigInteger('size')->nullable();
             $table->unsignedInteger('width')->nullable();
             $table->unsignedInteger('height')->nullable();
-            $table->json('params')->nullable();           // driver-agnostic params
-            $table->string('driver')->nullable();         // set once library is chosen
+            $table->json('params')->nullable();          // driver-agnostic params
+            $table->string('driver')->nullable();        // set once library is chosen
 
             $table->string('status')->default('pending'); // pending | complete | failed
             $table->text('error')->nullable();
@@ -187,7 +272,7 @@ return new class extends Migration {
 
 ## Step 4 — Add `field_layout_id` to `media_libraries`
 
-Allows a library to have a custom field layout (same pattern as EntryGroup).
+Follows the same pattern as `EntryGroup`. The column does not exist yet.
 
 **File:** `database/migrations/YYYY_MM_DD_000004_add_field_layout_id_to_media_libraries.php`
 
@@ -213,14 +298,14 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('media_libraries', function (Blueprint $table) {
-            $table->dropForeignIdFor(\App\Models\FieldLayout::class);
+            $table->dropForeign(['field_layout_id']);
             $table->dropColumn('field_layout_id');
         });
     }
 };
 ```
 
-**Run all four migrations now:**
+**Run all four migrations:**
 
 ```bash
 php artisan migrate
@@ -228,9 +313,10 @@ php artisan migrate
 
 ---
 
-## Step 5 — Create `App\Models\Media`
+## Step 5 — Rewrite `App\Models\Media`
 
-Fresh model. No Spatie, no `HasTags`. Follows the same structural pattern as `Entry`.
+Replace the current file in full. Remove the dead Spatie import and the
+mis-named `media_library()` relation. Add traits and storage helpers.
 
 **File:** `app/Models/Media.php`
 
@@ -240,17 +326,18 @@ Fresh model. No Spatie, no `HasTags`. Follows the same structural pattern as `En
 namespace App\Models;
 
 use App\Traits\Fieldable;
-use App\Traits\Category\HasCategories;
 use App\Traits\HasTransformations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class Media extends Model
 {
-    use Fieldable, HasCategories, HasTransformations, SoftDeletes;
+    use Fieldable, HasTransformations, SoftDeletes;
 
     protected $fillable = [
         'library_id', 'name', 'file_name', 'original_name',
@@ -275,22 +362,36 @@ class Media extends Model
         return $this->hasMany(Media\Transformation::class);
     }
 
-    /**
-     * All models that reference this media item.
-     *
-     * NOTE: Eloquent's morphedByMany cannot handle a pivot that references
-     * multiple distinct model types. Do NOT implement a morphedByMany() here.
-     * Callers needing usage data should use MediaUsageRepository::forMedia($this),
-     * which groups rows by mediable_type and eager-loads each group separately.
-     * The raw pivot can also be queried directly:
-     *
-     *   DB::table('mediables')->where('media_id', $this->id)->get()
-     */
-    // usages() intentionally omitted — see note above.
+    public function categories(): MorphToMany
+    {
+        return $this->morphToMany(Category::class, 'categorizable')
+                    ->withTimestamps();
+    }
 
-    // ── Field-scoped usage (added in Step 18) ─────────────────────────────
-    // fieldUsages() and isReferencedByField() are added after the FileUpload
-    // field type and mediables pivot are fully wired up.
+    /**
+     * Raw pivot rows for all field-driven references to this media item.
+     * Returns columns: mediable_type, mediable_id, field_id,
+     *                  field_name, field_handle, sort_order.
+     *
+     * Eloquent's morphedByMany cannot handle a pivot that references multiple
+     * distinct model types cleanly, so we expose the raw query builder instead.
+     */
+    public function fieldUsages(): \Illuminate\Database\Query\Builder
+    {
+        return DB::table('mediables')
+            ->where('media_id', $this->id)
+            ->whereNotNull('field_id')
+            ->join('fields', 'fields.id', '=', 'mediables.field_id')
+            ->select('mediables.*', 'fields.name as field_name', 'fields.handle as field_handle');
+    }
+
+    public function isReferencedByField(): bool
+    {
+        return DB::table('mediables')
+            ->where('media_id', $this->id)
+            ->whereNotNull('field_id')
+            ->exists();
+    }
 
     // ── Storage helpers ────────────────────────────────────────────────────
 
@@ -370,13 +471,16 @@ class Transformation extends Model
     public function isComplete(): bool { return $this->status === 'complete'; }
     public function isFailed(): bool   { return $this->status === 'failed'; }
 
-    /**
-     * @param  ?int  $width   Nullable — not all transformations produce explicit dimensions.
-     * @param  ?int  $height  Nullable — same reason.
-     */
-    public function markComplete(string $path, int $size, ?int $width = null, ?int $height = null): void
-    {
-        $this->update(compact('path', 'size', 'width', 'height') + ['status' => 'complete', 'error' => null]);
+    public function markComplete(
+        string $path,
+        int    $size,
+        ?int   $width  = null,
+        ?int   $height = null
+    ): void {
+        $this->update(
+            compact('path', 'size', 'width', 'height')
+            + ['status' => 'complete', 'error' => null]
+        );
     }
 
     public function markFailed(string $error): void
@@ -390,8 +494,15 @@ class Transformation extends Model
 
 ## Step 7 — Update `App\Models\Media\Library`
 
-Replace Spatie's `InteractsWithMedia` / `HasMedia` interface with the native traits.
-Preserve `$table = 'media_libraries'` — without it Eloquent defaults to `libraries`.
+Replace the two inline relation methods (`category_groups()`, `field_groups()`)
+with the existing project traits (`HasCategoryGroups`, `HasFieldGroups`). Add
+`HasFieldLayout` and the new `HasMediaItems` trait (created in Step 9). Add
+`field_layout_id` to `$fillable`.
+
+> **Breaking change:** the inline methods were named `category_groups()` and
+> `field_groups()` (snake_case). The traits expose `categoryGroups()` and
+> `fieldGroups()` (camelCase). Every caller must be updated in **Step 15**.
+> Do not skip Step 15 after applying this step.
 
 **File:** `app/Models/Media/Library.php` *(full replacement)*
 
@@ -411,7 +522,7 @@ class Library extends Model
 {
     use HasCategoryGroups, HasFieldGroups, HasFieldLayout, HasMediaItems;
 
-    protected $table = 'media_libraries';   // ← must not be dropped
+    protected $table = 'media_libraries';   // must not be removed
 
     protected $fillable = [
         'field_layout_id', 'name', 'handle', 'adapter',
@@ -433,16 +544,20 @@ class Library extends Model
 }
 ```
 
-> `activeMedia()` is intentionally omitted. `SoftDeletes` on `Media` already adds a
-> global scope excluding deleted rows — a redundant `whereNull('deleted_at')` on top
-> would be misleading. If you need deleted rows, call `$library->media()->withTrashed()`.
+> `SoftDeletes` is intentionally omitted from `Library`. When a library is
+> deleted the job (Step 21) soft-deletes its media items individually;
+> `PurgeDeletedMedia` (Step 14) handles physical cleanup later.
+>
+> The old `categories()` helper on `Library` is removed. Callers that need
+> categories should go through `$library->categoryGroups` and then each
+> group's categories, consistent with how other models resolve them.
 
 ---
 
 ## Step 8 — Create `App\Traits\HasTransformations`
 
-Lives on the `Media` model. Stubs transformation requests without binding to a
-concrete image library — the driver is swapped in Step 11.
+Lives on the `Media` model. Keeps transformation logic out of the model body
+and decoupled from whichever image library is eventually chosen.
 
 **File:** `app/Traits/HasTransformations.php`
 
@@ -453,6 +568,7 @@ namespace App\Traits;
 
 use App\Models\Media\Transformation;
 use App\Services\Media\TransformationDriverInterface;
+use Illuminate\Support\Facades\Storage;
 
 trait HasTransformations
 {
@@ -461,6 +577,7 @@ trait HasTransformations
         return $this->transformations()->where('key', $key)->first();
     }
 
+    /** Returns the transformation only if it has completed successfully. */
     public function transformation(string $key): ?Transformation
     {
         $t = $this->getTransformation($key);
@@ -472,6 +589,10 @@ trait HasTransformations
         return $this->transformation($key) !== null;
     }
 
+    /**
+     * Request a transformation. Returns immediately with a pending record
+     * if the driver is async; or a complete record if sync.
+     */
     public function transform(string $key, array $params = []): Transformation
     {
         $existing = $this->getTransformation($key);
@@ -496,9 +617,11 @@ trait HasTransformations
     public function clearTransformation(string $key): void
     {
         $t = $this->getTransformation($key);
-        if (!$t) return;
+        if (!$t) {
+            return;
+        }
         if ($t->fileExists()) {
-            \Illuminate\Support\Facades\Storage::disk($t->disk)->delete($t->path);
+            Storage::disk($t->disk)->delete($t->path);
         }
         $t->delete();
     }
@@ -507,7 +630,7 @@ trait HasTransformations
     {
         foreach ($this->transformations as $t) {
             if ($t->fileExists()) {
-                \Illuminate\Support\Facades\Storage::disk($t->disk)->delete($t->path);
+                Storage::disk($t->disk)->delete($t->path);
             }
             $t->delete();
         }
@@ -527,8 +650,8 @@ trait HasTransformations
 
 ## Step 9 — Create `App\Traits\HasMediaItems`
 
-Lives on `Media\Library`. Handles upload, soft-delete, and purge. Physical file removal
-happens only in `purgeMedia()` — never on soft-delete.
+Lives on `Media\Library`. Handles upload validation, file storage, and deletion.
+Physical file removal happens **only** in `purgeMedia()` — never on soft-delete.
 
 **File:** `app/Traits/HasMediaItems.php`
 
@@ -550,7 +673,7 @@ trait HasMediaItems
      * sort_order is computed inside a transaction with a write lock to prevent
      * duplicate order values under concurrent uploads.
      *
-     * @throws \InvalidArgumentException on constraint violation
+     * @throws \InvalidArgumentException when the file fails library constraints.
      */
     public function addMediaFromUpload(UploadedFile $file, array $attributes = []): Media
     {
@@ -583,7 +706,7 @@ trait HasMediaItems
 
     /**
      * Soft-delete a media record. Physical file is NOT removed here.
-     * PurgeDeletedMedia job handles cleanup after the grace period.
+     * PurgeDeletedMedia handles cleanup after the grace period.
      */
     public function removeMedia(Media $media): void
     {
@@ -592,20 +715,22 @@ trait HasMediaItems
 
     /**
      * Permanently delete a media record and its physical file.
-     * Called by the purge job, or directly when you are certain.
+     * Called by the purge job, or directly when immediate removal is needed.
      */
     public function purgeMedia(Media $media): void
     {
         foreach ($media->transformations as $t) {
             Storage::disk($t->disk)->delete($t->path);
         }
-
         Storage::disk($media->disk)->delete($media->path);
         $media->forceDelete();
     }
 
     /**
-     * Returns an array of human-readable error strings; empty = valid.
+     * Returns an array of human-readable error strings. Empty = valid.
+     * The HTTP layer (UploadMediaRequest) also validates mime type and size
+     * as a first line of defence; this provides a second check for uploads
+     * that bypass the request layer.
      */
     public function validateUpload(UploadedFile $file): array
     {
@@ -628,7 +753,7 @@ trait HasMediaItems
 
 ## Step 10 — Create `App\Traits\HasMedia`
 
-Goes on any model that needs to hold media attachments: `User`, `Entry`, `Category`, etc.
+Goes on any model that holds media attachments: `Entry`, `User`, `Category`, etc.
 
 **File:** `app/Traits/HasMedia.php`
 
@@ -642,9 +767,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 trait HasMedia
 {
-    /**
-     * All media attached to this model (any attachment method).
-     */
+    /** All media attached to this model via any attachment method. */
     public function media(): MorphToMany
     {
         return $this->morphToMany(Media::class, 'mediable', 'mediables')
@@ -653,9 +776,7 @@ trait HasMedia
                     ->orderByPivot('sort_order');
     }
 
-    /**
-     * Media attached directly (field_id IS NULL) — avatars, library browser picks, etc.
-     */
+    /** Media attached directly (field_id IS NULL) — avatars, library browser picks. */
     public function directMedia(): MorphToMany
     {
         return $this->morphToMany(Media::class, 'mediable', 'mediables')
@@ -668,8 +789,9 @@ trait HasMedia
     /**
      * Media attached via a specific FileUpload field.
      *
-     * Pass a field ID (int) in batch/list contexts to avoid a per-call DB lookup.
-     * Pass a handle (string) only in single-model contexts (edit forms, etc.).
+     * Pass an int ID in batch/list contexts to avoid a per-call DB lookup.
+     * Pass a string handle only in single-model contexts (edit forms, etc.).
+     * once() memoises the handle→ID lookup within a single request.
      */
     public function mediaForField(string|int $field): MorphToMany
     {
@@ -684,6 +806,7 @@ trait HasMedia
                     ->orderByPivot('sort_order');
     }
 
+    /** Attach a media item as a direct attachment. Idempotent. */
     public function attachMedia(Media $media, int $sortOrder = 0): void
     {
         $this->directMedia()->syncWithoutDetaching([
@@ -691,16 +814,21 @@ trait HasMedia
         ]);
     }
 
+    /** Remove a media item from all pivot rows for this model. */
     public function detachMedia(Media $media): void
     {
         $this->media()->detach($media->id);
     }
 
+    /** Replace direct attachments with exactly the given IDs. */
     public function syncMedia(array $mediaIds): void
     {
         $this->directMedia()->sync($mediaIds);
     }
 
+    /**
+     * First directly-attached media item, optionally scoped to a library handle.
+     */
     public function firstMedia(?string $libraryHandle = null): ?Media
     {
         return $this->directMedia()
@@ -716,8 +844,8 @@ trait HasMedia
 
 ## Step 11 — Create the Transformation Driver Interface and NullDriver
 
-The interface is the single swap point for any image library. Wire the null driver
-immediately so nothing breaks before a concrete driver is chosen.
+The interface is the single swap point for any image library. Wire the null
+driver immediately so nothing breaks before a real library is chosen.
 
 **File:** `app/Services/Media/TransformationDriverInterface.php`
 
@@ -763,24 +891,25 @@ class NullTransformationDriver implements TransformationDriverInterface
         throw new \RuntimeException('No transformation driver configured.');
     }
 
-    public function resize(int $width, int $height): static   { return $this; }
-    public function fit(int $width, int $height): static      { return $this; }
+    public function resize(int $width, int $height): static              { return $this; }
+    public function fit(int $width, int $height): static                 { return $this; }
     public function crop(int $width, int $height, int $x = 0, int $y = 0): static { return $this; }
-    public function quality(int $quality): static             { return $this; }
-    public function format(string $format): static            { return $this; }
-    public function sharpen(int $amount = 10): static         { return $this; }
+    public function quality(int $quality): static                        { return $this; }
+    public function format(string $format): static                       { return $this; }
+    public function sharpen(int $amount = 10): static                    { return $this; }
     public function watermark(string $sourcePath, string $position = 'bottom-right'): static { return $this; }
 }
 ```
 
-When a real image library is chosen: create one new class implementing the interface,
-swap the binding in `AppServiceProvider` (Step 12). Nothing else changes.
+To adopt a real image library later: create one new class implementing the
+interface and swap the binding in `AppServiceProvider::register()`. Nothing
+else changes.
 
 ---
 
 ## Step 12 — Create `App\Services\MediaStorageService`
 
-Controllers and actions call this — they never call `Storage::` directly.
+Controllers and actions call this. They should never call `Storage::` directly.
 
 **File:** `app/Services/MediaStorageService.php`
 
@@ -829,9 +958,11 @@ class MediaStorageService
 
 ---
 
-## Step 13 — Register Bindings in AppServiceProvider
+## Step 13 — Register Bindings in `AppServiceProvider`
 
-Open `app/Providers/AppServiceProvider.php` and add inside `register()`:
+Open `app/Providers/AppServiceProvider.php`.
+
+In `register()`, add:
 
 ```php
 $this->app->bind(
@@ -842,17 +973,8 @@ $this->app->bind(
 $this->app->singleton('media-service', fn() => new \App\Services\MediaStorageService());
 ```
 
-Confirm the morph map in `boot()` still contains both media keys:
-
-```php
-Relation::morphMap([
-    // ... existing entries ...
-    'media'         => \App\Models\Media::class,
-    'media_library' => \App\Models\Media\Library::class,
-]);
-```
-
-Also register the observer in `boot()` — do it now so it is not forgotten:
+In `boot()`, add the observer registration. The morph map entries `'media'`
+and `'media_library'` are already correct — leave them untouched:
 
 ```php
 \App\Models\FieldValue::observe(\App\Observers\FieldValueObserver::class);
@@ -860,10 +982,7 @@ Also register the observer in `boot()` — do it now so it is not forgotten:
 
 ---
 
-## Step 14 — Create `App\Jobs\PurgeDeletedMedia`
-
-Runs on a schedule. Permanently removes files and records soft-deleted beyond the
-grace period.
+## Step 14 — Create `App\Jobs\PurgeDeletedMedia` and Schedule It
 
 **File:** `app/Jobs/PurgeDeletedMedia.php`
 
@@ -906,7 +1025,7 @@ class PurgeDeletedMedia implements ShouldQueue
 }
 ```
 
-**Register the schedule** in `routes/console.php` (Laravel 11+):
+In `routes/console.php`, add alongside the existing `model:prune` schedule:
 
 ```php
 use App\Jobs\PurgeDeletedMedia;
@@ -916,13 +1035,60 @@ Schedule::job(new PurgeDeletedMedia(graceDays: 30))->daily();
 
 ---
 
-## Step 15 — Fix `FieldValue::resolvedValue()`
+## Step 15 — Update All Callers of the Renamed Library Relations
 
-`app/Models/FieldValue.php` currently ends mid-method after
-`$column = $fieldType->instance()->storageColumn();` — the body is incomplete and
-the method has never returned a value. Replace the full method body:
+Step 7 changed `category_groups()` → `categoryGroups()` and
+`field_groups()` → `fieldGroups()` on `Media\Library`. Three files use the
+old snake_case names and must be updated before anything runs.
 
-**File:** `app/Models/FieldValue.php` — update `resolvedValue()`:
+**`app/Actions/Media/Library/CreateNewMediaLibrary.php`**
+
+```php
+public function create(array $input): Library
+{
+    $library = Library::create($input);
+
+    if (!empty($input['category_groups'])) {
+        $library->categoryGroups()->sync($input['category_groups']);
+    }
+
+    return $library;
+}
+```
+
+**`app/Actions/Media/Library/EditMediaLibrary.php`**
+
+```php
+public function edit(Library $library, array $input): bool
+{
+    $library->categoryGroups()->sync($input['category_groups'] ?? []);
+    $library->fieldGroups()->sync($input['field_groups'] ?? []);
+
+    return $library->update($input);
+}
+```
+
+**`app/Http/Controllers/Admin/Media/Library.php`**
+
+Change the two eager-load calls to camelCase (one in `create()`, one in
+`edit()`):
+
+```php
+// Before
+LibraryModel::with('category_groups')->find($id);
+
+// After
+LibraryModel::with('categoryGroups')->find($id);
+```
+
+---
+
+## Step 16 — Fix `FieldValue::resolvedValue()`
+
+The current implementation instantiates `fieldType->instance()` twice.
+Replace the method body with a single-instantiation version.
+
+**File:** `app/Models/FieldValue.php` — replace `resolvedValue()`:
 
 ```php
 public function resolvedValue(): mixed
@@ -936,8 +1102,10 @@ public function resolvedValue(): mixed
     $instance = $fieldType->instance();
     $column   = $instance->storageColumn();
 
-    // If the field type defines value(), delegate to it. This is how FileUpload
-    // returns Collection<Media> instead of the raw [3, 7, 12] ID array.
+    // If the field type defines its own value(), delegate to it.
+    // FileUpload::value() returns Collection<Media> instead of raw IDs.
+    // All other existing types fall back to AbstractField::value() which
+    // is a transparent pass-through, so this branch is always safe.
     if (method_exists($instance, 'value')) {
         return $instance->value($this->{$column});
     }
@@ -948,7 +1116,7 @@ public function resolvedValue(): mixed
 
 ---
 
-## Step 16 — Create `App\Field\Types\FileUpload`
+## Step 17 — Create `App\Field\Types\FileUpload`
 
 **File:** `app/Field/Types/FileUpload.php`
 
@@ -1035,11 +1203,11 @@ class FileUpload extends AbstractField
 }
 ```
 
-**Field settings:**
+**Available field settings:**
 
 | Key | Type | Default | Purpose |
 |---|---|---|---|
-| `library_id` | int\|null | null | Restrict picker to a specific library by ID |
+| `library_id` | int\|null | null | Restrict picker to a specific library |
 | `library_handle` | string\|null | null | Portable alternative to `library_id` |
 | `min` | int | 0 | Minimum files required |
 | `max` | int\|null | null | Maximum files (null = unlimited; 1 = single-file mode) |
@@ -1048,10 +1216,14 @@ class FileUpload extends AbstractField
 
 ---
 
-## Step 17 — Create `App\Observers\FieldValueObserver`
+## Step 18 — Create `App\Observers\FieldValueObserver`
 
-Single point responsible for keeping the `mediables` pivot truthful for FileUpload
-fields. Nothing else should write field-scoped rows to that pivot.
+Single point that keeps the `mediables` pivot truthful for FileUpload fields.
+Nothing else should write field-scoped rows to that pivot.
+
+`Field::$with = ['fieldType']` is already set, and `FieldValue::$with =
+['field']` chains through it, so `$fieldValue->field->fieldType` is always
+loaded — no N+1 on the `isFileUpload()` check.
 
 **File:** `app/Observers/FieldValueObserver.php`
 
@@ -1089,7 +1261,6 @@ class FieldValueObserver
 
     private function isFileUpload(FieldValue $fieldValue): bool
     {
-        // field and fieldType are always eager-loaded via Field model's $with
         return $fieldValue->field?->fieldType?->object === FileUpload::class;
     }
 
@@ -1102,7 +1273,7 @@ class FieldValueObserver
         $instance = $fieldValue->field->fieldType->instance();
         $newIds   = $instance->cast($fieldValue->value_json);
 
-        // Remove pivot rows that are no longer in the selection
+        // Remove pivot rows no longer in the selection
         DB::table('mediables')
             ->where('mediable_type', $type)
             ->where('mediable_id',   $id)
@@ -1110,7 +1281,7 @@ class FieldValueObserver
             ->whereNotIn('media_id', $newIds ?: [0])
             ->delete();
 
-        // Upsert rows for the current selection, preserving sort order
+        // Upsert current selection, preserving sort order
         foreach ($newIds as $sortOrder => $mediaId) {
             DB::table('mediables')->upsert(
                 [
@@ -1127,43 +1298,6 @@ class FieldValueObserver
             );
         }
     }
-}
-```
-
-The observer is already registered in `AppServiceProvider::boot()` from Step 13.
-
----
-
-## Step 18 — Add Field-Scoped Methods to `App\Models\Media`
-
-Now that the `mediables` pivot and `FileUpload` type exist, add the inverse usage
-queries. Open `app/Models/Media.php` and add:
-
-```php
-use Illuminate\Support\Facades\DB;
-
-/**
- * Raw pivot rows for all field-driven references to this media item.
- * Returns columns: mediable_type, mediable_id, field_id, field_name, field_handle, sort_order.
- *
- * Use this instead of a morphedByMany relationship — Eloquent cannot handle a pivot
- * that references multiple distinct model types cleanly.
- */
-public function fieldUsages(): \Illuminate\Database\Query\Builder
-{
-    return DB::table('mediables')
-        ->where('media_id', $this->id)
-        ->whereNotNull('field_id')
-        ->join('fields', 'fields.id', '=', 'mediables.field_id')
-        ->select('mediables.*', 'fields.name as field_name', 'fields.handle as field_handle');
-}
-
-public function isReferencedByField(): bool
-{
-    return DB::table('mediables')
-        ->where('media_id', $this->id)
-        ->whereNotNull('field_id')
-        ->exists();
 }
 ```
 
@@ -1192,9 +1326,9 @@ class DeleteMedia extends AbstractAction
 
 ---
 
-## Step 20 — Update `App\Actions\Media\Library\UploadMedia`
+## Step 20 — Replace `App\Actions\Media\Library\UploadMedia`
 
-Replace the old Spatie `addMedia()->toMediaCollection()` call.
+Remove the Spatie `addMedia()->toMediaCollection()` call entirely.
 
 **File:** `app/Actions/Media/Library/UploadMedia.php`
 
@@ -1227,17 +1361,9 @@ class UploadMedia extends AbstractAction
 
 ---
 
-## Step 21 — Implement `App\Jobs\ProcessMediaLibraryRemoval`
+## Step 21 — Implement `ProcessMediaLibraryRemoval` and Update `DeleteMediaLibrary`
 
-The job currently has an empty `handle()`. Implement it and update `DeleteMediaLibrary`
-to pass the library ID and dispatch it.
-
-**Deletion policy:** soft-delete all media belonging to the library. Physical files are
-cleaned up by `PurgeDeletedMedia` during its next scheduled run (grace period applies).
-To purge files immediately instead, replace `$media->delete()` with
-`$library->purgeMedia($media)`.
-
-**File:** `app/Jobs/ProcessMediaLibraryRemoval.php`
+**File:** `app/Jobs/ProcessMediaLibraryRemoval.php` *(full replacement)*
 
 ```php
 <?php
@@ -1257,12 +1383,15 @@ class ProcessMediaLibraryRemoval implements ShouldQueue
 
     public function handle(): void
     {
-        Media::withTrashed()
-            ->where('library_id', $this->libraryId)
+        // Soft-delete all media belonging to this library.
+        // Physical file removal is handled by PurgeDeletedMedia on its next run.
+        // To remove files immediately instead, swap $media->delete() for
+        // $library->purgeMedia($media) after loading the library model.
+        Media::where('library_id', $this->libraryId)
             ->whereNull('deleted_at')
             ->chunkById(100, function ($items) {
                 foreach ($items as $media) {
-                    $media->delete(); // SoftDeletes — PurgeDeletedMedia cleans files later
+                    $media->delete();
                 }
             });
     }
@@ -1300,11 +1429,12 @@ class DeleteMediaLibrary extends AbstractAction
 
 ## Step 22 — Fix `StoreMediaLibraryFormRequest`
 
-The form request validates `'storage'` but the database column is `'adapter'`.
+The request validates `'storage'` but the database column is `'adapter'`. No
+Blade views for media library forms exist yet, so only the PHP file changes.
 
 **File:** `app/Http/Requests/Media/Library/StoreMediaLibraryFormRequest.php`
 
-In `rules()`, change:
+In `rules()`:
 
 ```php
 // Before
@@ -1314,7 +1444,7 @@ In `rules()`, change:
 'adapter' => ['required', 'string'],
 ```
 
-In the conditional block, change:
+In the conditional block:
 
 ```php
 // Before
@@ -1324,22 +1454,17 @@ if ($this->data('storage') == 'local') {
 if ($this->data('adapter') == 'local') {
 ```
 
-Also update the create/edit Blade views to use `name="adapter"` wherever they
-currently use `name="storage"`.
+When media library Blade views are eventually created, use `name="adapter"`
+throughout.
 
 ---
 
 ## Step 23 — Update `App\Models\User`
 
-Add `HasMedia` so users can hold avatar attachments. Update `avatar()` to check the
-media library before generating a fallback.
+Add `HasMedia` and update `avatar()` to check the media library first.
+`laravolt/avatar` is already in `composer.json` — no new dependency.
 
-> **Behavioral change notice:** the current fallback is a Gravatar URL keyed on
-> `$this->email`. The new fallback is a Laravolt-generated base64 image keyed on
-> `$this->name`, with no external HTTP request. Both the `src` type and the fallback
-> key change. Notify frontend and API consumers before deploying this step.
-
-**In `app/Models/User.php`** — add the import, the trait, and replace `avatar()`:
+In `app/Models/User.php`, add the import and trait, then add/replace:
 
 ```php
 use App\Models\Media;
@@ -1356,13 +1481,13 @@ public function avatar(): string
         return $media->url();
     }
 
-    // Fallback: generated avatar from name; no external request.
-    // Previously this was Gravatar keyed on $this->email — a behaviour change.
+    // Fallback: generated avatar from name; no external HTTP request.
     return \Laravolt\Avatar\Facade::create($this->name)->toBase64();
 }
 
 public function setAvatar(Media $media): void
 {
+    // Remove any existing avatar before attaching the new one.
     $existing = $this->directMedia()
         ->whereHas('library', fn($q) => $q->where('handle', 'avatars'))
         ->get();
@@ -1381,15 +1506,15 @@ public function setAvatar(Media $media): void
 
 ### 24a — FieldTypeSeeder
 
-Add to `database/seeders/FieldTypeSeeder.php`:
+Add to the `$types` array in `database/seeders/FieldTypeSeeder.php`:
 
 ```php
 ['name' => 'File Upload', 'object' => \App\Field\Types\FileUpload::class],
 ```
 
-### 24b — Avatars library
+### 24b — Avatars Library
 
-Add to a media seeder (or `DatabaseSeeder`):
+Add to a media seeder or `DatabaseSeeder`:
 
 ```php
 use App\Models\Media\Library as MediaLibrary;
@@ -1403,34 +1528,29 @@ MediaLibrary::firstOrCreate(['handle' => 'avatars'], [
 ]);
 ```
 
-### 24c — Field groups for FileUpload fields *(recommended)*
-
-See `MediaFieldGroupSeeder` in `media-refactor-plan.md` for a full seeder that creates
-`hero_image`, `gallery`, `attachments`, `profile_photo`, `category_image`, and
-`category_icon` fields across the four model contexts.
-
 ---
 
 ## Step 25 — Tests
 
-Run the full suite to confirm nothing regressed:
+Run the full suite first to confirm baseline:
 
 ```bash
 composer test
 ```
 
-Minimum new test coverage required for this layer:
+Minimum new test coverage required:
 
 ```php
-// Upload creates Media record and stores physical file
+// Upload creates a Media record and stores the physical file
 Storage::fake('local');
 $library = MediaLibrary::factory()->create(['adapter' => 'local']);
 $file    = UploadedFile::fake()->image('photo.jpg');
 $media   = $library->addMediaFromUpload($file);
 expect($media->file_name)->toEndWith('.jpg');
+expect($media->path)->not->toBeEmpty();
 Storage::disk('local')->assertExists($media->path);
 
-// Soft-delete preserves file; purge removes it
+// Soft-delete preserves the file; purge removes it
 $library->removeMedia($media);
 expect($media->fresh()->trashed())->toBeTrue();
 Storage::disk('local')->assertExists($media->path);
@@ -1451,10 +1571,10 @@ $resolved = $entry->fresh(['fieldValues.field.fieldType'])->field($field->handle
 expect($resolved)->toHaveCount(3);
 expect($resolved->first())->toBeInstanceOf(Media::class);
 
-// Observer syncs mediables pivot on save
+// FieldValueObserver syncs the mediables pivot on save
 expect(DB::table('mediables')->where('field_id', $field->id)->count())->toBe(3);
 
-// Library deletion dispatches removal job
+// Library deletion dispatches the removal job
 Queue::fake();
 (new DeleteMediaLibrary)->delete($library);
 Queue::assertPushed(ProcessMediaLibraryRemoval::class);
@@ -1466,34 +1586,28 @@ Queue::assertPushed(ProcessMediaLibraryRemoval::class);
 
 Work through these in order. Each item is a discrete, independently verifiable state.
 
-- [ ] **Step 1** — `media` table: Spatie columns dropped; `original_name`, `path`, `alt_text`, `title`, `sort_order`, `deleted_at` present
-- [ ] **Step 2** — `mediables` table exists with `field_id` column and four-column unique constraint
+- [ ] **Step 1** — `media` table: `collection_name` and `order_column` dropped; `library_id`, `original_name`, `path`, `alt_text`, `title`, `sort_order`, `deleted_at` added; migration passes cleanly
+- [ ] **Step 2** — `mediables` table exists with `field_id` nullable FK and four-column unique constraint
 - [ ] **Step 3** — `media_transformations` table exists
 - [ ] **Step 4** — `field_layout_id` column on `media_libraries`; `php artisan migrate` passes
-- [ ] **Step 5** — `Media` extends `Model`, not `BaseMedia`; no Spatie imports
-- [ ] **Step 6** — `Transformation` model exists; `markComplete()` uses `?int $width`, `?int $height`
-- [ ] **Step 7** — `Library` uses `HasMediaItems`, no Spatie traits; `$table = 'media_libraries'` present
+- [ ] **Step 5** — `Media` model: no Spatie import; `library()` BelongsTo present; `categories()` MorphToMany preserved; `fieldUsages()`, `isReferencedByField()`, and storage helpers present
+- [ ] **Step 6** — `Transformation` model exists; `markComplete()` accepts nullable `$width`/`$height`
+- [ ] **Step 7** — `Library` uses `HasCategoryGroups`, `HasFieldGroups`, `HasFieldLayout`, `HasMediaItems`; inline `category_groups()` and `field_groups()` methods gone; `field_layout_id` in `$fillable`
 - [ ] **Step 8** — `HasTransformations` trait created
-- [ ] **Step 9** — `HasMediaItems` trait created; sort_order increment uses `lockForUpdate()`
-- [ ] **Step 10** — `HasMedia` trait created; `mediaForField()` uses `once()` for handle lookup
-- [ ] **Step 11** — `TransformationDriverInterface` and `NullTransformationDriver` created
-- [ ] **Step 12** — `MediaStorageService` created
-- [ ] **Step 13** — `AppServiceProvider` registers driver binding, service singleton, observer, and morph map entries
-- [ ] **Step 14** — `PurgeDeletedMedia` job created and scheduled
-- [ ] **Step 15** — `FieldValue::resolvedValue()` is complete; dispatches to `$instance->value()` when available
-- [ ] **Step 16** — `FileUpload` field type created; uses `value()`, not `resolve()`
-- [ ] **Step 17** — `FieldValueObserver` created and registered
-- [ ] **Step 18** — `Media::fieldUsages()` and `isReferencedByField()` added
+- [ ] **Step 9** — `HasMediaItems` trait created; sort order uses `lockForUpdate()`
+- [ ] **Step 10** — `HasMedia` trait created; `mediaForField()` uses `once()` for string handle lookup
+- [ ] **Step 11** — `TransformationDriverInterface` and `NullTransformationDriver` in `app/Services/Media/`
+- [ ] **Step 12** — `MediaStorageService` in `app/Services/`
+- [ ] **Step 13** — `AppServiceProvider::register()` has driver binding and `media-service` singleton; `boot()` registers `FieldValueObserver`; morph map unchanged
+- [ ] **Step 14** — `PurgeDeletedMedia` job created; `Schedule::job(new PurgeDeletedMedia(...))->daily()` in `routes/console.php`
+- [ ] **Step 15** — `CreateNewMediaLibrary` uses `categoryGroups()->sync()`; `EditMediaLibrary` uses `categoryGroups()->sync()` and `fieldGroups()->sync()`; `Admin\Media\Library` controller eager-loads `categoryGroups` (camelCase)
+- [ ] **Step 16** — `FieldValue::resolvedValue()` instantiates `instance()` once; uses `method_exists` guard
+- [ ] **Step 17** — `FileUpload` field type created; `value()` returns `Collection<Media>`
+- [ ] **Step 18** — `FieldValueObserver` created; registered in `AppServiceProvider::boot()`
 - [ ] **Step 19** — `DeleteMedia` action created
-- [ ] **Step 20** — `UploadMedia` action uses `media-service`, not Spatie API
-- [ ] **Step 21** — `ProcessMediaLibraryRemoval::handle()` implemented; `DeleteMediaLibrary` dispatches it with library ID
-- [ ] **Step 22** — `StoreMediaLibraryFormRequest` uses `'adapter'` throughout; Blade views updated
-- [ ] **Step 23** — `User` uses `HasMedia`; `avatar()` updated; frontend/API consumers notified
+- [ ] **Step 20** — `UploadMedia` action uses `media-service`; no Spatie calls remain
+- [ ] **Step 21** — `ProcessMediaLibraryRemoval` takes `int $libraryId` constructor arg and implements `handle()`; `DeleteMediaLibrary` dispatches it
+- [ ] **Step 22** — `StoreMediaLibraryFormRequest` validates `'adapter'` throughout
+- [ ] **Step 23** — `User` has `HasMedia`; `avatar()` checks `firstMedia('avatars')` before Laravolt fallback; `setAvatar()` added
 - [ ] **Step 24** — `FileUpload` row in `FieldTypeSeeder`; avatars library seeded
-- [ ] **Step 25** — `composer test` passes; upload, purge, field-resolution, and observer tests added
-- [ ] **Final** — `composer remove spatie/laravel-medialibrary`; `config/media-library.php` deleted
-
-> **Before the final step:** `App\Models\User` currently uses `HasTags` from
-> `spatie/laravel-tags`. Removing that package without a replacement will cause a fatal
-> error on `User` model load. Decide on a replacement (native `tags` table + `Taggable`
-> trait, or a community package) and update `User` before running the remove command.
+- [ ] **Step 25** — `composer test` passes; upload, purge, field-resolution, observer, and library-deletion tests added
