@@ -20,6 +20,7 @@ class RolesPermissionsSeeder extends Seeder
             'access admin' => 'Determines if given user can access the administration panel',
 
             'view user' => 'Allows for viewing users',
+            'read users' => 'Allows for listing and reading users via the API',
             'create user' => 'Allows for creating users',
             'edit user' => 'Allows for editing users',
             'delete user' => 'Allows for deleting users',
@@ -34,16 +35,19 @@ class RolesPermissionsSeeder extends Seeder
             'edit role' => 'Allow users to edit roles',
             'delete role' => 'Allow users to delete roles',
 
+            'read category groups' => 'Allow users to list and read category groups via the API',
             'create category group' => 'Allow users to create category groups',
             'edit category group' => 'Allow users to edit category groups',
             'delete category group' => 'Allow users to delete category groups',
             'reorder category group' => 'Allow users to reorder category groups',
 
+            'read categories' => 'Allow users to list and read categories via the API',
             'create category' => 'Allow users to create categories',
             'edit category' => 'Allow users to edit categories',
             'delete category' => 'Allow users to delete categories',
             'reorder category' => 'Allow users to reorder categories',
 
+            'read entry groups' => 'Allow users to list and read entry groups via the API',
             'create entry group' => 'Allow users to create entry groups',
             'edit entry group' => 'Allow users to edit entry groups',
             'delete entry group' => 'Allow users to delete entry groups',
@@ -52,6 +56,7 @@ class RolesPermissionsSeeder extends Seeder
             'edit entry type' => 'Allow users to edit entry types',
             'delete entry type' => 'Allow users to delete entry types',
 
+            'read entries' => 'Allow users to list and read entries via the API',
             'create entry' => 'Allow users to create entries',
             'edit entry' => 'Allow users to edit entries',
             'delete entry' => 'Allow users to delete entries',
@@ -73,6 +78,8 @@ class RolesPermissionsSeeder extends Seeder
             'delete media library' => 'Allow users to delete media libraries',
             'reorder media library' => 'Allow users to reorder media libraries',
 
+            'read status groups' => 'Allow users to list and read status groups via the API',
+            'read statuses' => 'Allow users to list and read statuses via the API',
             'create status' => 'Allow users to create statuses',
             'edit status' => 'Allow users to edit statuses',
             'delete status' => 'Allow users to delete statuses',
