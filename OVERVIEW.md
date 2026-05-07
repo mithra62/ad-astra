@@ -38,6 +38,12 @@
     - [Reading Field Values from a User](#reading-field-values-from-a-user)
     - [Typical Controller Pattern](#typical-controller-pattern)
     - [Comparison: Users vs Entries](#comparison-users-vs-entries)
+- [Author Eligibility](#author-eligibility)
+    - [Schema](#schema)
+    - [EntryAuthorService and EntryAuthors Facade](#entryauthorservice-and-entryauthors-facade)
+    - [Promoting and Demoting Authors](#promoting-and-demoting-authors)
+    - [Author Eligibility via UserService](#author-eligibility-via-userservice)
+    - [Querying Eligible Authors](#querying-eligible-authors)
 - [UserService and the Users Facade](#userservice-and-the-users-facade)
     - [CRUD](#crud)
     - [Roles](#roles)
@@ -179,7 +185,9 @@ EntryGroup        — owns a FieldLayout, a StatusGroup, plus polymorphic
                     published_at, created_by_user_id
               ├── FieldValue        — scalar custom field data (polymorphic)
               ├── EntryRelationship — relational field data (M2M to other Entries)
-              ├── entry_authors     — ordered M2M of editorial authors
+              ├── EntryAuthor (entry_authors) + entry_author_entry pivot
+              │                   — explicit eligibility registry; only promoted
+              │                     users appear in author pickers; pivot stores sort_order
               ├── categories        — polymorphic M2M (categorizables)
               └── EntryTree         — optional hierarchical URI tree node
 
@@ -312,9 +320,14 @@ Coverage currently includes:
   categories, statuses, settings, and media libraries.
 - Entry type classes and `EntryTypeRegistry`.
 - Models for entries, entry trees, metrics, fields, field values, settings,
-  OAuth tokens, media, categories, statuses, users, and roles.
+  OAuth tokens, media, categories, statuses, users, roles, and `EntryAuthor`
+  (scopes, `display_name` accessor, relationships).
 - Services for entries, users, category groups, entry groups/types, settings,
-  and site routing.
+  site routing, and `EntryAuthorService` (`promote`, `demote`, `sync`,
+  `getEligible`, `findByUser`).
+- `User` model — `entryAuthor()` HasOne relation and `isAuthorEligible()` helper.
+- `UserService` author eligibility paths — `is_author` / `author_display_name`
+  keys in `create()` and `update()`.
 - Middleware tests for API logging.
 - Feature tests for settings, entry status validation, and entry type hooks.
 - Feature tests for user account status: `canAccessSystem()` model assertions for all five status values, expired suspension and lock auto-expiry, and `EnforceUserStatus` middleware logout/redirect behaviour (`tests/Feature/LoginTest.php`).
@@ -768,6 +781,135 @@ public function update(Request $request, User $user): void
 
 ---
 
+## Author Eligibility
+
+Not every user can be assigned as an entry author. The **Author Eligibility Layer** decouples the concept of "a user who may write content" from the plain `users` table. A user becomes eligible for entry author pickers only when an `EntryAuthor` record exists for them with `status = 'active'`. This record is the single source of truth; it is never inferred from roles or any other attribute.
+
+### Schema
+
+Two tables implement the layer:
+
+| Table               | Purpose                                                                                   |
+|---------------------|-------------------------------------------------------------------------------------------|
+| `entry_authors`     | **Eligibility registry.** One row per eligible user. Columns: `user_id` (unique FK), `display_name` (nullable), `status` (`active` / `pending` / `disabled`). |
+| `entry_author_entry`| **Pivot.** Links entries to their assigned authors. Columns: `entry_id`, `entry_author_id`, `sort_order`, timestamps. |
+
+`entry_authors` is intentionally separate from `users`. Demoting a user sets `status = 'disabled'` but preserves the row (and all existing entry assignments) so historical data is never orphaned.
+
+The `EntryAuthor` model (`App\Models\EntryAuthor`) provides three query scopes:
+
+```php
+EntryAuthor::active()->get();    // status = 'active'
+EntryAuthor::pending()->get();   // status = 'pending'
+EntryAuthor::disabled()->get();  // status = 'disabled'
+```
+
+The `display_name` accessor falls back gracefully:
+
+```
+EntryAuthor::display_name → explicit stored value → user->name → ''
+```
+
+### EntryAuthorService and EntryAuthors Facade
+
+`App\Services\EntryAuthorService` is the only place that writes to `entry_authors`. Inject it or use the `EntryAuthors` facade (`App\Facades\EntryAuthors`):
+
+| Method | Signature | Description |
+|---|---|---|
+| `getEligible()` | `(): Collection` | All active records with `user` eager-loaded, ordered by `display_name`. **The only source entry author pickers should ever read from.** |
+| `findByUser()` | `(User $user): ?EntryAuthor` | Look up the eligibility record for a user regardless of status. |
+| `promote()` | `(User $user, ?string $displayName = null): EntryAuthor` | Create or reactivate the record. Pass `null` to leave an existing `display_name` untouched; pass `''` to clear it. |
+| `demote()` | `(User $user): void` | Set `status = 'disabled'`. Does not delete the record or touch existing entry assignments. |
+| `sync()` | `(User $user, bool $eligible, ?string $displayName = null): ?EntryAuthor` | Idempotent upsert — calls `promote()` when `$eligible` is `true`, `demote()` otherwise. |
+
+### Promoting and Demoting Authors
+
+```php
+use App\Facades\EntryAuthors;
+
+// Promote a user (creates the record if needed, or reactivates it)
+$entryAuthor = EntryAuthors::promote($user);
+
+// Promote with a display name override
+$entryAuthor = EntryAuthors::promote($user, 'Jane Doe, Staff Writer');
+
+// Demote (disables but does not delete)
+EntryAuthors::demote($user);
+
+// Idempotent sync — use this from admin forms
+EntryAuthors::sync($user, eligible: true, displayName: 'Pen Name');
+EntryAuthors::sync($user, eligible: false);
+
+// Check eligibility on a User instance
+$user->load('entryAuthor');
+$user->isAuthorEligible(); // true only when status === 'active'
+```
+
+The seeder promotes `eric@mithra62.com` automatically:
+
+```php
+// UsersSeeder
+$user->assignRole('super admin');
+app(EntryAuthorService::class)->promote($user);
+```
+
+### Author Eligibility via UserService
+
+`UserService::create()` and `UserService::update()` accept two optional keys that are **stripped from the user attributes** and delegated to `EntryAuthorService::sync()`:
+
+| Key | Type | Behaviour |
+|---|---|---|
+| `is_author` | `bool` | When `true`, calls `promote()`; when `false`, calls `demote()`. Absent = no-op. |
+| `author_display_name` | `?string` | Passed as the display name to `promote()`. Only used when `is_author` is also present. |
+
+```php
+use App\Facades\Users;
+
+// Create a user and immediately promote them as an author
+$user = Users::create([
+    'name'                => 'Jane Doe',
+    'email'               => 'jane@example.com',
+    'password'            => 'secret',
+    'is_author'           => true,
+    'author_display_name' => 'J. Doe',
+]);
+
+// Update an existing user, removing author eligibility
+Users::update($user, ['is_author' => false]);
+
+// Update name without touching eligibility (key absent = no sync)
+Users::update($user, ['name' => 'Jane Smith']);
+```
+
+The admin Create User and Edit User forms wire these keys through their Twig views and `StoreUserRequest` / `EditUserRequest` validation rules.
+
+### Querying Eligible Authors
+
+The admin entry form (Create / Edit) populates its author picker by calling `EntryAuthors::getEligible()`:
+
+```php
+use App\Facades\EntryAuthors;
+
+$authors = EntryAuthors::getEligible();
+// Returns: Collection of EntryAuthor, only status='active', with user eager-loaded
+// Ordered by display_name ASC
+
+foreach ($authors as $author) {
+    echo $author->user_id;       // FK back to users
+    echo $author->display_name;  // falls back to user->name
+}
+```
+
+Entry author assignment passes **user IDs** (not `entry_author_id` values) through request validation. `EntryRepository::syncAuthors()` resolves them to active `EntryAuthor` IDs before writing to the `entry_author_entry` pivot — this is the **double-gate**: a user who has been demoted between page-load and form submission is silently dropped from the sync.
+
+Validation rule in `StoreEntryRequest` / `EditEntryRequest`:
+
+```php
+'authors.*' => ['integer', Rule::exists('entry_authors', 'user_id')->where('status', 'active')],
+```
+
+---
+
 ## UserService and the Users Facade
 
 ### CRUD
@@ -776,17 +918,22 @@ public function update(Request $request, User $user): void
 use App\Facades\Users;
 
 $user = Users::create([
-    'name'     => 'Jane Doe',
-    'email'    => 'jane@example.com',
-    'password' => 'secret',
-    'roles'    => ['admin'],
-    'fields'   => ['first_name' => 'Jane', 'last_name' => 'Doe'],
+    'name'                => 'Jane Doe',
+    'email'               => 'jane@example.com',
+    'password'            => 'secret',
+    'roles'               => ['admin'],
+    'fields'              => ['first_name' => 'Jane', 'last_name' => 'Doe'],
+    // Optional author eligibility keys (stripped before User::create()):
+    'is_author'           => true,
+    'author_display_name' => 'J. Doe',
 ]);
 
 $user = Users::update($user, [
     'name'   => 'Jane Smith',
     'roles'  => ['user'],
     'fields' => ['last_name' => 'Smith'],
+    // Optional — omit to leave eligibility unchanged:
+    'is_author'           => false,
 ]);
 
 Users::delete($user);
@@ -2075,20 +2222,46 @@ foreach ($related as $rel) {
 
 ### Accessing Entry Authors
 
-| Relationship | Type                 | Description                                        |
-|--------------|----------------------|----------------------------------------------------|
-| `creator`    | `BelongsTo User`     | User who created the record (`created_by_user_id`) |
-| `authors`    | `BelongsToMany User` | Editorial byline, ordered by pivot `sort_order`    |
+| Relationship | Type                        | Description                                                             |
+|--------------|-----------------------------|-------------------------------------------------------------------------|
+| `creator`    | `BelongsTo User`            | User who created the record (`created_by_user_id`)                      |
+| `authors`    | `BelongsToMany EntryAuthor` | Eligible byline authors, ordered by pivot `sort_order` from `entry_author_entry` |
+
+`Entry::authors()` returns **`EntryAuthor` models**, not `User` models directly. Each `EntryAuthor` has a `user_id` FK, a nullable `display_name`, and carries `status`. Access the underlying user through the `user` relation:
 
 ```php
 $post = Content::query()->inGroup('blog')->where('handle', 'my-post')->firstOrFail();
 
-$post->creator->name;
+// Creator (the user who hit "Save" — always a User)
+echo $post->creator->name;
+
+// Authors (EntryAuthor eligibility records, eager-loaded automatically)
 foreach ($post->authors as $author) {
-    echo $author->name;
-    echo $author->pivot->sort_order;
+    echo $author->display_name;      // falls back to user->name if null
+    echo $author->user_id;           // FK to users table
+    echo $author->user->email;       // access the related User
+    echo $author->pivot->sort_order; // ordering from entry_author_entry pivot
 }
-$post->authors->first()?->name; // primary author
+
+// Primary author (lowest sort_order)
+$primary = $post->authors->first();
+echo $primary?->display_name;
+```
+
+`authors` is always eager-loaded by `EntryQueryBuilder`'s terminal methods (`get()`, `first()`, `firstOrFail()`, `paginate()`). For entries fetched by other means, eager-load explicitly:
+
+```php
+$entry->load('authors.user');
+```
+
+**Filtering by author** uses `withAuthor(int $userId)` on the query builder. It accepts the plain `user_id` (not the `entry_author_id`):
+
+```php
+$posts = Content::query()
+    ->inGroup('blog')
+    ->withAuthor($user->id)
+    ->published()
+    ->get();
 ```
 
 ---
@@ -2193,8 +2366,10 @@ from a given date forward.
 ## Deleting Entries
 
 ```php
-// FK cascades remove field_values, entry_relationships, entry_authors,
-// categorizables, and the entry_tree node automatically.
+// FK cascades remove field_values, entry_relationships, entry_author_entry
+// (pivot rows), categorizables, and the entry_tree node automatically.
+// entry_authors eligibility records are NOT removed — they belong to the user,
+// not the entry.
 $entry->delete();
 
 // Via the facade — preferred for consistency
@@ -2672,6 +2847,8 @@ details should be kept visible:
   return real content.
 - `EntryResource` currently has user-shaped fields (`name`, `email`) instead of
   entry-shaped fields (`title`, `handle`, status, type, group, fields).
+  The author sub-object now returns `{ id: user_id, display_name }` correctly,
+  but the broader entry shape is still incomplete.
 - `Api\v1\User` checks `read users`, while the seeded permission is `view user`.
 - `Api\v1\Account@show` returns a placeholder success message instead of the
   authenticated user resource described by its OpenAPI annotation.
@@ -2683,6 +2860,10 @@ details should be kept visible:
   implementation code is added.
 - `site.templates.base_path` and `site.templates.not_found_template` are present
   in config but are not read by the current route drivers.
+- `entry_author_entry` FK cascades are defined in the migration but `Entry::delete()`
+  only cascades through `entry_authors` if `entry_id` is present in that table —
+  with the current schema the `entry_author_entry` pivot rows are removed via the
+  cascade on `entry_author_entry.entry_id`; no manual cleanup is required.
 
 ---
 
