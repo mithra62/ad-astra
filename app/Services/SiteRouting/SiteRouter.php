@@ -14,7 +14,7 @@ class SiteRouter
     {
         $result = $this->resolve($uri);
 
-        return view('templates::' . $result->template, $result->data);
+        return view($result->template, $result->data);
     }
 
     public function resolve(?string $uri): RouteResult

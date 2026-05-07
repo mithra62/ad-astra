@@ -37,7 +37,7 @@ class EntryTreeRouteDriverTest extends TestCase
 
         $this->assertNotNull($result);
         $this->assertSame('entry_tree', $result->type);
-        $this->assertSame('entries.page', $result->template);
+        $this->assertSame('templates::entries.page', $result->template);
         $this->assertSame($node->id, $result->resource->id);
         $this->assertSame($entry->id, $result->data['entry']->id);
         $this->assertSame($entry->entryType->id, $result->data['entryType']->id);

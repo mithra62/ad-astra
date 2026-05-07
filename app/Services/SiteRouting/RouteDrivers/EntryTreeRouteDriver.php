@@ -34,7 +34,7 @@ class EntryTreeRouteDriver implements RouteDriverInterface
 
         return new RouteResult(
             type: 'entry_tree',
-            template: $template,
+            template: 'templates::' . $template,
             data: [
                 'entry' => $entry,
                 'entryType' => $entry->entryType,

@@ -9,11 +9,7 @@ class EditFieldLayout extends AbstractAction
 {
     public function edit(FieldLayout $layout, array $input): FieldLayout
     {
-        $layout->update([
-            'name' => $input['name'],
-            'handle' => $input['handle'],
-        ]);
-
+        $layout->update($input);
         return $layout->fresh();
     }
 }
