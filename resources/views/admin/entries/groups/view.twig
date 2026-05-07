@@ -170,7 +170,7 @@
                                 <td class="hidden px-5 py-3.5 text-slate-600 md:table-cell">
                                     {% if entry.authors.count >= 1 %}
                                         {% for author in entry.authors %}
-                                            <span>{{ author.name }}</span>{% if not loop.last %}, {% endif %}
+                                            <span>{{ author.display_name }}</span>{% if not loop.last %}, {% endif %}
                                         {% endfor %}
                                     {% else %}
                                         —

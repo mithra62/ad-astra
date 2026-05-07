@@ -14,6 +14,13 @@
 {% set active_nav = active_nav|default('dashboard') %}
 {% set secondary_sidebar_template = secondary_sidebar_template|default(null) %}
 {% set has_secondary_sidebar = has_secondary_sidebar|default(secondary_sidebar_template is not empty) %}
+{% set current_user = auth_user() %}
+{% set account_menu_links = account_menu_links|default([
+    {label: 'Profile', url: route('account.details')},
+    {label: 'Preferences', url: route('account.settings')},
+    {label: 'API Tokens', url: route('account.tokens.index')},
+    {label: 'Logout', url: route('logout'), logout: true}
+]) %}
 
 <input id="sidebar-toggle" type="checkbox">
 <label for="sidebar-toggle" class="sidebar-overlay fixed inset-0 z-20 hidden bg-slate-900/40" aria-hidden="true"></label>
@@ -133,13 +140,79 @@
     <div class="flex min-w-0 flex-col">
         <header class="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
             {% block header %}
-                <div class="flex items-center gap-3">
-                    <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Open menu">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    </label>
-                    <div>
-                        <h4 class="text-sm font-semibold text-slate-800 sm:text-base">{{ page_heading|default(page_title|default('Dashboard')) }}</h4>
-                        {% block breadcrumbs %}{% endblock %}
+                <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div class="flex min-w-0 items-center gap-3">
+                        <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Open menu">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        </label>
+                        <div class="min-w-0">
+                            <h4 class="text-sm font-semibold text-slate-800 sm:text-base">{{ page_heading|default(page_title|default('Dashboard')) }}</h4>
+                            {% block breadcrumbs %}{% endblock %}
+                        </div>
+                    </div>
+
+                    <div class="flex min-w-0 items-center gap-2 sm:gap-3 lg:ml-auto">
+                        <form action="{{ admin_search_url|default('#') }}" method="GET" class="relative min-w-0 flex-1 sm:w-72 sm:flex-none" role="search">
+                            <label class="sr-only" for="admin-global-search">Search</label>
+                            <svg class="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.1-5.4a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"/>
+                            </svg>
+                            <input id="admin-global-search"
+                                   name="{{ admin_search_parameter|default('q') }}"
+                                   type="input"
+                                   value="{{ app.request.query.get(admin_search_parameter|default('q')) }}"
+                                   placeholder="Search"
+                                   class="h-10 w-full rounded-md border border-slate-200 bg-slate-50 pl-3 pr-14 text-sm text-slate-700 shadow-inner placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        </form>
+
+                        <div class="relative shrink-0" data-account-menu>
+                            <button type="button"
+                                    class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white text-sm font-semibold text-emerald-700 shadow-sm ring-offset-2 hover:border-emerald-200 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    aria-label="Open account menu"
+                                    data-account-menu-button>
+                                {% if current_user.avatar() %}
+                                    <img class="h-full w-full object-cover" src="{{ current_user.avatar() }}" alt="">
+                                {% else %}
+                                    {{ current_user.name|default('U')|slice(0, 2)|upper }}
+                                {% endif %}
+                            </button>
+
+                            <div class="absolute right-0 z-40 mt-2 hidden w-72 overflow-hidden rounded-md border border-slate-200 bg-white text-left shadow-lg"
+                                 role="menu"
+                                 data-account-menu-panel>
+                                <div class="border-b border-slate-100 px-4 py-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-sm font-semibold text-white">
+                                            {% if current_user.avatar() %}
+                                                <img class="h-full w-full object-cover" src="{{ current_user.avatar() }}" alt="">
+                                            {% else %}
+                                                {{ current_user.name|default('U')|slice(0, 2)|upper }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="truncate text-sm font-semibold text-slate-900">{{ current_user.name }}</p>
+                                            <p class="truncate text-xs text-slate-500">{{ current_user.email }}</p>
+                                            {% if current_user.title %}
+                                                <p class="mt-0.5 truncate text-xs text-slate-400">{{ current_user.title }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="py-1">
+                                    {% for link in account_menu_links %}
+                                        <a href="{{ link.url }}"
+                                           class="block px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 focus:bg-slate-50 focus:outline-none"
+                                           role="menuitem"
+                                           {% if link.logout|default(false) %}onclick="event.preventDefault(); document.getElementById('logout-form').submit();"{% endif %}>
+                                            {{ link.label }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             {% endblock %}
@@ -185,6 +258,61 @@
 </div>
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var accountMenus = Array.prototype.slice.call(document.querySelectorAll('[data-account-menu]'));
+
+        function closeAccountMenu(menu) {
+            var button = menu.querySelector('[data-account-menu-button]');
+            var panel = menu.querySelector('[data-account-menu-panel]');
+
+            if (!button || !panel) {
+                return;
+            }
+
+            panel.classList.add('hidden');
+            button.setAttribute('aria-expanded', 'false');
+        }
+
+        accountMenus.forEach(function (menu) {
+            var button = menu.querySelector('[data-account-menu-button]');
+            var panel = menu.querySelector('[data-account-menu-panel]');
+
+            if (!button || !panel) {
+                return;
+            }
+
+            button.addEventListener('click', function () {
+                var isOpen = !panel.classList.contains('hidden');
+
+                accountMenus.forEach(function (otherMenu) {
+                    if (otherMenu !== menu) {
+                        closeAccountMenu(otherMenu);
+                    }
+                });
+
+                panel.classList.toggle('hidden', isOpen);
+                button.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+            });
+        });
+
+        document.addEventListener('click', function (event) {
+            accountMenus.forEach(function (menu) {
+                if (!menu.contains(event.target)) {
+                    closeAccountMenu(menu);
+                }
+            });
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key !== 'Escape') {
+                return;
+            }
+
+            accountMenus.forEach(closeAccountMenu);
+        });
+    });
+</script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -56,7 +56,7 @@ class Group extends Controller
             'statusGroup.statuses',
         ])->find($id);
 
-        if (!$group instanceof EntryGroup) {
+        if (! $group instanceof EntryGroup) {
             abort(404);
         }
 
@@ -69,14 +69,14 @@ class Group extends Controller
 
         $allGroups = EntryGroup::withCount('entries')->ordered()->get();
         $entries = $group->entries()
-            ->with(['authors', 'status', 'entryType'])
+            ->with(['authors.user', 'status', 'entryType'])
             ->latest()
             ->paginate(20);
 
         return $this->view('entries.groups.view', [
-            'group'        => $group,
-            'groups'       => $allGroups,
-            'entries'      => $entries,
+            'group' => $group,
+            'groups' => $allGroups,
+            'entries' => $entries,
             'statusCounts' => $statusCounts,
         ]);
     }
@@ -92,7 +92,7 @@ class Group extends Controller
 
         ])->find($id);
 
-        if (!$group instanceof EntryGroup) {
+        if (! $group instanceof EntryGroup) {
             abort(404);
         }
 
@@ -109,9 +109,9 @@ class Group extends Controller
 
     public function update(EditEntryGroupRequest $request, string $id)
     {
-        $group = EntryGroups::find((int)$id);
+        $group = EntryGroups::find((int) $id);
 
-        if (!$group instanceof EntryGroup) {
+        if (! $group instanceof EntryGroup) {
             abort(404);
         }
 
@@ -124,9 +124,9 @@ class Group extends Controller
 
     public function destroy(DeleteEntryGroupRequest $request, string $id)
     {
-        $group = EntryGroups::find((int)$id);
+        $group = EntryGroups::find((int) $id);
 
-        if (!$group instanceof EntryGroup) {
+        if (! $group instanceof EntryGroup) {
             return redirect()
                 ->route('entries.groups')
                 ->with('failure', trans('entry.group.not_found'));
@@ -143,7 +143,7 @@ class Group extends Controller
     {
         $group = EntryGroup::withCount('entries')->find($id);
 
-        if (!$group instanceof EntryGroup) {
+        if (! $group instanceof EntryGroup) {
             return redirect()->route('entries.groups')->with('failure', trans('entry.group.not_found'));
         }
 
