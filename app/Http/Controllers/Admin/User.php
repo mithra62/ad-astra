@@ -57,11 +57,13 @@ class User extends Controller
         }
 
         $user->loadMissing(['roles', 'tokens', 'fieldValues.field.fieldType']);
+        $user->load(['statusLogs' => fn($q) => $q->with('actor')->limit(10)]);
         $schema = UserSchema::instance()->resolved();
         return $this->view('users.show', [
             'user' => $user,
             'field_values' => $user->fieldArray(),
             'schema' => $schema,
+            'status_logs' => $user->statusLogs,
         ]);
     }
 

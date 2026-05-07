@@ -1,6 +1,6 @@
 # Laravel CMS — Project Overview
 
-> **Documentation status (2026-04-29).** This file is synchronised against
+> **Documentation status (2026-05-07).** This file is synchronised against
 > the live source in `app/`, `database/`, `routes/`, and `config/`.
 > Project-specific code snippets are copy-paste accurate against the current
 > codebase; generic tutorial snippets use placeholder model names where noted.
@@ -24,6 +24,14 @@
     - [Checking Permissions](#checking-permissions)
     - [Creating a New Permission and Role](#creating-a-new-permission-and-role)
 - [Adding New Permissions](#adding-new-permissions)
+- [User Account Status](#user-account-status)
+    - [Status Values](#status-values)
+    - [Parallel Lock Column](#parallel-lock-column)
+    - [Model Helpers](#model-helpers)
+    - [Authentication Gate](#authentication-gate)
+    - [Access-Enforcement Middleware](#access-enforcement-middleware)
+    - [Status Change Events and Audit Log](#status-change-events-and-audit-log)
+    - [Admin UI](#admin-ui)
 - [User Extended Profile (UserSchema)](#user-extended-profile-userschema)
     - [Setting Up the User Schema](#setting-up-the-user-schema)
     - [Writing Field Values to a User](#writing-field-values-to-a-user)
@@ -35,6 +43,7 @@
     - [Roles](#roles)
     - [Custom Fields](#custom-fields)
     - [Passwords](#passwords)
+    - [Status Management](#status-management)
     - [Two-Factor Authentication](#two-factor-authentication)
     - [OAuth Token Management](#oauth-token-management)
     - [Action Classes Inventory](#action-classes-inventory)
@@ -184,7 +193,11 @@ UserSchema        — singleton (id=1) that owns a single FieldLayout and
                     one or more FieldGroups for ALL users
   └── User        — uses Fieldable, HasRoles (Spatie), HasTags (Spatie),
                     HasApiTokens (Sanctum), TwoFactorAuthenticatable (Fortify),
-                    Notifiable; OAuth tokens via OauthToken HasMany
+                    Notifiable; OAuth tokens via OauthToken HasMany;
+                    account access controlled by five status values
+                    (active / inactive / pending / suspended / banned)
+                    plus a parallel locked_until column; status changes
+                    audited in UserStatusLog (user_status_logs)
 ```
 
 ### Cross-cutting infrastructure
@@ -304,6 +317,7 @@ Coverage currently includes:
   and site routing.
 - Middleware tests for API logging.
 - Feature tests for settings, entry status validation, and entry type hooks.
+- Feature tests for user account status: `canAccessSystem()` model assertions for all five status values, expired suspension and lock auto-expiry, and `EnforceUserStatus` middleware logout/redirect behaviour (`tests/Feature/LoginTest.php`).
 
 ---
 
@@ -378,6 +392,8 @@ create field / edit field / delete field
 create field layout / edit field layout / delete field layout
 
 create status / edit status / delete status
+
+manage user status
 
 edit setting
 ```
@@ -489,6 +505,132 @@ if (auth()->user()->can('publish entry')) { }  // inline
 ```
 
 The `super admin` role bypasses every permission via `Gate::before`.
+
+---
+
+## User Account Status
+
+### Status Values
+
+The `User` model carries a `status` column with five administrative values
+defined in `App\Enums\UserStatus`:
+
+| Value       | Constant                | Meaning                                                                    |
+|-------------|-------------------------|----------------------------------------------------------------------------|
+| `active`    | `UserStatus::ACTIVE`    | Full access                                                                |
+| `inactive`  | `UserStatus::INACTIVE`  | Disabled by an admin; cannot log in                                        |
+| `pending`   | `UserStatus::PENDING`   | Awaiting approval; cannot log in                                           |
+| `suspended` | `UserStatus::SUSPENDED` | Time-limited block; lifts automatically when `suspended_until` passes      |
+| `banned`    | `UserStatus::BANNED`    | Permanent block; `banned_at` timestamp is recorded                         |
+
+Status is **separate from roles**. Roles define what an active user may do;
+status governs whether they can enter the system at all. The default status for
+newly created users is driven by the `users.default_status` setting (fallback:
+`active`). Social-login registrations use `users.social_default_status`
+(fallback: `pending`).
+
+`UserStatus::ALL` contains every valid value and is used with
+`Rule::in(UserStatus::ALL)` in validation. `UserStatus::CREATION_ALLOWED`
+(`active`, `inactive`, `pending`) lists values permitted at creation time;
+`suspended` and `banned` are post-creation admin actions only.
+
+### Parallel Lock Column
+
+`locked_until` is a nullable datetime column orthogonal to status. An `active`
+user with a future `locked_until` cannot access the system. The lock expires
+automatically at runtime — no cron or scheduler is needed.
+
+| Column            | Purpose                                                           |
+|-------------------|-------------------------------------------------------------------|
+| `status`          | Administrative state (`UserStatus::ALL`)                          |
+| `suspended_until` | Set by `suspend()`; checked at runtime for auto-expiry            |
+| `banned_at`       | Timestamp set when status becomes `banned`, cleared otherwise     |
+| `locked_until`    | Parallel lock independent of status; checked on every request     |
+
+### Model Helpers
+
+```php
+$user->canAccessSystem();    // true if active + not locked (auto-expires)
+$user->isLocked();           // true if locked_until is in the future
+$user->isSuspended();        // true if suspended and suspended_until is future
+$user->statusLabel();        // human-readable label e.g. "Pending Approval"
+$user->statusColour();       // Tailwind token: 'emerald', 'amber', 'orange'…
+$user->accessDeniedReason(); // lang key string, or null if access is allowed
+$user->statusLogs();         // HasMany → UserStatusLog, newest-first
+```
+
+`canAccessSystem()` handles suspension auto-expiry inline: a suspended user
+whose `suspended_until` has passed is treated as active without any database
+write. The column is cleaned up on the next explicit status change.
+
+### Authentication Gate
+
+`FortifyServiceProvider` registers an `authenticateUsing` callback that calls
+`canAccessSystem()` before completing login. Non-active users receive a
+`ValidationException` with a translated error key from `lang/en/auth.php` —
+they are never authenticated and no session is created.
+
+```
+auth.account_inactive   — inactive
+auth.account_pending    — pending
+auth.account_suspended  — suspended (within window)
+auth.account_banned     — banned
+auth.account_locked     — locked (regardless of status)
+```
+
+### Access-Enforcement Middleware
+
+Two middleware classes enforce status on every request after login:
+
+| Middleware             | Stack | Blocked response                                    |
+|------------------------|-------|-----------------------------------------------------|
+| `EnforceUserStatus`    | `web` | Logout + redirect to login with error flash         |
+| `EnforceUserStatusApi` | `api` | `403 JSON`; stateful fallback: logout + redirect    |
+
+Both are appended in `bootstrap/app.php` and fire on every request, so a
+status change takes effect immediately on the user's next page load or API call.
+
+### Status Change Events and Audit Log
+
+Every status or lock change fires an event caught by `WriteUserStatusLog`,
+which records a row in `user_status_logs`:
+
+| Event               | Fired by                                        |
+|---------------------|-------------------------------------------------|
+| `UserStatusChanged` | `UserService::setStatus()`, `UserService::suspend()` |
+| `UserLockChanged`   | `UserService::lockUser()`, `UserService::unlockUser()` |
+
+`user_status_logs` stores `user_id`, `changed_by_user_id`, `previous_status`,
+`new_status`, `previous_locked_until`, `new_locked_until`, `reason`, `context`
+(JSON — e.g. `suspended_until` timestamp), and `created_at`. The model is
+`App\Models\UserStatusLog` with `actor()` (the admin who made the change) and
+`user()` belongs-to relations.
+
+### Admin UI
+
+The user `show` view (`resources/views/admin/users/show.twig`) includes a
+**Status & Access** card visible only to users with the `manage user status`
+permission. It provides:
+
+- Current status badge with suspension expiry or lock-expiry details.
+- A status `<select>` that dynamically reveals a reason textarea and a
+  "Suspended Until" datetime picker (with one-click presets: +1h, +24h, +3d,
+  +7d, +30d) when "Suspended" is chosen. The reason field is required for all
+  non-active statuses.
+- A "Remove Account Lock" section — only shown when the account is locked —
+  with a DELETE form that calls `users.lock.destroy` immediately.
+- A status history log of the 10 most recent `user_status_logs` entries.
+
+Admin routes:
+
+| Method   | URL                          | Route name            | Action                    |
+|----------|------------------------------|-----------------------|---------------------------|
+| `PATCH`  | `/admin/users/{id}/status`   | `users.status.update` | Change status / suspend   |
+| `DELETE` | `/admin/users/{id}/lock`     | `users.lock.destroy`  | Remove lock immediately   |
+
+Both routes are handled by `App\Http\Controllers\Admin\UserStatusController`
+and gated on the `manage user status` permission via
+`App\Http\Requests\User\UserStatusRequest`.
 
 ---
 
@@ -680,6 +822,34 @@ app(\App\Actions\User\UpdateUserPassword::class)->update($user, [
     'password_confirmation' => 'newpassword123',
 ]);
 ```
+
+### Status Management
+
+```php
+use App\Enums\UserStatus;
+
+// Set any non-suspension status; manages banned_at automatically
+Users::setStatus($user, UserStatus::INACTIVE, 'Account deactivated');
+Users::setStatus($user, UserStatus::BANNED,   'Violated terms of service');
+Users::setStatus($user, UserStatus::ACTIVE);   // reason optional for active
+
+// Suspend for a fixed window
+Users::suspend($user, new DateTime('+7 days'), 'Repeated spam posts');
+
+// Lock account temporarily (parallel to status — does not change status)
+Users::lockUser($user, new DateTime('+30 minutes'), 'Too many failed logins');
+Users::unlockUser($user);                          // clear lock immediately
+```
+
+`setStatus()` fires `UserStatusChanged` and keeps `banned_at` and
+`suspended_until` in sync automatically. `suspend()` fires `UserStatusChanged`
+with `context['suspended_until']`. `lockUser()` / `unlockUser()` fire
+`UserLockChanged`. All four methods write to `user_status_logs` via the
+`WriteUserStatusLog` listener registered in `AppServiceProvider`.
+
+Status changes made through `UserService::update()` are intentionally ignored —
+the `status`, `suspended_until`, `banned_at`, and `locked_until` keys are
+stripped from the update payload. Always use the dedicated status methods above.
 
 ### Two-Factor Authentication
 
