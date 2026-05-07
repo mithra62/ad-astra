@@ -20,7 +20,10 @@ class UserTest extends TestCase
     {
         $model = new User;
 
-        $this->assertEquals(['name', 'email', 'password'], $model->getFillable());
+        // Core attributes plus the status columns added by the user-status system.
+        foreach (['name', 'email', 'password', 'status', 'suspended_until', 'banned_at', 'locked_until'] as $field) {
+            $this->assertContains($field, $model->getFillable(), "Expected '$field' to be fillable.");
+        }
     }
 
     public function test_hides_password_and_remember_token(): void

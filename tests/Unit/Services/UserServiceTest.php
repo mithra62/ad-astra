@@ -206,7 +206,7 @@ class UserServiceTest extends TestCase
 
     public function test_first_or_create_from_social_creates_new_user_when_not_found(): void
     {
-        $result = $this->service->firstOrCreateFromSocial('social@example.com', 'Social User');
+        $result = $this->service->firstOrCreateFromSocial('social@example.com', 'Social User', 'github', '127.0.0.1');
 
         $this->assertInstanceOf(User::class, $result);
         $this->assertDatabaseHas('users', [
@@ -223,7 +223,7 @@ class UserServiceTest extends TestCase
     {
         $existing = User::factory()->create(['email' => 'existing@example.com', 'name' => 'Original Name']);
 
-        $result = $this->service->firstOrCreateFromSocial('existing@example.com', 'Different Name');
+        $result = $this->service->firstOrCreateFromSocial('existing@example.com', 'Different Name', 'github', '127.0.0.1');
 
         $this->assertEquals($existing->id, $result->id);
         $this->assertEquals('Original Name', $result->name);
@@ -231,15 +231,15 @@ class UserServiceTest extends TestCase
 
     public function test_first_or_create_from_social_does_not_duplicate_user(): void
     {
-        $this->service->firstOrCreateFromSocial('once@example.com', 'Once');
-        $this->service->firstOrCreateFromSocial('once@example.com', 'Twice');
+        $this->service->firstOrCreateFromSocial('once@example.com', 'Once', 'github', '127.0.0.1');
+        $this->service->firstOrCreateFromSocial('once@example.com', 'Twice', 'github', '127.0.0.1');
 
         $this->assertDatabaseCount('users', 1);
     }
 
     public function test_first_or_create_from_social_sets_a_password_on_creation(): void
     {
-        $result = $this->service->firstOrCreateFromSocial('newuser@example.com', 'New User');
+        $result = $this->service->firstOrCreateFromSocial('newuser@example.com', 'New User', 'github', '127.0.0.1');
 
         $this->assertNotNull($result->fresh()->password);
     }

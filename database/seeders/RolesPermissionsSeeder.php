@@ -23,6 +23,7 @@ class RolesPermissionsSeeder extends Seeder
             'create user' => 'Allows for creating users',
             'edit user' => 'Allows for editing users',
             'delete user' => 'Allows for deleting users',
+            'manage user status' => 'Allows for changing user account status (active, inactive, pending, suspended, banned) and managing locks',
 
             'view user token' => 'Allow users to view tokens for users',
             'create user token' => 'Allow users to create tokens for users',

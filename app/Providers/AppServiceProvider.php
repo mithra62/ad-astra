@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Events\UserLockChanged;
+use App\Events\UserStatusChanged;
+use App\Listeners\WriteUserStatusLog;
 use App\Models\Category;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\Entry;
@@ -24,6 +27,7 @@ use App\Services\UserService;
 use App\Settings;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -79,6 +83,10 @@ class AppServiceProvider extends ServiceProvider
         // Model observers
         Status::observe(StatusObserver::class);
         EntryTree::observe(EntryTreeObserver::class);
+
+        // User status audit log listeners
+        Event::listen(UserStatusChanged::class, WriteUserStatusLog::class);
+        Event::listen(UserLockChanged::class, WriteUserStatusLog::class);
 
 //        Route::group([
 //            'namespace' => 'mithra62\Shop\Http\Controllers',

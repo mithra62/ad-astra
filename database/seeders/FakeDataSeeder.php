@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserStatus;
 use App\Facades\Categories;
 use App\Facades\Content;
 use App\Models\Category;
@@ -47,6 +48,16 @@ class FakeDataSeeder extends Seeder
         'super admin',
     ];
 
+    // Weighted user-status pool: ~75 % active, ~10 % pending, ~8 % inactive,
+    // ~5 % suspended, ~2 % banned.
+    private const USER_STATUS_WEIGHTS = [
+        UserStatus::ACTIVE    => 75,
+        UserStatus::PENDING   => 10,
+        UserStatus::INACTIVE  => 8,
+        UserStatus::SUSPENDED => 5,
+        UserStatus::BANNED    => 2,
+    ];
+
     // Preferred weights per status handle. Any handle not listed defaults to 1.
     // Applied only to statuses that actually exist on the entry group's status group,
     // so entry groups with a narrower set (e.g. no 'archived') are handled safely.
@@ -76,6 +87,21 @@ class FakeDataSeeder extends Seeder
     // Users
     // =========================================================================
 
+    /**
+     * Pick a weighted random user status from USER_STATUS_WEIGHTS.
+     */
+    private function pickUserStatus(): string
+    {
+        $pool = [];
+        foreach (self::USER_STATUS_WEIGHTS as $status => $weight) {
+            for ($w = 0; $w < $weight; $w++) {
+                $pool[] = $status;
+            }
+        }
+
+        return fake()->randomElement($pool);
+    }
+
     /** @return User[] */
     private function seedUsers(): array
     {
@@ -87,14 +113,16 @@ class FakeDataSeeder extends Seeder
 
         for ($i = 0; $i < self::USER_COUNT; $i++) {
             $password = Str::random(10) . 'A1!'; // satisfies min:8 + complexity
+            $status = $this->pickUserStatus();
 
             $data = [
-                'name' => fake()->name(),
-                'email' => fake()->unique()->safeEmail(),
+                'name'     => fake()->name(),
+                'email'    => fake()->unique()->safeEmail(),
                 'password' => $password,
                 'password_confirmation' => $password,
-                'roles' => [fake()->randomElement(self::ROLE_POOL)],
-                'fields' => $this->fakeUserFields(),
+                'status'   => $status,
+                'roles'    => [fake()->randomElement(self::ROLE_POOL)],
+                'fields'   => $this->fakeUserFields(),
             ];
 
             if (!$this->validateUser($data)) {
@@ -103,9 +131,19 @@ class FakeDataSeeder extends Seeder
             }
 
             // email_verified_at: 80 % verified, 20 % pending
-            $user = $userService->create(array_merge($data, [
-                'email_verified_at' => fake()->boolean(80) ? now() : null,
-            ]));
+            $extra = ['email_verified_at' => fake()->boolean(80) ? now() : null];
+
+            // Suspended accounts need a suspended_until date.
+            if ($status === UserStatus::SUSPENDED) {
+                $extra['suspended_until'] = now()->addDays(fake()->numberBetween(1, 30));
+            }
+
+            // Banned accounts record their banned_at timestamp.
+            if ($status === UserStatus::BANNED) {
+                $extra['banned_at'] = now()->subDays(fake()->numberBetween(1, 90));
+            }
+
+            $user = $userService->create(array_merge($data, $extra));
 
             $created[] = $user;
         }

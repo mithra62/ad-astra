@@ -225,4 +225,40 @@ return [
         ],
     ],
 
+
+    // -------------------------------------------------------------------------
+    // Users
+    // -------------------------------------------------------------------------
+
+    'users' => [
+        'name'        => 'Users',
+        'description' => 'User account and access configuration.',
+        'icon'        => 'ti-users',
+        'sort_order'  => 10,
+        'fields'      => [
+            [
+                'handle'           => 'default_status',
+                'label'            => 'Default User Status',
+                'type'             => 'text',
+                'default'          => 'active',
+                'rules'            => ['required', 'string', 'in:active,inactive,pending,suspended,banned'],
+                'instructions'     => 'Status assigned to new user accounts created by an admin.',
+                'group'            => 'Accounts',
+                'hidden'           => false,
+                'user_overridable' => false,
+            ],
+            [
+                'handle'           => 'social_default_status',
+                'label'            => 'Social Login Default Status',
+                'type'             => 'text',
+                'default'          => 'pending',
+                'rules'            => ['required', 'string', 'in:active,inactive,pending,suspended,banned'],
+                'instructions'     => 'Status assigned to accounts created via OAuth / social login. Set to "active" only if you fully trust your OAuth provider.',
+                'group'            => 'Accounts',
+                'hidden'           => false,
+                'user_overridable' => false,
+            ],
+        ],
+    ],
+
 ];

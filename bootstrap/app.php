@@ -15,9 +15,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
-    })->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
+
+        // Enforce account status on every authenticated web request.
+        $middleware->web(append: [
+            \App\Http\Middleware\EnforceUserStatus::class,
+        ]);
+
+        // Enforce account status on every authenticated API request.
+        $middleware->api(append: [
+            \App\Http\Middleware\EnforceUserStatusApi::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

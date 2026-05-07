@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\User;
 
+use App\Enums\UserStatus;
 use App\Http\Requests\FormRequest;
 use App\Models\UserSchema;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
@@ -24,15 +26,16 @@ class StoreUserRequest extends FormRequest
         $schema = UserSchema::resolved();
         return array_merge(
             [
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'email', 'unique:users,email'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
+                'name'                 => ['required', 'string', 'max:255'],
+                'email'                => ['required', 'email', 'unique:users,email'],
+                'password'             => ['required', 'string', 'min:8', 'confirmed'],
                 'password_confirmation' => ['required'],
-                'roles' => ['required', 'array'],
-                'roles.*' => ['string', 'exists:roles,name'],
-                'fields' => ['nullable', 'array'],
-                'is_author' => ['nullable', 'boolean'],
-                'author_display_name' => ['nullable', 'string', 'max:255'],
+                'status'               => ['nullable', 'string', Rule::in(UserStatus::CREATION_ALLOWED)],
+                'roles'                => ['required', 'array'],
+                'roles.*'              => ['string', 'exists:roles,name'],
+                'fields'               => ['nullable', 'array'],
+                'is_author'            => ['nullable', 'boolean'],
+                'author_display_name'  => ['nullable', 'string', 'max:255'],
             ],
             $this->schemaFieldRules($schema)
         );

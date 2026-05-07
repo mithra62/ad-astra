@@ -23,11 +23,14 @@ use App\Http\Controllers\Admin\Status\Group as StatusGroup;
 use App\Http\Controllers\Admin\User;
 use App\Http\Controllers\Admin\User\Layout as UserLayout;
 use App\Http\Controllers\Admin\User\Token as UserTokens;
+use App\Http\Controllers\Admin\UserStatusController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     //users
+    Route::patch('users/{id}/status', [UserStatusController::class, 'update'])->name('users.status.update');
+    Route::delete('users/{id}/lock', [UserStatusController::class, 'destroy'])->name('users.lock.destroy');
     Route::get('users/{id}/confirm', [User::class, 'confirm'])->name('users.confirm');
     Route::put('users/{id}/password', [User::class, 'password'])->name('users.password');
     Route::get('users/{id}/password', [User::class, 'changePassword'])->name('users.change_password');

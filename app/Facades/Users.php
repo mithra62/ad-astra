@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\User\OauthToken;
 use App\Services\UserService;
 use Carbon\Carbon;
+use DateTime;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Facade;
@@ -20,12 +21,18 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @method static Collection getForDropdown(int $limit = 50)
  * @method static int getTotalCount()
  * @method static Collection getLatestUsers(int $limit = 9)
- * @method static User firstOrCreateFromSocial(string $email, string $name)
+ * @method static User firstOrCreateFromSocial(string $email, string $name, string $provider, string $ip)
  *
  * CRUD
  * @method static User create(array $data)
  * @method static User update(User $user, array $data)
  * @method static bool delete(User $user)
+ *
+ * Status management
+ * @method static User setStatus(User $user, string $newStatus, ?string $reason = null)
+ * @method static User suspend(User $user, DateTime $until, string $reason = '')
+ * @method static User lockUser(User $user, DateTime $until, string $reason = '')
+ * @method static User unlockUser(User $user)
  *
  * Roles
  * @method static User assignRoles(User $user, array|string $roles)

@@ -2,11 +2,17 @@
 
 namespace App\Services;
 
+use App\Enums\UserStatus;
+use App\Events\NewSocialUserRegistered;
+use App\Events\UserLockChanged;
+use App\Events\UserStatusChanged;
 use App\Models\User;
 use App\Models\User\OauthToken;
+use App\Settings;
 use App\Traits\PersistsFieldValues;
 use App\Services\EntryAuthorService;
 use Carbon\Carbon;
+use DateTime;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -85,17 +91,36 @@ class UserService
 
     /**
      * Find a user by email or create one for a social-login callback.
-     * Only `name` is set on creation; password and roles are left for later.
+     *
+     * New accounts are given the status configured under
+     * Settings users.social_default_status (default: 'pending').
+     * A NewSocialUserRegistered event is fired for new accounts only.
      */
-    public function firstOrCreateFromSocial(string $email, string $name): User
+    public function firstOrCreateFromSocial(string $email, string $name, string $provider, string $ip): User
     {
-        return User::firstOrCreate(
+        $created = false;
+
+        $socialDefaultStatus = app(Settings::class)->get('users', 'social_default_status')
+            ?? UserStatus::PENDING;
+
+        $user = User::firstOrCreate(
             ['email' => $email],
             [
-                'name' => $name,
+                'name'     => $name,
                 'password' => Hash::make(\Illuminate\Support\Str::random(32)),
+                'status'   => $socialDefaultStatus,
             ],
         );
+
+        if ($user->wasRecentlyCreated) {
+            $created = true;
+        }
+
+        if ($created) {
+            event(new NewSocialUserRegistered($user, $provider, $ip));
+        }
+
+        return $user;
     }
 
     // -------------------------------------------------------------------------
@@ -186,7 +211,22 @@ class UserService
      */
     public function update(User $user, array $data): User
     {
-        $attributes = Arr::except($data, ['password', 'roles', 'fields', 'is_author', 'author_display_name']);
+        // 'status' and its companion columns are intentionally excluded here.
+        // Account status must only change through setStatus(), suspend(),
+        // lockUser(), or unlockUser() so that the audit log is always written,
+        // events are fired, and companion columns (banned_at, suspended_until)
+        // are kept in sync.  Any 'status' key in $data is silently ignored.
+        $attributes = Arr::except($data, [
+            'password',
+            'roles',
+            'fields',
+            'is_author',
+            'author_display_name',
+            'status',
+            'suspended_until',
+            'banned_at',
+            'locked_until',
+        ]);
 
         if (!empty($attributes)) {
             $user->update($attributes);
@@ -233,6 +273,107 @@ class UserService
     {
         return (bool)$user->tokens()->where('id', $tokenId)->delete();
     }
+
+    // -------------------------------------------------------------------------
+    // Status management
+    // -------------------------------------------------------------------------
+
+    /**
+     * Set an administrative status on a user account.
+     *
+     * Automatically manages the banned_at timestamp and fires UserStatusChanged.
+     * Do not use this method for suspensions — use suspend() instead.
+     *
+     * @param string $newStatus  One of UserStatus::ALL
+     * @param string|null $reason  Optional reason stored in the audit log
+     */
+    public function setStatus(User $user, string $newStatus, ?string $reason = null): User
+    {
+        $previousStatus = $user->status;
+
+        $update = ['status' => $newStatus];
+
+        // Keep banned_at in sync with the banned status.
+        if ($newStatus === UserStatus::BANNED && $previousStatus !== UserStatus::BANNED) {
+            $update['banned_at'] = now();
+        } elseif ($newStatus !== UserStatus::BANNED) {
+            $update['banned_at'] = null;
+        }
+
+        // Clear suspended_until if we're moving away from suspended.
+        if ($newStatus !== UserStatus::SUSPENDED) {
+            $update['suspended_until'] = null;
+        }
+
+        $user->forceFill($update)->save();
+
+        event(new UserStatusChanged($user, $previousStatus, $newStatus, $reason, []));
+
+        return $user->refresh();
+    }
+
+    /**
+     * Suspend a user until a given datetime.
+     *
+     * Sets status to 'suspended', records suspended_until, and fires
+     * UserStatusChanged with the context array containing the expiry.
+     */
+    public function suspend(User $user, DateTime $until, string $reason = ''): User
+    {
+        $previousStatus = $user->status;
+
+        $user->forceFill([
+            'status'         => UserStatus::SUSPENDED,
+            'suspended_until' => $until,
+            'banned_at'      => null,
+        ])->save();
+
+        event(new UserStatusChanged(
+            $user,
+            $previousStatus,
+            UserStatus::SUSPENDED,
+            $reason ?: null,
+            ['suspended_until' => $until->format('Y-m-d H:i:s')],
+        ));
+
+        return $user->refresh();
+    }
+
+    /**
+     * Lock a user account until a given datetime (parallel to status).
+     *
+     * Fires UserLockChanged.
+     */
+    public function lockUser(User $user, DateTime $until, string $reason = ''): User
+    {
+        $previousLockedUntil = $user->locked_until;
+
+        $user->forceFill(['locked_until' => $until])->save();
+
+        event(new UserLockChanged($user, $previousLockedUntil, $until, $reason));
+
+        return $user->refresh();
+    }
+
+    /**
+     * Remove an account lock, allowing the user to log in again (subject to status).
+     *
+     * Fires UserLockChanged.
+     */
+    public function unlockUser(User $user): User
+    {
+        $previousLockedUntil = $user->locked_until;
+
+        $user->forceFill(['locked_until' => null])->save();
+
+        event(new UserLockChanged($user, $previousLockedUntil, null, ''));
+
+        return $user->refresh();
+    }
+
+    // -------------------------------------------------------------------------
+    // Delete
+    // -------------------------------------------------------------------------
 
     public function delete(User $user): bool
     {
@@ -348,6 +489,8 @@ class UserService
      *
      * Accepted keys in $data:
      *   name, email, title, phone, password  — core user attributes
+     *   status  (string) — one of UserStatus::CREATION_ALLOWED; defaults to the
+     *                      system setting users.default_status (fallback: 'active')
      *   roles   (array)  — role names to sync
      *   fields  (array)  — ['handle' => value] custom field values
      */
@@ -357,6 +500,12 @@ class UserService
 
         if (!empty($attributes['password'])) {
             $attributes['password'] = Hash::make($attributes['password']);
+        }
+
+        // Apply system default status when none is supplied.
+        if (empty($attributes['status'])) {
+            $attributes['status'] = app(Settings::class)->get('users', 'default_status')
+                ?? UserStatus::ACTIVE;
         }
 
         $user = User::create($attributes);
