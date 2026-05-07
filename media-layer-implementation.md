@@ -105,6 +105,15 @@ mime type and file size.** The request validates at the HTTP boundary; the
 trait validates programmatically. This is intentional layering, not duplication
 — leave both in place.
 
+**5. `mediables.field_id = 0` is a sentinel, not a valid `fields.id`.**
+Any query on `mediables` that should return only field-driven attachments
+**must** use `where('field_id', '>', 0)`, never `whereNotNull('field_id')`.
+The column is `NOT NULL DEFAULT 0`, so `whereNotNull` would silently include
+direct attachments (avatars, library browser picks). The two places this matters
+are `Media::fieldUsages()` and `Media::isReferencedByField()` — both already
+use the correct filter. Any new query on `mediables` that scopes to field
+references must follow this same pattern.
+
 ---
 
 ## Do not start two steps in parallel.
@@ -227,14 +236,16 @@ return new class extends Migration {
 ## Step 4 — Create New Table Migrations
 
 Check the current last migration timestamp in `database/migrations/` before
-creating these files, and use timestamps that come after it. They must run
-after `fields`, `categories`, and all other core tables exist. The examples
-below use `2026_04_28_000002` onward — adjust if newer migrations have been
-added to the repo.
+creating these files and use timestamps that come **after** it. At time of
+writing the latest core migration is `2026_05_06_*` (`create_entry_metrics_table`).
+The three new files therefore use `2026_05_07_000001–3`. If additional
+migrations have been added since, bump accordingly — the deferred-FK migration
+**must** run after all tables it references (`fields`, `field_layouts`, `media`,
+`media_libraries`) exist.
 
 ### 4a — `mediables`
 
-**File:** `database/migrations/2026_04_28_000002_create_mediables_table.php`
+**File:** `database/migrations/2026_05_07_000001_create_mediables_table.php`
 
 ```php
 <?php
@@ -283,7 +294,7 @@ return new class extends Migration {
 
 ### 4b — `media_transformations`
 
-**File:** `database/migrations/2026_04_28_000003_create_media_transformations_table.php`
+**File:** `database/migrations/2026_05_07_000002_create_media_transformations_table.php`
 
 ```php
 <?php
@@ -326,7 +337,7 @@ return new class extends Migration {
 
 ### 4c — Deferred FK constraint (`media_libraries.field_layout_id` only)
 
-**File:** `database/migrations/2026_04_28_000004_add_media_foreign_keys.php`
+**File:** `database/migrations/2026_05_07_000003_add_media_foreign_keys.php`
 
 ```php
 <?php
@@ -1295,6 +1306,11 @@ class FieldValueObserver
 
     private function isFileUpload(FieldValue $fieldValue): bool
     {
+        // Reads only the string `object` column of the already-eager-loaded
+        // FieldType record — does NOT instantiate FileUpload here.
+        // FileUpload::class resolves to a plain string constant at compile time,
+        // so there is no circular-dependency risk during bootstrapping.
+        // The actual instance() call happens in syncMediables(), well after boot.
         return $fieldValue->field?->fieldType?->object === FileUpload::class;
     }
 
@@ -1314,17 +1330,26 @@ class FieldValueObserver
             ->whereNotIn('media_id', $newIds ?: [0])
             ->delete();
 
+        // Collect all rows first, then upsert in one query.
+        // A per-iteration upsert() inside a foreach is correct for small sets
+        // but causes N round-trips for large galleries. Batching reduces that
+        // to a single statement regardless of how many IDs are selected.
+        $rows = [];
         foreach ($newIds as $sortOrder => $mediaId) {
+            $rows[] = [
+                'media_id'      => $mediaId,
+                'mediable_type' => $type,
+                'mediable_id'   => $id,
+                'field_id'      => $fieldId,
+                'sort_order'    => $sortOrder,
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ];
+        }
+
+        if (!empty($rows)) {
             DB::table('mediables')->upsert(
-                [
-                    'media_id'      => $mediaId,
-                    'mediable_type' => $type,
-                    'mediable_id'   => $id,
-                    'field_id'      => $fieldId,
-                    'sort_order'    => $sortOrder,
-                    'created_at'    => now(),
-                    'updated_at'    => now(),
-                ],
+                $rows,
                 ['media_id', 'mediable_type', 'mediable_id', 'field_id'],
                 ['sort_order', 'updated_at']
             );
@@ -1762,7 +1787,7 @@ Queue::assertPushed(ProcessMediaLibraryRemoval::class);
 - [ ] **Step 1** — `2025_12_27_152812_create_tag_tables.php` deleted; no `Spatie\Tags` references remain in app or config
 - [ ] **Step 2** — `create_media_table.php` rewritten: native columns present; no Spatie columns; `library_id` is plain `unsignedBigInteger` with no FK (intentional — async cleanup pattern; see Step 4c comment)
 - [ ] **Step 3** — `create_media_library_table.php` rewritten: `field_layout_id` is plain `unsignedBigInteger` (no FK yet); no Spatie columns
-- [ ] **Step 4** — `mediables`, `media_transformations`, and `add_media_foreign_keys` migrations created after the last existing timestamp; `php artisan migrate` passes cleanly on a fresh database
+- [ ] **Step 4** — `mediables`, `media_transformations`, and `add_media_foreign_keys` migrations created with `2026_05_07_000001–3` timestamps (or newer if more core migrations have been added); `php artisan migrate` passes cleanly on a fresh database
 - [ ] **Step 4a** — `mediables.field_id` is `unsignedBigInteger NOT NULL DEFAULT 0` (sentinel, not nullable); unique constraint covers all four columns; no FK on `field_id` (0 is not a valid `fields.id`)
 - [ ] **Step 4c** — only `media_libraries.field_layout_id` FK added; `media.library_id` intentionally has no FK (nullOnDelete would race the cleanup job; cascadeOnDelete would skip the grace period)
 - [ ] **Step 5** — `Media` model: no Spatie import; `library()` BelongsTo present; `categories()` preserved; `fieldUsages()` and `isReferencedByField()` use `where('field_id', '>', 0)` (not whereNotNull); storage helpers added

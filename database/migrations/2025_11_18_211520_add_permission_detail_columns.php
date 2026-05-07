@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::table('permissions', function (Blueprint $table) {
             $table->string('description')->nullable()->after('guard_name');
+            $table->string('domain')->nullable()->after('guard_name');
         });
     }
 
@@ -22,6 +23,7 @@ return new class extends Migration {
     {
         Schema::table('permissions', function (Blueprint $table) {
             $table->dropColumn('description');
+            $table->dropColumn('domain');
         });
     }
 };
