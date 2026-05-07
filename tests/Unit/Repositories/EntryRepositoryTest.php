@@ -6,6 +6,7 @@ use App\EntryTypes\AbstractEntryType;
 use App\Models\Category;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\Entry;
+use App\Models\EntryAuthor;
 use App\Models\EntryGroup;
 use App\Models\EntryRelationship;
 use App\Models\EntryType;
@@ -192,6 +193,7 @@ class EntryRepositoryTest extends TestCase
         $type = $this->makeEntryType($group);
         $user = User::factory()->create();
         $author = User::factory()->create();
+        $entryAuthor = EntryAuthor::factory()->create(['user_id' => $author->id, 'status' => 'active']);
         $this->actingAs($user);
 
         $entryType = $this->makeAbstractEntryType($type);
@@ -201,7 +203,10 @@ class EntryRepositoryTest extends TestCase
             'authors' => [$author->id],
         ]);
 
-        $this->assertDatabaseHas('entry_authors', ['entry_id' => $entry->id, 'user_id' => $author->id]);
+        $this->assertDatabaseHas('entry_author_entry', [
+            'entry_id'        => $entry->id,
+            'entry_author_id' => $entryAuthor->id,
+        ]);
     }
 
     public function test_create_syncs_categories(): void
@@ -388,10 +393,14 @@ class EntryRepositoryTest extends TestCase
         $type = $this->makeEntryType($group);
         $entry = Entry::factory()->create(['entry_group_id' => $group->id, 'entry_type_id' => $type->id]);
         $author = User::factory()->create();
+        $entryAuthor = EntryAuthor::factory()->create(['user_id' => $author->id, 'status' => 'active']);
 
         $this->repo->applyData($entry, ['authors' => [$author->id]]);
 
-        $this->assertDatabaseHas('entry_authors', ['entry_id' => $entry->id, 'user_id' => $author->id]);
+        $this->assertDatabaseHas('entry_author_entry', [
+            'entry_id'        => $entry->id,
+            'entry_author_id' => $entryAuthor->id,
+        ]);
     }
 
     public function test_apply_data_syncs_categories(): void

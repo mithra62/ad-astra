@@ -3,6 +3,7 @@
 namespace Tests\Unit\Models;
 
 use App\Models\Entry;
+use App\Models\EntryAuthor;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\FieldLayout;
@@ -84,11 +85,11 @@ class EntryTest extends TestCase
     public function test_authors_relationship_is_belongs_to_many(): void
     {
         $entry = Entry::factory()->create();
-        $user1 = User::factory()->create();
-        $user2 = User::factory()->create();
+        $ea1 = EntryAuthor::factory()->create();
+        $ea2 = EntryAuthor::factory()->create();
 
-        $entry->authors()->attach($user1->id, ['sort_order' => 1]);
-        $entry->authors()->attach($user2->id, ['sort_order' => 2]);
+        $entry->authors()->attach($ea1->id, ['sort_order' => 1]);
+        $entry->authors()->attach($ea2->id, ['sort_order' => 2]);
 
         $this->assertInstanceOf(BelongsToMany::class, $entry->authors());
         $this->assertCount(2, $entry->authors()->get());
@@ -97,9 +98,9 @@ class EntryTest extends TestCase
     public function test_authors_pivot_exposes_sort_order(): void
     {
         $entry = Entry::factory()->create();
-        $user = User::factory()->create();
+        $ea = EntryAuthor::factory()->create();
 
-        $entry->authors()->attach($user->id, ['sort_order' => 5]);
+        $entry->authors()->attach($ea->id, ['sort_order' => 5]);
 
         $author = $entry->authors()->first();
 
@@ -109,16 +110,17 @@ class EntryTest extends TestCase
     public function test_authors_are_ordered_by_sort_order_pivot(): void
     {
         $entry = Entry::factory()->create();
-        $user1 = User::factory()->create();
-        $user2 = User::factory()->create();
+        $ea1 = EntryAuthor::factory()->create();
+        $ea2 = EntryAuthor::factory()->create();
 
-        $entry->authors()->attach($user1->id, ['sort_order' => 2]);
-        $entry->authors()->attach($user2->id, ['sort_order' => 1]);
+        $entry->authors()->attach($ea1->id, ['sort_order' => 2]);
+        $entry->authors()->attach($ea2->id, ['sort_order' => 1]);
 
         $authors = $entry->authors()->get();
 
-        $this->assertEquals($user2->id, $authors->first()->id);
-        $this->assertEquals($user1->id, $authors->last()->id);
+        // ea2 has sort_order=1 so comes first; ea1 has sort_order=2 so comes last
+        $this->assertEquals($ea2->id, $authors->first()->id);
+        $this->assertEquals($ea1->id, $authors->last()->id);
     }
 
     public function test_entry_relationships_is_has_many(): void

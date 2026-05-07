@@ -17,6 +17,7 @@ use App\Observers\EntryTreeObserver;
 use App\Observers\StatusObserver;
 use App\Rest\Api;
 use App\Services\CategoryService;
+use App\Services\EntryAuthorService;
 use App\Services\FieldService;
 use App\Services\FilesService;
 use App\Services\UserService;
@@ -53,6 +54,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(UserService::class, fn() => new UserService());
         $this->app->singleton(CategoryService::class, fn($app) => new CategoryService($app));
+        $this->app->singleton(EntryAuthorService::class, fn() => new EntryAuthorService());
     }
 
     /**

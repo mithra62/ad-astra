@@ -5,6 +5,7 @@ namespace Tests\Unit\Builders;
 use App\Builders\EntryQueryBuilder;
 use App\Models\Category;
 use App\Models\Entry;
+use App\Models\EntryAuthor;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\User;
@@ -265,8 +266,9 @@ class EntryQueryBuilderTest extends TestCase
     public function test_with_author_returns_entries_with_given_author(): void
     {
         $user = User::factory()->create();
+        $ea = EntryAuthor::factory()->create(['user_id' => $user->id]);
         $entry = Entry::factory()->create();
-        $entry->authors()->attach($user->id, ['sort_order' => 0]);
+        $entry->authors()->attach($ea->id, ['sort_order' => 0]);
 
         $other = Entry::factory()->create();
 
@@ -280,8 +282,9 @@ class EntryQueryBuilderTest extends TestCase
     {
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
+        $ea1 = EntryAuthor::factory()->create(['user_id' => $user1->id]);
         $entry = Entry::factory()->create();
-        $entry->authors()->attach($user1->id, ['sort_order' => 0]);
+        $entry->authors()->attach($ea1->id, ['sort_order' => 0]);
 
         $results = $this->builder()->withAuthor($user2->id)->get();
 
@@ -664,16 +667,17 @@ class EntryQueryBuilderTest extends TestCase
     public function test_chaining_status_and_author_filters(): void
     {
         $user = User::factory()->create();
+        $ea = EntryAuthor::factory()->create(['user_id' => $user->id]);
 
         $match = Entry::factory()->create(['status_handle' => 'published']);
-        $match->authors()->attach($user->id, ['sort_order' => 0]);
+        $match->authors()->attach($ea->id, ['sort_order' => 0]);
 
         // Right status, wrong author
         Entry::factory()->create(['status_handle' => 'published']);
 
         // Right author, wrong status
         $wrongStatus = Entry::factory()->create(['status_handle' => 'draft']);
-        $wrongStatus->authors()->attach($user->id, ['sort_order' => 0]);
+        $wrongStatus->authors()->attach($ea->id, ['sort_order' => 0]);
 
         $results = $this->builder()
             ->withStatus('published')

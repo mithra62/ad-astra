@@ -30,8 +30,13 @@ use OpenApi\Attributes as OA;
             property: 'authors',
             type: 'array',
             nullable: true,
-            items: new OA\Items(ref: '#/components/schemas/RelatedItem'),
-            description: 'Users assigned as authors (included when eager-loaded)'
+            items: new OA\Items(
+                properties: [
+                    new OA\Property(property: 'id', type: 'integer', description: 'The user ID of the author'),
+                    new OA\Property(property: 'display_name', type: 'string', description: 'The author display name (falls back to username)'),
+                ]
+            ),
+            description: 'Eligible authors assigned to this entry (included when eager-loaded)'
         ),
         new OA\Property(
             property: 'categories',
@@ -60,7 +65,10 @@ class EntryResource extends JsonResource
             'fields'           => $this->fieldArray(),
             'authors'          => $this->whenLoaded(
                 'authors',
-                fn () => $this->authors->map(fn ($u) => ['id' => $u->id, 'title' => $u->name])
+                fn () => $this->authors->map(fn ($a) => [
+                    'id'           => $a->user_id,
+                    'display_name' => $a->display_name,
+                ])
             ),
             'categories'       => $this->whenLoaded(
                 'categories',

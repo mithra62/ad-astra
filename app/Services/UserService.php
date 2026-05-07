@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\User\OauthToken;
 use App\Traits\PersistsFieldValues;
+use App\Services\EntryAuthorService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -185,7 +186,7 @@ class UserService
      */
     public function update(User $user, array $data): User
     {
-        $attributes = Arr::except($data, ['password', 'roles', 'fields']);
+        $attributes = Arr::except($data, ['password', 'roles', 'fields', 'is_author', 'author_display_name']);
 
         if (!empty($attributes)) {
             $user->update($attributes);
@@ -197,6 +198,14 @@ class UserService
 
         if (array_key_exists('fields', $data)) {
             $this->setFields($user, $data['fields']);
+        }
+
+        if (array_key_exists('is_author', $data)) {
+            app(EntryAuthorService::class)->sync(
+                $user,
+                (bool) $data['is_author'],
+                $data['author_display_name'] ?? null,
+            );
         }
 
         return $user->refresh();
@@ -344,7 +353,7 @@ class UserService
      */
     public function create(array $data): User
     {
-        $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation']);
+        $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation', 'is_author', 'author_display_name']);
 
         if (!empty($attributes['password'])) {
             $attributes['password'] = Hash::make($attributes['password']);
@@ -358,6 +367,14 @@ class UserService
 
         if (array_key_exists('fields', $data) && is_array($data['fields'])) {
             $this->setFields($user, $data['fields']);
+        }
+
+        if (array_key_exists('is_author', $data)) {
+            app(EntryAuthorService::class)->sync(
+                $user,
+                (bool) $data['is_author'],
+                $data['author_display_name'] ?? null,
+            );
         }
 
         return $user->refresh();

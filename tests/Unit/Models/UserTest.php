@@ -2,10 +2,12 @@
 
 namespace Tests\Unit\Models;
 
+use App\Models\EntryAuthor;
 use App\Models\User;
 use App\Models\User\OauthToken;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -137,5 +139,67 @@ class UserTest extends TestCase
         $user = User::factory()->create();
 
         $this->assertInstanceOf(MorphMany::class, $user->fieldValues());
+    }
+
+    // -------------------------------------------------------------------------
+    // entryAuthor() relationship
+    // -------------------------------------------------------------------------
+
+    public function test_entry_author_relationship_is_has_one(): void
+    {
+        $user = User::factory()->create();
+
+        $this->assertInstanceOf(HasOne::class, $user->entryAuthor());
+    }
+
+    public function test_entry_author_relationship_returns_related_entry_author(): void
+    {
+        $user = User::factory()->create();
+        $ea = EntryAuthor::factory()->create(['user_id' => $user->id]);
+
+        $this->assertNotNull($user->entryAuthor);
+        $this->assertEquals($ea->id, $user->entryAuthor->id);
+    }
+
+    public function test_entry_author_relationship_returns_null_when_no_record_exists(): void
+    {
+        $user = User::factory()->create();
+
+        $this->assertNull($user->entryAuthor);
+    }
+
+    // -------------------------------------------------------------------------
+    // isAuthorEligible()
+    // -------------------------------------------------------------------------
+
+    public function test_is_author_eligible_returns_true_when_active_entry_author_exists(): void
+    {
+        $user = User::factory()->create();
+        EntryAuthor::factory()->create(['user_id' => $user->id, 'status' => 'active']);
+
+        $this->assertTrue($user->fresh()->isAuthorEligible());
+    }
+
+    public function test_is_author_eligible_returns_false_when_no_entry_author_record_exists(): void
+    {
+        $user = User::factory()->create();
+
+        $this->assertFalse($user->isAuthorEligible());
+    }
+
+    public function test_is_author_eligible_returns_false_when_status_is_pending(): void
+    {
+        $user = User::factory()->create();
+        EntryAuthor::factory()->pending()->create(['user_id' => $user->id]);
+
+        $this->assertFalse($user->fresh()->isAuthorEligible());
+    }
+
+    public function test_is_author_eligible_returns_false_when_status_is_disabled(): void
+    {
+        $user = User::factory()->create();
+        EntryAuthor::factory()->disabled()->create(['user_id' => $user->id]);
+
+        $this->assertFalse($user->fresh()->isAuthorEligible());
     }
 }

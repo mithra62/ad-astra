@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\EntryTypes\AbstractEntryType;
 use App\EntryTypes\EntryTypeRegistry;
 use App\Models\Entry;
+use App\Models\EntryAuthor;
 use App\Models\EntryGroup;
 use App\Models\EntryRelationship;
 use App\Models\Field;
@@ -120,9 +121,18 @@ class EntryRepository
 
     private function syncAuthors(Entry $entry, array $userIds): void
     {
+        // Resolve user IDs → EntryAuthor IDs, filtering to active records only.
+        // Ineligible user IDs are silently dropped here as a second safety net
+        // (validation in the form request is the first gate).
+        $authorIds = EntryAuthor::active()
+            ->whereIn('user_id', $userIds)
+            ->pluck('id', 'user_id');
+
         $sync = [];
         foreach ($userIds as $order => $userId) {
-            $sync[$userId] = ['sort_order' => $order];
+            if (isset($authorIds[$userId])) {
+                $sync[$authorIds[$userId]] = ['sort_order' => $order];
+            }
         }
 
         $entry->authors()->sync($sync);

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Facades\Content;
 use App\Models\Category;
 use App\Models\Entry;
+use App\Models\EntryAuthor;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -16,8 +17,17 @@ class EntrySeeder extends Seeder
 
     public function run(): void
     {
+        // Look up the canonical seed user by email rather than position, so the
+        // seeder stays correct regardless of insertion order.
+        $author = User::where('email', 'eric@mithra62.com')->firstOrFail();
+
+        // Guard: UsersSeeder must have run first and promoted this user to author.
+        // If this fails, check the DatabaseSeeder run order.
+        EntryAuthor::where('user_id', $author->id)
+            ->where('status', 'active')
+            ->firstOrFail();
+
         // Auth::setUser() works in CLI context without requiring a session-backed guard.
-        $author = User::first();
         Auth::setUser($author);
 
         $posts = $this->seedBlogPosts($author);

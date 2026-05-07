@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Actions\Entry\CreateNewEntry;
 use App\Actions\Entry\UpdateEntry;
 use App\Facades\Entries;
-use App\Facades\Users;
+use App\Facades\EntryAuthors;
 use App\Http\Requests\Entry\DeleteEntryRequest;
 use App\Http\Requests\Entry\EditEntryRequest;
 use App\Http\Requests\Entry\StoreEntryRequest;
@@ -52,13 +52,13 @@ class Entry extends Controller
         }
 
         $allGroups = EntryGroup::withCount('entries')->ordered()->get();
-        $users = Users::getForDropdown(10);
+        $authors = EntryAuthors::getEligible();
 
         return $this->view('entries.create', [
             'group' => $group,
             'groups' => $allGroups,
             'entryType' => $entryType,
-            'users' => $users,
+            'authors' => $authors,
         ]);
     }
 
@@ -79,12 +79,12 @@ class Entry extends Controller
         ]);
 
         $allGroups = EntryGroup::withCount('entries')->ordered()->get();
-        $users = Users::getForDropdown(10);
+        $authors = EntryAuthors::getEligible();
 
         return $this->view('entries.edit', [
             'entry' => $entry,
             'groups' => $allGroups,
-            'users' => $users,
+            'authors' => $authors,
             'field_values' => $entry->fieldArray(),
         ]);
     }

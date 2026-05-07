@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Services\EntryAuthorService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -25,5 +26,9 @@ class UsersSeeder extends Seeder
         ]);
 
         $user->assignRole('super admin');
+
+        // Promote to active author so this account appears in entry author pickers
+        // and can be used as the default seeded author in EntrySeeder.
+        app(EntryAuthorService::class)->promote($user);
     }
 }

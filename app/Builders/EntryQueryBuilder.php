@@ -49,7 +49,7 @@ class EntryQueryBuilder
 
     public function withAuthor(int $userId): static
     {
-        $this->query->whereHas('authors', fn($q) => $q->where('users.id', $userId));
+        $this->query->whereHas('authors', fn($q) => $q->where('entry_authors.user_id', $userId));
 
         return $this;
     }

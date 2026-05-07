@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\Models\EntryAuthor;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\User\OauthToken;
@@ -1159,6 +1160,146 @@ class UserServiceTest extends TestCase
         $result = $this->service->listOauthTokens($user);
 
         $this->assertCount(2, $result);
+    }
+
+    // -------------------------------------------------------------------------
+    // create() — author eligibility
+    // -------------------------------------------------------------------------
+
+    public function test_create_promotes_user_to_author_when_is_author_is_true(): void
+    {
+        $result = $this->service->create([
+            'name'      => 'Author',
+            'email'     => 'author@example.com',
+            'password'  => 'Secret1234!',
+            'is_author' => true,
+        ]);
+
+        $this->assertDatabaseHas('entry_authors', ['user_id' => $result->id, 'status' => 'active']);
+    }
+
+    public function test_create_does_not_create_entry_author_when_is_author_is_false(): void
+    {
+        $result = $this->service->create([
+            'name'      => 'Non Author',
+            'email'     => 'nonauthor@example.com',
+            'password'  => 'Secret1234!',
+            'is_author' => false,
+        ]);
+
+        $this->assertDatabaseMissing('entry_authors', ['user_id' => $result->id]);
+    }
+
+    public function test_create_skips_author_sync_when_is_author_key_is_absent(): void
+    {
+        $result = $this->service->create([
+            'name'     => 'Skippy',
+            'email'    => 'skippy@example.com',
+            'password' => 'Secret1234!',
+        ]);
+
+        $this->assertDatabaseMissing('entry_authors', ['user_id' => $result->id]);
+    }
+
+    public function test_create_sets_author_display_name_when_provided(): void
+    {
+        $result = $this->service->create([
+            'name'                => 'Writer',
+            'email'               => 'writer@example.com',
+            'password'            => 'Secret1234!',
+            'is_author'           => true,
+            'author_display_name' => 'The Wordsmith',
+        ]);
+
+        $this->assertDatabaseHas('entry_authors', [
+            'user_id'      => $result->id,
+            'display_name' => 'The Wordsmith',
+        ]);
+    }
+
+    public function test_create_strips_is_author_from_stored_user_attributes(): void
+    {
+        // If is_author were passed to User::create() it would throw a
+        // MassAssignmentException — reaching this assertion means it was stripped.
+        $result = $this->service->create([
+            'name'      => 'Safe',
+            'email'     => 'safe@example.com',
+            'password'  => 'Secret1234!',
+            'is_author' => true,
+        ]);
+
+        $this->assertDatabaseHas('users', ['email' => 'safe@example.com']);
+    }
+
+    // -------------------------------------------------------------------------
+    // update() — author eligibility
+    // -------------------------------------------------------------------------
+
+    public function test_update_promotes_user_to_author_when_is_author_is_true(): void
+    {
+        $user = User::factory()->create();
+
+        $this->service->update($user, ['is_author' => true]);
+
+        $this->assertDatabaseHas('entry_authors', ['user_id' => $user->id, 'status' => 'active']);
+    }
+
+    public function test_update_demotes_user_when_is_author_is_false(): void
+    {
+        $user = User::factory()->create();
+        EntryAuthor::factory()->create(['user_id' => $user->id, 'status' => 'active']);
+
+        $this->service->update($user, ['is_author' => false]);
+
+        $this->assertDatabaseHas('entry_authors', ['user_id' => $user->id, 'status' => 'disabled']);
+    }
+
+    public function test_update_skips_author_sync_when_is_author_key_is_absent(): void
+    {
+        $user = User::factory()->create();
+        $ea = EntryAuthor::factory()->create(['user_id' => $user->id, 'status' => 'active']);
+
+        // No 'is_author' key — eligibility should be left entirely untouched
+        $this->service->update($user, ['name' => 'No Change']);
+
+        $this->assertDatabaseHas('entry_authors', ['id' => $ea->id, 'status' => 'active']);
+    }
+
+    public function test_update_passes_author_display_name_to_service(): void
+    {
+        $user = User::factory()->create();
+
+        $this->service->update($user, [
+            'is_author'           => true,
+            'author_display_name' => 'New Alias',
+        ]);
+
+        $this->assertDatabaseHas('entry_authors', [
+            'user_id'      => $user->id,
+            'display_name' => 'New Alias',
+        ]);
+    }
+
+    public function test_update_strips_is_author_from_stored_user_attributes(): void
+    {
+        $user = User::factory()->create(['name' => 'Before']);
+
+        // If is_author were passed to User::update() it would attempt to set
+        // an unknown column — reaching this assertion means it was stripped.
+        $this->service->update($user, ['name' => 'After', 'is_author' => true]);
+
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'name' => 'After']);
+    }
+
+    public function test_update_can_promote_a_previously_disabled_author(): void
+    {
+        $user = User::factory()->create();
+        EntryAuthor::factory()->disabled()->create(['user_id' => $user->id]);
+
+        $this->service->update($user, ['is_author' => true]);
+
+        $this->assertDatabaseHas('entry_authors', ['user_id' => $user->id, 'status' => 'active']);
+        $this->assertDatabaseCount('entry_authors', 1);
     }
 
     protected function setUp(): void

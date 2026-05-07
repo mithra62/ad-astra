@@ -31,6 +31,8 @@ class StoreUserRequest extends FormRequest
                 'roles' => ['required', 'array'],
                 'roles.*' => ['string', 'exists:roles,name'],
                 'fields' => ['nullable', 'array'],
+                'is_author' => ['nullable', 'boolean'],
+                'author_display_name' => ['nullable', 'string', 'max:255'],
             ],
             $this->schemaFieldRules($schema)
         );

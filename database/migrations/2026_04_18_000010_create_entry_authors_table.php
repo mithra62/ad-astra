@@ -10,20 +10,18 @@ return new class extends Migration {
         Schema::create('entry_authors', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('entry_id')
-                ->constrained('entries')
-                ->cascadeOnDelete();
-
             $table->foreignId('user_id')
+                ->unique()
                 ->constrained('users')
                 ->cascadeOnDelete();
 
-            $table->unsignedInteger('sort_order')->default(0);
+            $table->string('display_name')->nullable();
+
+            $table->enum('status', ['active', 'pending', 'disabled'])->default('pending');
 
             $table->timestamps();
 
-            $table->unique(['entry_id', 'user_id'], 'entry_author_unique');
-            $table->index(['entry_id', 'sort_order'], 'entry_author_sort_idx');
+            $table->index('status', 'entry_authors_status_idx');
         });
     }
 

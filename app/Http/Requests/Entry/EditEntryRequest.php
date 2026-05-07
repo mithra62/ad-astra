@@ -38,7 +38,7 @@ class EditEntryRequest extends FormRequest
                 ],
                 'published_at' => ['nullable', 'date'],
                 'authors' => ['nullable', 'array'],
-                'authors.*' => ['integer', 'exists:users,id'],
+                'authors.*' => ['integer', Rule::exists('entry_authors', 'user_id')->where('status', 'active')],
                 'categories' => ['nullable', 'array'],
                 'categories.*' => ['integer', 'exists:categories,id'],
                 'fields' => ['nullable', 'array'],

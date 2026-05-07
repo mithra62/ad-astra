@@ -11,6 +11,7 @@ use App\Models\EntryType;
 use App\Models\Status;
 use App\Models\StatusGroup;
 use App\Models\User;
+use App\Services\EntryAuthorService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -45,7 +46,7 @@ class SandboxedEntryTreeSeeder extends Seeder
 
     protected function seedAuthor(): User
     {
-        return User::query()->updateOrCreate(
+        $user = User::query()->updateOrCreate(
             ['email' => self::USER_EMAIL],
             [
                 'name' => 'Sandbox Tree Author',
@@ -54,6 +55,12 @@ class SandboxedEntryTreeSeeder extends Seeder
                 'remember_token' => Str::random(10),
             ]
         );
+
+        // Ensure the sandbox author has an active eligibility record so that
+        // any future entry assignments go through the eligibility layer cleanly.
+        app(EntryAuthorService::class)->promote($user);
+
+        return $user;
     }
 
     protected function seedStatusGroup(): StatusGroup
@@ -98,7 +105,7 @@ class SandboxedEntryTreeSeeder extends Seeder
                 'name' => 'Sandbox Tree Page',
                 'class' => PageEntryType::class,
                 'sort_order' => 1,
-                'default_template' => 'templates::entries.page',
+                'default_template' => 'entries.page',
                 'has_entry_tree' => true,
                 'field_layout_id' => null,
             ]
@@ -233,7 +240,7 @@ class SandboxedEntryTreeSeeder extends Seeder
                     'uri' => '__seed__-' . $definition['entry_handle'],
                     'depth' => 0,
                     'sort_order' => $definition['sort_order'],
-                    'template' => 'templates::site.tree',
+                    'template' => 'site.tree',
                     'is_home' => false,
                 ]
             );

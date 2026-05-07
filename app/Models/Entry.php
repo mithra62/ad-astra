@@ -57,7 +57,7 @@ class Entry extends Model
 
     public function authors(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'entry_authors')
+        return $this->belongsToMany(EntryAuthor::class, 'entry_author_entry')
             ->withPivot('sort_order')
             ->orderByPivot('sort_order')
             ->withTimestamps();
