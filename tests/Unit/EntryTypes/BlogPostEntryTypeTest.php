@@ -19,38 +19,6 @@ class BlogPostEntryTypeTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // beforeCreate — published_at
-    // -------------------------------------------------------------------------
-
-    public function test_before_create_stamps_published_at_when_status_is_published(): void
-    {
-        $type = $this->makeType();
-
-        $result = $type->beforeCreate(['status' => 'published']);
-
-        $this->assertNotNull($result['published_at']);
-    }
-
-    public function test_before_create_does_not_overwrite_explicit_published_at(): void
-    {
-        $type = $this->makeType();
-        $date = now()->subDay()->toDateTimeString();
-
-        $result = $type->beforeCreate(['status' => 'published', 'published_at' => $date]);
-
-        $this->assertSame($date, $result['published_at']);
-    }
-
-    public function test_before_create_does_not_stamp_published_at_when_status_is_draft(): void
-    {
-        $type = $this->makeType();
-
-        $result = $type->beforeCreate(['status' => 'draft']);
-
-        $this->assertArrayNotHasKey('published_at', $result);
-    }
-
-    // -------------------------------------------------------------------------
     // beforeCreate — reading_time
     // -------------------------------------------------------------------------
 

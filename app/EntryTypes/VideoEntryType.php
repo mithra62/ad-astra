@@ -7,18 +7,6 @@ use App\Models\Entry;
 class VideoEntryType extends AbstractEntryType
 {
     /**
-     * Videos go live immediately on creation unless an explicit date is provided.
-     */
-    public function beforeCreate(array $data): array
-    {
-        if (empty($data['published_at'])) {
-            $data['published_at'] = now();
-        }
-
-        return $data;
-    }
-
-    /**
      * Require at least one of platform_id or video_url when publishing.
      *
      * {@inheritdoc}

@@ -20,17 +20,8 @@ class PodcastEpisodeEntryTypeTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // beforeCreate
+    // beforeCreate — episode_number
     // -------------------------------------------------------------------------
-
-    public function test_before_create_defaults_published_at_to_now(): void
-    {
-        $type = $this->makeType();
-
-        $result = $type->beforeCreate([]);
-
-        $this->assertNotNull($result['published_at']);
-    }
 
     public function test_before_create_assigns_episode_number_when_not_provided(): void
     {

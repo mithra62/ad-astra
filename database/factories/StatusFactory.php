@@ -30,4 +30,11 @@ class StatusFactory extends Factory
             'is_default' => true,
         ]);
     }
+
+    public function public(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'is_public' => true,
+        ]);
+    }
 }

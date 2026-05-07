@@ -17,22 +17,13 @@ class PortfolioItemEntryTypeTest extends TestCase
         return new PortfolioItemEntryType($record);
     }
 
-    public function test_before_create_defaults_published_at_to_now(): void
+    public function test_before_create_returns_data_unchanged(): void
     {
         $type = $this->makeType();
+        $data = ['title' => 'Branding Project'];
 
-        $result = $type->beforeCreate([]);
+        $result = $type->beforeCreate($data);
 
-        $this->assertNotNull($result['published_at']);
-    }
-
-    public function test_before_create_respects_explicit_published_at(): void
-    {
-        $type = $this->makeType();
-        $date = now()->addWeek()->toDateTimeString();
-
-        $result = $type->beforeCreate(['published_at' => $date]);
-
-        $this->assertSame($date, $result['published_at']);
+        $this->assertSame($data, $result);
     }
 }

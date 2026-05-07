@@ -7,29 +7,6 @@ use Carbon\Carbon;
 
 class EventEntryType extends AbstractEntryType
 {
-    public function beforeCreate(array $data): array
-    {
-        if (empty($data['published_at'])) {
-            $data['published_at'] = now();
-        }
-
-        return $data;
-    }
-
-    public function beforeUpdate(Entry $entry, array $data): array
-    {
-        if (
-            isset($data['status']) &&
-            $data['status'] === 'published' &&
-            empty($data['published_at']) &&
-            !$entry->published_at
-        ) {
-            $data['published_at'] = now();
-        }
-
-        return $data;
-    }
-
     /**
      * Guard the date range: end_date must not be earlier than start_date.
      *

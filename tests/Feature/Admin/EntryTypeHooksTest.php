@@ -75,6 +75,7 @@ class EntryTypeHooksTest extends TestCase
             'handle'          => 'published',
             'name'            => 'Published',
             'is_default'      => false,
+            'is_public'       => true,
         ]);
 
         foreach ($extraStatuses as $handle => $name) {

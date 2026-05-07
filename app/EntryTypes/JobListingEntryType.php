@@ -7,20 +7,9 @@ use Carbon\Carbon;
 
 class JobListingEntryType extends AbstractEntryType
 {
-    public function beforeCreate(array $data): array
-    {
-        if (empty($data['published_at'])) {
-            $data['published_at'] = now();
-        }
-
-        return $data;
-    }
-
     public function beforeUpdate(Entry $entry, array $data): array
     {
         if (isset($data['status']) && in_array($data['status'], ['expired', 'closed'], true)) {
-            $data['published_at'] = null;
-
             return $data;
         }
 
@@ -33,8 +22,7 @@ class JobListingEntryType extends AbstractEntryType
                 : Carbon::parse($closingRaw);
 
             if (now()->gt($closing)) {
-                $data['status']       = 'expired';
-                $data['published_at'] = null;
+                $data['status'] = 'expired';
             }
         }
 

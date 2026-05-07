@@ -32,10 +32,6 @@ class PodcastEpisodeEntryType extends AbstractEntryType
             $data['fields']['episode_number'] = Entry::where('entry_group_id', $groupId)->count() + 1;
         }
 
-        if (empty($data['published_at'])) {
-            $data['published_at'] = now();
-        }
-
         return $data;
     }
 

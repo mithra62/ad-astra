@@ -7,15 +7,10 @@ use App\Models\Entry;
 class BlogPostEntryType extends AbstractEntryType
 {
     /**
-     * Stamp published_at when created with a published status and no explicit date.
      * Compute reading_time from the body word count.
      */
     public function beforeCreate(array $data): array
     {
-        if (($data['status'] ?? null) === 'published' && empty($data['published_at'])) {
-            $data['published_at'] = now();
-        }
-
         return $this->computeReadingTime($data);
     }
 

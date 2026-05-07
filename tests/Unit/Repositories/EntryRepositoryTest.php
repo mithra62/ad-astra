@@ -506,6 +506,122 @@ class EntryRepositoryTest extends TestCase
     // Relationship field (syncRelationshipField via applyData)
     // -----------------------------------------------------------------------
 
+    // -----------------------------------------------------------------------
+    // published_at stamping via status is_public
+    // -----------------------------------------------------------------------
+
+    public function test_create_stamps_published_at_when_status_is_public(): void
+    {
+        $statusGroup = StatusGroup::factory()->create();
+        Status::factory()->default()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft', 'is_public' => false]);
+        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'live', 'is_public' => true]);
+        $group = $this->makeEntryGroup($statusGroup);
+        $type  = $this->makeEntryType($group);
+        $this->actingAs(User::factory()->create());
+
+        $entry = $this->repo->create($this->makeAbstractEntryType($type), [
+            'title'  => 'Going Live',
+            'status' => 'live',
+        ]);
+
+        $this->assertNotNull($entry->published_at);
+    }
+
+    public function test_create_does_not_stamp_published_at_when_status_is_not_public(): void
+    {
+        $statusGroup = $this->makeStatusGroup(); // default draft, is_public=false
+        $group = $this->makeEntryGroup($statusGroup);
+        $type  = $this->makeEntryType($group);
+        $this->actingAs(User::factory()->create());
+
+        $entry = $this->repo->create($this->makeAbstractEntryType($type), ['title' => 'Draft Entry']);
+
+        $this->assertNull($entry->published_at);
+    }
+
+    public function test_create_does_not_overwrite_explicit_published_at_when_status_is_public(): void
+    {
+        $statusGroup = StatusGroup::factory()->create();
+        Status::factory()->default()->create(['status_group_id' => $statusGroup->id, 'handle' => 'live', 'is_public' => true]);
+        $group = $this->makeEntryGroup($statusGroup);
+        $type  = $this->makeEntryType($group);
+        $this->actingAs(User::factory()->create());
+
+        $explicit = now()->subWeek()->toDateTimeString();
+
+        $entry = $this->repo->create($this->makeAbstractEntryType($type), [
+            'title'        => 'Backdated',
+            'published_at' => $explicit,
+        ]);
+
+        $this->assertEquals($explicit, $entry->published_at->toDateTimeString());
+    }
+
+    public function test_create_stamps_published_at_when_default_status_is_public(): void
+    {
+        $statusGroup = StatusGroup::factory()->create();
+        Status::factory()->default()->create(['status_group_id' => $statusGroup->id, 'handle' => 'live', 'is_public' => true]);
+        $group = $this->makeEntryGroup($statusGroup);
+        $type  = $this->makeEntryType($group);
+        $this->actingAs(User::factory()->create());
+
+        // No explicit status passed — should pick up the default which is public.
+        $entry = $this->repo->create($this->makeAbstractEntryType($type), ['title' => 'Auto Published']);
+
+        $this->assertNotNull($entry->published_at);
+    }
+
+    public function test_apply_data_stamps_published_at_when_transitioning_to_public_status(): void
+    {
+        $statusGroup = $this->makeStatusGroup(); // draft, is_public=false
+        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'live', 'is_public' => true]);
+        $group = $this->makeEntryGroup($statusGroup);
+        $type  = $this->makeEntryType($group);
+        $entry = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id'  => $type->id,
+            'published_at'   => null,
+        ]);
+
+        $updated = $this->repo->applyData($entry, ['status' => 'live']);
+
+        $this->assertNotNull($updated->published_at);
+    }
+
+    public function test_apply_data_does_not_stamp_published_at_when_already_set(): void
+    {
+        $statusGroup = $this->makeStatusGroup();
+        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'live', 'is_public' => true]);
+        $group = $this->makeEntryGroup($statusGroup);
+        $type  = $this->makeEntryType($group);
+        $original = now()->subDays(10);
+        $entry = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id'  => $type->id,
+            'published_at'   => $original,
+        ]);
+
+        $updated = $this->repo->applyData($entry, ['status' => 'live']);
+
+        $this->assertEquals($original->toDateTimeString(), $updated->published_at->toDateTimeString());
+    }
+
+    public function test_apply_data_does_not_stamp_published_at_for_non_public_status(): void
+    {
+        $statusGroup = $this->makeStatusGroup(); // draft, is_public=false
+        $group = $this->makeEntryGroup($statusGroup);
+        $type  = $this->makeEntryType($group);
+        $entry = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id'  => $type->id,
+            'published_at'   => null,
+        ]);
+
+        $updated = $this->repo->applyData($entry, ['status' => 'draft']);
+
+        $this->assertNull($updated->published_at);
+    }
+
     protected function setUp(): void
     {
         parent::setUp();

@@ -92,6 +92,10 @@ class EntryRepository
             $entry->status_handle = $status->handle;
             $entry->status_is_public = $status->is_public;
 
+            if ($status->is_public && !$entry->published_at) {
+                $entry->published_at = now();
+            }
+
             return;
         }
 
@@ -116,12 +120,16 @@ class EntryRepository
             $entry->status_id = $default->getKey();
             $entry->status_handle = $default->handle;
             $entry->status_is_public = $default->is_public;
+
+            if ($default->is_public && !$entry->published_at) {
+                $entry->published_at = now();
+            }
         }
     }
 
     private function syncAuthors(Entry $entry, array $userIds): void
     {
-        // Resolve user IDs → EntryAuthor IDs, filtering to active records only.
+        // Resolve user IDs -> EntryAuthor IDs, filtering to active records only.
         // Ineligible user IDs are silently dropped here as a second safety net
         // (validation in the form request is the first gate).
         $authorIds = EntryAuthor::active()
@@ -191,7 +199,7 @@ class EntryRepository
 
     private function syncRelationshipField(Entry $entry, Field $field, array $relatedIds): void
     {
-        // Prevent direct self-reference (A → A). Indirect cycles (A → B → A) are
+        // Prevent direct self-reference (A -> A). Indirect cycles (A -> B -> A) are
         // intentionally not enforced here — relationship data is a graph, not a tree,
         // and cycle prevention for deeper traversals must be handled by the caller
         // using loadRelatedRecursive() or an equivalent depth-limited loader.

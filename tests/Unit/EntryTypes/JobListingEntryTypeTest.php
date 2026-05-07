@@ -19,50 +19,32 @@ class JobListingEntryTypeTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // beforeCreate
+    // beforeUpdate — expired/closed guard
     // -------------------------------------------------------------------------
 
-    public function test_before_create_defaults_published_at_to_now(): void
-    {
-        $type = $this->makeType();
-
-        $result = $type->beforeCreate([]);
-
-        $this->assertNotNull($result['published_at']);
-    }
-
-    public function test_before_create_respects_explicit_published_at(): void
-    {
-        $type = $this->makeType();
-        $date = now()->addDay()->toDateTimeString();
-
-        $result = $type->beforeCreate(['published_at' => $date]);
-
-        $this->assertSame($date, $result['published_at']);
-    }
-
-    // -------------------------------------------------------------------------
-    // beforeUpdate — expired/closed clearing
-    // -------------------------------------------------------------------------
-
-    public function test_before_update_clears_published_at_when_expired(): void
+    public function test_before_update_returns_early_when_status_is_expired(): void
     {
         $type  = $this->makeType();
         $entry = Entry::factory()->published()->create();
 
-        $result = $type->beforeUpdate($entry, ['status' => 'expired']);
+        // closing_date in payload would normally trigger auto-expire logic,
+        // but the explicit 'expired' status should short-circuit it.
+        $result = $type->beforeUpdate($entry, [
+            'status' => 'expired',
+            'fields' => ['closing_date' => now()->subDay()->toDateString()],
+        ]);
 
-        $this->assertNull($result['published_at']);
+        $this->assertSame('expired', $result['status']);
     }
 
-    public function test_before_update_clears_published_at_when_closed(): void
+    public function test_before_update_returns_early_when_status_is_closed(): void
     {
         $type  = $this->makeType();
         $entry = Entry::factory()->published()->create();
 
         $result = $type->beforeUpdate($entry, ['status' => 'closed']);
 
-        $this->assertNull($result['published_at']);
+        $this->assertSame('closed', $result['status']);
     }
 
     // -------------------------------------------------------------------------
@@ -79,7 +61,6 @@ class JobListingEntryTypeTest extends TestCase
         ]);
 
         $this->assertSame('expired', $result['status']);
-        $this->assertNull($result['published_at']);
     }
 
     public function test_before_update_does_not_expire_when_closing_date_is_future(): void
@@ -102,22 +83,6 @@ class JobListingEntryTypeTest extends TestCase
         $result = $type->beforeUpdate($entry, ['title' => 'Updated Title']);
 
         $this->assertArrayNotHasKey('status', $result);
-    }
-
-    public function test_before_update_explicit_status_takes_precedence_over_auto_expire(): void
-    {
-        // If the caller explicitly sets 'expired' or 'closed', the early return
-        // fires and closing_date logic is skipped — published_at is still cleared.
-        $type  = $this->makeType();
-        $entry = Entry::factory()->published()->create();
-
-        $result = $type->beforeUpdate($entry, [
-            'status' => 'closed',
-            'fields' => ['closing_date' => now()->subDay()->toDateString()],
-        ]);
-
-        $this->assertSame('closed', $result['status']);
-        $this->assertNull($result['published_at']);
     }
 
     // -------------------------------------------------------------------------

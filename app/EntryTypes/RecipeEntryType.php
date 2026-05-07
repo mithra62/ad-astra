@@ -7,14 +7,10 @@ use App\Models\Entry;
 class RecipeEntryType extends AbstractEntryType
 {
     /**
-     * Recipes go live immediately. Compute total_time from prep + cook.
+     * Compute total_time from prep + cook times.
      */
     public function beforeCreate(array $data): array
     {
-        if (empty($data['published_at'])) {
-            $data['published_at'] = now();
-        }
-
         return $this->computeTotalTime($data);
     }
 
