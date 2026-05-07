@@ -124,4 +124,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
         activateTab(tabsRoot);
     });
+
+    document.querySelectorAll('[data-permission-domain]').forEach((domain) => {
+        const toggle = domain.querySelector('[data-permission-domain-toggle]');
+        const checkboxes = Array.from(domain.querySelectorAll('[data-permission-checkbox]'));
+
+        if (!toggle || !checkboxes.length) {
+            return;
+        }
+
+        const syncToggle = () => {
+            const checkedCount = checkboxes.filter((checkbox) => checkbox.checked).length;
+
+            toggle.checked = checkedCount === checkboxes.length;
+            toggle.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+        };
+
+        toggle.addEventListener('change', () => {
+            checkboxes.forEach((checkbox) => {
+                checkbox.checked = toggle.checked;
+            });
+
+            toggle.indeterminate = false;
+        });
+
+        checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', syncToggle);
+        });
+
+        syncToggle();
+    });
 });

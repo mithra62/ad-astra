@@ -22,3 +22,4 @@
 22. Implement a user activity log
 23. Implement a notification system for user actions
 24. Ensure deleting the default status isn't possible
+25. Ensure a user can't update their own status by managing a user
