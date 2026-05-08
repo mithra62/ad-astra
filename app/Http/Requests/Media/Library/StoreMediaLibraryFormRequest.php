@@ -13,60 +13,52 @@ class StoreMediaLibraryFormRequest extends FormRequest
         return Auth::user()->can('create media library');
     }
 
-    /**
-     * @return string[]
-     */
     public function rules(): array
     {
+        $library = $this->route()->parameter('library');
+
         $rules = [
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('media_libraries')->ignore($this->route()->parameter('library')),
+                Rule::unique('media_libraries', 'name')->ignore($library),
             ],
             'handle' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('media_libraries', 'handle')->ignore($this->route()->parameter('library')),
+                Rule::unique('media_libraries', 'handle')->ignore($library),
             ],
             'adapter' => [
                 'required',
                 'string',
+                'max:50',
             ],
-            'adapter_settings' => [
-                'required',
-                'array',
-            ],
-            'max_size' => [
-                'required',
-                'numeric',
-            ],
-            'category_groups' => [
-                'array',
-            ],
-            'allowed_types' => [
-                'required',
-                'array',
-            ],
+
+            // adapter_settings is nullable — local adapter needs no extra config by default.
+            'adapter_settings'       => ['nullable', 'array'],
+            'adapter_settings.*.url' => ['sometimes', 'string', 'max:255'],
+
+            // allowed_types null = accept any MIME type.
+            'allowed_types'   => ['nullable', 'array'],
+            'allowed_types.*' => ['string'],
+
+            // max_size in MB; 0 = unlimited.
+            'max_size'   => ['nullable', 'integer', 'min:0'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+
+            // Relationship IDs — both optional.
+            'category_groups'   => ['nullable', 'array'],
+            'category_groups.*' => ['integer', 'exists:category_groups,id'],
+            'field_groups'      => ['nullable', 'array'],
+            'field_groups.*'    => ['integer', 'exists:field_groups,id'],
         ];
 
-        if ($this->data('adapter') == 'local') {
-            $adaptor_rules = [
-                'adapter_settings.local.url' => [
-                    'required',
-                    'string',
-                    'max:255',
-                ],
-                'adapter_settings.local.path' => [
-                    'required',
-                    'string',
-                    'max:255',
-                ],
-            ];
-
-            $rules = array_merge($rules, $adaptor_rules);
+        // Require an explicit URL when storing files on a non-local adapter
+        // that needs a public base URL (e.g. S3 custom domain).
+        if ($this->input('adapter') !== 'local') {
+            //$rules['adapter_settings.url'] = ['required', 'url', 'max:255'];
         }
 
         return $rules;
@@ -75,9 +67,9 @@ class StoreMediaLibraryFormRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'adapter_settings.local.url' => 'Base URL',
-            'adapter_settings.local.path' => 'Base Path',
-            'allowed_types' => 'Allowed File Types',
+            'adapter_settings.url' => 'Adapter Base URL',
+            'allowed_types'        => 'Allowed File Types',
+            'max_size'             => 'Max File Size (MB)',
         ];
     }
 }

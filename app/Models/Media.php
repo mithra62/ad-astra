@@ -19,8 +19,7 @@ class Media extends Model
 
     protected $fillable = [
         'library_id', 'name', 'file_name', 'original_name',
-        'mime_type', 'disk', 'path', 'size',
-        'alt_text', 'title', 'sort_order',
+        'mime_type', 'disk', 'path', 'size', 'sort_order',
     ];
 
     protected $casts = [

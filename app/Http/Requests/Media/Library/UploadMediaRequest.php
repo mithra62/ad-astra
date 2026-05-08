@@ -14,28 +14,50 @@ class UploadMediaRequest extends FormRequest
 
     public function rules(): array
     {
-        $library_id = $this->route()->parameter('library_id');
-        $library = LibraryModel::find($library_id);
-        $rules = [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'categories' => [
-                'array',
-            ],
-            'file' => [
-                'file',
-                'required',
-            ],
-        ];
+        $library = $this->resolveLibrary();
+
+        $fileRules = ['required', 'file'];
 
         if ($library instanceof LibraryModel) {
-            $rules['file'][] = 'mimetypes:' . app('files-service')->compileMimeTypes($library->allowed_types);
-            $rules['file'][] = 'max:' . app('files-service')->convertMbToBytes($library->max_size);
+            // MIME type restriction — null allowed_types means accept anything.
+            if (!empty($library->allowed_types)) {
+                $fileRules[] = 'mimetypes:' . implode(',', $library->allowed_types);
+            }
+
+            // max_size is stored in MB; Laravel's max: rule expects kilobytes.
+            if ($library->max_size > 0) {
+                $fileRules[] = 'max:' . ($library->max_size * 1024);
+            }
         }
 
-        return $rules;
+        return [
+            'file'         => $fileRules,
+            'name'         => ['nullable', 'string', 'max:255'],
+            'categories'   => ['nullable', 'array'],
+            'categories.*' => ['integer', 'exists:categories,id'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'file' => 'uploaded file',
+        ];
+    }
+
+    /**
+     * Resolve the library from the route — supports both 'library' and
+     * 'library_id' as route parameter names.
+     */
+    private function resolveLibrary(): ?LibraryModel
+    {
+        $param = $this->route()->parameter('library')
+            ?? $this->route()->parameter('library_id');
+
+        if ($param instanceof LibraryModel) {
+            return $param;
+        }
+
+        return $param ? LibraryModel::find($param) : null;
     }
 }

@@ -30,8 +30,6 @@ class MediaFactory extends Factory
             'disk'          => 'local',
             'path'          => 'uploads/' . $fileName,
             'size'          => fake()->numberBetween(1024, 5 * 1024 * 1024),
-            'alt_text'      => null,
-            'title'         => null,
             'sort_order'    => 0,
         ];
     }

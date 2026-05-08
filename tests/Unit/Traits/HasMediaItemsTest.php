@@ -171,10 +171,9 @@ class HasMediaItemsTest extends TestCase
         $library = $this->makeLibrary();
         $file    = UploadedFile::fake()->image('hero.jpg');
 
-        $media = $library->addMediaFromUpload($file, ['alt_text' => 'Hero image', 'title' => 'Hero']);
+        $media = $library->addMediaFromUpload($file, ['name' => 'Hero Image']);
 
-        $this->assertEquals('Hero image', $media->alt_text);
-        $this->assertEquals('Hero', $media->title);
+        $this->assertEquals('Hero Image', $media->name);
     }
 
     // -------------------------------------------------------------------------

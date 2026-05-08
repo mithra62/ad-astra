@@ -183,7 +183,7 @@ class MediaModelTest extends TestCase
     {
         $fillable = (new Media)->getFillable();
 
-        foreach (['library_id', 'name', 'file_name', 'original_name', 'mime_type', 'disk', 'path', 'size', 'alt_text', 'title', 'sort_order'] as $attr) {
+        foreach (['library_id', 'name', 'file_name', 'original_name', 'mime_type', 'disk', 'path', 'size', 'sort_order'] as $attr) {
             $this->assertContains($attr, $fillable, "Expected '$attr' to be fillable.");
         }
     }

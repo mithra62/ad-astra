@@ -1,119 +1,154 @@
-{{ include('admin._inc._header', {title: 'Media Library'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb start -->
-        <div class="row m-1">
-            <div class="col-12 ">
-                <h5>Media Libraries</h5>
-                <div class="col-6 ">
-                    <ul class="app-line-breadcrumbs mb-3">
-                        <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                                <span>
-                                    <i class="ph-duotone  ph-table f-s-16"></i> Dashboard
-                                </span>
-                            </a>
-                        </li>
-                        <li class="">
-                            <a class="f-s-14 f-w-500" href="{{ route('media.libraries') }}">Media Libraries</a>
-                        </li>
-                        <li class="active">
-                            <a class="f-s-14 f-w-500"
-                               href="{{ route('media.libraries.show', library) }}">{{ library.name }}</a>
-                        </li>
-                    </ul>
-                </div>
+{% extends 'admin._inc._layout' %}
+
+{% set page_title = 'Media Library' %}
+{% set page_heading = 'Media Library' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'media' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">Dashboard</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="media-libraries.twig">Media Libraries</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">Marketing Assets</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    <input id="secnav-toggle" type="checkbox">
+
+    <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 lg:hidden">
+        <span class="flex items-center gap-2">
+            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
+            </svg>
+            Section Navigation
+        </span>
+        <span class="secnav-chevron text-slate-400">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </span>
+    </label>
+
+    <div id="secondary-nav-panel" class="hidden border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+        <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="media-libraries.twig">Libraries</a>
+            <a class="flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="media-library.twig">View Library</a>
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="media-upload.twig">Upload</a>
+        </nav>
+    </div>
+
+    <aside class="hidden h-fit lg:block">
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-4 py-3">
+                <h5 class="text-sm font-semibold text-slate-700">Media</h5>
+            </div>
+            <nav class="p-2">
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="media-libraries.twig">Libraries</a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="media-library.twig">View Library</a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="media-upload.twig">Upload</a>
+            </nav>
+        </div>
+    </aside>
+{% endblock %}
+
+{% block content %}
+    {% set items = [
+        {name: 'hero-banner.jpg', size: '842 KB', type: 'image', bg: 'bg-sky-100', icon_color: 'text-sky-400'},
+        {name: 'product-shot.png', size: '1.2 MB', type: 'image', bg: 'bg-violet-100', icon_color: 'text-violet-400'},
+        {name: 'team-photo.jpg', size: '3.1 MB', type: 'image', bg: 'bg-pink-100', icon_color: 'text-pink-400'},
+        {name: 'logo-dark.svg', size: '14 KB', type: 'image', bg: 'bg-slate-100', icon_color: 'text-slate-400'},
+        {name: 'press-kit.pdf', size: '5.4 MB', type: 'document', bg: 'bg-red-100', icon_color: 'text-red-400'},
+        {name: 'roadmap-q2.pdf', size: '2.2 MB', type: 'document', bg: 'bg-amber-100', icon_color: 'text-amber-400'},
+        {name: 'demo-reel.mp4', size: '48 MB', type: 'video', bg: 'bg-emerald-100', icon_color: 'text-emerald-400'},
+        {name: 'brand-guide.pdf', size: '8.7 MB', type: 'document', bg: 'bg-orange-100', icon_color: 'text-orange-400'}
+    ] %}
+
+    <div class="flex min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Marketing Assets</h1>
+                <p class="mt-1 text-sm text-slate-500">Browse, manage, and organize uploaded files.</p>
+            </div>
+            <a href="{{ route('media.create', library) }}" class="inline-flex items-center gap-1.5 self-start rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:self-auto">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                Upload Files
+            </a>
+        </div>
+
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-5 py-3">
+                <h5 class="text-sm font-semibold text-slate-700">Overview</h5>
+            </div>
+            <div class="grid grid-cols-2 divide-x divide-y divide-slate-200 sm:grid-cols-4 sm:divide-y-0">
+                <div class="p-4 sm:p-5"><p class="text-xs font-medium uppercase tracking-wide text-slate-500">Total Files</p><p class="mt-1.5 text-3xl font-semibold text-slate-900">342</p></div>
+                <div class="p-4 sm:p-5"><p class="text-xs font-medium uppercase tracking-wide text-slate-500">Images</p><p class="mt-1.5 text-3xl font-semibold text-slate-900">284</p></div>
+                <div class="p-4 sm:p-5"><p class="text-xs font-medium uppercase tracking-wide text-slate-500">Documents</p><p class="mt-1.5 text-3xl font-semibold text-slate-900">41</p></div>
+                <div class="p-4 sm:p-5"><p class="text-xs font-medium uppercase tracking-wide text-slate-500">Video</p><p class="mt-1.5 text-3xl font-semibold text-slate-900">17</p></div>
             </div>
         </div>
-        <!-- Breadcrumb end -->
-        {{ include('admin._inc._message') }}
 
-        <div class="row">
-            {{ include('admin.media._sidebar', {active: library.id}) }}
-            <div class="col-lg-8 col-xxl-9">
-                <div class="tab-content">
-                    <div aria-labelledby="profile-tab" class="tab-pane fade active show"
-                         id="profile-tab-pane"
-                         role="tabpanel" tabindex="0">
-                        <div class="card setting-profile-tab">
-                            <div class="card-header">
-                                <h5>Uploaded Media</h5>
-                                <div class="col-12">
-                                    <p class="float-right text-end">
-                                        <a href="{{ route('media.create', library) }}" class="btn btn-primary">Upload
-                                            Media</a>
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="profile-tab profile-container">
-                                    {% if media.count >= 1 %}
-                                        <div class="table-responsive">
-                                            <table class="table align-middle mb-0">
-                                                <thead>
-                                                <tr>
-                                                    <th scope="col">Name</th>
-                                                    <th scope="col">Disk</th>
-                                                    <th scope="col">Mime</th>
-                                                    <th scope="col">Last Modified</th>
-                                                    <th scope="col">Created</th>
-                                                    <th scope="col"></th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {% for file in media %}
-                                                    <tr>
-                                                        <td>{{ file.name }}</td>
-                                                        <td class="">
-                                                            {{ file.disk }}
-                                                        </td>
-                                                        <td class="f-w-500">
-                                                            File Type
-                                                        </td>
-                                                        <td class="text-secondary f-w-600">
-                                                            {{ file.updated_at.format('F j, Y') }}
-                                                        </td>
-                                                        <td>
-                                                            {{ file.created_at.format('F j, Y') }}
-                                                        </td>
-                                                        <td>
-                                                            <a class="btn btn-primary icon-btn b-r-4"
-                                                               href="{{ route('media.show', file) }}">
-                                                                <i class="ti ti-eye"></i>
-                                                            </a>
-                                                            <a class="btn btn-success icon-btn b-r-4"
-                                                               href="{{ route('media.edit', file) }}">
-                                                                <i class="ti ti-edit"></i>
-                                                            </a>
-                                                            <a class="btn btn-danger icon-btn b-r-4"
-                                                               href="{{ route('media.confirm', file) }}">
-                                                                <i class="ti ti-trash"></i>
-                                                            </a>
-                                                            <a class="btn btn-warning icon-btn b-r-4"
-                                                               href="{{ route('media.download', file) }}">
-                                                                <i class="ti ti-download"></i>
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    {% else %}
-                                        <p class="text-center">
-                                            No Media Uploaded yet <br/>
-                                            <a href="{{ route('media.create', library) }}"
-                                               class="btn btn-outline-primary">Upload Media</a>
-                                        </p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-5 py-3">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <h5 class="text-sm font-semibold text-slate-700">All Files</h5>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select class="rounded-md border border-slate-300 px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <option>All types</option>
+                            <option>Images</option>
+                            <option>Documents</option>
+                            <option>Video</option>
+                        </select>
+                        <input class="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-44" placeholder="Search files" type="search">
                     </div>
                 </div>
-                {{ media.links() }}
+            </div>
+
+            <div class="p-5">
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+                    {% for item in items %}
+                        <div class="group relative overflow-hidden rounded-lg border border-slate-200 bg-slate-50 transition-all hover:border-emerald-300 hover:shadow-sm">
+                            <div class="flex aspect-square items-center justify-center {{ item.bg }}">
+                                {% if item.type == 'video' %}
+                                    <svg class="h-10 w-10 {{ item.icon_color }}" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+                                    </svg>
+                                {% elseif item.type == 'document' %}
+                                    <svg class="h-10 w-10 {{ item.icon_color }}" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                {% else %}
+                                    <svg class="h-10 w-10 {{ item.icon_color }}" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                {% endif %}
+                            </div>
+                            <div class="px-2.5 py-2">
+                                <p class="truncate text-xs font-medium text-slate-800">{{ item.name }}</p>
+                                <p class="text-xs text-slate-400">{{ item.size }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-slate-200 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-slate-500">Showing 1-8 of 342 files</p>
+                <nav class="flex items-center gap-1" aria-label="Pagination">
+                    <a class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-emerald-600 text-sm font-semibold text-white shadow-sm" href="#" aria-current="page">1</a>
+                    <a class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50" href="#">2</a>
+                    <a class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50" href="#">3</a>
+                </nav>
             </div>
         </div>
     </div>
-</main>
-{{ include('admin._inc._footer') }}
+{% endblock %}

@@ -147,13 +147,13 @@
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <label class="mb-1.5 block text-sm font-medium text-slate-700" for="storage">Storage Disk</label>
-                                <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="storage" name="storage">
-                                    <option value="local" {% if old('storage', 'local') == 'local' %}selected{% endif %}>Local Disk</option>
-                                    <option value="public" {% if old('storage') == 'public' %}selected{% endif %}>Public Disk</option>
-                                    <option value="s3" {% if old('storage') == 's3' %}selected{% endif %}>Amazon S3</option>
+                                <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="adapter" name="adapter">
+                                    <option value="local" {% if old('adapter', 'local') == 'local' %}selected{% endif %}>Local Disk</option>
+                                    <option value="public" {% if old('adapter') == 'public' %}selected{% endif %}>Public Disk</option>
+                                    <option value="s3" {% if old('adapter') == 's3' %}selected{% endif %}>Amazon S3</option>
                                 </select>
-                                {% if errors.has('storage') %}
-                                    <p class="mt-1 text-sm text-red-600">{{ errors.first('storage') }}</p>
+                                {% if errors.has('adapter') %}
+                                    <p class="mt-1 text-sm text-red-600">{{ errors.first('adapter') }}</p>
                                 {% endif %}
                             </div>
                             <div>

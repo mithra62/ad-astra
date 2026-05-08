@@ -69,9 +69,9 @@ class MediaStorageServiceTest extends TestCase
         $library = $this->makeLibrary();
         $file    = UploadedFile::fake()->image('hero.jpg');
 
-        $media = $this->service()->upload($library, $file, ['alt_text' => 'A hero shot']);
+        $media = $this->service()->upload($library, $file, ['name' => 'Hero Shot']);
 
-        $this->assertEquals('A hero shot', $media->alt_text);
+        $this->assertEquals('Hero Shot', $media->name);
     }
 
     // -------------------------------------------------------------------------

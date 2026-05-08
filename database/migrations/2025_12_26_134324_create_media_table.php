@@ -25,8 +25,6 @@ return new class extends Migration {
             $table->string('path');
             $table->unsignedBigInteger('size');
 
-            $table->string('alt_text')->nullable();
-            $table->string('title')->nullable();
             $table->unsignedInteger('sort_order')->default(0);
 
             $table->timestamps();
