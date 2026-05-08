@@ -20,8 +20,8 @@ class Login extends Controller
         try {
             $socialUser = Socialite::driver($provider)->user();
         } catch (InvalidStateException $e) {
-            echo "broken";
-            exit;
+            return redirect()->route('login')
+                ->withErrors(['oauth' => __('auth.oauth_state_invalid')]);
         }
 
         // Find user by email or create a new one for this social provider.

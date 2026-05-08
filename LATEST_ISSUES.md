@@ -8,7 +8,7 @@ The findings below are grouped by severity. Severity reflects user-visible / dat
 
 ## 1. Critical / Data-Integrity Issues
 
-### 1.1 OAuth callback prints "broken" and dies on `InvalidStateException`
+### [RESOLVED] 1.1 OAuth callback prints "broken" and dies on `InvalidStateException`
 **File:** `app/Http/Controllers/Login.php` (lines 22–25)
 
 ```php
