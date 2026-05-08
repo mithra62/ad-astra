@@ -67,25 +67,40 @@
                             <p class="mt-1 text-sm text-red-600">{{ errors.first('name') }}</p>
                         {% endif %}
                     </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="alt_text">Alt Text</label>
-                        <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('alt_text') %} border-red-400{% endif %}"
-                               id="alt_text" name="alt_text" type="text" value="{{ old('alt_text', media.alt_text) }}" placeholder="Describe the image for screen readers">
-                        <p class="mt-1 text-xs text-slate-400">Used as the HTML alt attribute for images.</p>
-                        {% if errors.has('alt_text') %}
-                            <p class="mt-1 text-sm text-red-600">{{ errors.first('alt_text') }}</p>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="title">Title</label>
-                        <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('title') %} border-red-400{% endif %}"
-                               id="title" name="title" type="text" value="{{ old('title', media.title) }}" placeholder="Optional tooltip title">
-                        <p class="mt-1 text-xs text-slate-400">Used as the HTML title attribute.</p>
-                        {% if errors.has('title') %}
-                            <p class="mt-1 text-sm text-red-600">{{ errors.first('title') }}</p>
-                        {% endif %}
-                    </div>
                 </div>
+
+
+                {% set layout = media.library.fieldLayout %}
+                {% if layout and layout.tabs.count >= 1 %}
+                {% for tab in layout.tabs %}
+                <div class="border-b border-slate-200 px-5 py-3">
+                    <h5 class="text-sm font-semibold text-slate-700">{{ tab.name }}</h5>
+                </div>
+                        {% for element in tab.elements %}
+                            {% set field = element.field %}
+                            <div class="space-y-4 px-5 py-5">
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-slate-700"
+                                       for="field_{{ field.handle }}">{{ field.label }}</label>
+                                {% if field.instructions %}
+                                    <small
+                                        class="text-secondary d-block mb-1">{{ field.instructions }}</small>
+                                {% endif %}
+                                {{ field.render({
+                                    id: 'field_' ~ field.handle,
+                                    class: 'w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20'
+                                })|raw }}
+                                {% if errors.has('fields.' ~ field.handle) %}
+                                    <p class="mt-1 text-xs text-red-600">{{ errors.first('fields.' ~ field.handle) }}</p>
+                                {% endif %}
+                            </div>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                    {% endif %}
+
+
+
             </div>
 
             <div class="flex flex-col gap-4">

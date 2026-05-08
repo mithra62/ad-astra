@@ -8,8 +8,8 @@ use App\Http\Requests\Media\EditMediaRequest;
 use App\Models\Media as MediaModel;
 use App\Models\Media\Library as LibraryModel;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+use App\Actions\Media\EditMedia as EditMediaAction;
 
 class Media extends Controller
 {
@@ -50,7 +50,9 @@ class Media extends Controller
     public function update(EditMediaRequest $request, string $id): RedirectResponse
     {
         $media = MediaModel::findOrFail($id);
-        $media->update($request->validated());
+        $editor = app(EditMediaAction::class);
+        $media = $editor->edit($media, $request->validated());
+
         return redirect()->route('media.show', $media->id)
             ->with('success', trans('media.updated'));
     }

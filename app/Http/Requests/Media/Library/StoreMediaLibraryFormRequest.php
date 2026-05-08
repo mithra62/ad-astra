@@ -38,7 +38,7 @@ class StoreMediaLibraryFormRequest extends FormRequest
 
             // adapter_settings is nullable — local adapter needs no extra config by default.
             'adapter_settings'       => ['nullable', 'array'],
-            'adapter_settings.*.url' => ['sometimes', 'string', 'max:255'],
+            //'adapter_settings.*.url' => ['sometimes', 'string', 'max:255'],
 
             // allowed_types null = accept any MIME type.
             'allowed_types'   => ['nullable', 'array'],
