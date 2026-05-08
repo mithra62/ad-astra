@@ -66,7 +66,6 @@ class LogRequestResponse
             'request_headers' => $this->encodeForLog(
                 $this->sanitizeHeaders($request->headers->all())
             ),
-            'response_payload' => $this->summarizeResponse($response),
             'response_headers' => $this->encodeForLog(
                 $this->sanitizeHeaders($response->headers->all())
             ),

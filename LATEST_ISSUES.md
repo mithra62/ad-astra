@@ -25,7 +25,7 @@ A legitimate user whose OAuth state token expires or is replayed will see a lite
 
 Every method (`update`, `updatePassword`, `show`, `updateAvatar`, `updateEmail`) just returns a hard-coded JSON success message; `show()` even returns the message *"Profile updated successfully"*. The route `GET /api/v1/account` is wired in `routes/api.php` and advertised in the Swagger docs, so callers receive HTTP 200 with bogus content while making no actual changes. Either remove the routes/Swagger annotations or implement the methods against `UserService`.
 
-### 1.3 `api_logs` table is missing the `response_payload` column referenced by the middleware
+### 1.3 [RESOLVED] `api_logs` table is missing the `response_payload` column referenced by the middleware
 **Files:** `app/Http/Middleware/LogRequestResponse.php` (line 69), `app/Models/ApiLog.php`, `database/migrations/2025_11_07_174041_create_api_log_table.php`
 
 `LogRequestResponse::handle()` calls `ApiLog::create([... 'response_payload' => …])`, but:
@@ -34,7 +34,7 @@ Every method (`update`, `updatePassword`, `show`, `updateAvatar`, `updateEmail`)
 
 Add `$table->longText('response_payload')->nullable();` in a follow-up migration and add the column to fillable/casts.
 
-### 1.4 `api_logs` migration `down()` drops the wrong table
+### 1.4 [RESOLVED] `api_logs` migration `down()` drops the wrong table
 **File:** `database/migrations/2025_11_07_174041_create_api_log_table.php`
 
 ```php
@@ -52,7 +52,7 @@ Rolling back this migration is a no-op. Fix to `dropIfExists('api_logs')`.
 
 The same risk extends to `EntryService::update()` which separately calls `syncTreeNode()` after `applyData()` returns; the tree sync should also live inside the transaction.
 
-### 1.6 `Status::observe()` registered twice
+### 1.6 [RESOLVED] `Status::observe()` registered twice
 **File:** `app/Providers/AppServiceProvider.php` (lines 92 and 116)
 
 ```php
@@ -63,7 +63,7 @@ Status::observe(StatusObserver::class);   // line 116 — duplicate
 
 Every status `updating` event fires the cascading `Entry::where(...)->update(...)` twice. With small datasets this is just wasted I/O, but on large tables the duplicate UPDATE doubles the lock window and chews queue/replication budget. Delete the second registration.
 
-### 1.7 Hard-coded super-admin in `UsersSeeder`
+### 1.7 [RESOLVED] Hard-coded super-admin in `UsersSeeder`
 **File:** `database/seeders/UsersSeeder.php`
 
 `UsersSeeder::run()` always creates `eric@mithra62.com` with password `password` and the `super admin` role. If `db:seed` ever runs against production (CI mistake, deployment hook, fresh-install script) you ship a known admin credential. Drive the email/password from `.env` or a config helper, refuse to seed in `production`, and rotate the default password.

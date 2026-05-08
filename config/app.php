@@ -123,4 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'default_dev_password' => env('DEV_USER_PASSWORD', str()->random(16)),
+    'default_dev_name' => env('DEV_USER_NAME', str()->random(16)),
+    'default_dev_email' => env('DEV_USER_EMAIL', str()->random(16)),
+
 ];

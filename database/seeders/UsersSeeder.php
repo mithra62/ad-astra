@@ -20,10 +20,10 @@ class UsersSeeder extends Seeder
         // User::factory(10)->create();
 
         $user = User::factory()->create([
-            'name' => 'Eric Lamb',
-            'email' => 'eric@mithra62.com',
+            'name' => config('app.default_dev_name'),
+            'email' => config('app.default_dev_email'),
             'status' => 'active',
-            'password' => Hash::make('password'),
+            'password' => Hash::make(config('app.default_dev_password')),
         ]);
 
         $user->assignRole('super admin');
