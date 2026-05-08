@@ -49,10 +49,11 @@ class Media extends Controller
 
     public function update(EditMediaRequest $request, string $id): RedirectResponse
     {
-        $media = MediaModel::findOrFail($id);
+        $media = MediaModel::with([
+            'library.fieldLayout.tabs.elements.field.fieldType',
+        ])->findOrFail($id);
         $editor = app(EditMediaAction::class);
         $media = $editor->edit($media, $request->validated());
-
         return redirect()->route('media.show', $media->id)
             ->with('success', trans('media.updated'));
     }

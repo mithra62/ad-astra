@@ -76,7 +76,10 @@ class EntryMetricTest extends TestCase
     public function test_entry_metrics_are_deleted_when_entry_is_deleted(): void
     {
         $entry = Entry::factory()->create();
-        EntryMetric::factory()->count(2)->create(['entry_id' => $entry->id]);
+        EntryMetric::factory()->count(2)->sequence(
+            ['metric' => 'views',     'recorded_date' => '2026-01-01'],
+            ['metric' => 'downloads', 'recorded_date' => '2026-01-01'],
+        )->create(['entry_id' => $entry->id]);
 
         $entry->delete();
 

@@ -31,26 +31,26 @@ trait HasMediaItems
             throw new \InvalidArgumentException(implode(' ', $errors));
         }
 
-        $disk     = $this->adapter;
-        $folder   = $this->handle;
+        $disk = $this->adapter;
+        $folder = $this->handle;
         $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
 
         $path = $file->storeAs($folder, $fileName, $disk);
 
         try {
             return DB::transaction(function () use ($file, $disk, $fileName, $path, $attributes) {
-                $nextOrder = (int) $this->media()->lockForUpdate()->max('sort_order') + 1;
+                $nextOrder = (int)$this->media()->lockForUpdate()->max('sort_order') + 1;
 
                 return $this->media()->create(array_merge([
-                    'uuid'          => (string) Str::uuid(),
-                    'name'          => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
-                    'file_name'     => $fileName,
+                    'uuid' => (string)Str::uuid(),
+                    'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                    'file_name' => $fileName,
                     'original_name' => $file->getClientOriginalName(),
-                    'mime_type'     => $file->getMimeType(),
-                    'disk'          => $disk,
-                    'path'          => $path,
-                    'size'          => $file->getSize(),
-                    'sort_order'    => $nextOrder,
+                    'mime_type' => $file->getMimeType(),
+                    'disk' => $disk,
+                    'path' => $path,
+                    'size' => $file->getSize(),
+                    'sort_order' => $nextOrder,
                 ], $attributes));
             });
         } catch (\Throwable $e) {

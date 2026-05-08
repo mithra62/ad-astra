@@ -4,13 +4,12 @@ namespace App\Repositories;
 
 use App\Models\Category;
 use App\Models\Category\Group;
-use App\Models\FieldValue;
-use Illuminate\Database\QueryException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
-class CategoryRepository
+class CategoryRepository extends AbstractFieldableRepository
 {
     public function create(Group $group, array $data): Category
     {
@@ -69,61 +68,18 @@ class CategoryRepository
         return false;
     }
 
-    private function applyFieldValues(Category $category, array $fields): void
+    /**
+     * {@inheritdoc}
+     *
+     * For categories the field layout lives on the owning group.
+     */
+    public function resolveLayoutFields(Model $model): Collection
     {
-        if (empty($fields)) {
-            return;
-        }
-
-        $layoutFields = $this->resolveLayoutFields($category);
-
-        foreach ($fields as $handle => $value) {
-            $field = $layoutFields->firstWhere('handle', $handle);
-
-            if (!$field || !$field->fieldType) {
-                continue;
-            }
-
-            $instance = $field->fieldType->instance();
-
-            $this->upsertFieldValue(
-                $field->getKey(),
-                $category->getKey(),
-                $category->getMorphClass(),
-                $instance->storageColumn(),
-                $value
-            );
-        }
-    }
-
-    public function resolveLayoutFields(Category $category): Collection
-    {
-        $category->loadMissing([
+        $model->loadMissing([
             'group.fieldLayout.tabs.elements.field.fieldType',
         ]);
 
-        return $category->group->fieldLayout?->fields() ?? collect();
-    }
-
-    private function upsertFieldValue(
-        int    $fieldId,
-        int    $fieldableId,
-        string $fieldableType,
-        string $column,
-        mixed  $value,
-    ): void
-    {
-        $key = ['field_id' => $fieldId, 'fieldable_id' => $fieldableId, 'fieldable_type' => $fieldableType];
-
-        try {
-            FieldValue::updateOrCreate($key, [$column => $value]);
-        } catch (QueryException $e) {
-            if ($e->getCode() !== '23000') {
-                throw $e;
-            }
-
-            FieldValue::updateOrCreate($key, [$column => $value]);
-        }
+        return $model->group->fieldLayout?->fields() ?? collect();
     }
 
     public function applyData(Category $category, array $data): Category

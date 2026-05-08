@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\Category\HasCategories;
 use App\Traits\Fieldable;
 use App\Traits\HasEntryTree;
+use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Entry extends Model
 {
-    use Fieldable, HasCategories, HasEntryTree, HasFactory;
+    use Fieldable, HasCategories, HasEntryTree, HasFactory, HasMedia;
 
     protected $fillable = [
         'entry_group_id',

@@ -75,8 +75,9 @@
             </div>
         </div>
 
-        <form id="general-create-form" method="POST" action="{{ route('categories.edit', category) }}" class="flex w-full min-w-0 flex-col gap-5">
+        <form id="general-create-form" method="POST" action="{{ route('categories.update', category) }}" class="flex w-full min-w-0 flex-col gap-5">
             {{ csrf_field() }}
+            {{ method_field('PUT') }}
             <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                 <div class="border-b border-slate-200 px-5 py-3">
                     <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
@@ -129,6 +130,7 @@
                                         class="text-secondary d-block mb-1">{{ field.instructions }}</small>
                                 {% endif %}
                                 {{ field.render({
+                                    value: field_values[field.handle],
                                     id: 'field_' ~ field.handle,
                                     class: 'w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20'
                                 })|raw }}
