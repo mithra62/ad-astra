@@ -58,5 +58,15 @@ return [
         'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
         'redirect' => env('LINKEDIN_REDIRECT_URL'),
     ],
-
+    'twitter' => [
+        'client_id' => env('TWITTER_CLIENT_ID'),
+        'client_secret' => env('TWITTER_CLIENT_SECRET'),
+        'redirect' => env('TWITTER_REDIRECT_URI'),
+        // Add 'oauth' => 2 if using OAuth 2.0
+    ],
+    'bluesky' => [
+        'client_id' => env('BLUESKY_CLIENT_ID'), // e.g., URL to client-metadata.json
+        'client_secret' => env('BLUESKY_CLIENT_SECRET'),
+        'redirect' => env('BLUESKY_REDIRECT_URI'),
+    ],
 ];
