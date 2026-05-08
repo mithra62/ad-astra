@@ -88,10 +88,10 @@
                             </div>
                         </td>
                         <td class="px-4 py-3">
-                            {% if user.status == 'Active' %}
-                                <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Active</span>
+                            {% if user.status == 'active' %}
+                                <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">{{ user.status }}</span>
                             {% else %}
-                                <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">Suspended</span>
+                                <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">{{ user.status }}</span>
                             {% endif %}
                         </td>
                         <td class="px-4 py-3 text-slate-500">{{ user.updated_at.format('F j, Y') }}</td>
