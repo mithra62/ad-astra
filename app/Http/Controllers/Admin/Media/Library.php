@@ -34,7 +34,7 @@ class Library extends Controller
     {
         $creator = app(CreateNewMediaLibrary::class);
         $library = $creator->create($request->all());
-        return redirect()->route('media.libraries.show', $library->id)->with('status', trans('media.library.created'));
+        return redirect()->route('media.libraries.show', $library->id)->with('success', trans('media.library.created'));
     }
 
     /**
@@ -99,7 +99,7 @@ class Library extends Controller
      */
     public function edit(string $id)
     {
-        $library = LibraryModel::with('category_groups')->find($id);
+        $library = LibraryModel::with('categoryGroups')->find($id);
         if (!$library instanceof LibraryModel) {
             abort(404);
         }

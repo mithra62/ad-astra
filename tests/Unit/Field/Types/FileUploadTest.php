@@ -1,0 +1,283 @@
+<?php
+
+namespace Tests\Unit\Field\Types;
+
+use App\Field\Types\FileUpload;
+use App\Models\Media;
+use App\Models\Media\Library;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
+use Tests\TestCase;
+
+class FileUploadTest extends TestCase
+{
+    use RefreshDatabase;
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private function make(array $settings = []): FileUpload
+    {
+        return new FileUpload($settings);
+    }
+
+    private function makeLibrary(string $handle = 'uploads'): Library
+    {
+        return Library::create([
+            'name'    => ucfirst($handle) . ' Library',
+            'handle'  => $handle,
+            'adapter' => 'local',
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // storageColumn / isRelational
+    // -------------------------------------------------------------------------
+
+    public function test_storage_column_is_value_json(): void
+    {
+        $this->assertEquals('value_json', $this->make()->storageColumn());
+    }
+
+    public function test_is_relational_returns_false(): void
+    {
+        $this->assertFalse($this->make()->isRelational());
+    }
+
+    // -------------------------------------------------------------------------
+    // normaliseIds
+    // -------------------------------------------------------------------------
+
+    public function test_normalise_ids_from_json_string(): void
+    {
+        $result = $this->make()->normaliseIds('[1,2,3]');
+
+        $this->assertEquals([1, 2, 3], $result);
+    }
+
+    public function test_normalise_ids_from_array(): void
+    {
+        $result = $this->make()->normaliseIds(['1', '2', '3']);
+
+        $this->assertEquals([1, 2, 3], $result);
+    }
+
+    public function test_normalise_ids_from_collection(): void
+    {
+        $media = Media::factory()->count(2)->create();
+
+        $result = $this->make()->normaliseIds($media);
+
+        $this->assertEquals($media->pluck('id')->map('intval')->all(), $result);
+    }
+
+    public function test_normalise_ids_empty_string_returns_empty_array(): void
+    {
+        $this->assertEquals([], $this->make()->normaliseIds(''));
+    }
+
+    public function test_normalise_ids_null_returns_empty_array(): void
+    {
+        $this->assertEquals([], $this->make()->normaliseIds(null));
+    }
+
+    // -------------------------------------------------------------------------
+    // cast
+    // -------------------------------------------------------------------------
+
+    public function test_cast_decodes_json_string_to_int_array(): void
+    {
+        $result = $this->make()->cast('[10, 20, 30]');
+
+        $this->assertSame([10, 20, 30], $result);
+    }
+
+    public function test_cast_passes_through_array(): void
+    {
+        $result = $this->make()->cast(['5', '10']);
+
+        $this->assertSame([5, 10], $result);
+    }
+
+    public function test_cast_returns_empty_for_invalid_json(): void
+    {
+        $this->assertSame([], $this->make()->cast('not json'));
+    }
+
+    public function test_cast_returns_empty_for_null(): void
+    {
+        $this->assertSame([], $this->make()->cast(null));
+    }
+
+    // -------------------------------------------------------------------------
+    // value()
+    // -------------------------------------------------------------------------
+
+    public function test_value_returns_collection_of_media_models(): void
+    {
+        $media  = Media::factory()->count(2)->create();
+        $ids    = $media->pluck('id')->all();
+
+        $result = $this->make()->value(json_encode($ids));
+
+        $this->assertInstanceOf(Collection::class, $result);
+        $this->assertCount(2, $result);
+    }
+
+    public function test_value_returns_empty_collection_for_empty_input(): void
+    {
+        $result = $this->make()->value('[]');
+
+        $this->assertInstanceOf(Collection::class, $result);
+        $this->assertCount(0, $result);
+    }
+
+    public function test_value_preserves_saved_sort_order(): void
+    {
+        $first  = Media::factory()->create();
+        $second = Media::factory()->create();
+
+        // Store second before first — value() should return in that order.
+        $result = $this->make()->value(json_encode([$second->id, $first->id]));
+
+        $this->assertEquals($second->id, $result->first()->id);
+        $this->assertEquals($first->id,  $result->last()->id);
+    }
+
+    // -------------------------------------------------------------------------
+    // validate — min / max count
+    // -------------------------------------------------------------------------
+
+    public function test_validate_returns_true_for_empty_value_with_no_constraints(): void
+    {
+        $result = $this->make()->validate('[]');
+
+        $this->assertTrue($result);
+    }
+
+    public function test_validate_returns_error_when_below_min(): void
+    {
+        $type   = $this->make(['min' => 2]);
+        $media  = Media::factory()->create();
+
+        $result = $type->validate(json_encode([$media->id]));
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('2', $result);
+    }
+
+    public function test_validate_passes_when_count_meets_min(): void
+    {
+        $type  = $this->make(['min' => 1]);
+        $media = Media::factory()->create();
+
+        $result = $type->validate(json_encode([$media->id]));
+
+        $this->assertTrue($result);
+    }
+
+    public function test_validate_returns_error_when_above_max(): void
+    {
+        $type  = $this->make(['max' => 1]);
+        $media = Media::factory()->count(2)->create();
+
+        $result = $type->validate(json_encode($media->pluck('id')->all()));
+
+        $this->assertIsString($result);
+    }
+
+    public function test_validate_passes_when_count_meets_max(): void
+    {
+        $type  = $this->make(['max' => 2]);
+        $media = Media::factory()->count(2)->create();
+
+        $result = $type->validate(json_encode($media->pluck('id')->all()));
+
+        $this->assertTrue($result);
+    }
+
+    // -------------------------------------------------------------------------
+    // validate — ID existence
+    // -------------------------------------------------------------------------
+
+    public function test_validate_returns_error_when_id_does_not_exist(): void
+    {
+        $result = $this->make()->validate('[99999]');
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('no longer exist', $result);
+    }
+
+    public function test_validate_passes_when_all_ids_exist(): void
+    {
+        $media  = Media::factory()->count(2)->create();
+        $result = $this->make()->validate(json_encode($media->pluck('id')->all()));
+
+        $this->assertTrue($result);
+    }
+
+    // -------------------------------------------------------------------------
+    // validate — library membership
+    // -------------------------------------------------------------------------
+
+    public function test_validate_returns_error_when_media_not_in_expected_library(): void
+    {
+        $libA  = $this->makeLibrary('lib-a');
+        $libB  = $this->makeLibrary('lib-b');
+        $media = Media::factory()->create(['library_id' => $libA->id]);
+
+        $type   = $this->make(['library_id' => $libB->id]);
+        $result = $type->validate(json_encode([$media->id]));
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('expected library', $result);
+    }
+
+    public function test_validate_passes_when_media_belongs_to_expected_library(): void
+    {
+        $library = $this->makeLibrary();
+        $media   = Media::factory()->create(['library_id' => $library->id]);
+
+        $type   = $this->make(['library_id' => $library->id]);
+        $result = $type->validate(json_encode([$media->id]));
+
+        $this->assertTrue($result);
+    }
+
+    public function test_validate_resolves_library_by_handle(): void
+    {
+        $library = $this->makeLibrary('photos');
+        $media   = Media::factory()->create(['library_id' => $library->id]);
+
+        $type   = $this->make(['library_handle' => 'photos']);
+        $result = $type->validate(json_encode([$media->id]));
+
+        $this->assertTrue($result);
+    }
+
+    // -------------------------------------------------------------------------
+    // validate — allowed_types MIME check
+    // -------------------------------------------------------------------------
+
+    public function test_validate_returns_error_when_mime_type_not_in_allowed_types(): void
+    {
+        $media = Media::factory()->create(['mime_type' => 'video/mp4']);
+
+        $type   = $this->make(['allowed_types' => ['image/jpeg', 'image/png']]);
+        $result = $type->validate(json_encode([$media->id]));
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('disallowed', $result);
+    }
+
+    public function test_validate_passes_when_mime_type_is_allowed(): void
+    {
+        $media = Media::factory()->create(['mime_type' => 'image/jpeg']);
+
+        $type   = $this->make(['allowed_types' => ['image/jpeg']]);
+        $result = $type->validate(json_encode([$media->id]));
+
+        $this->assertTrue($result);
+    }
+}

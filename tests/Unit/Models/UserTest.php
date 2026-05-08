@@ -3,13 +3,17 @@
 namespace Tests\Unit\Models;
 
 use App\Models\EntryAuthor;
+use App\Models\Media;
+use App\Models\Media\Library;
 use App\Models\User;
 use App\Models\User\OauthToken;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class UserTest extends TestCase
@@ -124,17 +128,97 @@ class UserTest extends TestCase
 
     public function test_avatar_returns_non_empty_string(): void
     {
-        $user = User::factory()->create(['email' => 'test@example.com']);
+        $user = User::factory()->create(['name' => 'Test User']);
 
         $this->assertIsString($user->avatar());
         $this->assertNotEmpty($user->avatar());
     }
 
-    public function test_avatar_returns_empty_string_when_no_email(): void
+    public function test_avatar_returns_generated_avatar_when_no_media_attached(): void
     {
-        $user = new User(['email' => null]);
+        $user = User::factory()->create(['name' => 'Jane Doe']);
 
-        $this->assertEquals('', $user->avatar());
+        // No media attached — falls back to Laravolt generated avatar.
+        $avatar = $user->avatar();
+        $this->assertIsString($avatar);
+        $this->assertNotEmpty($avatar);
+    }
+
+    public function test_avatar_returns_media_url_when_avatar_attached(): void
+    {
+        Storage::fake('local');
+
+        $user    = User::factory()->create(['name' => 'John Smith']);
+        $library = Library::create([
+            'name'    => 'User Avatars',
+            'handle'  => 'avatars',
+            'adapter' => 'local',
+        ]);
+        $media = Media::factory()->image()->create([
+            'library_id' => $library->id,
+            'disk'       => 'local',
+            'path'       => 'avatars/test.jpg',
+        ]);
+
+        $user->attachMedia($media);
+
+        $this->assertStringContainsString('test.jpg', $user->avatar());
+    }
+
+    public function test_set_avatar_attaches_media_to_user(): void
+    {
+        Storage::fake('local');
+
+        $user    = User::factory()->create();
+        $library = Library::create([
+            'name'    => 'User Avatars',
+            'handle'  => 'avatars',
+            'adapter' => 'local',
+        ]);
+        $media = Media::factory()->image()->create([
+            'library_id' => $library->id,
+            'disk'       => 'local',
+            'path'       => 'avatars/new.jpg',
+        ]);
+
+        $user->setAvatar($media);
+
+        $this->assertTrue(
+            $user->directMedia()->where('media.id', $media->id)->exists()
+        );
+    }
+
+    public function test_set_avatar_replaces_existing_avatar(): void
+    {
+        Storage::fake('local');
+
+        $user    = User::factory()->create();
+        $library = Library::create([
+            'name'    => 'User Avatars',
+            'handle'  => 'avatars',
+            'adapter' => 'local',
+        ]);
+        $old = Media::factory()->image()->create(['library_id' => $library->id, 'disk' => 'local', 'path' => 'avatars/old.jpg']);
+        $new = Media::factory()->image()->create(['library_id' => $library->id, 'disk' => 'local', 'path' => 'avatars/new.jpg']);
+
+        $user->attachMedia($old);
+        $user->setAvatar($new);
+
+        $this->assertFalse(
+            $user->directMedia()->where('media.id', $old->id)->exists(),
+            'Old avatar should be detached'
+        );
+        $this->assertTrue(
+            $user->directMedia()->where('media.id', $new->id)->exists(),
+            'New avatar should be attached'
+        );
+    }
+
+    public function test_media_relationship_is_morph_to_many(): void
+    {
+        $user = User::factory()->create();
+
+        $this->assertInstanceOf(MorphToMany::class, $user->media());
     }
 
     public function test_has_field_values_morph_many_from_fieldable_trait(): void

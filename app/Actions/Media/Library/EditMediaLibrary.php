@@ -9,19 +9,8 @@ class EditMediaLibrary extends AbstractAction
 {
     public function edit(Library $library, array $input): bool
     {
-        $library->category_groups()->detach();
-        if (!empty($input['category_groups'])) {
-            foreach ($input['category_groups'] as $cat_group) {
-                $library->category_groups()->attach($cat_group);
-            }
-        }
-
-        $library->field_groups()->detach();
-        if (!empty($input['field_groups'])) {
-            foreach ($input['field_groups'] as $field_group) {
-                $library->field_groups()->attach($field_group);
-            }
-        }
+        $library->categoryGroups()->sync($input['category_groups'] ?? []);
+        $library->fieldGroups()->sync($input['field_groups'] ?? []);
 
         return $library->update($input);
     }

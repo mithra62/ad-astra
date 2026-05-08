@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\PurgeDeletedMedia;
 use App\Models\ApiLog;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -16,3 +17,7 @@ Artisan::command('inspire', function () {
 Schedule::command('model:prune', ['--model' => [ApiLog::class]])
     ->dailyAt('02:00')
     ->runInBackground();
+
+// Permanently remove soft-deleted media (and their physical files) after the
+// grace period. Grace period defaults to 30 days.
+Schedule::job(new PurgeDeletedMedia(graceDays: 30))->dailyAt('03:00');

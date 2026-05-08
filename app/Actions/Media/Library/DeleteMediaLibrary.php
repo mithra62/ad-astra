@@ -3,15 +3,20 @@
 namespace App\Actions\Media\Library;
 
 use App\Actions\AbstractAction;
+use App\Jobs\ProcessMediaLibraryRemoval;
 use App\Models\Media\Library;
 
 class DeleteMediaLibrary extends AbstractAction
 {
-    /**
-     * @todo add to job queue
-     */
     public function delete(Library $library): bool
     {
-        return $library->delete();
+        $libraryId = $library->id;
+        $deleted   = $library->delete();
+
+        if ($deleted) {
+            ProcessMediaLibraryRemoval::dispatch($libraryId);
+        }
+
+        return (bool) $deleted;
     }
 }

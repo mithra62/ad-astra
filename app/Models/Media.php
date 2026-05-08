@@ -2,21 +2,103 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use App\Traits\Fieldable;
+use App\Traits\HasTransformations;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class Media extends Model
 {
-    public function media_library(): BelongsTo
+    use HasFactory, Fieldable, HasTransformations, SoftDeletes;
+
+    protected $fillable = [
+        'library_id', 'name', 'file_name', 'original_name',
+        'mime_type', 'disk', 'path', 'size',
+        'alt_text', 'title', 'sort_order',
+    ];
+
+    protected $casts = [
+        'size'       => 'integer',
+        'sort_order' => 'integer',
+    ];
+
+    // ── Relationships ──────────────────────────────────────────────────────
+
+    public function library(): BelongsTo
     {
-        return $this->belongsTo(Media\Library::class);
+        return $this->belongsTo(Media\Library::class, 'library_id');
     }
 
+    public function transformations(): HasMany
+    {
+        return $this->hasMany(Media\Transformation::class);
+    }
+
+    /** Preserved — used by UploadMedia action. */
     public function categories(): MorphToMany
     {
         return $this->morphToMany(Category::class, 'categorizable')
-            ->withTimestamps();
+                    ->withTimestamps();
+    }
+
+    // ── Field-scoped usage queries ─────────────────────────────────────────
+
+    /**
+     * Raw pivot rows for all field-driven references to this media item.
+     *
+     * field_id = 0 is the sentinel for direct attachments. Anything > 0 is a
+     * field-driven reference. The column is NOT NULL so whereNotNull would
+     * silently include direct attachments — use where('field_id', '>', 0).
+     */
+    public function fieldUsages(): \Illuminate\Database\Query\Builder
+    {
+        return DB::table('mediables')
+            ->where('media_id', $this->id)
+            ->where('field_id', '>', 0)
+            ->join('fields', 'fields.id', '=', 'mediables.field_id')
+            ->select(
+                'mediables.*',
+                'fields.name as field_name',
+                'fields.handle as field_handle'
+            );
+    }
+
+    public function isReferencedByField(): bool
+    {
+        return DB::table('mediables')
+            ->where('media_id', $this->id)
+            ->where('field_id', '>', 0)
+            ->exists();
+    }
+
+    // ── Storage helpers ────────────────────────────────────────────────────
+
+    public function url(): string
+    {
+        return Storage::disk($this->disk)->url($this->path);
+    }
+
+    public function temporaryUrl(int $minutes = 60): string
+    {
+        return Storage::disk($this->disk)->temporaryUrl(
+            $this->path,
+            now()->addMinutes($minutes)
+        );
+    }
+
+    public function fileExists(): bool
+    {
+        return Storage::disk($this->disk)->exists($this->path);
+    }
+
+    public function isImage(): bool
+    {
+        return str_starts_with($this->mime_type ?? '', 'image/');
     }
 }

@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
             // Field type registry — must run before any fields are created
             FieldTypeSeeder::class,
 
+            // Media libraries — avatars library used by User::avatar()
+            MediaLibrarySeeder::class,
+
             // Independent schema primitives
             StatusGroupSeeder::class,
             CategoryGroupSeeder::class,

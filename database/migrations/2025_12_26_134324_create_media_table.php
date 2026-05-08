@@ -9,17 +9,33 @@ return new class extends Migration {
     {
         Schema::create('media', function (Blueprint $table) {
             $table->id();
-
             $table->uuid()->nullable()->unique();
-            $table->string('collection_name');
+
+            // FK to media_libraries is intentionally absent here — media_libraries
+            // does not exist at this timestamp. A nullOnDelete FK would also race
+            // ProcessMediaLibraryRemoval and orphan records. Plain indexed column
+            // is correct; see 2026_05_07_000003_add_media_foreign_keys.
+            $table->unsignedBigInteger('library_id')->nullable()->index();
+
             $table->string('name');
             $table->string('file_name');
+            $table->string('original_name');
             $table->string('mime_type')->nullable();
             $table->string('disk');
+            $table->string('path');
             $table->unsignedBigInteger('size');
-            $table->unsignedInteger('order_column')->nullable()->index();
 
-            $table->nullableTimestamps();
+            $table->string('alt_text')->nullable();
+            $table->string('title')->nullable();
+            $table->unsignedInteger('sort_order')->default(0);
+
+            $table->timestamps();
+            $table->softDeletes();
         });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('media');
     }
 };

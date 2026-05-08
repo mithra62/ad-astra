@@ -4,26 +4,20 @@ namespace App\Actions\Media\Library;
 
 use App\Actions\AbstractAction;
 use App\Http\Requests\FormRequest;
+use App\Models\Media;
 use App\Models\Media\Library as LibraryModel;
 
 class UploadMedia extends AbstractAction
 {
-    public function upload(FormRequest $request, LibraryModel $library)
+    public function upload(FormRequest $request, LibraryModel $library): Media
     {
-        $path = $request->file('file', $library->adapter);
+        $media = app('media-service')->upload($library, $request->file('file'), [
+            'name' => $request->input('name'),
+        ]);
 
-        $media = $library->addMedia($path)->toMediaCollection($library->handle);
-        $media->library_id = $library->id;
-        $media->name = $request->input('name');
-
-        $media->categories()->detach();
         if (!empty($request->input('categories'))) {
-            foreach ($request->input('categories') as $cat_group) {
-                $media->categories()->attach($cat_group);
-            }
+            $media->categories()->sync($request->input('categories'));
         }
-
-        $media->save();
 
         return $media;
     }

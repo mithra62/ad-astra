@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Enums\UserStatus;
 use App\Models\User\OauthToken;
 use App\Traits\Fieldable;
+use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,12 +15,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
-use Laravolt\Avatar\Avatar;
+use Laravolt\Avatar\Facade as LaravoltAvatar;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens, HasRoles, Fieldable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, Fieldable, TwoFactorAuthenticatable, HasMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -44,6 +45,19 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password'          => 'hashed',
+        'suspended_until'   => 'datetime',
+        'banned_at'         => 'datetime',
+        'locked_until'      => 'datetime',
     ];
 
     // -------------------------------------------------------------------------
@@ -153,6 +167,42 @@ class User extends Authenticatable
     }
 
     // -------------------------------------------------------------------------
+    // Avatar
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the user's avatar URL. Checks for a directly-attached media item
+     * in the 'avatars' library first; falls back to the Laravolt generated avatar.
+     */
+    public function avatar(): string
+    {
+        $media = $this->firstMedia('avatars');
+
+        if ($media) {
+            return $media->url();
+        }
+
+        return LaravoltAvatar::create($this->name)->toBase64();
+    }
+
+    /**
+     * Replace the user's avatar. Detaches any existing avatars-library media
+     * from this user before attaching the new one.
+     */
+    public function setAvatar(Media $media): void
+    {
+        $existing = $this->directMedia()
+            ->whereHas('library', fn ($q) => $q->where('handle', 'avatars'))
+            ->get();
+
+        foreach ($existing as $old) {
+            $this->detachMedia($old);
+        }
+
+        $this->attachMedia($media);
+    }
+
+    // -------------------------------------------------------------------------
     // Scopes
     // -------------------------------------------------------------------------
 
@@ -190,6 +240,11 @@ class User extends Authenticatable
         return $this->hasMany(OauthToken::class);
     }
 
+    public function oauthToken(): HasOne
+    {
+        return $this->hasOne(OauthToken::class)->latestOfMany();
+    }
+
     public function entryAuthor(): HasOne
     {
         return $this->hasOne(EntryAuthor::class);
@@ -207,34 +262,5 @@ class User extends Authenticatable
     public function isAuthorEligible(): bool
     {
         return $this->entryAuthor?->status === 'active';
-    }
-
-    /**
-     * Generates an avatar for the user based on their email using Gravatar service.
-     */
-    public function avatar(): string
-    {
-        $return = '';
-        if ($this->email) {
-            $return = app(Avatar::class)->create($this->email)->toGravatar();
-        }
-
-        return $return;
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
-            'suspended_until'   => 'datetime',
-            'banned_at'         => 'datetime',
-            'locked_until'      => 'datetime',
-        ];
     }
 }

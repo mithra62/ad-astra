@@ -31,7 +31,7 @@ class StoreMediaLibraryFormRequest extends FormRequest
                 'max:255',
                 Rule::unique('media_libraries', 'handle')->ignore($this->route()->parameter('library')),
             ],
-            'storage' => [
+            'adapter' => [
                 'required',
                 'string',
             ],
@@ -52,7 +52,7 @@ class StoreMediaLibraryFormRequest extends FormRequest
             ],
         ];
 
-        if ($this->data('storage') == 'local') {
+        if ($this->data('adapter') == 'local') {
             $adaptor_rules = [
                 'adapter_settings.local.url' => [
                     'required',

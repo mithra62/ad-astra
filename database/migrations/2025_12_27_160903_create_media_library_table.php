@@ -5,9 +5,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('media_libraries', function (Blueprint $table) {
@@ -15,13 +12,14 @@ return new class extends Migration {
             $table->string('name');
             $table->string('handle')->index();
 
+            // FK to field_layouts added in a later migration — field_layouts does
+            // not exist until April 2026. See 2026_05_07_000003_add_media_foreign_keys.
+            $table->unsignedBigInteger('field_layout_id')->nullable()->index();
+
             $table->string('adapter', 50)->default('local');
             $table->json('adapter_settings')->nullable();
-            // $table->string('server_path', 255)->default('');
-            // $table->string('url', 100);
             $table->json('allowed_types')->nullable();
             $table->unsignedInteger('max_size')->default(10);
-
             $table->unsignedInteger('sort_order')->default(0);
 
             $table->timestamps();
@@ -29,9 +27,6 @@ return new class extends Migration {
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('media_libraries');

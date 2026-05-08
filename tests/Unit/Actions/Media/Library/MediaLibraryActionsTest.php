@@ -15,45 +15,44 @@ class MediaLibraryActionsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_create_returns_library_instance(): void
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private function makeLibraryData(array $overrides = []): array
     {
-        $action = app(CreateNewMediaLibrary::class);
-
-        $result = $action->create($this->makeLibraryData());
-
-        $this->assertInstanceOf(Library::class, $result);
+        return array_merge([
+            'name'    => 'Test Library',
+            'handle'  => 'test-library',
+            'adapter' => 'local',
+        ], $overrides);
     }
 
     // -------------------------------------------------------------------------
     // CreateNewMediaLibrary
     // -------------------------------------------------------------------------
 
-    private function makeLibraryData(array $overrides = []): array
+    public function test_create_returns_library_instance(): void
     {
-        return array_merge([
-            'name' => 'Test Library',
-            'handle' => 'test-library',
-            'adapter' => 'local',
-        ], $overrides);
+        $result = app(CreateNewMediaLibrary::class)->create($this->makeLibraryData());
+
+        $this->assertInstanceOf(Library::class, $result);
     }
 
     public function test_create_persists_library_to_database(): void
     {
-        $action = app(CreateNewMediaLibrary::class);
+        app(CreateNewMediaLibrary::class)->create(
+            $this->makeLibraryData(['name' => 'Uploads', 'handle' => 'uploads'])
+        );
 
-        $action->create($this->makeLibraryData(['name' => 'Uploads', 'handle' => 'uploads']));
-
-        $this->assertDatabaseHas('media_libraries', [
-            'name' => 'Uploads',
-            'handle' => 'uploads',
-        ]);
+        $this->assertDatabaseHas('media_libraries', ['name' => 'Uploads', 'handle' => 'uploads']);
     }
 
     public function test_create_stores_adapter(): void
     {
-        $action = app(CreateNewMediaLibrary::class);
-
-        $library = $action->create($this->makeLibraryData(['adapter' => 'local']));
+        $library = app(CreateNewMediaLibrary::class)->create(
+            $this->makeLibraryData(['adapter' => 'local'])
+        );
 
         $this->assertEquals('local', $library->adapter);
     }
@@ -61,35 +60,32 @@ class MediaLibraryActionsTest extends TestCase
     public function test_create_attaches_category_groups_when_provided(): void
     {
         $catGroup = CategoryGroup::factory()->create();
-        $action = app(CreateNewMediaLibrary::class);
 
-        $library = $action->create($this->makeLibraryData([
+        $library = app(CreateNewMediaLibrary::class)->create($this->makeLibraryData([
             'category_groups' => [$catGroup->id],
         ]));
 
-        $this->assertTrue($library->category_groups()->where('group_id', $catGroup->id)->exists());
+        $this->assertTrue($library->categoryGroups()->where('group_id', $catGroup->id)->exists());
     }
 
     public function test_create_attaches_multiple_category_groups(): void
     {
         $catGroup1 = CategoryGroup::factory()->create();
         $catGroup2 = CategoryGroup::factory()->create();
-        $action = app(CreateNewMediaLibrary::class);
 
-        $library = $action->create($this->makeLibraryData([
+        $library = app(CreateNewMediaLibrary::class)->create($this->makeLibraryData([
             'category_groups' => [$catGroup1->id, $catGroup2->id],
         ]));
 
-        $this->assertTrue($library->category_groups()->where('group_id', $catGroup1->id)->exists());
-        $this->assertTrue($library->category_groups()->where('group_id', $catGroup2->id)->exists());
+        $this->assertTrue($library->categoryGroups()->where('group_id', $catGroup1->id)->exists());
+        $this->assertTrue($library->categoryGroups()->where('group_id', $catGroup2->id)->exists());
     }
 
     public function test_create_with_no_category_groups_produces_no_attachments(): void
     {
-        $action = app(CreateNewMediaLibrary::class);
-        $library = $action->create($this->makeLibraryData());
+        $library = app(CreateNewMediaLibrary::class)->create($this->makeLibraryData());
 
-        $this->assertCount(0, $library->category_groups);
+        $this->assertCount(0, $library->categoryGroups);
     }
 
     // -------------------------------------------------------------------------
@@ -99,9 +95,8 @@ class MediaLibraryActionsTest extends TestCase
     public function test_delete_removes_library_from_database(): void
     {
         $library = Library::create($this->makeLibraryData(['handle' => 'to-delete']));
-        $action = app(DeleteMediaLibrary::class);
 
-        $action->delete($library);
+        app(DeleteMediaLibrary::class)->delete($library);
 
         $this->assertDatabaseMissing('media_libraries', ['id' => $library->id]);
     }
@@ -109,9 +104,8 @@ class MediaLibraryActionsTest extends TestCase
     public function test_delete_returns_true(): void
     {
         $library = Library::create($this->makeLibraryData(['handle' => 'del-true']));
-        $action = app(DeleteMediaLibrary::class);
 
-        $result = $action->delete($library);
+        $result = app(DeleteMediaLibrary::class)->delete($library);
 
         $this->assertTrue($result);
     }
@@ -123,9 +117,8 @@ class MediaLibraryActionsTest extends TestCase
     public function test_edit_returns_true_on_success(): void
     {
         $library = Library::create($this->makeLibraryData(['handle' => 'edit-true']));
-        $action = app(EditMediaLibrary::class);
 
-        $result = $action->edit($library, ['name' => 'Updated', 'handle' => 'updated']);
+        $result = app(EditMediaLibrary::class)->edit($library, ['name' => 'Updated', 'handle' => 'updated']);
 
         $this->assertTrue($result);
     }
@@ -133,13 +126,12 @@ class MediaLibraryActionsTest extends TestCase
     public function test_edit_updates_library_name_and_handle(): void
     {
         $library = Library::create($this->makeLibraryData(['name' => 'Old', 'handle' => 'old']));
-        $action = app(EditMediaLibrary::class);
 
-        $action->edit($library, ['name' => 'New Library', 'handle' => 'new-library']);
+        app(EditMediaLibrary::class)->edit($library, ['name' => 'New Library', 'handle' => 'new-library']);
 
         $this->assertDatabaseHas('media_libraries', [
-            'id' => $library->id,
-            'name' => 'New Library',
+            'id'     => $library->id,
+            'name'   => 'New Library',
             'handle' => 'new-library',
         ]);
     }
@@ -148,61 +140,57 @@ class MediaLibraryActionsTest extends TestCase
     {
         $catGroup1 = CategoryGroup::factory()->create();
         $catGroup2 = CategoryGroup::factory()->create();
-        $library = Library::create($this->makeLibraryData(['handle' => 'cat-replace']));
-        $library->category_groups()->attach($catGroup1->id);
-        $action = app(EditMediaLibrary::class);
+        $library   = Library::create($this->makeLibraryData(['handle' => 'cat-replace']));
+        $library->categoryGroups()->attach($catGroup1->id);
 
-        $action->edit($library, [
-            'name' => $library->name,
-            'handle' => $library->handle,
+        app(EditMediaLibrary::class)->edit($library, [
+            'name'            => $library->name,
+            'handle'          => $library->handle,
             'category_groups' => [$catGroup2->id],
         ]);
 
         $fresh = $library->fresh();
-        $this->assertFalse($fresh->category_groups()->where('group_id', $catGroup1->id)->exists());
-        $this->assertTrue($fresh->category_groups()->where('group_id', $catGroup2->id)->exists());
+        $this->assertFalse($fresh->categoryGroups()->where('group_id', $catGroup1->id)->exists());
+        $this->assertTrue($fresh->categoryGroups()->where('group_id', $catGroup2->id)->exists());
     }
 
     public function test_edit_detaches_all_category_groups_when_none_provided(): void
     {
         $catGroup = CategoryGroup::factory()->create();
-        $library = Library::create($this->makeLibraryData(['handle' => 'cat-detach']));
-        $library->category_groups()->attach($catGroup->id);
-        $action = app(EditMediaLibrary::class);
+        $library  = Library::create($this->makeLibraryData(['handle' => 'cat-detach']));
+        $library->categoryGroups()->attach($catGroup->id);
 
-        $action->edit($library, ['name' => $library->name, 'handle' => $library->handle]);
+        app(EditMediaLibrary::class)->edit($library, ['name' => $library->name, 'handle' => $library->handle]);
 
-        $this->assertCount(0, $library->fresh()->category_groups);
+        $this->assertCount(0, $library->fresh()->categoryGroups);
     }
 
     public function test_edit_replaces_field_groups(): void
     {
         $fieldGroup1 = FieldGroup::factory()->create();
         $fieldGroup2 = FieldGroup::factory()->create();
-        $library = Library::create($this->makeLibraryData(['handle' => 'fg-replace']));
-        $library->field_groups()->attach($fieldGroup1->id);
-        $action = app(EditMediaLibrary::class);
+        $library     = Library::create($this->makeLibraryData(['handle' => 'fg-replace']));
+        $library->fieldGroups()->attach($fieldGroup1->id);
 
-        $action->edit($library, [
-            'name' => $library->name,
-            'handle' => $library->handle,
+        app(EditMediaLibrary::class)->edit($library, [
+            'name'         => $library->name,
+            'handle'       => $library->handle,
             'field_groups' => [$fieldGroup2->id],
         ]);
 
         $fresh = $library->fresh();
-        $this->assertFalse($fresh->field_groups()->where('group_id', $fieldGroup1->id)->exists());
-        $this->assertTrue($fresh->field_groups()->where('group_id', $fieldGroup2->id)->exists());
+        $this->assertFalse($fresh->fieldGroups()->where('group_id', $fieldGroup1->id)->exists());
+        $this->assertTrue($fresh->fieldGroups()->where('group_id', $fieldGroup2->id)->exists());
     }
 
     public function test_edit_detaches_all_field_groups_when_none_provided(): void
     {
         $fieldGroup = FieldGroup::factory()->create();
-        $library = Library::create($this->makeLibraryData(['handle' => 'fg-detach']));
-        $library->field_groups()->attach($fieldGroup->id);
-        $action = app(EditMediaLibrary::class);
+        $library    = Library::create($this->makeLibraryData(['handle' => 'fg-detach']));
+        $library->fieldGroups()->attach($fieldGroup->id);
 
-        $action->edit($library, ['name' => $library->name, 'handle' => $library->handle]);
+        app(EditMediaLibrary::class)->edit($library, ['name' => $library->name, 'handle' => $library->handle]);
 
-        $this->assertCount(0, $library->fresh()->field_groups);
+        $this->assertCount(0, $library->fresh()->fieldGroups);
     }
 }

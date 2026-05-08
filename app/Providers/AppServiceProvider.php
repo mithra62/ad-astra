@@ -17,12 +17,16 @@ use App\Models\EntryTree;
 use App\Models\Status;
 use App\Models\User;
 use App\Observers\EntryTreeObserver;
+use App\Observers\FieldValueObserver;
 use App\Observers\StatusObserver;
 use App\Rest\Api;
 use App\Services\CategoryService;
 use App\Services\EntryAuthorService;
 use App\Services\FieldService;
 use App\Services\FilesService;
+use App\Services\Media\NullTransformationDriver;
+use App\Services\Media\TransformationDriverInterface;
+use App\Services\MediaStorageService;
 use App\Services\UserService;
 use App\Settings;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -59,6 +63,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(UserService::class, fn() => new UserService());
         $this->app->singleton(CategoryService::class, fn($app) => new CategoryService($app));
         $this->app->singleton(EntryAuthorService::class, fn() => new EntryAuthorService());
+
+        // Media layer
+        $this->app->bind(TransformationDriverInterface::class, NullTransformationDriver::class);
+        $this->app->singleton('media-service', fn() => new MediaStorageService());
     }
 
     /**
@@ -83,6 +91,7 @@ class AppServiceProvider extends ServiceProvider
         // Model observers
         Status::observe(StatusObserver::class);
         EntryTree::observe(EntryTreeObserver::class);
+        \App\Models\FieldValue::observe(FieldValueObserver::class);
 
         // User status audit log listeners
         Event::listen(UserStatusChanged::class, WriteUserStatusLog::class);
