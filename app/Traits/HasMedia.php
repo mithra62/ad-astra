@@ -14,6 +14,17 @@ trait HasMedia
     // direct attachments at the DB level. See mediables migration for details.
     private const DIRECT_ATTACHMENT = 0;
 
+    /**
+     * Per-instance cache for firstMedia() results.
+     *
+     * Keyed by library handle string (empty string = no handle filter).
+     * Cleared automatically whenever a mutation method changes the pivot rows,
+     * so reads within the same request never see stale data.
+     *
+     * @var array<string, \App\Models\Media|null>
+     */
+    private array $firstMediaCache = [];
+
     /** All media attached to this model via any method. */
     public function media(): MorphToMany
     {
@@ -57,27 +68,43 @@ trait HasMedia
         $this->directMedia()->syncWithoutDetaching([
             $media->id => ['sort_order' => $sortOrder, 'field_id' => self::DIRECT_ATTACHMENT],
         ]);
+        $this->firstMediaCache = [];
     }
 
     /** Remove a media item from all pivot rows for this model. */
     public function detachMedia(Media $media): void
     {
         $this->media()->detach($media->id);
+        $this->firstMediaCache = [];
     }
 
     /** Replace direct attachments with exactly the given IDs. */
     public function syncMedia(array $mediaIds): void
     {
         $this->directMedia()->sync($mediaIds);
+        $this->firstMediaCache = [];
     }
 
-    /** First directly-attached item, optionally scoped to a library handle. */
+    /**
+     * First directly-attached item, optionally scoped to a library handle.
+     *
+     * Results are cached on the model instance for the duration of the request.
+     * Calling attachMedia / detachMedia / syncMedia clears the cache automatically.
+     * If you need to bypass the cache (e.g. after a raw pivot mutation), call
+     * $model->firstMediaCache = [] or unset($model->firstMediaCache[$handle]).
+     */
     public function firstMedia(?string $libraryHandle = null): ?Media
     {
-        return $this->directMedia()
-            ->when($libraryHandle, fn ($q) => $q->whereHas(
-                'library', fn ($lq) => $lq->where('handle', $libraryHandle)
-            ))
-            ->first();
+        $key = $libraryHandle ?? '';
+
+        if (!array_key_exists($key, $this->firstMediaCache)) {
+            $this->firstMediaCache[$key] = $this->directMedia()
+                ->when($libraryHandle, fn ($q) => $q->whereHas(
+                    'library', fn ($lq) => $lq->where('handle', $libraryHandle)
+                ))
+                ->first();
+        }
+
+        return $this->firstMediaCache[$key];
     }
 }

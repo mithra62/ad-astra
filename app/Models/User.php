@@ -173,16 +173,22 @@ class User extends Authenticatable
     /**
      * Returns the user's avatar URL. Checks for a directly-attached media item
      * in the 'avatars' library first; falls back to the Laravolt generated avatar.
+     *
+     * Result is memoized per instance via once() so repeated calls within the
+     * same request (nav bar, sidebar, breadcrumb, etc.) cost nothing after the
+     * first resolve.
      */
     public function avatar(): string
     {
-        $media = $this->firstMedia('avatars');
+        return once(function () {
+            $media = $this->firstMedia('avatars');
 
-        if ($media) {
-            return $media->url();
-        }
+            if ($media) {
+                return $media->url();
+            }
 
-        return LaravoltAvatar::create($this->name)->toBase64();
+            return LaravoltAvatar::create($this->name)->toBase64();
+        });
     }
 
     /**
