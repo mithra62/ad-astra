@@ -73,7 +73,7 @@ class Media extends Controller
             ->with('success', trans('media.deleted'));
     }
 
-    public function download(string $id): Response
+    public function download(string $id): \Symfony\Component\HttpFoundation\Response
     {
         $media = MediaModel::findOrFail($id);
         if (!Storage::disk($media->disk)->exists($media->path)) {

@@ -93,7 +93,7 @@
                                         </svg>
                                     </div>
                                     <div class="min-w-0">
-                                        <a class="font-medium text-slate-900 hover:text-emerald-700" href="media-library.twig">{{ library.name }}</a>
+                                        <a class="font-medium text-slate-900 hover:text-emerald-700" href="{{ route('media.libraries.show', library) }}">{{ library.name }}</a>
                                         <p class="mt-0.5 font-mono text-xs text-slate-400">{{ library.handle }}</p>
                                     </div>
                                 </div>

@@ -1,0 +1,151 @@
+{% extends 'admin._inc._layout' %}
+
+{% set page_title = 'Edit Media' %}
+{% set page_heading = 'Edit Media' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'media' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">Dashboard</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('media.libraries') }}">Media Libraries</a>
+        {% if media.library %}
+            <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+            <a class="hover:text-slate-800" href="{{ route('media.libraries.show', media.library) }}">{{ media.library.name }}</a>
+        {% endif %}
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('media.show', media) }}">{{ media.name ?: media.file_name }}</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">Edit</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.media._sidebar') }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Edit: {{ media.name ?: media.file_name }}</h1>
+                <p class="mt-1 text-sm text-slate-500">Update display name, alt text, and title for this file.</p>
+            </div>
+            <a href="{{ route('media.show', media) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to File
+            </a>
+        </div>
+
+        <form method="POST" action="{{ route('media.update', media) }}" class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
+            {{ csrf_field() }}
+            {{ method_field('PUT') }}
+
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3">
+                    <h5 class="text-sm font-semibold text-slate-700">File Details</h5>
+                </div>
+                <div class="space-y-4 px-5 py-5">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Display Name</label>
+                        <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('name') %} border-red-400{% endif %}"
+                               id="name" name="name" type="text" value="{{ old('name', media.name) }}" placeholder="{{ media.file_name }}">
+                        <p class="mt-1 text-xs text-slate-400">Human-readable label. Defaults to the filename if left blank.</p>
+                        {% if errors.has('name') %}
+                            <p class="mt-1 text-sm text-red-600">{{ errors.first('name') }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="alt_text">Alt Text</label>
+                        <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('alt_text') %} border-red-400{% endif %}"
+                               id="alt_text" name="alt_text" type="text" value="{{ old('alt_text', media.alt_text) }}" placeholder="Describe the image for screen readers">
+                        <p class="mt-1 text-xs text-slate-400">Used as the HTML alt attribute for images.</p>
+                        {% if errors.has('alt_text') %}
+                            <p class="mt-1 text-sm text-red-600">{{ errors.first('alt_text') }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="title">Title</label>
+                        <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('title') %} border-red-400{% endif %}"
+                               id="title" name="title" type="text" value="{{ old('title', media.title) }}" placeholder="Optional tooltip title">
+                        <p class="mt-1 text-xs text-slate-400">Used as the HTML title attribute.</p>
+                        {% if errors.has('title') %}
+                            <p class="mt-1 text-sm text-red-600">{{ errors.first('title') }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-4">
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">Save</h5>
+                    </div>
+                    <div class="space-y-2 px-5 py-4">
+                        <button type="submit" class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                            Save Changes
+                        </button>
+                        <a href="{{ route('media.show', media) }}" class="block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-50">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">File Info</h5>
+                    </div>
+                    <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                        <div class="flex items-center justify-between py-2">
+                            <dt class="text-slate-500">Filename</dt>
+                            <dd class="font-mono text-xs text-slate-700 truncate max-w-[120px]" title="{{ media.file_name }}">{{ media.file_name }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2">
+                            <dt class="text-slate-500">Type</dt>
+                            <dd class="text-slate-700">{{ media.mime_type ?: '—' }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2">
+                            <dt class="text-slate-500">Size</dt>
+                            <dd class="text-slate-700">
+                                {% if media.size > 1048576 %}
+                                    {{ (media.size / 1048576)|number_format(1) }} MB
+                                {% elseif media.size > 1024 %}
+                                    {{ (media.size / 1024)|number_format(1) }} KB
+                                {% else %}
+                                    {{ media.size }} B
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2">
+                            <dt class="text-slate-500">Disk</dt>
+                            <dd class="text-slate-700">{{ media.disk }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="overflow-hidden rounded-lg border border-red-200 bg-white shadow-sm">
+                    <div class="border-b border-red-100 bg-red-50 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-red-800">Danger Zone</h5>
+                    </div>
+                    <div class="px-5 py-4">
+                        <a href="{{ route('media.confirm', media) }}" class="block w-full rounded-md border border-red-300 bg-white px-4 py-2 text-center text-sm font-medium text-red-600 shadow-sm hover:bg-red-50">
+                            Delete File
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
