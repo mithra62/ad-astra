@@ -88,17 +88,19 @@ second time (via `$this->field->fieldType->instance()`) to call `value()`. This
 is inefficient but functionally correct — `FileUpload::value()` will be called
 as expected. This method is existing core code and is not modified by this plan.
 
-**2. `Admin\Media\Media` controller stubs are wired to non-existent request classes.**
-The controller imports `DeleteMediaRequest` and `EditMediaRequest` which do not
-exist. The `show()`, `edit()`, `update()`, and `destroy()` methods are empty.
-`download()` returns the model object instead of a file response. Step 18b fills
-in these stubs and creates the missing request classes.
+**2. `Admin\Media` controller does not exist.**
+The admin routes register a full resource and two extras (`download`, `confirm`)
+pointing to `App\Http\Controllers\Admin\Media`, but the file
+`app/Http/Controllers/Admin/Media.php` has never been created. Step 18b creates
+it from scratch along with the two request classes it needs (`EditMediaRequest`,
+`DeleteMediaRequest`).
 
 **3. The Spatie tags migration must be deleted.**
 `2025_12_27_152812_create_tag_tables.php` was left behind when `spatie/laravel-tags`
-was removed from `composer.json`. On a fresh install it will try to run and fail
-because the `Spatie\Tags\*` classes no longer exist in vendor. Delete this file
-before running migrations.
+was removed from `composer.json`. The migration itself contains only plain
+Blueprint schema calls (no Spatie PHP class references), so it will not fatal —
+but it will create orphaned `tags` and `taggables` tables with no corresponding
+models. Delete this file before running migrations.
 
 **4. `UploadMediaRequest` and `HasMediaItems::validateUpload()` both check
 mime type and file size.** The request validates at the HTTP boundary; the
@@ -595,10 +597,11 @@ public function edit(Library $library, array $input): bool
 
 **`app/Http/Controllers/Admin/Media/Library.php`**
 
-Two calls to `with('category_groups')` — one in `create()`, one in `edit()`:
+One call to `with('category_groups')`, in `edit()` only (`create()` does not
+load an existing Library record):
 
 ```php
-// Before (both occurrences)
+// Before (edit() method, line ~102)
 LibraryModel::with('category_groups')->find($id);
 
 // After
@@ -609,11 +612,46 @@ LibraryModel::with('categoryGroups')->find($id);
 > data array keys passed to Blade are unaffected — they are not Eloquent
 > relation names.
 
-**Also update any existing tests** that reference `category_groups` or
-`field_groups` as Eloquent relation names on `Library` (e.g. `with('category_groups')`,
-`$library->category_groups`). These will fail with "Call to undefined
-relationship" after Step 6a removes the inline methods. Update them to
-`categoryGroups` in the same commit.
+**This step must be committed atomically with Step 6a.** The moment the inline
+snake_case methods are removed from the Library model, three test files and the
+Library controller break simultaneously. All fixes must land in one commit.
+
+The specific changes required across the three affected test files:
+
+**`tests/Unit/Actions/Media/Library/MediaLibraryActionsTest.php`** — seven
+tests call `$library->category_groups()`, `$library->field_groups()`, or
+access `$library->category_groups` / `$library->field_groups` as dynamic
+properties. Every occurrence must be renamed to `categoryGroups()` /
+`fieldGroups()`. The method calls in the test bodies that do
+`$library->category_groups()->attach(...)` or
+`$fresh->category_groups()->where(...)` must all be updated.
+
+**`tests/Unit/Models/Media/LibraryTest.php`** — three changes required:
+
+1. All snake_case relation method calls and property accesses renamed to
+   camelCase (same pattern as above).
+
+2. `test_has_correct_fillable_attributes()` asserts `$fillable` equals a
+   specific array that does not include `field_layout_id`. Step 6a adds it.
+   Update the expected array:
+   ```php
+   // Before
+   ['name', 'handle', 'adapter', 'adapter_settings', 'allowed_types', 'max_size', 'sort_order']
+   // After
+   ['field_layout_id', 'name', 'handle', 'adapter', 'adapter_settings', 'allowed_types', 'max_size', 'sort_order']
+   ```
+
+3. **Delete** the four `categories()` helper tests
+   (`test_categories_returns_empty_collection_when_no_category_groups`,
+   `test_categories_returns_all_categories_across_attached_groups`,
+   `test_categories_excludes_categories_from_unattached_groups`, and any
+   related helper). The `categories()` method was an inline workaround on the
+   old model; the new model does not define it, and nothing outside tests calls
+   it on `Library`. Remove the tests rather than rewriting them.
+
+**`tests/Unit/Models/Media/MediaTest.php`** — two tests call
+`$media->media_library()` which is renamed to `$media->library()` in Step 5.
+Update both when Step 5 is applied (not Step 6).
 
 ---
 
@@ -1566,15 +1604,23 @@ class DeleteMedia extends AbstractAction
 
 ---
 
-## Step 18b — Fill In `Admin\Media\Media` Controller Stubs
+## Step 18b — Create `Admin\Media` Controller
 
-The controller already exists but has four empty action methods, a broken
-`download()`, and imports two request classes that do not yet exist. Create
-the missing request classes first, then fill in the methods.
+The admin routes import `App\Http\Controllers\Admin\Media` and register a
+full resource plus `download` and `confirm` extras — but the file does not
+exist. Create it from scratch at the path below, then create the two request
+classes it needs.
+
+**Important:** the controller lives at `app/Http/Controllers/Admin/Media.php`
+with namespace `App\Http\Controllers\Admin`, **not** inside the
+`Admin/Media/` subdirectory. Putting it inside that directory would conflict
+with the existing `Library.php` class that already lives there and would not
+match the route import.
 
 ### Request classes
 
 **File:** `app/Http/Requests/Media/EditMediaRequest.php`
+
 
 ```php
 <?php
@@ -1614,12 +1660,17 @@ class DeleteMediaRequest extends FormRequest
 }
 ```
 
-### Controller methods
+### Controller
 
-**File:** `app/Http/Controllers/Admin/Media/Media.php` — fill in the stubs:
+**File:** `app/Http/Controllers/Admin/Media.php` *(create — does not exist yet)*
 
 ```php
+<?php
+
+namespace App\Http\Controllers\Admin;
+
 use App\Actions\Media\DeleteMedia as DeleteMediaAction;
+use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\Media\DeleteMediaRequest;
 use App\Http\Requests\Media\EditMediaRequest;
 use App\Models\Media as MediaModel;
@@ -1627,42 +1678,77 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
-public function show(MediaModel $media): \Illuminate\View\View
+class Media extends Controller
 {
-    return view('admin.media.show', compact('media'));
-}
-
-public function edit(MediaModel $media): \Illuminate\View\View
-{
-    return view('admin.media.edit', compact('media'));
-}
-
-public function update(EditMediaRequest $request, MediaModel $media): RedirectResponse
-{
-    $media->update($request->validated());
-    return redirect()->route('admin.media.show', $media)
-        ->with('success', 'Media updated.');
-}
-
-public function destroy(DeleteMediaRequest $request, MediaModel $media): RedirectResponse
-{
-    (new DeleteMediaAction)->delete($media);
-    return redirect()->route('admin.media.index')
-        ->with('success', 'Media deleted.');
-}
-
-public function download(MediaModel $media): Response
-{
-    if (!Storage::disk($media->disk)->exists($media->path)) {
-        abort(404, 'File not found on disk.');
+    public function index(): \Illuminate\View\View
+    {
+        $media = MediaModel::paginate(20);
+        return $this->view('media.index', compact('media'));
     }
 
-    return Storage::disk($media->disk)->download($media->path, $media->original_name);
+    public function show(string $id): \Illuminate\View\View
+    {
+        $media = MediaModel::findOrFail($id);
+        return $this->view('media.show', compact('media'));
+    }
+
+    public function edit(string $id): \Illuminate\View\View
+    {
+        $media = MediaModel::findOrFail($id);
+        return $this->view('media.edit', compact('media'));
+    }
+
+    public function update(EditMediaRequest $request, string $id): RedirectResponse
+    {
+        $media = MediaModel::findOrFail($id);
+        $media->update($request->validated());
+        return redirect()->route('media.show', $media->id)
+            ->with('success', trans('media.updated'));
+    }
+
+    public function confirm(string $id): \Illuminate\View\View|RedirectResponse
+    {
+        $media = MediaModel::find($id);
+        if (!$media instanceof MediaModel) {
+            return redirect()->route('media.index')
+                ->with('failure', trans('media.not_found'));
+        }
+        return $this->view('media.confirm', compact('media'));
+    }
+
+    public function destroy(DeleteMediaRequest $request, string $id): RedirectResponse
+    {
+        $media = MediaModel::findOrFail($id);
+        (new DeleteMediaAction)->delete($media);
+        return redirect()->route('media.index')
+            ->with('success', trans('media.deleted'));
+    }
+
+    public function download(string $id): Response
+    {
+        $media = MediaModel::findOrFail($id);
+        if (!Storage::disk($media->disk)->exists($media->path)) {
+            abort(404, 'File not found on disk.');
+        }
+        return Storage::disk($media->disk)->download($media->path, $media->original_name);
+    }
+
+    // create() and store() are handled by the Library upload flow.
+    // Route::resource registers them; stub them to avoid MethodNotAllowedHttpException.
+    public function create(): RedirectResponse
+    {
+        return redirect()->route('media.libraries');
+    }
+
+    public function store(): RedirectResponse
+    {
+        return redirect()->route('media.libraries');
+    }
 }
 ```
 
-> The Blade views (`admin.media.show`, `admin.media.edit`) are scaffolded as
-> needed. Their content is out of scope for this plan.
+> Blade views (`media.index`, `media.show`, `media.edit`, `media.confirm`)
+> are scaffolded as needed — their content is out of scope for this plan.
 
 ---
 
@@ -1808,7 +1894,7 @@ Queue::assertPushed(ProcessMediaLibraryRemoval::class);
 - [ ] **Step 17c** — `ProcessMediaLibraryRemoval` takes `int $libraryId`; `handle()` soft-deletes in chunks
 - [ ] **Step 17d** — `StoreMediaLibraryFormRequest` validates `'adapter'` throughout
 - [ ] **Step 18** — `DeleteMedia` action created
-- [ ] **Step 18b** — `EditMediaRequest` and `DeleteMediaRequest` created; `show()`, `edit()`, `update()`, `destroy()`, `download()` filled in on `Admin\Media\Media` controller
+- [ ] **Step 18b** — `app/Http/Controllers/Admin/Media.php` created (namespace `App\Http\Controllers\Admin`); `EditMediaRequest` and `DeleteMediaRequest` created; all resource methods plus `download()` and `confirm()` implemented
 - [ ] **Step 19** — `User` has `HasMedia`; `avatar()` checks `firstMedia('avatars')` before Laravolt fallback; `setAvatar()` detaches old avatars before attaching new one
 - [ ] **Step 20** — `FileUpload` row in `FieldTypeSeeder`; avatars library seeded
 - [ ] **Step 21** — `composer test` passes; upload, purge, field-resolution, observer, and library-deletion tests added

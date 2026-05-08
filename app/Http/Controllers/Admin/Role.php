@@ -37,8 +37,29 @@ class Role extends Controller
      */
     public function create()
     {
+        $groups = $this->buildFormRoles();
+        return $this->view('roles.create', ['permissions' => $groups]);
+    }
+
+    private function buildFormRoles()
+    {
         $permissions = Permission::all();
-        return $this->view('roles.create', ['permissions' => $permissions]);
+        $groups = [];
+        foreach($permissions AS $permission) {
+            if(!isset($groups[$permission->domain])) {
+                $groups[$permission->domain] = [];
+            }
+
+            if(!in_array($permission->name, $groups[$permission->domain])) {
+                $groups[$permission->domain][] = [
+                    'name' => $permission->name,
+                    'description' => $permission->description,
+                ];
+            }
+        }
+
+        ksort($groups);
+        return $groups;
     }
 
     /**
@@ -74,8 +95,8 @@ class Role extends Controller
             abort(404);
         }
 
-        $permissions = Permission::all();
-        return $this->view('roles.edit', ['role' => $role, 'permissions' => $permissions]);
+        $groups = $this->buildFormRoles();
+        return $this->view('roles.edit', ['role' => $role, 'permissions' => $groups]);
     }
 
     /**
