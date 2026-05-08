@@ -45,7 +45,7 @@ public function down(): void {
 
 Rolling back this migration is a no-op. Fix to `dropIfExists('api_logs')`.
 
-### 1.5 `EntryRepository::applyData()` is not transactional
+### 1.5 [RESOLVED] `EntryRepository::applyData()` is not transactional
 **File:** `app/Repositories/EntryRepository.php` (lines 285–317)
 
 `create()` is wrapped in `DB::transaction(...)`, but `applyData()` (the update path) writes core attributes, then status, then authors, then categories, then field values, then runs `afterUpdate`, all without a transaction. A failure during `applyFieldValues()` leaves the entry partially updated (e.g., new title and authors saved but new field values rolled forward only halfway). Wrap `applyData()` in `DB::transaction(...)` symmetric to `create()`.

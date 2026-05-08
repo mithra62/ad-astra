@@ -57,16 +57,23 @@ class EntryService extends AbstractService
             throw ValidationException::withMessages($errors);
         }
 
-        $entry = $this->repository->applyData($entry, $data);
+        // Wrap applyData + syncTreeNode in one transaction so a tree sync failure
+        // cannot leave the entry data committed without its tree counterpart.
+        // Laravel uses savepoints for the nested transaction inside applyData —
+        // no changes needed there. afterUpdate (called inside applyData, outside
+        // its inner transaction) will run within this outer transaction.
+        return DB::transaction(function () use ($entry, $data) {
+            $entry = $this->repository->applyData($entry, $data);
 
-        // applyData calls refresh() which clears loaded relations — reload before tree sync.
-        $entry->loadMissing('entryType');
-        if ($entry->entryType->has_entry_tree) {
-            $entry->loadMissing('entryTree');
-            $this->syncTreeNode($entry, $data);
-        }
+            // applyData calls refresh() which clears loaded relations — reload before tree sync.
+            $entry->loadMissing('entryType');
+            if ($entry->entryType->has_entry_tree) {
+                $entry->loadMissing('entryTree');
+                $this->syncTreeNode($entry, $data);
+            }
 
-        return $entry;
+            return $entry;
+        });
     }
 
     /**

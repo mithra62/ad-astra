@@ -290,30 +290,39 @@ class EntryRepository
         $typeObject = app(EntryTypeRegistry::class)->resolveByRecord($entryType);
         $data = $typeObject->beforeUpdate($entry, $data);
 
-        $this->applyCoreAttributes($entry, $data);
+        // Wrap all writes in a transaction — mirrors the create() pattern so a
+        // failure mid-way (e.g. during applyFieldValues) cannot leave the entry
+        // partially updated. afterUpdate runs outside the transaction so its
+        // side effects (emails, webhooks, etc.) are not rolled back if
+        // persistence fails.
+        $entry = DB::transaction(function () use ($entry, $data) {
+            $this->applyCoreAttributes($entry, $data);
 
-        if (array_key_exists('status', $data)) {
-            $entry->loadMissing('entryGroup.statusGroup.statuses');
-            $this->applyStatus($entry, $data['status'], applyDefault: false);
-        }
+            if (array_key_exists('status', $data)) {
+                $entry->loadMissing('entryGroup.statusGroup.statuses');
+                $this->applyStatus($entry, $data['status'], applyDefault: false);
+            }
 
-        $entry->save();
+            $entry->save();
 
-        if (array_key_exists('authors', $data)) {
-            $this->syncAuthors($entry, $data['authors']);
-        }
+            if (array_key_exists('authors', $data)) {
+                $this->syncAuthors($entry, $data['authors']);
+            }
 
-        if (array_key_exists('categories', $data)) {
-            $this->syncCategories($entry, $data['categories']);
-        }
+            if (array_key_exists('categories', $data)) {
+                $this->syncCategories($entry, $data['categories']);
+            }
 
-        if (array_key_exists('fields', $data)) {
-            $this->applyFieldValues($entry, $data['fields']);
-        }
+            if (array_key_exists('fields', $data)) {
+                $this->applyFieldValues($entry, $data['fields']);
+            }
+
+            return $entry->refresh();
+        });
 
         $typeObject->afterUpdate($entry, $data);
 
-        return $entry->refresh();
+        return $entry;
     }
 
     /**
