@@ -79,7 +79,7 @@ Every status `updating` event fires the cascading `Entry::where(...)->update(...
 
 ## 2. High Severity
 
-### 2.1 `TemplateController` is dead but still present
+### 2.1 [RESOLVED] `TemplateController` is dead but still present
 **File:** `app/Http/Controllers/TemplateController.php`
 
 No route or service references this controller (confirmed via `grep -rn TemplateController`). The site routing flow was migrated to `SiteController` + `SiteRouter` + `RouteDrivers`. The legacy file still contains:
@@ -89,7 +89,7 @@ No route or service references this controller (confirmed via `grep -rn Template
 
 Delete `TemplateController.php` and prune the autoload classmap. The same `View::replaceNamespace('admin', [])` line lives in `app/Services/SiteRouting/RouteDrivers/TemplateRouteDriver.php` constructor — verify it is intentional there too; nuking the admin namespace because the public template driver was instantiated is surprising behaviour.
 
-### 2.2 `Admin\Playground` controller and its view are orphans
+### 2.2 [RESOLVED] `Admin\Playground` controller and its view are orphans
 **Files:** `app/Http/Controllers/Admin/Playground.php`, missing view `playground.index`
 
 Not referenced by any route. Returns `view('playground.index')` which does not exist anywhere under `resources/views`. Delete.
