@@ -314,7 +314,7 @@ The provider must be in `bootstrap/providers.php` for the `bb-field` singleton t
 
 Twig is the templating language for this app, but `errors/404.blade.php`, `errors/500.blade.php`, etc. are Blade. Either convert to Twig for consistency or document that error pages are intentionally Blade because Laravel resolves them through the default loader.
 
-### 4.9 `LoginTest` only covers `canAccessSystem` and middleware logout
+### [RESOLVED] 4.9 `LoginTest` only covers `canAccessSystem` and middleware logout
 **File:** `tests/Feature/LoginTest.php`
 
 The full Fortify login form path, the OAuth callback, the suspension-window auto-expire flow, and the `EnforceUserStatusApi` middleware all lack feature tests. (`EnforceUserStatusApi` has no test at all.) Add at least:
@@ -323,7 +323,7 @@ The full Fortify login form path, the OAuth callback, the suspension-window auto
 * `test_api_request_with_blocked_status_returns_401`
 * `test_locked_user_cannot_access_admin_when_status_is_active`
 
-### 4.10 `Field::with = ['fieldType']` always eager-loads
+### [NOT IMPLEMENTING] 4.10 `Field::with = ['fieldType']` always eager-loads
 **File:** `app/Models/Field.php` (line 33)
 
 Fine for the admin UI but every `Field` query — including counts and existence checks — pulls the field type row. Replace with explicit `with('fieldType')` at call sites that need it, or with a global scope that listens to `wherePivot/exists` to short-circuit.
