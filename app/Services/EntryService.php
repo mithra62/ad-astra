@@ -379,7 +379,7 @@ class EntryService extends AbstractService
      */
     public function query(): EntryQueryBuilder
     {
-        return new EntryQueryBuilder($this->repository);
+        return new EntryQueryBuilder();
     }
 
     // -------------------------------------------------------------------------

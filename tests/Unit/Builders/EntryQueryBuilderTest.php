@@ -3,17 +3,25 @@
 namespace Tests\Unit\Builders;
 
 use App\Builders\EntryQueryBuilder;
+use App\Field\Types\Relationship;
+use App\Field\Types\Text;
 use App\Models\Category;
 use App\Models\Entry;
 use App\Models\EntryAuthor;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
+use App\Models\Field;
+use App\Models\Field\Type;
+use App\Models\FieldLayout;
+use App\Models\FieldLayout\Tab;
+use App\Models\FieldLayout\TabElement;
+use App\Models\FieldValue;
 use App\Models\User;
-use App\Repositories\EntryRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
+use InvalidArgumentException;
 use Tests\TestCase;
 
 class EntryQueryBuilderTest extends TestCase
@@ -34,7 +42,43 @@ class EntryQueryBuilderTest extends TestCase
 
     private function builder(): EntryQueryBuilder
     {
-        return new EntryQueryBuilder($this->app->make(EntryRepository::class));
+        return new EntryQueryBuilder();
+    }
+
+    /**
+     * Create an Entry wired to a layout containing a single Text field with
+     * the given handle. Returns [$entry, $field] for use in assertions.
+     */
+    private function makeEntryWithTextField(string $handle): array
+    {
+        $fieldType = Type::firstOrCreate(
+            ['object' => Text::class],
+            ['name' => 'Text', 'settings' => []]
+        );
+        $field     = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => $handle]);
+
+        $layout  = FieldLayout::factory()->create();
+        $tab     = Tab::factory()->create(['field_layout_id' => $layout->id]);
+        TabElement::factory()->create(['field_layout_tab_id' => $tab->id, 'field_id' => $field->id]);
+
+        $group = EntryGroup::factory()->create(['field_layout_id' => $layout->id]);
+        $type  = EntryType::factory()->create(['entry_group_id' => $group->id, 'field_layout_id' => null]);
+        $entry = Entry::factory()->create(['entry_group_id' => $group->id, 'entry_type_id' => $type->id]);
+
+        return [$entry, $field];
+    }
+
+    /**
+     * Store a text value for the given field on the given entry.
+     */
+    private function storeTextValue(Entry $entry, Field $field, string $value): void
+    {
+        FieldValue::create([
+            'field_id'       => $field->id,
+            'fieldable_id'   => $entry->id,
+            'fieldable_type' => $entry->getMorphClass(),
+            'value_text'     => $value,
+        ]);
     }
 
     public function test_of_type_returns_self(): void
@@ -686,5 +730,140 @@ class EntryQueryBuilderTest extends TestCase
 
         $this->assertCount(1, $results);
         $this->assertEquals($match->id, $results->first()->id);
+    }
+
+    // -------------------------------------------------------------------------
+    // whereField()
+    // -------------------------------------------------------------------------
+
+    public function test_where_field_returns_self(): void
+    {
+        [$entry, $field] = $this->makeEntryWithTextField('slug');
+        $this->storeTextValue($entry, $field, 'hello');
+
+        $builder = $this->builder();
+        $this->assertSame($builder, $builder->whereField('slug', 'hello'));
+    }
+
+    public function test_where_field_implicit_equals_returns_matching_entry(): void
+    {
+        // Both entries share the same field and group — only their stored values differ.
+        [$match, $field] = $this->makeEntryWithTextField('slug');
+        $this->storeTextValue($match, $field, 'my-post');
+
+        $other = Entry::factory()->create([
+            'entry_group_id' => $match->entry_group_id,
+            'entry_type_id'  => $match->entry_type_id,
+        ]);
+        $this->storeTextValue($other, $field, 'another-post');
+
+        $results = $this->builder()->whereField('slug', 'my-post')->get();
+
+        $this->assertTrue($results->contains('id', $match->id));
+        $this->assertFalse($results->contains('id', $other->id));
+    }
+
+    public function test_where_field_explicit_equals_operator_returns_matching_entry(): void
+    {
+        // Both entries share the same field and group — only their stored values differ.
+        [$match, $field] = $this->makeEntryWithTextField('colour');
+        $this->storeTextValue($match, $field, 'blue');
+
+        $other = Entry::factory()->create([
+            'entry_group_id' => $match->entry_group_id,
+            'entry_type_id'  => $match->entry_type_id,
+        ]);
+        $this->storeTextValue($other, $field, 'red');
+
+        $results = $this->builder()->whereField('colour', '=', 'blue')->get();
+
+        $this->assertTrue($results->contains('id', $match->id));
+        $this->assertFalse($results->contains('id', $other->id));
+    }
+
+    public function test_where_field_not_equal_operator_excludes_matching_entry(): void
+    {
+        [$entry, $field] = $this->makeEntryWithTextField('status_label');
+        $this->storeTextValue($entry, $field, 'draft');
+
+        $results = $this->builder()->whereField('status_label', '!=', 'draft')->get();
+
+        $this->assertFalse($results->contains('id', $entry->id));
+    }
+
+    public function test_where_field_excludes_entries_without_the_field_value(): void
+    {
+        // Entry has the field in its layout but no stored value row.
+        [$entry] = $this->makeEntryWithTextField('teaser');
+
+        $results = $this->builder()->whereField('teaser', 'anything')->get();
+
+        $this->assertFalse($results->contains('id', $entry->id));
+    }
+
+    public function test_where_field_can_be_chained_with_other_filters(): void
+    {
+        $fieldType = Type::firstOrCreate(
+            ['object' => Text::class],
+            ['name' => 'Text', 'settings' => []]
+        );
+        $field     = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => 'region']);
+        $layout    = FieldLayout::factory()->create();
+        $tab       = Tab::factory()->create(['field_layout_id' => $layout->id]);
+        TabElement::factory()->create(['field_layout_tab_id' => $tab->id, 'field_id' => $field->id]);
+
+        $group = EntryGroup::factory()->create(['field_layout_id' => $layout->id]);
+        $type  = EntryType::factory()->create(['entry_group_id' => $group->id, 'field_layout_id' => null]);
+
+        $match = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id'  => $type->id,
+            'status_handle'  => 'published',
+        ]);
+        $this->storeTextValue($match, $field, 'europe');
+
+        // Same group and field value, wrong status
+        $wrongStatus = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id'  => $type->id,
+            'status_handle'  => 'draft',
+        ]);
+        $this->storeTextValue($wrongStatus, $field, 'europe');
+
+        // Same group and status, wrong field value
+        $wrongField = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id'  => $type->id,
+            'status_handle'  => 'published',
+        ]);
+        $this->storeTextValue($wrongField, $field, 'asia');
+
+        $results = $this->builder()
+            ->inGroup($group)
+            ->withStatus('published')
+            ->whereField('region', 'europe')
+            ->get();
+
+        $this->assertCount(1, $results);
+        $this->assertEquals($match->id, $results->first()->id);
+    }
+
+    public function test_where_field_throws_for_unknown_handle(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/no field with handle \[does-not-exist\]/');
+
+        $this->builder()->whereField('does-not-exist', 'value');
+    }
+
+    public function test_where_field_throws_for_relational_field_handle(): void
+    {
+        $fieldType = Type::factory()->create(['object' => Relationship::class]);
+        Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => 'related-items']);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/\[related-items\] is a relational field/');
+
+        $this->builder()->whereField('related-items', 1);
     }
 }

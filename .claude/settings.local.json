@@ -51,7 +51,9 @@
       "Read(//c/wamp64/bin/**)",
       "Bash(/c/PHP/php.exe artisan *)",
       "Bash(/c/PHP/php.exe vendor/bin/phpunit --no-coverage)",
-      "Bash(C:\\\\php\\\\php.exe artisan *)"
+      "Bash(C:\\\\php\\\\php.exe artisan *)",
+      "Bash(Get-ChildItem -Path \"D:\\\\Projects\\\\mithra62\\\\laravel-base\\\\develop\" -Directory)",
+      "Bash(Select-Object Name)"
     ]
   }
 }

@@ -5,16 +5,17 @@ namespace App\Builders;
 use App\Models\Entry;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
-use App\Repositories\EntryRepository;
+use App\Models\Field;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use InvalidArgumentException;
 
 class EntryQueryBuilder
 {
     private Builder $query;
 
-    public function __construct(private readonly EntryRepository $repository)
+    public function __construct()
     {
         $this->query = Entry::query();
     }
@@ -66,6 +67,58 @@ class EntryQueryBuilder
     public function withCategory(int $categoryId): static
     {
         $this->query->whereHas('categories', fn($q) => $q->where('categories.id', $categoryId));
+
+        return $this;
+    }
+
+    /**
+     * Filter entries by a scalar custom field value.
+     *
+     * Supports the standard two- or three-argument form:
+     *   ->whereField('slug', 'my-post')           // implicit =
+     *   ->whereField('release_date', '>=', now())  // explicit operator
+     *
+     * One Field lookup is performed to resolve the handle to its storage column
+     * (value_text, value_integer, etc.). If the handle is unknown, or the field
+     * is relational (data lives in entry_relationships, not field_values), an
+     * InvalidArgumentException is thrown rather than silently returning no results.
+     *
+     * @throws InvalidArgumentException for unknown or relational field handles.
+     */
+    public function whereField(string $handle, mixed $operator, mixed $value = null): static
+    {
+        // Support two-argument shorthand: ->whereField('slug', 'my-post')
+        if ($value === null) {
+            $value    = $operator;
+            $operator = '=';
+        }
+
+        // Resolve the field's storage column with a single lookup so the WHERE
+        // targets the correct typed column rather than scanning all six.
+        $field = Field::with('fieldType')->where('handle', $handle)->first();
+
+        if (! $field?->fieldType) {
+            throw new InvalidArgumentException(
+                "whereField: no field with handle [{$handle}] exists."
+            );
+        }
+
+        $instance = $field->fieldType->instance();
+
+        if ($instance->isRelational()) {
+            throw new InvalidArgumentException(
+                "whereField: [{$handle}] is a relational field and cannot be filtered via field_values. Use a whereHas on entryRelationships instead."
+            );
+        }
+
+        $column = $instance->storageColumn();
+
+        // whereHas on the morphMany automatically scopes fieldable_type to Entry —
+        // no need to set it explicitly.
+        $this->query->whereHas('fieldValues', function ($q) use ($field, $column, $operator, $value) {
+            $q->where('field_id', $field->getKey())
+              ->where($column, $operator, $value);
+        });
 
         return $this;
     }
