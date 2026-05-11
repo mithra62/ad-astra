@@ -483,9 +483,11 @@ class UserService
      */
     public function upsertOauthToken(User $user, string $provider, array $data): OauthToken
     {
-        // Revoke existing active tokens for this provider
+        // Revoke existing active tokens for this provider in a single UPDATE.
+        // Bypasses Eloquent model events intentionally — no listeners exist on
+        // OauthToken. If that changes, dispatch a domain event from here instead.
         $user->oauthTokens()->provider($provider)->active()
-            ->each(fn(OauthToken $t) => $t->revoke());
+            ->update(['revoked_at' => now()]);
 
         return $user->oauthTokens()->create(
             array_merge($data, ['provider' => $provider])
@@ -569,7 +571,7 @@ class UserService
             $query->provider($provider);
         }
 
-        $query->each(fn(OauthToken $t) => $t->revoke());
+        $query->update(['revoked_at' => now()]);
     }
 
     /**

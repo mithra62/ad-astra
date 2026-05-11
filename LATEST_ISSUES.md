@@ -238,7 +238,7 @@ Unique constraints already create a backing index in MySQL/Postgres. The second 
 
 Neither column is read or written anywhere in `app/`. These appear to be a partial step toward `SEO_SCHEMA_PLAN.md`. Either complete that work or drop the columns to avoid implying functionality that doesn't exist.
 
-### 3.8 OAuth token revocation is sequential per-row
+### [RESOLVED] 3.8 OAuth token revocation is sequential per-row
 **File:** `app/Services/UserService.php::upsertOauthToken` (lines 472–481)
 
 ```php
