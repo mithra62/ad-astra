@@ -28,21 +28,30 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {
 
-    //users
-    Route::patch('users/{id}/status', [UserStatusController::class, 'update'])->name('users.status.update');
-    Route::delete('users/{id}/lock', [UserStatusController::class, 'destroy'])->name('users.lock.destroy');
-    Route::get('users/{id}/confirm', [User::class, 'confirm'])->name('users.confirm');
-    Route::put('users/{id}/password', [User::class, 'password'])->name('users.password');
-    Route::get('users/{id}/password', [User::class, 'changePassword'])->name('users.change_password');
+    // users
+    // 'layouts' is a literal segment — must precede the resource to avoid being
+    // matched by the resource's GET users/{user} show route.
     Route::get('users/layouts', [UserLayout::class, 'show'])->name('users.layouts.show');
+
     Route::resource('users', User::class);
-    Route::get('users/{id}/tokens/create', [UserTokens::class, 'create'])->name('users.token.create');
-    Route::post('users/{id}/tokens', [UserTokens::class, 'store'])->name('users.token.store');
-    Route::get('users/{id}/tokens', [UserTokens::class, 'index'])->name('users.token.index');
-    Route::get('users/{id}/tokens/{token_id}/confirm', [UserTokens::class, 'confirm'])->name('users.token.confirm');
-    Route::delete('users/{id}/tokens/{token_id}', [UserTokens::class, 'destroy'])->name('users.token.destroy');
-    Route::get('users/{id}/tokens/{token_id}/edit', [UserTokens::class, 'edit'])->name('users.token.edit');
-    Route::put('users/{id}/tokens/{token_id}', [UserTokens::class, 'update'])->name('users.token.update');
+
+    Route::prefix('users/{id}')->group(function () {
+        Route::patch('status',       [UserStatusController::class, 'update'])->name('users.status.update');
+        Route::delete('lock',        [UserStatusController::class, 'destroy'])->name('users.lock.destroy');
+        Route::get('confirm',        [User::class, 'confirm'])->name('users.confirm');
+        Route::put('password',       [User::class, 'password'])->name('users.password');
+        Route::get('password',       [User::class, 'changePassword'])->name('users.change_password');
+
+        Route::prefix('tokens')->group(function () {
+            Route::get('/',                      [UserTokens::class, 'index'])->name('users.token.index');
+            Route::get('create',                 [UserTokens::class, 'create'])->name('users.token.create');
+            Route::post('/',                     [UserTokens::class, 'store'])->name('users.token.store');
+            Route::get('{token_id}/edit',        [UserTokens::class, 'edit'])->name('users.token.edit');
+            Route::get('{token_id}/confirm',     [UserTokens::class, 'confirm'])->name('users.token.confirm');
+            Route::put('{token_id}',             [UserTokens::class, 'update'])->name('users.token.update');
+            Route::delete('{token_id}',          [UserTokens::class, 'destroy'])->name('users.token.destroy');
+        });
+    });
 
     //roles
     Route::get('roles/{id}/confirm', [Role::class, 'confirm'])->name('roles.confirm');
