@@ -172,14 +172,14 @@ A user whose suspension expired but who is also `locked_until = future` still ge
 
 `if ($e->getCode() !== '23000')` is correct on PDO MySQL/Postgres but other drivers may surface different codes. More importantly, both methods catch the QueryException and retry without `DB::transaction(...)` around the *whole* SELECT-then-INSERT/UPDATE sequence, which means repeated retries can interleave. Use `Model::upsert()` (Laravel 9+) or wrap in `DB::transaction(fn() => …, attempts: 3)`.
 
-### 2.12 `EntryTypeRegistry` keeps singleton instances across requests/tenants
+### [RESOLVED] 2.12 `EntryTypeRegistry` keeps singleton instances across requests/tenants
 **File:** `app/EntryTypes/EntryTypeRegistry.php`, registered as singleton in `app/Providers/ContentServiceProvider.php`
 
 The registry stores `AbstractEntryType` instances on the registry's *own* arrays, which are then shared across the whole application lifecycle. If any concrete type ever stores per-call state on `$this` (sequence counters, last-fetched record, request data), you have cross-request bleed. Today only `PodcastEpisodeEntryType::beforeCreate` mutates `$data` (no instance state), but this is brittle — document the no-instance-state contract on `AbstractEntryType` and consider an `app('entry_types')->fresh($handle)` accessor for cases that need a clean instance.
 
 Caches also drift: `resolveByHandle()` populates both `handleCache` and `idCache`, but `resolveByRecord()` only writes to `idCache`. Two consecutive calls with the same record produce different memoization paths.
 
-### 2.13 `ValidateClassReferences` artisan command treats a null `class` as broken
+### [RESOLVED] 2.13 `ValidateClassReferences` artisan command treats a null `class` as broken
 **File:** `app/Console/Commands/ValidateClassReferences.php` (line 22)
 
 `if (!class_exists($type->class))` fires for entry types whose `class` column is NULL — but the migration `2026_04_28_000001_make_entry_types_class_nullable.php` and `EntryTypeRegistry::instantiate()` explicitly support NULL (fall back to `GeneralEntryType`). The command therefore reports false positives any time a generic entry type exists. Skip rows where `$type->class` is empty.

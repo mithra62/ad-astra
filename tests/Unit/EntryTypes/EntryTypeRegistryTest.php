@@ -107,4 +107,28 @@ class EntryTypeRegistryTest extends TestCase
 
         $this->assertInstanceOf(AbstractEntryType::class, $instance);
     }
+
+    // -------------------------------------------------------------------------
+    // Cache convergence — resolveByHandle and resolveByRecord return same instance
+    // -------------------------------------------------------------------------
+
+    public function test_resolve_by_handle_and_resolve_by_record_return_same_instance(): void
+    {
+        $record = EntryType::factory()->create(['class' => GeneralEntryType::class]);
+
+        $byHandle = $this->registry->resolveByHandle($record->handle);
+        $byRecord = $this->registry->resolveByRecord($record);
+
+        $this->assertSame($byHandle, $byRecord);
+    }
+
+    public function test_resolve_by_record_then_by_handle_return_same_instance(): void
+    {
+        $record = EntryType::factory()->create(['class' => GeneralEntryType::class]);
+
+        $byRecord = $this->registry->resolveByRecord($record);
+        $byHandle = $this->registry->resolveByHandle($record->handle);
+
+        $this->assertSame($byRecord, $byHandle);
+    }
 }

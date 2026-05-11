@@ -6,6 +6,16 @@ use App\Models\Entry;
 use App\Models\EntryGroup;
 use App\Models\EntryType as EntryTypeRecord;
 
+/**
+ * Base class for all entry types.
+ *
+ * CONTRACT: concrete subclasses MUST NOT store per-call or per-request state on
+ * $this. The EntryTypeRegistry caches one instance per type for the lifetime of
+ * the process (singleton), so any instance property written during a lifecycle
+ * hook (beforeCreate, afterCreate, etc.) will bleed into subsequent requests.
+ * Keep hooks stateless — read from $data / $entry, return results, cause side
+ * effects via services, never via $this->someProperty = ….
+ */
 abstract class AbstractEntryType
 {
     public function __construct(protected EntryTypeRecord $record)

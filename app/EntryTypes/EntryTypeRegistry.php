@@ -54,12 +54,14 @@ class EntryTypeRegistry
 
     public function resolveByRecord(EntryTypeRecord $record): AbstractEntryType
     {
-        $id = $record->getKey();
+        $handle = $record->handle;
 
-        if (!isset($this->idCache[$id])) {
-            $this->idCache[$id] = $this->instantiate($record);
+        if (!isset($this->handleCache[$handle])) {
+            $instance = $this->instantiate($record);
+            $this->handleCache[$handle] = $instance;
+            $this->idCache[$record->getKey()] = $instance;
         }
 
-        return $this->idCache[$id];
+        return $this->handleCache[$handle];
     }
 }
