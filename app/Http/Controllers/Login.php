@@ -42,6 +42,6 @@ class Login extends Controller
 
         Auth::login($localUser, true);
 
-        return redirect($this->redirectTo ?? '/');
+        return redirect()->intended('/');
     }
 }

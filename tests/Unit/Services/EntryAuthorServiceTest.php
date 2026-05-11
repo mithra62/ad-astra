@@ -282,6 +282,39 @@ class EntryAuthorServiceTest extends TestCase
         $this->assertDatabaseHas('entry_authors', ['id' => $ea2->id, 'status' => 'active']);
     }
 
+    public function test_demote_touches_updated_at(): void
+    {
+        $user = User::factory()->create();
+        $ea = EntryAuthor::factory()->create(['user_id' => $user->id, 'status' => 'active']);
+
+        $originalUpdatedAt = $ea->updated_at;
+
+        $this->travel(2)->seconds();
+
+        $this->service->demote($user);
+
+        $this->assertGreaterThan(
+            $originalUpdatedAt,
+            $ea->fresh()->updated_at,
+            'demote() must update updated_at so cache/change-detection sees the demotion',
+        );
+    }
+
+    public function test_demote_fires_eloquent_updated_event(): void
+    {
+        $user = User::factory()->create();
+        EntryAuthor::factory()->create(['user_id' => $user->id, 'status' => 'active']);
+
+        $fired = false;
+        EntryAuthor::updated(function () use (&$fired) {
+            $fired = true;
+        });
+
+        $this->service->demote($user);
+
+        $this->assertTrue($fired, 'demote() must fire the Eloquent updated event so observers can react');
+    }
+
     // -------------------------------------------------------------------------
     // sync()
     // -------------------------------------------------------------------------

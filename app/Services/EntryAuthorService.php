@@ -62,8 +62,7 @@ class EntryAuthorService
      */
     public function demote(User $user): void
     {
-        EntryAuthor::where('user_id', $user->id)
-            ->update(['status' => 'disabled']);
+        $this->findByUser($user)?->update(['status' => 'disabled']);
     }
 
     /**

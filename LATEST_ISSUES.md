@@ -248,12 +248,12 @@ $user->oauthTokens()->provider($provider)->active()
 
 Each `revoke()` is its own UPDATE; on a noisy account this is N round-trips inside the same request. Use `$user->oauthTokens()->provider($provider)->active()->update(['revoked_at' => now()])` plus an event broadcast if revocation must be observable.
 
-### 3.9 `EntryAuthorService::demote` uses `update(...)` instead of model events
+### [RESOLVED] 3.9 `EntryAuthorService::demote` uses `update(...)` instead of model events
 **File:** `app/Services/EntryAuthorService.php` (line 65)
 
 `EntryAuthor::where('user_id', $user->id)->update(['status' => 'disabled']);` skips Eloquent observers / `updated_at` touch. If the Search Plan or audit log later wants to react to author demotion, this bypass is invisible. Prefer `each(fn ($a) => $a->update([...]))` or a dedicated event.
 
-### 3.10 `Login.php` references undefined `$this->redirectTo`
+### [RESOLVED] 3.10 `Login.php` references undefined `$this->redirectTo`
 **File:** `app/Http/Controllers/Login.php` (line 45)
 
 `return redirect($this->redirectTo ?? '/');` always evaluates the right-hand side because `redirectTo` is never declared on `Login` or its parent `Controller`. Under strict property access (`#[AllowDynamicProperties]` not set, PHP 8.2+ deprecation, future PHP 9 removal) this becomes an error. Either declare the property and load it from config, or drop the `??`.
