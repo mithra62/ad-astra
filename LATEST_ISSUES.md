@@ -345,7 +345,7 @@ The Unit suite (≈97 files) is reasonable; the **Feature** suite (7 files, incl
 4. **`EnforceUserStatusApi`** middleware — no unit or feature test exists.
 5. **Settings cache busting** — `SettingsResolverTest` verifies resolution but not the 1-hour cache invalidation on writes.
 6. **Bot-block flow** — once the middleware is wired up (1.8), add a test asserting POST without `__bb` returns 403 and POST with the right value succeeds and deletes the row.
-7. **Lifecycle hooks for every concrete `EntryType`** — there are unit tests for the type classes themselves, but no Feature tests confirm `beforeCreate`/`afterCreate`/`beforeUpdate`/`afterUpdate` are invoked end-to-end through `EntryService`.
+7. [RESOLVED] **Lifecycle hooks for every concrete `EntryType`** — there are unit tests for the type classes themselves, but no Feature tests confirm `beforeCreate`/`afterCreate`/`beforeUpdate`/`afterUpdate` are invoked end-to-end through `EntryService`. Added `tests/Stubs/SpyEntryType.php` (static-counter spy) and `tests/Feature/EntryTypeLifecycleTest.php` (10 tests covering invocation, mutation propagation, hook ordering).
 8. **`recordMetric` concurrency** — simulate the race by manually inserting a duplicate row inside a transaction and verifying the retry path increments cleanly.
 
 ---
