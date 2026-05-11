@@ -309,7 +309,7 @@ Pickers usually want the related user; consider `with('user')` to remove the ine
 
 The provider must be in `bootstrap/providers.php` for the `bb-field` singleton to bind. Worth a one-line confirmation; if it isn't, the `_bb.twig` partial throws "Target not found".
 
-### 4.8 Mixed Twig/Blade error views
+### [RESOLVED] 4.8 Mixed Twig/Blade error views
 **Path:** `resources/views/errors/*.blade.php`
 
 Twig is the templating language for this app, but `errors/404.blade.php`, `errors/500.blade.php`, etc. are Blade. Either convert to Twig for consistency or document that error pages are intentionally Blade because Laravel resolves them through the default loader.

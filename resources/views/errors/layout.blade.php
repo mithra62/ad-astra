@@ -1,3 +1,10 @@
+{{--
+    Error views are intentionally Blade, not Twig.
+    Laravel's exception handler renders these through its own internal path using
+    the Blade renderer directly. If TwigBridge fails to boot or a Twig template
+    throws, error pages must still render — Blade is always available as the
+    base renderer, so keeping error views in Blade is a defensive safety net.
+--}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
