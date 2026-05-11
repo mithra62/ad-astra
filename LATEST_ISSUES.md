@@ -263,7 +263,7 @@ Each `revoke()` is its own UPDATE; on a noisy account this is N round-trips insi
 
 Loops `each(fn(OauthToken $t) => $t->revoke())` while holding query results in memory. If a new OAuth token is issued during the loop it is missed. Wrap in `DB::transaction()` or do a single `update()`.
 
-### 3.12 Authentication middleware uses `Auth::user()->can(...)` without null-guard
+### [RESOLVED] 3.12 Authentication middleware uses `Auth::user()->can(...)` without null-guard
 **File:** `app/Http/Controllers/Controller.php` (line 29)
 
 If a route ever calls a controller method without the auth middleware applied (test, future direct dispatch, console command), `Auth::user()` is null and `->can()` throws. Defensive code: `Auth::user()?->can($permission) ?? false`.
@@ -299,12 +299,12 @@ The note in `CLAUDE.md` reads *"EntryResource exposes user-shaped fields; should
 
 Composer/autoload tolerates these on case-insensitive filesystems but ships broken on Linux for some files; rename and let the autoloader regenerate.
 
-### 4.6 `EntryAuthorService::findByUser()` does not eager-load the user
+### [NOT IMPLEMENTING]  4.6`EntryAuthorService::findByUser()` does not eager-load the user
 **File:** `app/Services/EntryAuthorService.php` (line 32)
 
 Pickers usually want the related user; consider `with('user')` to remove the inevitable N+1 in callers.
 
-### 4.7 `BotBlockServiceProvider` registered? Confirm
+### [RESOLVED] 4.7 `BotBlockServiceProvider` registered? Confirm
 **Search:** `grep -n BotBlockServiceProvider config/app.php bootstrap/providers.php`
 
 The provider must be in `bootstrap/providers.php` for the `bb-field` singleton to bind. Worth a one-line confirmation; if it isn't, the `_bb.twig` partial throws "Target not found".

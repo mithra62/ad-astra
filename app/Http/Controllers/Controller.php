@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Settings;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 abstract class Controller
 {
@@ -26,6 +26,6 @@ abstract class Controller
      */
     protected function can(string $permission): bool
     {
-        return Auth::user()->can($permission);
+        return Gate::allows($permission);
     }
 }
