@@ -207,12 +207,12 @@ The class name is also lowercase (`refreshTokens` instead of `RefreshTokens`), v
 
 The `sortDir` value is similarly unvalidated; non-`asc|desc` strings cause a SQL syntax error 500. Validate against `['asc', 'desc']`.
 
-### 3.3 `users` admin route ordering is fragile
+### [RESOLVED] 3.3 `users` admin route ordering is fragile
 **File:** `routes/admin.php`
 
 `Route::resource('users', User::class)` is registered between sets of token-related routes. `Route::get('users/layouts', …)` is registered *before* the resource (good) but the post-resource token routes `users/{id}/tokens/...` rely on path uniqueness rather than ordering — any future `users/{user}/tokens` resource would collide. Group all user/token routes under `Route::prefix('users')` for clarity.
 
-### 3.4 Missing `nullable()` on `api_logs.user_id`
+### [RESOLVED] 3.4 Missing `nullable()` on `api_logs.user_id`
 **File:** `database/migrations/2025_11_07_174041_create_api_log_table.php`
 
 `$table->foreignId('user_id')->constrained()->cascadeOnDelete();` cannot accept the `null` value `LogRequestResponse` will pass for unauthenticated requests (and the `__OA_Get` `/api/v1/account` route does not enforce auth before the middleware runs). Add `->nullable()` between `foreignId(...)` and `->constrained()`.

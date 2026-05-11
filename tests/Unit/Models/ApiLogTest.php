@@ -50,11 +50,18 @@ class ApiLogTest extends TestCase
         $this->assertEquals($user->id, $log->user->id);
     }
 
-    public function test_user_id_is_required_by_database(): void
+    public function test_user_id_accepts_a_valid_user(): void
     {
         $user = User::factory()->create();
         $log = ApiLog::factory()->create(['user_id' => $user->id]);
 
-        $this->assertNotNull($log->user_id);
+        $this->assertEquals($user->id, $log->user_id);
+    }
+
+    public function test_user_id_is_nullable_for_unauthenticated_requests(): void
+    {
+        $log = ApiLog::factory()->create(['user_id' => null]);
+
+        $this->assertNull($log->fresh()->user_id);
     }
 }
