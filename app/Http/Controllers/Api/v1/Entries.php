@@ -73,9 +73,10 @@ class Entries extends Controller
             $query->where(...$condition);
         }
 
-        if ($this->sort($request) && $this->sortDir($request)) {
-            $query->orderBy($this->sort($request), $this->sortDir($request));
-        }
+        $query->orderBy(
+            $this->sort($request, ['id', 'title', 'handle', 'published_at', 'created_at', 'updated_at']),
+            $this->sortDir($request),
+        );
 
         return new EntryCollection($query->paginate($this->limit($request)));
     }

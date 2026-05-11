@@ -68,9 +68,10 @@ class User extends Controller
             $query->where(...$condition);
         }
 
-        if ($this->sort($request) && $this->sortDir($request)) {
-            $query->orderBy($this->sort($request), $this->sortDir($request));
-        }
+        $query->orderBy(
+            $this->sort($request, ['id', 'name', 'email', 'created_at', 'updated_at']),
+            $this->sortDir($request),
+        );
 
         return new UserCollection($query->paginate($this->limit($request)));
     }

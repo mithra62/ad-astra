@@ -131,9 +131,10 @@ class Categories extends Controller
             $query->where(...$condition);
         }
 
-        if ($this->sort($request) && $this->sortDir($request)) {
-            $query->orderBy($this->sort($request), $this->sortDir($request));
-        }
+        $query->orderBy(
+            $this->sort($request, ['id', 'name', 'handle', 'created_at', 'updated_at']),
+            $this->sortDir($request),
+        );
 
         return new CategoryCollection($query->paginate($this->limit($request)));
     }

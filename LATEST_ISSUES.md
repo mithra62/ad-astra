@@ -195,12 +195,12 @@ The class name is also lowercase (`refreshTokens` instead of `RefreshTokens`), v
 
 ## 3. Medium Severity
 
-### 3.1 Two parallel `api_logs` pruning mechanisms
+### [RESOLVED] 3.1 Two parallel `api_logs` pruning mechanisms
 **Files:** `routes/console.php`, `app/Jobs/PruneApiLogs.php`
 
 `Schedule::command('model:prune', ['--model' => [ApiLog::class]])->dailyAt('02:00')` runs the prune command. `PruneApiLogs::handle()` *also* prunes and re-dispatches itself for 02:00 the next day. If both are active you double-prune every night, plus the jobs queue grows because `PruneApiLogs::dispatch()` chains forever even if the schedule already handled it. Pick one and document it.
 
-### 3.2 `Api\Controller::sort()` accepts arbitrary columns
+### [RESOLVED] 3.2 `Api\Controller::sort()` accepts arbitrary columns
 **File:** `app/Http/Controllers/Api/Controller.php` (lines 86–98)
 
 `$request->input('sort', 'id')` flows into `$query->orderBy($this->sort($request), …)` without a whitelist. Eloquent will happily order by `password`, `two_factor_secret`, `remember_token`, etc. — these are eager-loaded into a paginator and exposed via response headers/links. Even if the value never appears in the body, an attacker can use timing differentials (`ORDER BY two_factor_confirmed_at`) to enumerate accounts. Add a per-controller `$sortable = ['id', 'name', …]` allowlist.
@@ -217,7 +217,7 @@ The `sortDir` value is similarly unvalidated; non-`asc|desc` strings cause a SQL
 
 `$table->foreignId('user_id')->constrained()->cascadeOnDelete();` cannot accept the `null` value `LogRequestResponse` will pass for unauthenticated requests (and the `__OA_Get` `/api/v1/account` route does not enforce auth before the middleware runs). Add `->nullable()` between `foreignId(...)` and `->constrained()`.
 
-### 3.5 `entry_trees.uri` has both unique and index
+### [RESOLVED] 3.5 `entry_trees.uri` has both unique and index
 **File:** `database/migrations/2026_04_23_200641_create_entry_tree_table.php`
 
 ```php

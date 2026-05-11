@@ -61,9 +61,10 @@ class StatusGroups extends Controller
 
         $query = StatusGroup::withCount('statuses');
 
-        if ($this->sort($request) && $this->sortDir($request)) {
-            $query->orderBy($this->sort($request), $this->sortDir($request));
-        }
+        $query->orderBy(
+            $this->sort($request, ['id', 'name', 'created_at', 'updated_at']),
+            $this->sortDir($request),
+        );
 
         return new StatusGroupCollection($query->paginate($this->limit($request)));
     }

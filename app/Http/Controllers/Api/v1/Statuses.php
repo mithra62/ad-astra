@@ -79,9 +79,10 @@ class Statuses extends Controller
             $query->where(...$condition);
         }
 
-        if ($this->sort($request) && $this->sortDir($request)) {
-            $query->orderBy($this->sort($request), $this->sortDir($request));
-        }
+        $query->orderBy(
+            $this->sort($request, ['id', 'name', 'handle', 'sort_order', 'created_at', 'updated_at']),
+            $this->sortDir($request),
+        );
 
         return new StatusCollection($query->paginate($this->limit($request)));
     }

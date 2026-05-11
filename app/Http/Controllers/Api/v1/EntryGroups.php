@@ -60,9 +60,10 @@ class EntryGroups extends Controller
 
         $query = EntryGroup::withCount(['entries', 'entryTypes']);
 
-        if ($this->sort($request) && $this->sortDir($request)) {
-            $query->orderBy($this->sort($request), $this->sortDir($request));
-        }
+        $query->orderBy(
+            $this->sort($request, ['id', 'name', 'handle', 'created_at', 'updated_at']),
+            $this->sortDir($request),
+        );
 
         return new EntryGroupCollection($query->paginate($this->limit($request)));
     }

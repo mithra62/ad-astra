@@ -36,7 +36,6 @@ return new class extends Migration {
 
             $table->unique(['parent_id', 'handle']);
             $table->index(['parent_id', 'sort_order']);
-            $table->index('uri');
         });
     }
 

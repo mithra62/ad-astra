@@ -85,9 +85,10 @@ class CategoryGroups extends Controller
 
         $query = CategoryGroupModel::withCount('categories');
 
-        if ($this->sort($request) && $this->sortDir($request)) {
-            $query->orderBy($this->sort($request), $this->sortDir($request));
-        }
+        $query->orderBy(
+            $this->sort($request, ['id', 'name', 'created_at', 'updated_at']),
+            $this->sortDir($request),
+        );
 
         return new CategoryGroupCollection($query->paginate($this->limit($request)));
     }

@@ -24,10 +24,6 @@ class PruneApiLogs implements ShouldQueue
      */
     public function handle(): void
     {
-        ApiLog::pruneAll();
-
-        // Re-queue for 02:00 tomorrow regardless of when this run started,
-        // keeping the execution window consistent day-to-day.
-        static::dispatch()->delay(now()->addDay()->setTime(2, 0));
+        (new ApiLog)->pruneAll();
     }
 }

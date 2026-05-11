@@ -83,9 +83,10 @@ abstract class Controller extends DefaultController
      * @param Request $request
      * @return string
      */
-    protected function sort(Request $request): string
+    protected function sort(Request $request, array $allowed = ['id', 'created_at', 'updated_at']): string
     {
-        return $request->input('sort', 'id');
+        $column = $request->input('sort', 'id');
+        return in_array($column, $allowed, strict: true) ? $column : 'id';
     }
 
     /**
@@ -94,7 +95,8 @@ abstract class Controller extends DefaultController
      */
     protected function sortDir(Request $request): string
     {
-        return $request->input('direction', 'asc');
+        $dir = strtolower((string) $request->input('direction', 'asc'));
+        return in_array($dir, ['asc', 'desc'], strict: true) ? $dir : 'asc';
     }
 
     /**

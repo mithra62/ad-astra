@@ -20,7 +20,7 @@ class ValidateClassReferences extends Command
         $this->info('Checking entry_types.class …');
         EntryType::all()->each(function (EntryType $type) use (&$errors) {
             if (empty($type->class)) {
-                $this->line("  <fg=yellow>–</> {$type->handle} → (no class; GeneralEntryType will be used)");
+                $this->comment("  - {$type->handle}: no class set; GeneralEntryType will be used");
                 return;
             }
 
