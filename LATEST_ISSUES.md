@@ -352,11 +352,11 @@ The Unit suite (≈97 files) is reasonable; the **Feature** suite (7 files, incl
 
 ## 6. Suggested New Seeders
 
-* **`EnvAdminSeeder`** — replace the current hard-coded `eric@mithra62.com` block in `UsersSeeder` with a seeder that reads `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` from `.env`. Refuse to run when those are unset *and* the environment is `production`.
-* **`UserSettingsDomainSeeder`** — once 2.6 is fixed, seed `users.default_status` and `users.social_default_status` so the admin UI exposes them.
-* **`HomePageSeeder`** — create a single root `EntryTree` node with `is_home = true` pointing at a real entry. The current ExampleTest passes only because the catch-all falls through to `templates::site.index`; with a real home node the test will exercise the entry-tree driver path.
-* **`MediaTransformationSeeder`** — `media_transformations` table exists but no rows are seeded. Provide a `thumb` and `web` default so the media UI has something to render against.
-* **`SampleApiTokenSeeder`** *(local/testing only)* — create a Sanctum personal access token for the seeded super admin and print the plain-text token. Saves every developer 30 seconds when probing the API.
+* [RESOLVED] **`EnvAdminSeeder`** — Added production guard to `UsersSeeder` (warns and returns early in production). Fixed `EntrySeeder` hardcoded `eric@mithra62.com` to use `config('app.default_dev_email')`. No new seeder needed — the existing `UsersSeeder` already reads credentials from `config('app.default_dev_*')`.
+* [NOT IMPLEMENTING] **`UserSettingsDomainSeeder`** — Blocked by issue 2.6. `SettingsDomainSeeder` already seeds all config-defined defaults; this item adds no value until 2.6 is resolved.
+* [NOT IMPLEMENTING] **`HomePageSeeder`** — Deferred; requires a design decision on which entry group/type hosts the home page.
+* [NOT IMPLEMENTING] **`MediaTransformationSeeder`** — `media_transformations` rows are per-file transform records (keyed by `media_id`), not configuration presets. Nothing meaningful to seed without real media files.
+* [RESOLVED] **`SampleApiTokenSeeder`** *(local/testing only)* — Added `database/seeders/SampleApiTokenSeeder.php`. Revokes any existing dev token, creates a fresh Sanctum PAT, and prints the plain-text value to the console. Wired into the local/testing block of `DatabaseSeeder`.
 
 ---
 
@@ -364,12 +364,12 @@ The Unit suite (≈97 files) is reasonable; the **Feature** suite (7 files, incl
 
 The codebase has plenty of services but a handful of small helpers would pay back immediately:
 
-* **`current_user_setting(string $domain, string $handle, mixed $default = null)`** — wraps `app(Settings::class)->get(...)` against the auth user. Currently every controller does the wrapping by hand.
-* **`entry_url(Entry $entry): ?string`** — resolves the public URL by looking up the entry's tree node URI, falling back to the configured base path. Right now templates reach into `$entry->entryTree?->url` directly, which couples views to the model graph.
-* **`field_value(string $modelHandle, string $fieldHandle, mixed $default = null)`** — Twig-friendly accessor. The `Fieldable` trait exposes `field()` but that requires a model instance; templates often want a one-liner.
-* **`is_super_admin(?User $user = null): bool`** — wrap `Gate::before` semantics so views and controllers stop calling `Auth::user()->hasRole('super admin')` directly (search the codebase: that string appears in seven places).
-* **`media_url(int|Media|null $media, string $variant = 'web'): string`** — once `MediaStorageService` is fully wired, expose a Twig-callable that returns either the variant URL or a sane placeholder.
-* **`api_log(...)`** *(internal)* — encapsulate the LogRequestResponse INSERT so the missing `response_payload` (1.3) is fixed in one place rather than scattered across the middleware.
+* [NOT IMPLEMENTING] **`current_user_setting()`** — Settings API is already ergonomic. No scattered pattern of per-user settings lookups in controllers found.
+* [NOT IMPLEMENTING] **`entry_url()`** — No templates currently access `$entry->entryTree?->uri` directly; pattern isn't a problem yet. When needed, implement as a Twig extension, not a PHP global.
+* [NOT IMPLEMENTING] **`field_value()`** — Signature doesn't make sense. Twig already calls `entry.field('handle')` natively via PHP method dispatch.
+* [NOT IMPLEMENTING] **`is_super_admin()`** — `hasRole('super admin')` appears in one PHP location (AppServiceProvider, where it belongs) and only as a string comparison on role names in templates. No current-user pattern to eliminate.
+* [NOT IMPLEMENTING] **`media_url()`** — Blocked by media refactor plan.
+* [NOT IMPLEMENTING] **`api_log()` / `response_payload`** — Decided against storing response payloads entirely: data is reconstructable on demand, adds storage cost for 90-day retention, and the forensic value is in the request, not the response. The dead `summarizeResponse()` method remains in `LogRequestResponse` as reference for targeted future debugging if needed.
 
 ---
 

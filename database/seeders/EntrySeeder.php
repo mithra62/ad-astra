@@ -19,7 +19,7 @@ class EntrySeeder extends Seeder
     {
         // Look up the canonical seed user by email rather than position, so the
         // seeder stays correct regardless of insertion order.
-        $author = User::where('email', 'eric@mithra62.com')->firstOrFail();
+        $author = User::where('email', config('app.default_dev_email'))->firstOrFail();
 
         // Guard: UsersSeeder must have run first and promoted this user to author.
         // If this fails, check the DatabaseSeeder run order.

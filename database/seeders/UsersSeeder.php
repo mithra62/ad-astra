@@ -17,6 +17,11 @@ class UsersSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command->warn('UsersSeeder: skipped in production. Create the admin user manually.');
+            return;
+        }
+
         // User::factory(10)->create();
 
         $user = User::factory()->create([
