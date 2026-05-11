@@ -167,7 +167,7 @@ A user whose suspension expired but who is also `locked_until = future` still ge
 * Add `SoftDeletes` to `User` and migrate the column, or
 * Pre-detach / reassign in `UserService::delete()` and surface a 422 when the user owns content.
 
-### 2.11 `recordMetric` race retry loop assumes specific SQLSTATE
+### [RESOLVED] 2.11 `recordMetric` race retry loop assumes specific SQLSTATE
 **File:** `app/Services/EntryService.php` (lines 94–129) and `app/Repositories/EntryRepository.php::upsertFieldValue` (lines 231–253)
 
 `if ($e->getCode() !== '23000')` is correct on PDO MySQL/Postgres but other drivers may surface different codes. More importantly, both methods catch the QueryException and retry without `DB::transaction(...)` around the *whole* SELECT-then-INSERT/UPDATE sequence, which means repeated retries can interleave. Use `Model::upsert()` (Laravel 9+) or wrap in `DB::transaction(fn() => …, attempts: 3)`.

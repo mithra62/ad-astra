@@ -72,6 +72,17 @@ class UserStatusModelTest extends TestCase
         $this->assertTrue($user->canAccessSystem());
     }
 
+    public function test_expired_suspension_with_active_lock_cannot_access_system(): void
+    {
+        $user = User::factory()->create([
+            'status'          => UserStatus::SUSPENDED,
+            'suspended_until' => Carbon::now()->subMinute(), // suspension expired
+            'locked_until'    => Carbon::now()->addHour(),   // but still locked
+        ]);
+
+        $this->assertFalse($user->canAccessSystem());
+    }
+
     // -------------------------------------------------------------------------
     // isLocked()
     // -------------------------------------------------------------------------
@@ -146,15 +157,35 @@ class UserStatusModelTest extends TestCase
         $this->assertSame('account_banned', $user->accessDeniedReason());
     }
 
-    public function test_access_denied_reason_returns_account_suspended(): void
+    public function test_access_denied_reason_returns_account_suspended_until(): void
     {
         $user = User::factory()->suspended()->create();
+        $this->assertSame('account_suspended_until', $user->accessDeniedReason());
+    }
+
+    public function test_access_denied_reason_returns_account_suspended_when_no_expiry(): void
+    {
+        $user = User::factory()->create([
+            'status'          => UserStatus::SUSPENDED,
+            'suspended_until' => null,
+        ]);
         $this->assertSame('account_suspended', $user->accessDeniedReason());
     }
 
     public function test_access_denied_reason_returns_account_locked_for_locked_active_user(): void
     {
         $user = User::factory()->active()->locked()->create();
+        $this->assertSame('account_locked', $user->accessDeniedReason());
+    }
+
+    public function test_access_denied_reason_returns_account_locked_when_suspension_expired_but_lock_active(): void
+    {
+        $user = User::factory()->create([
+            'status'          => UserStatus::SUSPENDED,
+            'suspended_until' => Carbon::now()->subMinute(), // suspension expired
+            'locked_until'    => Carbon::now()->addHour(),   // but still locked
+        ]);
+
         $this->assertSame('account_locked', $user->accessDeniedReason());
     }
 

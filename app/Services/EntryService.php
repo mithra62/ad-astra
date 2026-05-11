@@ -11,7 +11,6 @@ use App\Models\EntryTree;
 use App\Models\FieldLayout;
 use App\Repositories\EntryRepository;
 use Carbon\Carbon;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -102,38 +101,16 @@ class EntryService extends AbstractService
     {
         $recordedDate = ($date ?? today())->toDateString();
 
-        $existing = EntryMetric::where('entry_id', $entry->id)
+        EntryMetric::upsert(
+            [['entry_id' => $entry->id, 'metric' => $metric, 'value' => $value, 'recorded_date' => $recordedDate]],
+            ['entry_id', 'metric', 'recorded_date'],
+            ['value' => DB::raw('value + ' . (int) $value)],
+        );
+
+        return EntryMetric::where('entry_id', $entry->id)
             ->where('metric', $metric)
             ->whereDate('recorded_date', $recordedDate)
-            ->first();
-
-        if ($existing) {
-            $existing->increment('value', $value);
-            return $existing->fresh();
-        }
-
-        try {
-            return EntryMetric::create([
-                'entry_id'      => $entry->id,
-                'metric'        => $metric,
-                'value'         => $value,
-                'recorded_date' => $recordedDate,
-            ]);
-        } catch (QueryException $e) {
-            // SQLSTATE 23000: two concurrent requests both saw no row and raced
-            // to INSERT. Retry as an increment — the row is now guaranteed to exist.
-            if ($e->getCode() !== '23000') {
-                throw $e;
-            }
-
-            $row = EntryMetric::where('entry_id', $entry->id)
-                ->where('metric', $metric)
-                ->whereDate('recorded_date', $recordedDate)
-                ->firstOrFail();
-
-            $row->increment('value', $value);
-            return $row->fresh();
-        }
+            ->firstOrFail();
     }
 
     /**

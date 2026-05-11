@@ -2,8 +2,10 @@
 
 namespace Tests\Unit\Services;
 
+use App\Models\Entry;
 use App\Models\EntryAuthor;
 use App\Models\Role;
+use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use App\Models\User\OauthToken;
 use App\Services\UserService;
@@ -471,6 +473,54 @@ class UserServiceTest extends TestCase
         $result = $this->service->delete($user);
 
         $this->assertTrue($result);
+    }
+
+    public function test_delete_throws_when_user_has_created_entries(): void
+    {
+        $user = User::factory()->create();
+        Entry::factory()->create(['created_by_user_id' => $user->id]);
+
+        $this->expectException(ValidationException::class);
+
+        $this->service->delete($user);
+    }
+
+    public function test_delete_does_not_remove_user_when_they_have_created_entries(): void
+    {
+        $user = User::factory()->create();
+        Entry::factory()->create(['created_by_user_id' => $user->id]);
+
+        try {
+            $this->service->delete($user);
+        } catch (ValidationException) {
+            // expected
+        }
+
+        $this->assertDatabaseHas('users', ['id' => $user->id]);
+    }
+
+    public function test_delete_throws_when_user_is_an_entry_author(): void
+    {
+        $user = User::factory()->create();
+        EntryAuthor::factory()->create(['user_id' => $user->id]);
+
+        $this->expectException(ValidationException::class);
+
+        $this->service->delete($user);
+    }
+
+    public function test_delete_does_not_remove_user_when_they_are_an_entry_author(): void
+    {
+        $user = User::factory()->create();
+        EntryAuthor::factory()->create(['user_id' => $user->id]);
+
+        try {
+            $this->service->delete($user);
+        } catch (ValidationException) {
+            // expected
+        }
+
+        $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
     public function test_assign_roles_adds_role_to_user(): void
