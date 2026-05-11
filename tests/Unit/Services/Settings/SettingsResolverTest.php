@@ -285,6 +285,84 @@ class SettingsResolverTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // Cache invalidation — read → write → read (the real-world sequence)
+    //
+    // These tests verify the end-to-end contract: a get() call that populates
+    // the cache followed by a set()/setMany() write must return the new value
+    // on the next get(), not the stale cached one.
+    // -------------------------------------------------------------------------
+
+    public function test_get_returns_new_system_value_after_set(): void
+    {
+        $this->makeDomain('rw1');
+        SettingValue::create(['domain' => 'rw1', 'field_handle' => 'rw1_timezone', 'user_id' => null, 'value_text' => 'UTC']);
+
+        // Prime the cache.
+        $this->assertSame('UTC', $this->settings->get('rw1', 'rw1_timezone'));
+
+        // Write a new value — must bust the cache.
+        $this->settings->set('rw1', 'rw1_timezone', 'Europe/Paris');
+
+        // Next read must reflect the DB update, not the stale cached entry.
+        $this->assertSame('Europe/Paris', $this->settings->get('rw1', 'rw1_timezone'));
+    }
+
+    public function test_get_returns_new_user_value_after_set(): void
+    {
+        $this->makeDomain('rw2');
+        $user = User::factory()->create();
+
+        SettingValue::create(['domain' => 'rw2', 'field_handle' => 'rw2_timezone', 'user_id' => $user->id, 'value_text' => 'UTC']);
+
+        // Prime the cache with the old user override.
+        $this->assertSame('UTC', $this->settings->get('rw2', 'rw2_timezone', null, $user));
+
+        // Write a new user override.
+        $this->settings->set('rw2', 'rw2_timezone', 'Asia/Tokyo', $user);
+
+        // Must not serve the stale cache.
+        $this->assertSame('Asia/Tokyo', $this->settings->get('rw2', 'rw2_timezone', null, $user));
+    }
+
+    public function test_get_returns_new_system_values_after_set_many(): void
+    {
+        $this->makeDomain('rw3');
+        SettingValue::create(['domain' => 'rw3', 'field_handle' => 'rw3_timezone', 'user_id' => null, 'value_text' => 'UTC']);
+        SettingValue::create(['domain' => 'rw3', 'field_handle' => 'rw3_count',    'user_id' => null, 'value_integer' => 5]);
+
+        // Prime the cache.
+        $this->settings->system('rw3');
+
+        // Bulk write.
+        $this->settings->setMany('rw3', ['rw3_timezone' => 'America/Chicago', 'rw3_count' => 99]);
+
+        $result = $this->settings->system('rw3');
+        $this->assertSame('America/Chicago', $result['rw3_timezone']);
+        $this->assertSame(99, $result['rw3_count']);
+    }
+
+    public function test_user_override_does_not_poison_system_cache(): void
+    {
+        $this->makeDomain('rw4');
+        $user = User::factory()->create();
+
+        SettingValue::create(['domain' => 'rw4', 'field_handle' => 'rw4_timezone', 'user_id' => null, 'value_text' => 'UTC']);
+
+        // Prime both system and user caches.
+        $this->settings->system('rw4');
+        $this->settings->all('rw4', $user);
+
+        // Write a user override — must only bust the user cache, not the system cache.
+        $this->settings->set('rw4', 'rw4_timezone', 'Pacific/Auckland', $user);
+
+        // System value must remain unchanged.
+        $this->assertSame('UTC', $this->settings->system('rw4')['rw4_timezone']);
+
+        // User read must reflect the override.
+        $this->assertSame('Pacific/Auckland', $this->settings->get('rw4', 'rw4_timezone', null, $user));
+    }
+
+    // -------------------------------------------------------------------------
     // bust() and bustDomain()
     // -------------------------------------------------------------------------
 
