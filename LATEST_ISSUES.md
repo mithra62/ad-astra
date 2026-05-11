@@ -158,7 +158,7 @@ A user whose suspension expired but who is also `locked_until = future` still ge
 
 `accessDeniedReason()` then has the inverse inconsistency for users with status SUSPENDED and `suspended_until = null` — `canAccessSystem()` returns false but no human-readable reason is wired specifically for "suspended without expiry".
 
-### 2.10 `users.created_by_user_id` blocks user deletion silently
+### [RESOLVED] 2.10 `users.created_by_user_id` blocks user deletion silently
 **File:** `database/migrations/2026_04_18_000009_create_entries_table.php`
 
 `created_by_user_id` is `restrictOnDelete()` and there is no soft-delete trait on `User`. `UserService::delete()` simply calls `$user->delete()`; if the user authored any entry the FK throws and the controller surfaces a 500 to the operator. Either:

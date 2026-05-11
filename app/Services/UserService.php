@@ -6,11 +6,14 @@ use App\Enums\UserStatus;
 use App\Events\NewSocialUserRegistered;
 use App\Events\UserLockChanged;
 use App\Events\UserStatusChanged;
+use App\Models\Entry;
+use App\Models\EntryAuthor;
 use App\Models\User;
 use App\Models\User\OauthToken;
 use App\Settings;
 use App\Traits\PersistsFieldValues;
 use App\Services\EntryAuthorService;
+use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Database\Eloquent\Collection;
@@ -377,7 +380,16 @@ class UserService
 
     public function delete(User $user): bool
     {
-        return (bool)$user->delete();
+        $hasCreatedEntries = Entry::where('created_by_user_id', $user->id)->exists();
+        $hasAuthoredEntries = EntryAuthor::where('user_id', $user->id)->exists();
+
+        if ($hasCreatedEntries || $hasAuthoredEntries) {
+            throw ValidationException::withMessages([
+                'user' => 'This user has associated content and cannot be deleted. Reassign or remove their entries first.',
+            ]);
+        }
+
+        return (bool) $user->delete();
     }
 
     /**
