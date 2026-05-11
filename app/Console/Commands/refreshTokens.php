@@ -4,21 +4,11 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
-class refreshTokens extends Command
+class RefreshTokens extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'app:refresh-tokens';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Command description';
+    protected $description = 'Refresh expiring OAuth tokens';
 
     /**
      * Execute the console command.

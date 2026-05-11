@@ -184,7 +184,7 @@ Caches also drift: `resolveByHandle()` populates both `handleCache` and `idCache
 
 `if (!class_exists($type->class))` fires for entry types whose `class` column is NULL — but the migration `2026_04_28_000001_make_entry_types_class_nullable.php` and `EntryTypeRegistry::instantiate()` explicitly support NULL (fall back to `GeneralEntryType`). The command therefore reports false positives any time a generic entry type exists. Skip rows where `$type->class` is empty.
 
-### 2.14 `app:refresh-tokens` artisan command is empty scaffold
+### [RESOLVED] 2.14 `app:refresh-tokens` artisan command is empty scaffold
 **File:** `app/Console/Commands/refreshTokens.php`
 
 `handle()` body is one comment block of pseudo-code; nothing executes. The command is registered automatically by Laravel discovery so operators can call it and get silent success. Either implement using `OauthToken::active()->each(fn()=>$svc->tryRefresh($t))` (the comment shows the intended call) or remove the command.
@@ -258,7 +258,7 @@ Each `revoke()` is its own UPDATE; on a noisy account this is N round-trips insi
 
 `return redirect($this->redirectTo ?? '/');` always evaluates the right-hand side because `redirectTo` is never declared on `Login` or its parent `Controller`. Under strict property access (`#[AllowDynamicProperties]` not set, PHP 8.2+ deprecation, future PHP 9 removal) this becomes an error. Either declare the property and load it from config, or drop the `??`.
 
-### 3.11 `User\OauthToken` revocation race
+### [RESOLVED] 3.11 `User\OauthToken` revocation race
 **File:** `app/Services/UserService.php::revokeAllOauthTokens` (lines 552–561)
 
 Loops `each(fn(OauthToken $t) => $t->revoke())` while holding query results in memory. If a new OAuth token is issued during the loop it is missed. Wrap in `DB::transaction()` or do a single `update()`.

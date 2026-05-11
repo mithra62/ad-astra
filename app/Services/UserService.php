@@ -19,6 +19,7 @@ use DateTime;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
@@ -483,15 +484,17 @@ class UserService
      */
     public function upsertOauthToken(User $user, string $provider, array $data): OauthToken
     {
-        // Revoke existing active tokens for this provider in a single UPDATE.
-        // Bypasses Eloquent model events intentionally — no listeners exist on
-        // OauthToken. If that changes, dispatch a domain event from here instead.
-        $user->oauthTokens()->provider($provider)->active()
-            ->update(['revoked_at' => now()]);
+        return DB::transaction(function () use ($user, $provider, $data): OauthToken {
+            // Revoke existing active tokens for this provider in a single UPDATE.
+            // Bypasses Eloquent model events intentionally — no listeners exist on
+            // OauthToken. If that changes, dispatch a domain event from here instead.
+            $user->oauthTokens()->provider($provider)->active()
+                ->update(['revoked_at' => now()]);
 
-        return $user->oauthTokens()->create(
-            array_merge($data, ['provider' => $provider])
-        );
+            return $user->oauthTokens()->create(
+                array_merge($data, ['provider' => $provider])
+            );
+        });
     }
 
     // -------------------------------------------------------------------------
