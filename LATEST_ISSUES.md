@@ -228,7 +228,7 @@ $table->index('uri');
 
 Unique constraints already create a backing index in MySQL/Postgres. The second `index('uri')` is wasteful and slows writes. Remove it.
 
-### 3.6 `__pending__<uniqid>` URI placeholder leaks on rare failures
+### [RESOLVED] 3.6 `__pending__<uniqid>` URI placeholder leaks on rare failures
 **File:** `app/Services/EntryService.php` (line 337)
 
 `createTreeNode` inserts a row with `'uri' => '__pending__' . uniqid()` then immediately rebuilds and saves the real URI. The wrapping `DB::transaction(...)` covers normal aborts, but if the second `save()` succeeds but `treeBuildUri` throws asynchronously (e.g. observer side effect), the placeholder URI is committed. Build the URI before the first `create()`, or compute the URI eagerly and skip the placeholder.

@@ -314,19 +314,22 @@ class EntryService extends AbstractService
             $this->treeAssertValidPlacement($parent, $isHome);
             $this->treeAssertUniqueHandleWithinParent($normalizedHandle, $parent);
 
-            $node = EntryTree::create([
-                'entry_id' => $entry->id,
-                'parent_id' => $parent?->id,
-                'handle' => $normalizedHandle,
-                'uri' => '__pending__' . uniqid(),
-                'depth' => $parent ? $parent->depth + 1 : 0,
-                'sort_order' => $this->treeNextSortOrder($parent),
-                'template' => $template,
+            $provisional = new EntryTree([
+                'handle'  => $normalizedHandle,
                 'is_home' => $isHome,
             ]);
+            $provisional->setRelation('parent', $parent);
 
-            $node->uri = $this->treeBuildUri($node);
-            $node->save();
+            $node = EntryTree::create([
+                'entry_id'   => $entry->id,
+                'parent_id'  => $parent?->id,
+                'handle'     => $normalizedHandle,
+                'uri'        => $this->treeBuildUri($provisional),
+                'depth'      => $parent ? $parent->depth + 1 : 0,
+                'sort_order' => $this->treeNextSortOrder($parent),
+                'template'   => $template,
+                'is_home'    => $isHome,
+            ]);
 
             return $node->fresh(['entry.entryType', 'parent']);
         });
