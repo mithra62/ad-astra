@@ -54,10 +54,10 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password'          => 'hashed',
-        'suspended_until'   => 'datetime',
-        'banned_at'         => 'datetime',
-        'locked_until'      => 'datetime',
+        'password' => 'hashed',
+        'suspended_until' => 'datetime',
+        'banned_at' => 'datetime',
+        'locked_until' => 'datetime',
     ];
 
     // -------------------------------------------------------------------------
@@ -69,22 +69,21 @@ class User extends Authenticatable
      *
      * Checks both the administrative status and the parallel lock flag.
      * Auto-expiry for suspended_until and locked_until is handled here at
-     * runtime — no cron required.
+     * runtime.
      */
     public function canAccessSystem(): bool
     {
-        // Suspended accounts regain access once the suspension window passes.
+        // Suspended accounts regain access once the suspension window passes,
+        // but a parallel lock must also have expired before granting access.
         if (
             $this->status === UserStatus::SUSPENDED
             && $this->suspended_until !== null
             && $this->suspended_until->isPast()
         ) {
-            // Treat as active for access purposes; UserService will clean up
-            // the column on next explicit status change.
-            return true;
+            return !$this->isLocked();
         }
 
-        if (! in_array($this->status, [UserStatus::ACTIVE, UserStatus::SUSPENDED], true)) {
+        if (!in_array($this->status, [UserStatus::ACTIVE, UserStatus::SUSPENDED], true)) {
             // inactive, pending, banned — all blocked.
             return false;
         }
@@ -137,16 +136,15 @@ class User extends Authenticatable
             return null;
         }
 
-        if ($this->isLocked()) {
-            return 'account_locked';
-        }
-
-        return match ($this->status) {
-            UserStatus::INACTIVE  => 'account_inactive',
-            UserStatus::PENDING   => 'account_pending',
-            UserStatus::SUSPENDED => 'account_suspended',
-            UserStatus::BANNED    => 'account_banned',
-            default               => 'account_inactive',
+        return match (true) {
+            $this->isLocked() => 'account_locked',
+            $this->status === UserStatus::INACTIVE => 'account_inactive',
+            $this->status === UserStatus::PENDING => 'account_pending',
+            $this->status === UserStatus::BANNED => 'account_banned',
+            $this->status === UserStatus::SUSPENDED
+            && $this->suspended_until !== null => 'account_suspended_until',
+            $this->status === UserStatus::SUSPENDED => 'account_suspended',
+            default => 'account_inactive',
         };
     }
 
@@ -198,7 +196,7 @@ class User extends Authenticatable
     public function setAvatar(Media $media): void
     {
         $existing = $this->directMedia()
-            ->whereHas('library', fn ($q) => $q->where('handle', 'avatars'))
+            ->whereHas('library', fn($q) => $q->where('handle', 'avatars'))
             ->get();
 
         foreach ($existing as $old) {

@@ -138,14 +138,14 @@ These keys are declared but nothing in `app/` references them:
 
 Either wire each into the relevant service (e.g. `MediaStorageService`, mail config sender, `EntryRepository::applyStatus()`) or remove from settings so the admin UI does not advertise non-functional knobs.
 
-### 2.8 `EntryQueryBuilder` is missing `whereField()` advertised in `CLAUDE.md`
+### 2.8 [RESOLVED] `EntryQueryBuilder` is missing `whereField()` advertised in `CLAUDE.md`
 **File:** `app/Builders/EntryQueryBuilder.php`
 
 `CLAUDE.md` lists `whereField()` as part of the fluent API, but the builder only has `inGroup`, `ofType`, `published`, `withStatus`, `withAuthor`, `withCategory`, `where`, and `orderBy`. Either drop the docs claim or add the method (likely a join through `field_values` keyed on field handle).
 
 The injected `EntryRepository $repository` is also unused inside the builder (line 17). Either remove the dependency or push the field eager-load list onto the repository for centralisation.
 
-### 2.9 `User::canAccessSystem()` does not check the lock when auto-expiring a suspension
+### [RESOLVED] 2.9 `User::canAccessSystem()` does not check the lock when auto-expiring a suspension
 **File:** `app/Models/User.php` (lines 74–103)
 
 ```php
