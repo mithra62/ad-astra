@@ -4,6 +4,14 @@ _Generated 2026-05-12. Verified against current codebase._
 
 ---
 
+## Current Foundation Status
+
+The native Media and Media Library layer is complete and in testing. This document is a follow-up plan for adding status governance to that completed foundation.
+
+For the operating overview of the implemented layer, see `docs/MEDIA_LAYER_OVERVIEW.md`.
+
+---
+
 ## Context
 
 Entries already carry a status layer: each `EntryGroup` owns a `StatusGroup` (the palette of available statuses), and each `Entry` stores `status_id`, `status_handle`, and `status_is_public` (the last two denormalized for index-backed filtering without joins). This plan replicates that exact pattern for media.

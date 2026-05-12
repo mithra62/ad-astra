@@ -191,15 +191,15 @@ EntryGroup        — owns a FieldLayout, a StatusGroup, plus polymorphic
               ├── categories        — polymorphic M2M (categorizables)
               └── EntryTree         — optional hierarchical URI tree node
 
-Media\Library     — upload container (adapter, allowed types, max size).
-                    Owns polymorphic CategoryGroups and FieldGroups.
-  └── Media       — extends Spatie MediaLibrary BaseMedia; has HasTags,
-                    categories() morphToMany, and can be given the Fieldable
-                    trait for custom field values (see dedicated section below)
+Media\Library     — native upload container (adapter, allowed types, max size).
+                    Owns polymorphic CategoryGroups, FieldGroups, and optional
+                    FieldLayout.
+  └── Media       — native file record with Fieldable, transformations,
+                    categories() morphToMany, storage helpers, and soft deletes
 
 UserSchema        — singleton (id=1) that owns a single FieldLayout and
                     one or more FieldGroups for ALL users
-  └── User        — uses Fieldable, HasRoles (Spatie), HasTags (Spatie),
+  └── User        — uses Fieldable, HasRoles (Spatie),
                     HasApiTokens (Sanctum), TwoFactorAuthenticatable (Fortify),
                     Notifiable; OAuth tokens via OauthToken HasMany;
                     account access controlled by five status values
@@ -366,8 +366,8 @@ Always rely on `$model->getMorphClass()` for new writes.
 
 The system uses **Spatie Permission** (`spatie/laravel-permission`) with the
 `HasRoles` trait on `User`. The `User` model also pulls in `Notifiable`,
-`HasApiTokens` (Sanctum), `HasTags` (Spatie Tags),
-`TwoFactorAuthenticatable` (Fortify), and the project's `Fieldable` trait so
+`HasApiTokens` (Sanctum), `TwoFactorAuthenticatable` (Fortify), and the
+project's `Fieldable` trait so
 users can store custom field values polymorphically.
 
 ### Built-in Roles
@@ -2380,27 +2380,27 @@ $entry->delete();
 
 ## Media Library
 
-Media is built on `spatie/laravel-medialibrary`, with project-specific
-`Media\Library` rows acting as upload containers. `App\Models\Media` extends
-Spatie's base media model and adds tags, a `media_library()` relation, and
-polymorphic categories.
+The native Media layer is complete and in testing. Media is handled by first-party
+Laravel models rather than Spatie MediaLibrary. See
+`docs/MEDIA_LAYER_OVERVIEW.md` for the detailed operating outline.
 
 ### Libraries
 
-`media_libraries` stores the admin-defined upload containers:
+`media_libraries` stores admin-defined upload containers:
 
 | Column             | Purpose                                      |
 |--------------------|----------------------------------------------|
-| `name` / `handle`  | Human name and collection handle             |
+| `name` / `handle`  | Human name and unique library handle         |
+| `field_layout_id`  | Optional layout for custom media fields      |
 | `adapter`          | Storage disk/adapter name used during upload |
 | `adapter_settings` | JSON settings for adapter-specific behavior  |
-| `allowed_types`    | JSON list of allowed file types              |
-| `max_size`         | Integer size limit used by admin validation  |
+| `allowed_types`    | JSON list of allowed MIME types              |
+| `max_size`         | Integer size limit used by validation        |
 | `sort_order`       | Admin ordering                               |
 
-`Media\Library` implements Spatie's `HasMedia` and uses
-`InteractsWithMedia`, so uploads are attached to the library model first and
-stored in a collection named after the library handle.
+`Media\Library` uses `HasMediaItems` for uploads and can own category groups,
+field groups, and an optional field layout. The seeded `avatars` library is used
+by `User::avatar()` and related avatar helpers.
 
 ### Uploads
 
@@ -2410,28 +2410,35 @@ The admin upload path is:
 POST /admin/media/libraries/{library_id}/upload
   -> Admin\Media\Library::upload()
   -> App\Actions\Media\Library\UploadMedia::upload()
+  -> App\Services\MediaStorageService::upload()
+  -> Media\Library::addMediaFromUpload()
 ```
 
-`UploadMedia` reads the uploaded `file`, calls
-`$library->addMedia(...)->toMediaCollection($library->handle)`, then writes the
-library ID and submitted name onto the resulting media row. It also detaches
-and re-attaches submitted category IDs.
+`addMediaFromUpload()` validates against the library constraints, stores the
+physical file on the configured disk, then creates the `media` row in a
+transaction. If persistence fails after storage succeeds, the stored file is
+deleted as compensation.
 
-```php
-$media = $library->addMedia($path)->toMediaCollection($library->handle);
-$media->library_id = $library->id;
-$media->name = $request->input('name');
-```
+### Attachments and Field Usage
 
-### Categories and Field Groups
+`Entry` and `User` use `HasMedia` for direct attachments through `mediables`.
+Direct attachments use `field_id = 0`; media referenced by a `FileUpload` field
+uses the real `fields.id`.
 
-Libraries can be associated with category groups through
-`category_groupables`; uploaded media can then be assigned concrete categories
-through `categorizables`.
+`FileUpload` stores ordered media IDs in `field_values.value_json`.
+`FieldValueObserver` keeps the `mediables` pivot synchronized so field-driven
+media usage remains queryable.
 
-Libraries can also own field groups through `field_groupables`. The current
-`Media` model does **not** use the `Fieldable` trait by default, so custom media
-field values require the same model change shown in [Technical Tutorials](#technical-tutorials).
+### Categories, Fields, Transformations, and Cleanup
+
+Media items can be categorized through `categorizables` and can store custom
+fields because `Media` uses `Fieldable`.
+
+Transformations live in `media_transformations` and are dispatched through
+`TransformationDriverInterface` with Imagick, GD, or null-driver implementations.
+
+Media records are soft-deleted first. `PurgeDeletedMedia` removes physical files
+and transformation files after the configured grace period.
 
 ---
 
@@ -2833,8 +2840,8 @@ infrastructure unless a concrete webhook profile has been configured and
 documented for the installation.
 
 External integration packages currently present include Sanctum, Fortify,
-Socialite, Spatie Permission, Spatie MediaLibrary, Spatie Tags, and Spatie
-Webhook Client.
+Socialite, Spatie Permission, and Spatie Webhook Client. Media handling is now
+native to the application.
 
 ---
 
@@ -2854,8 +2861,6 @@ details should be kept visible:
   authenticated user resource described by its OpenAPI annotation.
 - `EntryType.max_depth` and `EntryType.allowed_parent_types` are stored and
   cast, but current Entry Tree service methods do not enforce them.
-- `Media` does not use `Fieldable` by default; custom media fields require the
-  explicit trait addition documented above.
 - `app:refresh-tokens` is a scaffold and does not perform token refresh until
   implementation code is added.
 - `site.templates.base_path` and `site.templates.not_found_template` are present
@@ -2930,7 +2935,7 @@ entry_relationships  (relational fields only)
 | `entry`          | `App\Models\Entry`          | Scalar + Relational                          |
 | `user`           | `App\Models\User`           | Scalar only                                  |
 | `category`       | `App\Models\Category`       | Scalar only                                  |
-| `media`          | `App\Models\Media`          | Scalar only (after adding `Fieldable` trait) |
+| `media`          | `App\Models\Media`          | Scalar only                                  |
 | `entry_group`    | `App\Models\EntryGroup`     | No                                           |
 | `entry_type`     | `App\Models\EntryType`      | No                                           |
 | `category_group` | `App\Models\Category\Group` | No                                           |

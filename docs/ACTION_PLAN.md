@@ -4,12 +4,19 @@
 
 ---
 
+## 2026-05-12 Status Update
+
+The native Media and Media Library layer is complete and in testing. Treat the former Media refactor as landed. The remaining media-specific planning item is `media-status-implementation-plan.md`, which adds optional status governance on top of the completed native layer. See `MEDIA_LAYER_OVERVIEW.md` for how the implemented layer operates.
+
+---
+
 ## What These Files Are
 
 | File | Type | Status |
 |---|---|---|
 | `OVERVIEW.md` | Reference doc — current state of the CMS, synchronised against the live source on 2026-04-29. | Living doc. Has a **Known Gaps** section (~8 small, mostly API-layer bugs) that is the only actionable content. |
-| `media-refactor-plan.md` | Refactor — replace Spatie MediaLibrary + spatie/laravel-tags with a Laravel-native media layer; add `FileUpload` field type; soft-delete media; transformation driver interface. 10 phases. | Plan. Not started. |
+| `MEDIA_LAYER_OVERVIEW.md` | Reference doc — native Laravel media layer, Media Library containers, FileUpload integration, transformations, and purge flow. | Done. In testing. |
+| `media-status-implementation-plan.md` | Follow-up — status governance for media libraries and media records. | Plan. Not started. |
 | `SEARCH_PLAN_V2.md` | Feature — `is_searchable`/`search_weight` on `field_layout_tab_elements`, a `search_index` table, `Searchable` trait, `Indexer`, jobs, collection scoping. 7 delivery phases. | Plan, V2. Not started. Media explicitly out of scope but accommodated by the contract. |
 | `SHOP_PLAN.md` | Feature — `mithra62/Shop` e-commerce module: products, cart, orders, payments, discounts, tax, shipping, subscriptions, digital delivery. 11 phases (~16 weeks). | Plan, v3. Not started. Phase 11 is "Tenancy Integration." |
 | `TenantPlan.md` | Foundation — multi-tenant SaaS via shared DB + `tenant_id` on every tenant-owned table; `BelongsToTenant` trait; `ResolveTenant` middleware; Spatie teams mode; queue/job tenancy; super-admin & impersonation; billing. 6 steps. | Plan. Not started. The biggest blast radius of the five. |
@@ -25,7 +32,7 @@
 These are the constraints the ordering has to respect.
 
 **Tenancy ↔ Media (the critical one).**
-TenantPlan Step 1e adds `tenant_id` to `media` and `media_libraries`. TenantPlan Step 4 says: *"Override Spatie MediaLibrary's internal queue jobs (`PerformConversions`, `GenerateResponsiveImages`) with custom subclasses that implement `TenantAwareJob`. **This is the most complex integration point in the entire system — budget extra time.**"* If the Media refactor lands first and Spatie is gone (Media Plan Phase 10), this entire risk evaporates. The new native media layer can be born tenant-aware.
+TenantPlan Step 1e adds `tenant_id` to `media` and `media_libraries`. The old Spatie MediaLibrary queue-job risk is resolved because the native Media layer is complete and in testing. If the media status follow-up lands, do it before TenantPlan so tenant columns are added to the final table shape.
 
 **Tenancy ↔ Search.**
 Search adds two columns to `field_layout_tab_elements`. Tenancy adds `tenant_id` to that same table. Sequencing matters: if Search lands first, `search_index` has to be retrofitted with `tenant_id` later. If Tenancy lands first, Search just adds `tenant_id` from day one. Search-after-Tenancy is the cleaner direction.
@@ -64,7 +71,7 @@ Independent of all of the above. Each can be knocked out in isolation — they'r
 | Plan | Blast radius | If delayed | If rushed | Strategic value |
 |---|---|---|---|---|
 | TenantPlan | Massive — every tenant-owned table, every model, every query path | Every other feature has to be retrofitted with `tenant_id` later | Critical: cross-tenant data leak | Foundation for SaaS |
-| Media refactor | Large — every upload point, every media UI surface, two Spatie deps removed | TenantPlan inherits "the most complex integration point in the entire system" | Loses transformations until a driver is chosen (the plan stubs this with `NullTransformationDriver`, so it's safe) | Removes 2 Spatie deps, unlocks `FileUpload` field type, gives MediaLibrary a field layout (→ searchable media) |
+| Media layer | Done; currently in testing | Status governance may need a second migration pass if delayed until after TenantPlan | Treating the old Spatie plan as current would duplicate completed work | Native uploads, `FileUpload`, transformations, soft-delete purge flow, MediaLibrary field layouts |
 | Search V2 | Medium — additive (new tables, new trait, new dispatch points in repos/services) | Storefront and admin search stay absent | Wrong weights baked in (mitigated: opt-in per element, easy to retune) | Required for Shop UX and admin productivity |
 | Shop | Largest in pure code volume; mostly *additive* under `mithra62/Shop/` | Revenue feature delayed | Order/payment correctness bugs are unforgiving | The reason for the project |
 | SEO Schema | Small — additive columns, new `App\Schema\` namespace, one Twig function | Public-facing pages lack structured data | Low — no correctness-critical paths | SEO quality; Google Rich Results eligibility |
@@ -76,12 +83,12 @@ Independent of all of the above. Each can be knocked out in isolation — they'r
 
 ```
 0. OVERVIEW gaps        (warm-up — ~3-5 days; or interleave throughout)
-1. Media refactor       (~3-5 weeks)
-2. TenantPlan           (~6-8 weeks; Steps 1-5; defer Step 6 until just before Shop)
-3. Search V2            (~2-3 weeks)
-4. SEO Schema           (~2-3 weeks)
-5. Discussion layer     (~TBD; DISCUSSION_LAYER_PLAN.md not yet written)
-6. Shop                 (~14-16 weeks; Phase 11 collapses because tenancy is already real)
+1. Media status follow-up (optional, smaller than original refactor)
+2. TenantPlan             (~6-8 weeks; Steps 1-5; defer Step 6 until just before Shop)
+3. Search V2              (~2-3 weeks)
+4. SEO Schema             (~2-3 weeks)
+5. Discussion layer       (~TBD; DISCUSSION_LAYER_PLAN.md not yet written)
+6. Shop                   (~14-16 weeks; Phase 11 collapses because tenancy is already real)
 ```
 
 ### Step 0 — OVERVIEW Known Gaps (warm-up, ~3-5 days)
@@ -95,13 +102,15 @@ Knock these out first. They're small, they're isolated, and getting them green b
 - Enforce `EntryType.max_depth` and `EntryType.allowed_parent_types` in the Entry Tree service.
 - Implement `app:refresh-tokens` (currently a scaffold).
 - Wire `site.templates.base_path` and `site.templates.not_found_template` into the route drivers, or remove them from config.
-- Decide whether `Media` should use `Fieldable` by default — this becomes a clean default once the Media refactor lands, so revisit alongside that work rather than now.
+- Media is now `Fieldable` by default. Treat custom media fields as part of the current native layer.
 
 Don't try to do this in parallel with Step 1 — it's "loosen the muscles" before the big lifts, not real engineering capacity.
 
-### Step 1 — Media Refactor (~3-5 weeks)
+### Step 1 — Media Status Follow-Up
 
-**Why first.** This is the single highest-leverage decision in the queue. TenantPlan Step 4 names the Spatie MediaLibrary queue-job override as *"the most complex integration point in the entire system."* That complexity disappears entirely if Spatie is gone before Tenancy lands. Run the Media plan in its own order (Schema → Models → Traits → Driver interface → Service → Purge job → FileUpload field type → Actions/Controllers → Avatars → Tests → Remove Spatie).
+The native Media refactor is complete and in testing. The remaining media work currently documented is the status-governance follow-up in `media-status-implementation-plan.md`.
+
+**Why before tenancy if it ships.** It adds status columns and relationships to `media` and `media_libraries`, which TenantPlan later touches for `tenant_id`. If the status layer is desired, land it before TenantPlan to avoid a second coordinated migration pass.
 
 **What you get for the next plans:**
 
@@ -110,14 +119,14 @@ Don't try to do this in parallel with Step 1 — it's "loosen the muscles" befor
 - Two fewer Spatie deps to think about during Tenancy.
 - The `mediables` pivot adds a `field_id` column → multi-field media references work correctly from day one.
 
-**Gate.** Do not start TenantPlan until Media Phase 10 ("Remove Spatie") is merged, or you accept the `TenantAwareJob` overrides on Spatie's internal jobs as documented in TenantPlan Step 4. The point of doing Media first is to skip that work entirely.
+**Gate.** The old "remove Spatie first" gate is satisfied. Before TenantPlan, decide whether the media status layer is part of the near-term scope; if yes, complete it first so tenancy lands on the final media table shape.
 
 ### Step 2 — TenantPlan (Steps 1-5, ~6-8 weeks)
 
 **Why second.** Tenancy fundamentally changes how every query is shaped. Doing it after Media but before Search/Shop means:
 
 - Search and Shop are designed-in to tenancy, not retrofitted.
-- The Media refactor's tables (`media`, `mediables`, `media_transformations`) already have stable shapes when `tenant_id` is added — no double migration.
+- The native Media tables (`media`, `mediables`, `media_transformations`) already have stable shapes when `tenant_id` is added — no double migration.
 - The "two-tenant isolation test" that TenantPlan §1b makes you write against every model becomes a permanent contract for everything new.
 
 **Run Steps 1-5; defer Step 6 (Billing & Plans) until just before Shop.** Step 6 is Stripe + Cashier + plan limits + lapsed-subscription locking — that's a lot of code, and the way it carries usage counts (`tenant_usage`) overlaps Shop's own subscription/billing concerns. Land Step 6 *immediately before* Shop Phase 4 (Payment Gateway) so the same Stripe wiring serves both.
@@ -247,7 +256,8 @@ These are flagged in the plans but easy to lose sight of when you're ordering th
 ## Quick Reference — One-Line Summary Per Plan
 
 - **OVERVIEW.md** → reference doc. Eight small Known Gaps; fix as warm-up.
-- **media-refactor-plan.md** → replace Spatie MediaLibrary with native Laravel; do this **first** to spare TenantPlan its hardest integration point.
+- **MEDIA_LAYER_OVERVIEW.md** → native Media and Media Library layer. Done and in testing.
+- **media-status-implementation-plan.md** → optional status governance for Media; do before TenantPlan if it is in near-term scope.
 - **TenantPlan.md** → multi-tenant foundation. Do **second** so Search, SEO, Discussions, and Shop are born tenant-aware.
 - **SEARCH_PLAN_V2.md** → keyword search via index-time weighting. Do **third**; tack Media on while you're there.
 - **SEO_SCHEMA_PLAN.md** → schema.org JSON-LD from the Entry layer. Do **fourth**; additive and isolated, completes the content foundation before feature work begins.

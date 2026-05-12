@@ -16,8 +16,7 @@ Laravel Base is a Laravel 12 CMS/application foundation with an authenticated ad
 - Laravel Fortify for authentication
 - Laravel Sanctum for API token authentication
 - Spatie Permission for roles and permissions
-- Spatie Media Library for uploaded media
-- Spatie Tags
+- Native Laravel Media and Media Library layer for uploaded media
 - TwigBridge and Twig templates
 - L5 Swagger for API documentation
 - Vite 7 and Tailwind CSS 4

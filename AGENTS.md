@@ -43,6 +43,18 @@ No migration required. Add an entry to the appropriate domain's `fields` array i
 
 All polymorphic models must be registered in `AppServiceProvider::boot()` via `Relation::morphMap()`. Adding a new morphable model without registering it there will silently orphan rows if the class is ever renamed.
 
+## Media Layer
+
+The native Media layer is done and in testing. Do not reintroduce Spatie MediaLibrary patterns. Use `App\Models\Media`, `App\Models\Media\Library`, `MediaStorageService`, `HasMediaItems`, `HasMedia`, and the `FileUpload` field type.
+
+- Libraries are upload containers with adapter/disk settings, allowed MIME types, max size, optional field layout, category groups, and field groups.
+- Media records are first-party Eloquent models with `Fieldable`, transformations, storage helpers, and soft deletes.
+- Direct attachments use `mediables.field_id = 0`; `FileUpload` field references use the real `fields.id` in `mediables.field_id`.
+- FileUpload values are stored as ordered media ID arrays in `field_values.value_json`; `FieldValueObserver` keeps the `mediables` pivot in sync.
+- Physical deletion is deferred. Use soft deletes for app-level removal; `PurgeDeletedMedia` handles file and transformation purging.
+
+See `docs/MEDIA_LAYER_OVERVIEW.md` before changing upload, attachment, transformation, or purge behavior.
+
 ## Route Drivers (Public Site)
 
 To add a new public routing strategy, implement `App\Services\SiteRouting\RouteDrivers\RouteDriverInterface` and register the driver key in `SiteRouter::drivers()`. The driver must return a `RouteResult` or `null`. Drivers are tried in the order defined by `config('site.routing.priority')`.
@@ -67,9 +79,11 @@ The following major plans are queued and touch large surface areas. When making 
 
 | File | Area | Status |
 |---|---|---|
-| `TenantPlan.md` | Multi-tenant foundation (`tenant_id` everywhere) | Not started — do second |
-| `SEARCH_PLAN_V2.md` | Keyword search, `search_index`, `Searchable` trait | Not started — do third |
-| `SHOP_PLAN.md` | `mithra62/Shop` e-commerce module | Not started — do last |
+| `docs/MEDIA_LAYER_OVERVIEW.md` | Native Media and Media Library layer | Done - in testing |
+| `media-status-implementation-plan.md` | Media status governance | Planned follow-up |
+| `TenantPlan.md` | Multi-tenant foundation (`tenant_id` everywhere) | Not started |
+| `SEARCH_PLAN_V2.md` | Keyword search, `search_index`, `Searchable` trait | Not started |
+| `SHOP_PLAN.md` | `mithra62/Shop` e-commerce module | Not started |
 
 Key constraints:
 - Do not add new polymorphic pivot tables without a `tenant_id` column stub ready — TenantPlan will add it and conflicts are expensive.
