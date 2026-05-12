@@ -18,7 +18,6 @@ class ProcessMediaLibraryRemoval implements ShouldQueue
         // Soft-delete all media belonging to this library.
         // Physical file removal is handled by PurgeDeletedMedia on its next run.
         Media::where('library_id', $this->libraryId)
-            ->whereNull('deleted_at')
             ->chunkById(100, function ($items) {
                 foreach ($items as $media) {
                     $media->delete();

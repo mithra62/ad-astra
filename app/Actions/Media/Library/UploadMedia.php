@@ -11,9 +11,11 @@ class UploadMedia extends AbstractAction
 {
     public function upload(FormRequest $request, LibraryModel $library): Media
     {
-        $media = app('media-service')->upload($library, $request->file('file'), [
+        $attributes = array_filter([
             'name' => $request->input('name'),
-        ]);
+        ], fn ($v) => $v !== null);
+
+        $media = app('media-service')->upload($library, $request->file('file'), $attributes);
 
         if (!empty($request->input('categories'))) {
             $media->categories()->sync($request->input('categories'));

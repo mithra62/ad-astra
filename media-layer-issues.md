@@ -122,22 +122,23 @@ The automatic `FieldLayout::create()` call was removed entirely. Field layouts a
 
 ---
 
-### M5. Plan Step 21 test coverage gaps
-The plan's minimum test list specifies observer sync, `PurgeDeletedMedia`, `HasMediaItems` upload/purge, and `FileUpload::value()` resolution. Tests for `PurgeDeletedMedia`, `DeleteMediaAction`, `MediaStorageService`, `HasMediaItems`, and `HasMedia` all exist. Missing coverage:
+### ~~M5. Plan Step 21 test coverage gaps~~ — closed
 
-- `FieldValueObserver` syncing the `mediables` pivot on `saved` and `deleted`
-- `FileUpload::validate()` (library membership check, MIME type restriction, min/max counts)
-- `Admin\Media` controller routes and responses
-- `EditMedia` / `MediaRepository` update flow
+All four gaps addressed:
+- `FieldValueObserver` — already covered (6 tests for `saved`/`deleted`/sort-order)
+- `FileUpload::validate()` — already covered; handle-cache test added this session
+- `EditMedia` / `MediaRepository` — `EditMediaActionTest` added (7 tests: name, sort_order, categories, field values, return contract)
+- `Admin\Media` controller — `MediaControllerTest` (13 feature tests) and `MediaLibraryControllerTest` (16 feature tests) added
+
+Three latent production bugs found and fixed during test authoring: missing `Library` import in `MediaStorageService`, missing `Storage` import in `HasMediaItems` catch block, and `UploadMedia` passing `null` name overriding the PATHINFO_FILENAME default.
 
 ---
 
 ## Low — Plan vs. Implementation Gaps
 
-### L1. `ProcessMediaLibraryRemoval::whereNull('deleted_at')` is redundant
-**File:** `app/Jobs/ProcessMediaLibraryRemoval.php:21`
+### ~~L1. `ProcessMediaLibraryRemoval::whereNull('deleted_at')` is redundant~~ — resolved manually
 
-The `Media` model uses `SoftDeletes`, so the default Eloquent scope already excludes soft-deleted records. The explicit `whereNull('deleted_at')` is a no-op but harmless.
+Redundant `whereNull('deleted_at')` clause removed. The `SoftDeletes` scope on `Media` already excludes soft-deleted records from the default query.
 
 ---
 
