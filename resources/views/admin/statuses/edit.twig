@@ -1,11 +1,12 @@
 {% extends 'admin._inc._layout' %}
 {% import 'admin._inc._form-fields' as forms %}
 
-{% set page_title = 'Create Status' %}
+{% set page_title = 'Edit Status' %}
 {% set page_heading = 'Status Groups' %}
 {% set active_nav = 'content' %}
 {% set active_secondary_nav = 'statuses' %}
 {% set has_secondary_sidebar = true %}
+{% set active_secondary_nav = 'edit_status' %}
 
 {% block breadcrumbs %}
     <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
@@ -41,7 +42,7 @@
 {% endblock %}
 
 {% block secondary_sidebar %}
-    {{ include('admin.statuses._sidebar', {active: group.id}) }}
+    {{ include('admin.statuses._sidebar', {active: status.group.id}) }}
 {% endblock %}
 
 {% block content %}
@@ -58,7 +59,7 @@
     <div class="flex w-full min-w-0 flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Create Status</h1>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Edit Status</h1>
                 <p class="mt-1 text-sm text-slate-500">Create a reusable status, field, label, or option for content workflows.</p>
             </div>
             <a href="{{ route('statuses.groups.show', status.group) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
@@ -67,18 +68,6 @@
                 </svg>
                 Back to {{ status.group.name }}
             </a>
-        </div>
-
-        <div class="rounded-lg border border-sky-200 bg-sky-50 p-4">
-            <div class="flex items-start gap-3">
-                <svg class="mt-0.5 h-5 w-5 shrink-0 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <div>
-                    <p class="text-sm font-semibold text-sky-800">Create a new reusable item.</p>
-                    <p class="mt-1 text-sm text-sky-700">Handles should be stable once this item is used by content or templates.</p>
-                </div>
-            </div>
         </div>
 
         <form id="general-create-form" method="POST" action="{{ route('statuses.update', status.id) }}" class="flex w-full min-w-0 flex-col gap-5">
