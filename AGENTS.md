@@ -67,13 +67,11 @@ The following major plans are queued and touch large surface areas. When making 
 
 | File | Area | Status |
 |---|---|---|
-| `media-refactor-plan.md` | Replace Spatie MediaLibrary with native layer | Not started — do first |
 | `TenantPlan.md` | Multi-tenant foundation (`tenant_id` everywhere) | Not started — do second |
 | `SEARCH_PLAN_V2.md` | Keyword search, `search_index`, `Searchable` trait | Not started — do third |
 | `SHOP_PLAN.md` | `mithra62/Shop` e-commerce module | Not started — do last |
 
 Key constraints:
-- Do not add new dependencies on Spatie MediaLibrary or Spatie Tags — both will be removed in the media refactor.
 - Do not add new polymorphic pivot tables without a `tenant_id` column stub ready — TenantPlan will add it and conflicts are expensive.
 - `field_layout_tab_elements` is touched by both the Search plan (adds `is_searchable`, `search_weight`) and TenantPlan (adds `tenant_id`). Coordinate any migrations to this table carefully.
 

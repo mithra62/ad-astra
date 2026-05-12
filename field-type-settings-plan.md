@@ -70,10 +70,6 @@ protected array $settings_form = [
 | `slider` | `slider` | Requires `min`, `max`; supports `step`, `suffix`. See §slider widget. |
 | `color` | `color` | Stores hex string. Note dual-input caveat below. |
 | `key_value` | Custom repeater (no macro equivalent) | Ordered `{key, label}` pairs; Alpine.js add/remove rows |
-| `entry_groups` | `select` (multiple, DB-sourced) | Populated from `entry_groups` table |
-| `entry_types` | `select` (multiple, DB-sourced) | Populated from `entry_types` table |
-| `media_libraries` | `select` (multiple, DB-sourced) | Populated from `media_libraries` table |
-| `roles` | `select` (multiple, DB-sourced) | Populated from roles table |
 | `structured_rows_columns` | Custom (uses `_structured-rows.twig`) | Column-schema editor for Structured Rows FieldType |
 
 > **Naming note:** `select` and `select_multiple` as widget types configure *settings* with dropdowns. The `Select` and `Multi Select` FieldTypes are *content fields* that render as dropdowns. Different layers; do not conflate.
@@ -106,7 +102,7 @@ Rather than hand-rolling input markup, `_settings_widget.twig` imports `_form-fi
 {% elseif def.type == 'color' %}
     {{ f.color('settings[' ~ handle ~ ']', def.label, value, def.instructions) }}
 
-{% elseif def.type in ['select_multiple', 'entry_groups', 'entry_types', 'media_libraries', 'roles'] %}
+{% elseif def.type == 'select_multiple' %}
     {{ f.select('settings[' ~ handle ~ '][]', def.label, def.options, value, def.instructions, null, null, true) }}
 
 {% elseif def.type == 'key_value' %}
@@ -218,7 +214,7 @@ GET /admin/fields/type-settings?type_id={id}&field_id={id|null}
 The controller:
 1. Resolves `Field\Type` by `type_id` and instantiates the type class.
 2. Calls `settingsForm()` to get the descriptor array.
-3. For `select_multiple`, `entry_groups`, `entry_types`, `media_libraries`, `roles` widgets, fetches current DB records and formats as `[{value, label}]` arrays to match the macro's `options` signature.
+3. For `select_multiple` widgets and any one-off DB-sourced settings (e.g. Relationship's entry group list, FileUpload's library list, Users' role list), fetches current DB records and formats as `[{value, label}]` arrays to match the macro's `options` signature.
 4. If `field_id` is provided (edit page), passes `Field->settings` as `current_values`.
 5. Returns `response()->view('admin.fields._settings_panel', $data)`.
 
@@ -276,8 +272,8 @@ $field->settings = $this->filterSettings($request->input('settings', []), $typeI
 | **EmailAddress** | — | `input` (type=email) |
 | **Telephone** | — | `input` (type=tel) |
 | **Url** | — | `input` (type=url) |
-| **FileUpload** | `library` (media_libraries), `allowed_types` (key_value), `min`, `max` | `file` macro + AJAX bridge (see §FileUpload render) |
-| **Relationship** | `entry_groups` (entry_groups), `entry_types` (entry_types), `limit` (number) | (entry picker) |
+| **FileUpload** | `library` (one-off multi-select from media libraries), `allowed_types` (key_value), `min`, `max` | `file` macro + AJAX bridge (see §FileUpload render) |
+| **Relationship** | `entry_groups` (one-off multi-select from entry groups), `entry_types` (one-off multi-select from entry types), `limit` (number) | (entry picker) |
 
 `EmailAddress`, `Telephone`, and `Url` declare empty `$settings_form` — the panel shows the "no configurable settings" message.
 
@@ -457,7 +453,7 @@ Relates a field to one or more User records.
 
 | Setting | Widget | Notes |
 |---|---|---|
-| `roles` | `roles` | Restrict selectable users to those with specified roles. Empty = all users. |
+| `roles` | one-off multi-select from roles table | Restrict selectable users to those with specified roles. Empty = all users. |
 | `limit` | `number` | Maximum selectable users (0 = unlimited). |
 | `display` | `select` | `dropdown` (searchable), `checkboxes`, or `tokens`. Default: `dropdown`. |
 
@@ -557,9 +553,9 @@ Select, Multi Select, and Radio Group share the same problem: a stored value may
 
 The `ValidatesAgainstOptions` trait implements all of this once; all three types use it.
 
-### DB-sourced widget data
+### DB-sourced one-off settings
 
-The AJAX route fetches current DB state every call. Do not cache the settings panel HTML — entry groups, media libraries, and roles can change between page load and type dropdown interaction.
+For field types whose settings include DB-sourced lists (Relationship's entry groups, FileUpload's media libraries, Users' roles), the AJAX route fetches current DB state on every call and passes it as `options` alongside the settings form definition. Do not cache the settings panel HTML — these lists can change between page load and type dropdown interaction.
 
 ### `Number` and `Slider` share `storageColumn()` logic
 
