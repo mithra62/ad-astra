@@ -636,7 +636,7 @@ class FakeDataSeeder extends Seeder
 
         $validator = Validator::make($data, [
             'title' => ['required', 'string', 'max:255'],
-            'handle' => ['nullable', 'string', 'max:255'],
+            'handle' => ['required', 'string', 'max:255'],
             'status' => ['nullable', 'string', 'max:100', Rule::in($validStatuses)],
             'published_at' => ['nullable', 'date'],
             'authors' => ['nullable', 'array'],

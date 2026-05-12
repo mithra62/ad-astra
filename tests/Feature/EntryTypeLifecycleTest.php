@@ -33,7 +33,7 @@ class EntryTypeLifecycleTest extends TestCase
 
     public function test_before_create_is_invoked(): void
     {
-        $this->service->create($this->type->handle, ['title' => 'Hello']);
+        $this->service->create($this->type->handle, ['title' => 'Hello', 'handle' => 'hello']);
 
         $this->assertSame(1, SpyEntryType::$beforeCreateCalls);
     }
@@ -41,7 +41,7 @@ class EntryTypeLifecycleTest extends TestCase
     public function test_before_create_mutation_is_persisted(): void
     {
         // SpyEntryType::beforeCreate appends ' [bc]' to the title.
-        $this->service->create($this->type->handle, ['title' => 'Hello']);
+        $this->service->create($this->type->handle, ['title' => 'Hello', 'handle' => 'hello']);
 
         $this->assertDatabaseHas('entries', ['title' => 'Hello [bc]']);
     }
@@ -52,7 +52,7 @@ class EntryTypeLifecycleTest extends TestCase
 
     public function test_after_create_is_invoked(): void
     {
-        $this->service->create($this->type->handle, ['title' => 'Hello']);
+        $this->service->create($this->type->handle, ['title' => 'Hello', 'handle' => 'hello']);
 
         $this->assertSame(1, SpyEntryType::$afterCreateCalls);
     }
@@ -61,7 +61,7 @@ class EntryTypeLifecycleTest extends TestCase
     {
         // Verify the entry passed to afterCreate already exists in the DB
         // by checking that the returned entry has a non-zero primary key.
-        $entry = $this->service->create($this->type->handle, ['title' => 'Hello']);
+        $entry = $this->service->create($this->type->handle, ['title' => 'Hello', 'handle' => 'hello']);
 
         $this->assertTrue($entry->exists);
         $this->assertGreaterThan(0, $entry->id);
@@ -120,7 +120,7 @@ class EntryTypeLifecycleTest extends TestCase
     public function test_before_create_runs_before_after_create(): void
     {
         // Both hooks fire on a single create() call.
-        $this->service->create($this->type->handle, ['title' => 'Hello']);
+        $this->service->create($this->type->handle, ['title' => 'Hello', 'handle' => 'hello']);
 
         $this->assertSame(1, SpyEntryType::$beforeCreateCalls);
         $this->assertSame(1, SpyEntryType::$afterCreateCalls);

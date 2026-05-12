@@ -27,7 +27,14 @@ class EditEntryRequest extends FormRequest
         return array_merge(
             [
                 'title' => ['required', 'string', 'max:255'],
-                'handle' => ['nullable', 'string', 'max:255'],
+                'handle' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('entries', 'handle')
+                        ->where(fn($query) => $query->where('entry_group_id', $entry->entry_group_id))
+                        ->ignore($entry->id),
+                ],
                 'status' => [
                     'nullable',
                     'string',

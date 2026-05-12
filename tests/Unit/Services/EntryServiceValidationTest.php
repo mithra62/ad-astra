@@ -47,6 +47,7 @@ class EntryServiceValidationTest extends TestCase
         // triggers JobListingEntryType::validate() to return an error.
         $this->service->create($type->handle, [
             'title'  => 'Software Engineer',
+            'handle' => 'software-engineer',
             'status' => 'published',
             'fields' => [],
         ]);
@@ -59,6 +60,7 @@ class EntryServiceValidationTest extends TestCase
         try {
             $this->service->create($type->handle, [
                 'title'  => 'Software Engineer',
+                'handle' => 'software-engineer',
                 'status' => 'published',
                 'fields' => [],
             ]);
@@ -76,6 +78,7 @@ class EntryServiceValidationTest extends TestCase
         // Draft status bypasses the publish-gate in JobListingEntryType::validate().
         $entry = $this->service->create($type->handle, [
             'title'  => 'Software Engineer',
+            'handle' => 'software-engineer',
             'status' => 'draft',
             'fields' => [],
         ]);
@@ -91,6 +94,7 @@ class EntryServiceValidationTest extends TestCase
         try {
             $this->service->create($type->handle, [
                 'title'  => 'Software Engineer',
+                'handle' => 'software-engineer',
                 'status' => 'published',
                 'fields' => [],
             ]);

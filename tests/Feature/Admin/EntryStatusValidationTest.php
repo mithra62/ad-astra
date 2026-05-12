@@ -32,6 +32,7 @@ class EntryStatusValidationTest extends TestCase
         $response = $this->actingAs($user)->post(route('entries.store', ['group_id' => $group->id]), [
             'type_handle' => $type->handle,
             'title' => 'Valid Entry',
+            'handle' => 'valid-entry',
             'status' => 'published',
         ]);
 
@@ -97,6 +98,7 @@ class EntryStatusValidationTest extends TestCase
             ->post(route('entries.store', ['group_id' => $group->id]), [
                 'type_handle' => $type->handle,
                 'title' => 'Invalid Entry',
+                'handle' => 'invalid-entry',
                 'status' => 'published',
             ]);
 

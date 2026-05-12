@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class EntrySeeder extends Seeder
 {
@@ -102,6 +103,7 @@ class EntrySeeder extends Seeder
 
         $created = [];
         foreach ($definitions as $key => $data) {
+            $data['handle'] ??= $key;
             $created[$key] = Content::create('blog_post', $data);
         }
 
@@ -189,6 +191,7 @@ class EntrySeeder extends Seeder
         ];
 
         foreach ($products as $product) {
+            $product['handle'] ??= Str::slug($product['title']);
             Content::create('product', $product);
         }
     }

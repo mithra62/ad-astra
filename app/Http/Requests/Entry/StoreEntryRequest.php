@@ -27,7 +27,14 @@ class StoreEntryRequest extends FormRequest
             [
                 'type_handle' => ['required', 'string', 'exists:entry_types,handle'],
                 'title' => ['required', 'string', 'max:255'],
-                'handle' => ['nullable', 'string', 'max:255'],
+                'handle' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('entries', 'handle')->where(
+                        fn($query) => $query->where('entry_group_id', $group->id)
+                    ),
+                ],
                 'status' => [
                     'nullable',
                     'string',

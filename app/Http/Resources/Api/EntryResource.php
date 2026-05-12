@@ -15,7 +15,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'entry_group_id', type: 'integer', format: 'int64', description: 'ID of the entry group this entry belongs to'),
         new OA\Property(property: 'entry_type_id', type: 'integer', format: 'int64', description: 'ID of the entry type for this entry'),
         new OA\Property(property: 'title', type: 'string', description: 'Human-readable title'),
-        new OA\Property(property: 'handle', type: 'string', nullable: true, description: 'URL-safe identifier within the group'),
+        new OA\Property(property: 'handle', type: 'string', description: 'URL-safe identifier within the group'),
         new OA\Property(property: 'status_handle', type: 'string', nullable: true, description: 'Handle of the current status'),
         new OA\Property(property: 'status_is_public', type: 'boolean', description: 'Whether the current status is publicly visible'),
         new OA\Property(property: 'published_at', type: 'string', format: 'date-time', nullable: true, description: 'Date/time the entry was published'),

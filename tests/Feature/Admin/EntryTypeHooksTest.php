@@ -164,6 +164,7 @@ class EntryTypeHooksTest extends TestCase
             ->post(route('entries.store', ['group_id' => $group->id]), [
                 'type_handle' => $type->handle,
                 'title'       => 'Test Blog Post',
+                'handle'      => 'test-blog-post',
                 'status'      => 'draft',
                 'fields'      => ['body' => $body],
             ]);
@@ -195,6 +196,7 @@ class EntryTypeHooksTest extends TestCase
             ->post(route('entries.store', ['group_id' => $group->id]), [
                 'type_handle' => $type->handle,
                 'title'       => 'Published Post',
+                'handle'      => 'published-post',
                 'status'      => 'published',
             ]);
 
@@ -223,6 +225,7 @@ class EntryTypeHooksTest extends TestCase
             ->post(route('entries.store', ['group_id' => $group->id]), [
                 'type_handle' => $type->handle,
                 'title'       => 'Headphones Without SKU',
+                'handle'      => 'headphones-without-sku',
                 'status'      => 'published',
             ]);
 
@@ -244,6 +247,7 @@ class EntryTypeHooksTest extends TestCase
             ->post(route('entries.store', ['group_id' => $group->id]), [
                 'type_handle' => $type->handle,
                 'title'       => 'Headphones With SKU',
+                'handle'      => 'headphones-with-sku',
                 'status'      => 'published',
                 'fields'      => ['sku' => 'ELEC-001'],
             ]);
@@ -277,6 +281,7 @@ class EntryTypeHooksTest extends TestCase
         $response = $this->actingAs($user)
             ->put(route('entries.update', $entry), [
                 'title'  => $entry->title,
+                'handle' => $entry->handle,
                 'status' => 'published',
                 'fields' => [
                     'application_url' => 'https://jobs.example.com/apply',
@@ -306,6 +311,7 @@ class EntryTypeHooksTest extends TestCase
         $response = $this->actingAs($user)
             ->put(route('entries.update', $entry), [
                 'title'  => $entry->title,
+                'handle' => $entry->handle,
                 'status' => 'published',
                 'fields' => [
                     'application_url' => 'https://jobs.example.com/apply',
@@ -343,6 +349,7 @@ class EntryTypeHooksTest extends TestCase
             ->from(route('entries.edit', $entry))
             ->put(route('entries.update', $entry), [
                 'title'  => 'Annual Conference',
+                'handle' => $entry->handle,
                 'status' => 'draft',
                 'fields' => [
                     'start_date' => '2026-07-10',
@@ -372,6 +379,7 @@ class EntryTypeHooksTest extends TestCase
         $response = $this->actingAs($user)
             ->put(route('entries.update', $entry), [
                 'title'  => 'One Day Event',
+                'handle' => $entry->handle,
                 'status' => 'draft',
                 'fields' => [
                     'start_date' => '2026-07-10',

@@ -98,11 +98,11 @@ class Entries extends Controller
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['type_handle', 'title'],
+                required: ['type_handle', 'title', 'handle'],
                 properties: [
                     new OA\Property(property: 'type_handle', type: 'string', description: 'Handle of the entry type (must belong to this group)', example: 'article'),
                     new OA\Property(property: 'title', type: 'string', maxLength: 255, description: 'Entry title', example: 'My First Post'),
-                    new OA\Property(property: 'handle', type: 'string', maxLength: 255, nullable: true, description: 'URL-safe identifier within the group'),
+                    new OA\Property(property: 'handle', type: 'string', maxLength: 255, description: 'URL-safe identifier within the group'),
                     new OA\Property(property: 'status', type: 'string', nullable: true, description: 'Status handle (must exist in the group status group)', example: 'draft'),
                     new OA\Property(property: 'published_at', type: 'string', format: 'date-time', nullable: true),
                     new OA\Property(property: 'authors', type: 'array', nullable: true, items: new OA\Items(type: 'integer'), description: 'User IDs to assign as authors'),
@@ -188,10 +188,10 @@ class Entries extends Controller
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['title'],
+                required: ['title', 'handle'],
                 properties: [
                     new OA\Property(property: 'title', type: 'string', maxLength: 255, example: 'Updated Title'),
-                    new OA\Property(property: 'handle', type: 'string', maxLength: 255, nullable: true),
+                    new OA\Property(property: 'handle', type: 'string', maxLength: 255),
                     new OA\Property(property: 'status', type: 'string', nullable: true, description: 'Status handle'),
                     new OA\Property(property: 'published_at', type: 'string', format: 'date-time', nullable: true),
                     new OA\Property(property: 'authors', type: 'array', nullable: true, items: new OA\Items(type: 'integer')),

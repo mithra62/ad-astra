@@ -15,7 +15,6 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class EntryRepository
@@ -59,7 +58,17 @@ class EntryRepository
             $entry->title = $data['title'];
         }
 
-        $entry->handle = $data['handle'] ?? Str::slug($entry->title ?? '');
+        if (!$entry->exists && blank($data['handle'] ?? null)) {
+            throw new InvalidArgumentException('Entry handle is required.');
+        }
+
+        if (array_key_exists('handle', $data)) {
+            if (blank($data['handle'])) {
+                throw new InvalidArgumentException('Entry handle is required.');
+            }
+
+            $entry->handle = $data['handle'];
+        }
 
         if (array_key_exists('published_at', $data)) {
             $entry->published_at = $data['published_at'];

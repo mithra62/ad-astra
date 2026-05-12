@@ -35,7 +35,7 @@ class EntryRepositoryTest extends TestCase
 
         $entryType = $this->makeAbstractEntryType($type);
 
-        $entry = $this->repo->create($entryType, ['title' => 'Hello World']);
+        $entry = $this->repo->create($entryType, ['title' => 'Hello World', 'handle' => 'hello-world']);
 
         $this->assertInstanceOf(Entry::class, $entry);
         $this->assertTrue($entry->exists);
@@ -89,7 +89,7 @@ class EntryRepositoryTest extends TestCase
 
         $entryType = $this->makeAbstractEntryType($type);
 
-        $entry = $this->repo->create($entryType, ['title' => 'Authored']);
+        $entry = $this->repo->create($entryType, ['title' => 'Authored', 'handle' => 'authored']);
 
         $this->assertEquals($user->id, $entry->created_by_user_id);
     }
@@ -103,7 +103,7 @@ class EntryRepositoryTest extends TestCase
 
         $entryType = $this->makeAbstractEntryType($type);
 
-        $entry = $this->repo->create($entryType, ['title' => 'Draft Entry']);
+        $entry = $this->repo->create($entryType, ['title' => 'Draft Entry', 'handle' => 'draft-entry']);
 
         $this->assertEquals('draft', $entry->status_handle);
     }
@@ -118,7 +118,7 @@ class EntryRepositoryTest extends TestCase
 
         $entryType = $this->makeAbstractEntryType($type);
 
-        $entry = $this->repo->create($entryType, ['title' => 'Live', 'status' => 'published']);
+        $entry = $this->repo->create($entryType, ['title' => 'Live', 'handle' => 'live', 'status' => 'published']);
 
         $this->assertEquals('published', $entry->status_handle);
     }
@@ -141,10 +141,10 @@ class EntryRepositoryTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Status [published] does not belong to EntryGroup');
 
-        $this->repo->create($entryType, ['title' => 'Live', 'status' => 'published']);
+        $this->repo->create($entryType, ['title' => 'Live', 'handle' => 'live', 'status' => 'published']);
     }
 
-    public function test_create_auto_generates_handle_from_title(): void
+    public function test_create_throws_when_handle_is_missing(): void
     {
         $statusGroup = $this->makeStatusGroup();
         $group = $this->makeEntryGroup($statusGroup);
@@ -153,9 +153,10 @@ class EntryRepositoryTest extends TestCase
 
         $entryType = $this->makeAbstractEntryType($type);
 
-        $entry = $this->repo->create($entryType, ['title' => 'My Blog Post']);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Entry handle is required.');
 
-        $this->assertEquals('my-blog-post', $entry->handle);
+        $this->repo->create($entryType, ['title' => 'My Blog Post']);
     }
 
     public function test_create_uses_explicit_handle_when_provided(): void
@@ -183,7 +184,7 @@ class EntryRepositoryTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessageMatches('/no status group/i');
 
-        $this->repo->create($entryType, ['title' => 'Broken']);
+        $this->repo->create($entryType, ['title' => 'Broken', 'handle' => 'broken']);
     }
 
     public function test_create_syncs_authors(): void
@@ -200,6 +201,7 @@ class EntryRepositoryTest extends TestCase
 
         $entry = $this->repo->create($entryType, [
             'title' => 'With Authors',
+            'handle' => 'with-authors',
             'authors' => [$author->id],
         ]);
 
@@ -223,6 +225,7 @@ class EntryRepositoryTest extends TestCase
 
         $entry = $this->repo->create($entryType, [
             'title' => 'Categorised',
+            'handle' => 'categorised',
             'categories' => [$category->id],
         ]);
 
@@ -521,6 +524,7 @@ class EntryRepositoryTest extends TestCase
 
         $entry = $this->repo->create($this->makeAbstractEntryType($type), [
             'title'  => 'Going Live',
+            'handle' => 'going-live',
             'status' => 'live',
         ]);
 
@@ -534,7 +538,7 @@ class EntryRepositoryTest extends TestCase
         $type  = $this->makeEntryType($group);
         $this->actingAs(User::factory()->create());
 
-        $entry = $this->repo->create($this->makeAbstractEntryType($type), ['title' => 'Draft Entry']);
+        $entry = $this->repo->create($this->makeAbstractEntryType($type), ['title' => 'Draft Entry', 'handle' => 'draft-entry']);
 
         $this->assertNull($entry->published_at);
     }
@@ -551,6 +555,7 @@ class EntryRepositoryTest extends TestCase
 
         $entry = $this->repo->create($this->makeAbstractEntryType($type), [
             'title'        => 'Backdated',
+            'handle'       => 'backdated',
             'published_at' => $explicit,
         ]);
 
@@ -566,7 +571,7 @@ class EntryRepositoryTest extends TestCase
         $this->actingAs(User::factory()->create());
 
         // No explicit status passed — should pick up the default which is public.
-        $entry = $this->repo->create($this->makeAbstractEntryType($type), ['title' => 'Auto Published']);
+        $entry = $this->repo->create($this->makeAbstractEntryType($type), ['title' => 'Auto Published', 'handle' => 'auto-published']);
 
         $this->assertNotNull($entry->published_at);
     }
