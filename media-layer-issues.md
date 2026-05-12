@@ -2,7 +2,7 @@
 
 *Compiled 2026-05-11. Based on comparison of `media-layer-implementation.md` against the live codebase on the `media` branch.*
 
-**Summary:** 3 critical · 8 high · 5 medium · 5 low
+**Summary:** 2 critical · 7 high · 5 medium · 5 low
 
 ---
 
@@ -26,10 +26,9 @@ The `uuid` column provided no value: all media routes use integer IDs, all media
 
 ---
 
-### C4. `EditMediaRequest` crashes when `library_id` is null
-**File:** `app/Http/Requests/Media/EditMediaRequest.php:14`
+### ~~C4. `EditMediaRequest` crashes when `library_id` is null~~ — fixed (see also H2)
 
-Calls `MediaLibrary::resolvedFields($media->library_id)`, which internally calls `findOrFail($id)`. When `library_id` is null, `findOrFail(null)` throws a `ModelNotFoundException` and the edit page 404s. It also calls `Media::find()` without a null guard — if the `media_item` route parameter doesn't resolve (e.g. the record was soft-deleted), `$media->library_id` throws a property-access-on-null error.
+Replaced the three independent `resolvedFields()` calls with a private `resolvedSchema()` method that uses `MediaLibrary::with(...)->find()` (returns null gracefully) and caches the result on the instance. Null `$media` and null `library_id` both resolve to `null`, which `schemaFieldRules()` already handles by returning an empty array. Also adds `fieldType` to the eager-load chain, eliminating an N+1 in `schemaFieldRules()`. Covered by `EditMediaRequestTest`.
 
 ---
 
@@ -59,10 +58,9 @@ The plan (Step 18b) specifies a simple request validating `name`, `alt_text`, an
 
 ---
 
-### H2. `EditMediaRequest` executes 6+ redundant DB queries per request
-**File:** `app/Http/Requests/Media/EditMediaRequest.php`
+### ~~H2. `EditMediaRequest` executes 6+ redundant DB queries per request~~ — fixed with C4
 
-`rules()`, `messages()`, and `attributes()` each independently call `Media::find()` and `MediaLibrary::resolvedFields()` — six separate round-trips for the same two records. These should be resolved once and cached on the request instance.
+Resolved as part of the C4 fix. The private `resolvedSchema()` cache means `messages()` and `attributes()` incur zero queries after `rules()` has fired. Verified by two query-count assertions in `EditMediaRequestTest`.
 
 ---
 

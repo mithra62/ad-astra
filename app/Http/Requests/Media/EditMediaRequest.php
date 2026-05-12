@@ -8,36 +8,38 @@ use App\Models\Media\Library as MediaLibrary;
 
 class EditMediaRequest extends FormRequest
 {
+    private ?MediaLibrary $resolvedSchema = null;
+    private bool $schemaResolved = false;
+
     public function rules(): array
     {
-        $media = Media::find($this->route()->parameter('media_item'));
-        $schema = MediaLibrary::resolvedFields($media->library_id);
         return array_merge(
-            [
-                'name' => [
-                    'required',
-                    'sometimes',
-                    'string',
-                    'max:255',
-                ],
-            ],
-            $this->schemaFieldRules($schema)
+            ['name' => ['required', 'sometimes', 'string', 'max:255']],
+            $this->schemaFieldRules($this->resolvedSchema())
         );
     }
+
     public function messages(): array
     {
-        $media = Media::find($this->route()->parameter('media_item'));
-        $schema = MediaLibrary::resolvedFields($media->library_id);
-        return $this->schemaFieldMessages($schema);
+        return $this->schemaFieldMessages($this->resolvedSchema());
     }
 
-    /**
-     * @return array
-     */
     public function attributes(): array
     {
-        $media = Media::find($this->route()->parameter('media_item'));
-        $schema = MediaLibrary::resolvedFields($media->library_id);
-        return $this->schemaFieldAttributes($schema);
+        return $this->schemaFieldAttributes($this->resolvedSchema());
+    }
+
+    private function resolvedSchema(): ?MediaLibrary
+    {
+        if (!$this->schemaResolved) {
+            $media = Media::find($this->route()->parameter('media_item'));
+            $this->resolvedSchema = ($media && $media->library_id)
+                ? MediaLibrary::with('fieldLayout.tabs.elements.field.fieldType')
+                              ->find($media->library_id)
+                : null;
+            $this->schemaResolved = true;
+        }
+
+        return $this->resolvedSchema;
     }
 }

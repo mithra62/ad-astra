@@ -36,6 +36,10 @@ trait HasMediaItems
 
         $path = $file->storeAs($folder, $fileName, $disk);
 
+        if ($path === false) {
+            throw new \RuntimeException("Failed to store uploaded file on disk '{$disk}'.");
+        }
+
         try {
             return DB::transaction(function () use ($file, $disk, $fileName, $path, $attributes) {
                 $nextOrder = (int)$this->media()->lockForUpdate()->max('sort_order') + 1;
