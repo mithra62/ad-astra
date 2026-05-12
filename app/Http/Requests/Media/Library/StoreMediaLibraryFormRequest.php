@@ -16,7 +16,6 @@ class StoreMediaLibraryFormRequest extends FormRequest
     public function rules(): array
     {
         $library = $this->route()->parameter('library');
-
         $rules = [
             'name' => [
                 'required',

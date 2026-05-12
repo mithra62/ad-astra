@@ -23,7 +23,8 @@ return new class extends Migration {
             $table->unsignedInteger('sort_order')->default(0);
 
             $table->timestamps();
-            $table->unique(['name', 'handle']);
+            $table->unique('name');
+            $table->unique('handle');
         });
     }
 
