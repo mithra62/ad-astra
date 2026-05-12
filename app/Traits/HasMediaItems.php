@@ -42,7 +42,6 @@ trait HasMediaItems
                 $nextOrder = (int)$this->media()->lockForUpdate()->max('sort_order') + 1;
 
                 return $this->media()->create(array_merge([
-                    'uuid' => (string)Str::uuid(),
                     'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
                     'file_name' => $fileName,
                     'original_name' => $file->getClientOriginalName(),

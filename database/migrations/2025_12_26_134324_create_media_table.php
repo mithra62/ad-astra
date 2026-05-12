@@ -9,7 +9,6 @@ return new class extends Migration {
     {
         Schema::create('media', function (Blueprint $table) {
             $table->id();
-            $table->uuid()->nullable()->unique();
 
             // FK to media_libraries is intentionally absent here — media_libraries
             // does not exist at this timestamp. A nullOnDelete FK would also race

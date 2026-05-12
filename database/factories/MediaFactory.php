@@ -16,13 +16,11 @@ class MediaFactory extends Factory
 
     public function definition(): array
     {
-        $uuid     = (string) Str::uuid();
         $ext      = fake()->randomElement(['jpg', 'png', 'pdf', 'mp4']);
-        $fileName = $uuid . '.' . $ext;
+        $fileName = Str::uuid() . '.' . $ext;
 
         return [
             'library_id'    => Library::factory(),
-            'uuid'          => $uuid,
             'name'          => fake()->words(2, true),
             'file_name'     => $fileName,
             'original_name' => fake()->word() . '.' . $ext,
@@ -37,11 +35,9 @@ class MediaFactory extends Factory
     public function image(): static
     {
         return $this->state(function () {
-            $uuid     = (string) Str::uuid();
             $ext      = fake()->randomElement(['jpg', 'png', 'webp']);
-            $fileName = $uuid . '.' . $ext;
+            $fileName = Str::uuid() . '.' . $ext;
             return [
-                'uuid'          => $uuid,
                 'file_name'     => $fileName,
                 'original_name' => 'photo.' . $ext,
                 'mime_type'     => 'image/' . ($ext === 'jpg' ? 'jpeg' : $ext),
@@ -53,10 +49,8 @@ class MediaFactory extends Factory
     public function pdf(): static
     {
         return $this->state(function () {
-            $uuid     = (string) Str::uuid();
-            $fileName = $uuid . '.pdf';
+            $fileName = Str::uuid() . '.pdf';
             return [
-                'uuid'          => $uuid,
                 'file_name'     => $fileName,
                 'original_name' => 'document.pdf',
                 'mime_type'     => 'application/pdf',

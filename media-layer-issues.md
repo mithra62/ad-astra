@@ -2,7 +2,7 @@
 
 *Compiled 2026-05-11. Based on comparison of `media-layer-implementation.md` against the live codebase on the `media` branch.*
 
-**Summary:** 5 critical · 8 high · 5 medium · 5 low
+**Summary:** 4 critical · 8 high · 5 medium · 5 low
 
 ---
 
@@ -14,10 +14,9 @@
 
 ---
 
-### C2. `Media::$fillable` missing `uuid`
-**File:** `app/Models/Media.php:20-23`
+### ~~C2. `Media::$fillable` missing `uuid`~~ — resolved by removal
 
-`uuid` is not listed in `$fillable`. `HasMediaItems::addMediaFromUpload()` generates a UUID and passes it to `$this->media()->create(...)`, which goes through mass assignment — the UUID is silently dropped and the column stays null. `MediaFactory` has the same problem: it defines `'uuid'` in `definition()` but it is never saved.
+The `uuid` column provided no value: all media routes use integer IDs, all media access is behind auth middleware, and the physical file path already uses a UUID-based filename. The column was dead infrastructure. Removed from the migration, `HasMediaItems::addMediaFromUpload()`, and `MediaFactory`.
 
 ---
 
