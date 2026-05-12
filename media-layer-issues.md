@@ -70,23 +70,15 @@ Replaced the raw `MediaModel::query()->where(['library_id' => $id])->paginate(20
 
 ---
 
-### H5. Route name collision between explicit routes and resource
-**File:** `routes/admin.php:99-102`
+### ~~H5. Route name collision between explicit routes and resource~~ — fixed
 
-```php
-Route::get('media/{library_id}/create', ...)->name('media.create');
-Route::post('media/{library_id}/create', ...)->name('media.store');
-Route::resource('media', Media::class);   // also registers media.create and media.store
-```
-
-The resource's registration comes after the explicit routes, so `route('media.create')` resolves to the resource's `GET /admin/media/create` (no `library_id`), not the explicit route. Links generated with `route('media.create')` go to the wrong URL. The resource's `GET /admin/media/create` also hits `Admin\Media::create(string $library_id)` without the required parameter, which will error.
+Added `->except(['create', 'store'])` to the `Route::resource('media', ...)` call. Those two actions are covered by the explicit `media.create` / `media.store` routes above it (which carry the required `{library_id}`). The resource now only registers `index`, `show`, `edit`, `update`, and `destroy` — the five actions the controller implements meaningfully.
 
 ---
 
-### H6. `HasTransformations::transform()` re-uses failed transformations with stale paths
-**File:** `app/Traits/HasTransformations.php:36-43`
+### ~~H6. `HasTransformations::transform()` re-uses failed transformations with stale paths~~ — fixed
 
-If a transformation exists with status `failed`, it is reused as-is (it is non-null and non-complete) and dispatched again. The stored `path` in the failed record may be stale or wrong if `params` changed between calls, but `transform()` does not update it before dispatching.
+`transform()` now has four explicit branches: `complete` → return as-is; `pending` → return as-is (job in flight, no re-dispatch); `failed` → reset `path`, `params`, and `status` to `pending` then dispatch; `null` → create fresh record then dispatch. Two new tests added: one verifying the failed record is updated with current params/path before dispatch, one verifying pending records are returned without creating a duplicate.
 
 ---
 

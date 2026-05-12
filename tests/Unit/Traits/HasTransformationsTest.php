@@ -145,6 +145,57 @@ class HasTransformationsTest extends TestCase
         $this->assertCount(1, Transformation::where('media_id', $media->id)->get());
     }
 
+    public function test_transform_resets_failed_record_with_current_params(): void
+    {
+        $media = Media::factory()->create([
+            'disk'      => 'local',
+            'path'      => 'uploads/photo.jpg',
+            'file_name' => 'photo.jpg',
+        ]);
+
+        // Simulate a previously failed attempt with stale params.
+        Transformation::create([
+            'media_id' => $media->id,
+            'key'      => 'thumb',
+            'disk'     => 'local',
+            'path'     => 'uploads/_t/photo_thumb_old.webp',  // stale
+            'params'   => ['format' => 'webp'],               // stale
+            'status'   => 'failed',
+        ]);
+
+        $result = $media->transform('thumb', ['format' => 'jpg']);
+
+        $result->refresh();
+        // NullTransformationDriver marks synchronously as failed, but path and params
+        // must have been updated to the current call's values before dispatch.
+        $this->assertSame(['format' => 'jpg'], $result->params);
+        $this->assertStringEndsWith('.jpg', $result->path);
+        $this->assertStringNotContainsString('_old', $result->path, 'Stale path must be replaced.');
+        // Must not create a second record.
+        $this->assertCount(1, Transformation::where('media_id', $media->id)->get());
+    }
+
+    public function test_transform_returns_pending_record_without_creating_duplicate(): void
+    {
+        $media = Media::factory()->create([
+            'disk'      => 'local',
+            'path'      => 'uploads/photo.jpg',
+            'file_name' => 'photo.jpg',
+        ]);
+
+        Transformation::create([
+            'media_id' => $media->id,
+            'key'      => 'thumb',
+            'disk'     => 'local',
+            'path'     => 'uploads/_t/photo_thumb.jpg',
+            'status'   => 'pending',
+        ]);
+
+        $media->transform('thumb');
+
+        $this->assertCount(1, Transformation::where('media_id', $media->id)->get());
+    }
+
     // -------------------------------------------------------------------------
     // clearTransformation
     // -------------------------------------------------------------------------

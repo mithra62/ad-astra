@@ -33,7 +33,22 @@ trait HasTransformations
             return $existing;
         }
 
-        $transformation = $existing ?? $this->transformations()->create([
+        if ($existing && $existing->isFailed()) {
+            $existing->update([
+                'path'   => $this->derivedPath($key, $params),
+                'params' => $params,
+                'status' => 'pending',
+            ]);
+            app(TransformationDriverInterface::class)->dispatch($existing);
+            return $existing;
+        }
+
+        if ($existing) {
+            // pending — a job is already in flight, don't re-dispatch
+            return $existing;
+        }
+
+        $transformation = $this->transformations()->create([
             'key'    => $key,
             'disk'   => $this->disk,
             'path'   => $this->derivedPath($key, $params),
