@@ -64,10 +64,9 @@ Replaced `once(fn () => ...)` with a private `resolveFieldHandle(string $handle)
 
 ---
 
-### H4. `Admin\Media\Library::show()` bypasses the `media()` relation, ignoring `sort_order`
-**File:** `app/Http/Controllers/Admin/Media/Library.php:67-71`
+### ~~H4. `Admin\Media\Library::show()` bypasses the `media()` relation, ignoring `sort_order`~~ — fixed
 
-Builds a raw `where(['library_id' => $id])` query instead of `$library->media()`, which has `->orderBy('sort_order')`. Media in the library view is returned in undefined (insertion) order.
+Replaced the raw `MediaModel::query()->where(['library_id' => $id])->paginate(20)` with `$library->media()->paginate(20)`. The `Library::media()` `hasMany` already carries `->orderBy('sort_order')`, so ordering is now correct and the `MediaModel` import was removed as unused.
 
 ---
 

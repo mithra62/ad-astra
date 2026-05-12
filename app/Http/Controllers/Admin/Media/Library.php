@@ -13,7 +13,6 @@ use App\Http\Requests\Media\Library\StoreMediaLibraryFormRequest;
 use App\Http\Requests\Media\Library\UploadMediaRequest;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\Field\Group as FieldGroup;
-use App\Models\Media as MediaModel;
 use App\Models\Media\Library as LibraryModel;
 
 class Library extends Controller
@@ -64,11 +63,7 @@ class Library extends Controller
             abort(404);
         }
 
-        $query = MediaModel::query();
-        $where = [
-            'library_id' => $id,
-        ];
-        $media = $query->where($where)->paginate(20);
+        $media = $library->media()->paginate(20);
 
         $data = [
             'library' => $library,

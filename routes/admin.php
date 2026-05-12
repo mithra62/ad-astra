@@ -99,7 +99,8 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('media/{library_id}/create', [Media::class, 'create'])->name('media.create');
     Route::post('media/{library_id}/create', [Media::class, 'store'])->name('media.store');
     Route::resource('media', Media::class)
-        ->parameters(['media' => 'media_item']); //just to keep things consistent
+        ->except(['create', 'store'])
+        ->parameters(['media' => 'media_item']);
 
     Route::get('categories/{group_id}/create', [Category::class, 'create'])->name('categories.create');
     Route::post('categories/{group_id}/create', [Category::class, 'store'])->name('categories.store');
