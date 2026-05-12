@@ -133,76 +133,95 @@ public function mediaLibraries(): HasMany
 
 ## Part 2 — Database Migrations
 
-Run in this order. The library migration must precede the media migration because the media FK references `statuses`, but both new columns are nullable so no backfill is needed.
+This is a fresh-installation plan. **No new migration files are created.** Instead, three existing migration files are edited in place, following the same deferred-FK pattern already used in the codebase.
 
-### Step 2.1 — `database/migrations/2026_05_12_000001_add_status_group_to_media_libraries_table.php`
+### Why deferred FKs
 
-```php
-<?php
+`media_libraries` was created in December 2025 (`2025_12_27`). `status_groups` and `statuses` are not created until April 2026 (`2026_04_18_000005`, `2026_04_18_000006`). Declaring an immediate FK constraint in the creation migration would fail because the referenced table does not yet exist at that timestamp.
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+The codebase already solves this exact problem for `field_layout_id`: the column is added as a plain `unsignedBigInteger` in the creation migration, and the FK is wired in a later dedicated migration (`2026_05_07_000003_add_media_foreign_keys`). By May 2026, both `field_layouts` and `status_groups` exist, so all FKs can be added there.
 
-return new class extends Migration {
-    public function up(): void
-    {
-        Schema::table('media_libraries', function (Blueprint $table) {
-            $table->foreignId('status_group_id')
-                ->nullable()
-                ->after('field_layout_id')
-                ->constrained('status_groups')
-                ->nullOnDelete();
-        });
-    }
+### Step 2.1 — Edit `database/migrations/2025_12_27_160903_create_media_library_table.php`
 
-    public function down(): void
-    {
-        Schema::table('media_libraries', function (Blueprint $table) {
-            $table->dropForeign(['status_group_id']);
-            $table->dropColumn('status_group_id');
-        });
-    }
-};
-```
-
-### Step 2.2 — `database/migrations/2026_05_12_000002_add_status_to_media_table.php`
+Add `status_group_id` as a plain indexed column, following the same comment style as `field_layout_id`. The FK is wired in Step 2.3.
 
 ```php
-<?php
+// FK to field_layouts added in a later migration — field_layouts does
+// not exist until April 2026. See 2026_05_07_000003_add_media_foreign_keys.
+$table->unsignedBigInteger('field_layout_id')->nullable()->index();
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration {
-    public function up(): void
-    {
-        Schema::table('media', function (Blueprint $table) {
-            $table->foreignId('status_id')
-                ->nullable()
-                ->after('library_id')
-                ->constrained('statuses')
-                ->nullOnDelete();
-
-            $table->string('status_handle')->nullable()->after('status_id')->index();
-            $table->boolean('status_is_public')->default(false)->after('status_handle')->index();
-        });
-    }
-
-    public function down(): void
-    {
-        Schema::table('media', function (Blueprint $table) {
-            $table->dropForeign(['status_id']);
-            $table->dropIndex(['status_handle']);
-            $table->dropIndex(['status_is_public']);
-            $table->dropColumn(['status_id', 'status_handle', 'status_is_public']);
-        });
-    }
-};
+// FK to status_groups added in a later migration — status_groups does
+// not exist until April 2026. See 2026_05_07_000003_add_media_foreign_keys.
+$table->unsignedBigInteger('status_group_id')->nullable()->index();
 ```
 
-After adding both migrations:
+The `down()` method requires no change — `Schema::dropIfExists('media_libraries')` drops the column along with the table.
+
+### Step 2.2 — Edit `database/migrations/2025_12_26_134324_create_media_table.php`
+
+Add `status_id`, `status_handle`, and `status_is_public` inside the existing `Schema::create` block. Place them after the `library_id` line. `status_id` is a plain indexed column for the same reason as above; the FK is wired in Step 2.3.
+
+```php
+// FK to media_libraries — see note in create_media_library_table migration.
+$table->unsignedBigInteger('library_id')->nullable()->index();
+
+// FK to statuses added in a later migration — statuses does not exist
+// until April 2026. See 2026_05_07_000003_add_media_foreign_keys.
+$table->unsignedBigInteger('status_id')->nullable()->index();
+$table->string('status_handle')->nullable()->index();
+$table->boolean('status_is_public')->default(false)->index();
+```
+
+The `down()` method requires no change — `Schema::dropIfExists('media')` drops the table entirely.
+
+### Step 2.3 — Edit `database/migrations/2026_05_07_000003_add_media_foreign_keys.php`
+
+Add the two new FK constraints alongside the existing `field_layout_id` FK. By this timestamp (May 2026) both `status_groups` and `statuses` exist.
+
+```php
+public function up(): void
+{
+    // media_libraries.field_layout_id → field_layouts
+    Schema::table('media_libraries', function (Blueprint $table) {
+        $table->foreign('field_layout_id')
+              ->references('id')
+              ->on('field_layouts')
+              ->nullOnDelete();
+
+        // NEW
+        $table->foreign('status_group_id')
+              ->references('id')
+              ->on('status_groups')
+              ->nullOnDelete();
+    });
+
+    // NEW — media.status_id → statuses
+    Schema::table('media', function (Blueprint $table) {
+        $table->foreign('status_id')
+              ->references('id')
+              ->on('statuses')
+              ->nullOnDelete();
+    });
+
+    // NOTE: media.library_id intentionally has NO FK constraint.
+    // ... (existing comment preserved verbatim)
+}
+
+public function down(): void
+{
+    Schema::table('media_libraries', function (Blueprint $table) {
+        $table->dropForeign(['field_layout_id']);
+        $table->dropForeign(['status_group_id']); // NEW
+    });
+
+    // NEW
+    Schema::table('media', function (Blueprint $table) {
+        $table->dropForeign(['status_id']);
+    });
+}
+```
+
+After editing all three files, run:
 
 ```bash
 php artisan migrate
@@ -688,22 +707,25 @@ test_validate_passes_regardless_of_media_status
 
 These steps are independent of each other unless noted. Steps 1–4 can be done together before running migrations.
 
-| # | Step | Depends on | File |
-|---|---|---|---|
-| 1 | Create `HasStatusGroup` trait | — | `app/Traits/HasStatusGroup.php` |
-| 2 | Update `EntryGroup` (remove inline methods, add trait) | Step 1 | `app/Models/EntryGroup.php` |
-| 3 | Update `Library` model (add trait + fillable) | Step 1 | `app/Models/Media/Library.php` |
-| 4 | Update `StatusGroup` (add `mediaLibraries()`) | — | `app/Models/StatusGroup.php` |
-| 5 | Run migrations | Steps 2–4 | `php artisan migrate [--env=testing]` |
-| 6 | Update `Media` model (fillable, casts, scopes, relationship) | Step 5 | `app/Models/Media.php` |
-| 7 | Update `MediaRepository` (`applyStatus` helper) | Step 6 | `app/Repositories/MediaRepository.php` |
-| 8 | Update `EditMediaRequest` (status validation rule) | Step 3 | `app/Http/Requests/Media/EditMediaRequest.php` |
-| 9 | Update `HasMediaItems` (default status on upload) | Steps 3, 6 | `app/Traits/HasMediaItems.php` |
-| 10 | Update admin `Media` controller (eager load) | — | `app/Http/Controllers/Admin/Media.php` |
-| 11 | Update factories | Step 5 | `database/factories/Media/LibraryFactory.php`, `database/factories/MediaFactory.php` |
-| 12 | Write tests | Steps 1–11 | `tests/Feature/Admin/MediaStatusTest.php` |
+| # | Step | Action | Depends on | File |
+|---|---|---|---|---|
+| 1 | Create `HasStatusGroup` trait | New file | — | `app/Traits/HasStatusGroup.php` |
+| 2 | Update `EntryGroup` (remove inline methods, add trait) | Edit | Step 1 | `app/Models/EntryGroup.php` |
+| 3 | Update `Library` model (add trait + fillable) | Edit | Step 1 | `app/Models/Media/Library.php` |
+| 4 | Update `StatusGroup` (add `mediaLibraries()`) | Edit | — | `app/Models/StatusGroup.php` |
+| 5 | Edit media library creation migration (add `status_group_id` column) | Edit existing | — | `database/migrations/2025_12_27_160903_create_media_library_table.php` |
+| 6 | Edit media creation migration (add `status_id`, `status_handle`, `status_is_public` columns) | Edit existing | — | `database/migrations/2025_12_26_134324_create_media_table.php` |
+| 7 | Edit add_media_foreign_keys migration (wire both FKs) | Edit existing | Steps 5–6 | `database/migrations/2026_05_07_000003_add_media_foreign_keys.php` |
+| 8 | Run migrations | — | Steps 5–7 | `php artisan migrate && php artisan migrate --env=testing` |
+| 9 | Update `Media` model (fillable, casts, scopes, relationship) | Edit | Step 8 | `app/Models/Media.php` |
+| 10 | Update `MediaRepository` (`applyStatus` helper) | Edit | Step 9 | `app/Repositories/MediaRepository.php` |
+| 11 | Update `EditMediaRequest` (status validation rule) | Edit | Step 3 | `app/Http/Requests/Media/EditMediaRequest.php` |
+| 12 | Update `HasMediaItems` (default status on upload) | Edit | Steps 3, 9 | `app/Traits/HasMediaItems.php` |
+| 13 | Update admin `Media` controller (eager load) | Edit | — | `app/Http/Controllers/Admin/Media.php` |
+| 14 | Update factories | Edit | Step 8 | `database/factories/Media/LibraryFactory.php`, `database/factories/MediaFactory.php` |
+| 15 | Write tests | New file | Steps 1–14 | `tests/Feature/Admin/MediaStatusTest.php` |
 
-Steps 1, 2, 3, 4 can be done in parallel. Steps 6, 7, 8, 9, 10 can be done in parallel after Step 5. Tests should be written after all implementation is done but verified against `php artisan test` before committing.
+Steps 1, 2, 3, 4, 5, 6 are independent and can be done in parallel. Step 7 depends on 5 and 6. Steps 9–13 can be done in parallel after Step 8. Write tests last and verify with `php artisan test` before committing.
 
 ---
 
