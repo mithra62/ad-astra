@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 class FileUpload extends AbstractField
 {
     protected string $handle = 'file_upload';
-    protected string $name   = 'File Upload';
+    protected string $name = 'File Upload';
 
     /** @var array<string, int|null> */
     private static array $libraryHandleCache = [];
@@ -32,11 +32,13 @@ class FileUpload extends AbstractField
      *   2. All submitted IDs exist in the media table
      *   3. If a library is configured, all items belong to that library
      *   4. Field-level allowed_types override (MIME check)
+     *
+     * @todo convert into Laravel validation rules
      */
     public function validate(mixed $value): bool|string
     {
         $ids = $this->normaliseIds($value);
-        $min = (int) $this->getSetting('min', 0);
+        $min = (int)$this->getSetting('min', 0);
         $max = $this->getSetting('max');
 
         if ($min > 0 && count($ids) < $min) {
@@ -44,8 +46,8 @@ class FileUpload extends AbstractField
             return "At least {$min} {$noun} must be selected.";
         }
 
-        if ($max !== null && count($ids) > (int) $max) {
-            $noun = (int) $max === 1 ? 'file' : 'files';
+        if ($max !== null && count($ids) > (int)$max) {
+            $noun = (int)$max === 1 ? 'file' : 'files';
             return "No more than {$max} {$noun} may be selected.";
         }
 
@@ -54,7 +56,7 @@ class FileUpload extends AbstractField
         }
 
         // Verify all submitted IDs actually exist.
-        $found   = Media::whereIn('id', $ids)->pluck('id')->all();
+        $found = Media::whereIn('id', $ids)->pluck('id')->all();
         $missing = array_diff($ids, $found);
         if (!empty($missing)) {
             return 'One or more selected files no longer exist.';
@@ -68,7 +70,7 @@ class FileUpload extends AbstractField
 
         if ($libraryId) {
             $outsideLibrary = Media::whereIn('id', $ids)
-                ->where('library_id', '!=', (int) $libraryId)
+                ->where('library_id', '!=', (int)$libraryId)
                 ->pluck('id')
                 ->all();
             if (!empty($outsideLibrary)) {
@@ -80,7 +82,7 @@ class FileUpload extends AbstractField
         $allowedTypes = $this->getSetting('allowed_types');
         if (!empty($allowedTypes)) {
             $badType = Media::whereIn('id', $ids)
-                ->whereNotIn('mime_type', (array) $allowedTypes)
+                ->whereNotIn('mime_type', (array)$allowedTypes)
                 ->exists();
             if ($badType) {
                 return 'One or more selected files have a disallowed file type.';
@@ -121,7 +123,7 @@ class FileUpload extends AbstractField
         return Media::whereIn('id', $ids)
             ->with('fieldValues.field.fieldType')
             ->get()
-            ->sortBy(fn ($m) => array_search($m->id, $ids))
+            ->sortBy(fn($m) => array_search($m->id, $ids))
             ->values();
     }
 

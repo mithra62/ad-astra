@@ -32,6 +32,8 @@ class Relationship extends AbstractField
 
     /**
      * Validate that the value is an array of IDs (or empty/null).
+     *
+     * @todo convert into Laravel validation rules
      */
     public function validate(mixed $value): bool|string
     {

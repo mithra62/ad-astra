@@ -5,6 +5,7 @@
 {% set active_nav = 'members' %}
 {% set active_user_section = 'roles' %}
 {% set has_secondary_sidebar = true %}
+{% set active_secondary_nav = 'create_role' %}
 
 {% block breadcrumbs %}
     <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
@@ -21,7 +22,7 @@
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <span class="text-slate-800">{{ selected_role.label }}</span>
+        <span class="text-slate-800">Create Role</span>
     </nav>
 {% endblock %}
 
@@ -33,7 +34,7 @@
     <div class="flex min-w-0 flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Create User Role</h1>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Create Role</h1>
                 <p class="mt-1 text-sm text-slate-500">Assign capabilities to one role at a time using the seeded permission domains.</p>
             </div>
             <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:self-auto" href="{{ route('roles.index') }}">

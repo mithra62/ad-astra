@@ -122,7 +122,7 @@
                 {% endif %}
 
                 {% if group.categoryGroups().count >= 1 %}
-                    {{ include('admin.entries._taxonomy') }}
+                    {{ include('admin.entries._taxonomy', {group: group}) }}
                 {% endif %}
 
                 <!-- Tab footer: prev/next navigation -->
@@ -177,7 +177,8 @@
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-slate-700" for="published_at">Publish Date</label>
                             <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                                   id="published_at" name="published_at" type="datetime-local">
+                                   id="published_at" name="published_at" type="datetime-local"
+                                   value="{{ old('published_at', entry.published_at ? entry.published_at.format('Y-m-d\\TH:i') : '') }}">
                             <p class="mt-1 text-xs text-slate-400">Leave blank to use status overrides.</p>
                         </div>
 {#                        <div>#}

@@ -22,6 +22,11 @@ abstract class AbstractField
     protected array $settings = [];
 
     /**
+     * @var array
+     */
+    protected array $settings_form = [];
+
+    /**
      * @var Field|null
      */
     protected ?Field $field;
