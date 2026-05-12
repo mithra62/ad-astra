@@ -2,11 +2,14 @@
 
 namespace Tests\Unit\Traits;
 
+use App\Models\Field;
+use App\Models\Field\Type as FieldType;
 use App\Models\Media;
 use App\Models\Media\Library;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -16,6 +19,24 @@ use Tests\TestCase;
 class HasMediaTest extends TestCase
 {
     use RefreshDatabase;
+
+    // -------------------------------------------------------------------------
+    // Setup
+    // -------------------------------------------------------------------------
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Reset static handle cache so each test starts with a clean slate.
+        $this->resetFieldHandleCache();
+    }
+
+    private function resetFieldHandleCache(): void
+    {
+        $ref = new \ReflectionProperty(\App\Traits\HasMedia::class, 'fieldHandleCache');
+        $ref->setAccessible(true);
+        $ref->setValue(null, []);
+    }
 
     // -------------------------------------------------------------------------
     // Helpers
@@ -239,5 +260,76 @@ class HasMediaTest extends TestCase
         $user->attachMedia($media); // field_id = 0 sentinel
 
         $this->assertCount(0, $user->mediaForField(7)->get());
+    }
+
+    // -------------------------------------------------------------------------
+    // H3 — handle→ID lookup is cached (only one query per unique handle)
+    // -------------------------------------------------------------------------
+
+    public function test_media_for_field_with_string_handle_queries_db_once(): void
+    {
+        Storage::fake('local');
+        $user  = User::factory()->create();
+        $field = Field::factory()->create(['handle' => 'gallery']);
+        $lib   = $this->makeLibrary();
+        $media = $this->makeMedia($lib);
+
+        DB::table('mediables')->insert([
+            'media_id'      => $media->id,
+            'mediable_type' => 'user',
+            'mediable_id'   => $user->id,
+            'field_id'      => $field->id,
+            'sort_order'    => 0,
+            'created_at'    => now(),
+            'updated_at'    => now(),
+        ]);
+
+        DB::enableQueryLog();
+
+        $user->mediaForField('gallery')->get(); // first call — should query fields table
+        $queryCountAfterFirst = count(DB::getQueryLog());
+
+        $user->mediaForField('gallery')->get(); // second call — cache hit, no fields query
+        $queryCountAfterSecond = count(DB::getQueryLog());
+
+        DB::disableQueryLog();
+
+        // Each ->get() runs at least one mediables query; the fields lookup
+        // should only appear once total (between the two calls).
+        $queriesDuringSecondCall = $queryCountAfterSecond - $queryCountAfterFirst;
+        $this->assertSame(1, $queriesDuringSecondCall,
+            'Second mediaForField() call should only run the mediables query, not the fields lookup.');
+    }
+
+    public function test_media_for_field_caches_different_handles_independently(): void
+    {
+        Storage::fake('local');
+        $user    = User::factory()->create();
+        $type    = FieldType::firstOrCreate(['object' => \App\Field\Types\Text::class], ['name' => 'Text', 'settings' => []]);
+        $gallery  = Field::factory()->create(['handle' => 'gallery-a', 'field_type_id' => $type->id]);
+        $featured = Field::factory()->create(['handle' => 'featured-a', 'field_type_id' => $type->id]);
+
+        DB::enableQueryLog();
+
+        $user->mediaForField('gallery-a')->get();
+        $user->mediaForField('featured-a')->get(); // different handle — must query fields table once more
+
+        $log = DB::getQueryLog();
+        DB::disableQueryLog();
+
+        $fieldQueries = collect($log)->filter(
+            fn ($q) => str_contains($q['query'], 'fields') && str_contains($q['query'], 'handle')
+        );
+
+        $this->assertSame(2, $fieldQueries->count(),
+            'Each unique handle should produce exactly one fields lookup.');
+    }
+
+    public function test_media_for_field_returns_null_field_id_for_unknown_handle(): void
+    {
+        $user   = User::factory()->create();
+        $result = $user->mediaForField('no-such-field')->get();
+
+        $this->assertCount(0, $result);
     }
 }

@@ -2,7 +2,7 @@
 
 *Compiled 2026-05-11. Based on comparison of `media-layer-implementation.md` against the live codebase on the `media` branch.*
 
-**Summary:** 0 critical · 7 high · 5 medium · 5 low
+**Summary:** 0 critical · 6 high · 5 medium · 5 low
 
 ---
 
@@ -46,13 +46,9 @@ Added `if ($path === false)` guard between `storeAs()` and the transaction, thro
 
 ## High — Incorrect Behaviour
 
-### H1. `EditMediaRequest` diverges from the plan and the update flow
-**File:** `app/Http/Requests/Media/EditMediaRequest.php`
+### ~~H1. `EditMediaRequest` diverges from the plan and the update flow~~ — resolved by design decision
 
-The plan (Step 18b) specifies a simple request validating `name`, `alt_text`, and `title`. The actual request dynamically generates rules from the library's field layout. This is a legitimate design evolution, but it has two downstream problems:
-
-- **`alt_text` and `title` are validated and handled nowhere.** They were in the plan, were never added to the migration or `$fillable`, and the new dynamic request also does not include them. If those fields are no longer part of the design, the migration plan and model need to be formally updated to reflect that.
-- **`MediaRepository::applyCoreAttributes()` only handles `name` and `sort_order`** (`app/Repositories/MediaRepository.php:68-77`). Dynamic field values submitted under `fields.*` go through `applyFieldValues()` correctly, but any core scalar metadata beyond `name` cannot be updated through the current edit flow.
+`alt_text` is now a custom field on the library's field layout (see C1); `title` is canonical to `name`. The dynamic `EditMediaRequest` is therefore correct. `MediaRepository::applyCoreAttributes()` handling only `name` and `sort_order` is complete — those are the only core scalar attributes remaining on the model. No code changes needed.
 
 ---
 
@@ -62,14 +58,9 @@ Resolved as part of the C4 fix. The private `resolvedSchema()` cache means `mess
 
 ---
 
-### H3. `HasMedia::mediaForField()` — `once()` memoization is a no-op
-**File:** `app/Traits/HasMedia.php:56`
+### ~~H3. `HasMedia::mediaForField()` — `once()` memoization is a no-op~~ — fixed
 
-```php
-: once(fn () => \App\Models\Field::where('handle', $field)->value('id'));
-```
-
-A new anonymous closure is created on every call to `mediaForField()`. `once()` keys its cache by closure identity (`spl_object_id`), so each call produces a unique object and `once()` always executes the query. The memoization never fires. A static property cache keyed by handle string would be needed for the intended effect.
+Replaced `once(fn () => ...)` with a private `resolveFieldHandle(string $handle): ?int` method that checks/populates `private static array $fieldHandleCache`. The static array is keyed by handle string and shared across all trait hosts and instances in a process, so the `fields` lookup fires at most once per unique handle. `setUp()` in `HasMediaTest` uses `ReflectionProperty` to reset the cache before each test. Three new caching tests added.
 
 ---
 

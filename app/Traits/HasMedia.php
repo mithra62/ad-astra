@@ -45,21 +45,39 @@ trait HasMedia
     }
 
     /**
+     * Process-wide handle→ID cache shared across all instances and requests.
+     * Static so the lookup survives across multiple model instances in one process.
+     *
+     * @var array<string, int|null>
+     */
+    private static array $fieldHandleCache = [];
+
+    /**
      * Media attached via a specific FileUpload field.
      * Pass int ID in batch contexts; pass string handle in single-model contexts.
-     * once() memoises the handle→ID lookup within one request lifecycle.
+     * Handle→ID lookups are cached in a static array keyed by handle string,
+     * so repeated calls with the same handle only hit the DB once per process.
      */
     public function mediaForField(string|int $field): MorphToMany
     {
         $fieldId = is_int($field)
             ? $field
-            : once(fn () => \App\Models\Field::where('handle', $field)->value('id'));
+            : $this->resolveFieldHandle($field);
 
         return $this->morphToMany(Media::class, 'mediable', 'mediables')
                     ->wherePivot('field_id', $fieldId)
                     ->withTimestamps()
                     ->withPivot('sort_order', 'field_id')
                     ->orderByPivot('sort_order');
+    }
+
+    private function resolveFieldHandle(string $handle): ?int
+    {
+        if (!array_key_exists($handle, static::$fieldHandleCache)) {
+            static::$fieldHandleCache[$handle] = \App\Models\Field::where('handle', $handle)->value('id');
+        }
+
+        return static::$fieldHandleCache[$handle];
     }
 
     /** Attach a media item as a direct attachment. Idempotent. */
