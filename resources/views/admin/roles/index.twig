@@ -105,7 +105,11 @@
                                 <div class="flex items-start gap-3">
                                     <span class="mt-0.5 h-10 w-10 shrink-0 rounded-md ring-1 ring-inset ring-slate-200" style="background-color: {{ role.highlight }}"></span>
                                     <div class="min-w-0">
-                                        <a class="font-medium text-slate-900 hover:text-emerald-700" href="view-role.twig">{{ role.name|title }}</a>
+                                        {% if role.name != 'super admin' %}
+                                        <a class="font-medium text-slate-900 hover:text-emerald-700" href="{{ route('roles.edit', role) }}">{{ role.name|title }}</a>
+                                        {% else %}
+                                            {{ role.name|title }}
+                                        {% endif %}
                                         <div class="row-actions mt-0.5 flex flex-wrap items-center gap-2 text-xs">
                                             {% if role.name != 'super admin' %}
                                                 <a class="text-emerald-600 hover:underline" href="{{ route('roles.edit', role.id) }}">Edit</a>

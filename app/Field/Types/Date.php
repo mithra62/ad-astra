@@ -21,7 +21,6 @@ class Date extends AbstractField
 
     public function render(array $params): string
     {
-        //$params['field'] = $this;
         return view('_fields.date', $params)->render();
     }
 }
