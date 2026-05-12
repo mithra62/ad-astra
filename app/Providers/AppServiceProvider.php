@@ -24,6 +24,7 @@ use App\Services\CategoryService;
 use App\Services\EntryAuthorService;
 use App\Services\FieldService;
 use App\Services\FilesService;
+use App\Services\Media\GDTransformationDriver;
 use App\Services\Media\NullTransformationDriver;
 use App\Services\Media\TransformationDriverInterface;
 use App\Services\MediaStorageService;
@@ -65,7 +66,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(EntryAuthorService::class, fn() => new EntryAuthorService());
 
         // Media layer
-        $this->app->bind(TransformationDriverInterface::class, NullTransformationDriver::class);
+        $this->app->bind(TransformationDriverInterface::class, function () {
+            if (extension_loaded('imagick')) return new \App\Services\Media\ImagickTransformationDriver();
+            if (extension_loaded('gd'))      return new GDTransformationDriver();
+            return new NullTransformationDriver();
+        });
         $this->app->singleton('media-service', fn() => new MediaStorageService());
     }
 

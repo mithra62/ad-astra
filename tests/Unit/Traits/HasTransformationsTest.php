@@ -4,6 +4,8 @@ namespace Tests\Unit\Traits;
 
 use App\Models\Media;
 use App\Models\Media\Transformation;
+use App\Services\Media\NullTransformationDriver;
+use App\Services\Media\TransformationDriverInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -15,9 +17,14 @@ class HasTransformationsTest extends TestCase
 {
     use RefreshDatabase;
 
-    // The AppServiceProvider binds NullTransformationDriver by default, which
-    // marks dispatched transformations as 'failed'. Tests that need a complete
-    // status must set it directly on the Transformation record.
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Isolate trait tests from whichever driver is configured in production.
+        // NullTransformationDriver marks dispatched transformations as 'failed',
+        // so tests that need a complete status must set it directly on the record.
+        $this->app->bind(TransformationDriverInterface::class, NullTransformationDriver::class);
+    }
 
     // -------------------------------------------------------------------------
     // getTransformation / transformation

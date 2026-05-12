@@ -82,10 +82,11 @@ Added `->except(['create', 'store'])` to the `Route::resource('media', ...)` cal
 
 ---
 
-### H7. `TransformationDriverInterface` API is incoherent
-**File:** `app/Services/Media/TransformationDriverInterface.php`
+### ~~H7. `TransformationDriverInterface` API is incoherent~~ — fixed
 
-The interface declares fluent builder methods (`resize()`, `fit()`, `crop()`, etc.) returning `static`, implying a builder chain. But `dispatch(Transformation $t)` operates on a pre-built `Transformation` model whose `params` JSON column already holds the parameters. There is no clear path from calling `$driver->resize(100, 100)` to having those values influence `dispatch()`. Any real driver implementation would have to invent its own convention. The builder methods and the `dispatch`/`applySync` contract belong in separate interfaces, or the builder methods should be removed.
+Adopted the executor-only model. Removed the six fluent builder methods (`resize`, `fit`, `crop`, `quality`, `format`, `sharpen`, `watermark`) from the interface and their no-op implementations from `NullTransformationDriver`. The interface now declares only `dispatch()` and `applySync()`. Drivers read operation intent from `$transformation->params` (the JSON column), which already crosses the queue boundary correctly. No callers of the removed methods existed in the codebase.
+
+`GDTransformationDriver` implemented as the default driver (replaces `NullTransformationDriver` in `AppServiceProvider`). Params schema (Option A — named keys): `width`, `height`, `mode` (`cover` / `contain` / `exact`, default `cover`), `format` (`jpg` / `png` / `gif` / `webp`), `quality` (0–100, default 85). `ProcessTransformation` queued job added — driver-agnostic, resolves driver from container. `HasTransformationsTest` now rebinds `NullTransformationDriver` in setUp to stay isolated from the active driver. 9 new tests in `GDTransformationDriverTest`.
 
 ---
 
