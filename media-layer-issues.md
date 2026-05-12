@@ -98,29 +98,27 @@ Added `->with('fieldValues.field.fieldType')` to the `whereIn` query in `value()
 
 ## Medium — Broken Contracts / Missing Pieces
 
-### M1. `Library::create()` action generates a FieldLayout without uniqueness protection
-**File:** `app/Actions/Media/Library/CreateNewMediaLibrary.php:13`
+### ~~M1. `Library::create()` action generates a FieldLayout without uniqueness protection~~ — resolved by design decision
 
-Always calls `FieldLayout::create(['handle' => $input['handle'] . '-layout-media'])`. If a field layout with that handle already exists (from a previously deleted library or a naming collision), the insert fails without a clear error. No uniqueness check or `firstOrCreate` guard is in place.
-
----
-
-### M2. `Admin\Media\Library::edit()` eager-loads only `categoryGroups`, not `fieldGroups`
-**File:** `app/Http/Controllers/Admin/Media/Library.php:102`
-
-Passes `with('categoryGroups')` only. The edit view needs to know which field groups are currently attached in order to pre-select them. Without eager-loading, those are lazy-loaded (N+1) or missing from the view data.
+The automatic `FieldLayout::create()` call was removed entirely. Field layouts are first-class citizens managed manually through the FieldLayout admin UI; a library is created without one and a layout is assigned explicitly if needed. The stale `use App\Models\FieldLayout` import was also removed.
 
 ---
 
-### M3. `UploadMediaRequest` requires `name`, preventing filename fallback
-**File:** `app/Http/Requests/Media/Library/UploadMediaRequest.php:33-36`
+### ~~M2. `Admin\Media\Library::edit()` eager-loads only `categoryGroups`, not `fieldGroups`~~ — fixed manually
 
-`name` is `required`. `HasMediaItems::addMediaFromUpload()` already derives a name from `PATHINFO_FILENAME` of the original filename. Making `name` required at the HTTP boundary forces every upload form to include an explicit name field even when a sensible default exists.
+`with('categoryGroups')` expanded to `with('categoryGroups', 'fieldGroups')` on line 97.
 
 ---
 
-### M4. `MediaStorageService::delete()` indirection through library is unnecessary
-Beyond the null-crash noted in C3, routing a simple soft-delete through `$media->library->removeMedia($media)` (which just calls `$media->delete()`) adds a needless layer and an extra DB query to load the library. `DeleteMedia` action and `MediaStorageService` should call `$media->delete()` directly.
+### ~~M3. `UploadMediaRequest` requires `name`, preventing filename fallback~~ — fixed manually
+
+`name` rule changed from `required` to `nullable` — upload forms no longer need to supply an explicit name, and `addMediaFromUpload()` falls back to `PATHINFO_FILENAME` of the original filename.
+
+---
+
+### ~~M4. `MediaStorageService::delete()` indirection through library is unnecessary~~ — resolved with C3
+
+`delete()` and `purge()` were rewritten to operate directly on the media item as part of the C3 fix. Stale `use App\Models\Media\Library` import removed in M4 pass.
 
 ---
 

@@ -94,7 +94,7 @@ class Library extends Controller
      */
     public function edit(string $id)
     {
-        $library = LibraryModel::with('categoryGroups')->find($id);
+        $library = LibraryModel::with('categoryGroups', 'fieldGroups')->find($id);
         if (!$library instanceof LibraryModel) {
             abort(404);
         }

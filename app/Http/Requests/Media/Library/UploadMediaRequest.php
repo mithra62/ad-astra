@@ -32,7 +32,7 @@ class UploadMediaRequest extends FormRequest
 
         return [
             'file' => $fileRules,
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['nullable', 'string', 'max:255'],
             'categories' => ['nullable', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
         ];
