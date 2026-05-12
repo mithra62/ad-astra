@@ -5,6 +5,7 @@
 {% set active_nav = 'members' %}
 {% set active_user_section = 'users' %}
 {% set has_secondary_sidebar = true %}
+{% set active_secondary_nav = 'view' %}
 
 {% block breadcrumbs %}
     <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
@@ -253,6 +254,7 @@
                         {% endif %}
                     </div>
 
+                    {% if can('manage user status') %}
                     {# Status change form #}
                     <form method="POST"
                           action="{{ route('users.status.update', user.id) }}"
@@ -351,6 +353,8 @@
                             Update Status
                         </button>
                     </form>
+
+                    {% endif %}
 
                     {# Unlock action — only shown when account is locked #}
                     {% if user.isLocked() %}

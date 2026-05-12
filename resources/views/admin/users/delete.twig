@@ -5,14 +5,23 @@
 {% set active_nav = 'members' %}
 {% set active_user_section = 'users' %}
 {% set has_secondary_sidebar = true %}
+{% set active_secondary_nav = 'delete' %}
 
 {% block breadcrumbs %}
     <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">Dashboard</a>
+        <a class="hover:text-slate-800" href="{{ route('dashboard') }}"><svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg> Dashboard</a>
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         <a class="hover:text-slate-800" href="{{ route('users.index') }}">Users</a>
+
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('users.show', user) }}">
+            {{ user.name }}
+        </a>
+
         <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-        <span class="text-red-600">Delete</span>
+        <span class="text-slate-800">Delete User</span>
     </nav>
 {% endblock %}
 
