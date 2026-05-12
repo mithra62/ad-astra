@@ -176,4 +176,54 @@ class HasMediaItemsTest extends TestCase
         $this->assertEquals('Hero Image', $media->name);
     }
 
+    public function test_add_media_from_upload_throws_runtime_exception_when_store_returns_false(): void
+    {
+        $this->mockFailingDisk();
+
+        $library = $this->makeLibrary();
+        $file    = UploadedFile::fake()->image('fail.jpg');
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessageMatches('/Failed to store/');
+
+        $library->addMediaFromUpload($file);
+    }
+
+    public function test_add_media_from_upload_leaves_no_db_record_when_store_returns_false(): void
+    {
+        $this->mockFailingDisk();
+
+        $library = $this->makeLibrary();
+        $file    = UploadedFile::fake()->image('fail.jpg');
+
+        try {
+            $library->addMediaFromUpload($file);
+        } catch (\RuntimeException $e) {
+            // expected
+        }
+
+        $this->assertDatabaseEmpty('media');
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Binds a fake FilesystemManager into the container whose disk() returns a
+     * mock that reports putFileAs() failure (returns false). This exercises the
+     * $path === false guard in addMediaFromUpload() without needing a real disk.
+     */
+    private function mockFailingDisk(): void
+    {
+        $mockDisk = $this->createMock(\Illuminate\Contracts\Filesystem\Filesystem::class);
+        $mockDisk->method('putFileAs')->willReturn(false);
+
+        $mockManager = $this->createMock(\Illuminate\Filesystem\FilesystemManager::class);
+        $mockManager->method('disk')->willReturn($mockDisk);
+
+        $this->app->instance('filesystem', $mockManager);
+        $this->app->instance(\Illuminate\Contracts\Filesystem\Factory::class, $mockManager);
+    }
+
 }

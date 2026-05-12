@@ -2,7 +2,7 @@
 
 *Compiled 2026-05-11. Based on comparison of `media-layer-implementation.md` against the live codebase on the `media` branch.*
 
-**Summary:** 2 critical · 7 high · 5 medium · 5 low
+**Summary:** 0 critical · 7 high · 5 medium · 5 low
 
 ---
 
@@ -32,17 +32,15 @@ Replaced the three independent `resolvedFields()` calls with a private `resolved
 
 ---
 
-### C5. `HasMediaItems::addMediaFromUpload()` does not check for `storeAs()` failure
-**File:** `app/Traits/HasMediaItems.php:38`
+### ~~C5. `HasMediaItems::addMediaFromUpload()` does not check for `storeAs()` failure~~ — fixed
 
-`$file->storeAs()` returns `false` on failure. The code proceeds directly to the DB transaction and stores `false` as `path`, producing an unreadable record. No exception is thrown; the bad record persists.
+Added `if ($path === false)` guard between `storeAs()` and the transaction, throwing `RuntimeException` immediately with no DB write. Note: `FilesystemAdapter::put()` catches Flysystem exceptions internally and returns `false`, so this path is reachable in production. Covered by two new tests in `HasMediaItemsTest` that mock the filesystem manager at the container level to return `false` from `putFileAs()`.
 
 ---
 
-### C6. Spatie tags migration still present (converted to no-op but not deleted)
-**File:** `database/migrations/2025_12_27_152812_create_tag_tables.php`
+### ~~C6. Spatie tags migration still present (converted to no-op but not deleted)~~ — resolved manually
 
-The plan (Step 1) says to delete this file. It has been converted to a no-op class instead. It no longer creates orphaned tables, but it is dead file noise in the migrations directory and the plan's checklist item remains technically unfulfilled.
+`database/migrations/2025_12_27_152812_create_tag_tables.php` deleted.
 
 ---
 
