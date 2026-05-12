@@ -27,7 +27,7 @@ class StoreEntryRequest extends FormRequest
             [
                 'type_handle' => ['required', 'string', 'exists:entry_types,handle'],
                 'title' => ['required', 'string', 'max:255'],
-                'handle' => ['required', 'string', 'max:255'],
+                'handle' => ['nullable', 'string', 'max:255'],
                 'status' => [
                     'nullable',
                     'string',
