@@ -7,11 +7,20 @@ use App\Models\Media;
 use App\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class FileUploadTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $ref = new \ReflectionProperty(FileUpload::class, 'libraryHandleCache');
+        $ref->setAccessible(true);
+        $ref->setValue(null, []);
+    }
 
     // -------------------------------------------------------------------------
     // Helpers
@@ -279,5 +288,67 @@ class FileUploadTest extends TestCase
         $result = $type->validate(json_encode([$media->id]));
 
         $this->assertTrue($result);
+    }
+
+    // -------------------------------------------------------------------------
+    // H8 — value() eager-loads field values
+    // -------------------------------------------------------------------------
+
+    public function test_value_eager_loads_field_values_on_returned_media(): void
+    {
+        $media = Media::factory()->count(2)->create();
+
+        $result = $this->make()->value(json_encode($media->pluck('id')->all()));
+
+        // fieldValues relation must be loaded (not lazy) on every returned model.
+        foreach ($result as $item) {
+            $this->assertTrue($item->relationLoaded('fieldValues'),
+                "fieldValues relation should be eager-loaded on Media id={$item->id}");
+        }
+    }
+
+    public function test_value_incurs_no_extra_queries_per_item_for_field_values(): void
+    {
+        $media = Media::factory()->count(3)->create();
+        $ids   = json_encode($media->pluck('id')->all());
+
+        // Warm the query — first call may hit schema inspection caches.
+        $this->make()->value($ids);
+
+        DB::enableQueryLog();
+        $this->make()->value($ids);
+        $count = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        // Expect: 1 media query + up to 1 fieldValues query + up to 1 field query
+        // + up to 1 fieldType query = at most 4. Never N per media item.
+        $this->assertLessThanOrEqual(4, $count,
+            "value() should use eager loading, not one query per media item.");
+    }
+
+    // -------------------------------------------------------------------------
+    // validate() library_handle cache — single lookup per unique handle
+    // -------------------------------------------------------------------------
+
+    public function test_validate_library_handle_queries_db_only_once_per_handle(): void
+    {
+        $library = $this->makeLibrary('cache-test');
+        $media   = Media::factory()->create(['library_id' => $library->id]);
+        $type    = $this->make(['library_handle' => 'cache-test']);
+        $ids     = json_encode([$media->id]);
+
+        $type->validate($ids); // warms the cache
+
+        DB::enableQueryLog();
+        $type->validate($ids);
+        $log = DB::getQueryLog();
+        DB::disableQueryLog();
+
+        $libraryLookups = collect($log)->filter(
+            fn ($q) => str_contains($q['query'], 'media_libraries') && str_contains($q['query'], 'handle')
+        );
+
+        $this->assertSame(0, $libraryLookups->count(),
+            'Second validate() call must not re-query media_libraries for the same handle.');
     }
 }

@@ -11,6 +11,9 @@ class FileUpload extends AbstractField
     protected string $handle = 'file_upload';
     protected string $name   = 'File Upload';
 
+    /** @var array<string, int|null> */
+    private static array $libraryHandleCache = [];
+
     public function storageColumn(): string
     {
         return 'value_json';
@@ -60,9 +63,7 @@ class FileUpload extends AbstractField
         // If the field is scoped to a library, verify every item belongs to it.
         $libraryId = $this->getSetting('library_id');
         if (!$libraryId && $handle = $this->getSetting('library_handle')) {
-            $libraryId = once(fn () =>
-                \App\Models\Media\Library::where('handle', $handle)->value('id')
-            );
+            $libraryId = $this->resolveLibraryHandle($handle);
         }
 
         if ($libraryId) {
@@ -118,9 +119,19 @@ class FileUpload extends AbstractField
             return collect();
         }
         return Media::whereIn('id', $ids)
+            ->with('fieldValues.field.fieldType')
             ->get()
             ->sortBy(fn ($m) => array_search($m->id, $ids))
             ->values();
+    }
+
+    private function resolveLibraryHandle(string $handle): ?int
+    {
+        if (!array_key_exists($handle, static::$libraryHandleCache)) {
+            static::$libraryHandleCache[$handle] = \App\Models\Media\Library::where('handle', $handle)->value('id');
+        }
+
+        return static::$libraryHandleCache[$handle];
     }
 
     public function normaliseIds(mixed $value): array

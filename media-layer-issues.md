@@ -90,20 +90,9 @@ Adopted the executor-only model. Removed the six fluent builder methods (`resize
 
 ---
 
-### H8. `FileUpload::value()` does not eager-load field values on returned Media models
-**File:** `app/Field/Types/FileUpload.php:116-123`
+### ~~H8. `FileUpload::value()` does not eager-load field values on returned Media models~~ — fixed
 
-`value()` returns `Collection<Media>` via a bare `Media::whereIn('id', $ids)->get()` with no eager loading. Because `alt_text` is now a custom field (resolved by design — see C1), any template or code that accesses `$media->field('alt_text')` on each item in the resolved collection will trigger one lazy-load query per media item. For a gallery field with N items this is N+1 queries.
-
-`value()` should eager-load `fieldValues.field.fieldType` on the returned collection before returning it:
-
-```php
-return Media::whereIn('id', $ids)
-    ->with('fieldValues.field.fieldType')
-    ->get()
-    ->sortBy(fn ($m) => array_search($m->id, $ids))
-    ->values();
-```
+Added `->with('fieldValues.field.fieldType')` to the `whereIn` query in `value()`. Also fixed a secondary `once()` memoization bug in `validate()`: the `library_handle → id` lookup used `once(fn () => ...)` which never cached (same root cause as H3). Replaced with `private static array $libraryHandleCache` using the same static-array pattern. `setUp()` in `FileUploadTest` resets the cache via `ReflectionProperty`. Three new tests added: eager-load assertion, query-count bound, and handle-cache verification.
 
 ---
 
