@@ -1,0 +1,206 @@
+{% macro field(name, label, columns, rows, description, id, error_key, add_label, empty_rows, add_button) %}
+    {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
+    {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
+    {% set has_error = errors is defined and errors.has(field_error_key) %}
+    {% set saved_rows = old(field_error_key, rows|default([])) %}
+    {% set minimum_rows = empty_rows|default(1) %}
+    {% set row_count = saved_rows|length > minimum_rows ? saved_rows|length : minimum_rows %}
+    {% set add_button_config = add_button|default({}) %}
+    {% set add_button_label = add_button_config.label|default(add_label|default('Add row')) %}
+    {% set add_button_id = add_button_config.id|default(field_id ~ '_add') %}
+    {% set add_button_class = add_button_config.class|default('inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20') %}
+    {% set add_button_icon = add_button_config.icon|default(true) %}
+    {% set add_button_attributes = add_button_config.attributes|default({}) %}
+
+    <div data-matrix-field data-matrix-next-index="{{ row_count }}">
+        <div class="mb-1.5 flex items-center justify-between gap-3">
+            <label class="block text-sm font-medium text-slate-700" for="{{ add_button_id }}">{{ label }}</label>
+            <button id="{{ add_button_id }}" type="button" class="{{ add_button_class }}" data-matrix-add{% for attribute, value in add_button_attributes %}{% if value is not same as(false) %} {{ attribute }}{% if value is not same as(true) %}="{{ value }}"{% endif %}{% endif %}{% endfor %}>
+                {% if add_button_icon %}
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/></svg>
+                {% endif %}
+                <span>{{ add_button_label }}</span>
+            </button>
+        </div>
+
+        <div class="overflow-hidden rounded-lg border bg-white shadow-sm {% if has_error %}border-red-300{% else %}border-slate-200{% endif %}">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                    <tr>
+                        {% for column in columns %}
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500" {% if column.width is defined %}style="width: {{ column.width }}"{% endif %}>{{ column.label|default(column.handle) }}</th>
+                        {% endfor %}
+                        <th scope="col" class="w-12 px-3 py-2">
+                            <span class="sr-only">Actions</span>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white" data-matrix-rows>
+                    {% if row_count > 0 %}
+                        {% for row_index in 0..(row_count - 1) %}
+                            {% set row = saved_rows[row_index]|default({}) %}
+                            <tr class="group hover:bg-slate-50/60" data-matrix-row>
+                                {% for column in columns %}
+                                    {% set column_handle = column.handle|default(column.name|default(loop.index0)) %}
+                                    {% set column_type = column.type|default('text') %}
+                                    {% set column_value = row[column_handle]|default(column.default|default('')) %}
+                                    {% set input_name = name ~ '[' ~ row_index ~ '][' ~ column_handle ~ ']' %}
+                                    {% set input_id = field_id ~ '_' ~ row_index ~ '_' ~ column_handle %}
+                                    <td class="min-w-40 px-3 py-2 align-top">
+                                        {% if column_type == 'textarea' %}
+                                            <textarea id="{{ input_id }}" name="{{ input_name }}" rows="{{ column.rows|default(2) }}" placeholder="{{ column.placeholder|default('') }}" class="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">{{ column_value }}</textarea>
+                                        {% elseif column_type == 'select' %}
+                                            <select id="{{ input_id }}" name="{{ input_name }}" class="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                                {% for option in column.options|default([]) %}
+                                                    {% set option_value = option.value|default(option.label|default(option)) %}
+                                                    {% set option_label = option.label|default(option) %}
+                                                    <option value="{{ option_value }}" {% if column_value == option_value %}selected{% endif %}>{{ option_label }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        {% elseif column_type == 'checkbox' %}
+                                            <label class="inline-flex min-h-9 items-center">
+                                                <input type="hidden" name="{{ input_name }}" value="0">
+                                                <input id="{{ input_id }}" type="checkbox" name="{{ input_name }}" value="{{ column.value|default('1') }}" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if column_value %}checked{% endif %}>
+                                                <span class="sr-only">{{ column.label|default(column_handle) }}</span>
+                                            </label>
+                                        {% else %}
+                                            <input id="{{ input_id }}" name="{{ input_name }}" type="{{ column_type }}" value="{{ column_value }}" placeholder="{{ column.placeholder|default('') }}" class="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                                <td class="px-3 py-2 align-top">
+                                    <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-400 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/20" data-matrix-remove aria-label="Remove row">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if description %}
+            <p class="mt-1 text-xs leading-5 text-slate-400">{{ description }}</p>
+        {% endif %}
+        {% if has_error %}
+            <p id="{{ field_id }}_error" class="mt-1 text-xs text-red-600">{{ errors.first(field_error_key) }}</p>
+        {% endif %}
+
+        <template data-matrix-template>
+            <tr class="group hover:bg-slate-50/60" data-matrix-row>
+                {% for column in columns %}
+                    {% set column_handle = column.handle|default(column.name|default(loop.index0)) %}
+                    {% set column_type = column.type|default('text') %}
+                    {% set template_name = name ~ '[__INDEX__][' ~ column_handle ~ ']' %}
+                    {% set template_id = field_id ~ '_' ~ '__INDEX__' ~ '_' ~ column_handle %}
+                    <td class="min-w-40 px-3 py-2 align-top">
+                        {% if column_type == 'textarea' %}
+                            <textarea id="{{ template_id }}" name="{{ template_name }}" rows="{{ column.rows|default(2) }}" placeholder="{{ column.placeholder|default('') }}" class="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">{{ column.default|default('') }}</textarea>
+                        {% elseif column_type == 'select' %}
+                            <select id="{{ template_id }}" name="{{ template_name }}" class="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                {% for option in column.options|default([]) %}
+                                    {% set option_value = option.value|default(option.label|default(option)) %}
+                                    {% set option_label = option.label|default(option) %}
+                                    <option value="{{ option_value }}" {% if column.default|default('') == option_value %}selected{% endif %}>{{ option_label }}</option>
+                                {% endfor %}
+                            </select>
+                        {% elseif column_type == 'checkbox' %}
+                            <label class="inline-flex min-h-9 items-center">
+                                <input type="hidden" name="{{ template_name }}" value="0">
+                                <input id="{{ template_id }}" type="checkbox" name="{{ template_name }}" value="{{ column.value|default('1') }}" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if column.default|default(false) %}checked{% endif %}>
+                                <span class="sr-only">{{ column.label|default(column_handle) }}</span>
+                            </label>
+                        {% else %}
+                            <input id="{{ template_id }}" name="{{ template_name }}" type="{{ column_type }}" value="{{ column.default|default('') }}" placeholder="{{ column.placeholder|default('') }}" class="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        {% endif %}
+                    </td>
+                {% endfor %}
+                <td class="px-3 py-2 align-top">
+                    <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-400 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/20" data-matrix-remove aria-label="Remove row">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                    </button>
+                </td>
+            </tr>
+        </template>
+    </div>
+{% endmacro %}
+
+{% macro scripts() %}
+    <script>
+        (function () {
+            function replaceIndex(value, index) {
+                return value.replace(/__INDEX__/g, String(index));
+            }
+
+            function prepareRow(row, index) {
+                row.querySelectorAll('[name]').forEach(function (input) {
+                    input.name = replaceIndex(input.name, index);
+                });
+
+                row.querySelectorAll('[id]').forEach(function (input) {
+                    input.id = replaceIndex(input.id, index);
+                });
+            }
+
+            function initMatrixFields() {
+                document.querySelectorAll('[data-matrix-field]').forEach(function (field) {
+                    if (field.dataset.matrixReady === 'true') {
+                        return;
+                    }
+
+                    var addButton = field.querySelector('[data-matrix-add]');
+                    var rows = field.querySelector('[data-matrix-rows]');
+                    var template = field.querySelector('[data-matrix-template]');
+
+                    if (!addButton || !rows || !template) {
+                        return;
+                    }
+
+                    addButton.addEventListener('click', function () {
+                        var index = Number(field.dataset.matrixNextIndex || rows.children.length || 0);
+                        var fragment = template.content.cloneNode(true);
+                        var row = fragment.querySelector('[data-matrix-row]');
+
+                        if (!row) {
+                            return;
+                        }
+
+                        prepareRow(row, index);
+                        rows.appendChild(fragment);
+                        field.dataset.matrixNextIndex = String(index + 1);
+
+                        var firstInput = row.querySelector('input:not([type="hidden"]), select, textarea');
+                        if (firstInput) {
+                            firstInput.focus();
+                        }
+                    });
+
+                    rows.addEventListener('click', function (event) {
+                        var removeButton = event.target.closest('[data-matrix-remove]');
+
+                        if (!removeButton) {
+                            return;
+                        }
+
+                        var row = removeButton.closest('[data-matrix-row]');
+
+                        if (row) {
+                            row.remove();
+                        }
+                    });
+
+                    field.dataset.matrixReady = 'true';
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMatrixFields);
+            } else {
+                initMatrixFields();
+            }
+        })();
+    </script>
+{% endmacro %}

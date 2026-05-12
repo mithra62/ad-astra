@@ -160,47 +160,30 @@
                                 </div>
                             </div>
 
-                            <!-- Body -->
-                            <div class="border-b border-slate-100 px-5 py-5">
-                                <h5 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Body</h5>
-                                <div class="mb-2 flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5">
-                                    <!-- Mini toolbar hint (decorative in mockup) -->
-                                    <button type="button" class="rounded px-1.5 py-1 text-xs font-bold text-slate-600 hover:bg-slate-200" title="Bold">B</button>
-                                    <button type="button" class="rounded px-1.5 py-1 text-xs italic text-slate-600 hover:bg-slate-200" title="Italic">I</button>
-                                    <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200 underline" title="Underline">U</button>
-                                    <span class="mx-1 h-4 w-px bg-slate-300"></span>
-                                    <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200" title="Heading">H1</button>
-                                    <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200" title="Heading 2">H2</button>
-                                    <span class="mx-1 h-4 w-px bg-slate-300"></span>
-                                    <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200" title="Unordered list">
-                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-                                    </button>
-                                    <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200" title="Ordered list">
-                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7m0 0H5m2 0v2m0-2v2m10 10H5m14-4H5m14-4h-4"/></svg>
-                                    </button>
-                                    <button type="button" class="rounded px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-200" title="Link">
-                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                                    </button>
-                                    <button type="button" class="ml-auto rounded px-1.5 py-1 text-xs text-slate-500 hover:bg-slate-200" title="Fullscreen">
-                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
-                                    </button>
-                                </div>
-                                <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                                          id="body" name="body" rows="16"
-                                          placeholder="Write your article content here…"
-                                          data-tab-dirty="content"></textarea>
-                                <p class="mt-1.5 text-xs text-slate-400">Plain text or Markdown supported.</p>
-                            </div>
+                            {% import 'templates::tailwind2._matrix-field' as matrix %}
+
+                            {% set attributes = [
+                                { key: 'Color', value: 'Blue', visible: true },
+                                { key: 'Material', value: 'Cotton', visible: true },
+                                { key: 'Care', value: 'Machine washable', visible: false }
+                            ] %}
+                            {% set add_attribute_button = {
+                                label: add_attribute_button_label|default('Add attribute'),
+                                attributes: {
+                                    'data-tab-dirty': 'content'
+                                }
+                            } %}
 
                             <!-- Excerpt -->
                             <div class="px-5 py-5">
                                 <h5 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Excerpt</h5>
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="excerpt">Summary</label>
-                                <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                                          id="excerpt" name="excerpt" rows="3"
-                                          placeholder="A short description shown in article listings…"
-                                          data-tab-dirty="content"></textarea>
-                                <p class="mt-1 text-xs text-slate-400">Used in article listings, social cards, and RSS feeds. Aim for 1–2 sentences.</p>
+                                {{ matrix.field('attributes', 'Attributes', [
+                                    { handle: 'key', label: 'Key', placeholder: 'Color' },
+                                    { handle: 'value', label: 'Value', type: 'textarea', placeholder: 'Blue' },
+                                    { handle: 'visible', label: 'Visible', type: 'checkbox' }
+                                ], attributes, 'Add curated rows as needed.', null, null, null, 1, add_attribute_button) }}
+
+                                {{ matrix.scripts() }}
                             </div>
 
                         </div><!-- /tab-content -->
