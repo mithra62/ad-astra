@@ -96,10 +96,20 @@ trait HasMedia
         $this->firstMediaCache = [];
     }
 
-    /** Replace direct attachments with exactly the given IDs. */
+    /**
+     * Replace direct attachments with exactly the given IDs.
+     *
+     * Accepts a flat array of IDs; sequential sort_order (0-based) is assigned
+     * automatically so the caller's order is preserved in the pivot table.
+     * field_id is always written as the DIRECT_ATTACHMENT sentinel (0).
+     */
     public function syncMedia(array $mediaIds): void
     {
-        $this->directMedia()->sync($mediaIds);
+        $pivot = [];
+        foreach (array_values($mediaIds) as $i => $id) {
+            $pivot[$id] = ['sort_order' => $i, 'field_id' => self::DIRECT_ATTACHMENT];
+        }
+        $this->directMedia()->sync($pivot);
         $this->firstMediaCache = [];
     }
 

@@ -129,7 +129,7 @@ class Library extends Controller
     {
         $library = LibraryModel::find($id);
         if (!$library instanceof LibraryModel) {
-            return redirect()->route('media.libraries')->with('failure', 'media.library.not_found');
+            return redirect()->route('media.libraries')->with('failure', trans('media.library.not_found'));
         }
 
         return $this->view('media.libraries.delete', ['library' => $library]);
@@ -146,9 +146,9 @@ class Library extends Controller
         $media = $uploader->upload($request, $library);
 
         if ($media) {
-            return redirect()->route('media.show', $media)->with('success', 'media.uploaded');
+            return redirect()->route('media.show', $media)->with('success', trans('media.uploaded'));
         }
 
-        return redirect()->route('media.libraries.show', $library)->with('failure', 'media.upload_failed');
+        return redirect()->route('media.libraries.show', $library)->with('failure', trans('media.upload_failed'));
     }
 }
