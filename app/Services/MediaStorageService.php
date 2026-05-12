@@ -17,13 +17,17 @@ class MediaStorageService
     /** Soft-delete — physical file preserved until the purge job runs. */
     public function delete(Media $media): void
     {
-        $media->library->removeMedia($media);
+        $media->delete();
     }
 
     /** Hard-delete record and physical file immediately. */
     public function purge(Media $media): void
     {
-        $media->library->purgeMedia($media);
+        foreach ($media->transformations as $t) {
+            Storage::disk($t->disk)->delete($t->path);
+        }
+        Storage::disk($media->disk)->delete($media->path);
+        $media->forceDelete();
     }
 
     public function url(Media $media, ?int $signedMinutes = null): string

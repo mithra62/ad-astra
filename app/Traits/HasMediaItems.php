@@ -5,7 +5,6 @@ namespace App\Traits;
 use App\Models\Media;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 trait HasMediaItems
@@ -57,28 +56,6 @@ trait HasMediaItems
             Storage::disk($disk)->delete($path);
             throw $e;
         }
-    }
-
-    /**
-     * Soft-delete a media record. Physical file is NOT removed here.
-     * PurgeDeletedMedia handles physical cleanup after the grace period.
-     */
-    public function removeMedia(Media $media): void
-    {
-        $media->delete();
-    }
-
-    /**
-     * Permanently delete a media record and its physical file.
-     * Called by the purge job, or directly when immediate removal is needed.
-     */
-    public function purgeMedia(Media $media): void
-    {
-        foreach ($media->transformations as $t) {
-            Storage::disk($t->disk)->delete($t->path);
-        }
-        Storage::disk($media->disk)->delete($media->path);
-        $media->forceDelete();
     }
 
     /**

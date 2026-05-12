@@ -2,7 +2,7 @@
 
 *Compiled 2026-05-11. Based on comparison of `media-layer-implementation.md` against the live codebase on the `media` branch.*
 
-**Summary:** 4 critical · 8 high · 5 medium · 5 low
+**Summary:** 3 critical · 8 high · 5 medium · 5 low
 
 ---
 
@@ -20,17 +20,9 @@ The `uuid` column provided no value: all media routes use integer IDs, all media
 
 ---
 
-### C3. `MediaStorageService::delete()` and `purge()` crash when `library_id` is null
-**File:** `app/Services/MediaStorageService.php:19-24`
+### ~~C3. `MediaStorageService::delete()` and `purge()` crash when `library_id` is null~~ — fixed
 
-```php
-public function delete(Media $media): void
-{
-    $media->library->removeMedia($media);   // null dereference if library_id is null
-}
-```
-
-The `media.library_id` column is explicitly nullable (by design — orphan records from deleted libraries). `removeMedia()` just calls `$media->delete()` and does not use the library at all; routing it through `$media->library` is both unnecessary and fatal when the relation is null. Same issue in `purge()`.
+`delete()` and `purge()` now operate directly on the media item without loading the library. `removeMedia()` and `purgeMedia()` removed from `HasMediaItems` (neither used `$this`). `Storage` import removed from the trait. Two new null-library tests added to `MediaStorageServiceTest`; four now-dead `HasMediaItemsTest` tests removed.
 
 ---
 

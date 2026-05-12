@@ -104,6 +104,18 @@ class MediaStorageServiceTest extends TestCase
         Storage::disk('local')->assertExists('uploads/soft.jpg');
     }
 
+    public function test_delete_works_when_library_id_is_null(): void
+    {
+        Storage::fake('local');
+        Storage::disk('local')->put('uploads/orphan.jpg', 'data');
+
+        $media = Media::factory()->create(['library_id' => null, 'disk' => 'local', 'path' => 'uploads/orphan.jpg']);
+
+        $this->service()->delete($media);
+
+        $this->assertSoftDeleted('media', ['id' => $media->id]);
+    }
+
     // -------------------------------------------------------------------------
     // purge() — hard delete
     // -------------------------------------------------------------------------
@@ -132,6 +144,19 @@ class MediaStorageServiceTest extends TestCase
         $this->service()->purge($media);
 
         Storage::disk('local')->assertMissing('uploads/hard.jpg');
+    }
+
+    public function test_purge_works_when_library_id_is_null(): void
+    {
+        Storage::fake('local');
+        Storage::disk('local')->put('uploads/orphan.jpg', 'data');
+
+        $media = Media::factory()->create(['library_id' => null, 'disk' => 'local', 'path' => 'uploads/orphan.jpg']);
+
+        $this->service()->purge($media);
+
+        $this->assertNull(Media::withTrashed()->find($media->id));
+        Storage::disk('local')->assertMissing('uploads/orphan.jpg');
     }
 
     // -------------------------------------------------------------------------
