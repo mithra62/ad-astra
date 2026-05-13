@@ -515,13 +515,15 @@ Validation happens in several places:
 2. `AbstractEntryType::validate()` runs in `EntryService` before repository
    writes.
 3. Repository methods validate status membership and default status presence.
-4. Field type classes expose `validate()` methods, but these are not uniformly
-   invoked by the current FormRequest/service path.
+4. Field type classes expose `getRules()` for Laravel validation rules. Some
+   field types also still expose ad hoc `validate()` methods, but the preferred
+   direction is to consolidate field validation into `getRules()`.
 
 The current field validation path primarily uses `AbstractField::getRules()`.
 Settings-aware field validation such as `Relationship` limits and `FileUpload`
-library/MIME/min/max checks are available on the field type classes but are not
-yet centrally applied to entry requests.
+library/MIME/min/max checks should move into Laravel validation rules returned
+from `getRules()`. Custom `Rule` objects should be encouraged for richer checks
+that cannot be expressed cleanly as string rules.
 
 ## Extension Checklist
 
@@ -580,11 +582,17 @@ When adding or changing Entry behavior, update all relevant layers:
    after-create side effects may already have fired.
 
    **Recommended solution:** Move the whole create operation, including tree node
-   creation, under one service-owned transaction. Defer `afterCreate()` until
-   after that transaction commits, ideally through `DB::afterCommit()` or a
-   dedicated post-commit hook runner. Validate tree placement before persisting
-   where possible so duplicate handles, invalid parents, and home-node violations
-   fail early. Add a test proving failed tree creation leaves no entry row.
+   creation, under one service-owned transaction. Do not silently move the
+   existing `afterCreate()` hook to `DB::afterCommit()`: that would change the
+   semantic contract for every existing `AbstractEntryType` subclass because
+   callers currently regain control only after `afterCreate()` has run. Instead,
+   keep `afterCreate()` synchronous for compatibility and introduce an explicit
+   committed hook such as `afterCreateCommitted(Entry $entry, array $data): void`
+   for webhooks, emails, jobs, and other external side effects. Validate tree
+   placement before persisting where possible so duplicate handles, invalid
+   parents, and home-node violations fail early. Add a migration note explaining
+   the hook timing distinction, and add a test proving failed tree creation
+   leaves no entry row.
 
 4. **`afterUpdate()` side effects can run before the outer update transaction commits.**
    `EntryService::update()` wraps repository application and tree sync in an
@@ -593,13 +601,16 @@ When adding or changing Entry behavior, update all relevant layers:
    hook sends a webhook/email and later tree sync fails, the database can roll
    back while the side effect has already happened.
 
-   **Recommended solution:** Make lifecycle side effects explicitly post-commit.
-   A clean shape is: repository mutates and returns the updated entry plus the
-   hook payload; service completes tree sync inside the transaction; service then
-   schedules `afterUpdate()` with `DB::afterCommit()`. Keep `beforeUpdate()`
-   inside the transaction because it can influence persistence. Add a failing
-   tree-sync test with a fake hook to prove `afterUpdate()` is not called on
-   rollback.
+   **Recommended solution:** Add explicit post-commit lifecycle hooks rather than
+   changing the timing of `afterUpdate()`. Keep `afterUpdate()` synchronous for
+   compatibility, because existing entry type classes may rely on its side
+   effects completing before `Content::update()` returns. Add a new committed
+   hook such as `afterUpdateCommitted(Entry $entry, array $data): void` and run
+   it through `DB::afterCommit()` after the service completes repository writes
+   and tree sync. Document that synchronous `afterUpdate()` is for in-process
+   behavior that must complete before the caller resumes, while committed hooks
+   are for external side effects. Include a migration note and tests covering
+   both hook timings and rollback behavior.
 
 5. **Create lifecycle data is inconsistent between `beforeCreate()` and `afterCreate()`.**
    `EntryRepository::create()` mutates `$data` inside the transaction with
@@ -639,18 +650,22 @@ When adding or changing Entry behavior, update all relevant layers:
    index; because SQLite/MySQL support differs, keep application enforcement and
    tests as the portable baseline.
 
-8. **Field type settings-aware validation is not centrally enforced.**
-   Form requests use `getRules()` from field types, but not the richer
-   `validate()` methods on `Relationship` and `FileUpload`. Limits, library
-   restrictions, MIME restrictions, and some per-type settings can be bypassed
-   unless an entry type class repeats the checks.
+8. **Field type settings-aware validation is split across two paradigms.**
+   Form requests use `getRules()` from field types, while richer checks on
+   `Relationship` and `FileUpload` currently live in ad hoc `validate()` methods.
+   This creates two validation paths and makes it easy for settings-aware checks
+   such as limits, library restrictions, MIME restrictions, and relationship
+   constraints to be bypassed.
 
-   **Recommended solution:** Add a central layout field validator used by both
-   FormRequests and `EntryService`. It should resolve the effective layout,
-   apply required rules from `FieldLayoutTabElement`, apply Laravel rules from
-   `getRules()`, then call the field type instance's `validate()` with field
-   settings. Return field-keyed validation messages before repository writes.
-   Use it for entries first, then reuse the same pattern for categories/media.
+   **Recommended solution:** Make `getRules()` the single canonical field-type
+   validation contract and allow it to return full Laravel validation rules,
+   including custom `Rule` objects. Move settings-aware checks from field
+   `validate()` methods into rules generated by `getRules()` from the field
+   instance/settings. Add a central layout field validator used by both
+   FormRequests and `EntryService`; it should resolve the effective layout, add
+   required/nullable from `FieldLayoutTabElement`, merge the field type's
+   `getRules()`, and return field-keyed validation messages before repository
+   writes. Once migrated, deprecate and remove field-type `validate()` methods.
 
 ### Medium Priority
 

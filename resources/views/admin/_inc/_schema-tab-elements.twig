@@ -8,7 +8,7 @@
     </button>
 {% endmacro %}
 
-{% macro tabContent(tab, title_field_set) %}
+{% macro tabContent(tab, title_field_set, entry) %}
     <!-- ░░ TAB: Content ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
     <div id="tab-{{ tab.handle }}" class="tab-panel active" role="tabpanel" aria-labelledby="btn-{{ tab.handle }}" data-tab-panel="{{ tab.handle }}">
 
@@ -25,7 +25,7 @@
                         <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                id="title" name="title" type="text"
                                placeholder="Enter article title"
-                               value="{{ old('title') }}">
+                               value="{{ old('title', entry.title) }}">
                         {% if errors.has('title') %}
                             <p class="mt-1 text-xs text-red-600">{{ errors.first('title') }}</p>
                         {% endif %}
@@ -33,8 +33,11 @@
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Slug</label>
                         <input class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                               id="handle" name="handle" type="text">
-                        <p class="mt-1 text-xs text-slate-400">Leave blank to auto-generate from title.</p>
+                               id="handle" name="handle" type="text" value="{{ old('handle', entry.handle) }}">
+
+                        {% if errors.has('handle') %}
+                            <p class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>
+                        {% endif %}
                     </div>
                 {% endif %}
 
@@ -49,6 +52,7 @@
                         {% endif %}
                         <div class="input-group has-validation">
                             {{ field.render({
+                                value: field_values[field.handle],
                                 id: 'field_' ~ field.handle,
                             })|raw }}
                         </div>
