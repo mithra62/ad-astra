@@ -16,11 +16,16 @@
                         <option value="21922" {% if old('parent_id') == 21922 %} selected {% endif %}>Ullam Id Corporis Rem Dolores Dolorem.</option>
                     </select>
                     <p class="mt-1 text-xs text-slate-400">Leave blank to place at the top level.</p>
+                    {% if errors.has('parent_id') %}
+                        <p class="text-danger">{{ errors.first('parent_id', entry.entryType.parent_id) }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-slate-700" for="sort_order">Sort Order</label>
                     <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:max-w-[8rem]"
                            id="sort_order" name="sort_order" type="number" min="0" placeholder="0"
+                           readonly
+                           value="{{ old('sort_order', entry.entryTree.sort_order) }}"
                            data-tab-dirty="structure">
                     <p class="mt-1 text-xs text-slate-400">Lower numbers appear first in ordered lists.</p>
                 </div>
@@ -31,25 +36,32 @@
             <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Routing</h5>
             <div class="space-y-4">
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="entry_url">URL Override</label>
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="url">URL Override</label>
                     <div class="flex rounded-md shadow-sm">
                         <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-xs text-slate-500">https://example.com/</span>
                         <input class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                               id="entry_url" name="entry_url" type="text"
-                               value="{{ old('redirect_url', entry.entryType.redirect_url) }}"
+                               id="url" name="url" type="text"
+                               readonly
+                               value="{{ old('url', entry.entryTree.url) }}"
                                placeholder="articles/my-article"
                                data-tab-dirty="structure">
                     </div>
                     <p class="mt-1 text-xs text-slate-400">Leave blank to auto-build from slug and parent.</p>
+                    {% if errors.has('entry_url') %}
+                        <p class="text-danger">{{ errors.first('url', entry.entryTree.url) }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-slate-700" for="redirect_url">Redirect URL</label>
                     <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                            id="redirect_url" name="redirect_url" type="url"
-                           value="{{ old('redirect_url', entry.entryType.redirect_url) }}"
+                           value="{{ old('redirect_url', entry.entryTree.redirect_url) }}"
                            placeholder="https://example.com/new-location"
                            data-tab-dirty="structure">
                     <p class="mt-1 text-xs text-slate-400">Optional. If set, visiting this entry's URL will redirect here.</p>
+                    {% if errors.has('redirect_url') %}
+                        <p class="text-danger">{{ errors.first('redirect_url', entry.entryType.redirect_url) }}</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -60,10 +72,13 @@
                 <label class="mb-1.5 block text-sm font-medium text-slate-700" for="template">Template Path</label>
                 <input class="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm shadow-sm placeholder:text-slate-400 placeholder:font-sans focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                        id="template" name="template" type="text"
-                       value="{{ old('template', entry.entryType.template) }}"
+                       value="{{ old('template', entry.entryTree.template) }}"
                        placeholder="e.g. articles/default"
                        data-tab-dirty="structure">
                 <p class="mt-1 text-xs text-slate-400">Template path relative to the views root. Leave blank to use the entry type's default.</p>
+                {% if errors.has('template') %}
+                    <p class="text-danger">{{ errors.first('template', entry.entryTree.template) }}</p>
+                {% endif %}
             </div>
         </div>
 

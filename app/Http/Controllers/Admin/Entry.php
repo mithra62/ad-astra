@@ -72,6 +72,7 @@ class Entry extends Controller
 
         $entry->loadMissing([
             'entryGroup.entryTypes',
+            'entryTree',
             'entryGroup.statusGroup.statuses',
             'entryGroup.categoryGroups.categories',
             'entryGroup.fieldLayout.tabs.elements.field.fieldType',
