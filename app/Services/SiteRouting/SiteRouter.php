@@ -4,15 +4,22 @@ namespace App\Services\SiteRouting;
 
 use App\Services\SiteRouting\RouteDrivers\EntryTreeRouteDriver;
 use App\Services\SiteRouting\RouteDrivers\TemplateRouteDriver;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\View\View;
 use InvalidArgumentException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SiteRouter
 {
-    public function render(?string $uri): View
+    public function render(?string $uri): View|RedirectResponse
     {
         $result = $this->resolve($uri);
+        if ($result->type === 'entry_tree_redirect') {
+            return redirect()->away(
+                $result->data['url'],
+                $result->data['status'] ?? 302
+            );
+        }
 
         return view($result->template, $result->data);
     }

@@ -20,6 +20,7 @@ class EntryTree extends Model
         'uri',
         'depth',
         'sort_order',
+        'redirect_url',
         'template',
         'is_home',
     ];

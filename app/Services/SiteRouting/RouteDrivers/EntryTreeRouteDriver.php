@@ -26,6 +26,18 @@ class EntryTreeRouteDriver implements RouteDriverInterface
             return null;
         }
 
+        if (filled($node->redirect_url)) {
+            return new RouteResult(
+                type: 'entry_tree_redirect',
+                template: '',
+                data: [
+                    'url' => $node->redirect_url,
+                    'status' => 302,
+                ],
+                resource: $node,
+            );
+        }
+
         $entry = $node->entry;
 
         $template = $node->template
