@@ -8,7 +8,7 @@
     </button>
 {% endmacro %}
 
-{% macro tabContent(tab, title_field_set, entry) %}
+{% macro tabContent(tab, title_field_set, entry, field_values) %}
     <!-- ░░ TAB: Content ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
     <div id="tab-{{ tab.handle }}" class="tab-panel active" role="tabpanel" aria-labelledby="btn-{{ tab.handle }}" data-tab-panel="{{ tab.handle }}">
 

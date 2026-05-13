@@ -36,6 +36,7 @@
                         <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-xs text-slate-500">https://example.com/</span>
                         <input class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                id="entry_url" name="entry_url" type="text"
+                               value="{{ old('redirect_url', entry.entryType.redirect_url) }}"
                                placeholder="articles/my-article"
                                data-tab-dirty="structure">
                     </div>
@@ -45,6 +46,7 @@
                     <label class="mb-1.5 block text-sm font-medium text-slate-700" for="redirect_url">Redirect URL</label>
                     <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                            id="redirect_url" name="redirect_url" type="url"
+                           value="{{ old('redirect_url', entry.entryType.redirect_url) }}"
                            placeholder="https://example.com/new-location"
                            data-tab-dirty="structure">
                     <p class="mt-1 text-xs text-slate-400">Optional. If set, visiting this entry's URL will redirect here.</p>
@@ -58,6 +60,7 @@
                 <label class="mb-1.5 block text-sm font-medium text-slate-700" for="template">Template Path</label>
                 <input class="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm shadow-sm placeholder:text-slate-400 placeholder:font-sans focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                        id="template" name="template" type="text"
+                       value="{{ old('template', entry.entryType.template) }}"
                        placeholder="e.g. articles/default"
                        data-tab-dirty="structure">
                 <p class="mt-1 text-xs text-slate-400">Template path relative to the views root. Leave blank to use the entry type's default.</p>

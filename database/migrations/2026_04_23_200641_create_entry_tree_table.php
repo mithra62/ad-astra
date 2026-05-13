@@ -30,6 +30,7 @@ return new class extends Migration {
             $table->unsignedInteger('sort_order')->default(0);
 
             $table->string('template')->nullable();
+            $table->string('redirect_url')->nullable();
             $table->boolean('is_home')->default(false);
 
             $table->timestamps();

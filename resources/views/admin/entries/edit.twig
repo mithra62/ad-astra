@@ -102,7 +102,7 @@
                 {% if typeLayout and typeLayout.tabs.count >= 1 %}
                     {% for tab in layout.tabs %}
 
-                        {{ tabs.tabContent(tab, title_field_set, entry) }}
+                        {{ tabs.tabContent(tab, title_field_set, entry, field_values) }}
                         {% set title_field_set = true %}
                     {% endfor %}
                 {% endif %}
@@ -112,17 +112,17 @@
                 {% if groupLayout and groupLayout.tabs.count >= 1 %}
                     {% for tab in groupLayout.tabs %}
 
-                        {{ tabs.tabContent(tab, title_field_set, entry) }}
+                        {{ tabs.tabContent(tab, title_field_set, entry, field_values) }}
                         {% set title_field_set = true %}
                     {% endfor %}
                 {% endif %}
 
-                {% if entryType.has_entry_tree %}
+                {% if entry.entryType.has_entry_tree %}
                     {{ include('admin.entries._hierarchy', {active: group.id}) }}
                 {% endif %}
 
-                {% if group.categoryGroups().count >= 1 %}
-                    {{ include('admin.entries._taxonomy', {group: group}) }}
+                {% if entry.entryGroup.categoryGroups().count >= 1 %}
+                    {{ include('admin.entries._taxonomy', {group: entry.entryGroup}) }}
                 {% endif %}
 
                 <!-- Tab footer: prev/next navigation -->
@@ -161,7 +161,7 @@
                                         <option value="">— Default —</option>
                                         {% for s in entry.entryGroup.statusGroup.statuses %}
                                             <option value="{{ s.handle }}"
-                                                    {% if old('status') == s.handle %}selected{% endif %}>
+                                                    {% if old('status', entry.status_handle) == s.handle %}selected{% endif %}>
                                                 {{ s.name }}
                                             </option>
                                         {% endfor %}
