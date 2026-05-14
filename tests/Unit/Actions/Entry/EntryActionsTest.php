@@ -3,9 +3,13 @@
 namespace Tests\Unit\Actions\Entry;
 
 use App\Actions\Entry\CreateNewEntry;
+use App\Actions\Entry\RecordEntryMetric;
 use App\Actions\Entry\UpdateEntry;
 use App\Facades\Content;
+use App\Facades\Entries;
 use App\Models\Entry;
+use App\Models\EntryMetric;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -95,5 +99,67 @@ class EntryActionsTest extends TestCase
 
         $action = app(UpdateEntry::class);
         $action->update($entry, ['title' => 'Updated', 'status' => 'published']);
+    }
+
+    // -------------------------------------------------------------------------
+    // RecordEntryMetric
+    // -------------------------------------------------------------------------
+
+    public function test_record_delegates_to_entries_facade(): void
+    {
+        $entry = Entry::factory()->create();
+        $metric = EntryMetric::factory()->create(['entry_id' => $entry->id]);
+
+        Entries::shouldReceive('recordMetric')
+            ->once()
+            ->with($entry, 'views', 1, null)
+            ->andReturn($metric);
+
+        $action = app(RecordEntryMetric::class);
+        $result = $action->record($entry, 'views');
+
+        $this->assertSame($metric, $result);
+    }
+
+    public function test_record_returns_entry_metric_instance(): void
+    {
+        $entry = Entry::factory()->create();
+        $metric = EntryMetric::factory()->create(['entry_id' => $entry->id]);
+
+        Entries::shouldReceive('recordMetric')->once()->andReturn($metric);
+
+        $action = app(RecordEntryMetric::class);
+        $result = $action->record($entry, 'views');
+
+        $this->assertInstanceOf(EntryMetric::class, $result);
+    }
+
+    public function test_record_passes_custom_value_to_facade(): void
+    {
+        $entry = Entry::factory()->create();
+        $metric = EntryMetric::factory()->create(['entry_id' => $entry->id]);
+
+        Entries::shouldReceive('recordMetric')
+            ->once()
+            ->with($entry, 'downloads', 5, null)
+            ->andReturn($metric);
+
+        $action = app(RecordEntryMetric::class);
+        $action->record($entry, 'downloads', 5);
+    }
+
+    public function test_record_passes_custom_date_to_facade(): void
+    {
+        $entry = Entry::factory()->create();
+        $metric = EntryMetric::factory()->create(['entry_id' => $entry->id]);
+        $date = Carbon::parse('2025-01-15');
+
+        Entries::shouldReceive('recordMetric')
+            ->once()
+            ->with($entry, 'views', 1, $date)
+            ->andReturn($metric);
+
+        $action = app(RecordEntryMetric::class);
+        $action->record($entry, 'views', 1, $date);
     }
 }
