@@ -17,7 +17,7 @@ class Relationship extends AbstractField
     ];
 
     protected array $settings_form = [
-        'entry_group' => [
+        'entry_groups' => [
             'type' => 'select_multiple',
             'label' => 'Entry Groups',
             'options' => 'entry_groups',

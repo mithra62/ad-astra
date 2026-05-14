@@ -34,18 +34,18 @@ class Field extends Controller
             abort(404);
         }
 
-        $groups      = FieldGroup::all();
-        $typeId      = old('field_type_id');
+        $groups = FieldGroup::all();
+        $typeId = old('field_type_id');
         $defaultType = $typeId
             ? FieldType::find($typeId)
             : FieldType::where('object', \App\Field\Types\Text::class)->first();
 
         $data = [
-            'group'                => $group,
-            'groups'               => $groups,
-            'field_types'          => app('fields-service')->getFieldOptions(),
-            'initial_settings_form' => $defaultType ? $defaultType->instance()->settingsForm() : [],
-            'current_values'       => old('settings', []),
+            'group' => $group,
+            'groups' => $groups,
+            'field_types' => app('fields-service')->getFieldOptions(),
+            'initial_settings_form' => $defaultType ? $this->buildSettingsForm($defaultType->instance()) : [],
+            'current_values' => old('settings', []),
         ];
 
         return $this->view('fields.create', $data);
@@ -115,16 +115,16 @@ class Field extends Controller
             abort(404);
         }
 
-        $groups       = FieldGroup::all();
+        $groups = FieldGroup::all();
         $active_group = $field->groups->first();
         $data = [
-            'field'                 => $field,
-            'groups'                => $groups,
-            'field_types'           => app('fields-service')->getFieldOptions(),
-            'active_group'          => $active_group,
-            'current_type_handle'   => $field->fieldType?->instance()->handle(),
-            'initial_settings_form' => $field->fieldType?->instance()->settingsForm() ?? [],
-            'current_values'        => old('settings', $field->settings ?? []),
+            'field' => $field,
+            'groups' => $groups,
+            'field_types' => app('fields-service')->getFieldOptions(),
+            'active_group' => $active_group,
+            'current_type_handle' => $field->fieldType?->instance()->handle(),
+            'initial_settings_form' => $field->fieldType ? $this->buildSettingsForm($field->fieldType->instance()) : [],
+            'current_values' => old('settings', $field->settings ?? []),
         ];
 
         return $this->view('fields.edit', $data);
@@ -152,7 +152,7 @@ class Field extends Controller
     public function typeSettings(Request $request): \Illuminate\Http\Response
     {
         $request->validate([
-            'type_id'  => 'required|integer',
+            'type_id' => 'required|integer',
             'field_id' => 'nullable|integer',
         ]);
 
@@ -162,19 +162,12 @@ class Field extends Controller
         }
 
         $instance = $type->instance();
-        $form     = $instance->settingsForm();
-
-        // Merge DB-sourced option lists into each widget descriptor that needs them
-        foreach ($instance->settingsFormOptions() as $handle => $optionList) {
-            if (isset($form[$handle])) {
-                $form[$handle]['options'] = $optionList;
-            }
-        }
+        $form = $this->buildSettingsForm($instance);
 
         // Resolve current values from saved field settings (edit) or flashed old() input
         $currentValues = [];
         if ($request->field_id) {
-            $field         = FieldModel::find($request->field_id);
+            $field = FieldModel::find($request->field_id);
             $currentValues = $field?->settings ?? [];
         }
         $currentValues = old('settings', $currentValues);
@@ -182,17 +175,28 @@ class Field extends Controller
         // For Slider's 'default' slider-widget: inject the sibling min/max/step/suffix
         // so the slider widget knows its own bounds when rendered
         if (isset($form['default']) && ($form['default']['type'] ?? '') === 'slider') {
-            $defaults                   = $instance->settingsDefaults();
-            $form['default']['min']     = $currentValues['min']    ?? $defaults['min']    ?? 0;
-            $form['default']['max']     = $currentValues['max']    ?? $defaults['max']    ?? 100;
-            $form['default']['step']    = $currentValues['step']   ?? $defaults['step']   ?? 1;
-            $form['default']['suffix']  = $currentValues['suffix'] ?? $defaults['suffix'] ?? '';
+            $defaults = $instance->settingsDefaults();
+            $form['default']['min'] = $currentValues['min'] ?? $defaults['min'] ?? 0;
+            $form['default']['max'] = $currentValues['max'] ?? $defaults['max'] ?? 100;
+            $form['default']['step'] = $currentValues['step'] ?? $defaults['step'] ?? 1;
+            $form['default']['suffix'] = $currentValues['suffix'] ?? $defaults['suffix'] ?? '';
         }
 
         return response()->view('admin.fields._settings_panel', [
-            'settings_form'  => $form,
+            'settings_form' => $form,
             'current_values' => $currentValues,
         ]);
+    }
+
+    private function buildSettingsForm(\App\Field\AbstractField $instance): array
+    {
+        $form = $instance->settingsForm();
+        foreach ($instance->settingsFormOptions() as $handle => $optionList) {
+            if (isset($form[$handle])) {
+                $form[$handle]['options'] = $optionList;
+            }
+        }
+        return $form;
     }
 
     public function confirm(string $id)
