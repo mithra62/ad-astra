@@ -1,0 +1,18 @@
+<div class="px-5 py-5">
+    <h5 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Structured Rows</h5>
+    {% import 'admin._inc._structured-rows' as matrix %}
+
+    {% set attributes = [
+        { key: 'Color', value: 'Blue', visible: true },
+        { key: 'Material', value: 'Cotton', visible: true },
+        { key: 'Care', value: 'Machine washable', visible: false }
+    ] %}
+
+    {{ matrix.field('attributes', 'Attributes', [
+        { handle: 'key', label: 'Key', placeholder: 'Color' },
+        { handle: 'value', label: 'Value', type: 'textarea', placeholder: 'Blue' },
+        { handle: 'visible', label: 'Visible', type: 'checkbox' }
+    ], attributes, 'Add curated rows as needed.', null, null, null, 1, add_attribute_button) }}
+
+    {{ matrix.scripts() }}
+</div>
