@@ -48,16 +48,13 @@ class FieldValue extends Model
      */
     public function resolvedValue(): mixed
     {
-        $fieldType = $this->field?->fieldType;
-
-        if (!$fieldType) {
+        if (!$this->field) {
             return $this->value_text;
         }
 
-        $column = $fieldType->instance()->storageColumn();
+        $instance = $this->field->typeInstance();
+        $column   = $instance->storageColumn();
 
-        return $this->field->fieldType
-            ->instance()->value($this->{$column});
-        //return $this->{$column};
+        return $instance->value($this->{$column});
     }
 }

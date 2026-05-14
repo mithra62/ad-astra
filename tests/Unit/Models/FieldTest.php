@@ -2,6 +2,8 @@
 
 namespace Tests\Unit\Models;
 
+use App\Field\AbstractField;
+use App\Field\Types\Text;
 use App\Models\Field;
 use App\Models\Field\Group;
 use App\Models\Field\Type;
@@ -77,5 +79,65 @@ class FieldTest extends TestCase
 
         $this->assertCount(1, $field->groups);
         $this->assertEquals($group->id, $field->groups->first()->id);
+    }
+
+    // -------------------------------------------------------------------------
+    // typeInstance()
+    // -------------------------------------------------------------------------
+
+    public function test_type_instance_returns_abstract_field(): void
+    {
+        $type  = Type::factory()->create(['object' => Text::class]);
+        $field = Field::factory()->create(['field_type_id' => $type->id]);
+
+        $this->assertInstanceOf(AbstractField::class, $field->typeInstance());
+    }
+
+    public function test_type_instance_merges_field_settings_into_instance(): void
+    {
+        $type  = Type::factory()->create(['object' => Text::class, 'settings' => []]);
+        $field = Field::factory()->create([
+            'field_type_id' => $type->id,
+            'settings'      => ['placeholder' => 'Search…'],
+        ]);
+
+        $instance = $field->typeInstance();
+
+        $this->assertSame('Search…', $instance->getSetting('placeholder'));
+    }
+
+    public function test_type_instance_field_settings_override_type_settings(): void
+    {
+        $type  = Type::factory()->create(['object' => Text::class, 'settings' => ['placeholder' => 'Type default']]);
+        $field = Field::factory()->create([
+            'field_type_id' => $type->id,
+            'settings'      => ['placeholder' => 'Field override'],
+        ]);
+
+        $instance = $field->typeInstance();
+
+        $this->assertSame('Field override', $instance->getSetting('placeholder'));
+    }
+
+    public function test_type_instance_handles_null_field_settings(): void
+    {
+        $type  = Type::factory()->create(['object' => Text::class]);
+        $field = Field::factory()->create(['field_type_id' => $type->id, 'settings' => null]);
+
+        $this->assertInstanceOf(AbstractField::class, $field->typeInstance());
+    }
+
+    // -------------------------------------------------------------------------
+    // render()
+    // -------------------------------------------------------------------------
+
+    public function test_render_delegates_to_type_instance(): void
+    {
+        $type  = Type::factory()->create(['object' => Text::class]);
+        $field = Field::factory()->create(['field_type_id' => $type->id]);
+
+        // Text::render() calls a view; we just assert it returns a string
+        // without throwing, confirming the delegation path works end-to-end.
+        $this->assertIsString($field->render());
     }
 }

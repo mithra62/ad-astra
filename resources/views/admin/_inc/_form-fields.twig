@@ -123,17 +123,22 @@
     </div>
 {% endmacro %}
 
-{% macro select(name, label, options, value, description, id, error_key) %}
+{% macro select(name, label, options, value, description, id, error_key, multiple) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
-    {% set selected_value = old(field_error_key, value|default('')) %}
+    {% if multiple %}
+        {% set selected_value = old(field_error_key, value is not empty ? value : []) %}
+    {% else %}
+        {% set selected_value = old(field_error_key, value|default('')) %}
+    {% endif %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
-        <select class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if has_error %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="{{ field_id }}" name="{{ name }}" {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
+        <select class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if has_error %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="{{ field_id }}" name="{{ name }}" {% if multiple %}multiple{% endif %} {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
             {% for option in options %}
                 {% set option_value = option.value|default(option.label) %}
-                <option value="{{ option_value }}" {% if selected_value == option_value %}selected{% endif %}>{{ option.label }}</option>
+                {% set is_selected = multiple ? (option_value in selected_value) : (selected_value == option_value) %}
+                <option value="{{ option_value }}" {% if is_selected %}selected{% endif %}>{{ option.label }}</option>
             {% endfor %}
         </select>
         {% if description %}

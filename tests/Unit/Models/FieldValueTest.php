@@ -97,12 +97,31 @@ class FieldValueTest extends TestCase
         $this->assertInstanceOf(MorphTo::class, $fv->fieldable());
     }
 
-    public function test_resolved_value_returns_value_text_when_field_type_is_null(): void
+    public function test_resolved_value_returns_value_text_when_field_is_null(): void
     {
         $fv = new FieldValue(['value_text' => 'hello']);
         $fv->setRelation('field', null);
 
         $this->assertEquals('hello', $fv->resolvedValue());
+    }
+
+    public function test_resolved_value_passes_field_settings_to_type_instance(): void
+    {
+        $type  = Type::factory()->create(['object' => Text::class, 'settings' => []]);
+        $field = Field::factory()->create([
+            'field_type_id' => $type->id,
+            'settings'      => ['placeholder' => 'My placeholder'],
+        ]);
+        $fv = FieldValue::factory()->create([
+            'field_id'   => $field->id,
+            'value_text' => 'hello',
+        ]);
+
+        // resolvedValue() must use typeInstance() so field settings reach the instance
+        $fv->refresh();
+        $instance = $fv->field->typeInstance();
+        $this->assertSame('My placeholder', $instance->getSetting('placeholder'));
+        $this->assertSame('hello', $fv->resolvedValue());
     }
 
     public function test_resolved_value_uses_storage_column_from_field_type(): void

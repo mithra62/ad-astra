@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Field\AbstractField;
 use App\Models\Field\Group;
 use App\Models\Field\Type;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -48,12 +49,15 @@ class Field extends Model
             ->withTimestamps();
     }
 
+    public function typeInstance(): AbstractField
+    {
+        return $this->fieldType->instance($this->settings ?? []);
+    }
+
     public function render(array $params = []): string
     {
         $params['field'] = $this;
 
-        return $this->fieldType
-            ->instance()
-            ->render($params);
+        return $this->typeInstance()->render($params);
     }
 }
