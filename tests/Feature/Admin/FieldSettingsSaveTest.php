@@ -2,70 +2,16 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Field\Types\Select;
-use App\Field\Types\Slider;
-use App\Field\Types\StructuredRows;
-use App\Field\Types\Text;
 use App\Models\Field as FieldModel;
-use App\Models\Field\Group as FieldGroup;
-use App\Models\Field\Type as FieldType;
-use App\Models\Role;
-use App\Models\User;
+use App\Models\FieldValue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Feature\Admin\Concerns\MakesFieldTestFixtures;
 use Tests\TestCase;
 
 class FieldSettingsSaveTest extends TestCase
 {
+    use MakesFieldTestFixtures;
     use RefreshDatabase;
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function makeSuperAdmin(): User
-    {
-        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $user = User::factory()->create();
-        $user->assignRole($role);
-        return $user;
-    }
-
-    private function makeGroup(): FieldGroup
-    {
-        return FieldGroup::factory()->create();
-    }
-
-    private function selectType(): FieldType
-    {
-        return FieldType::firstOrCreate(
-            ['object' => Select::class],
-            ['name' => 'Select', 'handle' => 'select', 'settings' => []]
-        );
-    }
-
-    private function textType(): FieldType
-    {
-        return FieldType::firstOrCreate(
-            ['object' => Text::class],
-            ['name' => 'Text', 'handle' => 'text', 'settings' => []]
-        );
-    }
-
-    private function sliderType(): FieldType
-    {
-        return FieldType::firstOrCreate(
-            ['object' => Slider::class],
-            ['name' => 'Slider', 'handle' => 'slider', 'settings' => []]
-        );
-    }
-
-    private function structuredRowsType(): FieldType
-    {
-        return FieldType::firstOrCreate(
-            ['object' => StructuredRows::class],
-            ['name' => 'Structured Rows', 'handle' => 'structured_rows', 'settings' => []]
-        );
-    }
 
     // -------------------------------------------------------------------------
     // Select — options round-trip
@@ -73,17 +19,17 @@ class FieldSettingsSaveTest extends TestCase
 
     public function test_select_options_are_stored_in_db_after_create(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->selectType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->selectType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
             ->post(route('fields.store', ['group_id' => $group->id]), [
-                'group_id'      => $group->id,
+                'group_id' => $group->id,
                 'field_type_id' => $type->id,
-                'name'          => 'Colour',
-                'handle'        => 'colour',
-                'settings'      => [
+                'name' => 'Colour',
+                'handle' => 'colour',
+                'settings' => [
                     'options' => [
                         ['key' => 'red',  'label' => 'Red'],
                         ['key' => 'blue', 'label' => 'Blue'],
@@ -97,7 +43,7 @@ class FieldSettingsSaveTest extends TestCase
 
         $options = $field->settings['options'] ?? [];
         $this->assertCount(2, $options);
-        $this->assertSame('red',  $options[0]['key']);
+        $this->assertSame('red', $options[0]['key']);
         $this->assertSame('blue', $options[1]['key']);
     }
 
@@ -107,21 +53,21 @@ class FieldSettingsSaveTest extends TestCase
 
     public function test_text_placeholder_is_persisted_after_update(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->textType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->textType();
         $group = $this->makeGroup();
         $field = FieldModel::factory()->create([
             'field_type_id' => $type->id,
-            'settings'      => ['placeholder' => 'Old placeholder'],
+            'settings' => ['placeholder' => 'Old placeholder'],
         ]);
         $field->groups()->attach($group);
 
         $this->actingAs($user)
             ->put(route('fields.update', $field->id), [
                 'field_type_id' => $type->id,
-                'name'          => $field->name,
-                'handle'        => $field->handle,
-                'settings'      => ['placeholder' => 'New placeholder'],
+                'name' => $field->name,
+                'handle' => $field->handle,
+                'settings' => ['placeholder' => 'New placeholder'],
             ])
             ->assertRedirect();
 
@@ -134,23 +80,23 @@ class FieldSettingsSaveTest extends TestCase
 
     public function test_slider_min_and_max_are_stored_in_db(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->sliderType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->sliderType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
             ->post(route('fields.store', ['group_id' => $group->id]), [
-                'group_id'      => $group->id,
+                'group_id' => $group->id,
                 'field_type_id' => $type->id,
-                'name'          => 'Rating',
-                'handle'        => 'rating',
-                'settings'      => ['min' => 1, 'max' => 10, 'step' => 1],
+                'name' => 'Rating',
+                'handle' => 'rating',
+                'settings' => ['min' => 1, 'max' => 10, 'step' => 1],
             ])
             ->assertRedirect();
 
         $field = FieldModel::where('handle', 'rating')->first();
         $this->assertNotNull($field);
-        $this->assertSame(1,  (int) ($field->settings['min'] ?? null));
+        $this->assertSame(1, (int) ($field->settings['min'] ?? null));
         $this->assertSame(10, (int) ($field->settings['max'] ?? null));
     }
 
@@ -160,12 +106,12 @@ class FieldSettingsSaveTest extends TestCase
 
     public function test_structured_rows_columns_appear_in_edit_page_after_save(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->structuredRowsType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->structuredRowsType();
         $group = $this->makeGroup();
         $field = FieldModel::factory()->create([
             'field_type_id' => $type->id,
-            'settings'      => [
+            'settings' => [
                 'columns' => [
                     ['handle' => 'title', 'label' => 'Title', 'type' => 'text'],
                     ['handle' => 'qty',   'label' => 'Qty',   'type' => 'number'],
@@ -178,6 +124,68 @@ class FieldSettingsSaveTest extends TestCase
             ->get(route('fields.edit', $field->id))
             ->assertOk()
             ->assertSee('title', false)
-            ->assertSee('qty',   false);
+            ->assertSee('qty', false);
+    }
+
+    // -------------------------------------------------------------------------
+    // strict_options — admin warning is flashed when field has existing values
+    // -------------------------------------------------------------------------
+
+    public function test_strict_options_warning_is_flashed_when_field_has_existing_values(): void
+    {
+        $user = $this->makeSuperAdmin();
+        $type = $this->selectType();
+        $group = $this->makeGroup();
+        $field = FieldModel::factory()->create([
+            'field_type_id' => $type->id,
+            'settings' => ['options' => [['key' => 'red', 'label' => 'Red']]],
+        ]);
+        $field->groups()->attach($group);
+
+        FieldValue::factory()->create(['field_id' => $field->id, 'value_text' => 'red']);
+
+        $this->actingAs($user)
+            ->put(route('fields.update', $field->id), [
+                'field_type_id' => $type->id,
+                'name' => $field->name,
+                'handle' => $field->handle,
+                'settings' => [
+                    'options' => [['key' => 'red', 'label' => 'Red']],
+                    'strict_options' => true,
+                ],
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('warning');
+    }
+
+    // -------------------------------------------------------------------------
+    // normaliseKeyValue — label-only rows are silently dropped
+    // -------------------------------------------------------------------------
+
+    public function test_label_only_options_are_dropped_during_normalisation(): void
+    {
+        $user = $this->makeSuperAdmin();
+        $type = $this->selectType();
+        $group = $this->makeGroup();
+
+        $this->actingAs($user)
+            ->post(route('fields.store', ['group_id' => $group->id]), [
+                'group_id' => $group->id,
+                'field_type_id' => $type->id,
+                'name' => 'Status',
+                'handle' => 'status',
+                'settings' => [
+                    'options' => [
+                        ['key' => 'active', 'label' => 'Active'],
+                        ['key' => '',       'label' => 'Orphan'],
+                    ],
+                ],
+            ])
+            ->assertRedirect();
+
+        $field = FieldModel::where('handle', 'status')->first();
+        $options = $field->settings['options'] ?? [];
+        $this->assertCount(1, $options);
+        $this->assertSame('active', $options[0]['key']);
     }
 }

@@ -2,70 +2,16 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Field\Types\Select;
-use App\Field\Types\Slider;
-use App\Field\Types\Users;
-use App\Models\Field\Group as FieldGroup;
-use App\Models\Field\Type as FieldType;
-use App\Models\Role;
-use App\Models\User;
+use App\Models\Field as FieldModel;
+use App\Models\FieldValue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Feature\Admin\Concerns\MakesFieldTestFixtures;
 use Tests\TestCase;
 
 class FieldSettingsValidationTest extends TestCase
 {
+    use MakesFieldTestFixtures;
     use RefreshDatabase;
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function makeSuperAdmin(): User
-    {
-        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $user = User::factory()->create();
-        $user->assignRole($role);
-        return $user;
-    }
-
-    private function makeGroup(): FieldGroup
-    {
-        return FieldGroup::factory()->create();
-    }
-
-    private function selectType(): FieldType
-    {
-        return FieldType::firstOrCreate(
-            ['object' => Select::class],
-            ['name' => 'Select', 'handle' => 'select', 'settings' => []]
-        );
-    }
-
-    private function sliderType(): FieldType
-    {
-        return FieldType::firstOrCreate(
-            ['object' => Slider::class],
-            ['name' => 'Slider', 'handle' => 'slider', 'settings' => []]
-        );
-    }
-
-    private function usersType(): FieldType
-    {
-        return FieldType::firstOrCreate(
-            ['object' => Users::class],
-            ['name' => 'Users', 'handle' => 'users', 'settings' => []]
-        );
-    }
-
-    private function basePayload(FieldType $type, FieldGroup $group, array $overrides = []): array
-    {
-        return array_merge([
-            'group_id'      => $group->id,
-            'field_type_id' => $type->id,
-            'name'          => 'Test Field',
-            'handle'        => 'test_field',
-        ], $overrides);
-    }
 
     // -------------------------------------------------------------------------
     // Select — options required
@@ -73,8 +19,8 @@ class FieldSettingsValidationTest extends TestCase
 
     public function test_select_fails_when_options_are_empty(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->selectType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->selectType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
@@ -88,8 +34,8 @@ class FieldSettingsValidationTest extends TestCase
 
     public function test_select_fails_when_options_are_absent(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->selectType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->selectType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
@@ -107,8 +53,8 @@ class FieldSettingsValidationTest extends TestCase
 
     public function test_slider_fails_when_min_is_missing(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->sliderType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->sliderType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
@@ -122,8 +68,8 @@ class FieldSettingsValidationTest extends TestCase
 
     public function test_slider_fails_when_max_is_missing(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->sliderType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->sliderType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
@@ -137,8 +83,8 @@ class FieldSettingsValidationTest extends TestCase
 
     public function test_slider_passes_with_valid_min_and_max(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->sliderType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->sliderType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
@@ -154,8 +100,8 @@ class FieldSettingsValidationTest extends TestCase
 
     public function test_users_fails_when_limit_is_negative(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->usersType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->usersType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
@@ -169,8 +115,8 @@ class FieldSettingsValidationTest extends TestCase
 
     public function test_users_passes_when_limit_is_zero(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->usersType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->usersType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
@@ -178,5 +124,32 @@ class FieldSettingsValidationTest extends TestCase
                 'settings' => ['limit' => 0],
             ]))
             ->assertRedirect();
+    }
+
+    // -------------------------------------------------------------------------
+    // Type-change guard — blocked when field has existing values
+    // -------------------------------------------------------------------------
+
+    public function test_type_change_is_blocked_when_field_has_existing_values(): void
+    {
+        $user = $this->makeSuperAdmin();
+        $textType = $this->textType();
+        $sliderType = $this->sliderType();
+        $group = $this->makeGroup();
+        $field = FieldModel::factory()->create(['field_type_id' => $textType->id]);
+        $field->groups()->attach($group);
+
+        FieldValue::factory()->create(['field_id' => $field->id, 'value_text' => 'hello']);
+
+        $this->withoutExceptionHandling();
+        $this->expectException(\RuntimeException::class);
+
+        $this->actingAs($user)
+            ->put(route('fields.update', $field->id), [
+                'field_type_id' => $sliderType->id,
+                'name' => $field->name,
+                'handle' => $field->handle,
+                'settings' => ['min' => 0, 'max' => 100],
+            ]);
     }
 }

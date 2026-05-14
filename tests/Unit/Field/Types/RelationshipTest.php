@@ -6,6 +6,7 @@ use App\Field\AbstractField;
 use App\Field\Types\Relationship;
 use App\Models\Entry;
 use App\Models\EntryGroup;
+use App\Models\Field;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -68,9 +69,9 @@ class RelationshipTest extends TestCase
 
     public function test_get_setting_returns_configured_entry_group(): void
     {
-        $field = new Relationship(['entry_group' => 'blog-posts']);
+        $field = new Relationship(['entry_groups' => 'blog-posts']);
 
-        $this->assertEquals('blog-posts', $field->getSetting('entry_group'));
+        $this->assertEquals('blog-posts', $field->getSetting('entry_groups'));
     }
 
     public function test_get_setting_returns_default_when_key_missing(): void
@@ -166,7 +167,7 @@ class RelationshipTest extends TestCase
         $html = (new Relationship([]))->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringContainsString('<select', $html);
-        $this->assertStringContainsString('name="fields[' . $field->handle . '][]"', $html);
+        $this->assertStringContainsString('name="fields['.$field->handle.'][]"', $html);
         $this->assertStringContainsString('multiple', $html);
     }
 
@@ -174,9 +175,9 @@ class RelationshipTest extends TestCase
      * Return a minimal Field model with a random handle so render() can build
      * the correct name="fields[handle][]" attribute.
      */
-    private function makeFieldModel(): \App\Models\Field
+    private function makeFieldModel(): Field
     {
-        return \App\Models\Field::factory()->make(['handle' => 'related_entries']);
+        return Field::factory()->make(['handle' => 'related_entries']);
     }
 
     public function test_render_shows_no_entries_available_when_no_entry_group_configured(): void
@@ -194,13 +195,13 @@ class RelationshipTest extends TestCase
         $entryB = Entry::factory()->for($group)->create(['title' => 'Beta Post']);
 
         $field = $this->makeFieldModel();
-        $html = (new Relationship(['entry_group' => 'articles']))
+        $html = (new Relationship(['entry_groups' => 'articles']))
             ->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringContainsString('Alpha Post', $html);
         $this->assertStringContainsString('Beta Post', $html);
-        $this->assertStringContainsString((string)$entryA->id, $html);
-        $this->assertStringContainsString((string)$entryB->id, $html);
+        $this->assertStringContainsString((string) $entryA->id, $html);
+        $this->assertStringContainsString((string) $entryB->id, $html);
     }
 
     /**
@@ -220,7 +221,7 @@ class RelationshipTest extends TestCase
         Entry::factory()->for($group2)->create(['title' => 'Page One']);
 
         $field = $this->makeFieldModel();
-        $html = (new Relationship(['entry_group' => 'articles']))
+        $html = (new Relationship(['entry_groups' => 'articles']))
             ->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringContainsString('Article One', $html);
@@ -235,7 +236,7 @@ class RelationshipTest extends TestCase
         Entry::factory()->for($group2)->create(['title' => 'Page One']);
 
         $field = $this->makeFieldModel();
-        $html = (new Relationship(['entry_group' => ['articles', 'pages']]))
+        $html = (new Relationship(['entry_groups' => ['articles', 'pages']]))
             ->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringContainsString('Article One', $html);
@@ -248,7 +249,7 @@ class RelationshipTest extends TestCase
         $entry = Entry::factory()->for($group)->create(['title' => 'Selected Post']);
 
         $field = $this->makeFieldModel();
-        $html = (new Relationship(['entry_group' => 'articles']))
+        $html = (new Relationship(['entry_groups' => 'articles']))
             ->render([
                 'id' => 'f1',
                 'value' => collect([$entry]),   // as returned by Entry::field()
@@ -256,7 +257,7 @@ class RelationshipTest extends TestCase
             ]);
 
         $this->assertMatchesRegularExpression(
-            '/value="' . $entry->id . '"[^>]*selected/',
+            '/value="'.$entry->id.'"[^>]*selected/',
             $html
         );
     }
@@ -267,7 +268,7 @@ class RelationshipTest extends TestCase
         $entry = Entry::factory()->for($group)->create(['title' => 'Flash Post']);
 
         $field = $this->makeFieldModel();
-        $html = (new Relationship(['entry_group' => 'articles']))
+        $html = (new Relationship(['entry_groups' => 'articles']))
             ->render([
                 'id' => 'f1',
                 'value' => [$entry->id],   // as returned by old() flash data
@@ -275,7 +276,7 @@ class RelationshipTest extends TestCase
             ]);
 
         $this->assertMatchesRegularExpression(
-            '/value="' . $entry->id . '"[^>]*selected/',
+            '/value="'.$entry->id.'"[^>]*selected/',
             $html
         );
     }
@@ -287,7 +288,7 @@ class RelationshipTest extends TestCase
         $other = Entry::factory()->for($group)->create(['title' => 'Other']);
 
         $field = $this->makeFieldModel();
-        $html = (new Relationship(['entry_group' => 'articles']))
+        $html = (new Relationship(['entry_groups' => 'articles']))
             ->render([
                 'id' => 'f1',
                 'value' => collect([$selected]),
@@ -296,7 +297,7 @@ class RelationshipTest extends TestCase
 
         // The "Other" option must not carry the selected attribute.
         $this->assertDoesNotMatchRegularExpression(
-            '/value="' . $other->id . '"[^>]*selected/',
+            '/value="'.$other->id.'"[^>]*selected/',
             $html
         );
     }

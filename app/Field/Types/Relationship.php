@@ -4,6 +4,8 @@ namespace App\Field\Types;
 
 use App\Field\AbstractField;
 use App\Models\Entry;
+use App\Models\EntryGroup;
+use App\Models\EntryType;
 use Illuminate\Support\Collection;
 
 class Relationship extends AbstractField
@@ -23,7 +25,7 @@ class Relationship extends AbstractField
             'options' => 'entry_groups',
             'instructions' => 'Restrict selectable entries to these groups. Leave empty to allow all.',
             'default' => [],
-            'rules' => 'nullable|array'
+            'rules' => 'nullable|array',
         ],
         'entry_types' => [
             'type' => 'select_multiple',
@@ -31,27 +33,27 @@ class Relationship extends AbstractField
             'options' => 'entry_types',
             'instructions' => 'Further restrict by entry type.',
             'default' => [],
-            'rules' => 'nullable|array'
+            'rules' => 'nullable|array',
         ],
         'limit' => [
             'type' => 'number',
             'label' => 'Selection Limit',
             'instructions' => 'Maximum entries that may be selected. 0 = unlimited.',
             'default' => 0,
-            'rules' => 'nullable|integer|min:0'
+            'rules' => 'nullable|integer|min:0',
         ],
     ];
 
     public function settingsFormOptions(): array
     {
         return [
-            'entry_groups' => \App\Models\EntryGroup::orderBy('name')
+            'entry_groups' => EntryGroup::orderBy('name')
                 ->get(['id', 'handle', 'name'])
-                ->map(fn($g) => ['value' => $g->handle, 'label' => $g->name])
+                ->map(fn ($g) => ['value' => $g->handle, 'label' => $g->name])
                 ->all(),
-            'entry_types' => \App\Models\EntryType::orderBy('name')
+            'entry_types' => EntryType::orderBy('name')
                 ->get(['id', 'handle', 'name'])
-                ->map(fn($t) => ['value' => $t->handle, 'label' => $t->name])
+                ->map(fn ($t) => ['value' => $t->handle, 'label' => $t->name])
                 ->all(),
         ];
     }
@@ -81,7 +83,7 @@ class Relationship extends AbstractField
             return true;
         }
 
-        if (!is_array($value)) {
+        if (! is_array($value)) {
             return 'Relationship field value must be an array of entry IDs.';
         }
 
@@ -97,7 +99,7 @@ class Relationship extends AbstractField
     {
         $params['entries'] = $this->fetchAvailableEntries();
         $params['selected_ids'] = $this->extractSelectedIds($params['value'] ?? null);
-        $params['limit'] = (int)$this->getSetting('limit', 0);
+        $params['limit'] = (int) $this->getSetting('limit', 0);
 
         return view('_fields.relationship', $params)->render();
     }
@@ -109,16 +111,16 @@ class Relationship extends AbstractField
      */
     private function fetchAvailableEntries(): Collection
     {
-        $entryGroup = $this->getSetting('entry_group');
+        $entryGroup = $this->getSetting('entry_groups');
 
-        if (!$entryGroup) {
+        if (! $entryGroup) {
             return collect();
         }
 
         $handles = is_array($entryGroup) ? $entryGroup : [$entryGroup];
 
         return Entry::query()
-            ->whereHas('entryGroup', fn($q) => $q->whereIn('handle', $handles))
+            ->whereHas('entryGroup', fn ($q) => $q->whereIn('handle', $handles))
             ->orderBy('title')
             ->get(['id', 'title']);
     }
@@ -135,7 +137,7 @@ class Relationship extends AbstractField
     private function extractSelectedIds(mixed $value): array
     {
         if ($value instanceof Collection) {
-            return $value->pluck('id')->map(fn($id) => (int)$id)->all();
+            return $value->pluck('id')->map(fn ($id) => (int) $id)->all();
         }
 
         if (is_array($value)) {

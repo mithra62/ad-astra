@@ -8,7 +8,7 @@ trait FiltersFieldSettings
 {
     private function filterSettings(array $raw, AbstractField $instance): array
     {
-        $form     = $instance->settingsForm();
+        $form = $instance->settingsForm();
         $defaults = $instance->settingsDefaults();
         $filtered = [];
 
@@ -32,7 +32,7 @@ trait FiltersFieldSettings
         return array_values(
             array_filter(
                 $raw,
-                fn($row) => trim($row['key'] ?? '') !== '' || trim($row['label'] ?? '') !== ''
+                fn ($row) => trim($row['key'] ?? '') !== ''
             )
         );
     }

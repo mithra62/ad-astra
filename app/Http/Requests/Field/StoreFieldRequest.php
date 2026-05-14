@@ -20,7 +20,7 @@ class StoreFieldRequest extends FormRequest
             'field_type_id' => [
                 'required',
                 'integer',
-                'max:255',
+                'exists:field_types,id',
             ],
             'label' => [
                 'nullable',

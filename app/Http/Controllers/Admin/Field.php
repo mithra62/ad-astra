@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\Field\CreateNewField;
 use App\Actions\Field\EditField;
+use App\Field\AbstractField;
+use App\Field\Types\Text;
 use App\Http\Requests\Field\DeleteFieldRequest;
 use App\Http\Requests\Field\EditFieldRequest;
 use App\Http\Requests\Field\StoreFieldRequest;
@@ -12,6 +14,7 @@ use App\Models\Field\Group as FieldGroup;
 use App\Models\Field\Type as FieldType;
 use App\Models\FieldLayout as FieldLayoutModel;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class Field extends Controller
 {
@@ -20,8 +23,7 @@ class Field extends Controller
      */
     public function index()
     {
-        echo __FILE__ . ': ' . __LINE__;
-        exit;
+        abort(404);
     }
 
     /**
@@ -30,7 +32,7 @@ class Field extends Controller
     public function create($group_id)
     {
         $group = FieldGroup::find($group_id);
-        if (!$group instanceof FieldGroup) {
+        if (! $group instanceof FieldGroup) {
             abort(404);
         }
 
@@ -38,7 +40,7 @@ class Field extends Controller
         $typeId = old('field_type_id');
         $defaultType = $typeId
             ? FieldType::find($typeId)
-            : FieldType::where('object', \App\Field\Types\Text::class)->first();
+            : FieldType::where('object', Text::class)->first();
 
         $data = [
             'group' => $group,
@@ -60,6 +62,7 @@ class Field extends Controller
         $data = $request->validated();
         $data['group_id'] = $request->group_id;
         $group = $creator->createByGroup($data);
+
         return redirect()->route('fields.show', $group->id)->with('success', trans('field.created'));
     }
 
@@ -69,14 +72,14 @@ class Field extends Controller
     public function show(string $id)
     {
         $field = FieldModel::with('groups')->find($id);
-        if (!$field instanceof FieldModel) {
+        if (! $field instanceof FieldModel) {
             abort(404);
         }
 
         $groups = FieldGroup::all();
         $active_group = $field->groups->first();
         $layouts = FieldLayoutModel::with(['entryGroups', 'entryTypes.entryGroup'])
-            ->whereHas('tabs.elements', fn($q) => $q->where('field_id', $field->id))
+            ->whereHas('tabs.elements', fn ($q) => $q->where('field_id', $field->id))
             ->orderBy('name')
             ->get();
 
@@ -99,7 +102,12 @@ class Field extends Controller
         if ($field instanceof FieldModel) {
             $editor = app(EditField::class);
             $editor->edit($field, $request->validated());
-            return redirect()->route('fields.show', $id)->with('success', trans('field.updated'));
+            $redirect = redirect()->route('fields.show', $id)->with('success', trans('field.updated'));
+            if ($editor->warning) {
+                $redirect->with('warning', $editor->warning);
+            }
+
+            return $redirect;
         }
 
         abort(404);
@@ -111,7 +119,7 @@ class Field extends Controller
     public function edit(string $id)
     {
         $field = FieldModel::find($id);
-        if (!$field instanceof FieldModel) {
+        if (! $field instanceof FieldModel) {
             abort(404);
         }
 
@@ -139,6 +147,7 @@ class Field extends Controller
         if ($field instanceof FieldModel) {
             $group = $field->groups()->first();
             $field->delete();
+
             return redirect()->route('fields.groups.show', $group)->with('success', trans('field.deleted'));
         }
 
@@ -149,7 +158,7 @@ class Field extends Controller
      * Returns an HTML fragment with the settings panel for a given field type.
      * Called via AJAX when the type dropdown changes on the create/edit form.
      */
-    public function typeSettings(Request $request): \Illuminate\Http\Response
+    public function typeSettings(Request $request): Response
     {
         $request->validate([
             'type_id' => 'required|integer',
@@ -157,7 +166,7 @@ class Field extends Controller
         ]);
 
         $type = FieldType::find($request->type_id);
-        if (!$type instanceof FieldType) {
+        if (! $type instanceof FieldType) {
             abort(404);
         }
 
@@ -188,7 +197,7 @@ class Field extends Controller
         ]);
     }
 
-    private function buildSettingsForm(\App\Field\AbstractField $instance): array
+    private function buildSettingsForm(AbstractField $instance): array
     {
         $form = $instance->settingsForm();
         foreach ($instance->settingsFormOptions() as $handle => $optionList) {
@@ -196,13 +205,14 @@ class Field extends Controller
                 $form[$handle]['options'] = $optionList;
             }
         }
+
         return $form;
     }
 
     public function confirm(string $id)
     {
         $field = FieldModel::find($id);
-        if (!$field instanceof FieldModel) {
+        if (! $field instanceof FieldModel) {
             abort(404);
         }
 
@@ -213,6 +223,7 @@ class Field extends Controller
             'active_group' => $active_group,
             'groups' => $groups,
         ];
+
         return $this->view('fields.delete', $data);
     }
 }
