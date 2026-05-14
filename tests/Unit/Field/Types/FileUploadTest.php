@@ -31,6 +31,13 @@ class FileUploadTest extends TestCase
         return new FileUpload($settings);
     }
 
+    private function callProtected(FileUpload $instance, string $method): mixed
+    {
+        $ref = new \ReflectionMethod(FileUpload::class, $method);
+        $ref->setAccessible(true);
+        return $ref->invoke($instance);
+    }
+
     private function makeLibrary(string $handle = 'uploads'): Library
     {
         return Library::create([
@@ -324,6 +331,111 @@ class FileUploadTest extends TestCase
         // + up to 1 fieldType query = at most 4. Never N per media item.
         $this->assertLessThanOrEqual(4, $count,
             "value() should use eager loading, not one query per media item.");
+    }
+
+    // -------------------------------------------------------------------------
+    // resolveLibraryId
+    // -------------------------------------------------------------------------
+
+    public function test_resolve_library_id_returns_id_from_library_setting(): void
+    {
+        $library = $this->makeLibrary();
+        $type    = $this->make(['library' => [$library->id]]);
+
+        $id = $this->callProtected($type, 'resolveLibraryId');
+
+        $this->assertSame($library->id, $id);
+    }
+
+    public function test_resolve_library_id_falls_back_to_legacy_library_id_setting(): void
+    {
+        $library = $this->makeLibrary('legacy');
+        $type    = $this->make(['library_id' => $library->id]);
+
+        $id = $this->callProtected($type, 'resolveLibraryId');
+
+        $this->assertSame($library->id, $id);
+    }
+
+    public function test_resolve_library_id_returns_null_when_no_library_configured(): void
+    {
+        $type = $this->make();
+
+        $id = $this->callProtected($type, 'resolveLibraryId');
+
+        $this->assertNull($id);
+    }
+
+    // -------------------------------------------------------------------------
+    // buildAcceptString
+    // -------------------------------------------------------------------------
+
+    public function test_build_accept_string_returns_comma_separated_mimes_from_key_value_rows(): void
+    {
+        $type = $this->make([
+            'allowed_types' => [
+                ['key' => 'image/jpeg', 'label' => 'JPEG'],
+                ['key' => 'image/png',  'label' => 'PNG'],
+            ],
+        ]);
+
+        $accept = $this->callProtected($type, 'buildAcceptString');
+
+        $this->assertSame('image/jpeg,image/png', $accept);
+    }
+
+    public function test_build_accept_string_returns_empty_string_when_no_allowed_types(): void
+    {
+        $type = $this->make();
+
+        $accept = $this->callProtected($type, 'buildAcceptString');
+
+        $this->assertSame('', $accept);
+    }
+
+    public function test_build_accept_string_handles_flat_string_array(): void
+    {
+        $type = $this->make(['allowed_types' => ['image/gif', 'video/mp4']]);
+
+        $accept = $this->callProtected($type, 'buildAcceptString');
+
+        $this->assertSame('image/gif,video/mp4', $accept);
+    }
+
+    // -------------------------------------------------------------------------
+    // render()
+    // -------------------------------------------------------------------------
+
+    public function test_render_includes_library_upload_url(): void
+    {
+        $library = $this->makeLibrary('renders');
+        $type    = $this->make(['library' => [$library->id]]);
+
+        $html = $type->render(['input_name' => 'fields[photo]', 'label' => 'Photo']);
+
+        $this->assertStringContainsString((string) $library->id, $html);
+    }
+
+    public function test_render_includes_accept_attribute_when_allowed_types_set(): void
+    {
+        $library = $this->makeLibrary('renders2');
+        $type    = $this->make([
+            'library'       => [$library->id],
+            'allowed_types' => [['key' => 'image/jpeg', 'label' => 'JPEG']],
+        ]);
+
+        $html = $type->render(['input_name' => 'fields[photo]', 'label' => 'Photo']);
+
+        $this->assertStringContainsString('image/jpeg', $html);
+    }
+
+    public function test_render_shows_warning_when_no_library_configured(): void
+    {
+        $type = $this->make();
+
+        $html = $type->render(['input_name' => 'fields[photo]', 'label' => 'Photo']);
+
+        $this->assertStringContainsString('No library configured', $html);
     }
 
     // -------------------------------------------------------------------------

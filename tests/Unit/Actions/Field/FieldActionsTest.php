@@ -5,6 +5,7 @@ namespace Tests\Unit\Actions\Field;
 use App\Actions\Field\CreateNewField;
 use App\Actions\Field\EditField;
 use App\Field\Types\Boolean;
+use App\Field\Types\Select;
 use App\Field\Types\Text;
 use App\Models\Field;
 use App\Models\Field\Group as FieldGroup;
@@ -210,6 +211,133 @@ class FieldActionsTest extends TestCase
             ['object' => Boolean::class],
             ['name' => 'Boolean', 'settings' => []]
         );
+    }
+
+    /** Create a Select FieldType, reusing the existing row if already present. */
+    private function selectType(): FieldType
+    {
+        return FieldType::firstOrCreate(
+            ['object' => Select::class],
+            ['name' => 'Select', 'settings' => []]
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // filterSettings — via CreateNewField::create
+    // -------------------------------------------------------------------------
+
+    public function test_create_strips_undeclared_settings_keys(): void
+    {
+        $type   = $this->textType();
+        $action = app(CreateNewField::class);
+
+        $field = $action->create([
+            'field_type_id' => $type->id,
+            'name'          => 'Test',
+            'handle'        => 'test',
+            'settings'      => [
+                'placeholder'     => 'Enter…',
+                'unknown_key'     => 'should be stripped',
+                'placeholder_hex' => '#aabbcc',
+            ],
+        ]);
+
+        $this->assertArrayHasKey('placeholder', $field->fresh()->settings);
+        $this->assertArrayNotHasKey('unknown_key', $field->fresh()->settings);
+        $this->assertArrayNotHasKey('placeholder_hex', $field->fresh()->settings);
+    }
+
+    public function test_create_fills_defaults_for_missing_settings_keys(): void
+    {
+        $type   = $this->textType();
+        $action = app(CreateNewField::class);
+
+        $field = $action->create([
+            'field_type_id' => $type->id,
+            'name'          => 'Test2',
+            'handle'        => 'test2',
+            'settings'      => ['placeholder' => 'Hi'],
+        ]);
+
+        $stored = $field->fresh()->settings;
+        // All keys from Text's settingsForm should be present
+        $this->assertArrayHasKey('placeholder', $stored);
+        $this->assertArrayHasKey('max_length', $stored);
+        $this->assertSame('Hi', $stored['placeholder']);
+        $this->assertNull($stored['max_length']);
+    }
+
+    public function test_create_normalises_key_value_settings_stripping_empty_rows(): void
+    {
+        $type   = $this->selectType();
+        $action = app(CreateNewField::class);
+
+        $field = $action->create([
+            'field_type_id' => $type->id,
+            'name'          => 'Colour',
+            'handle'        => 'colour',
+            'settings'      => [
+                'options' => [
+                    ['key' => 'red',  'label' => 'Red'],
+                    ['key' => '',     'label' => ''],
+                    ['key' => 'blue', 'label' => 'Blue'],
+                    ['key' => '',     'label' => ''],
+                ],
+            ],
+        ]);
+
+        $stored = $field->fresh()->settings;
+        $this->assertCount(2, $stored['options']);
+        $this->assertSame('red',  $stored['options'][0]['key']);
+        $this->assertSame('blue', $stored['options'][1]['key']);
+    }
+
+    // -------------------------------------------------------------------------
+    // EditField — settings filtering and type-change reset
+    // -------------------------------------------------------------------------
+
+    public function test_edit_strips_undeclared_settings_keys(): void
+    {
+        $type   = $this->textType();
+        $field  = Field::factory()->create(['field_type_id' => $type->id, 'settings' => []]);
+        $action = app(EditField::class);
+
+        $action->edit($field, [
+            'name'          => $field->name,
+            'handle'        => $field->handle,
+            'field_type_id' => $type->id,
+            'settings'      => [
+                'placeholder' => 'Hello',
+                'injected'    => 'should vanish',
+            ],
+        ]);
+
+        $stored = $field->fresh()->settings;
+        $this->assertArrayHasKey('placeholder', $stored);
+        $this->assertArrayNotHasKey('injected', $stored);
+    }
+
+    public function test_edit_resets_settings_when_type_changes_on_value_free_field(): void
+    {
+        $textType    = $this->textType();
+        $booleanType = $this->booleanType();
+
+        $field = Field::factory()->create([
+            'field_type_id' => $textType->id,
+            'settings'      => ['placeholder' => 'saved value'],
+        ]);
+
+        $action = app(EditField::class);
+        $action->edit($field, [
+            'name'          => $field->name,
+            'handle'        => $field->handle,
+            'field_type_id' => $booleanType->id,
+        ]);
+
+        $stored = $field->fresh()->settings;
+        // Boolean has no settings form, so defaults should be an empty array
+        $this->assertIsArray($stored);
+        $this->assertArrayNotHasKey('placeholder', $stored);
     }
 
     public function test_edit_allows_same_type_id_even_with_existing_values(): void

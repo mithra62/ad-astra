@@ -139,16 +139,22 @@ class Library extends Controller
     {
         $library = LibraryModel::find($id);
         if (!$library instanceof LibraryModel) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => trans('media.library.not_found')], 404);
+            }
             abort(404);
         }
 
-        $uploader = app(UploadMedia::class);
-        $media = $uploader->upload($request, $library);
+        $media = app(UploadMedia::class)->upload($request, $library);
 
-        if ($media) {
-            return redirect()->route('media.show', $media)->with('success', trans('media.uploaded'));
+        if ($request->expectsJson()) {
+            return $media
+                ? response()->json(['id' => $media->id, 'name' => $media->original_name, 'url' => $media->url()])
+                : response()->json(['error' => trans('media.upload_failed')], 422);
         }
 
-        return redirect()->route('media.libraries.show', $library)->with('failure', trans('media.upload_failed'));
+        return $media
+            ? redirect()->route('media.show', $media)->with('success', trans('media.uploaded'))
+            : redirect()->route('media.libraries.show', $library)->with('failure', trans('media.upload_failed'));
     }
 }

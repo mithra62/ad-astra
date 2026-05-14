@@ -144,6 +144,58 @@ class FileUpload extends AbstractField
             ->values();
     }
 
+    public function render(array $params): string
+    {
+        $params['library_id'] = $this->resolveLibraryId();
+        $params['max']        = $this->getSetting('max');
+        $params['accept']     = $this->buildAcceptString();
+        return view('_fields.file_upload', $params)->render();
+    }
+
+    protected function resolveLibraryId(): ?int
+    {
+        // New: library setting stores array of IDs from select_multiple
+        $library = $this->getSetting('library');
+        if (!empty($library) && is_array($library)) {
+            $first = reset($library);
+            if (is_numeric($first)) {
+                return (int) $first;
+            }
+        }
+
+        // Legacy fallbacks
+        $libraryId = $this->getSetting('library_id');
+        if ($libraryId) {
+            return (int) $libraryId;
+        }
+
+        $handle = $this->getSetting('library_handle');
+        if ($handle) {
+            return $this->resolveLibraryHandle($handle);
+        }
+
+        return null;
+    }
+
+    protected function buildAcceptString(): string
+    {
+        $types = $this->getSetting('allowed_types', []);
+        if (empty($types)) {
+            return '';
+        }
+
+        $mimes = [];
+        foreach ((array) $types as $entry) {
+            if (is_array($entry) && !empty($entry['key'])) {
+                $mimes[] = $entry['key'];
+            } elseif (is_string($entry) && $entry !== '') {
+                $mimes[] = $entry;
+            }
+        }
+
+        return implode(',', $mimes);
+    }
+
     private function resolveLibraryHandle(string $handle): ?int
     {
         if (!array_key_exists($handle, static::$libraryHandleCache)) {
