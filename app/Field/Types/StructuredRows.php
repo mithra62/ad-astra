@@ -16,10 +16,31 @@ class StructuredRows extends AbstractField
     ];
 
     protected array $settings_form = [
-        'columns'   => ['type' => 'structured_rows_columns', 'label' => 'Columns', 'instructions' => 'Define the columns for each row. At least one column is required.', 'default' => [], 'rules' => 'required|array|min:1'],
-        'min_rows'  => ['type' => 'number', 'label' => 'Minimum Rows', 'default' => 0, 'rules' => 'nullable|integer|min:0'],
-        'max_rows'  => ['type' => 'number', 'label' => 'Maximum Rows', 'default' => null, 'rules' => 'nullable|integer|min:1'],
-        'add_label' => ['type' => 'text', 'label' => 'Add Row Button Label', 'default' => 'Add row', 'rules' => 'nullable|string|max:100'],
+        'columns' => [
+            'type' => 'structured_rows_columns',
+            'label' => 'Columns',
+            'instructions' => 'Define the columns for each row. At least one column is required.',
+            'default' => [],
+            'rules' => 'required|array|min:1'
+        ],
+        'min_rows' => [
+            'type' => 'number',
+            'label' => 'Minimum Rows',
+            'default' => 0,
+            'rules' => 'nullable|integer|min:0'
+        ],
+        'max_rows' => [
+            'type' => 'number',
+            'label' => 'Maximum Rows',
+            'default' => null,
+            'rules' => 'nullable|integer|min:1'
+        ],
+        'add_label' => [
+            'type' => 'text',
+            'label' => 'Add Row Button Label',
+            'default' => 'Add row',
+            'rules' => 'nullable|string|max:100'
+        ],
     ];
 
     public function storageColumn(): string
@@ -43,15 +64,15 @@ class StructuredRows extends AbstractField
             return true;
         }
 
-        $rows    = $this->cast($value);
-        $minRows = (int) $this->getSetting('min_rows', 0);
+        $rows = $this->cast($value);
+        $minRows = (int)$this->getSetting('min_rows', 0);
         $maxRows = $this->getSetting('max_rows');
 
         if ($minRows > 0 && count($rows) < $minRows) {
             return "At least {$minRows} row(s) are required.";
         }
 
-        if ($maxRows !== null && count($rows) > (int) $maxRows) {
+        if ($maxRows !== null && count($rows) > (int)$maxRows) {
             return "No more than {$maxRows} row(s) are allowed.";
         }
 
@@ -75,9 +96,9 @@ class StructuredRows extends AbstractField
 
     public function render(array $params): string
     {
-        $columns  = $this->getSetting('columns', []);
+        $columns = $this->getSetting('columns', []);
         $addLabel = $this->getSetting('add_label', 'Add row');
-        $minRows  = (int) $this->getSetting('min_rows', 0);
+        $minRows = (int)$this->getSetting('min_rows', 0);
 
         $rawRows = $this->cast($params['value'] ?? []);
 
@@ -89,9 +110,9 @@ class StructuredRows extends AbstractField
             );
         }, $rawRows);
 
-        $params['columns']   = $columns;
+        $params['columns'] = $columns;
         $params['add_label'] = $addLabel;
-        $params['min_rows']  = $minRows;
+        $params['min_rows'] = $minRows;
 
         return view('_fields.structured_rows', $params)->render();
     }

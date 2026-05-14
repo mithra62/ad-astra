@@ -15,10 +15,33 @@ class FileUpload extends AbstractField
     private static array $libraryHandleCache = [];
 
     protected array $settings_form = [
-        'library'       => ['type' => 'select_multiple', 'label' => 'Libraries', 'options' => 'libraries', 'instructions' => 'Restrict uploads to specific libraries. Leave empty to allow all.', 'default' => [], 'rules' => 'nullable|array'],
-        'allowed_types' => ['type' => 'key_value', 'label' => 'Allowed MIME Types', 'instructions' => 'List of allowed MIME types (e.g. image/jpeg). Leave empty to inherit from library.', 'default' => [], 'rules' => 'nullable|array'],
-        'min'           => ['type' => 'number', 'label' => 'Minimum Files', 'default' => null, 'rules' => 'nullable|integer|min:0'],
-        'max'           => ['type' => 'number', 'label' => 'Maximum Files', 'default' => null, 'rules' => 'nullable|integer|min:1'],
+        'library' => [
+            'type' => 'select_multiple',
+            'label' => 'Libraries',
+            'options' => 'libraries',
+            'instructions' => 'Restrict uploads to specific libraries. Leave empty to allow all.',
+            'default' => [],
+            'rules' => 'nullable|array'
+        ],
+        'allowed_types' => [
+            'type' => 'key_value',
+            'label' => 'Allowed MIME Types',
+            'instructions' => 'List of allowed MIME types (e.g. image/jpeg). Leave empty to inherit from library.',
+            'default' => [],
+            'rules' => 'nullable|array'
+        ],
+        'min' => [
+            'type' => 'number',
+            'label' => 'Minimum Files',
+            'default' => null,
+            'rules' => 'nullable|integer|min:0'
+        ],
+        'max' => [
+            'type' => 'number',
+            'label' => 'Maximum Files',
+            'default' => null,
+            'rules' => 'nullable|integer|min:1'
+        ],
     ];
 
     public function settingsFormOptions(): array
@@ -147,8 +170,8 @@ class FileUpload extends AbstractField
     public function render(array $params): string
     {
         $params['library_id'] = $this->resolveLibraryId();
-        $params['max']        = $this->getSetting('max');
-        $params['accept']     = $this->buildAcceptString();
+        $params['max'] = $this->getSetting('max');
+        $params['accept'] = $this->buildAcceptString();
         return view('_fields.file_upload', $params)->render();
     }
 
@@ -159,14 +182,14 @@ class FileUpload extends AbstractField
         if (!empty($library) && is_array($library)) {
             $first = reset($library);
             if (is_numeric($first)) {
-                return (int) $first;
+                return (int)$first;
             }
         }
 
         // Legacy fallbacks
         $libraryId = $this->getSetting('library_id');
         if ($libraryId) {
-            return (int) $libraryId;
+            return (int)$libraryId;
         }
 
         $handle = $this->getSetting('library_handle');
@@ -185,7 +208,7 @@ class FileUpload extends AbstractField
         }
 
         $mimes = [];
-        foreach ((array) $types as $entry) {
+        foreach ((array)$types as $entry) {
             if (is_array($entry) && !empty($entry['key'])) {
                 $mimes[] = $entry['key'];
             } elseif (is_string($entry) && $entry !== '') {

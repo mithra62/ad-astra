@@ -17,9 +17,29 @@ class Relationship extends AbstractField
     ];
 
     protected array $settings_form = [
-        'entry_group'  => ['type' => 'select_multiple', 'label' => 'Entry Groups', 'options' => 'entry_groups', 'instructions' => 'Restrict selectable entries to these groups. Leave empty to allow all.', 'default' => [], 'rules' => 'nullable|array'],
-        'entry_types'  => ['type' => 'select_multiple', 'label' => 'Entry Types', 'options' => 'entry_types', 'instructions' => 'Further restrict by entry type.', 'default' => [], 'rules' => 'nullable|array'],
-        'limit'        => ['type' => 'number', 'label' => 'Selection Limit', 'instructions' => 'Maximum entries that may be selected. 0 = unlimited.', 'default' => 0, 'rules' => 'nullable|integer|min:0'],
+        'entry_group' => [
+            'type' => 'select_multiple',
+            'label' => 'Entry Groups',
+            'options' => 'entry_groups',
+            'instructions' => 'Restrict selectable entries to these groups. Leave empty to allow all.',
+            'default' => [],
+            'rules' => 'nullable|array'
+        ],
+        'entry_types' => [
+            'type' => 'select_multiple',
+            'label' => 'Entry Types',
+            'options' => 'entry_types',
+            'instructions' => 'Further restrict by entry type.',
+            'default' => [],
+            'rules' => 'nullable|array'
+        ],
+        'limit' => [
+            'type' => 'number',
+            'label' => 'Selection Limit',
+            'instructions' => 'Maximum entries that may be selected. 0 = unlimited.',
+            'default' => 0,
+            'rules' => 'nullable|integer|min:0'
+        ],
     ];
 
     public function settingsFormOptions(): array

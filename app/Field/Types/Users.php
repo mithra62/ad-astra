@@ -18,9 +18,41 @@ class Users extends AbstractField
     ];
 
     protected array $settings_form = [
-        'roles'   => ['type' => 'select_multiple', 'label' => 'Restrict to Roles', 'options' => 'roles', 'instructions' => 'Limit selectable users to those with these roles. Leave empty to allow all users.', 'default' => [], 'rules' => 'nullable|array'],
-        'limit'   => ['type' => 'number', 'label' => 'Selection Limit', 'instructions' => 'Maximum users that may be selected. 0 = unlimited.', 'default' => 0, 'rules' => 'nullable|integer|min:0'],
-        'display' => ['type' => 'select', 'label' => 'Display As', 'options' => [['value' => 'dropdown', 'label' => 'Dropdown (searchable)'], ['value' => 'checkboxes', 'label' => 'Checkboxes'], ['value' => 'tokens', 'label' => 'Token list']], 'default' => 'dropdown', 'rules' => 'nullable|string|in:dropdown,checkboxes,tokens'],
+        'roles' => [
+            'type' => 'select_multiple',
+            'label' => 'Restrict to Roles',
+            'options' => 'roles',
+            'instructions' => 'Limit selectable users to those with these roles. Leave empty to allow all users.',
+            'default' => [],
+            'rules' => 'nullable|array'
+        ],
+        'limit' => [
+            'type' => 'number',
+            'label' => 'Selection Limit',
+            'instructions' => 'Maximum users that may be selected. 0 = unlimited.',
+            'default' => 0,
+            'rules' => 'nullable|integer|min:0'
+        ],
+        'display' => [
+            'type' => 'select',
+            'label' => 'Display As',
+            'options' => [
+                [
+                    'value' => 'dropdown',
+                    'label' => 'Dropdown (searchable)'
+                ],
+                [
+                    'value' => 'checkboxes',
+                    'label' => 'Checkboxes'
+                ],
+                [
+                    'value' => 'tokens',
+                    'label' => 'Token list'
+                ]
+            ],
+            'default' => 'dropdown',
+            'rules' => 'nullable|string|in:dropdown,checkboxes,tokens'
+        ],
     ];
 
     public function settingsFormOptions(): array
@@ -58,8 +90,8 @@ class Users extends AbstractField
             return true;
         }
 
-        $ids   = $this->cast($value);
-        $limit = (int) $this->getSetting('limit', 0);
+        $ids = $this->cast($value);
+        $limit = (int)$this->getSetting('limit', 0);
 
         if ($limit > 0 && count($ids) > $limit) {
             return "No more than {$limit} user(s) may be selected.";
@@ -74,7 +106,7 @@ class Users extends AbstractField
         $roles = $this->getSetting('roles', []);
         if (!empty($roles)) {
             $invalidUser = User::whereIn('id', $ids)
-                ->whereDoesntHave('roles', fn($q) => $q->whereIn('id', (array) $roles))
+                ->whereDoesntHave('roles', fn($q) => $q->whereIn('id', (array)$roles))
                 ->exists();
 
             if ($invalidUser) {
@@ -110,12 +142,12 @@ class Users extends AbstractField
 
         $query = User::select(['id', 'name', 'email'])->orderBy('name');
         if (!empty($roles)) {
-            $query->whereHas('roles', fn($q) => $q->whereIn('id', (array) $roles));
+            $query->whereHas('roles', fn($q) => $q->whereIn('id', (array)$roles));
         }
 
         $params['available_users'] = $query->get();
-        $params['display']         = $this->getSetting('display', 'dropdown');
-        $params['selected_ids']    = $this->extractSelectedIds($params['value'] ?? null);
+        $params['display'] = $this->getSetting('display', 'dropdown');
+        $params['selected_ids'] = $this->extractSelectedIds($params['value'] ?? null);
 
         return view('_fields.users', $params)->render();
     }
@@ -123,7 +155,7 @@ class Users extends AbstractField
     private function extractSelectedIds(mixed $value): array
     {
         if ($value instanceof \Illuminate\Support\Collection) {
-            return $value->pluck('id')->map(fn($id) => (int) $id)->all();
+            return $value->pluck('id')->map(fn($id) => (int)$id)->all();
         }
 
         if (is_array($value)) {

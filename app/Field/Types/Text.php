@@ -19,24 +19,24 @@ class Text extends AbstractField
 
     protected array $settings_form = [
         'placeholder' => [
-            'type'         => 'text',
-            'label'        => 'Placeholder',
+            'type' => 'text',
+            'label' => 'Placeholder',
             'instructions' => 'Shown inside the input when empty.',
-            'default'      => null,
-            'required'     => false,
-            'rules'        => 'nullable|string|max:255',
+            'default' => null,
+            'required' => false,
+            'rules' => 'nullable|string|max:255',
         ],
         'max_length' => [
-            'type'    => 'number',
-            'label'   => 'Max Length',
+            'type' => 'number',
+            'label' => 'Max Length',
             'default' => null,
-            'rules'   => 'nullable|integer|min:1',
+            'rules' => 'nullable|integer|min:1',
         ],
         'min_length' => [
-            'type'    => 'number',
-            'label'   => 'Min Length',
+            'type' => 'number',
+            'label' => 'Min Length',
             'default' => null,
-            'rules'   => 'nullable|integer|min:0',
+            'rules' => 'nullable|integer|min:0',
         ],
     ];
 

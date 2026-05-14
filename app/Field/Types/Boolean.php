@@ -15,9 +15,26 @@ class Boolean extends AbstractField
     ];
 
     protected array $settings_form = [
-        'default'   => ['type' => 'toggle', 'label' => 'Checked by default', 'default' => false, 'rules' => 'nullable|boolean'],
-        'label_on'  => ['type' => 'text', 'label' => 'On Label', 'instructions' => 'Label shown when toggled on.', 'default' => null, 'rules' => 'nullable|string|max:100'],
-        'label_off' => ['type' => 'text', 'label' => 'Off Label', 'instructions' => 'Label shown when toggled off.', 'default' => null, 'rules' => 'nullable|string|max:100'],
+        'default' => [
+            'type' => 'toggle',
+            'label' => 'Checked by default',
+            'default' => false,
+            'rules' => 'nullable|boolean'
+        ],
+        'label_on' => [
+            'type' => 'text',
+            'label' => 'On Label',
+            'instructions' => 'Label shown when toggled on.',
+            'default' => null,
+            'rules' => 'nullable|string|max:100'
+        ],
+        'label_off' => [
+            'type' => 'text',
+            'label' => 'Off Label',
+            'instructions' => 'Label shown when toggled off.',
+            'default' => null,
+            'rules' => 'nullable|string|max:100'
+        ],
     ];
 
     public function storageColumn(): string

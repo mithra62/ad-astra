@@ -15,10 +15,34 @@ class Date extends AbstractField
     ];
 
     protected array $settings_form = [
-        'min_date' => ['type' => 'text', 'label' => 'Min Date', 'instructions' => 'Earliest allowed date (YYYY-MM-DD).', 'default' => null, 'rules' => 'nullable|date'],
-        'max_date' => ['type' => 'text', 'label' => 'Max Date', 'instructions' => 'Latest allowed date (YYYY-MM-DD).', 'default' => null, 'rules' => 'nullable|date'],
-        'default'  => ['type' => 'text', 'label' => 'Default Value', 'instructions' => 'YYYY-MM-DD or "today".', 'default' => null, 'rules' => 'nullable|string|max:50'],
-        'format'   => ['type' => 'text', 'label' => 'Display Format', 'instructions' => 'PHP date format string, e.g. Y-m-d.', 'default' => null, 'rules' => 'nullable|string|max:50'],
+        'min_date' => [
+            'type' => 'text',
+            'label' => 'Min Date',
+            'instructions' => 'Earliest allowed date (YYYY-MM-DD).',
+            'default' => null,
+            'rules' => 'nullable|date'
+        ],
+        'max_date' => [
+            'type' => 'text',
+            'label' => 'Max Date',
+            'instructions' => 'Latest allowed date (YYYY-MM-DD).',
+            'default' => null,
+            'rules' => 'nullable|date'
+        ],
+        'default' => [
+            'type' => 'text',
+            'label' => 'Default Value',
+            'instructions' => 'YYYY-MM-DD or "today".',
+            'default' => null,
+            'rules' => 'nullable|string|max:50'
+        ],
+        'format' => [
+            'type' => 'text',
+            'label' => 'Display Format',
+            'instructions' => 'PHP date format string, e.g. Y-m-d.',
+            'default' => null,
+            'rules' => 'nullable|string|max:50'
+        ],
     ];
 
     public function storageColumn(): string

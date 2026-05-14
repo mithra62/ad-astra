@@ -19,11 +19,48 @@ class MultiSelect extends AbstractField
     ];
 
     protected array $settings_form = [
-        'options'        => ['type' => 'key_value', 'label' => 'Options', 'instructions' => 'Key/label pairs for selection. At least one option is required.', 'default' => [], 'rules' => 'required|array|min:1'],
-        'min'            => ['type' => 'number', 'label' => 'Minimum Selections', 'default' => null, 'rules' => 'nullable|integer|min:0'],
-        'max'            => ['type' => 'number', 'label' => 'Maximum Selections', 'default' => null, 'rules' => 'nullable|integer|min:1'],
-        'display'        => ['type' => 'select', 'label' => 'Display As', 'options' => [['value' => 'checkboxes', 'label' => 'Checkboxes'], ['value' => 'multiselect', 'label' => 'Multi-select list']], 'default' => 'checkboxes', 'rules' => 'nullable|string|in:checkboxes,multiselect'],
-        'strict_options' => ['type' => 'toggle', 'label' => 'Strict Options', 'instructions' => 'Reject entry saves when any stored value is no longer a valid option.', 'default' => false, 'rules' => 'nullable|boolean'],
+        'options' => [
+            'type' => 'key_value',
+            'label' => 'Options',
+            'instructions' => 'Key/label pairs for selection. At least one option is required.',
+            'default' => [],
+            'rules' => 'required|array|min:1'
+        ],
+        'min' => [
+            'type' => 'number',
+            'label' => 'Minimum Selections',
+            'default' => null,
+            'rules' => 'nullable|integer|min:0'
+        ],
+        'max' => [
+            'type' => 'number',
+            'label' => 'Maximum Selections',
+            'default' => null,
+            'rules' => 'nullable|integer|min:1']
+        ,
+        'display' => [
+            'type' => 'select',
+            'label' => 'Display As',
+            'options' => [
+                [
+                    'value' => 'checkboxes',
+                    'label' => 'Checkboxes'
+                ],
+                [
+                    'value' => 'multiselect',
+                    'label' => 'Multi-select list'
+                ]
+            ],
+            'default' => 'checkboxes',
+            'rules' => 'nullable|string|in:checkboxes,multiselect'
+        ],
+        'strict_options' => [
+            'type' => 'toggle',
+            'label' => 'Strict Options',
+            'instructions' => 'Reject entry saves when any stored value is no longer a valid option.',
+            'default' => false,
+            'rules' => 'nullable|boolean'
+        ],
     ];
 
     public function storageColumn(): string
@@ -55,11 +92,11 @@ class MultiSelect extends AbstractField
         $min = $this->getSetting('min');
         $max = $this->getSetting('max');
 
-        if ($min !== null && count($ids) < (int) $min) {
+        if ($min !== null && count($ids) < (int)$min) {
             return "At least {$min} option(s) must be selected.";
         }
 
-        if ($max !== null && count($ids) > (int) $max) {
+        if ($max !== null && count($ids) > (int)$max) {
             return "No more than {$max} option(s) may be selected.";
         }
 
