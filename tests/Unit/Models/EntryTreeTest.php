@@ -23,7 +23,7 @@ class EntryTreeTest extends TestCase
         $model = new EntryTree;
 
         $this->assertEquals(
-            ['entry_id', 'parent_id', 'handle', 'uri', 'depth', 'sort_order', 'template', 'is_home'],
+            ['entry_id', 'parent_id', 'handle', 'uri', 'depth', 'sort_order', 'redirect_url', 'template', 'is_home'],
             $model->getFillable()
         );
     }

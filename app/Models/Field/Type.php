@@ -34,7 +34,7 @@ class Type extends Model
      * @throws RuntimeException If the specified class does not extend AbstractField.
      * @throws RuntimeException If the specified class does not exist.
      */
-    public function instance(): AbstractField
+    public function instance(array $fieldSettings = []): AbstractField
     {
         $class = $this->object;
 
@@ -46,6 +46,8 @@ class Type extends Model
             throw new RuntimeException("FieldType class [{$class}] must extend AbstractField.");
         }
 
-        return new $class($this->settings ?? []);
+        $merged = array_merge($this->settings ?? [], $fieldSettings);
+
+        return new $class($merged);
     }
 }

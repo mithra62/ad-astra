@@ -131,7 +131,11 @@ The `name` convention `settings[placeholder]` maps cleanly through the macro's I
 
 ### 3. Required change to the `select` macro
 
-Add a `multiple` boolean parameter (default `false`). When true, render `<select multiple>` and handle `value` as an array for the `selected` check:
+> **Macro change policy — `_form-fields.twig` only:** `_form-fields.twig` macros are actively used across existing admin templates. Any modification must append new parameters at the end with sane defaults so all existing call sites continue to work without modification. If a change cannot be made backward-compatible by default values alone, every affected call site must be identified and updated in the same step.
+>
+> This policy does **not** apply to `_structured-rows.twig`. That macro file has no existing callers in the admin templates and can be modified freely.
+
+Add a `multiple` boolean parameter (default `false`) at the end of the `select` macro's signature. When true, render `<select multiple>` and handle `value` as an array for the `selected` check:
 
 ```twig
 {# _form-fields.twig — select macro signature change #}
@@ -139,13 +143,17 @@ Add a `multiple` boolean parameter (default `false`). When true, render `<select
     ...
     <select ... {% if multiple %}multiple{% endif %}>
         {% for option in options %}
-            {% set is_selected = multiple ? (option.value in value) : (selected_value == option.value) %}
+            {% set is_selected = multiple ? (option.value in (value ?? [])) : (selected_value == option.value) %}
             <option value="{{ option.value }}" {% if is_selected %}selected{% endif %}>{{ option.label }}</option>
         {% endfor %}
     </select>
 ```
 
-This single change enables all DB-sourced multi-select settings widgets without any new macro.
+`multiple` defaults to `false`, so all existing callers that omit it are unaffected. The `(value ?? [])` guard prevents a Twig `in` test from failing when `value` is null in the single-select path — also a safe no-op for existing callers.
+
+**Existing call sites to verify** (grep for `f.select(` or `select(` in `resources/views/admin/`): confirm none pass a positional eighth argument that would now be misinterpreted as `multiple`. If any are found, list and update them here before merging Step 3.
+
+This single change enables all `select_multiple` settings widgets without any new macro.
 
 ### 4. The `slider` widget type — dynamic bounds
 
@@ -847,7 +855,7 @@ Each step below is independently reviewable and shippable. No step introduces a 
 **Files to change:**
 
 - `resources/views/admin/_inc/_form-fields.twig`
-  - Find the `select` macro signature and add `multiple = false` as the last parameter.
+  - Add `multiple = false` as the last parameter of the `select` macro — appended at the end so all existing call sites that omit it receive the default and are unaffected. (`_form-fields.twig` macros have existing callers; see macro change policy in §3 of the architecture.)
   - Add `{% if multiple %}multiple{% endif %}` to the `<select>` element.
   - Update the `selected` check inside the options loop:
     ```twig
@@ -855,11 +863,11 @@ Each step below is independently reviewable and shippable. No step introduces a 
         ? (option.value in (value ?? []))
         : (selected_value == option.value) %}
     ```
-  - Ensure existing callers that pass no `multiple` argument continue to work (default `false`).
+  - Before merging, grep for all existing usages of this macro (`f.select(` in any `.twig` file under `resources/views/admin/`) and confirm no caller passes an eighth positional argument that would be silently reinterpreted as `multiple = true`. If any are found, fix them in this same step.
 
 **Tests to add** — this is a Twig template; test via feature test. Add a case to whatever existing feature test renders admin forms, or note for Step 12's feature test pass.
 
-**Review checkpoint:** Render any existing admin form that uses the `select` macro. Visual output identical to before.
+**Review checkpoint:** Render every existing admin form that uses the `select` macro. Visual output must be identical to before. Grep confirms no unintended `multiple` activations.
 
 ---
 
