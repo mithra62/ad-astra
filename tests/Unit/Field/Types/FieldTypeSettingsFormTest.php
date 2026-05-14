@@ -155,7 +155,7 @@ class FieldTypeSettingsFormTest extends TestCase
     {
         $form = (new Relationship([], null))->settingsForm();
 
-        $this->assertArrayHasKey('entry_group', $form);
+        $this->assertArrayHasKey('entry_groups', $form);
         $this->assertArrayHasKey('entry_types', $form);
         $this->assertArrayHasKey('limit', $form);
     }
@@ -229,7 +229,7 @@ class FieldTypeSettingsFormTest extends TestCase
     {
         $rules = (new Relationship([], null))->settingsRules();
 
-        $this->assertArrayHasKey('settings.entry_group', $rules);
+        $this->assertArrayHasKey('settings.entry_groups', $rules);
         $this->assertArrayHasKey('settings.limit', $rules);
     }
 }
