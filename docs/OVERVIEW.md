@@ -2999,8 +2999,7 @@ Add `Fieldable` to the Eloquent model that should read custom field values:
 // app/Models/ProductVariant.php
 namespace App\Models;
 
-use App\Traits\Fieldable;
-use Illuminate\Database\Eloquent\Model;
+use App\Traits\Field\Fieldable;use Illuminate\Database\Eloquent\Model;
 
 class ProductVariant extends Model
 {
@@ -3073,10 +3072,7 @@ requires `Field` rows and the `Fieldable` model.
 correct value for `fieldable_type`.
 
 ```php
-use App\Models\Field;
-use App\Models\FieldValue;
-use App\Models\ProductVariant;
-use App\Traits\PersistsFieldValues;
+use App\Models\Field;use App\Models\FieldValue;use App\Models\ProductVariant;use App\Traits\Field\PersistsFieldValues;
 
 // Option A - via PersistsFieldValues in a service
 class ProductVariantFieldService
@@ -3113,7 +3109,7 @@ FieldValue::updateOrCreate(
 In a controller or action, write fields after the model has been saved:
 
 ```php
-use App\Traits\PersistsFieldValues;
+use App\Traits\Field\PersistsFieldValues;
 
 class UpdateProductVariant
 {

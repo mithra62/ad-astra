@@ -23,7 +23,13 @@ class FieldTypeSeeder extends Seeder
             ['name' => 'Color Picker', 'object' => \App\Field\Types\ColorPicker::class],
             ['name' => 'Relationship', 'object' => \App\Field\Types\Relationship::class],
             ['name' => 'Boolean', 'object' => \App\Field\Types\Boolean::class],
-            ['name' => 'File Upload', 'object' => \App\Field\Types\FileUpload::class],
+            ['name' => 'File Upload',      'object' => \App\Field\Types\FileUpload::class],
+            ['name' => 'Select',           'object' => \App\Field\Types\Select::class],
+            ['name' => 'Multi Select',     'object' => \App\Field\Types\MultiSelect::class],
+            ['name' => 'Radio Group',      'object' => \App\Field\Types\RadioGroup::class],
+            ['name' => 'Slider',           'object' => \App\Field\Types\Slider::class],
+            ['name' => 'Users',            'object' => \App\Field\Types\Users::class],
+            ['name' => 'Structured Rows',  'object' => \App\Field\Types\StructuredRows::class],
         ];
 
         foreach ($types as $type) {

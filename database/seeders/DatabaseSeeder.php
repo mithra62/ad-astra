@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
         if (app()->environment(['local', 'testing'])) {
             $this->call([
                 EntrySeeder::class,
+                SandboxedEntryTreeSeeder::class,
                 SampleApiTokenSeeder::class,
                 //FakeDataSeeder::class,
             ]);

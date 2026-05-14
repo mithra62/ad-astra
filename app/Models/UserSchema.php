@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Traits\HasFieldGroups;
-use App\Traits\HasFieldLayout;
+use App\Traits\Field\HasFieldGroups;
+use App\Traits\Field\HasFieldLayout;
 use Illuminate\Database\Eloquent\Model;
 
 class UserSchema extends Model

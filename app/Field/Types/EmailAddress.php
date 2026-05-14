@@ -10,6 +10,8 @@ class EmailAddress extends AbstractField
 
     protected string $name = 'Email';
 
+    protected array $settings_form = [];
+
     public function storageColumn(): string
     {
         return 'value_text';

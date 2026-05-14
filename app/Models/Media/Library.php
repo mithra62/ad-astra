@@ -2,9 +2,9 @@
 
 namespace App\Models\Media;
 
+use App\Traits\Field\HasFieldGroups;
+use App\Traits\Field\HasFieldLayout;
 use App\Traits\HasCategoryGroups;
-use App\Traits\HasFieldGroups;
-use App\Traits\HasFieldLayout;
 use App\Traits\HasMediaItems;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

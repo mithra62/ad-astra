@@ -1,0 +1,18 @@
+{% set input_name = 'fields[' ~ field.handle ~ ']' %}
+{% set current_value = old('fields.' ~ field.handle, value|default('')) %}
+
+<div class="{{ layout == 'inline' ? 'flex flex-wrap gap-4' : 'space-y-2' }}">
+    {% for option in options %}
+        {% set option_value = option.value|default(option.key|default('')) %}
+        {% set option_label = option.label|default(option_value) %}
+        {% set radio_id = id ~ '_' ~ loop.index %}
+        <label class="flex cursor-pointer items-center gap-2" for="{{ radio_id }}">
+            <input id="{{ radio_id }}" type="radio" name="{{ input_name }}" value="{{ option_value }}"
+                class="border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                {% if current_value == option_value %}checked{% endif %}>
+            <span class="text-sm text-slate-700">{{ option_label }}</span>
+        </label>
+    {% else %}
+        <p class="text-sm text-slate-400 italic">No options configured.</p>
+    {% endfor %}
+</div>

@@ -15,6 +15,8 @@ class Telephone extends AbstractField
         'telephone',
     ];
 
+    protected array $settings_form = [];
+
     public function storageColumn(): string
     {
         return 'value_text';

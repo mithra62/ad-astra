@@ -5,7 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\UserStatus;
 use App\Models\User\OauthToken;
-use App\Traits\Fieldable;
+use App\Traits\Field\Fieldable;
 use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

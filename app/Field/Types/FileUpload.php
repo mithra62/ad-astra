@@ -14,6 +14,23 @@ class FileUpload extends AbstractField
     /** @var array<string, int|null> */
     private static array $libraryHandleCache = [];
 
+    protected array $settings_form = [
+        'library'       => ['type' => 'select_multiple', 'label' => 'Libraries', 'options' => 'libraries', 'instructions' => 'Restrict uploads to specific libraries. Leave empty to allow all.', 'default' => [], 'rules' => 'nullable|array'],
+        'allowed_types' => ['type' => 'key_value', 'label' => 'Allowed MIME Types', 'instructions' => 'List of allowed MIME types (e.g. image/jpeg). Leave empty to inherit from library.', 'default' => [], 'rules' => 'nullable|array'],
+        'min'           => ['type' => 'number', 'label' => 'Minimum Files', 'default' => null, 'rules' => 'nullable|integer|min:0'],
+        'max'           => ['type' => 'number', 'label' => 'Maximum Files', 'default' => null, 'rules' => 'nullable|integer|min:1'],
+    ];
+
+    public function settingsFormOptions(): array
+    {
+        return [
+            'libraries' => \App\Models\Media\Library::orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn($lib) => ['value' => $lib->id, 'label' => $lib->name])
+                ->all(),
+        ];
+    }
+
     public function storageColumn(): string
     {
         return 'value_json';

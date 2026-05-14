@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Traits\Field;
 
 use App\Models\FieldValue;
 use Illuminate\Database\Eloquent\Relations\MorphMany;

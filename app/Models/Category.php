@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\Category\Group;
-use App\Traits\Fieldable;
+use App\Traits\Field\Fieldable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

@@ -88,11 +88,8 @@ The `hasManyThrough` argument order is copied verbatim from `EntryGroup::statuse
 Remove the inline `statusGroup()` and `statuses()` methods and add `HasStatusGroup` to the `use` list.
 
 ```php
-use App\Traits\HasCategoryGroups;
-use App\Traits\HasFactory;
-use App\Traits\HasFieldGroups;
-use App\Traits\HasFieldLayout;
-use App\Traits\HasStatusGroup;          // add
+use App\Traits\Field\HasFieldGroups;use App\Traits\Field\HasFieldLayout;use App\Traits\HasCategoryGroups;use App\Traits\HasFactory;use App\Traits\HasStatusGroup;
+// add
 
 class EntryGroup extends Model
 {
@@ -107,11 +104,8 @@ The `fillable` array already contains `status_group_id` — nothing else changes
 Add `HasStatusGroup` to traits, add `status_group_id` to fillable.
 
 ```php
-use App\Traits\HasCategoryGroups;
-use App\Traits\HasFieldGroups;
-use App\Traits\HasFieldLayout;
-use App\Traits\HasMediaItems;
-use App\Traits\HasStatusGroup;          // add
+use App\Traits\Field\HasFieldGroups;use App\Traits\Field\HasFieldLayout;use App\Traits\HasCategoryGroups;use App\Traits\HasMediaItems;use App\Traits\HasStatusGroup;
+// add
 
 class Library extends Model
 {

@@ -8,7 +8,7 @@ use App\Models\Category;
 use App\Models\Field;
 use App\Models\Field\Type as FieldType;
 use App\Models\FieldValue;
-use App\Traits\PersistsFieldValues;
+use App\Traits\Field\PersistsFieldValues;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

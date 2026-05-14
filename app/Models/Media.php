@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\Fieldable;
+use App\Traits\Field\Fieldable;
 use App\Traits\HasTransformations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

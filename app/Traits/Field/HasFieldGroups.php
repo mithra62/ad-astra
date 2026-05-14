@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Traits\Field;
 
 use App\Models\Field\Group as FieldGroup;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;

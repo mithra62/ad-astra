@@ -15,6 +15,8 @@ class Url extends AbstractField
         'url',
     ];
 
+    protected array $settings_form = [];
+
     public function storageColumn(): string
     {
         return 'value_text';
