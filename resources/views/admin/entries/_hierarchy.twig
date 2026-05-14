@@ -1,3 +1,4 @@
+{% import 'admin._inc._form-fields' as forms %}
 <div id="tab-hierarchy" class="tab-panel" role="tabpanel" aria-labelledby="btn-hierarchy" data-tab-panel="hierarchy" hidden>
 
     <div class="divide-y divide-slate-100">
@@ -6,18 +7,21 @@
             <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Hierarchy</h5>
             <div class="space-y-4">
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="parent_id">Parent Entry</label>
+                    {{ forms.checkbox_card('is_home', 1, 'Is Home?', 'Should this Entry be considered the Home Page content?') }}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="parent_entry_id">Parent Entry</label>
                     <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                            id="parent_id" name="parent_id" data-tab-dirty="structure">
+                            id="parent_entry_id" name="parent_entry_id" data-tab-dirty="structure">
                         <option value="">— None (top-level) —</option>
-                        <option value="22060" {% if old('parent_id') == 22060 %} selected {% endif %}>Vel Fugiat Nemo Animi.</option>
-                        <option value="22004" {% if old('parent_id') == 22004 %} selected {% endif %}>Possimus Ut Architecto Ut Atque Fugit Est.</option>
-                        <option value="21970" {% if old('parent_id') == 21970 %} selected {% endif %}>Aut Soluta Dolor Nostrum Explicabo Et Aut.</option>
-                        <option value="21922" {% if old('parent_id') == 21922 %} selected {% endif %}>Ullam Id Corporis Rem Dolores Dolorem.</option>
+                        <option value="22060" {% if old('parent_entry_id') == 22060 %} selected {% endif %}>Vel Fugiat Nemo Animi.</option>
+                        <option value="22004" {% if old('parent_entry_id') == 22004 %} selected {% endif %}>Possimus Ut Architecto Ut Atque Fugit Est.</option>
+                        <option value="21970" {% if old('parent_entry_id') == 21970 %} selected {% endif %}>Aut Soluta Dolor Nostrum Explicabo Et Aut.</option>
+                        <option value="21922" {% if old('parent_entry_id') == 21922 %} selected {% endif %}>Ullam Id Corporis Rem Dolores Dolorem.</option>
                     </select>
                     <p class="mt-1 text-xs text-slate-400">Leave blank to place at the top level.</p>
-                    {% if errors.has('parent_id') %}
-                        <p class="text-danger">{{ errors.first('parent_id', entry.entryType.parent_id) }}</p>
+                    {% if errors.has('parent_entry_id') %}
+                        <p class="mt-1 text-xs text-red-600">{{ errors.first('parent_entry_id', entry.entryType.parent_id) }}</p>
                     {% endif %}
                 </div>
                 <div>
@@ -48,7 +52,7 @@
                     </div>
                     <p class="mt-1 text-xs text-slate-400">Leave blank to auto-build from slug and parent.</p>
                     {% if errors.has('entry_url') %}
-                        <p class="text-danger">{{ errors.first('url', entry.entryTree.url) }}</p>
+                        <p class="mt-1 text-xs text-red-600">{{ errors.first('url', entry.entryTree.url) }}</p>
                     {% endif %}
                 </div>
                 <div>
@@ -60,7 +64,7 @@
                            data-tab-dirty="structure">
                     <p class="mt-1 text-xs text-slate-400">Optional. If set, visiting this entry's URL will redirect here.</p>
                     {% if errors.has('redirect_url') %}
-                        <p class="text-danger">{{ errors.first('redirect_url', entry.entryType.redirect_url) }}</p>
+                        <p class="mt-1 text-xs text-red-600">{{ errors.first('redirect_url', entry.entryType.redirect_url) }}</p>
                     {% endif %}
                 </div>
             </div>
@@ -77,7 +81,7 @@
                        data-tab-dirty="structure">
                 <p class="mt-1 text-xs text-slate-400">Template path relative to the views root. Leave blank to use the entry type's default.</p>
                 {% if errors.has('template') %}
-                    <p class="text-danger">{{ errors.first('template', entry.entryTree.template) }}</p>
+                    <p class="mt-1 text-xs text-red-600">{{ errors.first('template', entry.entryTree.template) }}</p>
                 {% endif %}
             </div>
         </div>

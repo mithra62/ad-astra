@@ -96,6 +96,17 @@
                         {% if errors.has('status_group_id') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('status_group_id') }}</p>{% endif %}
                     </div>
                     <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="field_layout_id">Field Layout</label>
+                        <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm {% if errors.has('field_layout_id') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="field_layout_id" name="field_layout_id">
+                            {% for layout in field_layouts %}
+                                <option value="{{ layout.id }}" {% if old('field_layout_id', group.field_layout_id) == layout.id %}selected{% endif %}>
+                                    {{ layout.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.has('field_layout_id') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>{% endif %}
+                    </div>
+                    <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="description">Description</label>
                         <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="description" name="description" rows="4" placeholder="Optional internal description...">{{ old('description', group.description) }}</textarea>
                     </div>
