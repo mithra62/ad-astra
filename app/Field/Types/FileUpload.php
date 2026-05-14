@@ -24,7 +24,7 @@ class FileUpload extends AbstractField
     public function settingsFormOptions(): array
     {
         return [
-            'libraries' => \App\Models\Media\Library::orderBy('name')
+            'library' => \App\Models\Media\Library::orderBy('name')
                 ->get(['id', 'name'])
                 ->map(fn($lib) => ['value' => $lib->id, 'label' => $lib->name])
                 ->all(),

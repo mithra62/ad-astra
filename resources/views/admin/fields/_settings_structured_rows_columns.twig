@@ -1,0 +1,26 @@
+{# Column-schema editor for the Structured Rows field type. #}
+{# matrix.scripts() is NOT called here — it is emitted once by the create/edit view layout. #}
+{% import 'admin::_inc/_structured-rows' as matrix %}
+{{ matrix.field(
+    'settings[' ~ handle ~ ']',
+    def.label,
+    [
+        {handle: 'handle',      label: 'Handle',      type: 'text'},
+        {handle: 'label',       label: 'Label',       type: 'text'},
+        {handle: 'type',        label: 'Type',        type: 'select', options: [
+            {value: 'text',     label: 'Text'},
+            {value: 'textarea', label: 'Textarea'},
+            {value: 'number',   label: 'Number'},
+            {value: 'select',   label: 'Select'},
+            {value: 'checkbox', label: 'Checkbox'}
+        ]},
+        {handle: 'placeholder', label: 'Placeholder', type: 'text'},
+        {handle: 'width',       label: 'Width',       type: 'text'},
+        {handle: 'options',     label: 'Options',     type: 'text'}
+    ],
+    value,
+    def.instructions|default(''),
+    null, null,
+    'Add column',
+    0
+) }}

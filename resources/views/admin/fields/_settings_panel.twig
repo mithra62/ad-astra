@@ -1,0 +1,13 @@
+{% if settings_form is empty %}
+    <p class="text-sm italic text-slate-400">This field type has no configurable settings.</p>
+{% else %}
+    <div class="space-y-4">
+        {% for handle, def in settings_form %}
+            {{ include('admin::fields/_settings_widget', {
+                handle: handle,
+                def: def,
+                value: current_values[handle] is defined ? current_values[handle] : def.default
+            }) }}
+        {% endfor %}
+    </div>
+{% endif %}

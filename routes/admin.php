@@ -117,6 +117,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('update', 'fields.groups.update')
         ->name('destroy', 'fields.groups.destroy');
 
+    Route::get('fields/type-settings', [Field::class, 'typeSettings'])->name('fields.type_settings');
     Route::get('fields/{group_id}/create', [Field::class, 'create'])->name('fields.create');
     Route::post('fields/{group_id}/create', [Field::class, 'store'])->name('fields.store');
     Route::get('fields/{id}/confirm', [Field::class, 'confirm'])->name('fields.confirm');

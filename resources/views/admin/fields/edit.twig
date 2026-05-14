@@ -71,6 +71,7 @@
         <form id="general-create-form" method="POST" action="{{ route('fields.update', field) }}" class="flex w-full min-w-0 flex-col gap-5">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
+            <input type="hidden" id="field_id" value="{{ field.id }}">
             <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                 <div class="border-b border-slate-200 px-5 py-3">
                     <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
@@ -114,6 +115,20 @@
                 </div>
             </div>
 
+            <div id="field-settings-card" class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3">
+                    <h5 class="text-sm font-semibold text-slate-700">Field Type Settings</h5>
+                </div>
+                <div class="px-5 py-5">
+                    <div id="field-type-settings">
+                        {{ include('admin::fields/_settings_panel', {
+                            settings_form: initial_settings_form,
+                            current_values: current_values
+                        }) }}
+                    </div>
+                </div>
+            </div>
+
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
                 <a href="{{ route('fields.show', field) }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Cancel</a>
                 <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Edit Field</button>
@@ -129,6 +144,51 @@
                 window.attachHandleGenerator('name', 'handle');
             }
         });
+    </script>
+
+    {% import 'admin::_inc/_structured-rows' as matrix %}
+    {{ matrix.scripts() }}
+
+    <script>
+    (function () {
+        var settingsTouched = false;
+
+        document.getElementById('field-type-settings').addEventListener('input', function () {
+            settingsTouched = true;
+        });
+        document.getElementById('field-type-settings').addEventListener('change', function () {
+            settingsTouched = true;
+        });
+
+        document.getElementById('field_type_id').addEventListener('change', function () {
+            if (settingsTouched) {
+                var warn = document.getElementById('settings-type-warning');
+                if (!warn) {
+                    warn = document.createElement('div');
+                    warn.id = 'settings-type-warning';
+                    warn.setAttribute('role', 'alert');
+                    warn.className = 'mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800';
+                    warn.textContent = 'Changing the field type will discard your current settings.';
+                    var card = document.getElementById('field-settings-card');
+                    card.parentNode.insertBefore(warn, card);
+                }
+            }
+
+            var fieldId = document.getElementById('field_id') ? document.getElementById('field_id').value : '';
+            var typeId = this.value;
+            fetch('{{ route('fields.type_settings') }}?type_id=' + typeId + '&field_id=' + fieldId)
+                .then(function (r) { return r.text(); })
+                .then(function (html) {
+                    var warn = document.getElementById('settings-type-warning');
+                    if (warn) { warn.remove(); }
+                    document.getElementById('field-type-settings').innerHTML = html;
+                    settingsTouched = false;
+                    if (window.initColorFields)  window.initColorFields();
+                    if (window.initRangeSliders) window.initRangeSliders();
+                    if (window.initMatrixFields) window.initMatrixFields();
+                });
+        });
+    })();
     </script>
 {% endblock %}
 
