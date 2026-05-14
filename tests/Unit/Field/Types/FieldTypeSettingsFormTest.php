@@ -198,8 +198,8 @@ class FieldTypeSettingsFormTest extends TestCase
     {
         $options = (new FileUpload([], null))->settingsFormOptions();
 
-        $this->assertArrayHasKey('libraries', $options);
-        $this->assertIsArray($options['libraries']);
+        $this->assertArrayHasKey('library', $options);
+        $this->assertIsArray($options['library']);
     }
 
     public function test_relationship_settings_form_options_returns_entry_groups_and_entry_types_keys(): void
