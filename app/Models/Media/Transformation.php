@@ -3,12 +3,15 @@
 namespace App\Models\Media;
 
 use App\Models\Media;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 
 class Transformation extends Model
 {
+    use HasFactory;
+
     protected $table = 'media_transformations';
 
     protected $fillable = [
@@ -18,8 +21,8 @@ class Transformation extends Model
 
     protected $casts = [
         'params' => 'array',
-        'size'   => 'integer',
-        'width'  => 'integer',
+        'size' => 'integer',
+        'width' => 'integer',
         'height' => 'integer',
     ];
 
@@ -38,15 +41,26 @@ class Transformation extends Model
         return Storage::disk($this->disk)->exists($this->path);
     }
 
-    public function isPending(): bool  { return $this->status === 'pending'; }
-    public function isComplete(): bool { return $this->status === 'complete'; }
-    public function isFailed(): bool   { return $this->status === 'failed'; }
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isComplete(): bool
+    {
+        return $this->status === 'complete';
+    }
+
+    public function isFailed(): bool
+    {
+        return $this->status === 'failed';
+    }
 
     public function markComplete(
         string $path,
-        int    $size,
-        ?int   $width  = null,
-        ?int   $height = null
+        int $size,
+        ?int $width = null,
+        ?int $height = null
     ): void {
         $this->update(
             compact('path', 'size', 'width', 'height')

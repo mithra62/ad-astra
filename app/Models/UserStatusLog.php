@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserStatusLog extends Model
 {
+    use HasFactory;
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -23,9 +26,9 @@ class UserStatusLog extends Model
 
     protected $casts = [
         'previous_locked_until' => 'datetime',
-        'new_locked_until'      => 'datetime',
-        'context'               => 'array',
-        'created_at'            => 'datetime',
+        'new_locked_until' => 'datetime',
+        'context' => 'array',
+        'created_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

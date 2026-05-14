@@ -2,6 +2,9 @@
 
 namespace Tests\Unit\Actions\Entry\Tree;
 
+use App\Actions\Entry\Tree\CreateEntryTreeNode;
+use App\Actions\Entry\Tree\MoveEntryTreeNode;
+use App\Actions\Entry\Tree\RebuildEntryTreeUri;
 use App\Models\Entry;
 use App\Models\EntryGroup;
 use App\Models\EntryTree;
@@ -158,5 +161,110 @@ class EntryTreeActionsTest extends TestCase
         $this->expectExceptionMessage('The Entry Tree home node must remain at the root.');
 
         app(EntryService::class)->rebuildTreeUri($invalidHome);
+    }
+
+    // -------------------------------------------------------------------------
+    // CreateEntryTreeNode action wrapper — delegation
+    // -------------------------------------------------------------------------
+
+    public function test_create_tree_node_action_delegates_to_service(): void
+    {
+        $entry = $this->makeTreeEntry();
+        $node = EntryTree::factory()->create(['entry_id' => $entry->id]);
+        $service = $this->mock(EntryService::class);
+        $service->shouldReceive('createTreeNode')
+            ->once()
+            ->with($entry, 'About Us', null, null, false)
+            ->andReturn($node);
+
+        $result = app(CreateEntryTreeNode::class)->create($entry, 'About Us');
+
+        $this->assertSame($node, $result);
+    }
+
+    public function test_create_tree_node_action_passes_parent_template_and_home_flag(): void
+    {
+        $entry = $this->makeTreeEntry();
+        $parent = EntryTree::factory()->create(['entry_id' => $this->makeTreeEntry()->id]);
+        $node = EntryTree::factory()->create(['entry_id' => $entry->id]);
+        $service = $this->mock(EntryService::class);
+        $service->shouldReceive('createTreeNode')
+            ->once()
+            ->with($entry, 'Child', $parent, 'entries.show', false)
+            ->andReturn($node);
+
+        $result = app(CreateEntryTreeNode::class)->create($entry, 'Child', $parent, 'entries.show', false);
+
+        $this->assertSame($node, $result);
+    }
+
+    public function test_create_tree_node_action_returns_entry_tree_instance(): void
+    {
+        $entry = $this->makeTreeEntry();
+        $node = EntryTree::factory()->create(['entry_id' => $entry->id]);
+        $service = $this->mock(EntryService::class);
+        $service->shouldReceive('createTreeNode')->once()->andReturn($node);
+
+        $result = app(CreateEntryTreeNode::class)->create($entry, 'Page');
+
+        $this->assertInstanceOf(EntryTree::class, $result);
+    }
+
+    // -------------------------------------------------------------------------
+    // MoveEntryTreeNode action wrapper — delegation
+    // -------------------------------------------------------------------------
+
+    public function test_move_tree_node_action_delegates_to_service(): void
+    {
+        $node = EntryTree::factory()->create(['entry_id' => $this->makeTreeEntry()->id]);
+        $parent = EntryTree::factory()->create(['entry_id' => $this->makeTreeEntry()->id]);
+        $moved = EntryTree::factory()->create(['entry_id' => $this->makeTreeEntry()->id]);
+        $service = $this->mock(EntryService::class);
+        $service->shouldReceive('moveTreeNode')
+            ->once()
+            ->with($node, $parent, 2)
+            ->andReturn($moved);
+
+        $result = app(MoveEntryTreeNode::class)->handle($node, $parent, 2);
+
+        $this->assertSame($moved, $result);
+    }
+
+    public function test_move_tree_node_action_returns_entry_tree_instance(): void
+    {
+        $node = EntryTree::factory()->create(['entry_id' => $this->makeTreeEntry()->id]);
+        $moved = EntryTree::factory()->create(['entry_id' => $this->makeTreeEntry()->id]);
+        $service = $this->mock(EntryService::class);
+        $service->shouldReceive('moveTreeNode')->once()->andReturn($moved);
+
+        $result = app(MoveEntryTreeNode::class)->handle($node, null, 0);
+
+        $this->assertInstanceOf(EntryTree::class, $result);
+    }
+
+    // -------------------------------------------------------------------------
+    // RebuildEntryTreeUri action wrapper — delegation
+    // -------------------------------------------------------------------------
+
+    public function test_rebuild_tree_uri_action_delegates_to_service(): void
+    {
+        $node = EntryTree::factory()->create(['entry_id' => $this->makeTreeEntry()->id]);
+        $service = $this->mock(EntryService::class);
+        $service->shouldReceive('rebuildTreeUri')
+            ->once()
+            ->with($node);
+
+        app(RebuildEntryTreeUri::class)->handle($node);
+    }
+
+    public function test_rebuild_tree_uri_action_returns_void(): void
+    {
+        $node = EntryTree::factory()->create(['entry_id' => $this->makeTreeEntry()->id]);
+        $service = $this->mock(EntryService::class);
+        $service->shouldReceive('rebuildTreeUri')->once();
+
+        $result = app(RebuildEntryTreeUri::class)->handle($node);
+
+        $this->assertNull($result);
     }
 }

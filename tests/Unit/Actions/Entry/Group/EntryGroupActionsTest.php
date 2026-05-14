@@ -2,6 +2,8 @@
 
 namespace Tests\Unit\Actions\Entry\Group;
 
+use App\Actions\Entry\Group\CreateNewEntryGroup;
+use App\Actions\Entry\Group\EditEntryGroup;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\EntryGroup;
 use App\Models\Field\Group as FieldGroup;
@@ -194,5 +196,65 @@ class EntryGroupActionsTest extends TestCase
 
         $this->assertNotSame($group, $result);
         $this->assertEquals('After', $result->name);
+    }
+
+    // -------------------------------------------------------------------------
+    // CreateNewEntryGroup action wrapper — delegation
+    // -------------------------------------------------------------------------
+
+    public function test_create_action_delegates_to_service_create(): void
+    {
+        $group = EntryGroup::factory()->create();
+        $service = $this->mock(EntryGroupService::class);
+        $service->shouldReceive('create')
+            ->once()
+            ->with(['name' => 'Blog', 'handle' => 'blog'])
+            ->andReturn($group);
+
+        $result = app(CreateNewEntryGroup::class)->create(['name' => 'Blog', 'handle' => 'blog']);
+
+        $this->assertSame($group, $result);
+    }
+
+    public function test_create_action_returns_entry_group_instance(): void
+    {
+        $group = EntryGroup::factory()->create();
+        $service = $this->mock(EntryGroupService::class);
+        $service->shouldReceive('create')->once()->andReturn($group);
+
+        $result = app(CreateNewEntryGroup::class)->create(['name' => 'Blog', 'handle' => 'blog']);
+
+        $this->assertInstanceOf(EntryGroup::class, $result);
+    }
+
+    // -------------------------------------------------------------------------
+    // EditEntryGroup action wrapper — delegation
+    // -------------------------------------------------------------------------
+
+    public function test_edit_action_delegates_to_service_update(): void
+    {
+        $group = EntryGroup::factory()->create();
+        $updated = EntryGroup::factory()->create();
+        $service = $this->mock(EntryGroupService::class);
+        $service->shouldReceive('update')
+            ->once()
+            ->with($group, ['name' => 'New', 'handle' => 'new'])
+            ->andReturn($updated);
+
+        $result = app(EditEntryGroup::class)->edit($group, ['name' => 'New', 'handle' => 'new']);
+
+        $this->assertSame($updated, $result);
+    }
+
+    public function test_edit_action_returns_entry_group_instance(): void
+    {
+        $group = EntryGroup::factory()->create();
+        $updated = EntryGroup::factory()->create();
+        $service = $this->mock(EntryGroupService::class);
+        $service->shouldReceive('update')->once()->andReturn($updated);
+
+        $result = app(EditEntryGroup::class)->edit($group, []);
+
+        $this->assertInstanceOf(EntryGroup::class, $result);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Tests\Unit\Actions\Entry\Type;
 
+use App\Actions\Entry\Type\CreateNewEntryType;
+use App\Actions\Entry\Type\EditEntryType;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\FieldLayout;
@@ -218,5 +220,93 @@ class EntryTypeActionsTest extends TestCase
         ]);
 
         $this->assertEquals(0, $result->sort_order);
+    }
+
+    // -------------------------------------------------------------------------
+    // CreateNewEntryType action wrapper — delegation
+    // -------------------------------------------------------------------------
+
+    public function test_create_action_delegates_to_service_create(): void
+    {
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->create();
+        $service = $this->mock(EntryTypeService::class);
+        $service->shouldReceive('create')
+            ->once()
+            ->with($group->id, ['name' => 'Blog Post', 'handle' => 'blog-post'])
+            ->andReturn($type);
+
+        $result = app(CreateNewEntryType::class)->create($group->id, ['name' => 'Blog Post', 'handle' => 'blog-post']);
+
+        $this->assertSame($type, $result);
+    }
+
+    public function test_create_action_casts_string_group_id_to_integer(): void
+    {
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->create();
+        $service = $this->mock(EntryTypeService::class);
+        $service->shouldReceive('create')
+            ->once()
+            ->with(\Mockery::type('int'), \Mockery::any())
+            ->andReturn($type);
+
+        app(CreateNewEntryType::class)->create((string) $group->id, ['name' => 'Test', 'handle' => 'test']);
+    }
+
+    public function test_create_action_passes_correct_integer_value_for_string_group_id(): void
+    {
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->create();
+        $service = $this->mock(EntryTypeService::class);
+        $service->shouldReceive('create')
+            ->once()
+            ->with($group->id, \Mockery::any())
+            ->andReturn($type);
+
+        app(CreateNewEntryType::class)->create((string) $group->id, ['name' => 'Test', 'handle' => 'test']);
+    }
+
+    public function test_create_action_returns_entry_type_instance(): void
+    {
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->create();
+        $service = $this->mock(EntryTypeService::class);
+        $service->shouldReceive('create')->once()->andReturn($type);
+
+        $result = app(CreateNewEntryType::class)->create($group->id, []);
+
+        $this->assertInstanceOf(EntryType::class, $result);
+    }
+
+    // -------------------------------------------------------------------------
+    // EditEntryType action wrapper — delegation
+    // -------------------------------------------------------------------------
+
+    public function test_edit_action_delegates_to_service_update(): void
+    {
+        $type = EntryType::factory()->create();
+        $updated = EntryType::factory()->create();
+        $service = $this->mock(EntryTypeService::class);
+        $service->shouldReceive('update')
+            ->once()
+            ->with($type, ['name' => 'New Name', 'handle' => 'new-name'])
+            ->andReturn($updated);
+
+        $result = app(EditEntryType::class)->edit($type, ['name' => 'New Name', 'handle' => 'new-name']);
+
+        $this->assertSame($updated, $result);
+    }
+
+    public function test_edit_action_returns_entry_type_instance(): void
+    {
+        $type = EntryType::factory()->create();
+        $updated = EntryType::factory()->create();
+        $service = $this->mock(EntryTypeService::class);
+        $service->shouldReceive('update')->once()->andReturn($updated);
+
+        $result = app(EditEntryType::class)->edit($type, []);
+
+        $this->assertInstanceOf(EntryType::class, $result);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +12,8 @@ use InvalidArgumentException;
 
 class EntryTree extends Model
 {
+    use HasFactory;
+
     protected $table = 'entry_trees';
 
     protected $fillable = [
@@ -80,6 +83,6 @@ class EntryTree extends Model
 
     public function getUrlAttribute(): string
     {
-        return $this->uri === '/' ? '/' : '/' . $this->uri;
+        return $this->uri === '/' ? '/' : '/'.$this->uri;
     }
 }

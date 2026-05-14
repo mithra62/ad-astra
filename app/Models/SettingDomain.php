@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SettingDomain extends Model
 {
+    use HasFactory;
+
     protected $table = 'setting_domains';
 
     protected $fillable = [
@@ -44,7 +47,7 @@ class SettingDomain extends Model
         return array_values(
             array_filter(
                 $this->configFields(),
-                fn(array $f) => ($f['user_overridable'] ?? false) && !($f['hidden'] ?? false)
+                fn (array $f) => ($f['user_overridable'] ?? false) && ! ($f['hidden'] ?? false)
             )
         );
     }

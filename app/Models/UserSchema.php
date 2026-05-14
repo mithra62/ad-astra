@@ -4,14 +4,17 @@ namespace App\Models;
 
 use App\Traits\Field\HasFieldGroups;
 use App\Traits\Field\HasFieldLayout;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class UserSchema extends Model
 {
-    use HasFieldLayout, HasFieldGroups;
+    use HasFactory, HasFieldGroups, HasFieldLayout;
 
     private static ?self $resolved = null;
+
     protected $table = 'user_schema';
+
     protected $fillable = ['field_layout_id'];
 
     public static function instance(): static
