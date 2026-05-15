@@ -110,7 +110,7 @@
                     <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
                         <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'system' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('settings.show', 'general') }}">System Settings</a></li>
                         <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'field_groups' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('fields.groups') }}">Field Groups</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'roles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="">Entry Types</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'roles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('entries.types') }}">Entry Types</a></li>
                         <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'field_layouts' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('field-layouts') }}">Field Layouts</a></li>
                     </ul>
                 </div>
