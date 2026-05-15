@@ -37,6 +37,7 @@ class Settings
     public function get(string $domain, string $handle, mixed $default = null, ?User $user = null): mixed
     {
         $resolved = $this->all($domain, $user ?? auth()->user());
+
         return array_key_exists($handle, $resolved) ? $resolved[$handle] : $default;
     }
 
@@ -66,7 +67,7 @@ class Settings
     /**
      * Fetch and cache the raw typed system values for a domain.
      *
-     * @return array<string, mixed>  ['field_handle' => typed_value]
+     * @return array<string, mixed> ['field_handle' => typed_value]
      */
     private function systemRaw(string $domain): array
     {
@@ -102,7 +103,7 @@ class Settings
     {
         static $cache = [];
 
-        if (!isset($cache[$domain])) {
+        if (! isset($cache[$domain])) {
             $fields = config("settings.{$domain}.fields", []);
             $cache[$domain] = collect($fields)->keyBy('handle')->toArray();
         }
@@ -116,7 +117,7 @@ class Settings
     public function columnFor(string $type): string
     {
         return match ($type) {
-            'integer' => 'value_integer',
+            'integer', 'select' => 'value_integer',
             'float' => 'value_float',
             'boolean' => 'value_boolean',
             'json' => 'value_json',
@@ -127,7 +128,7 @@ class Settings
     /**
      * Fetch and cache the raw typed user override values for a domain.
      *
-     * @return array<string, mixed>  ['field_handle' => typed_value]
+     * @return array<string, mixed> ['field_handle' => typed_value]
      */
     private function userRaw(string $domain, User $user): array
     {
@@ -157,7 +158,7 @@ class Settings
     /**
      * Fill in config defaults for any field not represented in $raw.
      *
-     * @param array<string, mixed> $raw
+     * @param  array<string, mixed>  $raw
      * @return array<string, mixed>
      */
     private function applyDefaults(string $domain, array $raw): array
@@ -165,7 +166,7 @@ class Settings
         $result = $raw;
 
         foreach ($this->domainFields($domain) as $handle => $field) {
-            if (!array_key_exists($handle, $result)) {
+            if (! array_key_exists($handle, $result)) {
                 $result[$handle] = $field['default'] ?? null;
             }
         }
@@ -225,7 +226,7 @@ class Settings
     /**
      * Persist multiple values for a domain in one call, then bust once.
      *
-     * @param array<string, mixed> $values ['field_handle' => value, …]
+     * @param  array<string, mixed>  $values  ['field_handle' => value, …]
      */
     public function setMany(string $domain, array $values, ?User $user = null): void
     {
@@ -261,6 +262,6 @@ class Settings
             ->whereNotNull('user_id')
             ->distinct()
             ->pluck('user_id')
-            ->each(fn($id) => Cache::forget("settings.user.{$id}.{$domain}"));
+            ->each(fn ($id) => Cache::forget("settings.user.{$id}.{$domain}"));
     }
 }

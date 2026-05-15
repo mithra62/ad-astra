@@ -10,7 +10,7 @@ use App\Models\Field\Type as FieldType;
 use App\Models\FieldLayout;
 use App\Models\FieldLayout\Tab;
 use App\Models\FieldLayout\TabElement;
-use App\Models\UserSchema;
+use App\Settings;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -32,11 +32,7 @@ class UserSchemaSeeder extends Seeder
             'Bio' => ['bio', 'social_twitter', 'social_linkedin'],
         ]);
 
-        $schema = UserSchema::instance();
-        $schema->field_layout_id = $layout->id;
-        $schema->save();
-
-        $schema->fieldGroups()->syncWithoutDetaching([$profileGroup->id, $bioGroup->id]);
+        app(Settings::class)->set('users', 'user_field_layout_id', $layout->id);
     }
 
     private function seedProfileFields(FieldType $text): FieldGroup
@@ -134,7 +130,7 @@ class UserSchemaSeeder extends Seeder
     /**
      * Build a FieldLayout with named tabs, each containing field handles.
      *
-     * @param array<string, string[]> $tabs
+     * @param  array<string, string[]>  $tabs
      */
     private function buildLayout(array $tabs): FieldLayout
     {
@@ -144,15 +140,15 @@ class UserSchemaSeeder extends Seeder
         foreach ($tabs as $tabName => $handles) {
             $tab = Tab::create([
                 'field_layout_id' => $layout->id,
-                'name'            => $tabName,
-                'handle'          => Str::slug($tabName),
-                'sort_order'      => $tabOrder++,
+                'name' => $tabName,
+                'handle' => Str::slug($tabName),
+                'sort_order' => $tabOrder++,
             ]);
 
             $elementOrder = 1;
             foreach ($handles as $handle) {
                 $field = Field::where('handle', $handle)->first();
-                if (!$field) {
+                if (! $field) {
                     continue;
                 }
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\FieldLayout;
+
 /**
  * Settings domain and field definitions.
  *
@@ -225,38 +227,52 @@ return [
         ],
     ],
 
-
     // -------------------------------------------------------------------------
     // Users
     // -------------------------------------------------------------------------
 
     'users' => [
-        'name'        => 'Users',
+        'name' => 'Users',
         'description' => 'User account and access configuration.',
-        'icon'        => 'ti-users',
-        'sort_order'  => 10,
-        'fields'      => [
+        'icon' => 'ti-users',
+        'sort_order' => 10,
+        'fields' => [
             [
-                'handle'           => 'default_status',
-                'label'            => 'Default User Status',
-                'type'             => 'text',
-                'default'          => 'active',
-                'rules'            => ['required', 'string', 'in:active,inactive,pending,suspended,banned'],
-                'instructions'     => 'Status assigned to new user accounts created by an admin.',
-                'group'            => 'Accounts',
-                'hidden'           => false,
+                'handle' => 'default_status',
+                'label' => 'Default User Status',
+                'type' => 'text',
+                'default' => 'active',
+                'rules' => ['required', 'string', 'in:active,inactive,pending,suspended,banned'],
+                'instructions' => 'Status assigned to new user accounts created by an admin.',
+                'group' => 'Accounts',
+                'hidden' => false,
                 'user_overridable' => false,
             ],
             [
-                'handle'           => 'social_default_status',
-                'label'            => 'Social Login Default Status',
-                'type'             => 'text',
-                'default'          => 'pending',
-                'rules'            => ['required', 'string', 'in:active,inactive,pending,suspended,banned'],
-                'instructions'     => 'Status assigned to accounts created via OAuth / social login. Set to "active" only if you fully trust your OAuth provider.',
-                'group'            => 'Accounts',
-                'hidden'           => false,
+                'handle' => 'social_default_status',
+                'label' => 'Social Login Default Status',
+                'type' => 'text',
+                'default' => 'pending',
+                'rules' => ['required', 'string', 'in:active,inactive,pending,suspended,banned'],
+                'instructions' => 'Status assigned to accounts created via OAuth / social login. Set to "active" only if you fully trust your OAuth provider.',
+                'group' => 'Accounts',
+                'hidden' => false,
                 'user_overridable' => false,
+            ],
+            [
+                'handle' => 'user_field_layout_id',
+                'label' => 'User Field Layout',
+                'type' => 'select',
+                'default' => null,
+                'rules' => ['nullable', 'integer', 'exists:field_layouts,id'],
+                'instructions' => 'The field layout applied to all user profiles. Cannot be deleted while assigned here.',
+                'group' => 'Schema',
+                'hidden' => false,
+                'user_overridable' => false,
+                'options_callback' => static fn () => FieldLayout::orderBy('name')
+                    ->get()
+                    ->map(fn ($l) => ['value' => $l->id, 'label' => $l->name])
+                    ->toArray(),
             ],
         ],
     ],

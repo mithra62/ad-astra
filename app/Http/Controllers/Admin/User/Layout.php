@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\User;
 
 use App\Http\Controllers\Admin\Controller;
 use App\Models\FieldLayout as FieldLayoutModel;
-use App\Models\UserSchema;
+use App\Support\UserFieldLayout;
 use Illuminate\Http\Request;
 
 class Layout extends Controller
@@ -38,14 +38,14 @@ class Layout extends Controller
      */
     public function show()
     {
-        $shema = UserSchema::resolved();
-        $layout = FieldLayoutModel::with([
+        $layoutId = UserFieldLayout::resolvedId();
+        $layout = $layoutId ? FieldLayoutModel::with([
             'tabs.elements.field.fieldType',
             'entryGroups',
             'entryTypes.entryGroup',
-        ])->find($shema->field_layout_id);
+        ])->find($layoutId) : null;
 
-        if (!$layout instanceof FieldLayoutModel) {
+        if (! $layout instanceof FieldLayoutModel) {
             abort(404);
         }
 

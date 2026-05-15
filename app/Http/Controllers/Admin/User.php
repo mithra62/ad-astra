@@ -11,7 +11,10 @@ use App\Http\Requests\User\EditUserRequest;
 use App\Http\Requests\User\PasswordUserRequest;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Models\User as UserModel;
-use App\Models\UserSchema;
+use App\Support\UserFieldLayout;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Spatie\Permission\Models\Role as RoleModel;
 
 class User extends Controller
@@ -22,6 +25,7 @@ class User extends Controller
     public function index()
     {
         $users = Users::paginate(20);
+
         return $this->view('users.index', ['users' => $users]);
     }
 
@@ -32,6 +36,7 @@ class User extends Controller
     {
         $creator = app(CreateNewUser::class);
         $user = $creator->create($request->validated());
+
         return redirect()->route('users.show', $user->id)->with('success', trans('user.created'));
     }
 
@@ -41,9 +46,9 @@ class User extends Controller
     public function create()
     {
         $roles = RoleModel::all();
-        $schema = UserSchema::instance()->resolved();
+        $layout = UserFieldLayout::resolve();
 
-        return $this->view('users.create', compact('roles', 'schema'));
+        return $this->view('users.create', compact('roles', 'layout'));
     }
 
     /**
@@ -51,18 +56,19 @@ class User extends Controller
      */
     public function show(string $id)
     {
-        $user = Users::find((int)$id);
-        if (!$user instanceof UserModel) {
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
         $user->loadMissing(['roles', 'tokens', 'fieldValues.field.fieldType']);
-        $user->load(['statusLogs' => fn($q) => $q->with('actor')->limit(10)]);
-        $schema = UserSchema::instance()->resolved();
+        $user->load(['statusLogs' => fn ($q) => $q->with('actor')->limit(10)]);
+        $layout = UserFieldLayout::resolve();
+
         return $this->view('users.show', [
             'user' => $user,
             'field_values' => $user->fieldArray(),
-            'schema' => $schema,
+            'layout' => $layout,
             'status_logs' => $user->statusLogs,
         ]);
     }
@@ -72,11 +78,11 @@ class User extends Controller
      */
     public function edit(string $id)
     {
-        $schema = UserSchema::instance()->resolved();
+        $layout = UserFieldLayout::resolve();
         $roles = RoleModel::all();
-        $user = Users::find((int)$id);
+        $user = Users::find((int) $id);
 
-        if (!$user instanceof UserModel) {
+        if (! $user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
@@ -85,7 +91,7 @@ class User extends Controller
         return $this->view('users.edit', [
             'user' => $user,
             'roles' => $roles,
-            'schema' => $schema,
+            'layout' => $layout,
             'field_values' => $user->fieldArray(),
         ]);
     }
@@ -95,9 +101,10 @@ class User extends Controller
      */
     public function destroy(DeleteUserRequest $request, string $id)
     {
-        $user = Users::find((int)$id);
+        $user = Users::find((int) $id);
         if ($user instanceof UserModel) {
             Users::delete($user);
+
             return redirect()->route('users.index')->with('success', trans('user.deleted'));
         }
 
@@ -105,13 +112,12 @@ class User extends Controller
     }
 
     /**
-     * @param string $id
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return Factory|View|RedirectResponse
      */
     public function confirm(string $id)
     {
-        $user = Users::find((int)$id);
-        if (!$user instanceof UserModel) {
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
@@ -119,14 +125,12 @@ class User extends Controller
     }
 
     /**
-     * @param PasswordUserRequest $request
-     * @param string $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function password(PasswordUserRequest $request, string $id)
     {
-        $user = Users::find((int)$id);
-        if (!$user instanceof UserModel) {
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
@@ -138,8 +142,8 @@ class User extends Controller
 
     public function changePassword(string $id)
     {
-        $user = Users::find((int)$id);
-        if (!$user instanceof UserModel) {
+        $user = Users::find((int) $id);
+        if (! $user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
@@ -151,10 +155,11 @@ class User extends Controller
      */
     public function update(EditUserRequest $request, string $id)
     {
-        $user = Users::find((int)$id);
+        $user = Users::find((int) $id);
         if ($user instanceof UserModel) {
             $editor = app(UpdateUserProfileInformation::class);
             $user = $editor->update($user, $request->validated());
+
             return redirect()->route('users.edit', $user)->with('success', trans('user.updated'));
         }
 

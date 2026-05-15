@@ -6,7 +6,7 @@ use App\Actions\User\UpdateUserProfileInformation;
 use App\Http\Controllers\Admin\Controller as AdminController;
 use App\Http\Requests\Account\EditPasswordRequest;
 use App\Http\Requests\Account\EditUserRequest;
-use App\Models\UserSchema;
+use App\Support\UserFieldLayout;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -14,34 +14,25 @@ use Illuminate\Support\Facades\Hash;
 
 class Account extends AdminController
 {
-    /**
-     * @return View
-     */
     public function index(): View
     {
         return $this->view('account.index');
     }
 
-    /**
-     * @return View
-     */
     public function details(): View
     {
-        $schema = UserSchema::instance()->resolved();
+        $layout = UserFieldLayout::resolve();
         $user = Auth::user();
         $user->load('fieldValues.field.fieldType');
         $data = [
             'user' => $user,
-            'schema' => $schema,
+            'layout' => $layout,
             'field_values' => $user->fieldArray(),
         ];
+
         return $this->view('account.details', $data);
     }
 
-    /**
-     * @param EditPasswordRequest $request
-     * @return RedirectResponse
-     */
     public function change_password(EditPasswordRequest $request): RedirectResponse
     {
         $user = Auth::user();
@@ -63,6 +54,7 @@ class Account extends AdminController
         $user = Auth::user();
         $editor = app(UpdateUserProfileInformation::class);
         $user = $editor->update($user, $request->validated());
+
         return redirect()->route('account.details')->with('success', trans('account.updated'));
     }
 }

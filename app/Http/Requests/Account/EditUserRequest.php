@@ -3,15 +3,12 @@
 namespace App\Http\Requests\Account;
 
 use App\Http\Requests\User\StoreUserRequest;
-use App\Models\UserSchema;
+use App\Support\UserFieldLayout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class EditUserRequest extends StoreUserRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
         return true;
@@ -22,7 +19,8 @@ class EditUserRequest extends StoreUserRequest
      */
     public function rules(): array
     {
-        $schema = UserSchema::resolved();
+        $schema = UserFieldLayout::resolve();
+
         return array_merge(
             [
                 'name' => ['required', 'string', 'max:255'],

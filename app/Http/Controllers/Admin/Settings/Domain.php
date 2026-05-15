@@ -30,7 +30,7 @@ class Domain extends Controller
         $allDomains = SettingDomain::ordered()->get();
 
         $groupedFields = $this->groupFields(
-            config("settings.{$handle}.fields", []),
+            $this->hydrateOptions(config("settings.{$handle}.fields", [])),
             visibleOnly: true
         );
 
@@ -40,6 +40,24 @@ class Domain extends Controller
             'grouped_fields' => $groupedFields,
             'field_values' => $this->settings->system($handle),
         ]);
+    }
+
+    /**
+     * Invoke any options_callback closures so select fields receive a live options list.
+     *
+     * @param  array<int, array<string, mixed>>  $fields
+     * @return array<int, array<string, mixed>>
+     */
+    private function hydrateOptions(array $fields): array
+    {
+        return array_map(function (array $field): array {
+            if (isset($field['options_callback']) && is_callable($field['options_callback'])) {
+                $field['options'] = ($field['options_callback'])();
+                unset($field['options_callback']);
+            }
+
+            return $field;
+        }, $fields);
     }
 
     /**

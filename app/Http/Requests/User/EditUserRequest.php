@@ -3,13 +3,12 @@
 namespace App\Http\Requests\User;
 
 use App\Enums\UserStatus;
-use App\Models\UserSchema;
+use App\Support\UserFieldLayout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class EditUserRequest extends StoreUserRequest
 {
-
     public function authorize(): bool
     {
         return Auth::user()->can('edit user');
@@ -17,15 +16,15 @@ class EditUserRequest extends StoreUserRequest
 
     public function rules(): array
     {
-        $schema = UserSchema::resolved();
+        $schema = UserFieldLayout::resolve();
         $userId = $this->route()->parameter('user') ?? $this->route()->parameter('id');
 
         $rules = [
-            'name'    => ['required', 'string', 'max:255'],
-            'email'   => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
-            'roles'   => ['required', 'array'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
+            'roles' => ['required', 'array'],
             'roles.*' => ['string', 'exists:roles,name'],
-            'fields'  => ['nullable', 'array'],
+            'fields' => ['nullable', 'array'],
         ];
 
         // Only accept a 'status' field from callers who hold the dedicated
