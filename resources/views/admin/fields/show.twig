@@ -50,8 +50,8 @@
                 <p class="mt-1 text-sm text-slate-500">Field definition and placement within {{ layout.name }}.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2 self-start">
-                <a href="field-layout-tab-fields.twig" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
-                    Back to Layout
+                <a href="{{ route('fields.groups.show', field.groups.first) }}" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    Back to {{ field.groups.first.name }}
                 </a>
                 <a href="{{ route('fields.edit', field) }}" class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
                     Edit Field
