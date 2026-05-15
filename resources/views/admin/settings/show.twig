@@ -121,13 +121,21 @@
                                           name="{{ field.handle }}"
                                           id="field_{{ field.handle }}"
                                           rows="4">{{ old(field.handle, val) }}</textarea>
-                            {% elseif field.type == 'select' %}
+                            {% elseif field.type == 'select' or (field.options is defined and field.options|length) %}
                                 <select name="{{ field.handle }}"
                                         id="field_{{ field.handle }}"
                                         class="w-full rounded-md border {% if errors.has(field.handle) %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2">
-                                    <option value="">— None —</option>
+                                    <option value="">— Select —</option>
                                     {% for option in field.options|default([]) %}
-                                        <option value="{{ option.value }}" {% if (old(field.handle, val) ~ '') == (option.value ~ '') %}selected{% endif %}>{{ option.label }}</option>
+                                        {% if option.options is defined %}
+                                            <optgroup label="{{ option.label }}">
+                                                {% for sub in option.options %}
+                                                    <option value="{{ sub.value }}" {% if (old(field.handle, val) ~ '') == (sub.value ~ '') %}selected{% endif %}>{{ sub.label }}</option>
+                                                {% endfor %}
+                                            </optgroup>
+                                        {% else %}
+                                            <option value="{{ option.value }}" {% if (old(field.handle, val) ~ '') == (option.value ~ '') %}selected{% endif %}>{{ option.label }}</option>
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                             {% else %}

@@ -1,6 +1,8 @@
 <?php
 
+use App\Enums\UserStatus;
 use App\Models\FieldLayout;
+use Illuminate\Validation\Rule;
 
 /**
  * Settings domain and field definitions.
@@ -59,10 +61,37 @@ return [
                 'type' => 'text',
                 'default' => 'UTC',
                 'rules' => ['required', 'string', 'timezone'],
-                'instructions' => 'Default timezone for date display (e.g. UTC, America/New_York).',
+                'instructions' => 'Default timezone for date display.',
                 'group' => null,
                 'hidden' => false,
                 'user_overridable' => true,
+                'options_callback' => static function () {
+                    $grouped = [];
+                    $general = [];
+
+                    foreach (timezone_identifiers_list() as $tz) {
+                        $slash = strpos($tz, '/');
+                        if ($slash === false) {
+                            $general[] = ['value' => $tz, 'label' => $tz];
+                        } else {
+                            $continent = substr($tz, 0, $slash);
+                            $city = str_replace('_', ' ', substr($tz, $slash + 1));
+                            $grouped[$continent][] = ['value' => $tz, 'label' => $city];
+                        }
+                    }
+
+                    ksort($grouped);
+
+                    $result = [];
+                    if ($general) {
+                        $result[] = ['label' => 'General', 'options' => $general];
+                    }
+                    foreach ($grouped as $continent => $options) {
+                        $result[] = ['label' => $continent, 'options' => $options];
+                    }
+
+                    return $result;
+                },
             ],
             [
                 'handle' => 'date_format',
@@ -242,22 +271,30 @@ return [
                 'label' => 'Default User Status',
                 'type' => 'text',
                 'default' => 'active',
-                'rules' => ['required', 'string', 'in:active,inactive,pending,suspended,banned'],
+                'rules' => ['required', Rule::in(UserStatus::ALL)],
                 'instructions' => 'Status assigned to new user accounts created by an admin.',
                 'group' => 'Accounts',
                 'hidden' => false,
                 'user_overridable' => false,
+                'options_callback' => static fn () => array_map(
+                    fn ($s) => ['value' => $s, 'label' => UserStatus::label($s)],
+                    UserStatus::ALL
+                ),
             ],
             [
                 'handle' => 'social_default_status',
                 'label' => 'Social Login Default Status',
                 'type' => 'text',
                 'default' => 'pending',
-                'rules' => ['required', 'string', 'in:active,inactive,pending,suspended,banned'],
+                'rules' => ['required', Rule::in(UserStatus::ALL)],
                 'instructions' => 'Status assigned to accounts created via OAuth / social login. Set to "active" only if you fully trust your OAuth provider.',
                 'group' => 'Accounts',
                 'hidden' => false,
                 'user_overridable' => false,
+                'options_callback' => static fn () => array_map(
+                    fn ($s) => ['value' => $s, 'label' => UserStatus::label($s)],
+                    UserStatus::ALL
+                ),
             ],
             [
                 'handle' => 'user_field_layout_id',

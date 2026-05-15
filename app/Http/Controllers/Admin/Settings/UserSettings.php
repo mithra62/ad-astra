@@ -26,7 +26,13 @@ class UserSettings extends Controller
 
         $domainData = $allDomains
             ->map(function (SettingDomain $domain) use ($user) {
-                $overridableFields = $domain->overridableConfigFields();
+                $overridableFields = array_map(function (array $field): array {
+                    if (isset($field['options_callback']) && is_callable($field['options_callback'])) {
+                        $field['options'] = ($field['options_callback'])();
+                        unset($field['options_callback']);
+                    }
+                    return $field;
+                }, $domain->overridableConfigFields());
 
                 if (empty($overridableFields)) {
                     return null;

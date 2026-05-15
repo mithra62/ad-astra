@@ -24,6 +24,12 @@ use Illuminate\Support\Facades\Cache;
  */
 class Settings
 {
+    /** @var array<string, array<string, mixed>> Request-scoped memo for system raw values. */
+    private array $system_memo = [];
+
+    /** @var array<string, array<string, mixed>> Request-scoped memo for user raw values, keyed by "{userId}.{domain}". */
+    private array $user_memo = [];
+
     // -------------------------------------------------------------------------
     // Public API
     // -------------------------------------------------------------------------
@@ -71,7 +77,11 @@ class Settings
      */
     private function systemRaw(string $domain): array
     {
-        return Cache::remember(
+        if (isset($this->system_memo[$domain])) {
+            return $this->system_memo[$domain];
+        }
+
+        return $this->system_memo[$domain] = Cache::remember(
             "settings.system.{$domain}",
             3600,
             function () use ($domain) {
@@ -132,7 +142,13 @@ class Settings
      */
     private function userRaw(string $domain, User $user): array
     {
-        return Cache::remember(
+        $memoKey = "{$user->id}.{$domain}";
+
+        if (isset($this->user_memo[$memoKey])) {
+            return $this->user_memo[$memoKey];
+        }
+
+        return $this->user_memo[$memoKey] = Cache::remember(
             "settings.user.{$user->id}.{$domain}",
             3600,
             function () use ($domain, $user) {
@@ -218,8 +234,10 @@ class Settings
     {
         if ($user) {
             Cache::forget("settings.user.{$user->id}.{$domain}");
+            unset($this->user_memo["{$user->id}.{$domain}"]);
         } else {
             Cache::forget("settings.system.{$domain}");
+            unset($this->system_memo[$domain]);
         }
     }
 
