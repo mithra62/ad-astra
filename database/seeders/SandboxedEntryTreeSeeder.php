@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\EntryTypes\PageEntryType;
 use App\Facades\Entries;
+use App\Models\EntryBehavior;
 use App\Models\Entry;
 use App\Models\EntryGroup;
 use App\Models\EntryTree;
@@ -103,7 +103,7 @@ class SandboxedEntryTreeSeeder extends Seeder
             ['entry_group_id' => $entryGroup->id, 'handle' => self::ENTRY_TYPE_HANDLE],
             [
                 'name' => 'Sandbox Tree Page',
-                'class' => PageEntryType::class,
+                'entry_behavior_id' => EntryBehavior::where('handle', 'page')->value('id'),
                 'sort_order' => 1,
                 'default_template' => 'entries.page',
                 'has_entry_tree' => true,

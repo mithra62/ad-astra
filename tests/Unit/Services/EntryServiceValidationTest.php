@@ -2,15 +2,15 @@
 
 namespace Tests\Unit\Services;
 
-use App\EntryTypes\JobListingEntryType;
-use App\EntryTypes\ProductEntryType;
 use App\Models\Entry;
+use App\Models\EntryBehavior;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\Status;
 use App\Models\StatusGroup;
 use App\Models\User;
 use App\Services\EntryService;
+use Database\Seeders\EntryBehaviorSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -29,6 +29,7 @@ class EntryServiceValidationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(EntryBehaviorSeeder::class);
         $this->service = app(EntryService::class);
         $this->actingAs(User::factory()->create());
     }
@@ -213,9 +214,9 @@ class EntryServiceValidationTest extends TestCase
         $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
 
         $type = EntryType::factory()->create([
-            'entry_group_id' => $group->id,
-            'handle'         => 'job_listing_' . uniqid(),
-            'class'          => JobListingEntryType::class,
+            'entry_group_id'    => $group->id,
+            'handle'            => 'job_listing_' . uniqid(),
+            'entry_behavior_id' => EntryBehavior::where('handle', 'job-listing')->value('id'),
         ]);
 
         return compact('group', 'type');
@@ -235,9 +236,9 @@ class EntryServiceValidationTest extends TestCase
         $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
 
         $type = EntryType::factory()->create([
-            'entry_group_id' => $group->id,
-            'handle'         => 'product_' . uniqid(),
-            'class'          => ProductEntryType::class,
+            'entry_group_id'    => $group->id,
+            'handle'            => 'product_' . uniqid(),
+            'entry_behavior_id' => EntryBehavior::where('handle', 'product')->value('id'),
         ]);
 
         return compact('group', 'type');

@@ -148,13 +148,14 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::delete('entries/groups/{id}', [EntryGroup::class, 'destroy'])->name('entries.groups.destroy');
     Route::get('entries/groups/{id}/confirm', [EntryGroup::class, 'confirm'])->name('entries.groups.confirm');
     Route::get('entries/groups/{id}', [EntryGroup::class, 'show'])->name('entries.groups.show');
-    // Entry Types within a group
-    Route::get('entries/groups/{group_id}/types/create', [EntryType::class, 'create'])->name('entries.groups.types.create');
-    Route::post('entries/groups/{group_id}/types', [EntryType::class, 'store'])->name('entries.groups.types.store');
-    Route::get('entries/groups/{group_id}/types/{type_id}/edit', [EntryType::class, 'edit'])->name('entries.groups.types.edit');
-    Route::put('entries/groups/{group_id}/types/{type_id}', [EntryType::class, 'update'])->name('entries.groups.types.update');
-    Route::get('entries/groups/{group_id}/types/{type_id}/confirm', [EntryType::class, 'confirm'])->name('entries.groups.types.confirm');
-    Route::delete('entries/groups/{group_id}/types/{type_id}', [EntryType::class, 'destroy'])->name('entries.groups.types.destroy');
+    // Entry Types — top-level resource
+    Route::get('entries/types', [EntryType::class, 'index'])->name('entries.types');
+    Route::get('entries/types/create', [EntryType::class, 'create'])->name('entries.types.create');
+    Route::post('entries/types', [EntryType::class, 'store'])->name('entries.types.store');
+    Route::get('entries/types/{id}/edit', [EntryType::class, 'edit'])->name('entries.types.edit');
+    Route::put('entries/types/{id}', [EntryType::class, 'update'])->name('entries.types.update');
+    Route::get('entries/types/{id}/confirm', [EntryType::class, 'confirm'])->name('entries.types.confirm');
+    Route::delete('entries/types/{id}', [EntryType::class, 'destroy'])->name('entries.types.destroy');
     // Entry CRUD
     Route::get('entries/groups/{group_id}/create', [Entry::class, 'create'])->name('entries.create');
     Route::post('entries/groups/{group_id}/create', [Entry::class, 'store'])->name('entries.store');

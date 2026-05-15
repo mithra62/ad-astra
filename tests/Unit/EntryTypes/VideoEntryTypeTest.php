@@ -3,6 +3,7 @@
 namespace Tests\Unit\EntryTypes;
 
 use App\EntryTypes\VideoEntryType;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,7 +14,7 @@ class VideoEntryTypeTest extends TestCase
 
     private function makeType(): VideoEntryType
     {
-        $record = EntryType::factory()->create(['class' => VideoEntryType::class]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'video')->value('id')]);
         return new VideoEntryType($record);
     }
 

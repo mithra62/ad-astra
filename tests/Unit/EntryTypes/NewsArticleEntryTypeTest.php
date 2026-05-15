@@ -3,6 +3,7 @@
 namespace Tests\Unit\EntryTypes;
 
 use App\EntryTypes\NewsArticleEntryType;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,7 +14,7 @@ class NewsArticleEntryTypeTest extends TestCase
 
     private function makeType(): NewsArticleEntryType
     {
-        $record = EntryType::factory()->create(['class' => NewsArticleEntryType::class]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'news-article')->value('id')]);
         return new NewsArticleEntryType($record);
     }
 

@@ -13,6 +13,9 @@ class DatabaseSeeder extends Seeder
             RolesPermissionsSeeder::class,
             UsersSeeder::class,
 
+            // Entry behavior registry — must run before any entry types are created
+            EntryBehaviorSeeder::class,
+
             // Field type registry — must run before any fields are created
             FieldTypeSeeder::class,
 

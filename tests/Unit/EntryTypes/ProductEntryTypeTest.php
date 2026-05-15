@@ -4,6 +4,7 @@ namespace Tests\Unit\EntryTypes;
 
 use App\EntryTypes\ProductEntryType;
 use App\Models\Entry;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,7 +15,7 @@ class ProductEntryTypeTest extends TestCase
 
     private function makeType(): ProductEntryType
     {
-        $record = EntryType::factory()->create(['class' => ProductEntryType::class]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'product')->value('id')]);
         return new ProductEntryType($record);
     }
 

@@ -2,12 +2,11 @@
 
 namespace App\Facades;
 
-use App\Models\EntryGroup;
 use App\Models\EntryType;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static EntryType create(EntryGroup|int $group, array $data)
+ * @method static EntryType create(array $data)
  * @method static EntryType update(EntryType $type, array $data)
  * @method static bool delete(EntryType $type)
  * @method static EntryType|null find(int $id)

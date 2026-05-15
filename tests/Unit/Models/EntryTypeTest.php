@@ -18,6 +18,7 @@ class EntryTypeTest extends TestCase
     {
         $this->assertEquals(
             ['entry_group_id',
+                'entry_behavior_id',
                 'field_layout_id',
                 'name',
                 'handle',
@@ -25,7 +26,6 @@ class EntryTypeTest extends TestCase
                 'has_entry_tree',
                 'max_depth',
                 'allowed_parent_types',
-                'class',
                 'sort_order'],
             (new EntryType)->getFillable()
         );

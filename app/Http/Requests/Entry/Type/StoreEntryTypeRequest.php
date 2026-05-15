@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests\Entry\Type;
 
-use App\EntryTypes\AbstractEntryType;
 use App\Http\Requests\FormRequest;
-use App\Rules\ExtendsClass;
 use Illuminate\Support\Facades\Auth;
 
 class StoreEntryTypeRequest extends FormRequest
@@ -19,13 +17,13 @@ class StoreEntryTypeRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'handle' => ['required', 'string', 'max:255'],
-            'class' => ['required', 'string', 'max:255', new ExtendsClass(AbstractEntryType::class)],
+            'entry_behavior_id' => ['nullable', 'integer', 'exists:entry_behaviors,id'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'field_layout_id' => ['nullable', 'integer', 'exists:field_layouts,id'],
             'has_entry_tree' => ['nullable', 'boolean'],
             'max_depth' => ['nullable', 'integer', 'min:0', 'max:10'],
             'allowed_parent_types' => 'nullable|array',
-            'default_template' => 'nullable|string|max:255'
+            'default_template' => 'nullable|string|max:255',
         ];
     }
 }

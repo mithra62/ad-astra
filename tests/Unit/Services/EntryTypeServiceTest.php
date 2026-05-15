@@ -79,25 +79,20 @@ class EntryTypeServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function test_create_accepts_entry_group_model_or_int_equivalently(): void
+    public function test_create_accepts_entry_group_id_in_data(): void
     {
         $groupA = EntryGroup::factory()->create();
         $groupB = EntryGroup::factory()->create();
 
-        $byModel = $this->service->create($groupA, [
-            'name' => 'By Model', 'handle' => 'by-model', 'class' => 'App\\EntryTypes\\PageEntryType',
-        ]);
+        $byIdA = $this->service->create(['entry_group_id' => $groupA->id, 'name' => 'Type A', 'handle' => 'type-a']);
+        $byIdB = $this->service->create(['entry_group_id' => $groupB->id, 'name' => 'Type B', 'handle' => 'type-b']);
 
-        $byInt = $this->service->create($groupB->id, [
-            'name' => 'By Int', 'handle' => 'by-int', 'class' => 'App\\EntryTypes\\PageEntryType',
-        ]);
-
-        $this->assertEquals($groupA->id, $byModel->entry_group_id);
-        $this->assertEquals($groupB->id, $byInt->entry_group_id);
+        $this->assertEquals($groupA->id, $byIdA->entry_group_id);
+        $this->assertEquals($groupB->id, $byIdB->entry_group_id);
     }
 
     // -------------------------------------------------------------------------
-    // create() with EntryGroup model (not just int)
+    // create() with entry_group_id in data array
     // -------------------------------------------------------------------------
 
     protected function setUp(): void

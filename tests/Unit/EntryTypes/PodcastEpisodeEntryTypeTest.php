@@ -4,6 +4,7 @@ namespace Tests\Unit\EntryTypes;
 
 use App\EntryTypes\PodcastEpisodeEntryType;
 use App\Models\Entry;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
@@ -15,7 +16,7 @@ class PodcastEpisodeEntryTypeTest extends TestCase
 
     private function makeType(): PodcastEpisodeEntryType
     {
-        $record = EntryType::factory()->create(['class' => PodcastEpisodeEntryType::class]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'podcast-episode')->value('id')]);
         return new PodcastEpisodeEntryType($record);
     }
 

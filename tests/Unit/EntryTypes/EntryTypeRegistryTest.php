@@ -5,9 +5,11 @@ namespace Tests\Unit\EntryTypes;
 use App\EntryTypes\AbstractEntryType;
 use App\EntryTypes\EntryTypeRegistry;
 use App\EntryTypes\GeneralEntryType;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
+use Database\Seeders\EntryBehaviorSeeder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -20,51 +22,21 @@ class EntryTypeRegistryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(EntryBehaviorSeeder::class);
         $this->registry = app(EntryTypeRegistry::class);
     }
 
     // -------------------------------------------------------------------------
-    // instantiate() — null / missing class fallback (Option B)
+    // instantiate() — null behavior fallback
     // -------------------------------------------------------------------------
 
-    public function test_resolves_general_entry_type_when_class_is_null(): void
+    public function test_resolves_general_entry_type_when_behavior_is_null(): void
     {
-        $record = EntryType::factory()->create(['class' => null]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => null]);
 
         $instance = $this->registry->resolveByRecord($record);
 
         $this->assertInstanceOf(GeneralEntryType::class, $instance);
-    }
-
-    public function test_resolves_general_entry_type_when_class_does_not_exist(): void
-    {
-        $record = EntryType::factory()->create(['class' => 'App\\EntryTypes\\DoesNotExistEntryType']);
-
-        $instance = $this->registry->resolveByRecord($record);
-
-        $this->assertInstanceOf(GeneralEntryType::class, $instance);
-    }
-
-    public function test_logs_warning_when_class_is_null(): void
-    {
-        Log::shouldReceive('warning')->once()->withArgs(function (string $msg) {
-            return str_contains($msg, 'no class assigned') && str_contains($msg, 'GeneralEntryType');
-        });
-
-        $record = EntryType::factory()->create(['class' => null]);
-
-        $this->registry->resolveByRecord($record);
-    }
-
-    public function test_logs_warning_when_class_does_not_exist(): void
-    {
-        Log::shouldReceive('warning')->once()->withArgs(function (string $msg) {
-            return str_contains($msg, 'does not exist') && str_contains($msg, 'GeneralEntryType');
-        });
-
-        $record = EntryType::factory()->create(['class' => 'App\\EntryTypes\\DoesNotExistEntryType']);
-
-        $this->registry->resolveByRecord($record);
     }
 
     // -------------------------------------------------------------------------
@@ -76,7 +48,16 @@ class EntryTypeRegistryTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessageMatches('/must extend AbstractEntryType/');
 
-        $record = EntryType::factory()->create(['class' => \stdClass::class]);
+        $morphKey = 'behavior.bad-' . uniqid();
+        Relation::morphMap([$morphKey => \stdClass::class]);
+
+        $badBehavior = EntryBehavior::create([
+            'name'   => 'Bad',
+            'handle' => 'bad-class-' . uniqid(),
+            'class'  => $morphKey,
+        ]);
+
+        $record = EntryType::factory()->create(['entry_behavior_id' => $badBehavior->id]);
 
         $this->registry->resolveByRecord($record);
     }
@@ -87,7 +68,9 @@ class EntryTypeRegistryTest extends TestCase
 
     public function test_resolves_same_instance_for_same_record(): void
     {
-        $record = EntryType::factory()->create(['class' => GeneralEntryType::class]);
+        $record = EntryType::factory()->create([
+            'entry_behavior_id' => EntryBehavior::where('handle', 'general')->value('id'),
+        ]);
 
         $first  = $this->registry->resolveByRecord($record);
         $second = $this->registry->resolveByRecord($record);
@@ -101,7 +84,9 @@ class EntryTypeRegistryTest extends TestCase
 
     public function test_resolves_by_handle(): void
     {
-        $record = EntryType::factory()->create(['class' => GeneralEntryType::class]);
+        $record = EntryType::factory()->create([
+            'entry_behavior_id' => EntryBehavior::where('handle', 'general')->value('id'),
+        ]);
 
         $instance = $this->registry->resolveByHandle($record->handle);
 
@@ -114,7 +99,9 @@ class EntryTypeRegistryTest extends TestCase
 
     public function test_resolve_by_handle_and_resolve_by_record_return_same_instance(): void
     {
-        $record = EntryType::factory()->create(['class' => GeneralEntryType::class]);
+        $record = EntryType::factory()->create([
+            'entry_behavior_id' => EntryBehavior::where('handle', 'general')->value('id'),
+        ]);
 
         $byHandle = $this->registry->resolveByHandle($record->handle);
         $byRecord = $this->registry->resolveByRecord($record);
@@ -124,7 +111,9 @@ class EntryTypeRegistryTest extends TestCase
 
     public function test_resolve_by_record_then_by_handle_return_same_instance(): void
     {
-        $record = EntryType::factory()->create(['class' => GeneralEntryType::class]);
+        $record = EntryType::factory()->create([
+            'entry_behavior_id' => EntryBehavior::where('handle', 'general')->value('id'),
+        ]);
 
         $byRecord = $this->registry->resolveByRecord($record);
         $byHandle = $this->registry->resolveByHandle($record->handle);

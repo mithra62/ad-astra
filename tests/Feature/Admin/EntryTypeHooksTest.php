@@ -7,6 +7,7 @@ use App\EntryTypes\EventEntryType;
 use App\EntryTypes\JobListingEntryType;
 use App\EntryTypes\ProductEntryType;
 use App\Models\Entry;
+use App\Models\EntryBehavior;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\Field;
@@ -20,8 +21,10 @@ use App\Models\Status;
 use App\Models\StatusGroup;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -89,9 +92,18 @@ class EntryTypeHooksTest extends TestCase
 
         $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
 
+        $morphKey = 'behavior.test-' . uniqid();
+        Relation::morphMap([$morphKey => $class]);
+
+        $behavior = EntryBehavior::create([
+            'name'   => 'Test',
+            'handle' => Str::slug('test-' . uniqid()),
+            'class'  => $morphKey,
+        ]);
+
         $type = EntryType::factory()->create([
-            'entry_group_id' => $group->id,
-            'class'          => $class,
+            'entry_group_id'    => $group->id,
+            'entry_behavior_id' => $behavior->id,
         ]);
 
         return [$group, $type];

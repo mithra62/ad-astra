@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\EntryTypes\BlogPostEntryType;
-use App\EntryTypes\ProductEntryType;
 use App\Models\Category\Group as CategoryGroup;
+use App\Models\EntryBehavior;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\Field\Group as FieldGroup;
@@ -72,9 +71,9 @@ class EntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'blog_post'],
             [
-                'name'       => 'Blog Post',
-                'class'      => BlogPostEntryType::class,
-                'sort_order' => 1,
+                'name'              => 'Blog Post',
+                'entry_behavior_id' => EntryBehavior::where('handle', 'blog-post')->value('id'),
+                'sort_order'        => 1,
             ]
         );
     }
@@ -118,9 +117,9 @@ class EntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'product'],
             [
-                'name'       => 'Product',
-                'class'      => ProductEntryType::class,
-                'sort_order' => 1,
+                'name'              => 'Product',
+                'entry_behavior_id' => EntryBehavior::where('handle', 'product')->value('id'),
+                'sort_order'        => 1,
             ]
         );
     }

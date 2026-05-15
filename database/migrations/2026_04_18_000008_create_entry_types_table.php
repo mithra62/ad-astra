@@ -11,8 +11,14 @@ return new class extends Migration {
             $table->id();
 
             $table->foreignId('entry_group_id')
+                ->nullable()
                 ->constrained('entry_groups')
-                ->cascadeOnDelete();
+                ->nullOnDelete();
+
+            $table->foreignId('entry_behavior_id')
+                ->nullable()
+                ->constrained('entry_behaviors')
+                ->nullOnDelete();
 
             $table->foreignId('field_layout_id')
                 ->nullable()
@@ -28,7 +34,6 @@ return new class extends Migration {
             $table->unsignedInteger('max_depth')->nullable();
             $table->json('allowed_parent_types')->nullable();
 
-            $table->string('class');
             $table->unsignedInteger('sort_order')->default(0);
 
             $table->timestamps();

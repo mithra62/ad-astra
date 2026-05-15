@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\EntryBehavior;
 
 class EntryType extends Model
 {
@@ -15,6 +16,7 @@ class EntryType extends Model
 
     protected $fillable = [
         'entry_group_id',
+        'entry_behavior_id',
         'field_layout_id',
         'name',
         'handle',
@@ -22,7 +24,6 @@ class EntryType extends Model
         'has_entry_tree',
         'max_depth',
         'allowed_parent_types',
-        'class',
         'sort_order',
     ];
 
@@ -35,6 +36,11 @@ class EntryType extends Model
     public function entryGroup(): BelongsTo
     {
         return $this->belongsTo(EntryGroup::class);
+    }
+
+    public function entryBehavior(): BelongsTo
+    {
+        return $this->belongsTo(EntryBehavior::class);
     }
 
     public function entries(): HasMany

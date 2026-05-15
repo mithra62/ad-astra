@@ -3,6 +3,7 @@
 namespace Tests\Unit\EntryTypes;
 
 use App\EntryTypes\EventEntryType;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,7 +14,7 @@ class EventEntryTypeTest extends TestCase
 
     private function makeType(): EventEntryType
     {
-        $record = EntryType::factory()->create(['class' => EventEntryType::class]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'event')->value('id')]);
         return new EventEntryType($record);
     }
 

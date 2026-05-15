@@ -3,12 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\Entry;
+use App\Models\EntryBehavior;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\Status;
 use App\Models\StatusGroup;
 use App\Models\User;
 use App\Services\EntryService;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Stubs\SpyEntryType;
 use Tests\TestCase;
@@ -163,10 +165,19 @@ class EntryTypeLifecycleTest extends TestCase
 
         $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
 
+        $morphKey = 'behavior.spy-' . uniqid();
+        Relation::morphMap([$morphKey => SpyEntryType::class]);
+
+        $behavior = EntryBehavior::create([
+            'name'   => 'Spy',
+            'handle' => 'spy-' . uniqid(),
+            'class'  => $morphKey,
+        ]);
+
         $this->type = EntryType::factory()->create([
-            'entry_group_id' => $group->id,
-            'handle'         => 'spy-type-' . uniqid(),
-            'class'          => SpyEntryType::class,
+            'entry_group_id'   => $group->id,
+            'handle'           => 'spy-type-' . uniqid(),
+            'entry_behavior_id' => $behavior->id,
         ]);
     }
 

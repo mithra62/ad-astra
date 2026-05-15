@@ -54,7 +54,9 @@
       "Bash(C:\\\\php\\\\php.exe artisan *)",
       "Bash(Get-ChildItem -Path \"D:\\\\Projects\\\\mithra62\\\\laravel-base\\\\develop\" -Directory)",
       "Bash(Select-Object Name)",
-      "Bash(Remove-Item \"D:\\\\Projects\\\\mithra62\\\\laravel-base\\\\develop\\\\database\\\\migrations\\\\2026_04_18_000011_create_user_schema_table.php\")"
+      "Bash(Remove-Item \"D:\\\\Projects\\\\mithra62\\\\laravel-base\\\\develop\\\\database\\\\migrations\\\\2026_04_18_000011_create_user_schema_table.php\")",
+      "Bash(Get-Content \"C:\\\\Users\\\\eric\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--Projects-mithra62-laravel-base-develop\\\\6452e044-233b-4e3d-b197-ea68eed7c059\\\\tasks\\\\b507q4mql.output\")",
+      "Bash(Select-Object -Last 40)"
     ]
   }
 }

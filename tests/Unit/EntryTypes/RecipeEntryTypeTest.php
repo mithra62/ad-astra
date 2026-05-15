@@ -4,6 +4,7 @@ namespace Tests\Unit\EntryTypes;
 
 use App\EntryTypes\RecipeEntryType;
 use App\Models\Entry;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,7 +15,7 @@ class RecipeEntryTypeTest extends TestCase
 
     private function makeType(): RecipeEntryType
     {
-        $record = EntryType::factory()->create(['class' => RecipeEntryType::class]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'recipe')->value('id')]);
         return new RecipeEntryType($record);
     }
 

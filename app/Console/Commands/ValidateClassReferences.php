@@ -4,9 +4,10 @@ namespace App\Console\Commands;
 
 use App\EntryTypes\AbstractEntryType;
 use App\Field\AbstractField;
-use App\Models\EntryType;
+use App\Models\EntryBehavior;
 use App\Models\Field\Type as FieldType;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class ValidateClassReferences extends Command
 {
@@ -17,21 +18,24 @@ class ValidateClassReferences extends Command
     {
         $errors = 0;
 
-        $this->info('Checking entry_types.class …');
-        EntryType::all()->each(function (EntryType $type) use (&$errors) {
-            if (empty($type->class)) {
-                $this->comment("  - {$type->handle}: no class set; GeneralEntryType will be used");
+        $this->info('Checking entry_behaviors.class (morphMap keys) …');
+        EntryBehavior::all()->each(function (EntryBehavior $behavior) use (&$errors) {
+            $class = Relation::getMorphedModel($behavior->class);
+
+            if ($class === null) {
+                $this->error("  EntryBehavior [{$behavior->handle}] → morph key [{$behavior->class}] is not registered in the morphMap.");
+                $errors++;
                 return;
             }
 
-            if (!class_exists($type->class)) {
-                $this->error("  EntryType [{$type->handle}] → class [{$type->class}] does not exist.");
+            if (!class_exists($class)) {
+                $this->error("  EntryBehavior [{$behavior->handle}] → class [{$class}] does not exist.");
                 $errors++;
-            } elseif (!is_subclass_of($type->class, AbstractEntryType::class)) {
-                $this->error("  EntryType [{$type->handle}] → class [{$type->class}] does not extend AbstractEntryType.");
+            } elseif (!is_subclass_of($class, AbstractEntryType::class)) {
+                $this->error("  EntryBehavior [{$behavior->handle}] → class [{$class}] does not extend AbstractEntryType.");
                 $errors++;
             } else {
-                $this->line("  <fg=green>✓</> {$type->handle} → {$type->class}");
+                $this->line("  <fg=green>✓</> {$behavior->handle} → {$behavior->class} ({$class})");
             }
         });
 

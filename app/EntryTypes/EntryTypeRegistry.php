@@ -3,7 +3,6 @@
 namespace App\EntryTypes;
 
 use App\Models\EntryType as EntryTypeRecord;
-use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class EntryTypeRegistry
@@ -18,7 +17,7 @@ class EntryTypeRegistry
     {
         if (!isset($this->handleCache[$handle])) {
             $record = EntryTypeRecord::where('handle', $handle)
-                ->with(['entryGroup', 'fieldLayout.tabs.elements.field.fieldType'])
+                ->with(['entryGroup', 'entryBehavior', 'fieldLayout.tabs.elements.field.fieldType'])
                 ->firstOrFail();
 
             $instance = $this->instantiate($record);
@@ -27,29 +26,6 @@ class EntryTypeRegistry
         }
 
         return $this->handleCache[$handle];
-    }
-
-    private function instantiate(EntryTypeRecord $record): AbstractEntryType
-    {
-        $class = $record->class;
-
-        // Null or empty class — use GeneralEntryType as the default behaviour.
-        if (empty($class)) {
-            Log::warning("EntryType [{$record->handle}] has no class assigned; falling back to GeneralEntryType.");
-            return new GeneralEntryType($record);
-        }
-
-        // Class name recorded but the file is missing — same fallback, louder warning.
-        if (!class_exists($class)) {
-            Log::warning("EntryType class [{$class}] does not exist for entry type [{$record->handle}]; falling back to GeneralEntryType.");
-            return new GeneralEntryType($record);
-        }
-
-        if (!is_subclass_of($class, AbstractEntryType::class)) {
-            throw new RuntimeException("EntryType class [{$class}] must extend AbstractEntryType.");
-        }
-
-        return new $class($record);
     }
 
     public function resolveByRecord(EntryTypeRecord $record): AbstractEntryType
@@ -63,5 +39,16 @@ class EntryTypeRegistry
         }
 
         return $this->handleCache[$handle];
+    }
+
+    private function instantiate(EntryTypeRecord $record): AbstractEntryType
+    {
+        $behavior = $record->entryBehavior;
+
+        if ($behavior === null) {
+            return new GeneralEntryType($record);
+        }
+
+        return $behavior->instance($record);
     }
 }

@@ -5,6 +5,17 @@ namespace App\Providers;
 use App\Events\UserLockChanged;
 use App\Events\UserStatusChanged;
 use App\Listeners\WriteUserStatusLog;
+use App\EntryTypes\BlogPostEntryType;
+use App\EntryTypes\EventEntryType;
+use App\EntryTypes\GeneralEntryType;
+use App\EntryTypes\JobListingEntryType;
+use App\EntryTypes\NewsArticleEntryType;
+use App\EntryTypes\PageEntryType;
+use App\EntryTypes\PodcastEpisodeEntryType;
+use App\EntryTypes\PortfolioItemEntryType;
+use App\EntryTypes\ProductEntryType;
+use App\EntryTypes\RecipeEntryType;
+use App\EntryTypes\VideoEntryType;
 use App\Models\Category;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\Entry;
@@ -91,6 +102,19 @@ class AppServiceProvider extends ServiceProvider
             'media' => Media::class,
             'media_library' => MediaLibrary::class,
             'user' => User::class,
+
+            // Entry behavior concrete classes, keyed by behavior handle
+            'behavior.general' => GeneralEntryType::class,
+            'behavior.blog-post' => BlogPostEntryType::class,
+            'behavior.product' => ProductEntryType::class,
+            'behavior.page' => PageEntryType::class,
+            'behavior.event' => EventEntryType::class,
+            'behavior.job-listing' => JobListingEntryType::class,
+            'behavior.news-article' => NewsArticleEntryType::class,
+            'behavior.podcast-episode' => PodcastEpisodeEntryType::class,
+            'behavior.portfolio-item' => PortfolioItemEntryType::class,
+            'behavior.recipe' => RecipeEntryType::class,
+            'behavior.video' => VideoEntryType::class,
         ]);
 
         // Model observers

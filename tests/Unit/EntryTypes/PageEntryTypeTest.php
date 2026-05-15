@@ -3,6 +3,7 @@
 namespace Tests\Unit\EntryTypes;
 
 use App\EntryTypes\PageEntryType;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,7 +14,7 @@ class PageEntryTypeTest extends TestCase
 
     private function makeType(): PageEntryType
     {
-        $record = EntryType::factory()->create(['class' => PageEntryType::class]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'page')->value('id')]);
         return new PageEntryType($record);
     }
 

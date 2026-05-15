@@ -17,6 +17,6 @@ class CreateNewEntryType extends AbstractAction
 
     public function create(string|int $groupId, array $input): EntryType
     {
-        return $this->service->create((int)$groupId, $input);
+        return $this->service->create(['entry_group_id' => (int)$groupId] + $input);
     }
 }

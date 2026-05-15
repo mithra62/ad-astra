@@ -2,16 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\EntryTypes\EventEntryType;
-use App\EntryTypes\GeneralEntryType;
-use App\EntryTypes\JobListingEntryType;
-use App\EntryTypes\NewsArticleEntryType;
-use App\EntryTypes\PageEntryType;
-use App\EntryTypes\PodcastEpisodeEntryType;
-use App\EntryTypes\PortfolioItemEntryType;
-use App\EntryTypes\RecipeEntryType;
-use App\EntryTypes\VideoEntryType;
 use App\Models\Category\Group as CategoryGroup;
+use App\Models\EntryBehavior;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\Field;
@@ -78,7 +70,7 @@ class ExtendedEntryGroupSeeder extends Seeder
 
         EntryType::updateOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'event'],
-            ['name' => 'Event', 'class' => EventEntryType::class, 'sort_order' => 1]
+            ['name' => 'Event', 'entry_behavior_id' => EntryBehavior::where('handle', 'event')->value('id'), 'sort_order' => 1]
         );
     }
 
@@ -110,7 +102,7 @@ class ExtendedEntryGroupSeeder extends Seeder
 
         EntryType::updateOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'news_article'],
-            ['name' => 'News Article', 'class' => NewsArticleEntryType::class, 'sort_order' => 1]
+            ['name' => 'News Article', 'entry_behavior_id' => EntryBehavior::where('handle', 'news-article')->value('id'), 'sort_order' => 1]
         );
     }
 
@@ -144,7 +136,7 @@ class ExtendedEntryGroupSeeder extends Seeder
             ['entry_group_id' => $group->id, 'handle' => 'page'],
             [
                 'name' => 'Page',
-                'class' => PageEntryType::class,
+                'entry_behavior_id' => EntryBehavior::where('handle', 'page')->value('id'),
                 'sort_order' => 1,
                 'default_template' => 'entries.page',
                 'has_entry_tree' => true,
@@ -184,7 +176,7 @@ class ExtendedEntryGroupSeeder extends Seeder
 
         EntryType::updateOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'job_listing'],
-            ['name' => 'Job Listing', 'class' => JobListingEntryType::class, 'sort_order' => 1]
+            ['name' => 'Job Listing', 'entry_behavior_id' => EntryBehavior::where('handle', 'job-listing')->value('id'), 'sort_order' => 1]
         );
     }
 
@@ -218,7 +210,7 @@ class ExtendedEntryGroupSeeder extends Seeder
 
         EntryType::updateOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'podcast_episode'],
-            ['name' => 'Podcast Episode', 'class' => PodcastEpisodeEntryType::class, 'sort_order' => 1]
+            ['name' => 'Podcast Episode', 'entry_behavior_id' => EntryBehavior::where('handle', 'podcast-episode')->value('id'), 'sort_order' => 1]
         );
     }
 
@@ -253,7 +245,7 @@ class ExtendedEntryGroupSeeder extends Seeder
             ['entry_group_id' => $group->id, 'handle' => 'portfolio_item'],
             [
                 'name' => 'Portfolio Item',
-                'class' => PortfolioItemEntryType::class,
+                'entry_behavior_id' => EntryBehavior::where('handle', 'portfolio-item')->value('id'),
                 'sort_order' => 1,
                 'default_template' => 'entries.page',
                 'has_entry_tree' => true,
@@ -292,7 +284,7 @@ class ExtendedEntryGroupSeeder extends Seeder
             ['entry_group_id' => $group->id, 'handle' => 'video'],
             [
                 'name' => 'Video',
-                'class' => VideoEntryType::class,
+                'entry_behavior_id' => EntryBehavior::where('handle', 'video')->value('id'),
                 'sort_order' => 1,
                 'default_template' => 'entries.page',
                 'has_entry_tree' => true,
@@ -336,7 +328,7 @@ class ExtendedEntryGroupSeeder extends Seeder
             ['entry_group_id' => $group->id, 'handle' => 'recipe'],
             [
                 'name' => 'Recipe',
-                'class' => RecipeEntryType::class,
+                'entry_behavior_id' => EntryBehavior::where('handle', 'recipe')->value('id'),
                 'sort_order' => 1,
                 'default_template' => 'entries.page',
                 'has_entry_tree' => true,
@@ -366,7 +358,7 @@ class ExtendedEntryGroupSeeder extends Seeder
 
         EntryType::updateOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'general'],
-            ['name' => 'General', 'class' => GeneralEntryType::class, 'sort_order' => 1]
+            ['name' => 'General', 'entry_behavior_id' => EntryBehavior::where('handle', 'general')->value('id'), 'sort_order' => 1]
         );
     }
 

@@ -4,6 +4,7 @@ namespace Tests\Unit\EntryTypes;
 
 use App\EntryTypes\JobListingEntryType;
 use App\Models\Entry;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,7 +15,7 @@ class JobListingEntryTypeTest extends TestCase
 
     private function makeType(): JobListingEntryType
     {
-        $record = EntryType::factory()->create(['class' => JobListingEntryType::class]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'job-listing')->value('id')]);
         return new JobListingEntryType($record);
     }
 

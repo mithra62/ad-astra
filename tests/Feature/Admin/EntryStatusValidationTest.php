@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Admin;
 
-use App\EntryTypes\PageEntryType;
 use App\Models\Entry;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
@@ -74,7 +73,6 @@ class EntryStatusValidationTest extends TestCase
 
         $type = EntryType::factory()->create([
             'entry_group_id' => $group->id,
-            'class' => PageEntryType::class,
         ]);
 
         return [$group, $type];

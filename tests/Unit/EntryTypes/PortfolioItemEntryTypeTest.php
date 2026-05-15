@@ -3,6 +3,7 @@
 namespace Tests\Unit\EntryTypes;
 
 use App\EntryTypes\PortfolioItemEntryType;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,7 +14,7 @@ class PortfolioItemEntryTypeTest extends TestCase
 
     private function makeType(): PortfolioItemEntryType
     {
-        $record = EntryType::factory()->create(['class' => PortfolioItemEntryType::class]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'portfolio-item')->value('id')]);
         return new PortfolioItemEntryType($record);
     }
 

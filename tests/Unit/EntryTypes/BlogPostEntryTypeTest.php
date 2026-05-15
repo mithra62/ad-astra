@@ -4,6 +4,7 @@ namespace Tests\Unit\EntryTypes;
 
 use App\EntryTypes\BlogPostEntryType;
 use App\Models\Entry;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,7 +15,7 @@ class BlogPostEntryTypeTest extends TestCase
 
     private function makeType(): BlogPostEntryType
     {
-        $record = EntryType::factory()->create(['class' => BlogPostEntryType::class]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'blog-post')->value('id')]);
         return new BlogPostEntryType($record);
     }
 

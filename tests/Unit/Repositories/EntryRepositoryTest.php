@@ -65,7 +65,6 @@ class EntryRepositoryTest extends TestCase
     {
         return EntryType::factory()->create([
             'entry_group_id' => $group->id,
-            'class' => 'App\\EntryTypes\\BlogPostEntryType',
         ]);
     }
 

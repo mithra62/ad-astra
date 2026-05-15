@@ -1,0 +1,90 @@
+{% extends 'admin._inc._layout' %}
+
+{% set page_title = 'Entry Types' %}
+{% set page_heading = 'Entry Types' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'entries' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="#">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">Entry Types</span>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Entry Types</h1>
+                <p class="mt-1 text-sm text-slate-500">Manage content schemas. Assign them to Entry Groups to activate them.</p>
+            </div>
+            <a href="{{ route('entries.types.create') }}"
+               class="inline-flex items-center gap-1.5 self-start rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 sm:self-auto">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                New Entry Type
+            </a>
+        </div>
+
+        {% if types.count > 0 %}
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Name</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Handle</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Behavior</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Entry Group</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                    {% for type in types %}
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-5 py-3 font-medium text-slate-900">
+                                <a href="{{ route('entries.types.edit', type.id) }}" class="hover:text-emerald-700">
+                                    {{ type.name }}
+                                </a>
+                            </td>
+                            <td class="px-5 py-3 text-slate-500"><code>{{ type.handle }}</code></td>
+                            <td class="px-5 py-3 text-slate-700">
+                                {{ type.entryBehavior ? type.entryBehavior.name : '— General —' }}
+                            </td>
+                            <td class="px-5 py-3">
+                                {% if type.entryGroup %}
+                                    <a href="{{ route('entries.groups.show', type.entryGroup.id) }}"
+                                       class="text-emerald-700 hover:underline">{{ type.entryGroup.name }}</a>
+                                {% else %}
+                                    <span class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">Unattached</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-5 py-3 text-right">
+                                <a href="{{ route('entries.types.edit', type.id) }}"
+                                   class="text-sm font-medium text-slate-600 hover:text-slate-900">Edit</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div>{{ types.links() }}</div>
+        {% else %}
+            <div class="rounded-lg border border-slate-200 bg-white px-5 py-10 text-center shadow-sm">
+                <p class="text-sm text-slate-500">No Entry Types yet. <a href="{{ route('entries.types.create') }}" class="font-medium text-emerald-600 hover:underline">Create the first one.</a></p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

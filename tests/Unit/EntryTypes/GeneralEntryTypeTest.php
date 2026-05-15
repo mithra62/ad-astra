@@ -3,6 +3,7 @@
 namespace Tests\Unit\EntryTypes;
 
 use App\EntryTypes\GeneralEntryType;
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,7 +14,7 @@ class GeneralEntryTypeTest extends TestCase
 
     private function makeType(): GeneralEntryType
     {
-        $record = EntryType::factory()->create(['class' => GeneralEntryType::class]);
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'general')->value('id')]);
         return new GeneralEntryType($record);
     }
 

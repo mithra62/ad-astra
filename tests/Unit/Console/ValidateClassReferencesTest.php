@@ -2,8 +2,9 @@
 
 namespace Tests\Unit\Console;
 
-use App\EntryTypes\GeneralEntryType;
-use App\Models\EntryType;
+use App\Models\EntryBehavior;
+use Database\Seeders\EntryBehaviorSeeder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,66 +13,47 @@ class ValidateClassReferencesTest extends TestCase
     use RefreshDatabase;
 
     // -------------------------------------------------------------------------
-    // Null class — should be skipped, not reported as broken
-    // -------------------------------------------------------------------------
-
-    public function test_null_class_is_not_reported_as_an_error(): void
-    {
-        EntryType::factory()->create(['class' => null]);
-
-        $this->artisan('app:validate-class-references')
-            ->assertSuccessful();
-    }
-
-    public function test_null_class_outputs_handle_in_informational_line(): void
-    {
-        $type = EntryType::factory()->create(['class' => null]);
-
-        $this->artisan('app:validate-class-references')
-            ->expectsOutputToContain($type->handle)
-            ->assertSuccessful();
-    }
-
-    public function test_null_class_outputs_no_class_set_message(): void
-    {
-        EntryType::factory()->create(['class' => null]);
-
-        $this->artisan('app:validate-class-references')
-            ->expectsOutputToContain('no class set')
-            ->assertSuccessful();
-    }
-
-    // -------------------------------------------------------------------------
-    // Valid class — should pass
+    // Valid morphMap keys — should pass
     // -------------------------------------------------------------------------
 
     public function test_valid_class_passes(): void
     {
-        EntryType::factory()->create(['class' => GeneralEntryType::class]);
+        $this->seed(EntryBehaviorSeeder::class);
 
         $this->artisan('app:validate-class-references')
             ->assertSuccessful();
     }
 
     // -------------------------------------------------------------------------
-    // Missing class — should fail
+    // Unmapped morph key — should fail
     // -------------------------------------------------------------------------
 
     public function test_missing_class_is_reported_as_error(): void
     {
-        EntryType::factory()->create(['class' => 'App\\EntryTypes\\DoesNotExistEntryType']);
+        EntryBehavior::create([
+            'name'   => 'Missing',
+            'handle' => 'missing-' . uniqid(),
+            'class'  => 'behavior.nonexistent-' . uniqid(),
+        ]);
 
         $this->artisan('app:validate-class-references')
             ->assertFailed();
     }
 
     // -------------------------------------------------------------------------
-    // Invalid class — exists but does not extend AbstractEntryType
+    // Mapped key whose class does not extend AbstractEntryType — should fail
     // -------------------------------------------------------------------------
 
     public function test_class_not_extending_abstract_entry_type_is_reported_as_error(): void
     {
-        EntryType::factory()->create(['class' => \stdClass::class]);
+        $morphKey = 'behavior.bad-' . uniqid();
+        Relation::morphMap([$morphKey => \stdClass::class]);
+
+        EntryBehavior::create([
+            'name'   => 'Bad',
+            'handle' => 'bad-' . uniqid(),
+            'class'  => $morphKey,
+        ]);
 
         $this->artisan('app:validate-class-references')
             ->assertFailed();
