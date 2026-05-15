@@ -2,57 +2,49 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Facades\Content;
+use App\Enums\UserStatus;
 use App\Facades\Users;
 use App\Models\ApiLog;
 use App\Models\Entry;
-use Illuminate\Support\Number;
+use App\Models\EntryGroup;
+use App\Models\Media;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class Dashboard extends Controller
 {
     public function index()
     {
-        $content = Content::query()->inGroup('products')->published()->first();
-        // print_r($content);
+        $totalEntries = Entry::count();
+        $publishedCount = Entry::published()->count();
 
-        $entry = Entry::inGroup('products')->where('handle', 'the-pragmatic-programmer')->first();
-
-        //        $entry = Entry::where('handle', 'the-pragmatic-programmer')
-        //            ->with('entryGroup')
-        //            ->first()
-        //            ?->entryGroup
-        //            ?->handle; // e.g. "blog_posts" not "blog"
-        //        print_r($entry);
-        //        exit;
-
-        //        $post = Content::query()
-        //            ->inGroup(2)
-        //            ->where('handle', 'the-pragmatic-programmer')
-        //            ->firstOrFail();
-        //
-        //        print_r($post);
-        //        exit;
-
-        //        $entry = Content::find(1);
-        //        echo $entry->field('body');
-        //        print_r($entry);
-        //        exit;
-        //        $client = new Client();
-        //        $data = $client->get('v1/users');
-        //
-        //        print_r($data);
-        //        exit;
         $params = [
+            'total_entries' => $totalEntries,
+            'published_entries' => $publishedCount,
+            'draft_entries' => $totalEntries - $publishedCount,
             'total_users' => Users::getTotalCount(),
+            'active_users' => User::where('status', UserStatus::ACTIVE)->count(),
+            'total_media' => Media::count(),
             'total_api_requests' => ApiLog::count(),
-            'api_logs' => ApiLog::limit(100)->with(['user'])->get(),
-            'latest_users' => Users::getLatestUsers(9),
-            'total_remittances' => 0,
-            'total_submissions' => 0,
-            'total_corn_remittances' => 0,
-            'total_soybean_remittances' => 0,
-            'sum_corn_remittance_totals' => Number::currency(0),
-            'sum_soybean_remittance_totals' => Number::currency(0),
+            'recent_api_errors' => ApiLog::where('response_status_code', '>=', 500)
+                ->where('created_at', '>=', now()->subDay())
+                ->count(),
+            'entry_groups' => EntryGroup::withCount('entries')->ordered()->get(),
+            'recent_entries' => Entry::latest()
+                ->with(['creator', 'entryGroup'])
+                ->limit(10)
+                ->get(),
+            'top_api_routes' => ApiLog::select(
+                'request_route',
+                DB::raw('count(*) as hits'),
+                DB::raw('sum(case when response_status_code >= 500 then 1 else 0 end) as errors')
+            )
+                ->where('created_at', '>=', now()->subDays(7))
+                ->groupBy('request_route')
+                ->orderByDesc('hits')
+                ->limit(5)
+                ->get(),
+            'api_logs' => ApiLog::latest()->limit(20)->with(['user'])->get(),
         ];
 
         return $this->view('dashboard', $params);
