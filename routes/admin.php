@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Account;
+use App\Http\Controllers\Admin\Account\Settings as UserSettings;
 use App\Http\Controllers\Admin\Account\Token as AccountTokens;
 use App\Http\Controllers\Admin\Category;
 use App\Http\Controllers\Admin\Category\Group as CategoryGroup;
@@ -17,13 +18,12 @@ use App\Http\Controllers\Admin\Media;
 use App\Http\Controllers\Admin\Media\Library;
 use App\Http\Controllers\Admin\Role;
 use App\Http\Controllers\Admin\Settings\Domain as SettingsDomain;
-use App\Http\Controllers\Admin\Account\Settings AS UserSettings;
 use App\Http\Controllers\Admin\Status;
 use App\Http\Controllers\Admin\Status\Group as StatusGroup;
 use App\Http\Controllers\Admin\User;
 use App\Http\Controllers\Admin\User\Layout as UserLayout;
 use App\Http\Controllers\Admin\User\Token as UserTokens;
-use App\Http\Controllers\Admin\UserStatusController;
+use App\Http\Controllers\Admin\User\Status as UserStatus;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {
@@ -36,20 +36,20 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::resource('users', User::class);
 
     Route::prefix('users/{id}')->group(function () {
-        Route::patch('status',       [UserStatusController::class, 'update'])->name('users.status.update');
-        Route::delete('lock',        [UserStatusController::class, 'destroy'])->name('users.lock.destroy');
-        Route::get('confirm',        [User::class, 'confirm'])->name('users.confirm');
-        Route::put('password',       [User::class, 'password'])->name('users.password');
-        Route::get('password',       [User::class, 'changePassword'])->name('users.change_password');
+        Route::patch('status', [UserStatus::class, 'update'])->name('users.status.update');
+        Route::delete('lock', [UserStatus::class, 'destroy'])->name('users.lock.destroy');
+        Route::get('confirm', [User::class, 'confirm'])->name('users.confirm');
+        Route::put('password', [User::class, 'password'])->name('users.password');
+        Route::get('password', [User::class, 'changePassword'])->name('users.change_password');
 
         Route::prefix('tokens')->group(function () {
-            Route::get('/',                      [UserTokens::class, 'index'])->name('users.token.index');
-            Route::get('create',                 [UserTokens::class, 'create'])->name('users.token.create');
-            Route::post('/',                     [UserTokens::class, 'store'])->name('users.token.store');
-            Route::get('{token_id}/edit',        [UserTokens::class, 'edit'])->name('users.token.edit');
-            Route::get('{token_id}/confirm',     [UserTokens::class, 'confirm'])->name('users.token.confirm');
-            Route::put('{token_id}',             [UserTokens::class, 'update'])->name('users.token.update');
-            Route::delete('{token_id}',          [UserTokens::class, 'destroy'])->name('users.token.destroy');
+            Route::get('/', [UserTokens::class, 'index'])->name('users.token.index');
+            Route::get('create', [UserTokens::class, 'create'])->name('users.token.create');
+            Route::post('/', [UserTokens::class, 'store'])->name('users.token.store');
+            Route::get('{token_id}/edit', [UserTokens::class, 'edit'])->name('users.token.edit');
+            Route::get('{token_id}/confirm', [UserTokens::class, 'confirm'])->name('users.token.confirm');
+            Route::put('{token_id}', [UserTokens::class, 'update'])->name('users.token.update');
+            Route::delete('{token_id}', [UserTokens::class, 'destroy'])->name('users.token.destroy');
         });
     });
 

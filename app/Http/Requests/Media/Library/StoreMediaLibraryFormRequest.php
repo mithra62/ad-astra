@@ -36,22 +36,22 @@ class StoreMediaLibraryFormRequest extends FormRequest
             ],
 
             // adapter_settings is nullable — local adapter needs no extra config by default.
-            'adapter_settings'       => ['nullable', 'array'],
+            'adapter_settings' => ['nullable', 'array'],
             //'adapter_settings.*.url' => ['sometimes', 'string', 'max:255'],
 
             // allowed_types null = accept any MIME type.
-            'allowed_types'   => ['nullable', 'array'],
+            'allowed_types' => ['nullable', 'array'],
             'allowed_types.*' => ['string'],
 
             // max_size in MB; 0 = unlimited.
-            'max_size'   => ['nullable', 'integer', 'min:0'],
+            'max_size' => ['nullable', 'integer', 'min:0'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
 
             // Relationship IDs — both optional.
-            'category_groups'   => ['nullable', 'array'],
+            'category_groups' => ['nullable', 'array'],
             'category_groups.*' => ['integer', 'exists:category_groups,id'],
-            'field_groups'      => ['nullable', 'array'],
-            'field_groups.*'    => ['integer', 'exists:field_groups,id'],
+            'field_groups' => ['nullable', 'array'],
+            'field_groups.*' => ['integer', 'exists:field_groups,id'],
         ];
 
         // Require an explicit URL when storing files on a non-local adapter
@@ -67,8 +67,8 @@ class StoreMediaLibraryFormRequest extends FormRequest
     {
         return [
             'adapter_settings.url' => 'Adapter Base URL',
-            'allowed_types'        => 'Allowed File Types',
-            'max_size'             => 'Max File Size (MB)',
+            'allowed_types' => 'Allowed File Types',
+            'max_size' => 'Max File Size (MB)',
         ];
     }
 }

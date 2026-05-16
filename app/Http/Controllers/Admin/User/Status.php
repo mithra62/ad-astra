@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Admin\User;
 
 use App\Facades\Users;
+use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\User\UserStatusRequest;
 use App\Models\User as UserModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
-class UserStatusController extends Controller
+class Status extends Controller
 {
     /**
      * Change the status of a user account.
@@ -18,9 +19,9 @@ class UserStatusController extends Controller
      */
     public function update(UserStatusRequest $request, string $id): RedirectResponse
     {
-        $user = Users::find((int) $id);
+        $user = Users::find((int)$id);
 
-        if (! $user instanceof UserModel) {
+        if (!$user instanceof UserModel) {
             return redirect()->route('users.index')
                 ->with('failure', trans('user.not_found'));
         }
@@ -53,13 +54,13 @@ class UserStatusController extends Controller
      */
     public function destroy(Request $request, string $id): RedirectResponse
     {
-        if (! $request->user()->can('manage user status')) {
+        if (!$request->user()->can('manage user status')) {
             abort(403);
         }
 
-        $user = Users::find((int) $id);
+        $user = Users::find((int)$id);
 
-        if (! $user instanceof UserModel) {
+        if (!$user instanceof UserModel) {
             return redirect()->route('users.index')
                 ->with('failure', trans('user.not_found'));
         }

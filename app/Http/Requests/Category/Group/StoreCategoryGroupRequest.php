@@ -23,6 +23,7 @@ class StoreCategoryGroupRequest extends FormRequest
                 'nullable',
                 'array',
             ],
+            'field_groups.*' => ['integer', 'exists:field_groups,id'],
             'name' => [
                 'required',
                 'string',

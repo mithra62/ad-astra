@@ -33,12 +33,6 @@
             <h5 class="text-sm font-semibold text-slate-700">Category Groups</h5>
         </div>
         <nav class="p-2">
-            <a class="flex items-center gap-2 rounded-md  px-3 py-2 text-sm font-medium " href="index.twig">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
-                </svg>
-                All Entries fdsa
-            </a>
             {% for group in groups %}
                 <a href="{{ route('categories.groups.show', group) }}" class="{% if active == group.id %} text-emerald-700 bg-emerald-50 {% endif %} mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

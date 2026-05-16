@@ -28,7 +28,7 @@ class StoreCategoryRequest extends FormRequest
                     'max:255',
                 ],
                 'handle' => [
-                    'nullable',
+                    'required',
                     'string',
                     'max:255',
                 ],

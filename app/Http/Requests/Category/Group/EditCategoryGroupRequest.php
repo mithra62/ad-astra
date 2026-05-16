@@ -2,11 +2,10 @@
 
 namespace App\Http\Requests\Category\Group;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-class EditCategoryGroupRequest extends FormRequest
+class EditCategoryGroupRequest extends StoreCategoryGroupRequest
 {
     public function authorize(): bool
     {
@@ -19,6 +18,14 @@ class EditCategoryGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'field_groups' => [
+                'nullable',
+                'array',
+            ],
+            'field_layout_id' => [
+                'nullable',
+                'integer',
+            ],
             'name' => [
                 'required',
                 'string',

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Field\Group;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class DeleteFieldGroupRequest extends FormRequest
