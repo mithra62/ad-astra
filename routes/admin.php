@@ -184,7 +184,6 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::delete('field-layouts/{layout_id}/tabs/{tab_id}/elements/{element_id}', [FieldLayoutTabElement::class, 'destroy'])->name('field-layouts.tabs.elements.destroy');
 
     // System settings
-    Route::get('settings', [SettingsDomain::class, 'index'])->name('settings');
     Route::get('settings/{handle}', [SettingsDomain::class, 'show'])->name('settings.show');
     Route::put('settings/{handle}', [SettingsDomain::class, 'update'])->name('settings.update');
 

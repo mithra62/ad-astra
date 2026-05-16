@@ -56,6 +56,17 @@ return [
                 'user_overridable' => false,
             ],
             [
+                'handle' => 'installed_version',
+                'label' => 'Installed Version',
+                'type' => 'text',
+                'default' => '0.1',
+                'rules' => ['required', 'string', 'max:255'],
+                'instructions' => 'The installed system version.',
+                'group' => null,
+                'hidden' => true,
+                'user_overridable' => false,
+            ],
+            [
                 'handle' => 'timezone',
                 'label' => 'Timezone',
                 'type' => 'text',
@@ -276,8 +287,8 @@ return [
                 'group' => 'Accounts',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn () => array_map(
-                    fn ($s) => ['value' => $s, 'label' => UserStatus::label($s)],
+                'options_callback' => static fn() => array_map(
+                    fn($s) => ['value' => $s, 'label' => UserStatus::label($s)],
                     UserStatus::ALL
                 ),
             ],
@@ -291,8 +302,8 @@ return [
                 'group' => 'Accounts',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn () => array_map(
-                    fn ($s) => ['value' => $s, 'label' => UserStatus::label($s)],
+                'options_callback' => static fn() => array_map(
+                    fn($s) => ['value' => $s, 'label' => UserStatus::label($s)],
                     UserStatus::ALL
                 ),
             ],
@@ -306,9 +317,9 @@ return [
                 'group' => 'Schema',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn () => FieldLayout::orderBy('name')
+                'options_callback' => static fn() => FieldLayout::orderBy('name')
                     ->get()
-                    ->map(fn ($l) => ['value' => $l->id, 'label' => $l->name])
+                    ->map(fn($l) => ['value' => $l->id, 'label' => $l->name])
                     ->toArray(),
             ],
         ],
