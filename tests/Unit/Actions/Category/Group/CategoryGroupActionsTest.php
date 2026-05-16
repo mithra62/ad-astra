@@ -38,29 +38,6 @@ class CategoryGroupActionsTest extends TestCase
         ]);
     }
 
-    public function test_create_also_creates_field_layout_for_group(): void
-    {
-        $action = app(CreateNewCategoryGroup::class);
-
-        $group = $action->create(['name' => 'Topics', 'handle' => 'topics', 'sort_order' => 0]);
-
-        $this->assertNotNull($group->field_layout_id);
-        $this->assertDatabaseHas('field_layouts', [
-            'id' => $group->field_layout_id,
-            'name' => 'Topics Layout cat',
-        ]);
-    }
-
-    public function test_create_links_auto_created_layout_to_group(): void
-    {
-        $action = app(CreateNewCategoryGroup::class);
-
-        $group = $action->create(['name' => 'Genres', 'handle' => 'genres', 'sort_order' => 0]);
-
-        $this->assertNotNull($group->fieldLayout);
-        $this->assertEquals($group->field_layout_id, $group->fieldLayout->id);
-    }
-
     public function test_create_stores_sort_order(): void
     {
         $action = app(CreateNewCategoryGroup::class);

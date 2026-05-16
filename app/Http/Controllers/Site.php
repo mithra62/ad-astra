@@ -6,7 +6,7 @@ use App\Services\SiteRouting\SiteRouter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
-class SiteController extends Controller
+class Site extends Controller
 {
     /**
      * @param SiteRouter $router
