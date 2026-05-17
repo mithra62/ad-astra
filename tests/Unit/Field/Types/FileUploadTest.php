@@ -3,6 +3,8 @@
 namespace Tests\Unit\Field\Types;
 
 use App\Field\Types\FileUpload;
+use App\Models\Field;
+use App\Models\Field\Type;
 use App\Models\Media;
 use App\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,14 +37,15 @@ class FileUploadTest extends TestCase
     {
         $ref = new \ReflectionMethod(FileUpload::class, $method);
         $ref->setAccessible(true);
+
         return $ref->invoke($instance);
     }
 
     private function makeLibrary(string $handle = 'uploads'): Library
     {
         return Library::create([
-            'name'    => ucfirst($handle) . ' Library',
-            'handle'  => $handle,
+            'name' => ucfirst($handle).' Library',
+            'handle' => $handle,
             'adapter' => 'local',
         ]);
     }
@@ -132,8 +135,8 @@ class FileUploadTest extends TestCase
 
     public function test_value_returns_collection_of_media_models(): void
     {
-        $media  = Media::factory()->count(2)->create();
-        $ids    = $media->pluck('id')->all();
+        $media = Media::factory()->count(2)->create();
+        $ids = $media->pluck('id')->all();
 
         $result = $this->make()->value(json_encode($ids));
 
@@ -151,14 +154,14 @@ class FileUploadTest extends TestCase
 
     public function test_value_preserves_saved_sort_order(): void
     {
-        $first  = Media::factory()->create();
+        $first = Media::factory()->create();
         $second = Media::factory()->create();
 
         // Store second before first — value() should return in that order.
         $result = $this->make()->value(json_encode([$second->id, $first->id]));
 
         $this->assertEquals($second->id, $result->first()->id);
-        $this->assertEquals($first->id,  $result->last()->id);
+        $this->assertEquals($first->id, $result->last()->id);
     }
 
     // -------------------------------------------------------------------------
@@ -174,8 +177,8 @@ class FileUploadTest extends TestCase
 
     public function test_validate_returns_error_when_below_min(): void
     {
-        $type   = $this->make(['min' => 2]);
-        $media  = Media::factory()->create();
+        $type = $this->make(['min' => 2]);
+        $media = Media::factory()->create();
 
         $result = $type->validate(json_encode([$media->id]));
 
@@ -185,7 +188,7 @@ class FileUploadTest extends TestCase
 
     public function test_validate_passes_when_count_meets_min(): void
     {
-        $type  = $this->make(['min' => 1]);
+        $type = $this->make(['min' => 1]);
         $media = Media::factory()->create();
 
         $result = $type->validate(json_encode([$media->id]));
@@ -195,7 +198,7 @@ class FileUploadTest extends TestCase
 
     public function test_validate_returns_error_when_above_max(): void
     {
-        $type  = $this->make(['max' => 1]);
+        $type = $this->make(['max' => 1]);
         $media = Media::factory()->count(2)->create();
 
         $result = $type->validate(json_encode($media->pluck('id')->all()));
@@ -205,7 +208,7 @@ class FileUploadTest extends TestCase
 
     public function test_validate_passes_when_count_meets_max(): void
     {
-        $type  = $this->make(['max' => 2]);
+        $type = $this->make(['max' => 2]);
         $media = Media::factory()->count(2)->create();
 
         $result = $type->validate(json_encode($media->pluck('id')->all()));
@@ -227,7 +230,7 @@ class FileUploadTest extends TestCase
 
     public function test_validate_passes_when_all_ids_exist(): void
     {
-        $media  = Media::factory()->count(2)->create();
+        $media = Media::factory()->count(2)->create();
         $result = $this->make()->validate(json_encode($media->pluck('id')->all()));
 
         $this->assertTrue($result);
@@ -239,11 +242,11 @@ class FileUploadTest extends TestCase
 
     public function test_validate_returns_error_when_media_not_in_expected_library(): void
     {
-        $libA  = $this->makeLibrary('lib-a');
-        $libB  = $this->makeLibrary('lib-b');
+        $libA = $this->makeLibrary('lib-a');
+        $libB = $this->makeLibrary('lib-b');
         $media = Media::factory()->create(['library_id' => $libA->id]);
 
-        $type   = $this->make(['library_id' => $libB->id]);
+        $type = $this->make(['library_id' => $libB->id]);
         $result = $type->validate(json_encode([$media->id]));
 
         $this->assertIsString($result);
@@ -253,9 +256,9 @@ class FileUploadTest extends TestCase
     public function test_validate_passes_when_media_belongs_to_expected_library(): void
     {
         $library = $this->makeLibrary();
-        $media   = Media::factory()->create(['library_id' => $library->id]);
+        $media = Media::factory()->create(['library_id' => $library->id]);
 
-        $type   = $this->make(['library_id' => $library->id]);
+        $type = $this->make(['library_id' => $library->id]);
         $result = $type->validate(json_encode([$media->id]));
 
         $this->assertTrue($result);
@@ -264,9 +267,9 @@ class FileUploadTest extends TestCase
     public function test_validate_resolves_library_by_handle(): void
     {
         $library = $this->makeLibrary('photos');
-        $media   = Media::factory()->create(['library_id' => $library->id]);
+        $media = Media::factory()->create(['library_id' => $library->id]);
 
-        $type   = $this->make(['library_handle' => 'photos']);
+        $type = $this->make(['library_handle' => 'photos']);
         $result = $type->validate(json_encode([$media->id]));
 
         $this->assertTrue($result);
@@ -280,7 +283,7 @@ class FileUploadTest extends TestCase
     {
         $media = Media::factory()->create(['mime_type' => 'video/mp4']);
 
-        $type   = $this->make(['allowed_types' => ['image/jpeg', 'image/png']]);
+        $type = $this->make(['allowed_types' => ['image/jpeg', 'image/png']]);
         $result = $type->validate(json_encode([$media->id]));
 
         $this->assertIsString($result);
@@ -291,7 +294,7 @@ class FileUploadTest extends TestCase
     {
         $media = Media::factory()->create(['mime_type' => 'image/jpeg']);
 
-        $type   = $this->make(['allowed_types' => ['image/jpeg']]);
+        $type = $this->make(['allowed_types' => ['image/jpeg']]);
         $result = $type->validate(json_encode([$media->id]));
 
         $this->assertTrue($result);
@@ -317,7 +320,7 @@ class FileUploadTest extends TestCase
     public function test_value_incurs_no_extra_queries_per_item_for_field_values(): void
     {
         $media = Media::factory()->count(3)->create();
-        $ids   = json_encode($media->pluck('id')->all());
+        $ids = json_encode($media->pluck('id')->all());
 
         // Warm the query — first call may hit schema inspection caches.
         $this->make()->value($ids);
@@ -330,7 +333,7 @@ class FileUploadTest extends TestCase
         // Expect: 1 media query + up to 1 fieldValues query + up to 1 field query
         // + up to 1 fieldType query = at most 4. Never N per media item.
         $this->assertLessThanOrEqual(4, $count,
-            "value() should use eager loading, not one query per media item.");
+            'value() should use eager loading, not one query per media item.');
     }
 
     // -------------------------------------------------------------------------
@@ -340,7 +343,7 @@ class FileUploadTest extends TestCase
     public function test_resolve_library_id_returns_id_from_library_setting(): void
     {
         $library = $this->makeLibrary();
-        $type    = $this->make(['library' => [$library->id]]);
+        $type = $this->make(['library' => [$library->id]]);
 
         $id = $this->callProtected($type, 'resolveLibraryId');
 
@@ -350,7 +353,7 @@ class FileUploadTest extends TestCase
     public function test_resolve_library_id_falls_back_to_legacy_library_id_setting(): void
     {
         $library = $this->makeLibrary('legacy');
-        $type    = $this->make(['library_id' => $library->id]);
+        $type = $this->make(['library_id' => $library->id]);
 
         $id = $this->callProtected($type, 'resolveLibraryId');
 
@@ -409,7 +412,7 @@ class FileUploadTest extends TestCase
     public function test_render_includes_library_upload_url(): void
     {
         $library = $this->makeLibrary('renders');
-        $type    = $this->make(['library' => [$library->id]]);
+        $type = $this->make(['library' => [$library->id]]);
 
         $html = $type->render(['input_name' => 'fields[photo]', 'label' => 'Photo']);
 
@@ -419,8 +422,8 @@ class FileUploadTest extends TestCase
     public function test_render_includes_accept_attribute_when_allowed_types_set(): void
     {
         $library = $this->makeLibrary('renders2');
-        $type    = $this->make([
-            'library'       => [$library->id],
+        $type = $this->make([
+            'library' => [$library->id],
             'allowed_types' => [['key' => 'image/jpeg', 'label' => 'JPEG']],
         ]);
 
@@ -438,6 +441,50 @@ class FileUploadTest extends TestCase
         $this->assertStringContainsString('No library configured', $html);
     }
 
+    public function test_render_emits_hidden_input_named_from_field_handle_when_input_name_omitted(): void
+    {
+        $library = $this->makeLibrary('attachments');
+        $media = Media::factory()->create(['library_id' => $library->id]);
+
+        $fieldType = Type::firstOrCreate(
+            ['object' => FileUpload::class],
+            ['name' => 'File Upload', 'object' => FileUpload::class]
+        );
+        $field = Field::factory()->create([
+            'field_type_id' => $fieldType->id,
+            'handle' => 'attachment',
+        ]);
+
+        $type = new FileUpload(['library' => [$library->id]], $field);
+        $html = $type->render(['value' => collect([$media])]);
+
+        $this->assertStringContainsString('name="fields[attachment][]"', $html);
+    }
+
+    public function test_render_respects_explicit_input_name_param(): void
+    {
+        $library = $this->makeLibrary('explicit');
+        $media = Media::factory()->create(['library_id' => $library->id]);
+
+        $fieldType = Type::firstOrCreate(
+            ['object' => FileUpload::class],
+            ['name' => 'File Upload', 'object' => FileUpload::class]
+        );
+        $field = Field::factory()->create([
+            'field_type_id' => $fieldType->id,
+            'handle' => 'attachment',
+        ]);
+
+        $type = new FileUpload(['library' => [$library->id]], $field);
+        $html = $type->render([
+            'input_name' => 'custom[name]',
+            'value' => collect([$media]),
+        ]);
+
+        $this->assertStringContainsString('name="custom[name][]"', $html);
+        $this->assertStringNotContainsString('name="fields[attachment][]"', $html);
+    }
+
     // -------------------------------------------------------------------------
     // validate() library_handle cache — single lookup per unique handle
     // -------------------------------------------------------------------------
@@ -445,9 +492,9 @@ class FileUploadTest extends TestCase
     public function test_validate_library_handle_queries_db_only_once_per_handle(): void
     {
         $library = $this->makeLibrary('cache-test');
-        $media   = Media::factory()->create(['library_id' => $library->id]);
-        $type    = $this->make(['library_handle' => 'cache-test']);
-        $ids     = json_encode([$media->id]);
+        $media = Media::factory()->create(['library_id' => $library->id]);
+        $type = $this->make(['library_handle' => 'cache-test']);
+        $ids = json_encode([$media->id]);
 
         $type->validate($ids); // warms the cache
 
