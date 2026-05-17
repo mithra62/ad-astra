@@ -3,6 +3,7 @@
 namespace Tests\Unit\Observers;
 
 use App\Field\Types\FileUpload;
+use App\Field\Types\Media as MediaField;
 use App\Models\Entry;
 use App\Models\Field;
 use App\Models\Field\Type as FieldType;
@@ -30,6 +31,16 @@ class FieldValueObserverTest extends TestCase
         $fieldType = FieldType::firstOrCreate(
             ['object' => FileUpload::class],
             ['name' => 'File Upload', 'object' => FileUpload::class]
+        );
+
+        return Field::factory()->create(['field_type_id' => $fieldType->id]);
+    }
+
+    private function makeMediaField(): Field
+    {
+        $fieldType = FieldType::firstOrCreate(
+            ['object' => MediaField::class],
+            ['name' => 'Media', 'object' => MediaField::class]
         );
 
         return Field::factory()->create(['field_type_id' => $fieldType->id]);
@@ -169,6 +180,83 @@ class FieldValueObserverTest extends TestCase
             'media_id' => $media->id,
             'field_id' => $field->id,
         ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Media field type — same observer behavior via SyncsToMediables interface
+    // -------------------------------------------------------------------------
+
+    public function test_saving_media_field_value_creates_mediable_rows(): void
+    {
+        $field   = $this->makeMediaField();
+        $library = $this->makeLibrary();
+        $media   = Media::factory()->create(['library_id' => $library->id]);
+        $entry   = $this->makeEntry();
+
+        FieldValue::create([
+            'fieldable_type' => $entry->getMorphClass(),
+            'fieldable_id'   => $entry->id,
+            'field_id'       => $field->id,
+            'value_json'     => json_encode([$media->id]),
+        ]);
+
+        $this->assertDatabaseHas('mediables', [
+            'media_id'      => $media->id,
+            'mediable_type' => $entry->getMorphClass(),
+            'mediable_id'   => $entry->id,
+            'field_id'      => $field->id,
+        ]);
+    }
+
+    public function test_deleting_media_field_value_removes_mediable_rows(): void
+    {
+        $field   = $this->makeMediaField();
+        $library = $this->makeLibrary();
+        $media   = Media::factory()->create(['library_id' => $library->id]);
+        $entry   = $this->makeEntry();
+
+        $fieldValue = FieldValue::create([
+            'fieldable_type' => $entry->getMorphClass(),
+            'fieldable_id'   => $entry->id,
+            'field_id'       => $field->id,
+            'value_json'     => json_encode([$media->id]),
+        ]);
+
+        $this->assertDatabaseHas('mediables', ['media_id' => $media->id]);
+
+        $fieldValue->delete();
+
+        $this->assertDatabaseMissing('mediables', [
+            'media_id' => $media->id,
+            'field_id' => $field->id,
+        ]);
+    }
+
+    public function test_media_field_value_preserves_sort_order_across_mixed_libraries(): void
+    {
+        $field   = $this->makeMediaField();
+        $libA    = Library::create(['name' => 'A', 'handle' => 'a', 'adapter' => 'local']);
+        $libB    = Library::create(['name' => 'B', 'handle' => 'b', 'adapter' => 'local']);
+        $mA      = Media::factory()->create(['library_id' => $libA->id]);
+        $mB      = Media::factory()->create(['library_id' => $libB->id]);
+        $entry   = $this->makeEntry();
+        $ids     = [$mB->id, $mA->id]; // intentional order
+
+        FieldValue::create([
+            'fieldable_type' => $entry->getMorphClass(),
+            'fieldable_id'   => $entry->id,
+            'field_id'       => $field->id,
+            'value_json'     => json_encode($ids),
+        ]);
+
+        foreach ($ids as $sortOrder => $mediaId) {
+            $row = DB::table('mediables')
+                ->where('media_id', $mediaId)
+                ->where('field_id', $field->id)
+                ->first();
+
+            $this->assertEquals($sortOrder, $row->sort_order);
+        }
     }
 
     public function test_upsert_preserves_sort_order(): void

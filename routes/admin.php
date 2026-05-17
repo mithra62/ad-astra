@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\FieldLayout\Tab as FieldLayoutTab;
 use App\Http\Controllers\Admin\FieldLayout\TabElement as FieldLayoutTabElement;
 use App\Http\Controllers\Admin\Media;
 use App\Http\Controllers\Admin\Media\Library;
+use App\Http\Controllers\Admin\MediaPicker;
 use App\Http\Controllers\Admin\Role;
 use App\Http\Controllers\Admin\Settings\Domain as SettingsDomain;
 use App\Http\Controllers\Admin\Status;
@@ -83,6 +84,9 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('update', 'categories.groups.update')
         ->name('destroy', 'categories.groups.destroy');
 
+    // Must be registered before Route::resource('media', ...) so the
+    // literal `picker` segment isn't captured as a {media_item} parameter.
+    Route::get('media/picker', [MediaPicker::class, 'index'])->name('media.picker.index');
     Route::post('media/libraries/{library_id}/upload', [Library::class, 'upload'])->name('media.libraries.upload');
     Route::get('media/libraries/{id}/confirm', [Library::class, 'confirm'])->name('media.libraries.confirm');
     Route::resource('media/libraries', Library::class)

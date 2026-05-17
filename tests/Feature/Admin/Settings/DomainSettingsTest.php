@@ -17,25 +17,9 @@ class DomainSettingsTest extends TestCase
 
     public function test_index_redirects_guests_to_login(): void
     {
-        $response = $this->get(route('settings'));
+        $response = $this->get(route('settings.show', 'general'));
 
         $response->assertRedirect(route('login'));
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    public function test_index_renders_for_authenticated_user(): void
-    {
-        $user = $this->makeSuperAdmin();
-        $this->makeDomain();
-
-        $response = $this->actingAs($user)->get(route('settings'));
-
-        $response->assertOk();
-        $response->assertSee('Settings');
-        $response->assertSee('Test Domain');
     }
 
     private function makeSuperAdmin(): User

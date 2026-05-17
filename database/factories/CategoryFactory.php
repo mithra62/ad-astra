@@ -27,7 +27,10 @@ class CategoryFactory extends Factory
             'group_id' => Group::factory(),
             'parent_id' => null,
             'name' => $name,
-            'handle' => Str::slug($name),
+            // Random suffix keeps the (group_id, handle) unique index from
+            // colliding when two factory-built categories happen to draw the
+            // same word pair from Faker's bounded lorem vocabulary.
+            'handle' => Str::slug($name) . '-' . Str::random(6),
             'sort_order' => $this->faker->numberBetween(0, 100),
         ];
     }

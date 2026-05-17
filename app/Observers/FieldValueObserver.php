@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Field\Types\FileUpload;
+use App\Contracts\SyncsToMediables;
 use App\Models\FieldValue;
 use Illuminate\Support\Facades\DB;
 
@@ -10,7 +10,7 @@ class FieldValueObserver
 {
     public function saved(FieldValue $fieldValue): void
     {
-        if (!$this->isFileUpload($fieldValue)) {
+        if (!$this->syncsMediables($fieldValue)) {
             return;
         }
         $this->syncMediables($fieldValue);
@@ -18,26 +18,31 @@ class FieldValueObserver
 
     public function deleted(FieldValue $fieldValue): void
     {
-        if (!$this->isFileUpload($fieldValue)) {
+        if (!$this->syncsMediables($fieldValue)) {
             return;
         }
 
         // field_id here is the actual Field ID (always > 0); never the sentinel 0.
         DB::table('mediables')
             ->where('mediable_type', $fieldValue->fieldable_type)
-            ->where('mediable_id',   $fieldValue->fieldable_id)
-            ->where('field_id',      $fieldValue->field_id)
+            ->where('mediable_id', $fieldValue->fieldable_id)
+            ->where('field_id', $fieldValue->field_id)
             ->delete();
     }
 
-    private function isFileUpload(FieldValue $fieldValue): bool
+    /**
+     * Read only the string `object` column of the already-eager-loaded
+     * FieldType record. is_subclass_of() with a string FQN autoloads the
+     * class but does NOT instantiate it, so boot ordering is safe.
+     * The actual instance() call happens later in syncMediables().
+     */
+    private function syncsMediables(FieldValue $fieldValue): bool
     {
-        // Reads only the string `object` column of the already-eager-loaded
-        // FieldType record — does NOT instantiate FileUpload here.
-        // FileUpload::class resolves to a plain string constant at compile time,
-        // so there is no circular-dependency risk during bootstrapping.
-        // The actual instance() call happens in syncMediables(), well after boot.
-        return $fieldValue->field?->fieldType?->object === FileUpload::class;
+        $class = $fieldValue->field?->fieldType?->object;
+        if (!is_string($class) || $class === '') {
+            return false;
+        }
+        return is_subclass_of($class, SyncsToMediables::class);
     }
 
     private function syncMediables(FieldValue $fieldValue): void
@@ -52,8 +57,8 @@ class FieldValueObserver
         // Remove stale pivot rows for this field on this model.
         DB::table('mediables')
             ->where('mediable_type', $type)
-            ->where('mediable_id',   $id)
-            ->where('field_id',      $fieldId)
+            ->where('mediable_id', $id)
+            ->where('field_id', $fieldId)
             ->whereNotIn('media_id', $newIds ?: [0])
             ->delete();
 

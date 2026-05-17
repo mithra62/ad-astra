@@ -24,6 +24,7 @@ class FieldTypeSeeder extends Seeder
             ['name' => 'Relationship', 'object' => \App\Field\Types\Relationship::class],
             ['name' => 'Boolean', 'object' => \App\Field\Types\Boolean::class],
             ['name' => 'File Upload',      'object' => \App\Field\Types\FileUpload::class],
+            ['name' => 'Media',            'object' => \App\Field\Types\Media::class],
             ['name' => 'Select',           'object' => \App\Field\Types\Select::class],
             ['name' => 'Multi Select',     'object' => \App\Field\Types\MultiSelect::class],
             ['name' => 'Radio Group',      'object' => \App\Field\Types\RadioGroup::class],
