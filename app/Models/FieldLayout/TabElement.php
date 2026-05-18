@@ -13,7 +13,18 @@ class TabElement extends Model
 
     protected $table = 'field_layout_tab_elements';
 
-    protected $fillable = ['field_layout_tab_id', 'field_id', 'required', 'sort_order'];
+    protected $fillable = [
+        'field_layout_tab_id',
+        'field_id',
+        'required',
+        'sort_order',
+        'hidden',
+        'readonly',
+        'disabled',
+        'schema_property',
+        'label',
+        'instructions',
+    ];
 
     protected $casts = [
         'required' => 'boolean',

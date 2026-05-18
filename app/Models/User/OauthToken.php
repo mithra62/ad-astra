@@ -51,38 +51,21 @@ class OauthToken extends Model
         'last_used_at' => 'datetime',
     ];
 
-    /**
-     * Fortify user relationship
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(config('auth.providers.users.model'));
     }
 
-    /* -----------------------------------------------------------------
-     |  Query scopes
-     | -----------------------------------------------------------------
-     */
-
-    /**
-     * Tokens for a given provider (google, github, stripe, etc.)
-     */
     public function scopeProvider(Builder $query, string $provider): Builder
     {
         return $query->where('provider', $provider);
     }
 
-    /**
-     * Only non-revoked tokens
-     */
     public function scopeActive(Builder $query): Builder
     {
         return $query->whereNull('revoked_at');
     }
 
-    /**
-     * Tokens that are expired or about to expire
-     */
     public function scopeExpired(Builder $query): Builder
     {
         return $query
@@ -90,9 +73,6 @@ class OauthToken extends Model
             ->where('expires_at', '<=', now());
     }
 
-    /**
-     * Tokens expiring within X seconds
-     */
     public function scopeExpiringSoon(Builder $query, int $seconds = 300): Builder
     {
         return $query
@@ -100,24 +80,12 @@ class OauthToken extends Model
             ->whereBetween('expires_at', [now(), now()->addSeconds($seconds)]);
     }
 
-    /**
-     * OIDC-based identity lookup
-     */
-    public function scopeOidcIdentity(
-        Builder $query,
-        string  $issuer,
-        string  $subject
-    ): Builder
+    public function scopeOidcIdentity(Builder $query, string  $issuer, string $subject): Builder
     {
         return $query
             ->where('issuer', $issuer)
             ->where('subject', $subject);
     }
-
-    /* -----------------------------------------------------------------
-     |  Helpers
-     | -----------------------------------------------------------------
-     */
 
     public function isActive(): bool
     {
@@ -144,9 +112,6 @@ class OauthToken extends Model
         ])->save();
     }
 
-    /**
-     * Convenience: check for a scope
-     */
     public function hasScope(string $scope): bool
     {
         return in_array($scope, $this->scopes ?? [], true);

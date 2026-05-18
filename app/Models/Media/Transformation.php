@@ -15,8 +15,18 @@ class Transformation extends Model
     protected $table = 'media_transformations';
 
     protected $fillable = [
-        'media_id', 'key', 'disk', 'path', 'mime_type',
-        'size', 'width', 'height', 'params', 'driver', 'status', 'error',
+        'media_id',
+        'key',
+        'disk',
+        'path',
+        'mime_type',
+        'size',
+        'width',
+        'height',
+        'params',
+        'driver',
+        'status',
+        'error',
     ];
 
     protected $casts = [
@@ -56,12 +66,14 @@ class Transformation extends Model
         return $this->status === 'failed';
     }
 
-    public function markComplete(
-        string $path,
-        int    $size,
-        ?int   $width = null,
-        ?int   $height = null
-    ): void
+    /**
+     * @param string $path
+     * @param int $size
+     * @param int|null $width
+     * @param int|null $height
+     * @return void
+     */
+    public function markComplete(string $path, int $size, ?int $width = null, ?int $height = null): void
     {
         $this->update(
             compact('path', 'size', 'width', 'height')

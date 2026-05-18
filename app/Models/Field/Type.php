@@ -12,19 +12,16 @@ class Type extends Model
 {
     use HasFactory;
 
-    /**
-     * @var string[]
-     */
-    protected $fillable = ['name', 'object', 'settings'];
+    protected $fillable = [
+        'name',
+        'object',
+        'settings'
+    ];
 
-    /**
-     * @var string[]
-     */
-    protected $casts = ['settings' => 'array'];
+    protected $casts = [
+        'settings' => 'array'
+    ];
 
-    /**
-     * @var string
-     */
     protected $table = 'field_types';
 
     /**
