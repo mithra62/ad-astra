@@ -58,10 +58,11 @@ class Transformation extends Model
 
     public function markComplete(
         string $path,
-        int $size,
-        ?int $width = null,
-        ?int $height = null
-    ): void {
+        int    $size,
+        ?int   $width = null,
+        ?int   $height = null
+    ): void
+    {
         $this->update(
             compact('path', 'size', 'width', 'height')
             + ['status' => 'complete', 'error' => null]

@@ -14,23 +14,29 @@ class Library extends Model
 {
     use HasFactory, HasCategoryGroups, HasFieldGroups, HasFieldLayout, HasMediaItems;
 
-    protected $table = 'media_libraries'; // must not be removed
+    protected $table = 'media_libraries';
 
     protected $fillable = [
-        'field_layout_id', 'name', 'handle', 'adapter',
-        'adapter_settings', 'allowed_types', 'max_size', 'sort_order',
+        'field_layout_id',
+        'name',
+        'handle',
+        'adapter',
+        'adapter_settings',
+        'allowed_types',
+        'max_size',
+        'sort_order',
     ];
 
     protected $casts = [
-        'sort_order'       => 'integer',
+        'sort_order' => 'integer',
         'adapter_settings' => 'array',
-        'allowed_types'    => 'array',
-        'max_size'         => 'integer',
+        'allowed_types' => 'array',
+        'max_size' => 'integer',
     ];
 
     public function media(): HasMany
     {
         return $this->hasMany(\App\Models\Media::class, 'library_id')
-                    ->orderBy('sort_order');
+            ->orderBy('sort_order');
     }
 }
