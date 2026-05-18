@@ -11,7 +11,7 @@ trait PersistsFieldValues
     public function setField(Model $model, string $handle, mixed $value): void
     {
         $field = Field::where('handle', $handle)->firstOrFail();
-        $column = $field->fieldType->instance()->storageColumn();
+        $column = $field->typeInstance()->storageColumn();
 
         FieldValue::updateOrCreate(
             [
@@ -43,7 +43,7 @@ trait PersistsFieldValues
                 continue;
             }
 
-            $column = $field->fieldType->instance()->storageColumn();
+            $column = $field->typeInstance()->storageColumn();
 
             FieldValue::updateOrCreate(
                 [

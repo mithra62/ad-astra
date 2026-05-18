@@ -3,6 +3,7 @@
 namespace App\Models\Field;
 
 use App\Field\AbstractField;
+use App\Models\Field;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use RuntimeException;
@@ -34,7 +35,7 @@ class Type extends Model
      * @throws RuntimeException If the specified class does not extend AbstractField.
      * @throws RuntimeException If the specified class does not exist.
      */
-    public function instance(array $fieldSettings = []): AbstractField
+    public function instance(array $fieldSettings = [], ?Field $field = null): AbstractField
     {
         $class = $this->object;
 
@@ -48,6 +49,15 @@ class Type extends Model
 
         $merged = array_merge($this->settings ?? [], $fieldSettings);
 
-        return new $class($merged);
+        $instance = new $class($merged);
+
+        // When the caller has the owning Field in scope, attach it so the
+        // field type can read $this->field->handle for things like input_name
+        // defaulting and old() lookups in render().
+        if ($field) {
+            $instance->setField($field);
+        }
+
+        return $instance;
     }
 }

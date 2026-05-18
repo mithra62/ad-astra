@@ -312,8 +312,10 @@ class FileUploadTest extends TestCase
 
         // fieldValues relation must be loaded (not lazy) on every returned model.
         foreach ($result as $item) {
-            $this->assertTrue($item->relationLoaded('fieldValues'),
-                "fieldValues relation should be eager-loaded on Media id={$item->id}");
+            $this->assertTrue(
+                $item->relationLoaded('fieldValues'),
+                "fieldValues relation should be eager-loaded on Media id={$item->id}"
+            );
         }
     }
 
@@ -332,8 +334,11 @@ class FileUploadTest extends TestCase
 
         // Expect: 1 media query + up to 1 fieldValues query + up to 1 field query
         // + up to 1 fieldType query = at most 4. Never N per media item.
-        $this->assertLessThanOrEqual(4, $count,
-            'value() should use eager loading, not one query per media item.');
+        $this->assertLessThanOrEqual(
+            4,
+            $count,
+            'value() should use eager loading, not one query per media item.'
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -485,6 +490,63 @@ class FileUploadTest extends TestCase
         $this->assertStringNotContainsString('name="fields[attachment][]"', $html);
     }
 
+    /**
+     * Production code path: instances created via Field::typeInstance() (not
+     * direct constructor) must have the Field attached so input_name defaults
+     * resolve correctly. Prior tests only covered the constructor-pass path.
+     */
+    public function test_render_via_field_render_path_uses_handle_for_input_name(): void
+    {
+        $library = $this->makeLibrary('attachments');
+        $media   = Media::factory()->create(['library_id' => $library->id]);
+
+        $fieldType = Type::firstOrCreate(
+            ['object' => FileUpload::class],
+            ['name' => 'File Upload', 'object' => FileUpload::class]
+        );
+        $field = Field::factory()->create([
+            'field_type_id' => $fieldType->id,
+            'handle'        => 'attachment',
+            'settings'      => ['library' => [$library->id]],
+        ]);
+
+        $html = $field->render(['value' => collect([$media])]);
+
+        $this->assertStringContainsString('name="fields[attachment][]"', $html);
+    }
+
+    public function test_render_repopulates_chips_from_old_input_after_validation_error(): void
+    {
+        $library = $this->makeLibrary('attachments');
+        $stale   = Media::factory()->create(['library_id' => $library->id, 'original_name' => 'stale.pdf']);
+        $userA   = Media::factory()->create(['library_id' => $library->id, 'original_name' => 'just-uploaded-a.pdf']);
+        $userB   = Media::factory()->create(['library_id' => $library->id, 'original_name' => 'just-uploaded-b.pdf']);
+
+        $fieldType = Type::firstOrCreate(
+            ['object' => FileUpload::class],
+            ['name' => 'File Upload', 'object' => FileUpload::class]
+        );
+        $field = Field::factory()->create([
+            'field_type_id' => $fieldType->id,
+            'handle'        => 'attachment',
+            'settings'      => ['library' => [$library->id]],
+        ]);
+
+        // Simulate post-redirect state: bind a session to the current Request
+        // (unit tests don't go through HTTP middleware that does this) and
+        // flash old input as Laravel would after a withInput() redirect.
+        $session = $this->app['session']->driver();
+        $session->start();
+        $session->put('_old_input', ['fields' => ['attachment' => [$userA->id, $userB->id]]]);
+        $this->app['request']->setLaravelSession($session);
+
+        $html = $field->render(['value' => collect([$stale])]);
+
+        $this->assertStringContainsString('data-chip="' . $userA->id . '"', $html);
+        $this->assertStringContainsString('data-chip="' . $userB->id . '"', $html);
+        $this->assertStringNotContainsString('data-chip="' . $stale->id . '"', $html);
+    }
+
     // -------------------------------------------------------------------------
     // validate() library_handle cache — single lookup per unique handle
     // -------------------------------------------------------------------------
@@ -507,7 +569,10 @@ class FileUploadTest extends TestCase
             fn ($q) => str_contains($q['query'], 'media_libraries') && str_contains($q['query'], 'handle')
         );
 
-        $this->assertSame(0, $libraryLookups->count(),
-            'Second validate() call must not re-query media_libraries for the same handle.');
+        $this->assertSame(
+            0,
+            $libraryLookups->count(),
+            'Second validate() call must not re-query media_libraries for the same handle.'
+        );
     }
 }

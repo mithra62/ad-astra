@@ -31,7 +31,7 @@ class EntryRepository
             $record = $entryType->getRecord();
             $record->loadMissing(['entryGroup.statusGroup.statuses', 'entryGroup.fieldLayout', 'fieldLayout']);
 
-            $entry = new Entry;
+            $entry = new Entry();
             $entry->entry_group_id = $record->entry_group_id;
             $entry->entry_type_id = $record->getKey();
             $entry->created_by_user_id = Auth::id();
@@ -175,7 +175,7 @@ class EntryRepository
                 continue;
             }
 
-            $instance = $field->fieldType->instance();
+            $instance = $field->typeInstance();
 
             if ($instance->isRelational()) {
                 $this->syncRelationshipField($entry, $field, (array)$value);
@@ -214,7 +214,7 @@ class EntryRepository
         // using loadRelatedRecursive() or an equivalent depth-limited loader.
         $relatedIds = array_values(array_filter(
             $relatedIds,
-            fn($id) => (int)$id !== $entry->getKey()
+            fn ($id) => (int)$id !== $entry->getKey()
         ));
 
         // Delete existing pivots for this field on this entry.
@@ -243,8 +243,7 @@ class EntryRepository
         string $fieldableType,
         string $column,
         mixed  $value,
-    ): void
-    {
+    ): void {
         $key = ['field_id' => $fieldId, 'fieldable_id' => $fieldableId, 'fieldable_type' => $fieldableType];
 
         try {

@@ -41,7 +41,7 @@ class EditField
         $newType = FieldType::find($newTypeId);
 
         if ($newType) {
-            $newInstance = $newType->instance();
+            $newInstance = $newType->instance([], $field);
 
             if ($typeChanged) {
                 $input['settings'] = $newInstance->settingsDefaults();
@@ -68,7 +68,9 @@ class EditField
 
     private function fieldHasValues(Field $field): bool
     {
-        $currentInstance = $field->fieldType?->instance();
+        // Null-safe: orphaned Fields without a FieldType return null and the
+        // outer null-safe check below treats them as non-relational.
+        $currentInstance = $field->fieldType ? $field->typeInstance() : null;
         if ($currentInstance?->isRelational()) {
             return EntryRelationship::where('field_id', $field->getKey())->exists();
         }

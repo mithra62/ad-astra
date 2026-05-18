@@ -54,7 +54,7 @@ abstract class AbstractFieldableRepository implements RepositoryInterface
                 continue;
             }
 
-            $instance = $field->fieldType->instance();
+            $instance = $field->typeInstance();
 
             $this->upsertFieldValue(
                 $field->getKey(),

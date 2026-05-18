@@ -160,6 +160,14 @@ class Media extends AbstractField implements SyncsToMediables
         // media is selected.
         $handle = $this->field?->handle;
         $params['input_name'] = $params['input_name'] ?? ($handle ? 'fields[' . $handle . ']' : 'media');
+
+        // After a validation error Laravel flashes the submitted input. Restore
+        // the user's just-selected media IDs so the chip strip re-renders with
+        // their work intact and they don't have to re-pick or re-upload.
+        if ($handle && ($oldIds = old('fields.' . $handle)) !== null && is_array($oldIds)) {
+            $params['value'] = $this->value($oldIds);
+        }
+
         $params['libraries'] = $libraries;
         $params['library_ids'] = $libraries->pluck('id')->all();
         $params['min'] = $this->getSetting('min');

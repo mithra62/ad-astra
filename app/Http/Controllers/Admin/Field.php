@@ -130,8 +130,8 @@ class Field extends Controller
             'groups' => $groups,
             'field_types' => app('fields-service')->getFieldOptions(),
             'active_group' => $active_group,
-            'current_type_handle' => $field->fieldType?->instance()->handle(),
-            'initial_settings_form' => $field->fieldType ? $this->buildSettingsForm($field->fieldType->instance()) : [],
+            'current_type_handle' => $field->fieldType ? $field->typeInstance()->handle() : null,
+            'initial_settings_form' => $field->fieldType ? $this->buildSettingsForm($field->typeInstance()) : [],
             'current_values' => old('settings', $field->settings ?? []),
         ];
 
@@ -170,15 +170,16 @@ class Field extends Controller
             abort(404);
         }
 
-        $instance = $type->instance();
+        // Load the Field first (when editing an existing one) so we can attach
+        // it to the instance. The settings panel render path benefits from
+        // having the Field in scope for input_name defaulting / old() lookups.
+        $field = $request->field_id ? FieldModel::find($request->field_id) : null;
+
+        $instance = $type->instance([], $field);
         $form = $this->buildSettingsForm($instance);
 
         // Resolve current values from saved field settings (edit) or flashed old() input
-        $currentValues = [];
-        if ($request->field_id) {
-            $field = FieldModel::find($request->field_id);
-            $currentValues = $field?->settings ?? [];
-        }
+        $currentValues = $field?->settings ?? [];
         $currentValues = old('settings', $currentValues);
 
         // For Slider's 'default' slider-widget: inject the sibling min/max/step/suffix

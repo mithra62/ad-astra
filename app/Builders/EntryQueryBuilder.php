@@ -50,7 +50,7 @@ class EntryQueryBuilder
 
     public function withAuthor(int $userId): static
     {
-        $this->query->whereHas('authors', fn($q) => $q->where('entry_authors.user_id', $userId));
+        $this->query->whereHas('authors', fn ($q) => $q->where('entry_authors.user_id', $userId));
 
         return $this;
     }
@@ -66,7 +66,7 @@ class EntryQueryBuilder
 
     public function withCategory(int $categoryId): static
     {
-        $this->query->whereHas('categories', fn($q) => $q->where('categories.id', $categoryId));
+        $this->query->whereHas('categories', fn ($q) => $q->where('categories.id', $categoryId));
 
         return $this;
     }
@@ -103,7 +103,7 @@ class EntryQueryBuilder
             );
         }
 
-        $instance = $field->fieldType->instance();
+        $instance = $field->typeInstance();
 
         if ($instance->isRelational()) {
             throw new InvalidArgumentException(

@@ -37,7 +37,7 @@ class FormRequest extends LaravelFormRequest
                 $key = "fields.{$field->handle}";
                 $fieldRules = $element->required ? ['required'] : ['nullable'];
 
-                $rules[$key] = array_merge($fieldRules, $field->fieldType->instance()->getRules());
+                $rules[$key] = array_merge($fieldRules, $field->typeInstance()->getRules());
             }
         }
 

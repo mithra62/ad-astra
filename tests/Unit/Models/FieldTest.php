@@ -21,7 +21,7 @@ class FieldTest extends TestCase
     {
         $this->assertEquals(
             ['field_type_id', 'name', 'handle', 'label', 'instructions', 'settings', 'hidden'],
-            (new Field)->getFillable()
+            (new Field())->getFillable()
         );
     }
 
@@ -45,7 +45,7 @@ class FieldTest extends TestCase
     {
         $prop = (new \ReflectionClass(Field::class))->getProperty('with');
         $prop->setAccessible(true);
-        $this->assertContains('fieldType', $prop->getValue(new Field));
+        $this->assertContains('fieldType', $prop->getValue(new Field()));
     }
 
     public function test_field_type_relationship_is_belongs_to(): void
@@ -125,6 +125,25 @@ class FieldTest extends TestCase
         $field = Field::factory()->create(['field_type_id' => $type->id, 'settings' => null]);
 
         $this->assertInstanceOf(AbstractField::class, $field->typeInstance());
+    }
+
+    public function test_type_instance_attaches_field_to_returned_instance(): void
+    {
+        $type  = Type::factory()->create(['object' => Text::class]);
+        $field = Field::factory()->create(['field_type_id' => $type->id, 'handle' => 'attached']);
+
+        $instance = $field->typeInstance();
+
+        // Read the protected `field` property via reflection — the field type
+        // base class doesn't expose a getter, but production code reads it
+        // directly (e.g. Media::render(), FileUpload::render()).
+        $ref = new \ReflectionProperty(AbstractField::class, 'field');
+        $ref->setAccessible(true);
+
+        $attached = $ref->getValue($instance);
+        $this->assertNotNull($attached);
+        $this->assertSame($field->id, $attached->id);
+        $this->assertSame('attached', $attached->handle);
     }
 
     // -------------------------------------------------------------------------

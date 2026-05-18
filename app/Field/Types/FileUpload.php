@@ -179,6 +179,14 @@ class FileUpload extends AbstractField implements SyncsToMediables
     {
         $handle = $this->field?->handle;
         $params['input_name'] = $params['input_name'] ?? ($handle ? 'fields['.$handle.']' : 'file_upload');
+
+        // After a validation error Laravel flashes the submitted input. Restore
+        // the user's just-selected media IDs so the chip strip re-renders with
+        // their work intact and the file doesn't have to be re-uploaded.
+        if ($handle && ($oldIds = old('fields.'.$handle)) !== null && is_array($oldIds)) {
+            $params['value'] = $this->value($oldIds);
+        }
+
         $params['library_id'] = $this->resolveLibraryId();
         $params['max'] = $this->getSetting('max');
         $params['accept'] = $this->buildAcceptString();

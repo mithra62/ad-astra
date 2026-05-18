@@ -51,7 +51,7 @@ class Field extends Model
 
     public function typeInstance(): AbstractField
     {
-        return $this->fieldType->instance($this->settings ?? []);
+        return $this->fieldType->instance($this->settings ?? [], $this);
     }
 
     public function render(array $params = []): string

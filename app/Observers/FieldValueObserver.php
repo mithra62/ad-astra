@@ -51,7 +51,7 @@ class FieldValueObserver
         $id      = $fieldValue->fieldable_id;
         $fieldId = $fieldValue->field_id;
 
-        $instance = $fieldValue->field->fieldType->instance();
+        $instance = $fieldValue->field->typeInstance();
         $newIds   = $instance->cast($fieldValue->value_json);
 
         // Remove stale pivot rows for this field on this model.

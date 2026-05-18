@@ -290,4 +290,52 @@ class MediaTest extends TestCase
         $this->assertStringContainsString('name="custom[name][]"', $html);
         $this->assertStringNotContainsString('name="fields[gallery][]"', $html);
     }
+
+    /**
+     * Verifies the production code path that actually breaks today: instances
+     * created via Field::typeInstance() (not the direct constructor) must have
+     * their owning Field attached so input_name defaulting works. The prior
+     * tests only exercised the constructor-pass path.
+     */
+    public function test_render_via_field_render_path_uses_handle_for_input_name(): void
+    {
+        $lib = $this->makeLibrary('photos');
+        $field = $this->makeFieldWithHandle('gallery');
+        $field->settings = ['libraries' => [$lib->id]];
+        $field->save();
+
+        // Call Field::render() — the exact path admin views use. Pre-populate
+        // a value so the chip rendering exercises the hidden-input name.
+        $media = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'p.jpg']);
+        $html = $field->render(['value' => collect([$media])]);
+
+        $this->assertStringContainsString('name="fields[gallery][]"', $html);
+    }
+
+    public function test_render_repopulates_chips_from_old_input_after_validation_error(): void
+    {
+        $lib = $this->makeLibrary('photos');
+        $field = $this->makeFieldWithHandle('gallery');
+        $field->settings = ['libraries' => [$lib->id]];
+        $field->save();
+
+        $stale  = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'stale.jpg']);
+        $userA  = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'just-uploaded-a.jpg']);
+        $userB  = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'just-uploaded-b.jpg']);
+
+        // Simulate post-redirect state: bind a session to the current Request
+        // (unit tests don't go through HTTP middleware that does this) and
+        // flash old input as Laravel would after a withInput() redirect.
+        $session = $this->app['session']->driver();
+        $session->start();
+        $session->put('_old_input', ['fields' => ['gallery' => [$userA->id, $userB->id]]]);
+        $this->app['request']->setLaravelSession($session);
+
+        // The caller passes the persisted value (stale); old() should win.
+        $html = $field->render(['value' => collect([$stale])]);
+
+        $this->assertStringContainsString('data-chip="' . $userA->id . '"', $html);
+        $this->assertStringContainsString('data-chip="' . $userB->id . '"', $html);
+        $this->assertStringNotContainsString('data-chip="' . $stale->id . '"', $html);
+    }
 }
