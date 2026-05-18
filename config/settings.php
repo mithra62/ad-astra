@@ -141,52 +141,6 @@ return [
     ],
 
     // -------------------------------------------------------------------------
-    // Media
-    // -------------------------------------------------------------------------
-
-    'media' => [
-        'name' => 'Media',
-        'description' => 'File upload and media library configuration.',
-        'icon' => 'ti-photo',
-        'sort_order' => 1,
-        'fields' => [
-            [
-                'handle' => 'max_upload_size',
-                'label' => 'Max Upload Size (KB)',
-                'type' => 'integer',
-                'default' => 10240,
-                'rules' => ['required', 'integer', 'min:1'],
-                'instructions' => 'Maximum file upload size in kilobytes.',
-                'group' => 'Uploads',
-                'hidden' => false,
-                'user_overridable' => false,
-            ],
-            [
-                'handle' => 'allowed_extensions',
-                'label' => 'Allowed File Extensions',
-                'type' => 'text',
-                'default' => 'jpg,jpeg,png,gif,webp,pdf,mp3,mp4,mov',
-                'rules' => ['required', 'string', 'max:500'],
-                'instructions' => 'Comma-separated list of permitted extensions (e.g. jpg,png,pdf).',
-                'group' => 'Uploads',
-                'hidden' => false,
-                'user_overridable' => false,
-            ],
-            [
-                'handle' => 'image_quality',
-                'label' => 'Image Quality (1–100)',
-                'type' => 'integer',
-                'default' => 85,
-                'rules' => ['required', 'integer', 'min:1', 'max:100'],
-                'instructions' => 'JPEG/WebP compression quality for processed images.',
-                'group' => 'Processing',
-                'hidden' => false,
-                'user_overridable' => false,
-            ],
-        ],
-    ],
-
-    // -------------------------------------------------------------------------
     // Email
     // -------------------------------------------------------------------------
 

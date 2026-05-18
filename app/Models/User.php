@@ -185,7 +185,7 @@ class User extends Authenticatable
                 return $media->url();
             }
 
-            return LaravoltAvatar::create($this->name)->toBase64();
+            return LaravoltAvatar::create($this->email)->toBase64();
         });
     }
 
