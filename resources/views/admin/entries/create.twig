@@ -1,0 +1,244 @@
+{% extends 'admin._inc._layout' %}
+
+{% set page_title = 'Entry Groups' %}
+{% set page_heading = 'Entry Groups' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'entries' %}
+{% set has_secondary_sidebar = true %}
+
+{% import 'admin._inc._schema-tab-elements' as tabs %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="#">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('entries.groups') }}">
+            Entry Groups
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('entries.groups.show', group) }}">
+            {{ group.name }}
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">Create Entry</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.entries.groups._sidebar', {active: group.id}) }}
+{% endblock %}
+
+{% block content %}
+    <!-- ── Form content ─────────────────────────────────────────── -->
+    <div class="flex min-w-0 flex-col gap-5">
+
+        <!-- Page title + back link -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Create Entry </h1>
+                <p class="mt-1 text-sm text-slate-500">Fill in the details below and save when ready.</p>
+            </div>
+            <a href="{{ route('entries.groups.show', group) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                Back to Entries
+            </a>
+        </div>
+
+        <!-- Two-column form -->
+        <form id="article-form" method="POST" action="{{ route('entries.store', {group_id: group.id}) }}"
+              class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
+            {{ csrf_field() }}
+            <input type="hidden" name="type_handle" value="{{ entryType.handle }}"/>
+            <!-- ── Left: tabbed content area ───────────────────── -->
+            <div class="flex flex-col gap-0 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm" data-tabs>
+
+                <!-- Tab bar -->
+                <div class="border-b border-slate-200 bg-slate-50">
+                    <div class="flex overflow-x-auto" role="tablist" aria-label="Article sections">
+
+                        {% set layout = entryType.fieldLayout %}
+                        {% if layout and layout.tabs.count >= 1 %}
+                            {% for tab in layout.tabs %}
+                                {{ tabs.tabButton(tab) }}
+                            {% endfor %}
+                        {% endif %}
+
+                        {% set groupLayout = group.fieldLayout %}
+                        {% if groupLayout and groupLayout.tabs.count >= 1 %}
+                            {% for tab in groupLayout.tabs %}
+                                {{ tabs.tabButton(tab) }}
+                            {% endfor %}
+                        {% endif %}
+
+                        {% if entryType.has_entry_tree %}
+                            {{ tabs.tabButton({
+                                handle: 'hierarchy',
+                                name: 'Hierarchy'
+                            }) }}
+                        {% endif %}
+
+                        {% if group.categoryGroups().count >= 1 %}
+                            {{ tabs.tabButton({
+                                handle: 'taxonomy',
+                                name: 'Taxonomy'
+                            }) }}
+                        {% endif %}
+
+                    </div>
+                </div><!-- /tab bar -->
+
+                {% set layout = entryType.fieldLayout %}
+                {% if layout and layout.tabs.count >= 1 %}
+                    {% for tab in layout.tabs %}
+
+                        {{ tabs.tabContent(tab, title_field_set) }}
+                        {% set title_field_set = true %}
+                    {% endfor %}
+                {% endif %}
+
+                {% set groupLayout = group.fieldLayout %}
+                {% set title_field_set = false %}
+                {% if groupLayout and groupLayout.tabs.count >= 1 %}
+                    {% for tab in groupLayout.tabs %}
+
+                        {{ tabs.tabContent(tab, title_field_set) }}
+                        {% set title_field_set = true %}
+                    {% endfor %}
+                {% endif %}
+
+                {% if entryType.has_entry_tree %}
+                    {{ include('admin.entries._hierarchy', {active: group.id}) }}
+                {% endif %}
+
+                {% if group.categoryGroups().count >= 1 %}
+                    {{ include('admin.entries._taxonomy', {group: group}) }}
+                {% endif %}
+
+                <!-- Tab footer: prev/next navigation -->
+                <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-5 py-3">
+                    <button type="button" id="tab-prev"
+                            data-tab-prev
+                            class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                        Previous
+                    </button>
+                    <span id="tab-position" data-tab-position class="text-xs text-slate-400">1 / 4</span>
+                    <button type="button" id="tab-next"
+                            data-tab-next
+                            class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40">
+                        Next
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+
+            </div><!-- /tabbed card -->
+
+            <!-- ── Right: persistent publishing panel ──────────── -->
+            <div class="flex flex-col gap-4">
+
+                <!-- Publish settings -->
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">Publishing</h5>
+                    </div>
+                    <div class="space-y-4 px-5 py-5">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status">Status</label>
+                            {% if group.statusGroup and group.statusGroup.statuses.count >= 1 %}
+                                <div class="col-md-4">
+                                    <select id="status" name="status" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                        <option value="">— Default —</option>
+                                        {% for s in group.statusGroup.statuses %}
+                                            <option value="{{ s.handle }}"
+                                                    {% if old('status') == s.handle %}selected{% endif %}>
+                                                {{ s.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <p class="mt-1 text-xs text-slate-400">Only statuses from the {{ group.statusGroup.name }}
+                                        group are allowed.</p>
+                                    {% if errors.has('status') %}
+                                        <p class="text-danger">{{ errors.first('status') }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="published_at">Publish Date</label>
+                            <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                   id="published_at" name="published_at" type="datetime-local"
+                                   value="{{ old('published_at', entry.published_at ? entry.published_at.format('Y-m-d\\TH:i') : '') }}">
+                            <p class="mt-1 text-xs text-slate-400">Leave blank to use status overrides.</p>
+                        </div>
+{#                        <div>#}
+{#                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="entry_type">Entry Type</label>#}
+{#                            <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"#}
+{#                                    id="entry_type" name="entry_type">#}
+{#                                <option>Standard Article</option>#}
+{#                                <option>Feature Story</option>#}
+{#                                <option>Press Release</option>#}
+{#                                <option>Opinion Piece</option>#}
+{#                            </select>#}
+{#                        </div>#}
+                    </div>
+                    <div class="space-y-2 border-t border-slate-100 px-5 py-4">
+                        <button class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                                type="submit">
+                            Create Entry
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Unsaved changes notice (hidden by default) -->
+                <div id="unsaved-notice"
+                     class="hidden rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                    <div class="flex items-start gap-2.5">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                        <p class="text-xs text-amber-800">You have unsaved changes. Remember to save before leaving.</p>
+                    </div>
+                </div>
+
+                <!-- Featured image -->
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">Featured Image</h5>
+                    </div>
+                    <div class="px-5 py-4">
+                        <label class="block cursor-pointer rounded-lg border-2 border-dashed border-slate-300 p-6 text-center hover:border-emerald-400 hover:bg-emerald-50/40 transition-colors" for="featured_image">
+                            <svg class="mx-auto h-8 w-8 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <p class="mt-2 text-xs font-medium text-slate-500">Click to upload</p>
+                            <p class="mt-0.5 text-xs text-slate-400">PNG, JPG, WebP up to 10 MB</p>
+                            <input id="featured_image" name="featured_image" type="file" accept="image/*" class="sr-only">
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+            <!-- /right -->
+
+        </form>
+
+    </div>
+    <!-- /form content -->
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.attachHandleGenerator) {
+                window.attachHandleGenerator('title', 'handle');
+            }
+        });
+    </script>
+{% endblock %}

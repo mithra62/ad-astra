@@ -3,21 +3,24 @@
 
 // >>-- 70 Misc css start --<<
 
-.app-line-breadcrumbs{
+.app-line-breadcrumbs {
     li {
         display: inline-block;
-        &+li{
+
+        & + li {
             &::before {
                 content: "/";
                 color: var(--font-light-color);
                 padding-left: 0.5rem;
                 padding-right: 0.5rem;
             }
+
             &.active {
-                a{
+                a {
                     color: rgba(var(--primary), 1);
                 }
             }
+
             &:hover {
                 a {
                     text-decoration: underline;
@@ -38,8 +41,9 @@
         }
     }
 }
+
 @each $name, $color in reboot.$colors {
-    @include circle_breadcrumbs_mixin(""+$name, map.get(reboot.$colors , $name));
+    @include circle_breadcrumbs_mixin(""+$name, map.get(reboot.$colors, $name));
 }
 
 .app-breadcrumb {
@@ -55,14 +59,17 @@
         background: rgba(var(--secondary), 0.1);
         transform: skew(-20deg);
         cursor: pointer;
+
         a {
             display: block;
             transform: skew(20deg);
         }
+
         &.active {
             background: rgba(var(--primary), 1);
-            a{
-                color: rgba(var(--white),1);
+
+            a {
+                color: rgba(var(--white), 1);
             }
         }
     }
@@ -71,20 +78,24 @@
 .breadcrumb {
     flex-wrap: nowrap;
     border-radius: 5px;
+
     li {
         display: inline-block;
         color: rgba(var(--dark), 0.75);
         font-weight: 500;
+
         & + li {
             &::before {
                 font-family: "tabler-icons";
                 content: "\ea61" !important;
                 padding: 0 !important;
             }
+
             &.active {
                 color: rgba(var(--primary), 1);
             }
         }
+
         i {
             margin-right: 5px;
             line-height: 1.2;
@@ -97,6 +108,7 @@
         display: inline-block;
         color: rgba(var(--dark), 0.75);
         font-weight: 500;
+
         & + li {
             &::before {
                 content: "/";
@@ -104,11 +116,13 @@
                 padding-left: 10px;
                 padding-right: 10px;
             }
+
             &.active {
-                a{
+                a {
                     color: rgba(var(--primary), 1);
                 }
             }
+
             &:hover {
                 a {
                     text-decoration: underline;
@@ -123,6 +137,7 @@
         display: inline-block;
         color: rgba(var(--dark), 0.75);
         font-weight: 500;
+
         & + li {
             &::before {
                 font-family: "tabler-icons";
@@ -130,8 +145,9 @@
                 color: var(--font-light-color);
                 padding-left: 8px;
             }
+
             &.active {
-                a{
+                a {
                     color: rgba(var(--primary), 1);
                 }
             }
@@ -147,16 +163,19 @@
         text-align: center;
         display: inline-block;
         margin-left: 0;
+
         &:last-child {
             :before,
             :after {
                 display: none;
             }
         }
+
         &.active {
             background-color: rgba(var(--primary), 1);
-            a{
-                color: rgba(var(--white),1) ;
+
+            a {
+                color: rgba(var(--white), 1);
             }
         }
     }
@@ -167,16 +186,19 @@
         display: inline-block;
         position: relative;
         margin-right: 20px;
+
         & + {
             li {
                 margin-left: 20px;
             }
         }
-        &.active{
-            a{
-                color: rgba(var(--white),1);
+
+        &.active {
+            a {
+                color: rgba(var(--white), 1);
             }
         }
+
         a {
             display: block;
             width: 35px;
@@ -187,6 +209,7 @@
             border-radius: 50%;
             background-color: rgba(var(--secondary), 0.1);
             color: rgba(var(--dark), 0.75);
+
             &::after {
                 content: ">";
                 position: absolute;
@@ -194,6 +217,7 @@
                 font-size: 20px;
             }
         }
+
         &:first-child {
             a {
                 &::after {
@@ -209,11 +233,12 @@
     padding: 7px 15px;
     width: 100%;
     border-radius: 10px;
+
     li {
         position: relative;
         padding: 10px 25px;
         text-align: center;
-        color: rgba(var(--white),1);
+        color: rgba(var(--white), 1);
         display: inline-block;
         margin-left: -10px;
         border-radius: 6px;
@@ -227,33 +252,40 @@
             z-index: 1;
             right: -8px;
         }
+
         :before {
             bottom: 0;
             transform: skewX(-45deg);
         }
+
         :after {
             top: 0;
             transform: skewX(45deg);
         }
+
         &:last-child {
             :before,
             :after {
                 display: none;
             }
         }
+
         &.active {
             background-color: white;
+
             :before,
             :after {
                 background-color: white;
 
             }
-            a{
+
+            a {
                 color: black;
                 margin-left: 2px;
             }
         }
-        a{
+
+        a {
             color: white;
             margin-left: 18px;
         }
@@ -266,14 +298,17 @@
     margin: 0;
     border-radius: 5px 25px 25px 5px;
     overflow: hidden;
+
     li {
         float: left;
         margin-right: 3px;
         position: relative;
         z-index: 1;
+
         &:before {
             display: none;
         }
+
         &:after {
             content: "";
             width: 40px;
@@ -284,15 +319,18 @@
             right: -20px;
             z-index: -1;
         }
+
         &:nth-last-child(2) {
             &:after {
                 display: none;
             }
         }
+
         &:last-child {
             &:after {
                 display: none;
             }
+
             display: block;
             padding: 10px 22px;
             font-size: 14px;
@@ -304,6 +342,7 @@
             background-color: rgba(var(--success), 0.1);
 
         }
+
         a {
             display: block;
             padding: 10px 22px;
@@ -311,7 +350,7 @@
             border-radius: 0 25px 25px 0;
             // box-shadow: 5px 0 5px -5px #333;
             background: rgba(var(--success));
-            color:white;
+            color: white;
 
 
         }
@@ -324,10 +363,10 @@
         background: rgba(var(--light), 1);
         padding: 15px 40px;
         text-align: center;
-        color: rgba(var(--white),1);
+        color: rgba(var(--white), 1);
         display: inline-block;
         margin-left: -10px;
-      
+
         :before,
         :after {
             content: "";
@@ -335,36 +374,41 @@
             width: 34px;
             height: 28px;
             z-index: 1;
-            border-right: 12px solid rgba(var(--white),1);
+            border-right: 12px solid rgba(var(--white), 1);
             right: -6px;
         }
+
         :before {
             bottom: 0;
             transform: skewX(-45deg);
         }
+
         :after {
             top: 0;
             transform: skewX(45deg);
         }
+
         &:last-child {
             :before,
             :after {
                 display: none;
             }
         }
+
         &.active {
             background-color: rgba(var(--primary), 1);
+
             :before,
             :after {
                 background-color: rgba(var(--primary), 1);
             }
 
-            a{
+            a {
                 color: white;
             }
         }
 
-        a{
+        a {
             color: rgba(var(--dark));
             font-size: 16px;
         }
@@ -373,19 +417,22 @@
 
 .app-pagination {
     gap: 10px;
+
     .page-item {
         .page-link {
             font-weight: 500;
-            color: rgba(var(--primary)) ;
+            color: rgba(var(--primary));
             border-radius: 5px !important;
-            &:focus{
-                background-color:rgba(var(--white),1);
+
+            &:focus {
+                background-color: rgba(var(--white), 1);
                 box-shadow: 0 0 0 0.25rem rgba(var(--primary), 0.3);
             }
         }
+
         &.active {
             .page-link {
-                color: rgba(var(--white),1) ;
+                color: rgba(var(--white), 1);
                 background-color: rgba(var(--primary), 1);
                 border-color: rgba(var(--primary), 1);
             }

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Edit General Item</title>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+
+<input id="sidebar-toggle" type="checkbox">
+<label for="sidebar-toggle" class="sidebar-overlay fixed inset-0 z-20 hidden bg-slate-900/40" aria-hidden="true"></label>
+
+<div class="app-shell min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
+    <aside id="primary-sidebar" class="fixed inset-y-0 left-0 z-30 w-64 -translate-x-full overflow-y-auto border-r border-slate-200 bg-white px-5 py-6 transition-transform duration-200 lg:relative lg:inset-auto lg:z-auto lg:w-auto lg:translate-x-0 lg:transition-none">
+        <div class="mb-4 flex items-center justify-between lg:block">
+            <a class="text-lg font-semibold tracking-tight" href="#">Admin</a>
+            <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Close menu">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </label>
+        </div>
+        <nav class="mt-2 space-y-1 text-sm font-medium lg:mt-8">
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Dashboard</a>
+            <div class="nav-group">
+                <input id="nav-content" type="checkbox" checked>
+                <label for="nav-content" class="flex cursor-pointer items-center justify-between rounded-md bg-emerald-50 px-3 py-2 text-emerald-700">
+                    <span>Content</span>
+                    <span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                </label>
+                <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Articles</a></li>
+                    <li><a class="block rounded-md bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700" href="general-index.twig">General Items</a></li>
+                </ul>
+            </div>
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Settings</a>
+        </nav>
+    </aside>
+
+    <div class="flex min-w-0 flex-col">
+        <div class="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex items-center gap-3">
+                <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Open menu">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </label>
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-800 sm:text-base">Edit General Item</h4>
+                    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+                        <a class="hover:text-slate-800" href="#"><svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg> Dashboard</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <a class="hover:text-slate-800" href="general-index.twig">General Items</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <span class="text-slate-800">Edit</span>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div id="unsaved-bar" class="unsaved-bar items-center justify-between border-b border-amber-200 bg-amber-50 px-4 py-2 sm:px-6">
+            <span class="flex items-center gap-2 text-sm text-amber-800">
+                <svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                You have unsaved changes.
+            </span>
+            <button type="submit" form="general-form" class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Save Now</button>
+        </div>
+
+        <div class="flex flex-1 gap-6 p-4 sm:p-6 lg:grid lg:grid-cols-[14rem_1fr]">
+            <aside class="hidden h-fit lg:block">
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-4 py-3"><h5 class="text-sm font-semibold text-slate-700">General</h5></div>
+                    <nav class="p-2">
+                        <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="general-index.twig">All Items</a>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="general-edit.twig">Edit Item</a>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="general-order-items.twig">Order Items</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <div class="flex min-w-0 flex-col gap-5">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Edit General Item</h1>
+                        <p class="mt-1 text-sm text-slate-500">A clean single-column form for small reusable records.</p>
+                    </div>
+                    <a href="general-index.twig" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                        Back to Items
+                    </a>
+                </div>
+
+                <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                        <div>
+                            <p class="text-sm font-semibold text-red-800">Please fix the highlighted fields.</p>
+                            <p class="mt-1 text-sm text-red-700">This is an example validation summary shown after a failed save.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="general-form" method="POST" action="#" class="flex w-full min-w-0 flex-col gap-5">
+                    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                        <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Item Details</h5></div>
+                        <div class="space-y-5 px-5 py-5">
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
+                                <input class="w-full rounded-md border border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20" id="name" name="name" type="text" value="" placeholder="e.g. Published" required aria-invalid="true" aria-describedby="name-error">
+                                <p id="name-error" class="mt-1 text-xs text-red-600">Name is required.</p>
+                                <p class="mt-1 text-xs text-slate-400">Use a short, human-readable label.</p>
+                            </div>
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
+                                <div class="flex rounded-md shadow-sm">
+                                    <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-xs text-slate-500">general/</span>
+                                    <input class="w-full rounded-r-md border border-slate-300 px-3 py-2 font-mono text-sm placeholder:text-slate-400 placeholder:font-sans focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="handle" name="handle" type="text" value="published" placeholder="published" required>
+                                </div>
+                                <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="type">Type</label>
+                                    <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="type" name="type">
+                                        <option value="status" selected>Status</option>
+                                        <option value="field">Field</option>
+                                        <option value="option">Option</option>
+                                        <option value="label">Label</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status">Status</label>
+                                    <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="status" name="status">
+                                        <option value="active" selected>Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="value">Value</label>
+                                    <input class="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm shadow-sm placeholder:text-slate-400 placeholder:font-sans focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="value" name="value" type="text" value="published" placeholder="published">
+                                </div>
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="sort_order">Sort Order</label>
+                                    <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="sort_order" name="sort_order" type="number" min="0" value="10">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="description">Description</label>
+                                <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="description" name="description" rows="4" placeholder="Optional internal description...">Visible content that has completed review and is available to users.</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                        <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Display</h5></div>
+                        <div class="space-y-5 px-5 py-5">
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-slate-700">Color</label>
+                                <div class="flex flex-wrap gap-2">
+                                    {% set colors = ['slate','red','amber','emerald','sky','violet'] %}
+                                    {% for color in colors %}
+                                    <label class="cursor-pointer">
+                                        <input class="peer sr-only" type="radio" name="color" value="{{ color }}" {% if color == 'emerald' %}checked{% endif %}>
+                                        <span class="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm capitalize text-slate-700 shadow-sm peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-500/20">
+                                            <span class="h-3 w-3 rounded-full bg-{{ color }}-500"></span>{{ color }}
+                                        </span>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <label class="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700">
+                                <input type="checkbox" name="is_default" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                Use as default item for this type
+                            </label>
+                            <label class="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700">
+                                <input type="checkbox" name="is_locked" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                Lock item from accidental deletion
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                        <a href="general-index.twig" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Cancel</a>
+                        <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Save Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <footer class="mt-auto border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-slate-400">&copy; 2026 Admin &mdash; All rights reserved.</p>
+                <nav class="flex items-center gap-4 text-xs text-slate-400"><a class="hover:text-slate-600" href="#">Documentation</a><a class="hover:text-slate-600" href="#">Support</a><a class="hover:text-slate-600" href="#">Privacy</a><span class="text-slate-300">|</span><span>v1.0.0</span></nav>
+            </div>
+        </footer>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,7 +1,13 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\BotBlockServiceProvider;
+use App\Providers\ContentServiceProvider;
+use App\Providers\FortifyServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\BotBlockServiceProvider::class,
-    App\Providers\FortifyServiceProvider::class,
+    AppServiceProvider::class,
+    BotBlockServiceProvider::class,
+    ContentServiceProvider::class,
+    FortifyServiceProvider::class,
 ];

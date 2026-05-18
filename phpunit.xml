@@ -3,6 +3,8 @@
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
+         stopOnFailure="false"
+         stopOnError="false"
 >
     <testsuites>
         <testsuite name="Unit">
@@ -17,14 +19,22 @@
             <directory>app</directory>
         </include>
     </source>
+    <coverage>
+        <report>
+            <html outputDirectory="coverage"/>
+            <clover outputFile="coverage/clover.xml"/>
+            <text outputFile="php://stdout" showUncoveredFiles="false"/>
+        </report>
+    </coverage>
     <php>
-        <env name="APP_ENV" value="testing"/>
+        <env name="APP_ENV" value="testing" force="true"/>
+        <env name="APP_KEY" value="base64:nZ2iUikqLROLO1xtrmX/D0efHwGUOCSgYOvSwaWrbMo=" force="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="DB_CONNECTION" value="testing" force="true"/>
+        <env name="DB_DATABASE" value="database/testing.sqlite" force="true"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

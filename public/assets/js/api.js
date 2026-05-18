@@ -1,4 +1,4 @@
-fetch('/dashboard/chart')
+fetch('/admin/dashboard/chart')
     .then(res => res.json())
     .then(({labels, data}) => {
 

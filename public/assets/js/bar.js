@@ -8,7 +8,7 @@ const basicBarOptions = {
         type: 'bar',
         height: 350
     },
-    colors:['#2e5ce2'],
+    colors: ['#2e5ce2'],
     plotOptions: {
         bar: {
             borderRadius: 4,
@@ -84,7 +84,7 @@ const patternedBarOptions = {
             opacity: 0.25
         }
     },
-    colors:['#0F626A', '#0AB964', "#E14E5A", "#F9C123"],
+    colors: ['#0F626A', '#0AB964', "#E14E5A", "#F9C123"],
     plotOptions: {
         bar: {
             horizontal: true,
@@ -185,7 +185,7 @@ const stackedChartOptions = {
         height: 350,
         stacked: true,
     },
-    colors:["#0F626A" , "#626262", "#0AB964", "#E14E5A", '#F9C123'],
+    colors: ["#0F626A", "#626262", "#0AB964", "#E14E5A", '#F9C123'],
     plotOptions: {
         bar: {
             horizontal: true,
@@ -287,7 +287,7 @@ const groupedChartOptions = {
         height: 350,
         stacked: true,
     },
-    colors:['#E14E5A', "#4196FA"],
+    colors: ['#E14E5A', "#4196FA"],
     stroke: {
         width: 1,
         colors: ['#fff']

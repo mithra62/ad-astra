@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Http\Requests\Media\Library;
+
+use App\Http\Requests\FormRequest;
+use App\Models\Media\Library as LibraryModel;
+
+class UploadMediaRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        $library = $this->resolveLibrary();
+
+        $fileRules = ['required', 'file'];
+
+        if ($library instanceof LibraryModel) {
+            // MIME type restriction — null allowed_types means accept anything.
+            if (!empty($library->allowed_types)) {
+                $fileRules[] = 'mimetypes:' . implode(',', $library->allowed_types);
+            }
+
+            // max_size is stored in MB; Laravel's max: rule expects kilobytes.
+            if ($library->max_size > 0) {
+                $fileRules[] = 'max:' . ($library->max_size * 1024);
+            }
+        }
+
+        return [
+            'file' => $fileRules,
+            'name' => ['nullable', 'string', 'max:255'],
+            'categories' => ['nullable', 'array'],
+            'categories.*' => ['integer', 'exists:categories,id'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'file' => 'uploaded file',
+        ];
+    }
+
+    /**
+     * Resolve the library from the route — supports both 'library' and
+     * 'library_id' as route parameter names.
+     */
+    private function resolveLibrary(): ?LibraryModel
+    {
+        $param = $this->route()->parameter('library')
+            ?? $this->route()->parameter('library_id');
+
+        if ($param instanceof LibraryModel) {
+            return $param;
+        }
+
+        return $param ? LibraryModel::find($param) : null;
+    }
+}

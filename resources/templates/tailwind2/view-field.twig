@@ -1,0 +1,254 @@
+{% extends 'templates::tailwind2.layout' %}
+
+{% set field = field|default({
+    id: 42,
+    name: 'Featured Image',
+    handle: 'featured_image',
+    label: 'Featured Image',
+    instructions: 'Select the primary image shown in article lists and social previews.',
+    hidden: false,
+    required: true,
+    created_at: '2026-01-18 10:30:00',
+    updated_at: '2026-04-24 14:15:00',
+    fieldType: { name: 'Asset', handle: 'asset', class: 'App\\Field\\Types\\Asset' },
+    groups: [
+        { id: 1, name: 'Article Fields' },
+        { id: 2, name: 'Shared SEO' }
+    ]
+}) %}
+
+{% set layout = layout|default({
+    id: 7,
+    name: 'Article Layout',
+    handle: 'article_layout',
+    description: 'Default article editing layout.',
+    tabs: [
+        {
+            id: 1,
+            name: 'Content',
+            handle: 'content',
+            elements: [
+                { field: { handle: 'title', name: 'Title' }, required: true, hidden: false, width: 'full', instructions: '' },
+                { field: { handle: 'featured_image', name: 'Featured Image' }, required: true, hidden: false, width: 'full', instructions: 'Use a landscape image when possible.' },
+                { field: { handle: 'body', name: 'Body' }, required: false, hidden: false, width: 'full', instructions: '' }
+            ]
+        },
+        {
+            id: 2,
+            name: 'SEO',
+            handle: 'seo',
+            elements: [
+                { field: { handle: 'meta_title', name: 'Meta Title' }, required: false, hidden: false, width: 'half', instructions: '' },
+                { field: { handle: 'og_image', name: 'Open Graph Image' }, required: false, hidden: false, width: 'half', instructions: '' }
+            ]
+        },
+        {
+            id: 3,
+            name: 'Advanced',
+            handle: 'advanced',
+            elements: [
+                { field: { handle: 'canonical_url', name: 'Canonical URL' }, required: false, hidden: false, width: 'full', instructions: '' }
+            ]
+        }
+    ]
+}) %}
+
+{% set page_title = 'View Field' %}
+{% set page_heading = field.name %}
+{% set active_nav = 'field-layouts' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="home.twig">Dashboard</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="edit-field-layout.twig">Field Layouts</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="field-layout-tab-fields.twig">{{ layout.name }}</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">{{ field.name }}</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    <aside class="hidden h-fit lg:block">
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-4 py-3">
+                <h5 class="text-sm font-semibold text-slate-700">{{ layout.name }}</h5>
+                <p class="mt-0.5 truncate font-mono text-xs text-slate-400">{{ layout.handle }}</p>
+            </div>
+            <nav class="p-2">
+                <a class="block rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="edit-field-layout.twig">Layout Details</a>
+                <a class="mt-0.5 block rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="field-layout-tab-fields.twig">Tab Fields</a>
+                <a class="mt-0.5 block rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="view-field.twig">View Field</a>
+                <a class="mt-0.5 block rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="create-field-layout-tab.twig">New Tab</a>
+
+                <div class="my-2 border-t border-slate-100"></div>
+                <p class="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Layout Tabs</p>
+
+                {% for tab in layout.tabs %}
+                    {% set contains_field = false %}
+                    {% for element in tab.elements %}
+                        {% if element.field.handle == field.handle %}
+                            {% set contains_field = true %}
+                        {% endif %}
+                    {% endfor %}
+                    <a class="mt-0.5 flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium {{ contains_field ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50' }}" href="#tab-{{ tab.handle }}">
+                        <span class="truncate">{{ tab.name }}</span>
+                        <span class="ml-2 rounded-full {{ contains_field ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }} px-2 py-0.5 text-xs">{{ tab.elements|length }}</span>
+                    </a>
+                {% endfor %}
+            </nav>
+        </div>
+    </aside>
+{% endblock %}
+
+{% block content %}
+    <div class="flex min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{{ field.name }}</h1>
+                    <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">{{ field.fieldType.name }}</span>
+                    <span class="inline-flex rounded-full {{ field.hidden ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700' }} px-2.5 py-0.5 text-xs font-medium">{{ field.hidden ? 'Hidden' : 'Visible' }}</span>
+                </div>
+                <p class="mt-1 text-sm text-slate-500">Field definition and placement within {{ layout.name }}.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 self-start">
+                <a href="field-layout-tab-fields.twig" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    Back to Layout
+                </a>
+                <a href="#" class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                    Edit Field
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">Field Details</h5>
+                    </div>
+                    <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                        <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                            <dt class="text-slate-500">Name</dt>
+                            <dd class="font-medium text-slate-900">{{ field.name }}</dd>
+                        </div>
+                        <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                            <dt class="text-slate-500">Handle</dt>
+                            <dd class="font-mono text-xs text-slate-700">{{ field.handle }}</dd>
+                        </div>
+                        <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                            <dt class="text-slate-500">Label</dt>
+                            <dd class="text-slate-700">{{ field.label|default(field.name) }}</dd>
+                        </div>
+                        <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                            <dt class="text-slate-500">Instructions</dt>
+                            <dd class="text-slate-700">{{ field.instructions|default('None') }}</dd>
+                        </div>
+                        <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                            <dt class="text-slate-500">Type Class</dt>
+                            <dd class="break-all font-mono text-xs text-slate-700">{{ field.fieldType.class|default('Not configured') }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">Placement in {{ layout.name }}</h5>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                        {% for tab in layout.tabs %}
+                            <section id="tab-{{ tab.handle }}" class="px-5 py-4">
+                                <div class="mb-3 flex items-center justify-between gap-3">
+                                    <div>
+                                        <h2 class="text-sm font-semibold text-slate-900">{{ tab.name }}</h2>
+                                        <p class="font-mono text-xs text-slate-400">{{ tab.handle }}</p>
+                                    </div>
+                                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">{{ tab.elements|length }} fields</span>
+                                </div>
+
+                                <div class="space-y-2">
+                                    {% for element in tab.elements %}
+                                        {% set is_current = element.field.handle == field.handle %}
+                                        <div class="rounded-md border {{ is_current ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-white' }} px-4 py-3">
+                                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                                <div class="min-w-0">
+                                                    <p class="truncate text-sm font-medium {{ is_current ? 'text-emerald-900' : 'text-slate-900' }}">{{ element.field.name }}</p>
+                                                    <p class="truncate font-mono text-xs {{ is_current ? 'text-emerald-700' : 'text-slate-400' }}">{{ element.field.handle }}</p>
+                                                </div>
+                                                <div class="flex flex-wrap gap-1.5">
+                                                    {% if element.required %}
+                                                        <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">Required</span>
+                                                    {% endif %}
+                                                    {% if element.hidden %}
+                                                        <span class="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Hidden</span>
+                                                    {% endif %}
+                                                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{{ element.width|default('full') }}</span>
+                                                </div>
+                                            </div>
+                                            {% if is_current and element.instructions|default('') %}
+                                                <p class="mt-2 text-xs text-emerald-800">{{ element.instructions }}</p>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <p class="rounded-md border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">No fields have been assigned to this tab.</p>
+                                    {% endfor %}
+                                </div>
+                            </section>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">Groups</h5>
+                    </div>
+                    <div class="space-y-2 px-5 py-4">
+                        {% for group in field.groups %}
+                            <a class="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" href="#">
+                                <span>{{ group.name }}</span>
+                                <span class="font-mono text-xs text-slate-400">#{{ group.id }}</span>
+                            </a>
+                        {% else %}
+                            <p class="text-sm text-slate-500">This field is not assigned to any field groups.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-5 py-3">
+                        <h5 class="text-sm font-semibold text-slate-700">Metadata</h5>
+                    </div>
+                    <dl class="divide-y divide-slate-100 px-5 py-2 text-xs">
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-slate-500">ID</dt>
+                            <dd class="font-medium text-slate-700">{{ field.id }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-slate-500">Layout</dt>
+                            <dd class="text-slate-700">{{ layout.name }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-slate-500">Created</dt>
+                            <dd class="text-slate-700">{{ field.created_at|date('M j, Y') }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-slate-500">Updated</dt>
+                            <dd class="text-slate-700">{{ field.updated_at|date('M j, Y') }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

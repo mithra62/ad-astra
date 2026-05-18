@@ -1,7 +1,7 @@
 // countup js
 try {
     const counters = document.querySelectorAll('.counter');
-    counters.forEach(function(element) {
+    counters.forEach(function (element) {
         const countTo = parseInt(element.getAttribute('data-count'));
         let currentCount = parseInt(element.textContent);
         const duration = 8000;
@@ -10,9 +10,9 @@ try {
         let iterations = duration / interval;
         const stepValue = (countTo - currentCount) / iterations;
 
-        const intervalId = setInterval(function() {
+        const intervalId = setInterval(function () {
             currentCount += stepValue;
-            element.textContent = + Math.floor(currentCount);
+            element.textContent = +Math.floor(currentCount);
             iterations--;
             if (iterations <= 0) {
                 clearInterval(intervalId);

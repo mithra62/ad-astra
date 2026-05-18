@@ -34,92 +34,90 @@ let containerWidth;
 let maxNavbarLimit;
 
 function setUpHorizontalHeader() {
-  navbarSize = navBar.width();
-  containerWidth = ($(".simplebar-content").width())
-  maxNavbarLimit = -(navbarSize - containerWidth);
-  if ($("nav").hasClass("horizontal-sidebar")) {
-    $(".menu-next").removeClass("d-none");
-    $(".menu-previous").removeClass("d-none");
-  } else {
-    navBar.css("marginLeft",0)
-    $(".menu-next").addClass("d-none");
-    $(".menu-previous").addClass("d-none");
-  }
-  $(".horizontal-sidebar .show").removeClass("show");
+    navbarSize = navBar.width();
+    containerWidth = ($(".simplebar-content").width())
+    maxNavbarLimit = -(navbarSize - containerWidth);
+    if ($("nav").hasClass("horizontal-sidebar")) {
+        $(".menu-next").removeClass("d-none");
+        $(".menu-previous").removeClass("d-none");
+    } else {
+        navBar.css("marginLeft", 0)
+        $(".menu-next").addClass("d-none");
+        $(".menu-previous").addClass("d-none");
+    }
+    $(".horizontal-sidebar .show").removeClass("show");
 }
 
 $(document).on('click', '.menu-previous', function (e) {
-  let layoutOption = getLocalStorageItem("layout-option","ltr");
-  let attribute = (layoutOption == 'ltr' || layoutOption == 'box-layout') ? 'marginLeft' : 'marginRight';
-  let currentPosition = parseInt(navBar.css(attribute));
-  if (currentPosition < 0) {
-    navBar.css(`${attribute}`, "+=" + size)
-    $(".menu-next").removeClass("d-none");
-    $(".menu-previous").removeClass("d-none");
-    if (currentPosition >= leftsideLimit) {
-      $(this).addClass("d-none");
+    let layoutOption = getLocalStorageItem("layout-option", "ltr");
+    let attribute = (layoutOption == 'ltr' || layoutOption == 'box-layout') ? 'marginLeft' : 'marginRight';
+    let currentPosition = parseInt(navBar.css(attribute));
+    if (currentPosition < 0) {
+        navBar.css(`${attribute}`, "+=" + size)
+        $(".menu-next").removeClass("d-none");
+        $(".menu-previous").removeClass("d-none");
+        if (currentPosition >= leftsideLimit) {
+            $(this).addClass("d-none");
+        }
     }
-  }
 })
 
 $(document).on('click', '.menu-next', function (e) {
-  let layoutOption = getLocalStorageItem("layout-option","ltr");
-  let attribute = (layoutOption == 'ltr' || layoutOption == 'box-layout') ? 'marginLeft' : 'marginRight';
-  let currentPosition = parseInt(navBar.css(attribute));
-  if (currentPosition >= maxNavbarLimit) {
-    $(".menu-next").removeClass("d-none");
-    $(".menu-previous").removeClass("d-none");
-    navBar.css(`${attribute}`, "-=" + size)
-    if (currentPosition - parseInt(size) <= maxNavbarLimit) {
-      $(this).addClass("d-none");
+    let layoutOption = getLocalStorageItem("layout-option", "ltr");
+    let attribute = (layoutOption == 'ltr' || layoutOption == 'box-layout') ? 'marginLeft' : 'marginRight';
+    let currentPosition = parseInt(navBar.css(attribute));
+    if (currentPosition >= maxNavbarLimit) {
+        $(".menu-next").removeClass("d-none");
+        $(".menu-previous").removeClass("d-none");
+        navBar.css(`${attribute}`, "-=" + size)
+        if (currentPosition - parseInt(size) <= maxNavbarLimit) {
+            $(this).addClass("d-none");
+        }
     }
-  }
 })
 
 $(function () {
     setUpHorizontalHeader();
-  let themeMode = getLocalStorageItem('theme-mode', 'light')
+    let themeMode = getLocalStorageItem('theme-mode', 'light')
     setTimeout(() => {
-    $('body').addClass(`${themeMode}`)
-  }, 1500);
+        $('body').addClass(`${themeMode}`)
+    }, 1500);
 });
 
 
 // >>-- 02 Flag  Icon Js --<<
 $(function () {
-  let text = $(".selected i").attr('class')
-  $(".flag i").prop('class', text);
-  $(document).on('click', '.lang', function () {
-    $(".lang").removeClass("selected");
-    $(this).addClass("selected");
-    text = $(".selected i").attr('class')
+    let text = $(".selected i").attr('class')
     $(".flag i").prop('class', text);
-  });
+    $(document).on('click', '.lang', function () {
+        $(".lang").removeClass("selected");
+        $(this).addClass("selected");
+        text = $(".selected i").attr('class')
+        $(".flag i").prop('class', text);
+    });
 })
-
 
 
 // >>-- 03 Copy js --<<
 function copyvalue() {
-  let temp = document.createElement('input');
-  let texttoCopy = document.getElementById('copyText2').innerHTML;
-  temp.type = 'input';
-  temp.setAttribute('value', texttoCopy);
-  document.body.appendChild(temp);
-  temp.select();
-  document.execCommand("copy");
-  temp.remove();
-  console.timeEnd('time2');
+    let temp = document.createElement('input');
+    let texttoCopy = document.getElementById('copyText2').innerHTML;
+    temp.type = 'input';
+    temp.setAttribute('value', texttoCopy);
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand("copy");
+    temp.remove();
+    console.timeEnd('time2');
 }
-
 
 
 // >>-- 04 Sidebar toggle js --<<
 $(document).on('click', '.header-toggle', function () {
-  $("nav").toggleClass("semi-nav");
+    $("nav").toggleClass("semi-nav");
 });
 $(".toggle-semi-nav").on("click", function () {
-  $("nav").removeClass("semi-nav");
+    $("nav").removeClass("semi-nav");
 });
 
 
@@ -140,6 +138,7 @@ function resize() {
         $nav.addClass('semi-nav');
     }
 }
+
 $(function () {
     resize();
 });
@@ -151,7 +150,7 @@ window.addEventListener("resize", () => {
 // >>-- 06 Sidebar scroll js --<<
 const myElement = document.getElementById('app-simple-bar');
 if (myElement) {
-    new SimpleBar(myElement, { autoHide: true });
+    new SimpleBar(myElement, {autoHide: true});
 }
 
 // Sidebar active class js
@@ -179,7 +178,7 @@ $(function () {
 });
 // >>-- 07 Loader JS --<<
 $('.loader-wrapper').fadeOut('slow', function () {
-  $(this).remove();
+    $(this).remove();
 });
 
 
@@ -238,7 +237,6 @@ $(function () {
 });
 
 
-
 // >>-- 10 Hide-show --<<
 
 const appElement = document.getElementById("myapp");
@@ -272,27 +270,29 @@ if (themeToggle) {
         setLocalStorageItem('theme-mode', isDark ? 'light' : 'dark');
     });
 }
+
 function appendHtml() {
-  let div = document.getElementsByClassName('app-wrapper');
-  div.innerHTML += '<p>This is some HTML code</p>';
+    let div = document.getElementsByClassName('app-wrapper');
+    div.innerHTML += '<p>This is some HTML code</p>';
 }
+
 window.onload = function () {
-  appendHtml();
+    appendHtml();
 }
 
 // >>-- 12 Close on click js --<<
 
 $(document).on('click', '.close-btn', function () {
-  let targetItem = $(this).closest(".head-box");
-  let targetParent = targetItem.parent();
-  $(this).parent().parent().remove();
-  if (targetParent.find(".head-box").length <= 0) {
-    targetParent.parent().parent().find('.head-box-footer').addClass('d-none');
-    targetParent.parent().parent().find('.offcanvas-body').addClass('h-auto');
-  }
+    let targetItem = $(this).closest(".head-box");
+    let targetParent = targetItem.parent();
+    $(this).parent().parent().remove();
+    if (targetParent.find(".head-box").length <= 0) {
+        targetParent.parent().parent().find('.head-box-footer').addClass('d-none');
+        targetParent.parent().parent().find('.offcanvas-body').addClass('h-auto');
+    }
 });
 
- // >>-- 13 Searchbar js --<<
+// >>-- 13 Searchbar js --<<
 $(document).on('keyup', '.search-filter', function () {
     const search = $(this).val().toLowerCase();
     $('.search-list-item').each(function () {
@@ -336,7 +336,7 @@ closeCollaps.forEach((element) => {
 // >>-- 15  Modal js --<<
 
 $(function () {
-  $('#welcomeCard').modal('show');
+    $('#welcomeCard').modal('show');
 });
 
 function copyTextToClipboard(text) {

@@ -1,0 +1,40 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Field\Type;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class FieldTypeSeeder extends Seeder
+{
+    use WithoutModelEvents;
+
+    public function run(): void
+    {
+        $types = [
+            ['name' => 'Text', 'object' => \App\Field\Types\Text::class],
+            ['name' => 'Textarea', 'object' => \App\Field\Types\Textarea::class],
+            ['name' => 'Number', 'object' => \App\Field\Types\Number::class],
+            ['name' => 'Date', 'object' => \App\Field\Types\Date::class],
+            ['name' => 'Email Address', 'object' => \App\Field\Types\EmailAddress::class],
+            ['name' => 'URL', 'object' => \App\Field\Types\Url::class],
+            ['name' => 'Telephone', 'object' => \App\Field\Types\Telephone::class],
+            ['name' => 'Color Picker', 'object' => \App\Field\Types\ColorPicker::class],
+            ['name' => 'Relationship', 'object' => \App\Field\Types\Relationship::class],
+            ['name' => 'Boolean', 'object' => \App\Field\Types\Boolean::class],
+            ['name' => 'File Upload',      'object' => \App\Field\Types\FileUpload::class],
+            ['name' => 'Media',            'object' => \App\Field\Types\Media::class],
+            ['name' => 'Select',           'object' => \App\Field\Types\Select::class],
+            ['name' => 'Multi Select',     'object' => \App\Field\Types\MultiSelect::class],
+            ['name' => 'Radio Group',      'object' => \App\Field\Types\RadioGroup::class],
+            ['name' => 'Slider',           'object' => \App\Field\Types\Slider::class],
+            ['name' => 'Users',            'object' => \App\Field\Types\Users::class],
+            ['name' => 'Structured Rows',  'object' => \App\Field\Types\StructuredRows::class],
+        ];
+
+        foreach ($types as $type) {
+            Type::firstOrCreate(['object' => $type['object']], $type);
+        }
+    }
+}

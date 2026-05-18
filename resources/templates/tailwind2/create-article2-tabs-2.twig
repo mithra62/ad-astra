@@ -1,0 +1,120 @@
+{% extends 'templates::tailwind2.layout' %}
+
+{% set page_title = page_title|default('Create Article - 2 Tabs') %}
+{% set page_heading = page_heading|default('Create Article') %}
+{% set active_nav = active_nav|default('articles') %}
+{% set has_secondary_sidebar = has_secondary_sidebar|default(true) %}
+{% set tab_demo_label = tab_demo_label|default('2 Tabs') %}
+
+{% set article_tabs = article_tabs|default([
+    {
+        handle: 'content',
+        label: 'Content',
+        fields: [
+            { id: 'two_title', name: 'title', label: 'Title', type: 'text', placeholder: 'Enter article title' },
+            { id: 'two_body', name: 'body', label: 'Body', type: 'textarea', placeholder: 'Write the article body' }
+        ]
+    },
+    {
+        handle: 'settings',
+        label: 'Settings',
+        fields: [
+            { id: 'two_handle', name: 'handle', label: 'Slug', type: 'text', placeholder: 'auto-generated-from-title' },
+            { id: 'two_notes', name: 'notes', label: 'Internal Notes', type: 'textarea', placeholder: 'Editorial notes' }
+        ]
+    }
+]) %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="home.twig">Dashboard</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <a class="hover:text-slate-800" href="index.twig">Articles</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-slate-800">{{ tab_demo_label }}</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    <aside class="hidden h-fit lg:block">
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-4 py-3">
+                <h5 class="text-sm font-semibold text-slate-700">Articles</h5>
+            </div>
+            <nav class="p-2">
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="index.twig">All Articles</a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="#">{{ tab_demo_label }} Form</a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="create-article2.twig">Create Article</a>
+            </nav>
+        </div>
+    </aside>
+{% endblock %}
+
+{% block content %}
+    <div class="flex min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Create Article</h1>
+                <p class="mt-1 text-sm text-slate-500">{{ tab_demo_label }} field layout.</p>
+            </div>
+            <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto" href="index.twig">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                Back to Articles
+            </a>
+        </div>
+
+        <form id="article-form-two-tabs" method="POST" action="#" class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
+            <div class="flex flex-col gap-0 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm" data-tabs>
+                <div class="border-b border-slate-200 bg-slate-50">
+                    <div class="flex overflow-x-auto" role="tablist" aria-label="Article sections">
+                        {% for tab in article_tabs %}
+                            <button type="button" role="tab" aria-selected="{{ loop.first ? 'true' : 'false' }}" class="tab-btn {{ loop.first ? 'active' : '' }}" data-tab-target="{{ tab.handle }}" id="two-btn-{{ tab.handle }}" aria-controls="two-tab-{{ tab.handle }}">
+                                {{ tab.label }}
+                                <span class="unsaved-dot"></span>
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% for tab in article_tabs %}
+                    <section id="two-tab-{{ tab.handle }}" class="tab-panel {{ loop.first ? 'active' : '' }}" role="tabpanel" aria-labelledby="two-btn-{{ tab.handle }}" data-tab-panel="{{ tab.handle }}" {{ not loop.first ? 'hidden' : '' }}>
+                        <div class="divide-y divide-slate-100">
+                            {% for field in tab.fields %}
+                                <div class="px-5 py-5">
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field.id }}">{{ field.label }}</label>
+                                    {% if field.type == 'textarea' %}
+                                        <textarea id="{{ field.id }}" name="{{ field.name }}" rows="6" placeholder="{{ field.placeholder }}" data-tab-dirty="{{ tab.handle }}" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"></textarea>
+                                    {% else %}
+                                        <input id="{{ field.id }}" name="{{ field.name }}" type="{{ field.type }}" placeholder="{{ field.placeholder }}" data-tab-dirty="{{ tab.handle }}" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+                {% endfor %}
+
+                <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-5 py-3">
+                    <button type="button" data-tab-prev class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40">Previous</button>
+                    <span data-tab-position class="text-xs text-slate-400">1 / {{ article_tabs|length }}</span>
+                    <button type="button" data-tab-next class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40">Next</button>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3">
+                    <h5 class="text-sm font-semibold text-slate-700">Publishing</h5>
+                </div>
+                <div class="space-y-4 px-5 py-5">
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="two_status">Status</label>
+                    <select id="two_status" name="status" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        <option value="draft" selected>Draft</option>
+                        <option value="published">Published</option>
+                    </select>
+                </div>
+                <div class="border-t border-slate-100 px-5 py-4">
+                    <button class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" type="submit">Save Article</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

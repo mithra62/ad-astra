@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -15,12 +14,11 @@ return new class extends Migration
             $table->id();
             $table->string('method');
             $table->string('request_route');
-            $table->longText('request_payload');
-            $table->longText('request_headers');
-            $table->longText('response_payload')->nullable();
-            $table->longText('response_headers');
+            $table->json('request_payload');
+            $table->json('request_headers');
+            $table->json('response_headers');
             $table->integer('response_status_code');
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('api_log');
+        Schema::dropIfExists('api_logs');
     }
 };

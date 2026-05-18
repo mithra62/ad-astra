@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Role;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class StoreRoleRequest extends FormRequest
@@ -22,7 +22,7 @@ class StoreRoleRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255|unique:roles,name,' . (int)self::segment(2),
-            'permissions' => 'required|array'
+            'permissions' => 'required|array',
         ];
     }
 }

@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Http\Requests\Account\Token;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
+
 class DeleteAccountTokenRequest extends FormRequest
 {
     /**
@@ -18,7 +20,7 @@ class DeleteAccountTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'confirm_removal' => 'required'
+            'confirm_removal' => 'required',
         ];
     }
 

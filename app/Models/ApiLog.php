@@ -2,11 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\Builder;
 
 class ApiLog extends Model
 {
+    use HasFactory,
+        Prunable;
+
     /**
      * @var string[]
      */
@@ -15,10 +21,19 @@ class ApiLog extends Model
         'method',
         'request_payload',
         'request_headers',
-        'response_payload',
         'response_headers',
         'response_status_code',
         'user_id',
+    ];
+
+    /**
+     * @var string[]
+     */
+    protected $casts = [
+        'request_payload' => 'array',
+        'request_headers' => 'array',
+        'response_headers' => 'array',
+        'response_status_code' => 'integer',
     ];
 
     /**
@@ -29,5 +44,13 @@ class ApiLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return ApiLog
+     */
+    public function prunable()
+    {
+        return static::where('created_at', '<', now()->subDays(90));
     }
 }

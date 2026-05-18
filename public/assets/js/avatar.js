@@ -1,4 +1,4 @@
-$(function() {
+$(function () {
     const tooltip_init = {
         init: function () {
             $("button").tooltip();

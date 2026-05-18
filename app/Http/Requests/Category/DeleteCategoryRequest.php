@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Requests\Category;
+
+use App\Http\Requests\FormRequest;
+use Illuminate\Support\Facades\Auth;
+
+class DeleteCategoryRequest extends FormRequest
+{
+    /**
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return Auth::user()->can('delete category');
+    }
+
+    /**
+     * @return string[]
+     */
+    public function rules(): array
+    {
+        return [
+            'confirm_removal' => 'required',
+        ];
+    }
+
+    /**
+     * @return string[]
+     */
+    public function messages(): array
+    {
+        return [
+            'confirm_removal.required' => 'You must confirm the removal',
+        ];
+    }
+}

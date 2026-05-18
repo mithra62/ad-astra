@@ -1,6 +1,6 @@
 // Tooltip js
 "use strict";
-$(function() {
+$(function () {
     var tooltip_init = {
         init: function () {
             $("button").tooltip();
@@ -13,32 +13,22 @@ $(function() {
 });
 
 
-$(function() {
-    $("#myPopover").popover({
-        
-    });
+$(function () {
+    $("#myPopover").popover({});
 });
-$(function() {
-    $("#myPopover01").popover({
-      
-    });
+$(function () {
+    $("#myPopover01").popover({});
 });
 
 
-$(function() {
-    $("#myPopover2").popover({
-      
-    });
+$(function () {
+    $("#myPopover2").popover({});
 });
 
-$(function() {
-    $("#myPopover3").popover({
-      
-    });
+$(function () {
+    $("#myPopover3").popover({});
 });
 
-$(function() {
-    $("#myPopover4").popover({
-      
-    });
+$(function () {
+    $("#myPopover4").popover({});
 });

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,6 +12,7 @@ return new class extends Migration
     {
         Schema::table('permissions', function (Blueprint $table) {
             $table->string('description')->nullable()->after('guard_name');
+            $table->string('domain')->nullable()->after('guard_name');
         });
     }
 
@@ -23,6 +23,7 @@ return new class extends Migration
     {
         Schema::table('permissions', function (Blueprint $table) {
             $table->dropColumn('description');
+            $table->dropColumn('domain');
         });
     }
 };

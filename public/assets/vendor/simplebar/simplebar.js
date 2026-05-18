@@ -1,4 +1,4 @@
-    /**
+/**
  * simplebar - v6.2.4
  * Scrollbars, simpler.
  * https://grsmto.github.io/simplebar/
@@ -11,25 +11,29 @@ var SimpleBar = (function () {
     'use strict';
 
     /******************************************************************************
-    Copyright (c) Microsoft Corporation.
+     Copyright (c) Microsoft Corporation.
 
-    Permission to use, copy, modify, and/or distribute this software for any
-    purpose with or without fee is hereby granted.
+     Permission to use, copy, modify, and/or distribute this software for any
+     purpose with or without fee is hereby granted.
 
-    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-    PERFORMANCE OF THIS SOFTWARE.
-    ***************************************************************************** */
+     THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+     REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+     AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+     INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+     LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+     OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+     PERFORMANCE OF THIS SOFTWARE.
+     ***************************************************************************** */
     /* global Reflect, Promise */
 
-    var extendStatics = function(d, b) {
+    var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+            ({__proto__: []} instanceof Array && function (d, b) {
+                d.__proto__ = b;
+            }) ||
+            function (d, b) {
+                for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
+            };
         return extendStatics(d, b);
     };
 
@@ -37,14 +41,18 @@ var SimpleBar = (function () {
         if (typeof b !== "function" && b !== null)
             throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
-        function __() { this.constructor = d; }
+
+        function __() {
+            this.constructor = d;
+        }
+
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     }
 
     var canUseDOM = !!(
-      typeof window !== 'undefined' &&
-      window.document &&
-      window.document.createElement
+        typeof window !== 'undefined' &&
+        window.document &&
+        window.document.createElement
     );
 
     var canUseDom = canUseDOM;
@@ -91,23 +99,24 @@ var SimpleBar = (function () {
      * @returns {string} Returns the raw `toStringTag`.
      */
     function getRawTag(value) {
-      var isOwn = hasOwnProperty.call(value, symToStringTag$1),
-          tag = value[symToStringTag$1];
+        var isOwn = hasOwnProperty.call(value, symToStringTag$1),
+            tag = value[symToStringTag$1];
 
-      try {
-        value[symToStringTag$1] = undefined;
-        var unmasked = true;
-      } catch (e) {}
-
-      var result = nativeObjectToString$1.call(value);
-      if (unmasked) {
-        if (isOwn) {
-          value[symToStringTag$1] = tag;
-        } else {
-          delete value[symToStringTag$1];
+        try {
+            value[symToStringTag$1] = undefined;
+            var unmasked = true;
+        } catch (e) {
         }
-      }
-      return result;
+
+        var result = nativeObjectToString$1.call(value);
+        if (unmasked) {
+            if (isOwn) {
+                value[symToStringTag$1] = tag;
+            } else {
+                delete value[symToStringTag$1];
+            }
+        }
+        return result;
     }
 
     /** Used for built-in method references. */
@@ -128,7 +137,7 @@ var SimpleBar = (function () {
      * @returns {string} Returns the converted string.
      */
     function objectToString(value) {
-      return nativeObjectToString.call(value);
+        return nativeObjectToString.call(value);
     }
 
     /** `Object#toString` result references. */
@@ -146,12 +155,12 @@ var SimpleBar = (function () {
      * @returns {string} Returns the `toStringTag`.
      */
     function baseGetTag(value) {
-      if (value == null) {
-        return value === undefined ? undefinedTag : nullTag;
-      }
-      return (symToStringTag && symToStringTag in Object(value))
-        ? getRawTag(value)
-        : objectToString(value);
+        if (value == null) {
+            return value === undefined ? undefinedTag : nullTag;
+        }
+        return (symToStringTag && symToStringTag in Object(value))
+            ? getRawTag(value)
+            : objectToString(value);
     }
 
     /**
@@ -179,7 +188,7 @@ var SimpleBar = (function () {
      * // => false
      */
     function isObjectLike(value) {
-      return value != null && typeof value == 'object';
+        return value != null && typeof value == 'object';
     }
 
     /** `Object#toString` result references. */
@@ -203,8 +212,8 @@ var SimpleBar = (function () {
      * // => false
      */
     function isSymbol(value) {
-      return typeof value == 'symbol' ||
-        (isObjectLike(value) && baseGetTag(value) == symbolTag);
+        return typeof value == 'symbol' ||
+            (isObjectLike(value) && baseGetTag(value) == symbolTag);
     }
 
     /** Used to match a single whitespace character. */
@@ -219,10 +228,11 @@ var SimpleBar = (function () {
      * @returns {number} Returns the index of the last non-whitespace character.
      */
     function trimmedEndIndex(string) {
-      var index = string.length;
+        var index = string.length;
 
-      while (index-- && reWhitespace.test(string.charAt(index))) {}
-      return index;
+        while (index-- && reWhitespace.test(string.charAt(index))) {
+        }
+        return index;
     }
 
     /** Used to match leading whitespace. */
@@ -236,9 +246,9 @@ var SimpleBar = (function () {
      * @returns {string} Returns the trimmed string.
      */
     function baseTrim(string) {
-      return string
-        ? string.slice(0, trimmedEndIndex(string) + 1).replace(reTrimStart, '')
-        : string;
+        return string
+            ? string.slice(0, trimmedEndIndex(string) + 1).replace(reTrimStart, '')
+            : string;
     }
 
     /**
@@ -267,8 +277,8 @@ var SimpleBar = (function () {
      * // => false
      */
     function isObject(value) {
-      var type = typeof value;
-      return value != null && (type == 'object' || type == 'function');
+        var type = typeof value;
+        return value != null && (type == 'object' || type == 'function');
     }
 
     /** Used as references for various `Number` constants. */
@@ -310,24 +320,24 @@ var SimpleBar = (function () {
      * // => 3.2
      */
     function toNumber(value) {
-      if (typeof value == 'number') {
-        return value;
-      }
-      if (isSymbol(value)) {
-        return NAN;
-      }
-      if (isObject(value)) {
-        var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
-        value = isObject(other) ? (other + '') : other;
-      }
-      if (typeof value != 'string') {
-        return value === 0 ? value : +value;
-      }
-      value = baseTrim(value);
-      var isBinary = reIsBinary.test(value);
-      return (isBinary || reIsOctal.test(value))
-        ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
-        : (reIsBadHex.test(value) ? NAN : +value);
+        if (typeof value == 'number') {
+            return value;
+        }
+        if (isSymbol(value)) {
+            return NAN;
+        }
+        if (isObject(value)) {
+            var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+            value = isObject(other) ? (other + '') : other;
+        }
+        if (typeof value != 'string') {
+            return value === 0 ? value : +value;
+        }
+        value = baseTrim(value);
+        var isBinary = reIsBinary.test(value);
+        return (isBinary || reIsOctal.test(value))
+            ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+            : (reIsBadHex.test(value) ? NAN : +value);
     }
 
     /**
@@ -346,8 +356,8 @@ var SimpleBar = (function () {
      * }, _.now());
      * // => Logs the number of milliseconds it took for the deferred invocation.
      */
-    var now = function() {
-      return root$1.Date.now();
+    var now = function () {
+        return root$1.Date.now();
     };
 
     var now$1 = now;
@@ -414,128 +424,129 @@ var SimpleBar = (function () {
      * jQuery(window).on('popstate', debounced.cancel);
      */
     function debounce(func, wait, options) {
-      var lastArgs,
-          lastThis,
-          maxWait,
-          result,
-          timerId,
-          lastCallTime,
-          lastInvokeTime = 0,
-          leading = false,
-          maxing = false,
-          trailing = true;
+        var lastArgs,
+            lastThis,
+            maxWait,
+            result,
+            timerId,
+            lastCallTime,
+            lastInvokeTime = 0,
+            leading = false,
+            maxing = false,
+            trailing = true;
 
-      if (typeof func != 'function') {
-        throw new TypeError(FUNC_ERROR_TEXT$1);
-      }
-      wait = toNumber(wait) || 0;
-      if (isObject(options)) {
-        leading = !!options.leading;
-        maxing = 'maxWait' in options;
-        maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
-        trailing = 'trailing' in options ? !!options.trailing : trailing;
-      }
-
-      function invokeFunc(time) {
-        var args = lastArgs,
-            thisArg = lastThis;
-
-        lastArgs = lastThis = undefined;
-        lastInvokeTime = time;
-        result = func.apply(thisArg, args);
-        return result;
-      }
-
-      function leadingEdge(time) {
-        // Reset any `maxWait` timer.
-        lastInvokeTime = time;
-        // Start the timer for the trailing edge.
-        timerId = setTimeout(timerExpired, wait);
-        // Invoke the leading edge.
-        return leading ? invokeFunc(time) : result;
-      }
-
-      function remainingWait(time) {
-        var timeSinceLastCall = time - lastCallTime,
-            timeSinceLastInvoke = time - lastInvokeTime,
-            timeWaiting = wait - timeSinceLastCall;
-
-        return maxing
-          ? nativeMin(timeWaiting, maxWait - timeSinceLastInvoke)
-          : timeWaiting;
-      }
-
-      function shouldInvoke(time) {
-        var timeSinceLastCall = time - lastCallTime,
-            timeSinceLastInvoke = time - lastInvokeTime;
-
-        // Either this is the first call, activity has stopped and we're at the
-        // trailing edge, the system time has gone backwards and we're treating
-        // it as the trailing edge, or we've hit the `maxWait` limit.
-        return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
-          (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
-      }
-
-      function timerExpired() {
-        var time = now$1();
-        if (shouldInvoke(time)) {
-          return trailingEdge(time);
+        if (typeof func != 'function') {
+            throw new TypeError(FUNC_ERROR_TEXT$1);
         }
-        // Restart the timer.
-        timerId = setTimeout(timerExpired, remainingWait(time));
-      }
-
-      function trailingEdge(time) {
-        timerId = undefined;
-
-        // Only invoke if we have `lastArgs` which means `func` has been
-        // debounced at least once.
-        if (trailing && lastArgs) {
-          return invokeFunc(time);
+        wait = toNumber(wait) || 0;
+        if (isObject(options)) {
+            leading = !!options.leading;
+            maxing = 'maxWait' in options;
+            maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
+            trailing = 'trailing' in options ? !!options.trailing : trailing;
         }
-        lastArgs = lastThis = undefined;
-        return result;
-      }
 
-      function cancel() {
-        if (timerId !== undefined) {
-          clearTimeout(timerId);
+        function invokeFunc(time) {
+            var args = lastArgs,
+                thisArg = lastThis;
+
+            lastArgs = lastThis = undefined;
+            lastInvokeTime = time;
+            result = func.apply(thisArg, args);
+            return result;
         }
-        lastInvokeTime = 0;
-        lastArgs = lastCallTime = lastThis = timerId = undefined;
-      }
 
-      function flush() {
-        return timerId === undefined ? result : trailingEdge(now$1());
-      }
-
-      function debounced() {
-        var time = now$1(),
-            isInvoking = shouldInvoke(time);
-
-        lastArgs = arguments;
-        lastThis = this;
-        lastCallTime = time;
-
-        if (isInvoking) {
-          if (timerId === undefined) {
-            return leadingEdge(lastCallTime);
-          }
-          if (maxing) {
-            // Handle invocations in a tight loop.
-            clearTimeout(timerId);
+        function leadingEdge(time) {
+            // Reset any `maxWait` timer.
+            lastInvokeTime = time;
+            // Start the timer for the trailing edge.
             timerId = setTimeout(timerExpired, wait);
-            return invokeFunc(lastCallTime);
-          }
+            // Invoke the leading edge.
+            return leading ? invokeFunc(time) : result;
         }
-        if (timerId === undefined) {
-          timerId = setTimeout(timerExpired, wait);
+
+        function remainingWait(time) {
+            var timeSinceLastCall = time - lastCallTime,
+                timeSinceLastInvoke = time - lastInvokeTime,
+                timeWaiting = wait - timeSinceLastCall;
+
+            return maxing
+                ? nativeMin(timeWaiting, maxWait - timeSinceLastInvoke)
+                : timeWaiting;
         }
-        return result;
-      }
-      debounced.cancel = cancel;
-      debounced.flush = flush;
-      return debounced;
+
+        function shouldInvoke(time) {
+            var timeSinceLastCall = time - lastCallTime,
+                timeSinceLastInvoke = time - lastInvokeTime;
+
+            // Either this is the first call, activity has stopped and we're at the
+            // trailing edge, the system time has gone backwards and we're treating
+            // it as the trailing edge, or we've hit the `maxWait` limit.
+            return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
+                (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
+        }
+
+        function timerExpired() {
+            var time = now$1();
+            if (shouldInvoke(time)) {
+                return trailingEdge(time);
+            }
+            // Restart the timer.
+            timerId = setTimeout(timerExpired, remainingWait(time));
+        }
+
+        function trailingEdge(time) {
+            timerId = undefined;
+
+            // Only invoke if we have `lastArgs` which means `func` has been
+            // debounced at least once.
+            if (trailing && lastArgs) {
+                return invokeFunc(time);
+            }
+            lastArgs = lastThis = undefined;
+            return result;
+        }
+
+        function cancel() {
+            if (timerId !== undefined) {
+                clearTimeout(timerId);
+            }
+            lastInvokeTime = 0;
+            lastArgs = lastCallTime = lastThis = timerId = undefined;
+        }
+
+        function flush() {
+            return timerId === undefined ? result : trailingEdge(now$1());
+        }
+
+        function debounced() {
+            var time = now$1(),
+                isInvoking = shouldInvoke(time);
+
+            lastArgs = arguments;
+            lastThis = this;
+            lastCallTime = time;
+
+            if (isInvoking) {
+                if (timerId === undefined) {
+                    return leadingEdge(lastCallTime);
+                }
+                if (maxing) {
+                    // Handle invocations in a tight loop.
+                    clearTimeout(timerId);
+                    timerId = setTimeout(timerExpired, wait);
+                    return invokeFunc(lastCallTime);
+                }
+            }
+            if (timerId === undefined) {
+                timerId = setTimeout(timerExpired, wait);
+            }
+            return result;
+        }
+
+        debounced.cancel = cancel;
+        debounced.flush = flush;
+        return debounced;
     }
 
     /** Error message constants. */
@@ -586,21 +597,21 @@ var SimpleBar = (function () {
      * jQuery(window).on('popstate', throttled.cancel);
      */
     function throttle(func, wait, options) {
-      var leading = true,
-          trailing = true;
+        var leading = true,
+            trailing = true;
 
-      if (typeof func != 'function') {
-        throw new TypeError(FUNC_ERROR_TEXT);
-      }
-      if (isObject(options)) {
-        leading = 'leading' in options ? !!options.leading : leading;
-        trailing = 'trailing' in options ? !!options.trailing : trailing;
-      }
-      return debounce(func, wait, {
-        'leading': leading,
-        'maxWait': wait,
-        'trailing': trailing
-      });
+        if (typeof func != 'function') {
+            throw new TypeError(FUNC_ERROR_TEXT);
+        }
+        if (isObject(options)) {
+            leading = 'leading' in options ? !!options.leading : leading;
+            trailing = 'trailing' in options ? !!options.trailing : trailing;
+        }
+        return debounce(func, wait, {
+            'leading': leading,
+            'maxWait': wait,
+            'trailing': trailing
+        });
     }
 
     /**
@@ -613,21 +624,21 @@ var SimpleBar = (function () {
      */
 
     /******************************************************************************
-    Copyright (c) Microsoft Corporation.
+     Copyright (c) Microsoft Corporation.
 
-    Permission to use, copy, modify, and/or distribute this software for any
-    purpose with or without fee is hereby granted.
+     Permission to use, copy, modify, and/or distribute this software for any
+     purpose with or without fee is hereby granted.
 
-    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-    PERFORMANCE OF THIS SOFTWARE.
-    ***************************************************************************** */
+     THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+     REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+     AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+     INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+     LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+     OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+     PERFORMANCE OF THIS SOFTWARE.
+     ***************************************************************************** */
 
-    var __assign = function() {
+    var __assign = function () {
         __assign = Object.assign || function __assign(t) {
             for (var s, i = 1, n = arguments.length; i < n; i++) {
                 s = arguments[i];
@@ -648,6 +659,7 @@ var SimpleBar = (function () {
             }
         });
     }
+
     function scrollbarWidth() {
         if (cachedScrollbarWidth === null) {
             if (typeof document === 'undefined') {
@@ -673,19 +685,23 @@ var SimpleBar = (function () {
         }
         return element.ownerDocument.defaultView;
     }
+
     function getElementDocument$1(element) {
         if (!element || !element.ownerDocument) {
             return document;
         }
         return element.ownerDocument;
     }
+
     // Helper function to retrieve options from element attributes
     var getOptions$1 = function (obj) {
         var initialObj = {};
         var options = Array.prototype.reduce.call(obj, function (acc, attribute) {
             var option = attribute.name.match(/data-simplebar-(.+)/);
             if (option) {
-                var key = option[1].replace(/\W+(.)/g, function (_, chr) { return chr.toUpperCase(); });
+                var key = option[1].replace(/\W+(.)/g, function (_, chr) {
+                    return chr.toUpperCase();
+                });
                 switch (attribute.value) {
                     case 'true':
                         acc[key] = true;
@@ -704,12 +720,14 @@ var SimpleBar = (function () {
         }, initialObj);
         return options;
     };
+
     function addClasses$1(el, classes) {
         var _a;
         if (!el)
             return;
         (_a = el.classList).add.apply(_a, classes.split(' '));
     }
+
     function removeClasses$1(el, classes) {
         if (!el)
             return;
@@ -717,6 +735,7 @@ var SimpleBar = (function () {
             el.classList.remove(className);
         });
     }
+
     function classNamesToQuery$1(classNames) {
         return ".".concat(classNames.split(' ').join('.'));
     }
@@ -731,10 +750,13 @@ var SimpleBar = (function () {
         classNamesToQuery: classNamesToQuery$1
     });
 
-    var getElementWindow = getElementWindow$1, getElementDocument = getElementDocument$1, getOptions$2 = getOptions$1, addClasses$2 = addClasses$1, removeClasses = removeClasses$1, classNamesToQuery = classNamesToQuery$1;
+    var getElementWindow = getElementWindow$1, getElementDocument = getElementDocument$1, getOptions$2 = getOptions$1,
+        addClasses$2 = addClasses$1, removeClasses = removeClasses$1, classNamesToQuery = classNamesToQuery$1;
     var SimpleBarCore = /** @class */ (function () {
         function SimpleBarCore(element, options) {
-            if (options === void 0) { options = {}; }
+            if (options === void 0) {
+                options = {};
+            }
             var _this = this;
             this.removePreventClickId = null;
             this.minScrollbarWidth = 20;
@@ -759,10 +781,14 @@ var SimpleBar = (function () {
             this.isRtl = null;
             this.mouseX = 0;
             this.mouseY = 0;
-            this.onMouseMove = function () { };
-            this.onWindowResize = function () { };
-            this.onStopScrolling = function () { };
-            this.onMouseEntered = function () { };
+            this.onMouseMove = function () {
+            };
+            this.onWindowResize = function () {
+            };
+            this.onStopScrolling = function () {
+            };
+            this.onMouseEntered = function () {
+            };
             /**
              * On scroll event handling
              */
@@ -872,8 +898,7 @@ var SimpleBar = (function () {
                                 _this.axis.x.scrollbar.el.getBoundingClientRect();
                             if (_this.isWithinBounds(_this.axis.x.scrollbar.rect)) {
                                 _this.onDragStart(e, 'x');
-                            }
-                            else {
+                            } else {
                                 _this.onTrackClick(e, 'x');
                             }
                         }
@@ -882,8 +907,7 @@ var SimpleBar = (function () {
                                 _this.axis.y.scrollbar.el.getBoundingClientRect();
                             if (_this.isWithinBounds(_this.axis.y.scrollbar.rect)) {
                                 _this.onDragStart(e, 'y');
-                            }
-                            else {
+                            } else {
                                 _this.onTrackClick(e, 'y');
                             }
                         }
@@ -907,8 +931,7 @@ var SimpleBar = (function () {
                 e.stopPropagation();
                 if (_this.draggedAxis === 'y') {
                     eventOffset = e.pageY;
-                }
-                else {
+                } else {
                     eventOffset = e.pageX;
                 }
                 // Calculate how far the user's mouse is from the top/left of the scrollbar (minus the dragOffset).
@@ -917,8 +940,8 @@ var SimpleBar = (function () {
                     _this.axis[_this.draggedAxis].dragOffset;
                 dragPos = _this.isRtl
                     ? ((_k = (_j = track.rect) === null || _j === void 0 ? void 0 : _j[_this.axis[_this.draggedAxis].sizeAttr]) !== null && _k !== void 0 ? _k : 0) -
-                        scrollbar.size -
-                        dragPos
+                    scrollbar.size -
+                    dragPos
                     : dragPos;
                 // Convert the mouse position into a percentage of the scrollbar height/width.
                 var dragPerc = dragPos / (trackSize - scrollbar.size);
@@ -973,8 +996,8 @@ var SimpleBar = (function () {
                     dragOffset: 0,
                     isOverflowing: true,
                     forceVisible: false,
-                    track: { size: null, el: null, rect: null, isVisible: false },
-                    scrollbar: { size: null, el: null, rect: null, isVisible: false }
+                    track: {size: null, el: null, rect: null, isVisible: false},
+                    scrollbar: {size: null, el: null, rect: null, isVisible: false}
                 },
                 y: {
                     scrollOffsetAttr: 'scrollTop',
@@ -986,19 +1009,20 @@ var SimpleBar = (function () {
                     dragOffset: 0,
                     isOverflowing: true,
                     forceVisible: false,
-                    track: { size: null, el: null, rect: null, isVisible: false },
-                    scrollbar: { size: null, el: null, rect: null, isVisible: false }
+                    track: {size: null, el: null, rect: null, isVisible: false},
+                    scrollbar: {size: null, el: null, rect: null, isVisible: false}
                 }
             };
             if (typeof this.el !== 'object' || !this.el.nodeName) {
                 throw new Error("Argument passed to SimpleBar must be an HTML element instead of ".concat(this.el));
             }
             this.onMouseMove = throttle(this._onMouseMove, 64);
-            this.onWindowResize = debounce(this._onWindowResize, 64, { leading: true });
+            this.onWindowResize = debounce(this._onWindowResize, 64, {leading: true});
             this.onStopScrolling = debounce(this._onStopScrolling, this.stopScrollDelay);
             this.onMouseEntered = debounce(this._onMouseEntered, this.stopScrollDelay);
             this.init();
         }
+
         /**
          * Helper to fix browsers inconsistency on RTL:
          *  - Firefox inverts the scrollbar initial position
@@ -1036,17 +1060,15 @@ var SimpleBar = (function () {
             try {
                 // Detect browsers supporting CSS scrollbar styling and do not calculate
                 if ((this.contentWrapperEl &&
-                    getComputedStyle(this.contentWrapperEl, '::-webkit-scrollbar')
-                        .display === 'none') ||
+                        getComputedStyle(this.contentWrapperEl, '::-webkit-scrollbar')
+                            .display === 'none') ||
                     'scrollbarWidth' in document.documentElement.style ||
                     '-ms-overflow-style' in document.documentElement.style) {
                     return 0;
-                }
-                else {
+                } else {
                     return scrollbarWidth();
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 return scrollbarWidth();
             }
         };
@@ -1077,10 +1099,10 @@ var SimpleBar = (function () {
             this.wrapperEl = this.el.querySelector(classNamesToQuery(this.classNames.wrapper));
             this.contentWrapperEl =
                 this.options.scrollableNode ||
-                    this.el.querySelector(classNamesToQuery(this.classNames.contentWrapper));
+                this.el.querySelector(classNamesToQuery(this.classNames.contentWrapper));
             this.contentEl =
                 this.options.contentNode ||
-                    this.el.querySelector(classNamesToQuery(this.classNames.contentEl));
+                this.el.querySelector(classNamesToQuery(this.classNames.contentEl));
             this.offsetEl = this.el.querySelector(classNamesToQuery(this.classNames.offset));
             this.maskEl = this.el.querySelector(classNamesToQuery(this.classNames.mask));
             this.placeholderEl = this.findChild(this.wrapperEl, classNamesToQuery(this.classNames.placeholder));
@@ -1190,11 +1212,11 @@ var SimpleBar = (function () {
                 : 0;
             this.axis.x.isOverflowing =
                 this.axis.x.isOverflowing &&
-                    contentElScrollWidth > contentWrapperElOffsetWidth - offsetForYScrollbar;
+                contentElScrollWidth > contentWrapperElOffsetWidth - offsetForYScrollbar;
             this.axis.y.isOverflowing =
                 this.axis.y.isOverflowing &&
-                    contentElScrollHeight >
-                        contentWrapperElOffsetHeight - offsetForXScrollbar;
+                contentElScrollHeight >
+                contentWrapperElOffsetHeight - offsetForXScrollbar;
             this.axis.x.scrollbar.size = this.getScrollbarSize('x');
             this.axis.y.scrollbar.size = this.getScrollbarSize('y');
             if (this.axis.x.scrollbar.el)
@@ -1211,7 +1233,9 @@ var SimpleBar = (function () {
          */
         SimpleBarCore.prototype.getScrollbarSize = function (axis) {
             var _a, _b;
-            if (axis === void 0) { axis = 'y'; }
+            if (axis === void 0) {
+                axis = 'y';
+            }
             if (!this.axis[axis].isOverflowing || !this.contentEl) {
                 return 0;
             }
@@ -1228,7 +1252,9 @@ var SimpleBar = (function () {
         };
         SimpleBarCore.prototype.positionScrollbar = function (axis) {
             var _a, _b, _c;
-            if (axis === void 0) { axis = 'y'; }
+            if (axis === void 0) {
+                axis = 'y';
+            }
             var scrollbar = this.axis[axis].scrollbar;
             if (!this.axis[axis].isOverflowing ||
                 !this.contentWrapperEl ||
@@ -1242,8 +1268,8 @@ var SimpleBar = (function () {
             var scrollOffset = this.contentWrapperEl[this.axis[axis].scrollOffsetAttr];
             scrollOffset =
                 axis === 'x' &&
-                    this.isRtl &&
-                    ((_b = SimpleBarCore.getRtlHelpers()) === null || _b === void 0 ? void 0 : _b.isScrollOriginAtZero)
+                this.isRtl &&
+                ((_b = SimpleBarCore.getRtlHelpers()) === null || _b === void 0 ? void 0 : _b.isScrollOriginAtZero)
                     ? -scrollOffset
                     : scrollOffset;
             if (axis === 'x' && this.isRtl) {
@@ -1263,7 +1289,9 @@ var SimpleBar = (function () {
                     : "translate3d(0, ".concat(handleOffset, "px, 0)");
         };
         SimpleBarCore.prototype.toggleTrackVisibility = function (axis) {
-            if (axis === void 0) { axis = 'y'; }
+            if (axis === void 0) {
+                axis = 'y';
+            }
             var track = this.axis[axis].track.el;
             var scrollbar = this.axis[axis].scrollbar.el;
             if (!track || !scrollbar || !this.contentWrapperEl)
@@ -1272,8 +1300,7 @@ var SimpleBar = (function () {
                 track.style.visibility = 'visible';
                 this.contentWrapperEl.style[this.axis[axis].overflowAttr] = 'scroll';
                 this.el.classList.add("".concat(this.classNames.scrollable, "-").concat(axis));
-            }
-            else {
+            } else {
                 track.style.visibility = 'hidden';
                 this.contentWrapperEl.style[this.axis[axis].overflowAttr] = 'hidden';
                 this.el.classList.remove("".concat(this.classNames.scrollable, "-").concat(axis));
@@ -1281,20 +1308,23 @@ var SimpleBar = (function () {
             // Even if forceVisible is enabled, scrollbar itself should be hidden
             if (this.axis[axis].isOverflowing) {
                 scrollbar.style.display = 'block';
-            }
-            else {
+            } else {
                 scrollbar.style.display = 'none';
             }
         };
         SimpleBarCore.prototype.showScrollbar = function (axis) {
-            if (axis === void 0) { axis = 'y'; }
+            if (axis === void 0) {
+                axis = 'y';
+            }
             if (this.axis[axis].isOverflowing && !this.axis[axis].scrollbar.isVisible) {
                 addClasses$2(this.axis[axis].scrollbar.el, this.classNames.visible);
                 this.axis[axis].scrollbar.isVisible = true;
             }
         };
         SimpleBarCore.prototype.hideScrollbar = function (axis) {
-            if (axis === void 0) { axis = 'y'; }
+            if (axis === void 0) {
+                axis = 'y';
+            }
             if (this.axis[axis].isOverflowing && this.axis[axis].scrollbar.isVisible) {
                 removeClasses(this.axis[axis].scrollbar.el, this.classNames.visible);
                 this.axis[axis].scrollbar.isVisible = false;
@@ -1313,7 +1343,9 @@ var SimpleBar = (function () {
                     : '0px';
         };
         SimpleBarCore.prototype.onMouseMoveForAxis = function (axis) {
-            if (axis === void 0) { axis = 'y'; }
+            if (axis === void 0) {
+                axis = 'y';
+            }
             var currentAxis = this.axis[axis];
             if (!currentAxis.track.el || !currentAxis.scrollbar.el)
                 return;
@@ -1325,12 +1357,10 @@ var SimpleBar = (function () {
                 addClasses$2(currentAxis.track.el, this.classNames.hover);
                 if (this.isWithinBounds(currentAxis.scrollbar.rect)) {
                     addClasses$2(currentAxis.scrollbar.el, this.classNames.hover);
-                }
-                else {
+                } else {
                     removeClasses(currentAxis.scrollbar.el, this.classNames.hover);
                 }
-            }
-            else {
+            } else {
                 removeClasses(currentAxis.track.el, this.classNames.hover);
                 if (this.options.autoHide) {
                     this.hideScrollbar(axis);
@@ -1338,7 +1368,9 @@ var SimpleBar = (function () {
             }
         };
         SimpleBarCore.prototype.onMouseLeaveForAxis = function (axis) {
-            if (axis === void 0) { axis = 'y'; }
+            if (axis === void 0) {
+                axis = 'y';
+            }
             removeClasses(this.axis[axis].track.el, this.classNames.hover);
             removeClasses(this.axis[axis].scrollbar.el, this.classNames.hover);
             if (this.options.autoHide) {
@@ -1350,7 +1382,9 @@ var SimpleBar = (function () {
          */
         SimpleBarCore.prototype.onDragStart = function (e, axis) {
             var _a;
-            if (axis === void 0) { axis = 'y'; }
+            if (axis === void 0) {
+                axis = 'y';
+            }
             var elDocument = getElementDocument(this.el);
             var elWindow = getElementWindow(this.el);
             var scrollbar = this.axis[axis].scrollbar;
@@ -1365,8 +1399,7 @@ var SimpleBar = (function () {
             if (this.removePreventClickId === null) {
                 elDocument.addEventListener('click', this.preventClick, true);
                 elDocument.addEventListener('dblclick', this.preventClick, true);
-            }
-            else {
+            } else {
                 elWindow.clearTimeout(this.removePreventClickId);
                 this.removePreventClickId = null;
             }
@@ -1374,7 +1407,9 @@ var SimpleBar = (function () {
         SimpleBarCore.prototype.onTrackClick = function (e, axis) {
             var _this = this;
             var _a, _b, _c, _d;
-            if (axis === void 0) { axis = 'y'; }
+            if (axis === void 0) {
+                axis = 'y';
+            }
             var currentAxis = this.axis[axis];
             if (!this.options.clickOnTrack ||
                 !currentAxis.scrollbar.el ||
@@ -1404,8 +1439,7 @@ var SimpleBar = (function () {
                         _this.contentWrapperEl[_this.axis[axis].scrollOffsetAttr] = scrolled;
                         elWindow.requestAnimationFrame(scrollTo);
                     }
-                }
-                else {
+                } else {
                     if (scrolled < scrollSize) {
                         scrolled += speed;
                         _this.contentWrapperEl[_this.axis[axis].scrollOffsetAttr] = scrolled;
@@ -1519,6 +1553,7 @@ var SimpleBar = (function () {
     var _a = SimpleBarCore.helpers, getOptions = _a.getOptions, addClasses = _a.addClasses;
     var SimpleBar = /** @class */ (function (_super) {
         __extends(SimpleBar, _super);
+
         function SimpleBar() {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
@@ -1529,6 +1564,7 @@ var SimpleBar = (function () {
             SimpleBar.instances.set(args[0], _this);
             return _this;
         }
+
         SimpleBar.initDOMLoadedElements = function () {
             document.removeEventListener('DOMContentLoaded', this.initDOMLoadedElements);
             window.removeEventListener('load', this.initDOMLoadedElements);
@@ -1607,7 +1643,7 @@ var SimpleBar = (function () {
             if (typeof MutationObserver !== 'undefined') {
                 // Mutation observer to observe dynamically added elements
                 this.globalObserver = new MutationObserver(SimpleBar.handleMutations);
-                this.globalObserver.observe(document, { childList: true, subtree: true });
+                this.globalObserver.observe(document, {childList: true, subtree: true});
             }
             // Taken from jQuery `ready` function
             // Instantiate elements already present on the page
@@ -1615,8 +1651,7 @@ var SimpleBar = (function () {
                 (document.readyState !== 'loading' && !document.documentElement.doScroll)) {
                 // Handle it asynchronously to allow scripts the opportunity to delay init
                 window.setTimeout(this.initDOMLoadedElements);
-            }
-            else {
+            } else {
                 document.addEventListener('DOMContentLoaded', this.initDOMLoadedElements);
                 window.addEventListener('load', this.initDOMLoadedElements);
             }
@@ -1627,18 +1662,17 @@ var SimpleBar = (function () {
                     if (addedNode.nodeType === 1) {
                         if (addedNode.hasAttribute('data-simplebar')) {
                             !SimpleBar.instances.has(addedNode) &&
-                                document.documentElement.contains(addedNode) &&
-                                new SimpleBar(addedNode, getOptions(addedNode.attributes));
-                        }
-                        else {
+                            document.documentElement.contains(addedNode) &&
+                            new SimpleBar(addedNode, getOptions(addedNode.attributes));
+                        } else {
                             addedNode
                                 .querySelectorAll('[data-simplebar]')
                                 .forEach(function (el) {
-                                if (el.getAttribute('data-simplebar') !== 'init' &&
-                                    !SimpleBar.instances.has(el) &&
-                                    document.documentElement.contains(el))
-                                    new SimpleBar(el, getOptions(el.attributes));
-                            });
+                                    if (el.getAttribute('data-simplebar') !== 'init' &&
+                                        !SimpleBar.instances.has(el) &&
+                                        document.documentElement.contains(el))
+                                        new SimpleBar(el, getOptions(el.attributes));
+                                });
                         }
                     }
                 });
@@ -1646,14 +1680,13 @@ var SimpleBar = (function () {
                     if (removedNode.nodeType === 1) {
                         if (removedNode.getAttribute('data-simplebar') === 'init') {
                             SimpleBar.instances.has(removedNode) &&
-                                !document.documentElement.contains(removedNode) &&
-                                SimpleBar.instances.get(removedNode).unMount();
-                        }
-                        else {
+                            !document.documentElement.contains(removedNode) &&
+                            SimpleBar.instances.get(removedNode).unMount();
+                        } else {
                             Array.prototype.forEach.call(removedNode.querySelectorAll('[data-simplebar="init"]'), function (el) {
                                 SimpleBar.instances.has(el) &&
-                                    !document.documentElement.contains(el) &&
-                                    SimpleBar.instances.get(el).unMount();
+                                !document.documentElement.contains(el) &&
+                                SimpleBar.instances.get(el).unMount();
                             });
                         }
                     }

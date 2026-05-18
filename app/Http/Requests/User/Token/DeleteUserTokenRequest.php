@@ -1,7 +1,8 @@
 <?php
+
 namespace App\Http\Requests\User\Token;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class DeleteUserTokenRequest extends FormRequest
@@ -11,7 +12,7 @@ class DeleteUserTokenRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->can('delete token');
+        return Auth::user()->can('delete user token');
     }
 
     /**
@@ -20,7 +21,7 @@ class DeleteUserTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'confirm_removal' => 'required'
+            'confirm_removal' => 'required',
         ];
     }
 

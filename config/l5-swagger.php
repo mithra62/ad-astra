@@ -108,16 +108,16 @@ return [
              * @link https://zircote.github.io/swagger-php/reference/processors.html
              */
             'default_processors_configuration' => [
-            /** Example */
-            /**
-             * 'operationId.hash' => true,
-             * 'pathFilter' => [
-             * 'tags' => [
-             * '/pets/',
-             * '/store/',
-             * ],
-             * ],.
-             */
+                /** Example */
+                /**
+                 * 'operationId.hash' => true,
+                 * 'pathFilter' => [
+                 * 'tags' => [
+                 * '/pets/',
+                 * '/store/',
+                 * ],
+                 * ],.
+                 */
             ],
 
             /**
@@ -125,7 +125,10 @@ return [
              *
              * @see \OpenApi\scan
              */
-            'analyser' => null,
+            'analyser' => new \OpenApi\Analysers\ReflectionAnalyser([
+                new \OpenApi\Analysers\AttributeAnnotationFactory(),
+                new \OpenApi\Analysers\DocBlockAnnotationFactory(),
+            ]),
 
             /**
              * analysis: defaults to a new \OpenApi\Analysis .

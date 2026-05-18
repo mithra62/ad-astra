@@ -8,30 +8,33 @@
     .alert-#{$name} {
         background-color: rgba(#{$color}, 1);
         border: 1px solid rgba(#{$color}, 1);
-        color: rgba(var(--white),1);
+        color: rgba(var(--white), 1);
     }
     .alert-outline-#{$name} {
         border: 1px solid rgba(#{$color}, 1);
         color: rgba(#{$color}, 1);
+
         &:hover {
             background-color: rgba(#{$color}, 1);
-            color: rgba(var(--white),1);
+            color: rgba(var(--white), 1);
             transition: var(--app-transition);
         }
     }
     .alert-light-#{$name} {
         background-color: rgba(#{$color}, 0.1);
         color: rgba(#{$color}, 1);
+
         &:hover {
             background-color: rgba(#{$color}, 0.2);
             border-color: rgba(#{$color}, 1);
             color: rgba(#{$color}, 1);
         }
     }
-    .alert-light-border-#{$name}{
+    .alert-light-border-#{$name} {
         border: 1px solid rgba(#{$color}, 1);
         background-color: rgba(#{$color}, 0.1);
         color: rgba(#{$color}, 1);
+
         &:hover {
             background-color: rgba(#{$color}, 0.2);
         }
@@ -41,13 +44,14 @@
         border-left: 4px solid rgba(#{$color}, 1);
     }
     .alert-label {
-        &.alert-label-#{$name}{
+        &.alert-label-#{$name} {
             background-color: rgba(#{$color}, 0.6);
-            color: rgba(var(--white),1);
+            color: rgba(var(--white), 1);
+
             .label-icon {
-                &.label-icon-#{$name}{
+                &.label-icon-#{$name} {
                     background-color: rgba(#{$color}, 1);
-                    color: rgba(var(--white),1);
+                    color: rgba(var(--white), 1);
                 }
             }
         }
@@ -57,11 +61,13 @@
 @each $name, $color in reboot.$colors {
     @include alert_mixin(""+$name, map.get(reboot.$colors, $name));
 }
-.alert-label {  
+
+.alert-label {
     display: flex;
     align-items: center;
     padding-left: 60px;
     border: none;
+
     .label-icon {
         position: absolute;
         width: 50px;
@@ -72,19 +78,22 @@
         justify-content: center;
         align-items: center;
         font-size: 20px;
-        border-radius:6px 0 0 6px;
+        border-radius: 6px 0 0 6px;
     }
 }
-.custom-alert{
+
+.custom-alert {
     border: 1px solid var(--border_color);
-    .alert-header{
+
+    .alert-header {
         padding: 10px;
         margin-bottom: 20px;
-        background-color:rgba( var(--danger));
+        background-color: rgba(var(--danger));
         border-radius: 6px 6px 0 0;
         text-align: end;
     }
-    .alert-body{
+
+    .alert-body {
         padding: 0.375rem 0.75rem;
     }
 }

@@ -14,8 +14,8 @@
         });
 })();
 
-$(function() {
-    $("#form-validation").submit(function(event) {
+$(function () {
+    $("#form-validation").submit(function (event) {
         const userName = $("#userName").val();
         const email = $("#email").val();
         const password = $("#password").val();

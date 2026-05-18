@@ -11,8 +11,8 @@ new Chart(ctx, {
         labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
         datasets: [{
             label: "Dataset #1",
-            backgroundColor: hexToRGB(getLocalStorageItem('color-primary','#0F626A'),0.2),
-            borderColor: hexToRGB(getLocalStorageItem('color-primary','#0F626A'),1),
+            backgroundColor: hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 0.2),
+            borderColor: hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 1),
             borderWidth: 2,
             borderRadius: 5,
             borderSkipped: false,
@@ -20,8 +20,8 @@ new Chart(ctx, {
         },
             {
                 label: "Dataset #2",
-                backgroundColor: hexToRGB(getLocalStorageItem('color-primary','#0AB964'),0.2),
-                borderColor: hexToRGB(getLocalStorageItem('color-primary','#0AB964'),0.2),
+                backgroundColor: hexToRGB(getLocalStorageItem('color-primary', '#0AB964'), 0.2),
+                borderColor: hexToRGB(getLocalStorageItem('color-primary', '#0AB964'), 0.2),
                 borderWidth: 2,
                 borderRadius: 50,
                 borderSkipped: false,
@@ -53,13 +53,13 @@ new Chart(chart1, {
         labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
         datasets: [{
             label: "Dataset #1",
-            backgroundColor: hexToRGB(getLocalStorageItem('color-primary','#0F626A'),0.5),
-            borderColor: hexToRGB(getLocalStorageItem('color-primary','#0F626A'),1),
+            backgroundColor: hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 0.5),
+            borderColor: hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 1),
             data: [-65, 59, -20, 81, 56, -55, 40]
         },
             {
                 label: "Dataset #2",
-                backgroundColor: hexToRGB(getLocalStorageItem('color-primary','#0F626A'),0.5),
+                backgroundColor: hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 0.5),
                 borderColor: "rgba(299, 94, 64,1)",
                 data: [65, 59, -20, 81, -56, 55, -40]
             }]
@@ -88,14 +88,14 @@ new Chart(chart2, {
         labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
         datasets: [{
             label: "Dataset #1",
-            backgroundColor: hexToRGB(getLocalStorageItem('color-primary','#0F626A'),0.2),
-            borderColor: hexToRGB(getLocalStorageItem('color-primary','#0F626A'),1),
+            backgroundColor: hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 0.2),
+            borderColor: hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 1),
             data: [-20, 54, -20, -5, 56, -55, 40]
         },
             {
                 label: "Dataset #2",
-                backgroundColor: hexToRGB(getLocalStorageItem('color-danger','#E14E5A'),0.2),
-                borderColor: hexToRGB(getLocalStorageItem('color-danger','#E14E5A'),0.2),
+                backgroundColor: hexToRGB(getLocalStorageItem('color-danger', '#E14E5A'), 0.2),
+                borderColor: hexToRGB(getLocalStorageItem('color-danger', '#E14E5A'), 0.2),
                 data: [90, 59, -10, 81, -56, 10, -40]
             }]
     },
@@ -122,8 +122,8 @@ new Chart(chart3, {
         labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
         datasets: [{
             label: "Dataset #1",
-            backgroundColor: hexToRGB(getLocalStorageItem('color-danger','#E14E5A'),0.2),
-            borderColor: hexToRGB(getLocalStorageItem('color-danger','#E14E5A'),1),
+            backgroundColor: hexToRGB(getLocalStorageItem('color-danger', '#E14E5A'), 0.2),
+            borderColor: hexToRGB(getLocalStorageItem('color-danger', '#E14E5A'), 1),
             fill: false,
             stepped: true,
             data: [-20, 54, -20, -5, 56, -55, 40]
@@ -155,14 +155,14 @@ new Chart(chart4, {
         labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
         datasets: [{
             label: "Dataset #1",
-            backgroundColor: hexToRGB(getLocalStorageItem('color-success','#0AB964'),0.2),
-            borderColor: hexToRGB(getLocalStorageItem('color-success','#0AB964'),0.2),
+            backgroundColor: hexToRGB(getLocalStorageItem('color-success', '#0AB964'), 0.2),
+            borderColor: hexToRGB(getLocalStorageItem('color-success', '#0AB964'), 0.2),
             data: [-20, 25, -20, -5, 35, -10, 20]
         },
             {
                 label: "Dataset #2",
-                backgroundColor: hexToRGB(getLocalStorageItem('color-primary','#0F626A'),0.2),
-                borderColor: hexToRGB(getLocalStorageItem('color-primary','#0F626A'),1),
+                backgroundColor: hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 0.2),
+                borderColor: hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 1),
                 data: [-20, -23, 20, 0, 8, 25, -20]
             }]
     },
@@ -187,9 +187,9 @@ new Chart(chart5, {
             {
                 label: "Dataset #1",
                 backgroundColor: [
-                    hexToRGB(getLocalStorageItem('color-primary','#0F626A'),0.5),
-                    hexToRGB(getLocalStorageItem('color-success','#0AB964'),0.5),
-                    hexToRGB(getLocalStorageItem('color-danger','#E14E5A'),0.5),
+                    hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 0.5),
+                    hexToRGB(getLocalStorageItem('color-success', '#0AB964'), 0.5),
+                    hexToRGB(getLocalStorageItem('color-danger', '#E14E5A'), 0.5),
                 ],
                 data: [-20, -54, 20, 0, 56, 55, -40]
             }]
@@ -208,9 +208,9 @@ new Chart(chart6, {
             {
                 label: "Dataset #1",
                 backgroundColor: [
-                    hexToRGB(getLocalStorageItem('color-primary','#0F626A'),0.5),
-                    hexToRGB(getLocalStorageItem('color-info','#4196FA'),0.5),
-                    hexToRGB(getLocalStorageItem('color-warning','#F9C123'),0.5),
+                    hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 0.5),
+                    hexToRGB(getLocalStorageItem('color-info', '#4196FA'), 0.5),
+                    hexToRGB(getLocalStorageItem('color-warning', '#F9C123'), 0.5),
                 ],
                 data: [-10, -54, 40, 20, 56, 55, -40]
             }]
@@ -229,9 +229,9 @@ new Chart(chart7, {
             {
                 label: "Dataset #1",
                 backgroundColor: [
-                    hexToRGB(getLocalStorageItem('color-dark','#28232D'),0.5),
-                    hexToRGB(getLocalStorageItem('color-danger','#E14E5A'),0.5),
-                    hexToRGB(getLocalStorageItem('color-info','#4196FA'),0.5),
+                    hexToRGB(getLocalStorageItem('color-dark', '#28232D'), 0.5),
+                    hexToRGB(getLocalStorageItem('color-danger', '#E14E5A'), 0.5),
+                    hexToRGB(getLocalStorageItem('color-info', '#4196FA'), 0.5),
                 ],
                 data: [-20, -54, 20, 0, 56, 55, -40]
             }]
@@ -239,7 +239,6 @@ new Chart(chart7, {
 });
 
 // **------ Multi Series Pie**
-
 
 
 const chart8 = document.getElementById('myChart8');
@@ -250,19 +249,19 @@ new Chart(chart8, {
         labels: ['Overall Yay', 'Overall Nay', 'Group A Yay', 'Group A Nay', 'Group B Yay', 'Group B Nay', 'Group C Yay', 'Group C Nay'],
         datasets: [
             {
-                backgroundColor: [hexToRGB(getLocalStorageItem('color-secondary','#0F626A'),0.10), hexToRGB(getLocalStorageItem('color-secondary','#0F626A'))],
+                backgroundColor: [hexToRGB(getLocalStorageItem('color-secondary', '#0F626A'), 0.10), hexToRGB(getLocalStorageItem('color-secondary', '#0F626A'))],
                 data: [21, 79]
             },
             {
-                backgroundColor: [hexToRGB(getLocalStorageItem('color-secondary','#626262'),0.10), hexToRGB(getLocalStorageItem('color-success','#626262'))],
+                backgroundColor: [hexToRGB(getLocalStorageItem('color-secondary', '#626262'), 0.10), hexToRGB(getLocalStorageItem('color-success', '#626262'))],
                 data: [33, 67]
             },
             {
-                backgroundColor: [hexToRGB(getLocalStorageItem('color-primary','#0AB964'),0.5), hexToRGB(getLocalStorageItem('color-primary','#0AB964'),1)],
+                backgroundColor: [hexToRGB(getLocalStorageItem('color-primary', '#0AB964'), 0.5), hexToRGB(getLocalStorageItem('color-primary', '#0AB964'), 1)],
                 data: [20, 80]
             },
             {
-                backgroundColor: [hexToRGB(getLocalStorageItem('color-danger','#E14E5A'),0.5), hexToRGB(getLocalStorageItem('color-danger','#E14E5A'),1)],
+                backgroundColor: [hexToRGB(getLocalStorageItem('color-danger', '#E14E5A'), 0.5), hexToRGB(getLocalStorageItem('color-danger', '#E14E5A'), 1)],
                 data: [10, 90]
             }
         ]
@@ -272,13 +271,13 @@ new Chart(chart8, {
         plugins: {
             legend: {
                 labels: {
-                    generateLabels: function(chart) {
+                    generateLabels: function (chart) {
                         // Get the default label list
                         const original = Chart.overrides.pie.plugins.legend.labels.generateLabels;
                         const labelsOriginal = original.call(this, chart);
 
                         // Build an array of colors used in the datasets of the chart
-                        let datasetColors = chart.data.datasets.map(function(e) {
+                        let datasetColors = chart.data.datasets.map(function (e) {
                             return e.backgroundColor;
                         });
                         datasetColors = datasetColors.flat();
@@ -305,7 +304,7 @@ new Chart(chart8, {
                     }
 
                 },
-                onClick: function(mouseEvent, legendItem, legend) {
+                onClick: function (mouseEvent, legendItem, legend) {
                     // toggle the visibility of the dataset from what it currently is
                     legend.chart.getDatasetMeta(
                         legendItem.datasetIndex
@@ -315,7 +314,7 @@ new Chart(chart8, {
             },
             tooltip: {
                 callbacks: {
-                    label: function(context) {
+                    label: function (context) {
                         const labelIndex = (context.datasetIndex * 2) + context.dataIndex;
                         return context.chart.data.labels[labelIndex] + ': ' + context.formattedValue;
                     }
@@ -345,20 +344,20 @@ new Chart(myChart9, {
     type: 'line',
     data: {
         datasets: [{
-            borderColor: hexToRGB(getLocalStorageItem('color-danger','#E14E5A'),1),
+            borderColor: hexToRGB(getLocalStorageItem('color-danger', '#E14E5A'), 1),
             borderWidth: 1,
             radius: 0,
             data: data,
         },
             {
-                borderColor: hexToRGB(getLocalStorageItem('color-primary','#0F626A'),1),
+                borderColor: hexToRGB(getLocalStorageItem('color-primary', '#0F626A'), 1),
                 borderWidth: 1,
                 radius: 0,
                 data: data2,
             }]
     },
     options: {
-        animation:{
+        animation: {
             x: {
                 type: 'number',
                 easing: 'linear',

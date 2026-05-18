@@ -2,37 +2,46 @@
 
 namespace App\Http\Controllers;
 
-use Laravel\Socialite\Socialite;
+use App\Facades\Users;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 
 class Login extends Controller
 {
-    public function redirectToProvider($provider)
+    public function redirectToProvider(string $provider)
     {
         return Socialite::driver($provider)->redirect();
     }
 
-    public function handleProviderCallback($provider)
+    public function handleProviderCallback(Request $request, string $provider)
     {
         try {
-            $user = Socialite::driver($provider)->user();
+            $socialUser = Socialite::driver($provider)->user();
         } catch (InvalidStateException $e) {
-            echo "broken";
-            exit;
+            return redirect()->route('login')
+                ->withErrors(['oauth' => __('auth.oauth_state_invalid')]);
         }
 
-        print_r($user);
-        exit;
-
-
-        // Find user by email or create a new user
-        $localUser = User::firstOrCreate(
-            ['email' => $user->getEmail()],
-            ['name' => $user->getName()]
+        // Find user by email or create a new one for this social provider.
+        // The provider name and IP are passed so a NewSocialUserRegistered event
+        // can be fired for new accounts.
+        $localUser = Users::firstOrCreateFromSocial(
+            $socialUser->getEmail(),
+            $socialUser->getName(),
+            $provider,
+            $request->ip(),
         );
 
-        Auth::login($localUser, true); // Login the user
+        // Block access if the account is not permitted to use the system.
+        if (! $localUser->canAccessSystem()) {
+            return redirect()->route('login')
+                ->withErrors(['email' => trans('auth.' . ($localUser->accessDeniedReason() ?? 'account_inactive'))]);
+        }
 
-        return redirect($this->redirectTo); // Redirect the user after successful login
+        Auth::login($localUser, true);
+
+        return redirect()->intended('/');
     }
 }

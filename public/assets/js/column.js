@@ -217,7 +217,7 @@ const columnChartOptions = {
     xaxis: {
         labels: {
             rotate: -45,
-            rotateAlways:true,
+            rotateAlways: true,
             style: {
                 colors: [],
                 fontSize: '14px',

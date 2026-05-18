@@ -1,7 +1,8 @@
 <?php
+
 namespace App\Http\Requests\User;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class PasswordUserRequest extends FormRequest

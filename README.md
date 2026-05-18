@@ -1,52 +1,138 @@
-## About Checkoff Pro API
+# Laravel Base
 
-This program includes 3 components
-
-- Website to manage the system
-- Command script to import data remotely and consistently
-- A Level 4 REST API with token based authentication
+Laravel Base is a Laravel 12 CMS/application foundation with an authenticated admin area, a Sanctum-protected API, Twig-based views, configurable content types, field layouts, media libraries, settings, users, roles, and permissions.
 
 ## Requirements
 
-- PHP >= 8.2
-- MySQL >= 8.x
-- Curl
+- PHP 8.2 or newer
+- Composer
+- Node.js and npm
+- MySQL 8.x or a compatible database supported by the app configuration
+- PHP cURL extension
 
-## Installation
+## Stack
 
-Within the project directory, execute the below Commands (in order)
+- Laravel 12
+- Laravel Fortify for authentication
+- Laravel Sanctum for API token authentication
+- Spatie Permission for roles and permissions
+- Native Laravel Media and Media Library layer for uploaded media
+- TwigBridge and Twig templates
+- L5 Swagger for API documentation
+- Vite 7 and Tailwind CSS 4
+- PHPUnit 11
 
-1. `composer install`
-2. `npm install`
+## Application Areas
 
-- Rename `.env.example` to `.env`
-- Fill out the newly created `.env` file to match your system
+- Public site routing through `SiteController`, with route drivers for entry-tree and template-based pages.
+- Admin UI under `/admin` for users, roles, account settings, tokens, entries, entry groups, entry types, categories, statuses, fields, field layouts, media libraries, and domain/user settings.
+- API routes under `/api/v1`, protected by Sanctum, for users, entries, and the current account.
+- Content modeling through entry groups, entry types, fields, field groups, field layouts, statuses, categories, entry relationships, and entry tree routing.
+- Config-driven settings domains in `config/settings.php`.
+- Twig templates in `resources/views` and public templates in `resources/templates`.
 
-### Install Data
+## Setup
 
-Execute the below in the order provided
+Install PHP and JavaScript dependencies:
 
-1. `php artisan migrate`
-2. `php artisan db:seed --class=RolesPermissionsSeeder`
-3. `php artisan db:seed --class=UsersSeeder`
+```bash
+composer install
+npm install
+```
 
-### Log In
+Create and configure your environment file:
 
-3 users will be created with the data seed. Check the `users` table and use the password `password` to gain initial access. 
+```powershell
+Copy-Item .env.example .env
+php artisan key:generate
+```
 
-## Data Import
+Or, from a Unix-style shell:
 
-You'll have to edit your `.env` file to include a copy of the API key for the master/parent site. You'll get this from "someone". Update the `CRAFT_API_TOKEN` config value with the API key before proceeding. 
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Once that's done, execute the below command from the project woor. 
+Set the database values in `.env`, including `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`. The example environment uses MySQL and a `DB_TABLE_PREFIX` of `chp_`.
 
-`php artisan app:sync-craft`
+Run migrations and seed the application:
 
-The above will sync the local system data from the remote system. 
+```bash
+php artisan migrate
+php artisan db:seed
+```
 
-## API Documentation
+The default seeder creates a super admin user:
 
-Execute the below command to generate the API documentation. 
+- Email: `eric@mithra62.com`
+- Password: `password`
 
-`php artisan l5-swagger:generate`
+For uploaded media, create the public storage link:
 
+```bash
+php artisan storage:link
+```
+
+## Development
+
+Run the Laravel server, queue listener, and Vite dev server together:
+
+```bash
+composer run dev
+```
+
+Or run them separately:
+
+```bash
+php artisan serve
+php artisan queue:listen --tries=1
+npm run dev
+```
+
+Build frontend assets for production:
+
+```bash
+npm run build
+```
+
+## Testing
+
+Run the test suite:
+
+```bash
+composer test
+```
+
+The PHPUnit configuration uses the `testing` environment and `database/testing.sqlite`. The suite includes unit and feature coverage for actions, models, services, entry types, field types, middleware, settings, repositories, seeders, and admin flows.
+
+## API
+
+API endpoints are registered under `/api/v1` and require Sanctum authentication.
+
+Current API resources:
+
+- `GET /api/v1/account`
+- `/api/v1/users`
+- `/api/v1/entries`
+
+API request/response logging is handled by `LogRequestResponse` on the API routes. API log pruning is scheduled daily through Laravel's scheduler.
+
+Generate Swagger documentation with:
+
+```bash
+php artisan l5-swagger:generate
+```
+
+## Useful Commands
+
+```bash
+php artisan optimize:clear
+php artisan config:clear
+php artisan route:list --except-vendor
+php artisan app:validate-class-references
+php artisan schedule:run
+php artisan queue:work
+```
+
+`app:validate-class-references` checks database-backed entry type and field type class references before deployment.

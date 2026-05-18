@@ -1,0 +1,362 @@
+{% extends 'admin._inc._layout' %}
+
+{% set page_title = 'Role Permissions' %}
+{% set page_heading = 'Role Permissions' %}
+{% set active_nav = 'members' %}
+{% set active_user_section = 'roles' %}
+{% set has_secondary_sidebar = true %}
+
+{% set selected_role = {
+    id: 2,
+    name: 'admin',
+    label: 'Admin',
+    guard: 'web',
+    highlight: '#059669',
+    description: 'Receives every seeded permission directly and can manage the full administration panel.',
+    users: 6,
+    assigned_count: 43,
+    updated: 'May 6, 2026',
+    badge: 'bg-emerald-50 text-emerald-700 ring-emerald-100'
+} %}
+
+{% set roles = [
+    {id: 1, name: 'super admin', label: 'Super Admin', users: 2},
+    {id: 2, name: 'admin', label: 'Admin', users: 6},
+    {id: 3, name: 'user', label: 'User', users: 128}
+] %}
+
+{% set permission_groups = [
+    {
+        name: 'Platform',
+        description: 'Global access capabilities that unlock admin or API surfaces.',
+        permissions: [
+            {name: 'api', description: 'Allows access to the REST API', assigned: true},
+            {name: 'access admin', description: 'Allows access to the administration panel', assigned: true}
+        ]
+    },
+    {
+        name: 'Users',
+        description: 'User account lifecycle and account status management.',
+        permissions: [
+            {name: 'view user', description: 'View users', assigned: true},
+            {name: 'create user', description: 'Create users', assigned: true},
+            {name: 'edit user', description: 'Edit users', assigned: true},
+            {name: 'delete user', description: 'Delete users', assigned: true},
+            {name: 'manage user status', description: 'Change account status and locks', assigned: true}
+        ]
+    },
+    {
+        name: 'User Tokens',
+        description: 'Token administration for user accounts.',
+        permissions: [
+            {name: 'view user token', description: 'View user tokens', assigned: true},
+            {name: 'create user token', description: 'Create user tokens', assigned: true},
+            {name: 'edit user token', description: 'Edit user tokens', assigned: true},
+            {name: 'delete user token', description: 'Delete user tokens', assigned: true}
+        ]
+    },
+    {
+        name: 'Roles',
+        description: 'Role creation, editing, and deletion.',
+        permissions: [
+            {name: 'create role', description: 'Create roles', assigned: true},
+            {name: 'edit role', description: 'Edit roles', assigned: true},
+            {name: 'delete role', description: 'Delete roles', assigned: true}
+        ]
+    },
+    {
+        name: 'Content',
+        description: 'Entry groups, entry types, entries, category structures, and categories.',
+        permissions: [
+            {name: 'create entry group', description: 'Create entry groups', assigned: true},
+            {name: 'edit entry group', description: 'Edit entry groups', assigned: true},
+            {name: 'delete entry group', description: 'Delete entry groups', assigned: true},
+            {name: 'create entry type', description: 'Create entry types', assigned: true},
+            {name: 'edit entry type', description: 'Edit entry types', assigned: true},
+            {name: 'delete entry type', description: 'Delete entry types', assigned: true},
+            {name: 'create entry', description: 'Create entries', assigned: true},
+            {name: 'edit entry', description: 'Edit entries', assigned: true},
+            {name: 'delete entry', description: 'Delete entries', assigned: true},
+            {name: 'create category group', description: 'Create category groups', assigned: true},
+            {name: 'edit category group', description: 'Edit category groups', assigned: true},
+            {name: 'delete category group', description: 'Delete category groups', assigned: true},
+            {name: 'reorder category group', description: 'Reorder category groups', assigned: true},
+            {name: 'create category', description: 'Create categories', assigned: true},
+            {name: 'edit category', description: 'Edit categories', assigned: true},
+            {name: 'delete category', description: 'Delete categories', assigned: true},
+            {name: 'reorder category', description: 'Reorder categories', assigned: true}
+        ]
+    },
+    {
+        name: 'Fields',
+        description: 'Field groups, custom fields, and field layouts.',
+        permissions: [
+            {name: 'create field group', description: 'Create field groups', assigned: true},
+            {name: 'edit field group', description: 'Edit field groups', assigned: true},
+            {name: 'delete field group', description: 'Delete field groups', assigned: true},
+            {name: 'create field', description: 'Create fields', assigned: true},
+            {name: 'edit field', description: 'Edit fields', assigned: true},
+            {name: 'delete field', description: 'Delete fields', assigned: true},
+            {name: 'create field layout', description: 'Create field layouts', assigned: true},
+            {name: 'edit field layout', description: 'Edit field layouts', assigned: true},
+            {name: 'delete field layout', description: 'Delete field layouts', assigned: true}
+        ]
+    },
+    {
+        name: 'Media',
+        description: 'Media library administration.',
+        permissions: [
+            {name: 'create media library', description: 'Create media libraries', assigned: true},
+            {name: 'edit media library', description: 'Edit media libraries', assigned: true},
+            {name: 'delete media library', description: 'Delete media libraries', assigned: true},
+            {name: 'reorder media library', description: 'Reorder media libraries', assigned: true}
+        ]
+    },
+    {
+        name: 'Statuses',
+        description: 'Status management for content workflows.',
+        permissions: [
+            {name: 'create status', description: 'Create statuses', assigned: true},
+            {name: 'edit status', description: 'Edit statuses', assigned: true},
+            {name: 'delete status', description: 'Delete statuses', assigned: true}
+        ]
+    },
+    {
+        name: 'Settings',
+        description: 'System setting administration.',
+        permissions: [
+            {name: 'edit setting', description: 'Edit system settings', assigned: true}
+        ]
+    }
+] %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('roles.index') }}">Roles</a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">{{ selected_role.label }}</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    <input id="secnav-toggle" type="checkbox">
+
+    <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 lg:hidden">
+        <span class="flex items-center gap-2">
+            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
+            </svg>
+            Section Navigation
+        </span>
+        <span class="secnav-chevron text-slate-400">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </span>
+    </label>
+
+    <div id="secondary-nav-panel" class="hidden border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+        <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('users.index') }}">Users</a>
+            <a class="flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="{{ route('roles.index') }}">Roles</a>
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('users.layouts.show') }}">Field Layout</a>
+        </nav>
+    </div>
+
+    <aside class="hidden h-fit lg:block">
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-4 py-3">
+                <h5 class="text-sm font-semibold text-slate-700">Members</h5>
+            </div>
+            <nav class="p-2">
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('users.index') }}">Users</a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="{{ route('roles.index') }}">Roles</a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('users.layouts.show') }}">Field Layout</a>
+            </nav>
+        </div>
+    </aside>
+{% endblock %}
+
+{% block content %}
+    <div class="flex min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Manage {{ selected_role.label }} Permissions</h1>
+                <p class="mt-1 text-sm text-slate-500">Assign capabilities to one role at a time using the seeded permission domains.</p>
+            </div>
+            <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:self-auto" href="{{ route('roles.index') }}">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Roles
+            </a>
+        </div>
+
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="grid gap-0 lg:grid-cols-[1fr_18rem]">
+                <div class="border-b border-slate-200 px-5 py-5 lg:border-b-0 lg:border-r">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset {{ selected_role.badge }}">{{ selected_role.label }}</span>
+                            <p class="mt-3 max-w-2xl text-sm text-slate-500">{{ selected_role.description }}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 text-sm sm:min-w-64">
+                            <div class="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Users</p>
+                                <p class="mt-1 text-lg font-semibold text-slate-900">{{ selected_role.users }}</p>
+                            </div>
+                            <div class="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Assigned</p>
+                                <p class="mt-1 text-lg font-semibold text-slate-900">{{ selected_role.assigned_count }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-5 py-5">
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="role-selector">Editing Role</label>
+                    <select id="role-selector" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        {% for role in roles %}
+                            <option value="{{ role.id }}" {% if role.name == selected_role.name %}selected{% endif %}>{{ role.label }} ({{ role.users }})</option>
+                        {% endfor %}
+                    </select>
+                    <p class="mt-2 text-xs text-slate-400">Super admin bypasses individual assignments.</p>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ route('roles.update', selected_role.id) }}" class="flex min-w-0 flex-col gap-5">
+            {{ csrf_field() }}
+            {{ method_field('PUT') }}
+            <input type="hidden" name="id" value="{{ selected_role.id }}">
+
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3">
+                    <h5 class="text-sm font-semibold text-slate-700">Role Details</h5>
+                    <p class="mt-0.5 text-xs text-slate-500">Update the selected role before saving permission assignments.</p>
+                </div>
+
+                <div class="divide-y divide-slate-100">
+                    <div class="grid gap-4 px-5 py-5 lg:grid-cols-[12rem_1fr]">
+                        <div>
+                            <label class="text-sm font-medium text-slate-700" for="role-name">Name <span class="text-red-500">*</span></label>
+                            <p class="mt-1 text-xs text-slate-500">The unique role name used by the permission layer.</p>
+                        </div>
+                        <div class="max-w-xl">
+                            <input id="role-name" name="name" type="text" required value="{{ old('name', selected_role.name) }}" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            {% if errors is defined and errors.has('name') %}
+                                <p class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 px-5 py-5 lg:grid-cols-[12rem_1fr]">
+                        <div>
+                            <label class="text-sm font-medium text-slate-700" for="role-highlight">Highlight Color</label>
+                            <p class="mt-1 text-xs text-slate-500">Used for badges and quick visual recognition.</p>
+                        </div>
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <input id="role-highlight" name="highlight" type="color" value="{{ old('highlight', selected_role.highlight) }}" class="h-10 w-16 cursor-pointer rounded-md border border-slate-300 bg-white p-1 shadow-sm">
+                            <span class="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-600">{{ old('highlight', selected_role.highlight) }}</span>
+                            {% if errors is defined and errors.has('highlight') %}
+                                <p class="text-xs text-red-600">{{ errors.first('highlight') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 px-5 py-5 lg:grid-cols-[12rem_1fr]">
+                        <div>
+                            <label class="text-sm font-medium text-slate-700" for="role-description">Description</label>
+                            <p class="mt-1 text-xs text-slate-500">A short note explaining when this role should be assigned.</p>
+                        </div>
+                        <div>
+                            <textarea id="role-description" name="description" rows="3" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">{{ old('description', selected_role.description) }}</textarea>
+                            {% if errors is defined and errors.has('description') %}
+                                <p class="mt-1 text-xs text-red-600">{{ errors.first('description') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 px-5 py-5 lg:grid-cols-[12rem_1fr]">
+                        <div>
+                            <span class="text-sm font-medium text-slate-700">Guard</span>
+                            <p class="mt-1 text-xs text-slate-500">Shown for context. Guard changes should be handled carefully.</p>
+                        </div>
+                        <div>
+                            <span class="inline-flex rounded-md bg-slate-100 px-2.5 py-1.5 font-mono text-xs font-medium text-slate-700">{{ selected_role.guard }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-5 py-3">
+                <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h5 class="text-sm font-semibold text-slate-700">Permissions</h5>
+                        <p class="mt-0.5 text-xs text-slate-500">Grouped from `RolesPermissionsSeeder.php` by resource area.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <option>All permission groups</option>
+                            {% for group in permission_groups %}
+                                <option>{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <input class="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-48" placeholder="Search permissions" type="search">
+                    </div>
+                </div>
+            </div>
+
+            <div class="divide-y divide-slate-200">
+                {% for group in permission_groups %}
+                    <section class="px-5 py-5" data-permission-domain>
+                        <div class="grid gap-4 lg:grid-cols-[16rem_1fr] lg:items-start">
+                            <div class="flex flex-col lg:min-h-24 lg:w-64">
+                                <h6 class="text-sm font-semibold text-slate-800">{{ group.name }}</h6>
+                                <p class="mt-1 text-xs text-slate-500">{{ group.description }}</p>
+                                <label class="mt-3 inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-600 lg:mt-auto">
+                                    <input type="checkbox" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" checked data-permission-domain-toggle>
+                                    Select all
+                                </label>
+                            </div>
+                            <div class="grid min-w-0 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                                {% for permission in group.permissions %}
+                                    <label class="min-h-24 cursor-pointer rounded-md border border-slate-200 bg-white px-3 py-3 hover:border-emerald-200 hover:bg-emerald-50/30">
+                                        <span class="flex min-w-0 items-start gap-2.5">
+                                            <input type="checkbox" name="permissions[]" value="{{ permission.name }}" class="mt-0.5 shrink-0 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" data-permission-checkbox {% if permission.assigned %}checked{% endif %}>
+                                            <span class="block min-w-0 truncate text-sm font-medium text-slate-800">{{ permission.name }}</span>
+                                        </span>
+                                        <span class="block pl-7">
+                                            <span class="mt-0.5 block text-xs text-slate-500">{{ permission.description }}</span>
+                                        </span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                {% endfor %}
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-slate-500">Saving this role syncs the role details and selected `permissions[]` values.</p>
+                <div class="flex flex-col gap-2 sm:flex-row">
+                    <button type="reset" class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Reset</button>
+                    <button type="submit" class="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">Save {{ selected_role.label }}</button>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+{% endblock %}

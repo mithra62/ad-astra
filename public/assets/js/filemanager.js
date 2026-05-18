@@ -174,6 +174,7 @@ function renameFolder() {
         });
     });
 }
+
 renameFolder();
 //-------- folder rename end -----//
 
@@ -238,6 +239,7 @@ function generateUUID() {
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
 }
+
 getActionsFeture();
 
 // Recent table delete action
@@ -258,6 +260,7 @@ function deleteAction() {
         });
     });
 }
+
 deleteAction();
 
 // Folder content creation
@@ -303,7 +306,7 @@ document.querySelector('#folderAdd').onclick = function () {
 // Table data rename
 function renameTableEntry() {
     const renameKeyButton = document.querySelector("#renamekey");
-    document.querySelector("#recentdatatable").addEventListener("click", function(event) {
+    document.querySelector("#recentdatatable").addEventListener("click", function (event) {
         if (event.target.closest(".edit-folder-name")) {
             try {
                 const row = event.target.closest("tr");
@@ -311,11 +314,13 @@ function renameTableEntry() {
                 if (nameCell) {
                     $("#renameModal").modal("show");
                     document.querySelector("#titlename").value = nameCell.textContent;
+
                     function handleRename() {
                         nameCell.textContent = document.querySelector("#titlename").value;
                         $("#renameModal").modal("hide");
                         renameKeyButton.removeEventListener('click', handleRename);
                     }
+
                     renameKeyButton.removeEventListener('click', handleRename);
                     renameKeyButton.addEventListener('click', handleRename);
                 } else {
@@ -327,5 +332,6 @@ function renameTableEntry() {
         }
     });
 }
+
 renameTableEntry();
 

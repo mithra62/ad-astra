@@ -1,6 +1,6 @@
 $(function () {
     // **------ Load customizer ------**
-    $.get("../assets/customizer.txt", function (html_string) {
+    $.get("/assets/customizer.txt", function (html_string) {
         const customizer = $("#customizer");
         if (customizer.length > 0) {
             customizer.html(html_string);
@@ -23,7 +23,7 @@ $(document).on("click", ".sidebar-option > li", function () {
         }
 
         setUpHorizontalHeader();
-    }catch (e) {
+    } catch (e) {
         console.log("Fail to change sidebar option");
     }
 });

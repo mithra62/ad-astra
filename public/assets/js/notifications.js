@@ -3,14 +3,14 @@ const toastClose = () => {
 }
 
 $(".toast-close").on('click', function () {
-  toastClose();
+    toastClose();
 });
 
 const handleToast = (ele) => {
-  $("." + ele.id).removeClass('d-none');
-  setTimeout(function () {
-      $("." + ele.id).addClass("d-none");
-  }, 5000);
+    $("." + ele.id).removeClass('d-none');
+    setTimeout(function () {
+        $("." + ele.id).addClass("d-none");
+    }, 5000);
 }
 
 //  **------close-button**

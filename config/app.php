@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool)env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => 'MST',
+    'timezone' => 'UTC',
 
     /*
     |--------------------------------------------------------------------------
@@ -101,7 +101,7 @@ return [
 
     'previous_keys' => [
         ...array_filter(
-            explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
+            explode(',', (string)env('APP_PREVIOUS_KEYS', ''))
         ),
     ],
 
@@ -122,5 +122,9 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+    'default_dev_password' => env('DEV_USER_PASSWORD', str()->random(16)),
+    'default_dev_name' => env('DEV_USER_NAME', str()->random(16)),
+    'default_dev_email' => env('DEV_USER_EMAIL', str()->random(16)),
 
 ];

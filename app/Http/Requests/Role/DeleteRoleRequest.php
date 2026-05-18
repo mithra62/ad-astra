@@ -1,7 +1,8 @@
 <?php
+
 namespace App\Http\Requests\Role;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class DeleteRoleRequest extends FormRequest
@@ -11,7 +12,7 @@ class DeleteRoleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->can('delete roles');
+        return Auth::user()->can('delete role');
     }
 
     /**
@@ -20,7 +21,7 @@ class DeleteRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'confirm_removal' => 'required'
+            'confirm_removal' => 'required',
         ];
     }
 
@@ -28,7 +29,6 @@ class DeleteRoleRequest extends FormRequest
      * @return string[]
      */
     public function messages(): array
-
     {
         return [
             'confirm_removal.required' => 'You must confirm the removal',

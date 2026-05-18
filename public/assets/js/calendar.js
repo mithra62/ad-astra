@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
         customButtons: {
             addEventButton: {
                 text: 'add event...',
-                click: function() {
+                click: function () {
                     const dateStr = prompt('Enter a date in YYYY-MM-DD format');
                     const date = new Date(dateStr + 'T00:00:00');
 
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 display: 'background'
             },
         ],
-        eventClick: function() {
+        eventClick: function () {
             $('#exampleModal').modal('show');
         },
         selectable: true,

@@ -4,4 +4,4 @@ $(function () {
     $('#recentOrders2').DataTable();
     $('#recentOrders3').DataTable();
     $('#recentOrders4').DataTable();
-  });
+});

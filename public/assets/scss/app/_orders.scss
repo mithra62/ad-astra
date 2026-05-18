@@ -8,31 +8,39 @@
             }
         }
     }
+
     .check-box {
         margin-bottom: 0;
-       .checkmark {
+
+        .checkmark {
             border-radius: 5px;
             border: 2px solid rgba(var(--dark), 0.4);
         }
     }
+
     table {
         thead {
             tr {
                 th:nth-child(2) {
                     min-width: 100px;
                 }
+
                 th:nth-child(3) {
                     min-width: 200px;
                 }
+
                 th:nth-child(4) {
                     min-width: 200px;
                 }
+
                 th:nth-child(6) {
                     min-width: 200px;
                 }
+
                 th:nth-child(8) {
                     min-width: 200px;
                 }
+
                 th:nth-child(9) {
                     min-width: 200px;
                 }
@@ -40,11 +48,13 @@
         }
     }
 }
+
 .order-tabs {
     gap: 0.5rem;
+
     .nav-item {
         .nav-link {
-            color: rgba(var(--secondary),1) !important;
+            color: rgba(var(--secondary), 1) !important;
             border: 1px dashed rgba(var(--secondary), 0.4);
 
             &.active {
@@ -55,4 +65,5 @@
         }
     }
 }
+
 // >>-- 84 Orders css end --<<

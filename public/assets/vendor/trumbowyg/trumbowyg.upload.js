@@ -67,7 +67,7 @@
         }, false);
 
         // Success
-        xhrRequest.onreadystatechange = function() {
+        xhrRequest.onreadystatechange = function () {
             if (xhrRequest.readyState !== 4) {
                 return;
             }

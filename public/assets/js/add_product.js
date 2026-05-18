@@ -1,7 +1,7 @@
 // 1 basic editor
 
 // editor js
-$(document).ready(function() {
+$(document).ready(function () {
     const editorElement = $('#description-editor');
     if (editorElement.length) {
         editorElement.trumbowyg({
@@ -25,7 +25,7 @@ $(document).ready(function() {
 
 
 // select js
-$(document).ready(function() {
+$(document).ready(function () {
     $('.category-select').select2();
 });
 
@@ -39,6 +39,6 @@ FilePond.registerPlugin(FilePondPluginImageExifOrientation);
 FilePond.create(
     document.querySelector('#addProduct'),
     {
-      labelIdle: `<i class="fa-solid fa-cloud-upload fa-fw fs-4"></i> <div class="filepond--label-action text-decoration-none">Upload Your Product Images</div>`,
+        labelIdle: `<i class="fa-solid fa-cloud-upload fa-fw fs-4"></i> <div class="filepond--label-action text-decoration-none">Upload Your Product Images</div>`,
     }
 );

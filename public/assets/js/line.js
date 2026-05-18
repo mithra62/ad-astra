@@ -21,7 +21,7 @@ const lineChartOption = {
     },
     xaxis: {
         categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-        labels:{
+        labels: {
             style: {
                 colors: [],
                 fontSize: '14px',
@@ -31,7 +31,7 @@ const lineChartOption = {
 
     },
     yaxis: {
-        labels:{
+        labels: {
             style: {
                 colors: [],
                 fontSize: '14px',
@@ -88,10 +88,10 @@ const gradientLineOptions = {
     },
     xaxis: {
         type: 'datetime',
-        categories: ['1/11/2000', '2/11/2000', '3/11/2000', '4/11/2000', '5/11/2000', '6/11/2000', '7/11/2000', '8/11/2000', '9/11/2000', '10/11/2000', '11/11/2000', '12/11/2000', '1/11/2001', '2/11/2001', '3/11/2001','4/11/2001' ,'5/11/2001' ,'6/11/2001'],
+        categories: ['1/11/2000', '2/11/2000', '3/11/2000', '4/11/2000', '5/11/2000', '6/11/2000', '7/11/2000', '8/11/2000', '9/11/2000', '10/11/2000', '11/11/2000', '12/11/2000', '1/11/2001', '2/11/2001', '3/11/2001', '4/11/2001', '5/11/2001', '6/11/2001'],
         tickAmount: 10,
         labels: {
-            formatter: function(value, timestamp, opts) {
+            formatter: function (value, timestamp, opts) {
                 return opts.dateFormatter(new Date(timestamp), 'dd MMM')
             },
             style: {
@@ -103,7 +103,7 @@ const gradientLineOptions = {
         }
     },
     yaxis: {
-        labels:{
+        labels: {
             style: {
                 colors: [],
                 fontSize: '14px',
@@ -194,7 +194,7 @@ const mixedLineOptions = {
             enabled: false
         },
     },
-    colors: ['rgba(var(--success),1)', 'rgba(var(--info),1)' , 'rgba(var(--danger),1)'  ],
+    colors: ['rgba(var(--success),1)', 'rgba(var(--info),1)', 'rgba(var(--danger),1)'],
     dataLabels: {
         enabled: false
     },
@@ -205,7 +205,7 @@ const mixedLineOptions = {
     },
 
     legend: {
-        tooltipHoverFormatter: function(val, opts) {
+        tooltipHoverFormatter: function (val, opts) {
             return val + ' - <strong>' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] + '</strong>'
         }
     },
@@ -219,7 +219,7 @@ const mixedLineOptions = {
         categories: ['01 Jan', '02 Jan', '03 Jan', '04 Jan', '05 Jan', '06 Jan', '07 Jan', '08 Jan', '09 Jan',
             '10 Jan', '11 Jan', '12 Jan'
         ],
-        labels:{
+        labels: {
             style: {
                 colors: [],
                 fontSize: '14px',
@@ -229,7 +229,7 @@ const mixedLineOptions = {
     },
 
     yaxis: {
-        labels:{
+        labels: {
             style: {
                 colors: [],
                 fontSize: '14px',
@@ -311,7 +311,7 @@ const stepLineOptions = {
         }
     },
     xaxis: {
-        labels:{
+        labels: {
             style: {
                 colors: [],
                 fontSize: '14px',
@@ -320,7 +320,7 @@ const stepLineOptions = {
         }
     },
     yaxis: {
-        labels:{
+        labels: {
             style: {
                 colors: [],
                 fontSize: '14px',

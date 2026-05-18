@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import {defineConfig} from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -10,4 +10,18 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    server: {
+        host: 'eric.laravel-dev.com',
+        cors: {
+            origin: [
+                'http://127.0.0.1:8000',
+                'http://localhost:8000',
+                'http://eric.laravel-dev.com',
+            ],
+        },
+        hmr: {
+            host: 'eric.laravel-dev.com',
+            protocol: 'ws',
+        },
+    },
 });

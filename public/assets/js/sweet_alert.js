@@ -125,20 +125,20 @@ $('#click_9').on('click', function () {
 $('#click_10').on('click', function () {
     Swal.fire({
         title: "<strong>Welcome</strong>",
-  html: `
+        html: `
   Start Multipurpose, clean modern responsive bootstrap 5 admin template
   `,
-  showCloseButton: true,
-  showCancelButton: true,
-  focusConfirm: false,
-  confirmButtonText: `
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: `
     <i class="fa fa-thumbs-up"></i> Great!
   `,
-  confirmButtonAriaLabel: "Thumbs up, great!",
-  cancelButtonText: `
+        confirmButtonAriaLabel: "Thumbs up, great!",
+        cancelButtonText: `
     <i class="fa fa-thumbs-down"></i>
   `,
-  cancelButtonAriaLabel: "Thumbs down"
+        cancelButtonAriaLabel: "Thumbs down"
     })
 })
 $('#click_11').on('click', function () {

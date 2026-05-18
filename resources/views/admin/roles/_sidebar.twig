@@ -1,0 +1,57 @@
+<input id="secnav-toggle" type="checkbox">
+
+<label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 lg:hidden">
+        <span class="flex items-center gap-2">
+            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
+            </svg>
+            Section Navigation
+        </span>
+    <span class="secnav-chevron text-slate-400">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </span>
+</label>
+
+<div id="secondary-nav-panel" class="hidden border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+    <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
+        <a class="flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="index.twig">All Articles</a>
+        {% for group in groups %}
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="create-article.twig">New Article</a>
+        {% endfor %}
+        <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="categories.twig">Categories</a>
+        <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="#">Tags</a>
+        <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="#">Authors</a>
+        <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="reorder-articles.twig">Reorder</a>
+    </nav>
+</div>
+
+<aside class="hidden h-fit lg:block">
+    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 px-4 py-3">
+            <h5 class="text-sm font-semibold text-slate-700">User Roles</h5>
+        </div>
+        <nav class="p-2">
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium " href="{{ route('roles.index') }}">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>All Roles
+            </a>
+            <a href="{{ route('roles.create') }}" class="{% if active_secondary_nav == 'create_role' %} text-emerald-700 bg-emerald-50 {% endif %} mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>Create Role</a>
+            {% if role %}
+                <div class="my-2 border-t border-slate-100"></div>
+                <p class="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Manage Role</p>
+                <a href="{{ route('roles.edit', role) }}" class="{% if active_secondary_nav == 'edit_role' %} text-emerald-700 bg-emerald-50 {% endif %} mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit Role
+                </a>
+                <a href="{{ route('roles.confirm', role) }}" class="{% if active_secondary_nav == 'delete_role' %} text-emerald-700 bg-emerald-50 {% endif %} mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Delete Role
+                </a>
+            {% endif %}
+        </nav>
+    </div>
+</aside>

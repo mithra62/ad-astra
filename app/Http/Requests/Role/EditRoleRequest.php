@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Role;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class EditRoleRequest extends FormRequest
 {
@@ -21,8 +22,13 @@ class EditRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255|unique:roles,name,' . (int)self::segment(2),
-            'permissions' => 'required|array'
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('roles')->ignore($this->route()->parameter('role')),
+            ],
+            'permissions' => 'required|array',
         ];
     }
 }

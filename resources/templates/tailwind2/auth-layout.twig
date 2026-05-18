@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="{{ lang|default('en') }}">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>{% block title %}{{ page_title|default('Account') }}{% endblock %}</title>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
+    {% block head %}{% endblock %}
+</head>
+<body class="auth-page min-h-screen bg-slate-100 text-slate-950 antialiased">
+    <main class="flex min-h-screen items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
+        <div class="w-full max-w-md">
+            <div class="mb-6 text-center">
+                <a href="home.twig" class="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-600 text-lg font-semibold text-white shadow-sm">A</a>
+                <h1 class="mt-4 text-2xl font-semibold tracking-tight text-slate-900">{% block heading %}Account{% endblock %}</h1>
+                <p class="mt-1 text-sm text-slate-500">{% block subheading %}Access your admin workspace.{% endblock %}</p>
+            </div>
+
+            <section class="auth-card overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                {% block content %}{% endblock %}
+            </section>
+
+            <p class="mt-6 text-center text-xs text-slate-400">
+                &copy; {{ year|default('2026') }} {{ app_name|default('Admin') }}. All rights reserved.
+            </p>
+        </div>
+    </main>
+</body>
+</html>

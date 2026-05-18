@@ -2,52 +2,39 @@
 
 namespace App\Http\Requests\User;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Enums\UserStatus;
+use App\Support\UserFieldLayout;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
-class EditUserRequest extends FormRequest
+class EditUserRequest extends StoreUserRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
         return Auth::user()->can('edit user');
     }
 
-    /**
-     * @return string[]
-     */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . (int)request()->post('user_id'),
-            'roles' => 'required|array'
-        ];
-    }
+        $schema = UserFieldLayout::resolve();
+        $userId = $this->route()->parameter('user') ?? $this->route()->parameter('id');
 
-    /**
-     * @return string[]
-     */
-    public function messages(): array
-
-    {
-        return [
-            'terms.accepted' => 'You must accept the Terms of Service and Privacy Policy.',
-            'email.unique' => 'This email is already registered. Try logging in instead.',
-            'roles.required' => 'You must select at least one role.',
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
+            'roles' => ['required', 'array'],
+            'roles.*' => ['string', 'exists:roles,name'],
+            'fields' => ['nullable', 'array'],
         ];
-    }
 
-    /**
-     * @return string[]
-     */
-    public function attributes(): array
-    {
-        return [
-            'name' => 'full name',
-            'email' => 'email address',
-        ];
+        // Only accept a 'status' field from callers who hold the dedicated
+        // permission.  Without it, any submitted status value is stripped by
+        // UserService::update() anyway, but rejecting it here gives a clear
+        // validation error rather than a silent no-op.
+        if (Auth::user()->can('manage user status')) {
+            $rules['status'] = ['nullable', 'string', Rule::in(UserStatus::ALL)];
+        }
+
+        return array_merge($rules, $this->schemaFieldRules($schema));
     }
 }

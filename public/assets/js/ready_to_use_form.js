@@ -32,7 +32,7 @@ function readURL(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
 
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 const imgPreview = $('#imgPreview');
                 imgPreview.css('background-image', `url(${e.target.result})`);
                 imgPreview.hide().fadeIn(650);

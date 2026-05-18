@@ -45,7 +45,7 @@ const areaChartOptions = {
     },
     xaxis: {
         categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-        labels:{
+        labels: {
             style: {
                 colors: [],
                 fontSize: '14px',
@@ -55,7 +55,7 @@ const areaChartOptions = {
 
     },
     yaxis: {
-        labels:{
+        labels: {
             style: {
                 colors: [],
                 fontSize: '14px',
@@ -232,7 +232,7 @@ const timeSeriesOptions = {
                 fontWeight: 500,
             },
             offsetX: 0,
-            formatter: function(val) {
+            formatter: function (val) {
                 return (val / 1000000).toFixed(2); // Format as millions
             },
         },

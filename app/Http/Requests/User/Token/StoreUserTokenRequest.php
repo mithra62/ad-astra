@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Http\Requests\User\Token;
 
-use App\Models\User;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class StoreUserTokenRequest extends FormRequest
@@ -12,7 +12,7 @@ class StoreUserTokenRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->can('create token');
+        return Auth::user()->can('create user token');
     }
 
     /**

@@ -23,7 +23,8 @@ function phosphor_icon(element) {
         style: {
             background: "rgba(var(--success),1)",
         },
-        onClick: function () {}
+        onClick: function () {
+        }
     }).showToast();
 }
 

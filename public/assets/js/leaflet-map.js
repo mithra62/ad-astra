@@ -9,10 +9,11 @@ function initLeafletMap(id, setupFn) {
         console.error(`Error initializing map "${id}":`, error);
     }
 }
+
 // **------ Leaflet on Mobile Map **
 initLeafletMap('mobileMap', (map) => {
     map.fitWorld();
-    map.locate({ setView: true, maxZoom: 16 });
+    map.locate({setView: true, maxZoom: 16});
 
     const locationErrorHandler = () => map.setView([0, 0], 2);
     map.on('locationerror', locationErrorHandler);
@@ -31,7 +32,7 @@ initLeafletMap('accessibleMap', (map) => {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    L.marker([50.4501, 30.5234], { alt: 'Kyiv' })
+    L.marker([50.4501, 30.5234], {alt: 'Kyiv'})
         .addTo(map)
         .bindPopup('Kyiv, Ukraine is the birthplace of Leaflet!');
 });
@@ -99,13 +100,13 @@ initLeafletMap('customIconsMap', (map) => {
         }
     });
 
-    const greenIcon = new LeafIcon({ iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png' });
-    const redIcon = new LeafIcon({ iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-red.png' });
-    const orangeIcon = new LeafIcon({ iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-orange.png' });
+    const greenIcon = new LeafIcon({iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png'});
+    const redIcon = new LeafIcon({iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-red.png'});
+    const orangeIcon = new LeafIcon({iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-orange.png'});
 
-    L.marker([51.5, -0.09], { icon: greenIcon }).addTo(map).bindPopup('I am a green.');
-    L.marker([51.495, -0.083], { icon: redIcon }).addTo(map).bindPopup('I am a red.');
-    L.marker([51.49, -0.1], { icon: orangeIcon }).addTo(map).bindPopup('I am an orange.');
+    L.marker([51.5, -0.09], {icon: greenIcon}).addTo(map).bindPopup('I am a green.');
+    L.marker([51.495, -0.083], {icon: redIcon}).addTo(map).bindPopup('I am a red.');
+    L.marker([51.49, -0.1], {icon: orangeIcon}).addTo(map).bindPopup('I am an orange.');
 });
 
 // **------ Layer Groups and Layers Control **

@@ -42,7 +42,7 @@ jQuery(document).ready(function () {
                         try {
                             const width = $stepItem.innerWidth();
                             const pos = $stepItem.position();
-                            jQuery('.form-wizard-step-move').css({ left: pos.left, width });
+                            jQuery('.form-wizard-step-move').css({left: pos.left, width});
                         } catch (err) {
                             console.warn("Positioning error:", err);
                         }
@@ -79,7 +79,7 @@ jQuery(document).ready(function () {
                     try {
                         const width = $stepItem.innerWidth();
                         const pos = $stepItem.position();
-                        jQuery('.form-wizard-step-move').css({ left: pos.left, width });
+                        jQuery('.form-wizard-step-move').css({left: pos.left, width});
                     } catch (err) {
                         console.warn("Positioning error:", err);
                     }

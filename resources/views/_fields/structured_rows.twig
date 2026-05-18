@@ -1,0 +1,12 @@
+{% import 'admin::_inc/_structured-rows' as matrix %}
+{{ matrix.field(
+    'fields[' ~ field.handle ~ ']',
+    field.label,
+    columns,
+    rows,
+    field.instructions|default(''),
+    id,
+    null,
+    add_label|default('Add row'),
+    min_rows|default(0)
+) }}

@@ -16,7 +16,8 @@ function showToast(message, type) {
         style: {
             background: `rgba(var(--${type}), 1)`
         },
-        onClick: function () {}
+        onClick: function () {
+        }
     }).showToast();
 }
 

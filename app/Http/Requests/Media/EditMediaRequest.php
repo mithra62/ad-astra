@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Http\Requests\Media;
+
+use App\Http\Requests\FormRequest;
+use App\Models\Media;
+use App\Models\Media\Library as MediaLibrary;
+
+class EditMediaRequest extends FormRequest
+{
+    private ?MediaLibrary $resolvedSchema = null;
+    private bool $schemaResolved = false;
+
+    public function rules(): array
+    {
+        return array_merge(
+            ['name' => ['required', 'sometimes', 'string', 'max:255']],
+            $this->schemaFieldRules($this->resolvedSchema())
+        );
+    }
+
+    public function messages(): array
+    {
+        return $this->schemaFieldMessages($this->resolvedSchema());
+    }
+
+    public function attributes(): array
+    {
+        return $this->schemaFieldAttributes($this->resolvedSchema());
+    }
+
+    private function resolvedSchema(): ?MediaLibrary
+    {
+        if (!$this->schemaResolved) {
+            $media = Media::find($this->route()->parameter('media_item'));
+            $this->resolvedSchema = ($media && $media->library_id)
+                ? MediaLibrary::with('fieldLayout.tabs.elements.field.fieldType')
+                              ->find($media->library_id)
+                : null;
+            $this->schemaResolved = true;
+        }
+
+        return $this->resolvedSchema;
+    }
+}

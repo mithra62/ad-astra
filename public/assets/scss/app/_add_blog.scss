@@ -21,7 +21,8 @@
     input {
         display: none;
     }
-    label{
+
+    label {
         width: 100%;
         height: 280px;
         font-size: 2rem;
@@ -30,12 +31,13 @@
         align-items: center;
         flex-direction: column;
         border-radius: 20px;
-        border: 1px dashed rgba(var(--secondary),.4);
+        border: 1px dashed rgba(var(--secondary), .4);
         background-color: rgba(var(--light), .1
         );
     }
 }
-.uploaded-image{
+
+.uploaded-image {
     width: 400px;
     height: 200px;
 }

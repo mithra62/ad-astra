@@ -11,8 +11,9 @@
             }
         }
     }
-    .jstree-container-ul{
-        .jstree-hovered{
+
+    .jstree-container-ul {
+        .jstree-hovered {
             background: white !important;
         }
     }
@@ -28,12 +29,14 @@
             &:hover {
                 background: transparent;
             }
+
             .jstree-checkbox {
-                &::before{
-                    background-color: rgba(var(--primary),1);
+                &::before {
+                    background-color: rgba(var(--primary), 1);
                 }
             }
         }
+
         .jstree-checkbox {
             display: inline-block;
             vertical-align: middle;
@@ -41,7 +44,7 @@
             height: 20px;
             cursor: pointer;
             position: relative;
-    
+
             &::before {
                 transition: var(--app-transition);
                 cursor: pointer;
@@ -51,10 +54,10 @@
                 display: block;
                 width: 16px;
                 height: 16px;
-                border: 1px dashed rgba(var(--dark),.2);
+                border: 1px dashed rgba(var(--dark), .2);
                 border-radius: 2px;
             }
-    
+
             &::after {
                 position: absolute;
                 content: ' ';
@@ -63,21 +66,23 @@
                 left: 5px;
                 width: 5px;
                 height: 9px;
-                border: 2px dashed rgba(var(--white),1);
+                border: 2px dashed rgba(var(--white), 1);
                 border-top: none;
                 border-left: none;
                 transform: rotate(45deg);
             }
-    
+
             &.jstree-icon {
                 background-image: none !important;
             }
         }
     }
-    .jstree-container-ul{
-        .jstree-hovered{
-            background: rgba(var(--white),1) !important;
+
+    .jstree-container-ul {
+        .jstree-hovered {
+            background: rgba(var(--white), 1) !important;
         }
     }
 }
+
 // >>-- 108 Tree View css end --<<

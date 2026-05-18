@@ -1,0 +1,2 @@
+{% import 'admin::_inc/_form-fields' as fields %}
+{{ fields.slider('fields[' ~ field.handle ~ ']', field.label, value, min, max, step, field.instructions|default(''), id, suffix) }}

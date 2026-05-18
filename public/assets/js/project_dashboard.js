@@ -12,28 +12,28 @@ const taskOverviewOptions = {
         width: 100,
         offsetY: 0,
         offsetX: 0,
-        toolbar: { show: false },
-        sparkline: { enabled: true }
+        toolbar: {show: false},
+        sparkline: {enabled: true}
     },
     stroke: {
         width: 2,
         curve: 'smooth'
     },
-    dataLabels: { enabled: false },
+    dataLabels: {enabled: false},
     fill: {
         type: "gradient",
         gradient: {
             shadeIntensity: 1,
             colorStops: [
-                { offset: 0, color: 'rgba(var(--primary),.4)', opacity: 1 },
-                { offset: 100, color: 'rgba(var(--primary),.1)', opacity: 1 }
+                {offset: 0, color: 'rgba(var(--primary),.4)', opacity: 1},
+                {offset: 100, color: 'rgba(var(--primary),.1)', opacity: 1}
             ]
         }
     },
     colors: ['rgba(var(--primary))'],
-    xaxis: { show: false },
-    yaxis: { show: false },
-    grid: { show: false },
+    xaxis: {show: false},
+    yaxis: {show: false},
+    grid: {show: false},
     tooltip: {
         enabled: false
     },
@@ -65,28 +65,28 @@ const taskOverviewOptions1 = {
         width: 100,
         offsetY: 0,
         offsetX: 0,
-        toolbar: { show: false },
-        sparkline: { enabled: true }
+        toolbar: {show: false},
+        sparkline: {enabled: true}
     },
     stroke: {
         width: 2,
         curve: 'smooth'
     },
-    dataLabels: { enabled: false },
+    dataLabels: {enabled: false},
     fill: {
         type: "gradient",
         gradient: {
             shadeIntensity: 1,
             colorStops: [
-                { offset: 0, color: 'rgba(var(--primary),.4)', opacity: 1 },
-                { offset: 100, color: 'rgba(var(--primary),.1)', opacity: 1 }
+                {offset: 0, color: 'rgba(var(--primary),.4)', opacity: 1},
+                {offset: 100, color: 'rgba(var(--primary),.1)', opacity: 1}
             ]
         }
     },
     colors: ['rgba(var(--primary))'],
-    xaxis: { show: false },
-    yaxis: { show: false },
-    grid: { show: false },
+    xaxis: {show: false},
+    yaxis: {show: false},
+    grid: {show: false},
     tooltip: {
         enabled: false
     },
@@ -118,28 +118,28 @@ const taskOverviewOptions2 = {
         width: 100,
         offsetY: 0,
         offsetX: 0,
-        toolbar: { show: false },
-        sparkline: { enabled: true }
+        toolbar: {show: false},
+        sparkline: {enabled: true}
     },
     stroke: {
         width: 2,
         curve: 'smooth'
     },
-    dataLabels: { enabled: false },
+    dataLabels: {enabled: false},
     fill: {
         type: "gradient",
         gradient: {
             shadeIntensity: 1,
             colorStops: [
-                { offset: 0, color: 'rgba(var(--primary),.4)', opacity: 1 },
-                { offset: 100, color: 'rgba(var(--primary),.1)', opacity: 1 }
+                {offset: 0, color: 'rgba(var(--primary),.4)', opacity: 1},
+                {offset: 100, color: 'rgba(var(--primary),.1)', opacity: 1}
             ]
         }
     },
     colors: ['rgba(var(--primary))'],
-    xaxis: { show: false },
-    yaxis: { show: false },
-    grid: { show: false },
+    xaxis: {show: false},
+    yaxis: {show: false},
+    grid: {show: false},
     tooltip: {
         enabled: false
     },
@@ -228,7 +228,7 @@ const profitOverviewOptions = {
         height: 180,
         type: 'line',
     },
-    colors:['rgba(var(--white),1)','rgba(var(--white),1)'],
+    colors: ['rgba(var(--white),1)', 'rgba(var(--white),1)'],
     stroke: {
         curve: 'smooth',
         width: [0, 2]

@@ -42,17 +42,23 @@ timeInputs.forEach(selector => {
 //  **------ 3 Custom Input**
 
 const customInputs = [
-    { selector: '.contact-input', options: { numeral: true, delimiter: '-', blocks: [3, 3, 4] } },
-    { selector: '.formatting-contact', options: { delimiters: ['(', ')', '(', ')', '(', ')'], blocks: [0, 3, 0, 3, 0, 4, 0], uppercase: true } },
-    { selector: '.credit-input', options: { creditCard: true } },
-    { selector: '.numeral-input', options: { numeral: true, numeralThousandsGroupStyle: 'thousand' } },
-    { selector: '.price-input', options: { numeral: true, prefix: '$', signBeforePrefix: true } },
-    { selector: '.price-formatting', options: { numeral: true, prefix: '€', tailPrefix: true } },
-    { selector: '.prefix-input', options: { blocks: [6, 3, 3, 3], prefix: '253874' } },
-    { selector: '.prefix-del-input', options: { prefix: 'PREFIX', delimiters: ['-', '-', '.'], blocks: [6, 3, 3, 3, 2], uppercase: true } }
+    {selector: '.contact-input', options: {numeral: true, delimiter: '-', blocks: [3, 3, 4]}},
+    {
+        selector: '.formatting-contact',
+        options: {delimiters: ['(', ')', '(', ')', '(', ')'], blocks: [0, 3, 0, 3, 0, 4, 0], uppercase: true}
+    },
+    {selector: '.credit-input', options: {creditCard: true}},
+    {selector: '.numeral-input', options: {numeral: true, numeralThousandsGroupStyle: 'thousand'}},
+    {selector: '.price-input', options: {numeral: true, prefix: '$', signBeforePrefix: true}},
+    {selector: '.price-formatting', options: {numeral: true, prefix: '€', tailPrefix: true}},
+    {selector: '.prefix-input', options: {blocks: [6, 3, 3, 3], prefix: '253874'}},
+    {
+        selector: '.prefix-del-input',
+        options: {prefix: 'PREFIX', delimiters: ['-', '-', '.'], blocks: [6, 3, 3, 3, 2], uppercase: true}
+    }
 ];
 
-customInputs.forEach(({ selector, options }) => {
+customInputs.forEach(({selector, options}) => {
     try {
         new Cleave(selector, options);
     } catch (err) {

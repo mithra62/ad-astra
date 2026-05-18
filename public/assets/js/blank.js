@@ -7,7 +7,7 @@ let navbarSize;
 let containerWidth;
 let maxNavbarLimit;
 
-function setUpHorizontalHeader(){
+function setUpHorizontalHeader() {
     navbarSize = navBar.width();
     containerWidth = $(".simplebar-content").width();
     maxNavbarLimit = -(navbarSize - containerWidth);
@@ -49,6 +49,6 @@ $(document).on('click', '.menu-next', function () {
     }
 });
 
-$(function() {
+$(function () {
     setUpHorizontalHeader();
 });

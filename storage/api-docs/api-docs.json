@@ -1,23 +1,76 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Checkoff Pro",
-        "description": "API documentation for Checkoff Pro",
+        "title": "Magic Program",
+        "description": "API documentation for Magic Program",
         "version": "1.0.0"
     },
     "paths": {
-        "/api/remittances/corn": {
+        "/api/v1/account": {
             "get": {
                 "tags": [
-                    "Remittances"
+                    "Account"
                 ],
-                "summary": "Get details on Corn Remittances",
-                "operationId": "getAllCornRemittances",
+                "summary": "Get details on the authenticated user",
+                "operationId": "getAccount",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/category-groups/{group_id}/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "List categories in a group",
+                "description": "Returns a paginated list of categories belonging to the specified group. Root categories only by default; pass ?all=1 to include all levels.",
+                "operationId": "getCategories",
                 "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the category group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "all",
+                        "in": "query",
+                        "description": "Pass 1 to return all categories regardless of depth (not just roots)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "enum": [
+                                0,
+                                1
+                            ]
+                        }
+                    },
                     {
                         "name": "limit",
                         "in": "query",
-                        "description": "Number of items per page",
+                        "description": "Number of results per page (max 100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -27,11 +80,55 @@
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Starting page number",
+                        "description": "Page number",
                         "required": false,
                         "schema": {
                             "type": "integer",
                             "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "created_after",
+                        "in": "query",
+                        "description": "Filter to categories created after this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "created_before",
+                        "in": "query",
+                        "description": "Filter to categories created before this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
                         }
                     }
                 ],
@@ -43,28 +140,434 @@
                                 "schema": {
                                     "properties": {
                                         "data": {
-                                            "description": "Remittances",
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/CornRemittance"
+                                                "$ref": "#/components/schemas/Category"
                                             }
                                         },
                                         "meta": {
-                                            "description": "Remittances",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/Meta"
                                             }
                                         },
                                         "links": {
-                                            "description": "Remittances",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/Links"
                                             }
                                         },
                                         "pagination_info": {
-                                            "description": "Remittances",
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PaginationInfo"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Category group not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Create a new category",
+                "description": "Creates a category inside the specified group. The `fields` object accepts dynamic field values keyed by handle.",
+                "operationId": "createCategory",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the category group the new category will belong to",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Display name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "PHP"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier (auto-generated from name when omitted)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "php",
+                                        "nullable": true
+                                    },
+                                    "parent_id": {
+                                        "description": "ID of the parent category for hierarchical nesting",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "description": "Display sort position among siblings",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "description": "Dynamic field values keyed by handle (e.g. {\"colour\": \"#ff0000\", \"summary\": \"The PHP language\"})",
+                                        "type": "object",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Category created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Category"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Category group not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/category-groups/{group_id}/categories/{category}": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get a single category",
+                "description": "Returns a category with its dynamic field values and immediate children.",
+                "operationId": "getCategory",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the category group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "ID of the category",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Category"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Update a category",
+                "description": "Updates a category's core attributes and/or its dynamic field values. Any `fields` keys sent will overwrite the stored value for that handle; omit a key to leave it unchanged.",
+                "operationId": "updateCategory",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the category group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "ID of the category to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Display name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "PHP"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "parent_id": {
+                                        "description": "ID of the parent category (cannot be a descendant of this category)",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "description": "Display sort position",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "description": "Dynamic field values keyed by handle",
+                                        "type": "object",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Category updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Category"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Delete a category",
+                "description": "Permanently deletes the category. Child categories are not automatically deleted; reassign or delete them first.",
+                "operationId": "deleteCategory",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the category group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "ID of the category to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/category-groups": {
+            "get": {
+                "tags": [
+                    "Category Groups"
+                ],
+                "summary": "List all category groups",
+                "description": "Returns a paginated list of category groups, each including the total number of categories it contains.",
+                "operationId": "getCategoryGroups",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results per page (max 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CategoryGroup"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Meta"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Links"
+                                            }
+                                        },
+                                        "pagination_info": {
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/PaginationInfo"
@@ -85,20 +588,95 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Category Groups"
+                ],
+                "summary": "Create a new category group",
+                "description": "Creates a category group along with its backing field layout. Optionally attach existing field groups to define custom fields for categories in this group.",
+                "operationId": "createCategoryGroup",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Human-readable name (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Blog Tags"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "blog-tags"
+                                    },
+                                    "field_groups": {
+                                        "description": "IDs of field groups whose fields should be available on categories in this group",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Category group created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CategoryGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
-        "/api/remittances/corn/{id}": {
+        "/api/v1/category-groups/{group}": {
             "get": {
                 "tags": [
-                    "Remittances"
+                    "Category Groups"
                 ],
-                "summary": "Get details on a Corn Remittance",
-                "operationId": "getCorn",
+                "summary": "Get a single category group",
+                "operationId": "getCategoryGroup",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "group",
                         "in": "path",
-                        "description": "ID of the product to retrieve",
+                        "description": "ID of the category group",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -111,13 +689,147 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CornRemittance"
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CategoryGroup"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
                     "404": {
-                        "description": "Product not found"
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Category Groups"
+                ],
+                "summary": "Update a category group",
+                "operationId": "updateCategoryGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the category group to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Human-readable name (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Blog Tags"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "blog-tags"
+                                    },
+                                    "field_groups": {
+                                        "description": "IDs of field groups to sync (replaces existing assignment)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Category group updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CategoryGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Category Groups"
+                ],
+                "summary": "Delete a category group",
+                "description": "Permanently deletes the category group. All categories belonging to this group will also be deleted.",
+                "operationId": "deleteCategoryGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the category group to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
                     }
                 },
                 "security": [
@@ -127,18 +839,28 @@
                 ]
             }
         },
-        "/api/remittances/soybean": {
+        "/api/v1/entry-groups/{group_id}/entries": {
             "get": {
                 "tags": [
-                    "Remittances"
+                    "Entries"
                 ],
-                "summary": "Get details on Soybean Remittances",
-                "operationId": "getAllSoybeanRemittances",
+                "summary": "List entries in a group",
+                "description": "Returns a paginated list of entries belonging to the specified entry group.",
+                "operationId": "getEntries",
                 "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the entry group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
                     {
                         "name": "limit",
                         "in": "query",
-                        "description": "Number of items per page",
+                        "description": "Results per page (max 100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -148,11 +870,55 @@
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Starting page number",
+                        "description": "Page number",
                         "required": false,
                         "schema": {
                             "type": "integer",
                             "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "created_after",
+                        "in": "query",
+                        "description": "Filter to entries created after this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "created_before",
+                        "in": "query",
+                        "description": "Filter to entries created before this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
                         }
                     }
                 ],
@@ -164,28 +930,469 @@
                                 "schema": {
                                     "properties": {
                                         "data": {
-                                            "description": "Remittances",
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/SoybeanRemittance"
+                                                "$ref": "#/components/schemas/Entry"
                                             }
                                         },
                                         "meta": {
-                                            "description": "Remittances",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/Meta"
                                             }
                                         },
                                         "links": {
-                                            "description": "Remittances",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/Links"
                                             }
                                         },
                                         "pagination_info": {
-                                            "description": "Remittances",
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PaginationInfo"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Entry group not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Entries"
+                ],
+                "summary": "Create a new entry",
+                "description": "Creates an entry within the specified entry group. Field validation rules are resolved dynamically from the group and entry type schemas. The type_handle must belong to this group.",
+                "operationId": "createEntry",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the entry group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type_handle",
+                                    "title"
+                                ],
+                                "properties": {
+                                    "type_handle": {
+                                        "description": "Handle of the entry type (must belong to this group)",
+                                        "type": "string",
+                                        "example": "article"
+                                    },
+                                    "title": {
+                                        "description": "Entry title",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "My First Post"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier within the group",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "status": {
+                                        "description": "Status handle (must exist in the group status group)",
+                                        "type": "string",
+                                        "example": "draft",
+                                        "nullable": true
+                                    },
+                                    "published_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "nullable": true
+                                    },
+                                    "authors": {
+                                        "description": "User IDs to assign as authors",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "categories": {
+                                        "description": "Category IDs to assign",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "description": "Dynamic field values keyed by field handle",
+                                        "type": "object",
+                                        "nullable": true,
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Entry created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Entry"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/entry-groups/{group_id}/entries/{entry}": {
+            "get": {
+                "tags": [
+                    "Entries"
+                ],
+                "summary": "Get a single entry",
+                "operationId": "getEntry",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the entry group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "entry",
+                        "in": "path",
+                        "description": "ID of the entry",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Entry"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Entries"
+                ],
+                "summary": "Update an entry",
+                "description": "Updates an entry's core fields and/or dynamic field values. Field validation rules are resolved dynamically from the entry's group and type.",
+                "operationId": "updateEntry",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the entry group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "entry",
+                        "in": "path",
+                        "description": "ID of the entry to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Updated Title"
+                                    },
+                                    "handle": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "status": {
+                                        "description": "Status handle",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "published_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "nullable": true
+                                    },
+                                    "authors": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "categories": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "type": "object",
+                                        "nullable": true,
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Entry updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Entry"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Entries"
+                ],
+                "summary": "Delete an entry",
+                "description": "Permanently deletes the entry and its field values.",
+                "operationId": "deleteEntry",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "ID of the entry group",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "entry",
+                        "in": "path",
+                        "description": "ID of the entry to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/entry-groups": {
+            "get": {
+                "tags": [
+                    "Entry Groups"
+                ],
+                "summary": "List all entry groups",
+                "description": "Returns a paginated list of entry groups including entry and entry-type counts.",
+                "operationId": "getEntryGroups",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Results per page (max 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/EntryGroup"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Meta"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Links"
+                                            }
+                                        },
+                                        "pagination_info": {
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/PaginationInfo"
@@ -206,20 +1413,124 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Entry Groups"
+                ],
+                "summary": "Create a new entry group",
+                "operationId": "createEntryGroup",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle",
+                                    "status_group_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Human-readable name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Blog Posts"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "blog-posts"
+                                    },
+                                    "description": {
+                                        "description": "Optional description",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "description": "Display sort position",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "status_group_id": {
+                                        "description": "ID of the status group to use",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "field_layout_id": {
+                                        "description": "ID of an optional field layout",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "category_groups": {
+                                        "description": "IDs of category groups to attach",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "field_groups": {
+                                        "description": "IDs of field groups to attach",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Entry group created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/EntryGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
-        "/api/remittances/soybean/{id}": {
+        "/api/v1/entry-groups/{group}": {
             "get": {
                 "tags": [
-                    "Remittances"
+                    "Entry Groups"
                 ],
-                "summary": "Get details on a Soybean Remittance",
-                "operationId": "getSoybeanRemittance",
+                "summary": "Get a single entry group",
+                "operationId": "getEntryGroup",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "group",
                         "in": "path",
-                        "description": "ID of the product to retrieve",
+                        "description": "ID of the entry group",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -232,13 +1543,168 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CornRemittance"
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/EntryGroup"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
                     "404": {
-                        "description": "Product not found"
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Entry Groups"
+                ],
+                "summary": "Update an entry group",
+                "operationId": "updateEntryGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the entry group to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle",
+                                    "status_group_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Blog Posts"
+                                    },
+                                    "handle": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "blog-posts"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "status_group_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "field_layout_id": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "category_groups": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "field_groups": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Entry group updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/EntryGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Entry Groups"
+                ],
+                "summary": "Delete an entry group",
+                "description": "Permanently deletes the entry group and all of its entries.",
+                "operationId": "deleteEntryGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the entry group to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
                     }
                 },
                 "security": [
@@ -248,18 +1714,19 @@
                 ]
             }
         },
-        "/api/submissions": {
+        "/api/v1/status-groups": {
             "get": {
                 "tags": [
-                    "Submissions"
+                    "Status Groups"
                 ],
-                "summary": "Get a paginated list of Submissions",
-                "operationId": "getAllSubmissions",
+                "summary": "List all status groups",
+                "description": "Returns a paginated list of status groups, each including the total number of statuses it contains.",
+                "operationId": "getStatusGroups",
                 "parameters": [
                     {
                         "name": "limit",
                         "in": "query",
-                        "description": "Number of items per page",
+                        "description": "Results per page (max 100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -269,11 +1736,35 @@
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Starting page number",
+                        "description": "Page number",
                         "required": false,
                         "schema": {
                             "type": "integer",
                             "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
                         }
                     }
                 ],
@@ -285,28 +1776,24 @@
                                 "schema": {
                                     "properties": {
                                         "data": {
-                                            "description": "Submissions",
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/Submission"
+                                                "$ref": "#/components/schemas/StatusGroup"
                                             }
                                         },
                                         "meta": {
-                                            "description": "",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/Meta"
                                             }
                                         },
                                         "links": {
-                                            "description": "",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/Links"
                                             }
                                         },
                                         "pagination_info": {
-                                            "description": "",
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/PaginationInfo"
@@ -327,20 +1814,92 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Status Groups"
+                ],
+                "summary": "Create a new status group",
+                "operationId": "createStatusGroup",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Human-readable name (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Publishing Workflow"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier (must be unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "publishing-workflow"
+                                    },
+                                    "sort_order": {
+                                        "description": "Display sort position",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Status group created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/StatusGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
-        "/api/submissions/{id}": {
+        "/api/v1/status-groups/{group}": {
             "get": {
                 "tags": [
-                    "Submissions"
+                    "Status Groups"
                 ],
-                "summary": "Get details on a specific Submission",
-                "operationId": "getSubmission",
+                "summary": "Get a single status group",
+                "operationId": "getStatusGroup",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "group",
                         "in": "path",
-                        "description": "ID of the product to retrieve",
+                        "description": "ID of the status group",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -353,13 +1912,970 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Submission"
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/StatusGroup"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
                     "404": {
-                        "description": "Submission not found"
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Status Groups"
+                ],
+                "summary": "Update a status group",
+                "operationId": "updateStatusGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the status group to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Publishing Workflow"
+                                    },
+                                    "handle": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "publishing-workflow"
+                                    },
+                                    "sort_order": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status group updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/StatusGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Status Groups"
+                ],
+                "summary": "Delete a status group",
+                "description": "Permanently deletes the status group and all of its statuses.",
+                "operationId": "deleteStatusGroup",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "description": "ID of the status group to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/statuses": {
+            "get": {
+                "tags": [
+                    "Statuses"
+                ],
+                "summary": "List statuses",
+                "description": "Returns a paginated list of statuses. Filter by status group using the status_group_id query parameter.",
+                "operationId": "getStatuses",
+                "parameters": [
+                    {
+                        "name": "status_group_id",
+                        "in": "query",
+                        "description": "Filter results to a specific status group",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Results per page (max 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "created_after",
+                        "in": "query",
+                        "description": "Filter to statuses created after this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "created_before",
+                        "in": "query",
+                        "description": "Filter to statuses created before this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Status"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Meta"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Links"
+                                            }
+                                        },
+                                        "pagination_info": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PaginationInfo"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Statuses"
+                ],
+                "summary": "Create a new status",
+                "description": "Creates a status within the specified status group. If is_default is true, the previous default in the same group is automatically cleared.",
+                "operationId": "createStatus",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle",
+                                    "status_group_id"
+                                ],
+                                "properties": {
+                                    "status_group_id": {
+                                        "description": "ID of the status group this status belongs to",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "description": "Display name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Draft"
+                                    },
+                                    "handle": {
+                                        "description": "URL-safe identifier, unique within the group",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "draft"
+                                    },
+                                    "color": {
+                                        "description": "Optional display colour",
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "example": "#aaaaaa",
+                                        "nullable": true
+                                    },
+                                    "is_default": {
+                                        "description": "Set as the default status for the group (clears any existing default)",
+                                        "type": "boolean",
+                                        "example": false,
+                                        "nullable": true
+                                    },
+                                    "is_public": {
+                                        "description": "Whether this status is publicly visible",
+                                        "type": "boolean",
+                                        "example": false,
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "description": "Sort position within the group",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Status created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Status"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/statuses/{status}": {
+            "get": {
+                "tags": [
+                    "Statuses"
+                ],
+                "summary": "Get a single status",
+                "operationId": "getStatus",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "path",
+                        "description": "ID of the status",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Status"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Statuses"
+                ],
+                "summary": "Update a status",
+                "description": "Updates a status. If is_default is set to true, the previous default in the same group is automatically cleared.",
+                "operationId": "updateStatus",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "path",
+                        "description": "ID of the status to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "handle"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Published"
+                                    },
+                                    "handle": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "published"
+                                    },
+                                    "color": {
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "example": "#22c55e",
+                                        "nullable": true
+                                    },
+                                    "is_default": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                    },
+                                    "is_public": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                    },
+                                    "sort_order": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Status"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Statuses"
+                ],
+                "summary": "Delete a status",
+                "description": "Permanently deletes the status.",
+                "operationId": "deleteStatus",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "path",
+                        "description": "ID of the status to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "List users",
+                "description": "Returns a paginated list of users including their roles and custom field values.",
+                "operationId": "getUsers",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Results per page (max 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "created_after",
+                        "in": "query",
+                        "description": "Filter to users created after this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "created_before",
+                        "in": "query",
+                        "description": "Filter to users created before this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/User"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Meta"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Links"
+                                            }
+                                        },
+                                        "pagination_info": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PaginationInfo"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create a new user",
+                "description": "Creates a user account and optionally assigns roles and custom field values.",
+                "operationId": "createUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Display name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Jane Smith"
+                                    },
+                                    "email": {
+                                        "description": "Email address (must be unique)",
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255,
+                                        "example": "jane@example.com"
+                                    },
+                                    "password": {
+                                        "description": "Password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "secret1234"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Must match password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret1234"
+                                    },
+                                    "roles": {
+                                        "description": "Role names to assign",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "editor"
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "description": "Custom field values keyed by handle",
+                                        "type": "object",
+                                        "nullable": true,
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{user}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get a single user",
+                "operationId": "getUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID of the user",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update a user",
+                "description": "Updates a user's name, email, password, roles, and/or custom field values. Only provided keys are changed.",
+                "operationId": "updateUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID of the user to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Jane Smith"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255,
+                                        "example": "jane@example.com"
+                                    },
+                                    "password": {
+                                        "description": "Leave blank to keep existing password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "nullable": true
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "nullable": true
+                                    },
+                                    "roles": {
+                                        "description": "Replaces all current roles",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "fields": {
+                                        "type": "object",
+                                        "nullable": true,
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete a user",
+                "description": "Permanently deletes the user. A user cannot delete their own account.",
+                "operationId": "deleteUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID of the user to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
                     }
                 },
                 "security": [
@@ -469,206 +2985,370 @@
                 },
                 "type": "object"
             },
-            "CornRemittance": {
-                "title": "Corn Remittance",
-                "description": "corn remittance model",
+            "CategoryGroup": {
+                "title": "Category Group",
+                "description": "A category group that contains categories",
                 "properties": {
                     "id": {
-                        "description": "",
+                        "description": "Primary key",
                         "type": "integer",
                         "format": "int64"
                     },
-                    "title": {
-                        "description": "",
+                    "name": {
+                        "description": "Human-readable name",
                         "type": "string"
                     },
-                    "num_bushels_purchased": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
+                    "handle": {
+                        "description": "URL-safe unique identifier",
+                        "type": "string"
                     },
-                    "bushels_purchased_as_second_purchaser": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
+                    "sort_order": {
+                        "description": "Display sort position",
+                        "type": "integer"
                     },
-                    "bushels_sweet_corn_popcorn_seed_corn": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
+                    "categories_count": {
+                        "description": "Total number of categories in this group",
+                        "type": "integer"
                     },
-                    "total_bushels_subject_to_checkoff": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "format": "date-time"
                     },
-                    "total": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "first_purchased_submission_id": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "organization": {
-                        "description": "Organization",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
-                    },
-                    "commodity": {
-                        "description": "Commodity",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
-                    },
-                    "state": {
-                        "description": "State",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"
             },
-            "SoybeanRemittance": {
-                "title": "Soybean Remittance",
-                "description": "corn remittance model",
+            "Category": {
+                "title": "Category",
+                "description": "A category belonging to a category group. Categories support hierarchical nesting via parent_id and carry optional dynamic field values defined by the group's field layout.",
                 "properties": {
                     "id": {
-                        "description": "",
+                        "description": "Primary key",
                         "type": "integer",
                         "format": "int64"
                     },
-                    "title": {
-                        "description": "",
+                    "group_id": {
+                        "description": "ID of the category group this category belongs to",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "parent_id": {
+                        "description": "ID of the parent category, or null for root categories",
+                        "type": "integer",
+                        "format": "int64",
+                        "nullable": true
+                    },
+                    "name": {
+                        "description": "Human-readable display name",
                         "type": "string"
                     },
-                    "num_bushels_purchased": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
+                    "handle": {
+                        "description": "URL-safe unique identifier within the group",
+                        "type": "string"
                     },
-                    "num_bushels_assessed": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
+                    "sort_order": {
+                        "description": "Display sort position among siblings",
+                        "type": "integer"
                     },
-                    "net_market_value_assessed_bushels": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
+                    "fields": {
+                        "description": "Dynamic custom field values keyed by field handle. The available field handles and their value types are defined by the category group's field layout.",
+                        "type": "object",
+                        "nullable": true
                     },
-                    "total": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "first_purchased_submission_id": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "organization": {
-                        "description": "Organization",
+                    "children": {
+                        "description": "Immediate child categories, included only when the children relation is loaded (i.e. on show requests)",
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
+                            "$ref": "#/components/schemas/Category"
                         }
                     },
-                    "commodity": {
-                        "description": "Commodity",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "format": "date-time"
                     },
-                    "state": {
-                        "description": "State",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"
             },
-            "Submission": {
-                "title": "Submission Details",
-                "description": "submission model",
+            "EntryGroup": {
+                "title": "Entry Group",
+                "description": "A named collection of entries sharing a status group, field layout, and category groups.",
                 "properties": {
                     "id": {
-                        "description": "",
+                        "description": "Primary key",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "Human-readable name",
+                        "type": "string"
+                    },
+                    "handle": {
+                        "description": "URL-safe identifier (unique)",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Optional description",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "sort_order": {
+                        "description": "Display sort position",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "status_group_id": {
+                        "description": "ID of the associated status group",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "field_layout_id": {
+                        "description": "ID of the associated field layout",
+                        "type": "integer",
+                        "format": "int64",
+                        "nullable": true
+                    },
+                    "entries_count": {
+                        "description": "Total number of entries in this group (present when counted)",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "entry_types_count": {
+                        "description": "Total number of entry types in this group (present when counted)",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Entry": {
+                "title": "Entry",
+                "description": "A content entry belonging to an entry group.",
+                "properties": {
+                    "id": {
+                        "description": "Primary key",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "entry_group_id": {
+                        "description": "ID of the entry group this entry belongs to",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "entry_type_id": {
+                        "description": "ID of the entry type for this entry",
                         "type": "integer",
                         "format": "int64"
                     },
                     "title": {
-                        "description": "",
+                        "description": "Human-readable title",
                         "type": "string"
                     },
-                    "start_date": {
-                        "description": "",
+                    "handle": {
+                        "description": "URL-safe identifier within the group",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status_handle": {
+                        "description": "Handle of the current status",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status_is_public": {
+                        "description": "Whether the current status is publicly visible",
+                        "type": "boolean"
+                    },
+                    "published_at": {
+                        "description": "Date/time the entry was published",
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "fields": {
+                        "description": "Dynamic custom field values keyed by field handle",
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "authors": {
+                        "description": "Users assigned as authors (included when eager-loaded)",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RelatedItem"
+                        },
+                        "nullable": true
+                    },
+                    "categories": {
+                        "description": "Categories assigned to this entry (included when eager-loaded)",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RelatedItem"
+                        },
+                        "nullable": true
+                    },
+                    "created_at": {
                         "type": "string",
                         "format": "date-time"
                     },
-                    "end_date": {
-                        "description": "",
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "StatusGroup": {
+                "title": "Status Group",
+                "description": "A named collection of statuses shared across entries or other models.",
+                "properties": {
+                    "id": {
+                        "description": "Primary key",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "Human-readable name",
+                        "type": "string"
+                    },
+                    "handle": {
+                        "description": "URL-safe unique identifier",
+                        "type": "string"
+                    },
+                    "sort_order": {
+                        "description": "Display sort position",
+                        "type": "integer"
+                    },
+                    "statuses_count": {
+                        "description": "Total number of statuses in this group",
+                        "type": "integer"
+                    },
+                    "created_at": {
                         "type": "string",
                         "format": "date-time"
                     },
-                    "total_remittance": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
-                    },
-                    "submitted": {
-                        "description": "",
-                        "type": "boolean"
-                    },
-                    "paid_by_check": {
-                        "description": "",
-                        "type": "boolean"
-                    },
-                    "payment_date": {
-                        "description": "",
+                    "updated_at": {
                         "type": "string",
-                        "format": "date"
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Status": {
+                "title": "Status",
+                "description": "A status option belonging to a status group.",
+                "properties": {
+                    "id": {
+                        "description": "Primary key",
+                        "type": "integer",
+                        "format": "int64"
                     },
-                    "total": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
+                    "status_group_id": {
+                        "description": "ID of the status group this status belongs to",
+                        "type": "integer",
+                        "format": "int64"
                     },
-                    "first_purchased_submission_id": {
-                        "description": "",
-                        "type": "number",
-                        "format": "float"
+                    "name": {
+                        "description": "Human-readable display name",
+                        "type": "string"
                     },
-                    "organization": {
-                        "description": "Organization",
+                    "handle": {
+                        "description": "URL-safe identifier, unique within its group",
+                        "type": "string"
+                    },
+                    "color": {
+                        "description": "Optional display colour (e.g. #ff5733)",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "is_default": {
+                        "description": "Whether this is the default status in its group",
+                        "type": "boolean"
+                    },
+                    "is_public": {
+                        "description": "Whether this status is publicly visible",
+                        "type": "boolean"
+                    },
+                    "sort_order": {
+                        "description": "Display sort position within the group",
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "title": "User",
+                "description": "A user account.",
+                "properties": {
+                    "id": {
+                        "description": "Primary key",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "Display name",
+                        "type": "string"
+                    },
+                    "email": {
+                        "description": "Email address (unique)",
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "roles": {
+                        "description": "Role names assigned to this user",
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "avatar": {
+                        "description": "Avatar URL",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "fields": {
+                        "description": "Dynamic custom field values keyed by field handle",
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": {
+                            "type": "string"
                         }
                     },
-                    "commodity": {
-                        "description": "Commodity",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
                     },
-                    "state": {
-                        "description": "State",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RelatedItem"
-                        }
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"
@@ -685,12 +3365,36 @@
     },
     "tags": [
         {
-            "name": "Remittances",
-            "description": "Remittances"
+            "name": "Categories",
+            "description": "Manage categories within a category group. Categories support hierarchical nesting (parent_id) and carry optional dynamic custom fields defined by the group's field layout."
         },
         {
-            "name": "Submissions",
-            "description": "Submissions"
+            "name": "Category Groups",
+            "description": "Manage category groups. A category group is a named container for a set of categories and defines the field layout that all categories in the group share."
+        },
+        {
+            "name": "Entries",
+            "description": "Manage content entries within an entry group. Entries support dynamic field values, authors, categories, and status."
+        },
+        {
+            "name": "Entry Groups",
+            "description": "Manage entry groups. An entry group is a named collection of entries with a shared status group, field layout, and optional category groups."
+        },
+        {
+            "name": "Status Groups",
+            "description": "Manage status groups. A status group is a named collection of statuses (e.g. \"Publishing Workflow\") that can be assigned to entry groups."
+        },
+        {
+            "name": "Statuses",
+            "description": "Manage individual statuses within a status group. Setting is_default=true on a status will automatically unset the previous default in the same group."
+        },
+        {
+            "name": "Users",
+            "description": "Manage user accounts, roles, and custom field values."
+        },
+        {
+            "name": "Account",
+            "description": "Account"
         }
     ]
 }

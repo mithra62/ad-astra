@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 /**
  * @OA\Info(
  *      version="1.0.0",
- *      title="Checkoff Pro",
- *      description="API documentation for Checkoff Pro",
+ *      title="Magic Program",
+ *      description="API documentation for Magic Program",
  * )
  * @OA\SecurityScheme(
  *      securityScheme="sanctum",
@@ -63,10 +63,79 @@ abstract class Controller extends DefaultController
     protected function limit(Request $request): int
     {
         $limit = (int)$request->input('limit', 10);
-        if($limit > 100) {
+        if ($limit > 100) {
             $limit = 100;
         }
 
         return $limit;
+    }
+
+    /**
+     * @param Request $request
+     * @return int
+     */
+    protected function page(Request $request): int
+    {
+        return (int)$request->input('page', 1);
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    protected function sort(Request $request, array $allowed = ['id', 'created_at', 'updated_at']): string
+    {
+        $column = $request->input('sort', 'id');
+        return in_array($column, $allowed, strict: true) ? $column : 'id';
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    protected function sortDir(Request $request): string
+    {
+        $dir = strtolower((string) $request->input('direction', 'asc'));
+        return in_array($dir, ['asc', 'desc'], strict: true) ? $dir : 'asc';
+    }
+
+    /**
+     * @param array $where
+     * @param Request $request
+     * @return array
+     */
+    protected function buildWhere(array $where, Request $request): array
+    {
+        if ($this->createdBefore($request)) {
+            $where[] = [
+                'created_at', '<=', $this->createdBefore($request),
+            ];
+        }
+
+        if ($this->createdAfter($request)) {
+            $where[] = [
+                'created_at', '>=', $this->createdAfter($request),
+            ];
+        }
+
+        return $where;
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    protected function createdBefore(Request $request): string
+    {
+        return $request->input('created_before', '');
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    protected function createdAfter(Request $request): string
+    {
+        return $request->input('created_after', '');
     }
 }

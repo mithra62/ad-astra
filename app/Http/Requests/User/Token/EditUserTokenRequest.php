@@ -1,7 +1,8 @@
 <?php
+
 namespace App\Http\Requests\User\Token;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class EditUserTokenRequest extends FormRequest
@@ -11,7 +12,7 @@ class EditUserTokenRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->can('edit user');
+        return Auth::user()->can('edit user token');
     }
 
     /**
@@ -20,7 +21,7 @@ class EditUserTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:255',
         ];
     }
 }

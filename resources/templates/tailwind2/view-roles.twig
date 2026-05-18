@@ -1,0 +1,229 @@
+{% extends 'admin._inc._layout' %}
+
+{% set page_title = 'Roles' %}
+{% set page_heading = 'Roles' %}
+{% set active_nav = 'members' %}
+{% set active_user_section = 'roles' %}
+{% set has_secondary_sidebar = true %}
+
+{% set roles = [
+    {id: 1, name: 'super admin', label: 'Super Admin', guard: 'web', users: 2, permissions: 43, status: 'System', highlight: '#0f172a', updated: 'May 7, 2026', created: 'Jan 10, 2026', description: 'Full platform access with permission bypass behavior.'},
+    {id: 2, name: 'admin', label: 'Admin', guard: 'web', users: 6, permissions: 43, status: 'Active', highlight: '#059669', updated: 'May 6, 2026', created: 'Jan 14, 2026', description: 'Receives every seeded permission directly and can manage the administration panel.'},
+    {id: 3, name: 'editor', label: 'Editor', guard: 'web', users: 14, permissions: 24, status: 'Active', highlight: '#2563eb', updated: 'Apr 29, 2026', created: 'Feb 2, 2026', description: 'Manages content, categories, media, and publishing workflows.'},
+    {id: 4, name: 'user', label: 'User', guard: 'web', users: 128, permissions: 2, status: 'Default', highlight: '#64748b', updated: 'Apr 22, 2026', created: 'Jan 10, 2026', description: 'Baseline authenticated account role with limited admin access.'}
+] %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">Roles</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    <input id="secnav-toggle" type="checkbox">
+
+    <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 lg:hidden">
+        <span class="flex items-center gap-2">
+            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
+            </svg>
+            Section Navigation
+        </span>
+        <span class="secnav-chevron text-slate-400">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </span>
+    </label>
+
+    <div id="secondary-nav-panel" class="hidden border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+        <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('users.index') }}">Users</a>
+            <a class="flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="{{ route('roles.index') }}">Roles</a>
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('users.layouts.show') }}">Field Layout</a>
+        </nav>
+    </div>
+
+    <aside class="hidden h-fit lg:block">
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-4 py-3">
+                <h5 class="text-sm font-semibold text-slate-700">Members</h5>
+            </div>
+            <nav class="p-2">
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('users.index') }}">Users</a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="{{ route('roles.index') }}">Roles</a>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('users.layouts.show') }}">Field Layout</a>
+            </nav>
+        </div>
+    </aside>
+{% endblock %}
+
+{% block content %}
+    <div class="flex min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Roles</h1>
+                <p class="mt-1 text-sm text-slate-500">Review existing roles, assigned users, and permission coverage.</p>
+            </div>
+            <a class="inline-flex items-center gap-1.5 self-start rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:self-auto" href="{{ route('roles.create') }}">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                Add Role
+            </a>
+        </div>
+
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="grid grid-cols-2 divide-x divide-y divide-slate-200 sm:grid-cols-4 sm:divide-y-0">
+                <div class="p-4 sm:p-5">
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Total Roles</p>
+                    <p class="mt-1.5 text-3xl font-semibold text-slate-900">4</p>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Assigned Users</p>
+                    <p class="mt-1.5 text-3xl font-semibold text-slate-900">150</p>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Permissions</p>
+                    <p class="mt-1.5 text-3xl font-semibold text-slate-900">43</p>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Guards</p>
+                    <p class="mt-1.5 text-3xl font-semibold text-slate-900">1</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-5 py-3">
+                <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h5 class="text-sm font-semibold text-slate-700">Existing Roles</h5>
+                        <p class="mt-0.5 text-xs text-slate-500">Use this table to audit role usage before changing permissions.</p>
+                    </div>
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-auto">
+                            <option>All statuses</option>
+                            <option>Active</option>
+                            <option>System</option>
+                            <option>Default</option>
+                        </select>
+                        <div class="relative">
+                            <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <input class="w-full rounded-md border border-slate-300 bg-white py-1.5 pl-3 pr-10 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-56" placeholder="Search roles" type="search">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                    <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <tr>
+                        <th class="px-4 py-3" scope="col">Role</th>
+                        <th class="px-4 py-3" scope="col">Guard</th>
+                        <th class="px-4 py-3 text-center" scope="col">Users</th>
+                        <th class="px-4 py-3 text-center" scope="col">Permissions</th>
+                        <th class="px-4 py-3" scope="col">Status</th>
+                        <th class="px-4 py-3" scope="col">Updated</th>
+                        <th class="px-4 py-3 text-right" scope="col">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                    {% for role in roles %}
+                        <tr class="hover:bg-slate-50/60">
+                            <td class="px-4 py-3.5">
+                                <div class="flex items-start gap-3">
+                                    <span class="mt-0.5 h-10 w-10 shrink-0 rounded-md ring-1 ring-inset ring-slate-200" style="background-color: {{ role.highlight }}"></span>
+                                    <div class="min-w-0">
+                                        <a class="font-medium text-slate-900 hover:text-emerald-700" href="view-role.twig">{{ role.label }}</a>
+                                        <div class="row-actions mt-0.5 flex flex-wrap items-center gap-2 text-xs">
+                                            <a class="text-emerald-600 hover:underline" href="view-role.twig">View</a>
+                                            <span class="text-slate-300">|</span>
+                                            <a class="text-emerald-600 hover:underline" href="{{ route('roles.edit', role.id) }}">Edit</a>
+                                            <span class="text-slate-300">|</span>
+                                            <a class="text-slate-500 hover:underline" href="roles-permissions.twig">Permissions</a>
+                                            {% if role.status != 'System' %}
+                                                <span class="text-slate-300">|</span>
+                                                <a class="text-red-500 hover:underline" href="{{ route('roles.confirm', role.id) }}">Delete</a>
+                                            {% endif %}
+                                        </div>
+                                        <p class="mt-1 max-w-xl text-xs text-slate-500">{{ role.description }}</p>
+                                        <p class="mt-0.5 font-mono text-xs text-slate-400">{{ role.name }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3.5">
+                                <span class="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-700">{{ role.guard }}</span>
+                            </td>
+                            <td class="px-4 py-3.5 text-center font-medium text-slate-800">{{ role.users }}</td>
+                            <td class="px-4 py-3.5 text-center font-medium text-slate-800">{{ role.permissions }}</td>
+                            <td class="px-4 py-3.5">
+                                <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {% if role.status == 'Active' %}bg-emerald-50 text-emerald-700{% elseif role.status == 'System' %}bg-slate-100 text-slate-700{% else %}bg-blue-50 text-blue-700{% endif %}">{{ role.status }}</span>
+                            </td>
+                            <td class="px-4 py-3.5 text-slate-500">{{ role.updated }}</td>
+                            <td class="px-4 py-3.5">
+                                <div class="flex items-center justify-end gap-1">
+                                    <a class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" href="view-role.twig" title="View">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </a>
+                                    <a class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" href="{{ route('roles.edit', role.id) }}" title="Edit">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </a>
+                                    <a class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" href="roles-permissions.twig" title="Permissions">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                        </svg>
+                                    </a>
+                                    {% if role.status != 'System' %}
+                                        <a class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-600" href="{{ route('roles.confirm', role.id) }}" title="Delete">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex flex-wrap items-center gap-2">
+                    <select class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        <option>Bulk action</option>
+                        <option>Export selected</option>
+                        <option>Review permissions</option>
+                    </select>
+                    <button type="button" class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">Apply</button>
+                </div>
+                <div class="flex items-center justify-between gap-3 sm:justify-end">
+                    <span class="text-xs text-slate-500">Showing 4 roles</span>
+                    <div class="flex items-center gap-1">
+                        <button class="rounded px-2 py-1 text-xs text-slate-400" disabled>Prev</button>
+                        <span class="rounded bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white">1</span>
+                        <button class="rounded px-2 py-1 text-xs text-slate-400" disabled>Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

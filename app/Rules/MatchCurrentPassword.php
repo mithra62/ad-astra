@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Hash;
 
-class MatchCurrentPassword implements ValidationRule
+readonly class MatchCurrentPassword implements ValidationRule
 {
     /**
      * @param string $attribute

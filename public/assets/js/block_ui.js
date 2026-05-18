@@ -69,7 +69,7 @@ $(document).ready(function () {
         });
     });
 
-    $('#myButton4').on('click', function() {
+    $('#myButton4').on('click', function () {
         const message = $('.multiple-msgs');
         $('.block-mutiple-msg-card').block({
             message: message,
@@ -84,7 +84,7 @@ $(document).ready(function () {
                 padding: 0,
                 backgroundColor: 'transparent'
             },
-            onBlock: function(){
+            onBlock: function () {
                 clearTimeout();
             }
         });
@@ -103,7 +103,7 @@ $(document).ready(function () {
 
         window.setTimeout(function () {
             $('.block-mutiple-msg-card').unblock({
-                onUnblock: function(){
+                onUnblock: function () {
                     message.removeClass('bg-success');
                 }
             });
@@ -144,7 +144,7 @@ $(document).ready(function () {
                 color: '#333',
                 backgroundColor: 'transparent'
             },
-            onUnblock: function() {
+            onUnblock: function () {
                 alert('Page is now unblocked. FadeOut complete.');
             }
         });
@@ -166,7 +166,7 @@ $(document).ready(function () {
                 color: '#333',
                 backgroundColor: 'transparent'
             },
-            onBlock: function() {
+            onBlock: function () {
                 alert('Page is now blocked, FadeIn complete.');
             }
         });
@@ -304,7 +304,7 @@ $(document).ready(function () {
         });
     });
 
-    $('#myButton15').on('click', function() {
+    $('#myButton15').on('click', function () {
         const message = $('.multiple-msgs1');
         $('.form-multiple-message').block({
             message: message,
@@ -319,7 +319,7 @@ $(document).ready(function () {
                 padding: 0,
                 backgroundColor: 'transparent'
             },
-            onBlock: function(){
+            onBlock: function () {
                 clearTimeout();
             }
         });
@@ -338,7 +338,7 @@ $(document).ready(function () {
 
         window.setTimeout(function () {
             $('.form-multiple-message').unblock({
-                onUnblock: function(){
+                onUnblock: function () {
                     message.removeClass('bg-success');
                 }
             });

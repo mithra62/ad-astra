@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Delete General Item</title>
+    {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+
+<input id="sidebar-toggle" type="checkbox">
+<label for="sidebar-toggle" class="sidebar-overlay fixed inset-0 z-20 hidden bg-slate-900/40" aria-hidden="true"></label>
+
+<div class="app-shell min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
+    <aside id="primary-sidebar" class="fixed inset-y-0 left-0 z-30 w-64 -translate-x-full overflow-y-auto border-r border-slate-200 bg-white px-5 py-6 transition-transform duration-200 lg:relative lg:inset-auto lg:z-auto lg:w-auto lg:translate-x-0 lg:transition-none">
+        <div class="mb-4 flex items-center justify-between lg:block">
+            <a class="text-lg font-semibold tracking-tight" href="#">Admin</a>
+            <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Close menu">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </label>
+        </div>
+        <nav class="mt-2 space-y-1 text-sm font-medium lg:mt-8">
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Dashboard</a>
+            <div class="nav-group">
+                <input id="nav-content" type="checkbox" checked>
+                <label for="nav-content" class="flex cursor-pointer items-center justify-between rounded-md bg-emerald-50 px-3 py-2 text-emerald-700">
+                    <span>Content</span>
+                    <span class="nav-chevron"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                </label>
+                <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+                    <li><a class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100" href="#">Articles</a></li>
+                    <li><a class="block rounded-md bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700" href="general-index.twig">General Items</a></li>
+                </ul>
+            </div>
+            <a class="block rounded-md px-3 py-2 text-slate-600 hover:bg-slate-100" href="#">Settings</a>
+        </nav>
+    </aside>
+
+    <div class="flex min-w-0 flex-col">
+        <div class="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex items-center gap-3">
+                <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Open menu">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </label>
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-800 sm:text-base">Delete General Item</h4>
+                    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+                        <a class="hover:text-slate-800" href="#"><svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg> Dashboard</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <a class="hover:text-slate-800" href="general-index.twig">General Items</a>
+                        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <span class="text-red-600">Delete</span>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-1 gap-6 p-4 sm:p-6 lg:grid lg:grid-cols-[14rem_1fr]">
+            <aside class="hidden h-fit lg:block">
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 px-4 py-3"><h5 class="text-sm font-semibold text-slate-700">General</h5></div>
+                    <nav class="p-2">
+                        <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="general-index.twig">All Items</a>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="general-edit.twig">Edit Item</a>
+                        <a class="mt-0.5 flex items-center gap-2 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700" href="general-delete.twig">Delete Item</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <div class="flex min-w-0 flex-col gap-5">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Delete General Item</h1>
+                        <p class="mt-1 text-sm text-slate-500">Review usage before removing this item.</p>
+                    </div>
+                    <a href="general-index.twig" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                        Cancel
+                    </a>
+                </div>
+
+                <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                        <div>
+                            <p class="text-sm font-semibold text-red-800">This action cannot be undone.</p>
+                            <p class="mt-1 text-sm text-red-700">Deleting <strong>Published</strong> will remove the item and may affect records that currently reference it.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex w-full min-w-0 flex-col gap-5">
+                    <div class="flex w-full min-w-0 flex-col gap-5">
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Item Being Deleted</h5></div>
+                            <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                                <div class="flex items-center justify-between py-2.5"><dt class="text-slate-500">Name</dt><dd class="font-semibold text-slate-900">Published</dd></div>
+                                <div class="flex items-center justify-between py-2.5"><dt class="text-slate-500">Handle</dt><dd class="font-mono text-xs text-slate-700">published</dd></div>
+                                <div class="flex items-center justify-between py-2.5"><dt class="text-slate-500">Type</dt><dd class="text-slate-700">Status</dd></div>
+                                <div class="flex items-center justify-between py-2.5"><dt class="text-slate-500">Usage count</dt><dd class="font-semibold text-slate-900">148</dd></div>
+                            </dl>
+                        </div>
+
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3"><h5 class="text-sm font-semibold text-slate-700">Replacement</h5></div>
+                            <div class="space-y-4 px-5 py-5">
+                                <p class="text-sm text-slate-600">Choose a replacement for records that currently use this item.</p>
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="replacement">Reassign existing records to</label>
+                                    <select id="replacement" name="replacement" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                        <option value="">No replacement</option>
+                                        <option value="draft">Draft</option>
+                                        <option value="in-review">In Review</option>
+                                        <option value="archived">Archived</option>
+                                    </select>
+                                    <p class="mt-1 text-xs text-slate-400">Leave blank to clear this item from existing records.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-5">
+                        <div class="overflow-hidden rounded-lg border border-red-200 bg-white shadow-sm">
+                            <div class="border-b border-red-100 bg-red-50 px-5 py-3"><h5 class="text-sm font-semibold text-red-800">Confirm Deletion</h5></div>
+                            <form id="delete-form" method="POST" action="#" class="px-5 py-5">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <div class="mb-4 rounded-md bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                                    Type <strong>Published</strong> to confirm deletion.
+                                </div>
+                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="confirm_name">Confirmation</label>
+                                <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20" id="confirm_name" name="confirm_name" type="text" placeholder="Published" autocomplete="off">
+                                <p id="confirm-error" class="mt-1 hidden text-xs text-red-600">Name does not match. Type "Published" exactly.</p>
+                                <button id="delete-btn" type="submit" class="mt-5 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" disabled>
+                                    Permanently Delete
+                                </button>
+                                <a href="general-edit.twig" class="mt-2 block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">Back to Edit</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-auto border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-slate-400">&copy; 2026 Admin &mdash; All rights reserved.</p>
+                <nav class="flex items-center gap-4 text-xs text-slate-400"><a class="hover:text-slate-600" href="#">Documentation</a><a class="hover:text-slate-600" href="#">Support</a><a class="hover:text-slate-600" href="#">Privacy</a><span class="text-slate-300">|</span><span>v1.0.0</span></nav>
+            </div>
+        </footer>
+    </div>
+</div>
+
+</body>
+</html>

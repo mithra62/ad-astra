@@ -2,14 +2,14 @@
 config = {
     enableTime: false,
 }
-flatpickr(".basic-date",config);
+flatpickr(".basic-date", config);
 
 // **------02 time-picker**
 timepicker = {
     enableTime: true,
     dateFormat: "Y-m-d H:i",
 }
-flatpickr(".time-picker",timepicker);
+flatpickr(".time-picker", timepicker);
 
 //  **------03 date-time-picker**
 datetimepicker = {
@@ -17,13 +17,13 @@ datetimepicker = {
     noCalendar: true,
     dateFormat: "H:i",
 }
-flatpickr(".date-time-picker",datetimepicker);
+flatpickr(".date-time-picker", datetimepicker);
 
 //  **------ 04 picker-range**
 pickerrange = {
     mode: "range"
 }
-flatpickr(".picker-range",pickerrange);
+flatpickr(".picker-range", pickerrange);
 
 
 // **------05 human-friendly-dates**
@@ -33,51 +33,51 @@ humanfriendlydates = {
     altFormat: "F j, Y",
     dateFormat: "Y-m-d",
 }
-flatpickr(".human-friendly-dates",humanfriendlydates);
+flatpickr(".human-friendly-dates", humanfriendlydates);
 
 // **------06 multiple-dates**
 
-Multipledates= {
+Multipledates = {
     mode: "multiple",
     dateFormat: "Y-m-d"
 }
-flatpickr(".multiple-dates",Multipledates);
+flatpickr(".multiple-dates", Multipledates);
 
 //  **------ 07 week-numbers**
 
-weeknumbers= {
+weeknumbers = {
     weekNumbers: true,
 }
-flatpickr(".week-numbers",weeknumbers);
+flatpickr(".week-numbers", weeknumbers);
 
 
 //  **------ 08 hour-time-picker**
 
-hourtimepicker= {
+hourtimepicker = {
     enableTime: true,
     noCalendar: true,
     dateFormat: "H:i",
     time_24hr: true
 }
-flatpickr(".hour-time-picker",hourtimepicker);
+flatpickr(".hour-time-picker", hourtimepicker);
 
 //  **------ 09 time-picker-limits**
 
-timepickerlimits= {
+timepickerlimits = {
     enableTime: true,
     noCalendar: true,
     dateFormat: "H:i",
     minTime: "16:00",
     maxTime: "22:30",
 }
-flatpickr(".time-picker-limits",timepickerlimits);
+flatpickr(".time-picker-limits", timepickerlimits);
 
 //  **------ 10 inline**
 
-Inline= {
+Inline = {
     enableTime: true,
     noCalendar: true,
     dateFormat: "H:i",
 }
-flatpickr(".inline",Inline);
+flatpickr(".inline", Inline);
 

@@ -1,0 +1,29 @@
+{%- set limit = limit ?? 0 -%}
+{%- set selected_ids = selected_ids ?? [] -%}
+{%- set entries = entries ?? [] -%}
+
+<select
+    class="{{ class ?? 'form-control' }}"
+    id="{{ id }}"
+    name="fields[{{ field.handle }}][]"
+    multiple
+    {% if limit == 1 %}size="1"{% endif %}
+    data-field-type="relationship"
+    {% if limit > 0 %}data-limit="{{ limit }}"{% endif %}
+>
+    {% if entries is not empty %}
+        {% for entry in entries %}
+            <option value="{{ entry.id }}"{% if entry.id in selected_ids %} selected{% endif %}>
+                {{ entry.title }}
+            </option>
+        {% endfor %}
+    {% else %}
+        <option disabled value="">No entries available</option>
+    {% endif %}
+</select>
+
+{% if limit > 0 %}
+    <small class="form-text text-muted">
+        Select up to {{ limit }} {{ limit == 1 ? 'entry' : 'entries' }}.
+    </small>
+{% endif %}

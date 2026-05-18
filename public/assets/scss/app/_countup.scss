@@ -1,33 +1,36 @@
 // >>-- 100 countup css start --<<
 
-.simple-counter{
+.simple-counter {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     //height: 200px;
     padding: 20px;
-    border: 1px dotted rgb(var(--primary),0.2);
+    border: 1px dotted rgb(var(--primary), 0.2);
     gap: 20px;
-    .simple{
+
+    .simple {
         display: flex;
         flex-direction: column;
-        border: 1px solid rgb(var(--primary),0.2);
+        border: 1px solid rgb(var(--primary), 0.2);
         font-size: 20px;
         height: 130px;
-        width: 130px;    
+        width: 130px;
         justify-content: center;
         align-items: center;
         border-radius: 36px;
-        .counter{
+
+        .counter {
             font-size: 30px;
             font-weight: 500;
 
         }
-        div{
+
+        div {
             font-size: 32px;
             margin-bottom: 5px;
-        background-color: rgba(var(--white),1);
+            background-color: rgba(var(--white), 1);
             color: rgb(var(--primary), 1);
             border: 2px dotted rgb(var(--dark), 0.2);
             padding: 0px 7px;
@@ -37,39 +40,45 @@
             align-items: center;
         }
     }
-    p{
+
+    p {
         margin-top: 8px;
         font-weight: 500;
-        i{
+
+        i {
             font-weight: 500;
             font-size: 16px;
         }
     }
 }
-.customized-counter{
+
+.customized-counter {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     //height: 200px;
     padding: 20px;
-    border: 1px dotted rgb(var(--primary),0.2);
+    border: 1px dotted rgb(var(--primary), 0.2);
     gap: 20px;
-    .customized{
+
+    .customized {
         display: flex;
         flex-direction: column;
-        border: 2px dotted rgb(var(--primary),0.3);
+        border: 2px dotted rgb(var(--primary), 0.3);
         font-size: 20px;
         height: 180px;
-        width: 180px;    
+        width: 180px;
         justify-content: center;
         align-items: center;
         border-radius: var(--bs-border-radius);
-        div{
+
+        div {
             font-size: 25px;
             font-weight: 500;
         }
-        i{
+
+        i {
             font-size: 29px;
             margin-bottom: 12px;
             background-color: rgb(var(--info), 0.1);
@@ -84,14 +93,16 @@
             align-items: center;
         }
     }
-    p{
+
+    p {
         margin-top: 3px;
         text-align: center;
-        color: rgb(var(--secondary),1);
+        color: rgb(var(--secondary), 1);
     }
 }
-.under-tab-section{
-    .under-tab{
+
+.under-tab-section {
+    .under-tab {
         border-bottom: 0;
     }
 }

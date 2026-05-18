@@ -1,0 +1,254 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._form-fields' as forms %}
+
+{% set page_title = 'Create Entry Type' %}
+{% set page_heading = 'Entry Groups' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'entries' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+        <a class="hover:text-slate-800" href="#">
+            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Dashboard
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('entries.groups') }}">
+            Entry Groups
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <a class="hover:text-slate-800" href="{{ route('entries.groups.show', group) }}">
+            {{ group.name }}
+        </a>
+        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-slate-800">Create Entry Type</span>
+    </nav>
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.entries.groups._sidebar', {active: group.id}) }}
+{% endblock %}
+
+{% block content %}
+    <div id="unsaved-bar"
+         class="unsaved-bar items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-2">
+        <span class="flex items-center gap-2 text-sm text-amber-800">
+            <svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            You have unsaved changes.
+        </span>
+        <button type="submit" form="general-create-form"
+                class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Save
+            Now
+        </button>
+    </div>
+
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Create Entry Type</h1>
+                <p class="mt-1 text-sm text-slate-500">Create a reusable status, field, label, or option for content
+                    workflows.</p>
+            </div>
+            <a href="{{ route('entries.groups.show', group) }}"
+               class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to {{ group.name }}
+            </a>
+        </div>
+
+        <form id="general-create-form" method="POST" action="{{ route('entries.groups.types.store', group) }}"
+              class="flex w-full min-w-0 flex-col gap-5">
+            {{ csrf_field() }}
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-5 py-3">
+                    <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
+                </div>
+                <div class="space-y-5 px-5 py-5">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span
+                                class="text-red-500">*</span></label>
+                        <input value="{{ old('name') }}"
+                               class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 "
+                               id="name" name="name" type="text" placeholder="">
+                        {% if errors.has('name') %}
+                            <p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span
+                                class="text-red-500">*</span></label>
+                        <input
+                            class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                            id="handle" name="handle" type="text" value="{{ old('handle') }}">
+                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
+                        {% if errors.has('handle') %}
+                            <p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="class">Behavior {{ old('class') }}</label>
+                        <select
+                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm {% if errors.has('class') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                            id="class" name="class">
+                            {% for cls in type_classes %}
+                                <option value="{{ cls }}" {% if old('class') == cls %}selected{% endif %}>
+                                    {{ cls }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.has('status_group_id') %}
+                            <p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('status_group_id') }}</p>
+                        {% endif %}
+                        <small class="text-secondary d-block mb-1">
+                            Select the behavior that implements this entry type's lifecycle hooks.
+                            Must extend <code>App\EntryTypes\AbstractEntryType</code>.
+                        </small>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700"
+                               for="has_entry_tree">Allow Entry Tree</label>
+                        {{ forms.toggle(
+                            name: 'has_entry_tree',
+                            label: 'Allow Entry Tree',
+                            value: false,
+                            description: 'Allow Entries assigned to this Entry Type to have parent / child relationships.',
+                            checked_value: '1',
+                            id: 'has_entry_tree',
+                            error_key: null,
+                            copy_align: 'inline'
+                        ) }}
+                    </div>
+
+                    {% set entry_tree_enabled = old('has_entry_tree') == '1' %}
+                    {% set allowed_parent_types = old('allowed_parent_types', []) %}
+                    <div id="entry-tree-settings" class="{% if not entry_tree_enabled %}hidden {% endif %}rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
+                        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="max_depth">Max Depth</label>
+                                <input
+                                    class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 {% if errors.has('max_depth') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                                    id="max_depth"
+                                    name="max_depth"
+                                    type="number"
+                                    min="0"
+                                    value="{{ old('max_depth') }}"
+                                    {% if errors.has('max_depth') %}aria-invalid="true" aria-describedby="max_depth-error"{% endif %}>
+                                {% if errors.has('max_depth') %}
+                                    <p id="max_depth-error" class="mt-1 text-xs text-red-600">{{ errors.first('max_depth') }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="default_template">Default Template</label>
+                                <input
+                                    class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 {% if errors.has('default_template') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                                    id="default_template"
+                                    name="default_template"
+                                    type="text"
+                                    value="{{ old('default_template') }}"
+                                    placeholder="entries/default"
+                                    {% if errors.has('default_template') %}aria-invalid="true" aria-describedby="default_template-error"{% endif %}>
+                                {% if errors.has('default_template') %}
+                                    <p id="default_template-error" class="mt-1 text-xs text-red-600">{{ errors.first('default_template') }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="allowed_parent_types">Allowed Parent Types</label>
+                                <select
+                                    class="min-h-24 w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 {% if errors.has('allowed_parent_types') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                                    id="allowed_parent_types"
+                                    name="allowed_parent_types[]"
+                                    multiple
+                                    {% if errors.has('allowed_parent_types') %}aria-invalid="true" aria-describedby="allowed_parent_types-error"{% endif %}>
+                                    {% for cls in type_classes %}
+                                        <option value="{{ cls }}" {% if cls in allowed_parent_types %}selected{% endif %}>
+                                            {{ cls }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if errors.has('allowed_parent_types') %}
+                                    <p id="allowed_parent_types-error" class="mt-1 text-xs text-red-600">{{ errors.first('allowed_parent_types') }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status_group_id">Field Layout</label>
+                        <select
+                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm {% if errors.has('status_group_id') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                            id="field_layout_id" name="field_layout_id">
+                            <option value="">— None —</option>
+                            {% for layout in field_layouts %}
+                                <option value="{{ layout.id }}"
+                                        {% if old('field_layout_id') == layout.id %}selected{% endif %}>
+                                    {{ layout.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.has('field_layout_id') %}
+                            <p id="field_layout_id-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>
+                        {% endif %}
+                        <small class="text-secondary d-block mb-1">
+                            Fields from this layout are specific to this
+                            entry type. Group-level fields are always included.</code>.
+                        </small>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <a href="{{ route('entries.groups') }}"
+                   class="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Cancel</a>
+                <button type="submit"
+                        class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                    Create Entry Type
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.attachHandleGenerator) {
+                window.attachHandleGenerator('name', 'handle');
+            }
+
+            var entryTreeToggle = document.getElementById('has_entry_tree');
+            var entryTreeSettings = document.getElementById('entry-tree-settings');
+
+            if (entryTreeToggle && entryTreeSettings) {
+                var syncEntryTreeSettings = function () {
+                    entryTreeSettings.classList.toggle('hidden', !entryTreeToggle.checked);
+                };
+
+                entryTreeToggle.addEventListener('change', syncEntryTreeSettings);
+                syncEntryTreeSettings();
+            }
+        });
+    </script>
+{% endblock %}

@@ -8,13 +8,14 @@
         }
 
         h6,
-        p{
+        p {
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
         }
+
         // th {
         //     &:nth-child(2){
         //         min-width: 240px;
@@ -27,47 +28,50 @@
 
     }
 }
+
 @media print {
     .invoice-footer,
     footer,
     header,
-    nav{
+    nav {
         display: none;
         margin: 0 !important;
-        padding:0 !important;
+        padding: 0 !important;
     }
-    main{
+    main {
         width: 100%;
         padding: 0px;
-        .container{
+
+        .container {
             max-width: 100%;
             padding: 0;
         }
     }
     .app-wrapper {
-        .app-content{
+        .app-content {
             padding: 0px;
-            .go-top{
+
+            .go-top {
                 display: none !important;
             }
-            .invoice-container{
+
+            .invoice-container {
                 .main-title,
-                .breadcrumb{
+                .breadcrumb {
                     display: none;
                 }
             }
         }
     }
-    .customizer-btn{
+    .customizer-btn {
         display: none;
     }
-    .invoice-container{
-        .card-body{
+    .invoice-container {
+        .card-body {
             padding: 0;
         }
     }
 }
-
 
 
 // >>-- 89 Invoice css end --<<

@@ -1,0 +1,2 @@
+{% import 'admin::_inc/_form-fields' as fields %}
+{{ fields.color('fields[' ~ field.handle ~ ']', field.label, value, field.instructions|default(''), id, 'fields.' ~ field.handle) }}

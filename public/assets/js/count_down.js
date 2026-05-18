@@ -26,7 +26,7 @@ window.addEventListener('load', () => {
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
         // Update cached DOM references
-        timerElements.forEach(({ daysEl, hoursEl, minutesEl, secondsEl }) => {
+        timerElements.forEach(({daysEl, hoursEl, minutesEl, secondsEl}) => {
             if (daysEl) daysEl.innerHTML = days;
             if (hoursEl) hoursEl.innerHTML = hours;
             if (minutesEl) minutesEl.innerHTML = minutes;

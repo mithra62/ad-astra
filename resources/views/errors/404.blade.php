@@ -1,3 +1,10 @@
+{{--
+    Error views are intentionally Blade, not Twig.
+    Laravel's exception handler renders these through its own internal path using
+    the Blade renderer directly. If TwigBridge fails to boot or a Twig template
+    throws, error pages must still render — Blade is always available as the
+    base renderer, so keeping error views in Blade is a defensive safety net.
+--}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,8 +14,9 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="Multipurpose, super flexible, powerful, clean modern responsive bootstrap 5 admin template"
           name="description">
-    <meta content="admin template, ki-admin admin template, dashboard template, flat admin template, responsive admin template, web app"
-          name="keywords">
+    <meta
+        content="admin template, ki-admin admin template, dashboard template, flat admin template, responsive admin template, web app"
+        name="keywords">
     <meta content="la-themes" name="author">
     <link href="/assets/images/logo/favicon.png" rel="icon" type="image/x-icon">
     <link href="/assets/images/logo/favicon.png" rel="shortcut icon" type="image/x-icon">

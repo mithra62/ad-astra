@@ -1,6 +1,6 @@
 // >>-- 88 order List css start --<<
 
-.order-list-datatable{
+.order-list-datatable {
     .table-bottom-border {
         & > tbody {
             & > tr {
@@ -8,33 +8,42 @@
             }
         }
     }
+
     .check-box {
         margin-bottom: 0;
+
         .checkmark {
             border-radius: 5px;
             border: 2px solid rgba(var(--dark), 0.4);
         }
     }
-    tr{
-        th:nth-child(2){
+
+    tr {
+        th:nth-child(2) {
             min-width: 100px;
         }
-        th:nth-child(3){
+
+        th:nth-child(3) {
             min-width: 200px;
         }
-        th:nth-child(4){
+
+        th:nth-child(4) {
             min-width: 200px;
         }
-        th:nth-child(5){
+
+        th:nth-child(5) {
             min-width: 100px;
         }
-        th:nth-child(6){
+
+        th:nth-child(6) {
             min-width: 200px;
         }
-        th:nth-child(9){
+
+        th:nth-child(9) {
             min-width: 150px;
         }
-        th:nth-child(10){
+
+        th:nth-child(10) {
             min-width: 100px;
         }
     }

@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Settings;
-use Illuminate\Support\Facades\Auth;
-use App\Models\UsState;
+use Illuminate\Support\Facades\Gate;
 
 abstract class Controller
 {
@@ -13,9 +12,12 @@ abstract class Controller
      */
     protected Settings $settings;
 
+    protected int $total_per_page = 10;
+
     public function __construct()
     {
-        $this->settings = app('settings');
+        $this->settings = app(Settings::class);
+        $this->total_per_page = $this->settings->get('general', 'items_per_page', $this->total_per_page);
     }
 
     /**
@@ -24,21 +26,6 @@ abstract class Controller
      */
     protected function can(string $permission): bool
     {
-        return Auth::user()->can($permission);
-    }
-
-    /**
-     * @return array
-     */
-    protected function getPermissionStates(): array
-    {
-        $states = [];
-        foreach(UsState::all() as $state) {
-            if($this->can('read ' . strtolower($state->title))) {
-                $states[] = $state->id;
-            }
-        }
-
-        return $states;
+        return Gate::allows($permission);
     }
 }

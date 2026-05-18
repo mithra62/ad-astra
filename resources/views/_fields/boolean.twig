@@ -1,0 +1,2 @@
+{% import 'admin::_inc/_form-fields' as fields %}
+{{ fields.toggle('fields[' ~ field.handle ~ ']', field.label, value, field.instructions|default(''), '1', id, 'fields.' ~ field.handle) }}

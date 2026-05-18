@@ -1,15 +1,15 @@
 <?php
+
 namespace App\Rest;
 
 use App\Models\ApiLog;
-use Illuminate\Support\Carbon;
 
 class Api
 {
     public function getDashboardGraph()
     {
         $start = now()->subDays(14)->startOfDay();
-        $end   = now()->endOfDay();
+        $end = now()->endOfDay();
 
         // 1. Retrieve aggregated data from database
         $raw = ApiLog::query()

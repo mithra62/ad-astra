@@ -2,19 +2,21 @@
 
 namespace App\Actions\User;
 
+use App\Actions\AbstractAction;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Services\UserService;
+use App\Traits\PasswordValidationRules;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\ResetsUserPasswords;
 
-class ResetUserPassword implements ResetsUserPasswords
+class ResetUserPassword extends AbstractAction implements ResetsUserPasswords
 {
     use PasswordValidationRules;
 
     /**
      * Validate and reset the user's forgotten password.
      *
-     * @param  array<string, string>  $input
+     * @param array<string, string> $input
      */
     public function reset(User $user, array $input): void
     {
@@ -22,8 +24,6 @@ class ResetUserPassword implements ResetsUserPasswords
             'password' => $this->passwordRules(),
         ])->validate();
 
-        $user->forceFill([
-            'password' => Hash::make($input['password']),
-        ])->save();
+        app(UserService::class)->setPassword($user, $input['password']);
     }
 }

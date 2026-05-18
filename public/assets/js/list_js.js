@@ -116,7 +116,7 @@ const options3 = {
     valueNames: [
         'name',
         'born',
-        { data: ['id'] }
+        {data: ['id']}
     ]
 };
 new List('users', options3);
