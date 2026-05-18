@@ -22,11 +22,6 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens, HasRoles, Fieldable, TwoFactorAuthenticatable, HasMedia;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -37,21 +32,11 @@ class User extends Authenticatable
         'locked_until',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
@@ -59,10 +44,6 @@ class User extends Authenticatable
         'banned_at' => 'datetime',
         'locked_until' => 'datetime',
     ];
-
-    // -------------------------------------------------------------------------
-    // Access helpers
-    // -------------------------------------------------------------------------
 
     /**
      * Whether this user is permitted to access the system right now.
@@ -101,25 +82,16 @@ class User extends Authenticatable
         return true;
     }
 
-    /**
-     * Whether the account is currently locked (regardless of status).
-     */
     public function isLocked(): bool
     {
         return $this->locked_until !== null && $this->locked_until->isFuture();
     }
 
-    /**
-     * Whether the account status is active.
-     */
     public function isActive(): bool
     {
         return $this->status === UserStatus::ACTIVE;
     }
 
-    /**
-     * Whether the account is currently suspended (and suspension is still active).
-     */
     public function isSuspended(): bool
     {
         return $this->status === UserStatus::SUSPENDED
@@ -127,9 +99,6 @@ class User extends Authenticatable
             && $this->suspended_until->isFuture();
     }
 
-    /**
-     * Human-readable reason why access is denied, or null if access is allowed.
-     */
     public function accessDeniedReason(): ?string
     {
         if ($this->canAccessSystem()) {
@@ -148,9 +117,6 @@ class User extends Authenticatable
         };
     }
 
-    /**
-     * Human-readable status label.
-     */
     public function statusLabel(): string
     {
         return UserStatus::label($this->status ?? UserStatus::INACTIVE);
@@ -164,18 +130,6 @@ class User extends Authenticatable
         return UserStatus::colour($this->status ?? UserStatus::INACTIVE);
     }
 
-    // -------------------------------------------------------------------------
-    // Avatar
-    // -------------------------------------------------------------------------
-
-    /**
-     * Returns the user's avatar URL. Checks for a directly-attached media item
-     * in the 'avatars' library first; falls back to the Laravolt generated avatar.
-     *
-     * Result is memoized per instance via once() so repeated calls within the
-     * same request (nav bar, sidebar, breadcrumb, etc.) cost nothing after the
-     * first resolve.
-     */
     public function avatar(): string
     {
         return once(function () {
@@ -189,10 +143,6 @@ class User extends Authenticatable
         });
     }
 
-    /**
-     * Replace the user's avatar. Detaches any existing avatars-library media
-     * from this user before attaching the new one.
-     */
     public function setAvatar(Media $media): void
     {
         $existing = $this->directMedia()
@@ -206,29 +156,15 @@ class User extends Authenticatable
         $this->attachMedia($media);
     }
 
-    // -------------------------------------------------------------------------
-    // Scopes
-    // -------------------------------------------------------------------------
-
-    /**
-     * Limit query to users whose status is 'active'.
-     */
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', UserStatus::ACTIVE);
     }
 
-    /**
-     * Limit query to users with a specific status value.
-     */
     public function scopeWhereStatus(Builder $query, string $status): Builder
     {
         return $query->where('status', $status);
     }
-
-    // -------------------------------------------------------------------------
-    // Relations
-    // -------------------------------------------------------------------------
 
     public function oauthTokenFor(string $provider): ?OauthToken
     {
@@ -258,10 +194,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserStatusLog::class)->orderByDesc('created_at');
     }
-
-    // -------------------------------------------------------------------------
-    // Other helpers
-    // -------------------------------------------------------------------------
 
     public function isAuthorEligible(): bool
     {

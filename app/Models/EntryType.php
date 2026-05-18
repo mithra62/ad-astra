@@ -51,7 +51,6 @@ class EntryType extends Model
     public function scopeInGroup(Builder $query, int|EntryGroup $group): Builder
     {
         $id = $group instanceof EntryGroup ? $group->getKey() : $group;
-
         return $query->where('entry_group_id', $id);
     }
 }

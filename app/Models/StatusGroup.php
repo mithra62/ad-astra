@@ -12,9 +12,15 @@ class StatusGroup extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'handle', 'sort_order'];
+    protected $fillable = [
+        'name',
+        'handle',
+        'sort_order'
+    ];
 
-    protected $casts = ['sort_order' => 'integer'];
+    protected $casts = [
+        'sort_order' => 'integer'
+    ];
 
     public function statuses(): HasMany
     {

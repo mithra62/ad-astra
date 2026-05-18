@@ -57,7 +57,6 @@ class Field extends Model
     public function render(array $params = []): string
     {
         $params['field'] = $this;
-
         return $this->typeInstance()->render($params);
     }
 }

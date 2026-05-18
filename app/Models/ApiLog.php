@@ -47,7 +47,7 @@ class ApiLog extends Model
     }
 
     /**
-     * @return ApiLog|Builder
+     * @return ApiLog
      */
     public function prunable()
     {

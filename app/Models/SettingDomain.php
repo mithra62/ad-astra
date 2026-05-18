@@ -33,10 +33,6 @@ class SettingDomain extends Model
         return $query->orderBy('sort_order')->orderBy('name');
     }
 
-    // -------------------------------------------------------------------------
-    // Config helpers
-    // -------------------------------------------------------------------------
-
     /**
      * Return only the user-overridable field definitions for this domain.
      *
@@ -47,7 +43,7 @@ class SettingDomain extends Model
         return array_values(
             array_filter(
                 $this->configFields(),
-                fn (array $f) => ($f['user_overridable'] ?? false) && ! ($f['hidden'] ?? false)
+                fn(array $f) => ($f['user_overridable'] ?? false) && !($f['hidden'] ?? false)
             )
         );
     }

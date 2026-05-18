@@ -12,22 +12,28 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Query\Builder;
 
 class Media extends Model
 {
     use HasFactory, Fieldable, HasTransformations, SoftDeletes;
 
     protected $fillable = [
-        'library_id', 'name', 'file_name', 'original_name',
-        'mime_type', 'disk', 'path', 'size', 'sort_order',
+        'library_id',
+        'name',
+        'file_name',
+        'original_name',
+        'mime_type',
+        'disk',
+        'path',
+        'size',
+        'sort_order',
     ];
 
     protected $casts = [
-        'size'       => 'integer',
+        'size' => 'integer',
         'sort_order' => 'integer',
     ];
-
-    // ── Relationships ──────────────────────────────────────────────────────
 
     public function library(): BelongsTo
     {
@@ -43,10 +49,8 @@ class Media extends Model
     public function categories(): MorphToMany
     {
         return $this->morphToMany(Category::class, 'categorizable')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
-
-    // ── Field-scoped usage queries ─────────────────────────────────────────
 
     /**
      * Raw pivot rows for all field-driven references to this media item.
@@ -55,7 +59,7 @@ class Media extends Model
      * field-driven reference. The column is NOT NULL so whereNotNull would
      * silently include direct attachments — use where('field_id', '>', 0).
      */
-    public function fieldUsages(): \Illuminate\Database\Query\Builder
+    public function fieldUsages(): Builder
     {
         return DB::table('mediables')
             ->where('media_id', $this->id)
@@ -75,8 +79,6 @@ class Media extends Model
             ->where('field_id', '>', 0)
             ->exists();
     }
-
-    // ── Storage helpers ────────────────────────────────────────────────────
 
     public function url(): string
     {

@@ -17,10 +17,6 @@ class EntryAuthor extends Model
         'status',
     ];
 
-    // -------------------------------------------------------------------------
-    // Relations
-    // -------------------------------------------------------------------------
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -33,10 +29,6 @@ class EntryAuthor extends Model
             ->orderByPivot('sort_order')
             ->withTimestamps();
     }
-
-    // -------------------------------------------------------------------------
-    // Scopes
-    // -------------------------------------------------------------------------
 
     public function scopeActive(Builder $query): Builder
     {
@@ -52,10 +44,6 @@ class EntryAuthor extends Model
     {
         return $query->where('status', 'disabled');
     }
-
-    // -------------------------------------------------------------------------
-    // Accessors
-    // -------------------------------------------------------------------------
 
     /**
      * Return the display name, falling back to the related user's name.

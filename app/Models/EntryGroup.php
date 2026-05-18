@@ -25,7 +25,9 @@ class EntryGroup extends Model
         'sort_order',
     ];
 
-    protected $casts = ['sort_order' => 'integer'];
+    protected $casts = [
+        'sort_order' => 'integer'
+    ];
 
     public function statusGroup(): BelongsTo
     {

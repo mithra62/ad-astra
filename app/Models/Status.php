@@ -11,7 +11,15 @@ class Status extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['status_group_id', 'name', 'handle', 'color', 'is_default', 'is_public', 'sort_order'];
+    protected $fillable = [
+        'status_group_id',
+        'name',
+        'handle',
+        'color',
+        'is_default',
+        'is_public',
+        'sort_order'
+    ];
 
     protected $casts = [
         'is_default' => 'boolean',
