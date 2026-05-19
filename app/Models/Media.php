@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\Field\Fieldable;
+use App\Traits\HasStatus;
 use App\Traits\HasTransformations;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +20,7 @@ class Media extends Model
 {
     use HasFactory;
     use Fieldable;
+    use HasStatus;
     use HasTransformations;
     use SoftDeletes;
 
@@ -48,25 +50,17 @@ class Media extends Model
         return $this->belongsTo(Media\Library::class, 'library_id');
     }
 
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(Status::class);
-    }
-
     /**
-     * Public media only. Unlike Entry::scopePublished this checks a single
-     * column — media has no published_at concept.
+     * Public media only. Backward-compatible alias for HasStatus::scopePublic —
+     * unlike Entry::scopePublished, media has no published_at concept, so
+     * "published" here is identity with "public".
      *
+     * @see \App\Traits\HasStatus::scopePublic
      * @see \App\Models\Entry::scopePublished
      */
     public function scopePublished(EloquentBuilder $query): EloquentBuilder
     {
-        return $query->where('status_is_public', true);
-    }
-
-    public function scopeWithStatus(EloquentBuilder $query, string $handle): EloquentBuilder
-    {
-        return $query->where('status_handle', $handle);
+        return $query->public();
     }
 
     public function transformations(): HasMany

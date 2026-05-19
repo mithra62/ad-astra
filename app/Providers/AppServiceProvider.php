@@ -42,6 +42,7 @@ use App\Services\MediaStorageService;
 use App\Services\UserService;
 use App\Settings;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -57,7 +58,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Bind by class name so constructor injection works in controllers,
         // then alias to 'settings' for backwards-compatible app('settings') calls.
-        $this->app->singleton(Settings::class, fn() => new Settings());
+        $this->app->singleton(Settings::class, fn () => new Settings());
         $this->app->alias(Settings::class, 'settings');
 
         $this->app->singleton('api', function ($app) {
@@ -72,17 +73,33 @@ class AppServiceProvider extends ServiceProvider
             return new FieldService($app);
         });
 
-        $this->app->singleton(UserService::class, fn() => new UserService());
-        $this->app->singleton(CategoryService::class, fn($app) => new CategoryService($app));
-        $this->app->singleton(EntryAuthorService::class, fn() => new EntryAuthorService());
+        $this->app->singleton(UserService::class, fn () => new UserService());
+        $this->app->singleton(CategoryService::class, fn ($app) => new CategoryService($app));
+        $this->app->singleton(EntryAuthorService::class, fn () => new EntryAuthorService());
 
         // Media layer
         $this->app->bind(TransformationDriverInterface::class, function () {
-            if (extension_loaded('imagick')) return new \App\Services\Media\ImagickTransformationDriver();
-            if (extension_loaded('gd'))      return new GDTransformationDriver();
+            if (extension_loaded('imagick')) {
+                return new \App\Services\Media\ImagickTransformationDriver();
+            }
+            if (extension_loaded('gd')) {
+                return new GDTransformationDriver();
+            }
             return new NullTransformationDriver();
         });
-        $this->app->singleton('media-service', fn() => new MediaStorageService());
+        $this->app->singleton('media-service', fn () => new MediaStorageService());
+
+        // Schema macro for the status-denormalization column triple. FK to
+        // `statuses` is intentionally NOT included — this codebase uses a
+        // deferred-FK pattern (e.g. 2026_05_07_000003_add_media_foreign_keys.php)
+        // because `statuses` doesn't exist until April 2026. Add the FK in a
+        // follow-up migration once the table exists.
+        Blueprint::macro('statusColumns', function (): void {
+            /** @var Blueprint $this */
+            $this->unsignedBigInteger('status_id')->nullable()->index();
+            $this->string('status_handle')->nullable()->index();
+            $this->boolean('status_is_public')->default(false)->index();
+        });
     }
 
     /**
@@ -117,6 +134,16 @@ class AppServiceProvider extends ServiceProvider
             'behavior.video' => VideoEntryType::class,
         ]);
 
+        // Status sync: force-boot every HasStatus consumer so the trait's
+        // bootHasStatus() fires and registers each one with StatusSyncRegistry
+        // BEFORE StatusObserver might read the registry. Without this, a queue
+        // worker or artisan command that only touches Status (and no consumer)
+        // would find an empty registry and silently no-op the cascade.
+        // Add new consumers here when adopting HasStatus on a new model.
+        foreach ([Entry::class, Media::class] as $statusConsumer) {
+            new $statusConsumer();
+        }
+
         // Model observers
         Status::observe(StatusObserver::class);
         EntryTree::observe(EntryTreeObserver::class);
@@ -126,13 +153,13 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(UserStatusChanged::class, WriteUserStatusLog::class);
         Event::listen(UserLockChanged::class, WriteUserStatusLog::class);
 
-//        Route::group([
-//            'namespace' => 'mithra62\Shop\Http\Controllers',
-//            'domain' => config('fortify.domain', null),
-//            'prefix' => config('fortify.prefix'),
-//        ], function () {
-//            $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
-//        });
+        //        Route::group([
+        //            'namespace' => 'mithra62\Shop\Http\Controllers',
+        //            'domain' => config('fortify.domain', null),
+        //            'prefix' => config('fortify.prefix'),
+        //        ], function () {
+        //            $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
+        //        });
 
         //setup template routing
         View::addNamespace('templates', resource_path('templates'));
