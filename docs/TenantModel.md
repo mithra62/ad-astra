@@ -4,6 +4,25 @@ A detailed analysis of what a multi-tenant system would look like on top of this
 
 ---
 
+## Deployment Modes
+
+This codebase supports both an **installed distribution** and a **SaaS multi-tenant** deployment from the same codebase — the GitLab/Craft CMS/Statamic model. A single environment variable controls which mode is active:
+
+```
+TENANCY_ENABLED=false   # installed distribution (default)
+TENANCY_ENABLED=true    # SaaS multi-tenant
+```
+
+In **installed mode**, the tenant middleware, global query scopes, and all tenant-specific routing are inert. Customers install and own their own instance. No `tenants` table is required.
+
+In **SaaS mode**, the full multi-tenant stack is active: `ResolveTenant` runs on every request, all tenant-owned models are automatically scoped by `BelongsToTenant`, and billing/plans are enforced.
+
+The core content model — entries, fields, media, statuses — is mode-agnostic. Only the tenant resolution and scoping layer changes between modes.
+
+Treat `TENANCY_ENABLED` as a deploy-time constant, not a runtime toggle. Switching an existing installed-mode database to SaaS mode requires seeding the `tenants` table and backfilling `tenant_id` across all tenant-owned tables before flipping the flag.
+
+---
+
 ## The Core Decision: Database Strategy
 
 Before anything else, you need to pick a tenancy model, because it affects nearly every downstream decision.
@@ -42,6 +61,8 @@ This is how you answer "which tenants does this user belong to?" and "which user
 
 Every request needs to resolve which tenant it belongs to before any controller code runs. You'll build a `ResolveTenant` middleware that runs very early in the stack (add it to `bootstrap/app.php` before route middleware).
 
+The middleware is registered unconditionally — installed-mode deployments do not need to touch route files. When `TENANCY_ENABLED=false` it short-circuits immediately and calls `$next($request)` with no resolution logic. All resolution behaviour described below applies only when `TENANCY_ENABLED=true`.
+
 Resolution logic, in order of preference:
 
 1. **Subdomain matching** — parse `tenant-slug` from `Host: tenant-slug.yourplatform.com`, look it up in the `tenants` table, reject if inactive
@@ -58,6 +79,8 @@ If no tenant resolves and the request isn't for your platform's marketing site o
 ## Phase 3: Global Query Scoping
 
 This is the most pervasive change in the codebase. Every model that holds tenant-specific data needs a `tenant_id` column and a global query scope that automatically appends `WHERE tenant_id = ?` to every query.
+
+When `TENANCY_ENABLED=false`, the `BelongsToTenant` trait is a no-op: both the global scope callback and the `creating` hook return early before applying any scoping or stamping. Models with the trait behave identically to models without it in installed mode.
 
 The tables that need `tenant_id` added:
 
