@@ -114,10 +114,9 @@
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             {% if category_groups.count >= 1 %}
-                                <div class="col-12"><h5 class="border-bottom pb-2">Category Groups</h5></div>
+                                {% set selectedCatGroupIds = old('category_groups') ?: group.categoryGroups|map(attached => attached.id) %}
+                                <h6 class="mb-2 text-sm font-semibold text-slate-700">Category Groups</h6>
                                 <div class="col-md-12">
-                                    <small class="text-secondary d-block mb-2">Entries in this group can be assigned to
-                                        categories from the selected category groups.</small>
                                     {% for cg in category_groups %}
                                         <div class="form-check">
                                             <label class="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700" for="cg_{{ cg.id }}">
@@ -125,15 +124,7 @@
                                                        type="checkbox"
                                                        name="category_groups[]" value="{{ cg.id }}"
                                                        id="cg_{{ cg.id }}"
-                                                    {% if old('category_groups') %}
-                                                    {% for key, val in old('category_groups') %}
-                                                        {% if old('category_groups.' ~ key) == cg.id %}checked{% endif %}
-                                                    {% endfor %}
-                                                {% else %}
-                                                    {% for attached in group.categoryGroups %}
-                                                        {% if attached.id == cg.id %}checked{% endif %}
-                                                    {% endfor %}
-                                                    {% endif %}>
+                                                       {% if cg.id in selectedCatGroupIds %}checked{% endif %}>
                                                 {{ cg.name }}</label>
                                         </div>
                                     {% endfor %}
@@ -142,7 +133,8 @@
                         </div>
                         <div>
                             {% if field_groups.count >= 1 %}
-                                <div class="col-12"><h5 class="border-bottom pb-2">Field Groups</h5></div>
+                                {% set selectedFieldGroupIds = old('field_groups') ?: group.fieldGroups|map(attached => attached.id) %}
+                                <h6 class="mb-2 text-sm font-semibold text-slate-700">Field Groups</h6>
                                 <div class="col-md-12">
                                     {% for fg in field_groups %}
                                         <div class="form-check">
@@ -151,15 +143,7 @@
                                                        name="field_groups[]" value="{{ fg.id }}"
                                                        id="fg_{{ fg.id }}"
                                                        class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                                                    {% if old('field_groups') %}
-                                                    {% for key, val in old('field_groups') %}
-                                                        {% if old('field_groups.' ~ key) == fg.id %}checked{% endif %}
-                                                    {% endfor %}
-                                                {% else %}
-                                                    {% for attached in group.fieldGroups %}
-                                                        {% if attached.id == fg.id %}checked{% endif %}
-                                                    {% endfor %}
-                                                    {% endif %}>
+                                                    {% if fg.id in selectedFieldGroupIds %}checked{% endif %}>
                                                 {{ fg.name }}</label>
                                         </div>
                                     {% endfor %}
@@ -173,21 +157,13 @@
                         <p class="mb-3 text-xs text-slate-400">Select which Entry Types are assigned to this group. Only unattached types are listed.</p>
                         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                             {% for et in available_entry_types %}
+                                {% set selectedEntryTypeIds = old('entry_type_ids') ?: group.entryTypes|map(attached => attached.id) %}
                                 <label class="flex cursor-pointer items-start gap-2.5 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 hover:bg-slate-100" for="et_{{ et.id }}">
                                     <input class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                                            type="checkbox"
                                            name="entry_type_ids[]"
                                            value="{{ et.id }}"
-                                           id="et_{{ et.id }}"
-                                        {% if old('entry_type_ids') %}
-                                            {% for key, val in old('entry_type_ids') %}
-                                                {% if old('entry_type_ids.' ~ key) == et.id %}checked{% endif %}
-                                            {% endfor %}
-                                        {% else %}
-                                            {% for attached in group.entryTypes %}
-                                                {% if attached.id == et.id %}checked{% endif %}
-                                            {% endfor %}
-                                        {% endif %}>
+                                           id="et_{{ et.id }}" {% if et.id in selectedEntryTypeIds %}checked{% endif %}>
                                     <span>
                                         <span class="block text-sm font-medium text-slate-800">{{ et.name }}</span>
                                         <span class="block text-xs text-slate-400">{{ et.entryBehavior ? et.entryBehavior.name : 'General' }}</span>
@@ -214,14 +190,4 @@
 
 
     </div>
-{% endblock %}
-
-{% block scripts %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            if (window.attachHandleGenerator) {
-                window.attachHandleGenerator('name', 'handle');
-            }
-        });
-    </script>
 {% endblock %}

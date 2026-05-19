@@ -62,7 +62,7 @@
                         <th class="px-4 py-3 font-semibold">Name</th>
                         <th class="px-4 py-3 font-semibold">Types</th>
                         <th class="px-4 py-3 font-semibold">Entries</th>
-                        <th class="px-4 py-3 text-center font-semibold">Status Group</th>
+                        <th class="px-4 py-3 font-semibold">Status Group</th>
                         <th class="px-4 py-3 font-semibold"></th>
                     </tr>
                     </thead>
@@ -75,8 +75,12 @@
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
                                     <div>
-                                        <a class="font-medium text-slate-900 hover:text-emerald-700" href="{{ route('entries.groups.show', group) }}">{{ group.name }} <span class="mt-0.5 font-mono text-xs text-slate-400">{{ group.handle }}</span></a>
+                                        <a class="font-medium text-slate-900 hover:text-emerald-700" href="{{ route('entries.groups.show', group) }}">
+                                            {{ group.name }} <span class="mt-0.5 font-mono text-xs text-slate-400">{{ group.handle }}</span>
+                                        </a>
+                                        <p>{{ group.description }}</p>
                                         <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
+
                                             <a href="{{ route('entries.groups.show', group) }}" class="text-emerald-600 hover:underline">View</a>
                                             <span class="text-slate-300">|</span>
                                             <a href="{{ route('entries.groups.edit', group) }}" class="text-emerald-600 hover:underline">Edit</a>
@@ -87,9 +91,19 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 capitalize text-slate-600">{{ group.entry_types_count ?? '—' }}</td>
+                            <td class="px-4 py-3 capitalize text-slate-600">
+                                {% for type in group.entryTypes %}
+                                    <a href="{{ route('entries.types.edit', type) }}">{{ type.name }}</a>
+                                {% endfor %}
+                            </td>
                             <td class="px-4 py-3">{{ group.entries_count }}</td>
-                            <td class="px-4 py-3 text-center font-medium text-slate-800">{{ group.statusGroup.name ?? '—' }}</td>
+                            <td class="px-4 py-3 font-medium text-slate-800">
+                               {% if group.statusGroup.name %}
+                                   <a href="{{ route('statuses.groups.show', group.statusGroup.id) }}">{{ group.statusGroup.name }}</a>
+                                {% else %}
+
+                               {% endif %}
+                            </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-1.5">
                                     <a href="{{ route('entries.groups.show', group) }}" class="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-emerald-600" title="View">

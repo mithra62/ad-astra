@@ -18,8 +18,8 @@ class Group extends Controller
 {
     public function index()
     {
-        $groups = EntryGroup::withCount(['entries', 'entryTypes'])
-            ->with('statusGroup')
+        $groups = EntryGroup::withCount(['entries'])
+            ->with('statusGroup', 'entryTypes')
             ->ordered()
             ->paginate($this->total_per_page);
 
