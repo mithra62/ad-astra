@@ -105,8 +105,11 @@ class EditMediaRequestTest extends TestCase
         $count = count(DB::getQueryLog());
         DB::disableQueryLog();
 
-        $this->assertSame(0, $count,
-            'messages() and attributes() should read from the cached schema with zero DB queries.');
+        $this->assertSame(
+            0,
+            $count,
+            'messages() and attributes() should read from the cached schema with zero DB queries.'
+        );
     }
 
     public function test_repeated_calls_to_rules_incur_no_extra_queries(): void
@@ -122,8 +125,11 @@ class EditMediaRequestTest extends TestCase
         $count = count(DB::getQueryLog());
         DB::disableQueryLog();
 
-        $this->assertSame(0, $count,
-            'A second call to rules() should use the cached schema with zero DB queries.');
+        $this->assertSame(
+            0,
+            $count,
+            'A second call to rules() should use the cached schema with zero DB queries.'
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -141,7 +147,7 @@ class EditMediaRequestTest extends TestCase
         $this->assertArrayHasKey('name', $rules);
     }
 
-    public function test_rules_returns_only_name_rule_when_no_dynamic_fields_exist(): void
+    public function test_rules_returns_only_name_and_status_rules_when_no_dynamic_fields_exist(): void
     {
         $library = $this->makeLibrary('no-fields');
         $media   = Media::factory()->create(['library_id' => $library->id]);
@@ -149,6 +155,6 @@ class EditMediaRequestTest extends TestCase
 
         $rules = $request->rules();
 
-        $this->assertSame(['name'], array_keys($rules));
+        $this->assertSame(['name', 'status'], array_keys($rules));
     }
 }

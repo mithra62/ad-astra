@@ -6,18 +6,25 @@ use App\Traits\Field\HasFieldGroups;
 use App\Traits\Field\HasFieldLayout;
 use App\Traits\HasCategoryGroups;
 use App\Traits\HasMediaItems;
+use App\Traits\HasStatusGroup;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Library extends Model
 {
-    use HasFactory, HasCategoryGroups, HasFieldGroups, HasFieldLayout, HasMediaItems;
+    use HasFactory;
+    use HasCategoryGroups;
+    use HasFieldGroups;
+    use HasFieldLayout;
+    use HasMediaItems;
+    use HasStatusGroup;
 
     protected $table = 'media_libraries';
 
     protected $fillable = [
         'field_layout_id',
+        'status_group_id',
         'name',
         'handle',
         'adapter',

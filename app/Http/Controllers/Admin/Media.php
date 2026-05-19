@@ -51,6 +51,7 @@ class Media extends Controller
     {
         $media = MediaModel::with([
             'library.fieldLayout.tabs.elements.field.fieldType',
+            'library.statusGroup',
         ])->findOrFail($id);
         $editor = app(EditMediaAction::class);
         $media = $editor->edit($media, $request->validated());
@@ -71,7 +72,7 @@ class Media extends Controller
     public function destroy(DeleteMediaRequest $request, string $id): RedirectResponse
     {
         $media = MediaModel::findOrFail($id);
-        (new DeleteMediaAction)->delete($media);
+        (new DeleteMediaAction())->delete($media);
         return redirect()->route('media.index')
             ->with('success', trans('media.deleted'));
     }

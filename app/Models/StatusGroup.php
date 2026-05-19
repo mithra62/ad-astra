@@ -32,6 +32,11 @@ class StatusGroup extends Model
         return $this->hasMany(EntryGroup::class);
     }
 
+    public function mediaLibraries(): HasMany
+    {
+        return $this->hasMany(Media\Library::class);
+    }
+
     public function defaultStatus(): HasOne
     {
         return $this->hasOne(Status::class)->where('is_default', true);

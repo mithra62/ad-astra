@@ -3,6 +3,7 @@
 namespace Database\Factories\Media;
 
 use App\Models\Media\Library;
+use App\Models\StatusGroup;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -29,6 +30,13 @@ class LibraryFactory extends Factory
     {
         return $this->state(fn () => [
             'allowed_types' => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+        ]);
+    }
+
+    public function withStatusGroup(): static
+    {
+        return $this->state(fn () => [
+            'status_group_id' => StatusGroup::factory(),
         ]);
     }
 }

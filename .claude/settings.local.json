@@ -58,7 +58,8 @@
       "Bash(Get-Content \"C:\\\\Users\\\\eric\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--Projects-mithra62-laravel-base-develop\\\\6452e044-233b-4e3d-b197-ea68eed7c059\\\\tasks\\\\b507q4mql.output\")",
       "Bash(Select-Object -Last 40)",
       "Bash(C:/php/php.exe artisan *)",
-      "Bash(vendor/bin/pint --preset psr12 --dirty)"
+      "Bash(vendor/bin/pint --preset psr12 --dirty)",
+      "PowerShell(php artisan migrate:fresh --env=testing --force)"
     ]
   }
 }

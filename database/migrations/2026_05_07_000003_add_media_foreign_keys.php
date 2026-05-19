@@ -4,16 +4,31 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class () extends Migration {
     public function up(): void
     {
         // media_libraries.field_layout_id → field_layouts
-        // Cannot be in create_media_library_table because field_layouts does
-        // not exist until April 2026.
+        // media_libraries.status_group_id → status_groups
+        // Cannot be in create_media_library_table because neither table exists
+        // until April 2026.
         Schema::table('media_libraries', function (Blueprint $table) {
             $table->foreign('field_layout_id')
                   ->references('id')
                   ->on('field_layouts')
+                  ->nullOnDelete();
+
+            $table->foreign('status_group_id')
+                  ->references('id')
+                  ->on('status_groups')
+                  ->nullOnDelete();
+        });
+
+        // media.status_id → statuses
+        // Same reason as above — statuses does not exist until April 2026.
+        Schema::table('media', function (Blueprint $table) {
+            $table->foreign('status_id')
+                  ->references('id')
+                  ->on('statuses')
                   ->nullOnDelete();
         });
 
@@ -35,6 +50,11 @@ return new class extends Migration {
     {
         Schema::table('media_libraries', function (Blueprint $table) {
             $table->dropForeign(['field_layout_id']);
+            $table->dropForeign(['status_group_id']);
+        });
+
+        Schema::table('media', function (Blueprint $table) {
+            $table->dropForeign(['status_id']);
         });
     }
 };

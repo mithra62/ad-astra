@@ -41,9 +41,20 @@ trait HasMediaItems
             throw new \RuntimeException("Failed to store uploaded file on disk '{$disk}'.");
         }
 
+        // Resolved outside the transaction — this is a read-only lookup on the
+        // library's status group. Will be null on ungoverned libraries or when
+        // the group has no status flagged is_default.
+        $defaultStatus = method_exists($this, 'defaultStatus') ? $this->defaultStatus() : null;
+
         try {
-            return DB::transaction(function () use ($file, $disk, $fileName, $path, $attributes) {
+            return DB::transaction(function () use ($file, $disk, $fileName, $path, $attributes, $defaultStatus) {
                 $nextOrder = (int)$this->media()->lockForUpdate()->max('sort_order') + 1;
+
+                $statusAttributes = $defaultStatus ? [
+                    'status_id'        => $defaultStatus->id,
+                    'status_handle'    => $defaultStatus->handle,
+                    'status_is_public' => $defaultStatus->is_public,
+                ] : [];
 
                 return $this->media()->create(array_merge([
                     'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
@@ -54,7 +65,7 @@ trait HasMediaItems
                     'path' => $path,
                     'size' => $file->getSize(),
                     'sort_order' => $nextOrder,
-                ], $attributes));
+                ], $statusAttributes, $attributes));
             });
         } catch (\Throwable $e) {
             // Compensate: remove the physical file so it doesn't become orphaned.

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\Field\Fieldable;
 use App\Traits\HasTransformations;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,10 +17,16 @@ use Illuminate\Database\Query\Builder;
 
 class Media extends Model
 {
-    use HasFactory, Fieldable, HasTransformations, SoftDeletes;
+    use HasFactory;
+    use Fieldable;
+    use HasTransformations;
+    use SoftDeletes;
 
     protected $fillable = [
         'library_id',
+        'status_id',
+        'status_handle',
+        'status_is_public',
         'name',
         'file_name',
         'original_name',
@@ -33,11 +40,33 @@ class Media extends Model
     protected $casts = [
         'size' => 'integer',
         'sort_order' => 'integer',
+        'status_is_public' => 'boolean',
     ];
 
     public function library(): BelongsTo
     {
         return $this->belongsTo(Media\Library::class, 'library_id');
+    }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(Status::class);
+    }
+
+    /**
+     * Public media only. Unlike Entry::scopePublished this checks a single
+     * column — media has no published_at concept.
+     *
+     * @see \App\Models\Entry::scopePublished
+     */
+    public function scopePublished(EloquentBuilder $query): EloquentBuilder
+    {
+        return $query->where('status_is_public', true);
+    }
+
+    public function scopeWithStatus(EloquentBuilder $query, string $handle): EloquentBuilder
+    {
+        return $query->where('status_handle', $handle);
     }
 
     public function transformations(): HasMany

@@ -21,17 +21,17 @@ class LibraryTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $model = new Library;
+        $model = new Library();
 
         $this->assertEquals(
-            ['field_layout_id', 'name', 'handle', 'adapter', 'adapter_settings', 'allowed_types', 'max_size', 'sort_order'],
+            ['field_layout_id', 'status_group_id', 'name', 'handle', 'adapter', 'adapter_settings', 'allowed_types', 'max_size', 'sort_order'],
             $model->getFillable()
         );
     }
 
     public function test_uses_media_libraries_table(): void
     {
-        $this->assertEquals('media_libraries', (new Library)->getTable());
+        $this->assertEquals('media_libraries', (new Library())->getTable());
     }
 
     public function test_casts_sort_order_to_integer(): void
@@ -95,32 +95,32 @@ class LibraryTest extends TestCase
 
     public function test_category_groups_relationship_is_morph_to_many(): void
     {
-        $this->assertInstanceOf(MorphToMany::class, (new Library)->categoryGroups());
+        $this->assertInstanceOf(MorphToMany::class, (new Library())->categoryGroups());
     }
 
     public function test_category_groups_is_related_to_category_group_model(): void
     {
-        $this->assertInstanceOf(CategoryGroup::class, (new Library)->categoryGroups()->getRelated());
+        $this->assertInstanceOf(CategoryGroup::class, (new Library())->categoryGroups()->getRelated());
     }
 
     public function test_field_groups_relationship_is_morph_to_many(): void
     {
-        $this->assertInstanceOf(MorphToMany::class, (new Library)->fieldGroups());
+        $this->assertInstanceOf(MorphToMany::class, (new Library())->fieldGroups());
     }
 
     public function test_field_groups_is_related_to_field_group_model(): void
     {
-        $this->assertInstanceOf(FieldGroup::class, (new Library)->fieldGroups()->getRelated());
+        $this->assertInstanceOf(FieldGroup::class, (new Library())->fieldGroups()->getRelated());
     }
 
     public function test_media_relationship_is_has_many(): void
     {
-        $this->assertInstanceOf(HasMany::class, (new Library)->media());
+        $this->assertInstanceOf(HasMany::class, (new Library())->media());
     }
 
     public function test_field_layout_relationship_is_belongs_to(): void
     {
-        $this->assertInstanceOf(BelongsTo::class, (new Library)->fieldLayout());
+        $this->assertInstanceOf(BelongsTo::class, (new Library())->fieldLayout());
     }
 
     public function test_category_groups_can_be_attached_and_retrieved(): void
