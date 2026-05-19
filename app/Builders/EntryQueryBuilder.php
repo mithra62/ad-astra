@@ -112,6 +112,7 @@ class EntryQueryBuilder
         }
 
         $column = $instance->storageColumn();
+        $value = $instance->prepareForQuery($value);
 
         // whereHas on the morphMany automatically scopes fieldable_type to Entry —
         // no need to set it explicitly.

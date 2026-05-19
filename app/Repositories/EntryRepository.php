@@ -185,7 +185,7 @@ class EntryRepository
                     $entry->getKey(),
                     $entry->getMorphClass(),
                     $instance->storageColumn(),
-                    $value
+                    $instance->prepareForStorage($value),
                 );
             }
         }

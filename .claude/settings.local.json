@@ -59,7 +59,8 @@
       "Bash(Select-Object -Last 40)",
       "Bash(C:/php/php.exe artisan *)",
       "Bash(vendor/bin/pint --preset psr12 --dirty)",
-      "PowerShell(php artisan migrate:fresh --env=testing --force)"
+      "PowerShell(php artisan migrate:fresh --env=testing --force)",
+      "PowerShell($dirs = @\\(\"app\\\\Support\\\\Iso\",\"tests\\\\Unit\\\\Support\\\\Iso\",\"app\\\\Rules\\\\Field\",\"tests\\\\Unit\\\\Rules\\\\Field\",\"tests\\\\Feature\\\\Field\"\\); foreach \\($d in $dirs\\) { if \\(-not \\(Test-Path $d\\)\\) { New-Item -ItemType Directory -Force $d | Out-Null } }; \"ok\")"
     ]
   }
 }

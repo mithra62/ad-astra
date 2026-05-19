@@ -1,0 +1,12 @@
+<div class="relative">
+    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-sm text-slate-500" aria-hidden="true">{{ currency_symbol }}</span>
+    <input value="{{ old('fields.' ~ field.handle, value) }}"
+           class="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm shadow-sm transition placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+           id="{{ id }}"
+           type="number"
+           step="{{ step }}"
+           inputmode="decimal"
+           name="fields[{{ field.handle }}]"
+           placeholder="{{ field.instructions }}">
+    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-xs uppercase tracking-wide text-slate-400" aria-hidden="true">{{ currency_code }}</span>
+</div>

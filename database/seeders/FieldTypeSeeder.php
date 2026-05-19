@@ -31,6 +31,10 @@ class FieldTypeSeeder extends Seeder
             ['name' => 'Slider',           'object' => \App\Field\Types\Slider::class],
             ['name' => 'Users',            'object' => \App\Field\Types\Users::class],
             ['name' => 'Structured Rows',  'object' => \App\Field\Types\StructuredRows::class],
+            ['name' => 'Money',            'object' => \App\Field\Types\Money::class],
+            ['name' => 'Country',          'object' => \App\Field\Types\Country::class],
+            ['name' => 'State/Province',   'object' => \App\Field\Types\StateProvince::class],
+            ['name' => 'Time',             'object' => \App\Field\Types\Time::class],
         ];
 
         foreach ($types as $type) {
