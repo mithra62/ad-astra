@@ -130,6 +130,11 @@
                                         </svg>
                                     {% endif %}
                                 </div>
+                                {% if item.status_handle %}
+                                    <span class="absolute right-1.5 top-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset {% if item.status_is_public %}bg-emerald-50 text-emerald-700 ring-emerald-200{% else %}bg-white/90 text-slate-600 ring-slate-200{% endif %}">
+                                        {{ item.status ? item.status.name : item.status_handle }}
+                                    </span>
+                                {% endif %}
                                 <div class="px-2.5 py-2">
                                     <p class="truncate text-xs font-medium text-slate-800">{{ item.name ?: item.file_name }}</p>
                                     <p class="text-xs text-slate-400">

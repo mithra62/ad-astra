@@ -133,6 +133,20 @@
                                 <p class="mt-1 text-sm text-red-600">{{ errors.first('handle') }}</p>
                             {% endif %}
                         </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status_group_id">Status Group</label>
+                            <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('status_group_id') %} border-red-400{% endif %}"
+                                    id="status_group_id" name="status_group_id">
+                                <option value="">— None (ungoverned) —</option>
+                                {% for sg in status_groups %}
+                                    <option value="{{ sg.id }}" {% if old('status_group_id', library.status_group_id) == sg.id %}selected{% endif %}>{{ sg.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <p class="mt-1 text-xs text-slate-400">Changing or clearing this group does not retroactively migrate existing media — their saved status handle stays put.</p>
+                            {% if errors.has('status_group_id') %}
+                                <p class="mt-1 text-sm text-red-600">{{ errors.first('status_group_id') }}</p>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
 

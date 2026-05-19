@@ -57,15 +57,6 @@
             <div class="border-b border-slate-200 px-5 py-3">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <h5 class="text-sm font-semibold text-slate-700">All Libraries</h5>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <select class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                            <option>All statuses</option>
-                            <option>Active</option>
-                            <option>Restricted</option>
-                            <option>Archived</option>
-                        </select>
-                        <input class="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-52" placeholder="Search libraries" type="search">
-                    </div>
                 </div>
             </div>
 
@@ -76,7 +67,7 @@
                     <tr>
                         <th class="px-4 py-3" scope="col">Library</th>
                         <th class="px-4 py-3" scope="col">Storage</th>
-                        <th class="px-4 py-3" scope="col">Rules</th>
+                        <th class="px-4 py-3" scope="col">Status Group</th>
                         <th class="px-4 py-3 text-center" scope="col">Files</th>
                         <th class="px-4 py-3" scope="col">Updated</th>
                         <th class="px-4 py-3 text-right" scope="col">Actions</th>
@@ -99,18 +90,18 @@
                                 </div>
                             </td>
                             <td class="px-4 py-3.5">
-                                <p class="font-medium text-slate-700">{{ library.driver }}</p>
-                                <p class="text-xs text-slate-400">{{ library.storage }} used</p>
+                                <p class="font-medium text-slate-700">{{ library.adapter|capitalize }}</p>
+                                <p class="text-xs text-slate-400">Max {{ library.max_size ? library.max_size ~ ' MB' : 'unlimited' }}</p>
                             </td>
                             <td class="px-4 py-3.5">
-                                <div class="flex flex-col gap-1">
-                                    <span class="w-fit rounded-full px-2 py-0.5 text-xs font-medium {% if library.status == 'active' %}bg-emerald-50 text-emerald-700{% elseif library.status == 'restricted' %}bg-amber-50 text-amber-700{% else %}bg-slate-100 text-slate-600{% endif %}">{{ library.status|title }}</span>
-                                    <span class="text-xs text-slate-500">{{ library.visibility }} / {{ library.max_size }}</span>
-                                    <span class="text-xs text-slate-400">{{ library.types }}</span>
-                                </div>
+                                {% if library.statusGroup %}
+                                    <span class="inline-flex w-fit items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">{{ library.statusGroup.name }}</span>
+                                {% else %}
+                                    <span class="text-xs text-slate-400">— Ungoverned —</span>
+                                {% endif %}
                             </td>
-                            <td class="px-4 py-3.5 text-center font-medium text-slate-800">{{ library.files }}</td>
-                            <td class="px-4 py-3.5 text-slate-500">{{ library.updated }}</td>
+                            <td class="px-4 py-3.5 text-center font-medium text-slate-800">{{ library.media().count() }}</td>
+                            <td class="px-4 py-3.5 text-slate-500">{{ library.updated_at ? library.updated_at|date('M j, Y') : '—' }}</td>
                             <td class="px-4 py-3.5">
                                 <div class="flex items-center justify-end gap-1">
                                     <a class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" href="{{ route('media.libraries.show', library) }}" title="View">

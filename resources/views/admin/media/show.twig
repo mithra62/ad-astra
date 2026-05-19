@@ -124,6 +124,17 @@
                             <dt class="text-slate-500">Disk</dt>
                             <dd class="text-slate-700">{{ media.disk }}</dd>
                         </div>
+                        {% if media.status_handle %}
+                            <div class="flex items-center justify-between py-2.5">
+                                <dt class="text-slate-500">Status</dt>
+                                <dd>
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {% if media.status_is_public %}bg-emerald-50 text-emerald-700{% else %}bg-slate-100 text-slate-600{% endif %}"
+                                          {% if media.status and media.status.color %}style="background-color: {{ media.status.color }}20; color: {{ media.status.color }};"{% endif %}>
+                                        {{ media.status ? media.status.name : media.status_handle }}
+                                    </span>
+                                </dd>
+                            </div>
+                        {% endif %}
                         {% if media.alt_text %}
                             <div class="flex items-center justify-between py-2.5">
                                 <dt class="text-slate-500">Alt text</dt>

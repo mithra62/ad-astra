@@ -37,13 +37,16 @@ class Media extends Controller
 
     public function show(string $id): \Illuminate\View\View
     {
-        $media = MediaModel::findOrFail($id);
+        $media = MediaModel::with(['library', 'status'])->findOrFail($id);
         return $this->view('media.show', compact('media'));
     }
 
     public function edit(string $id): \Illuminate\View\View
     {
-        $media = MediaModel::findOrFail($id);
+        $media = MediaModel::with([
+            'library.statusGroup.statuses',
+            'status',
+        ])->findOrFail($id);
         return $this->view('media.edit', compact('media'));
     }
 

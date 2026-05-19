@@ -47,6 +47,9 @@ class StoreMediaLibraryFormRequest extends FormRequest
             'max_size' => ['nullable', 'integer', 'min:0'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
 
+            // Optional — ungoverned libraries (null) skip status governance.
+            'status_group_id' => ['nullable', 'integer', 'exists:status_groups,id'],
+
             // Relationship IDs — both optional.
             'category_groups' => ['nullable', 'array'],
             'category_groups.*' => ['integer', 'exists:category_groups,id'],
