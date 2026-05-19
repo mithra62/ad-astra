@@ -1,4 +1,5 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._form-fields' as forms %}
 
 {% set page_title = 'Create Entry Group' %}
 {% set page_heading = 'Entry Groups' %}
@@ -56,7 +57,7 @@
             {{ csrf_field() }}
             <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                 <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
+                    <h5 class="text-sm font-semibold text-slate-700">Entry Group Details</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
                     <div>
@@ -86,94 +87,78 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="field_layout_id">Field Layout</label>
-                        <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm {% if errors.has('field_layout_id') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="status_group_id" name="status_group_id">
+                        <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm {% if errors.has('field_layout_id') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="field_layout_id" name="field_layout_id">
                             {% for layout in field_layouts %}
                                 <option value="{{ layout.id }}" {% if old('field_layout_id') == layout.id %}selected{% endif %}>
                                     {{ layout.name }}
                                 </option>
                             {% endfor %}
                         </select>
-                        {% if errors.has('status_group_id') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('status_group_id') }}</p>{% endif %}
+                        {% if errors.has('field_layout_id') %}<p id="field_layout_id-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>{% endif %}
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="description">Description</label>
                         <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="description" name="description" rows="4" placeholder="Optional internal description...">{{ old('description') }}</textarea>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            {% if category_groups.count >= 1 %}
-                                <div class="col-12"><h5 class="border-bottom pb-2">Category Groups</h5></div>
-                                <div class="col-md-12">
-                                    <small class="text-secondary d-block mb-2">Entries in this group can be assigned to
-                                        categories from the selected category groups.</small>
-                                    {% for cg in category_groups %}
-                                        <div class="form-check">
-                                            <label class="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700" for="cg_{{ cg.id }}">
-                                            <input class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                                                   type="checkbox"
-                                                   name="category_groups[]" value="{{ cg.id }}"
-                                                   id="cg_{{ cg.id }}"
-                                                {% if old('category_groups') %}
-                                                {% for key, val in old('category_groups') %}
-                                                    {% if old('category_groups.' ~ key) == cg.id %}checked{% endif %}
-                                                {% endfor %}
-                                                {% endif %}>
-                                           {{ cg.name }}</label>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div>
-                            {% if field_groups.count >= 1 %}
-                                <div class="col-12"><h5 class="border-bottom pb-2">Field Groups</h5></div>
-                                <div class="col-md-12">
-                                    {% for fg in field_groups %}
-                                        <div class="form-check">
-                                            <label class="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700" for="fg_{{ fg.id }}">
-                                            <input type="checkbox"
-                                                   name="field_groups[]" value="{{ fg.id }}"
-                                                   id="fg_{{ fg.id }}"
-                                                   class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                                                {% if old('field_groups') %}
-                                                {% for key, val in old('field_groups') %}
-                                                    {% if old('field_groups.' ~ key) == fg.id %}checked{% endif %}
-                                                {% endfor %}
-                                                {% endif %}>
-                                            {{ fg.name }}</label>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    {% if available_entry_types.count >= 1 %}
-                    <div>
-                        <h6 class="mb-2 text-sm font-semibold text-slate-700">Entry Types</h6>
-                        <p class="mb-3 text-xs text-slate-400">Optionally assign existing Entry Types to this group now. Only unattached types are listed.</p>
+                    {% if category_groups.count >= 1 %}
+                    <section class="border-t border-slate-200 pt-5">
+                        {% set selectedCatGroupIds = old('category_groups') ?: [] %}
+                        <header class="mb-3 flex items-baseline justify-between gap-3">
+                            <div>
+                                <p class="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Associations</p>
+                                <h3 class="mt-0.5 text-base font-semibold text-slate-900">Category Groups</h3>
+                                <p class="mt-1 text-xs text-slate-500">Choose which category groups entries in this group can reference.</p>
+                            </div>
+                            <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">{{ selectedCatGroupIds|length }} / {{ category_groups.count }}</span>
+                        </header>
                         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                            {% for et in available_entry_types %}
-                                <label class="flex cursor-pointer items-start gap-2.5 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 hover:bg-slate-100" for="et_{{ et.id }}">
-                                    <input class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                                           type="checkbox"
-                                           name="entry_type_ids[]"
-                                           value="{{ et.id }}"
-                                           id="et_{{ et.id }}"
-                                        {% if old('entry_type_ids') %}
-                                            {% for key, val in old('entry_type_ids') %}
-                                                {% if old('entry_type_ids.' ~ key) == et.id %}checked{% endif %}
-                                            {% endfor %}
-                                        {% endif %}>
-                                    <span>
-                                        <span class="block text-sm font-medium text-slate-800">{{ et.name }}</span>
-                                        <span class="block text-xs text-slate-400">{{ et.entryBehavior ? et.entryBehavior.name : 'General' }}</span>
-                                    </span>
-                                </label>
+                            {% for cg in category_groups %}
+                                {{ forms.checkbox_card('category_groups[]', cg.id, cg.name, cg.description, cg.id in selectedCatGroupIds, 'cg_' ~ cg.id) }}
                             {% endfor %}
                         </div>
-                    </div>
+                    </section>
+                    {% endif %}
+
+                    {% if field_groups.count >= 1 %}
+                    <section class="border-t border-slate-200 pt-5">
+                        {% set selectedFieldGroupIds = old('field_groups') ?: [] %}
+                        <header class="mb-3 flex items-baseline justify-between gap-3">
+                            <div>
+                                <p class="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Associations</p>
+                                <h3 class="mt-0.5 text-base font-semibold text-slate-900">Field Groups</h3>
+                                <p class="mt-1 text-xs text-slate-500">Choose which field groups entries in this group can reference.</p>
+                            </div>
+                            <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">{{ selectedFieldGroupIds|length }} / {{ field_groups.count }}</span>
+                        </header>
+                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                            {% for fg in field_groups %}
+                                {{ forms.checkbox_card('field_groups[]', fg.id, fg.name, fg.description, fg.id in selectedFieldGroupIds, 'fg_' ~ fg.id) }}
+                            {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+
+                    {% if available_entry_types.count >= 1 %}
+                    <section class="border-t border-slate-200 pt-5">
+                        {% set selectedEntryTypeIds = old('entry_type_ids') ?: [] %}
+                        <header class="mb-3 flex items-baseline justify-between gap-3">
+                            <div>
+                                <p class="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Assignments</p>
+                                <h3 class="mt-0.5 text-base font-semibold text-slate-900">Entry Types</h3>
+                                <p class="mt-1 text-xs text-slate-500">Optionally assign existing Entry Types to this group now. Only unattached types are listed.</p>
+                            </div>
+                            <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">{{ selectedEntryTypeIds|length }} / {{ available_entry_types.count }}</span>
+                        </header>
+                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                            {% for et in available_entry_types %}
+                                {{ forms.checkbox_card('entry_type_ids[]', et.id, et.name, et.entryBehavior ? et.entryBehavior.name : 'General', et.id in selectedEntryTypeIds, 'et_' ~ et.id) }}
+                            {% endfor %}
+                        </div>
+                        {% if errors.has('entry_type_ids') %}
+                            <p class="mt-2 text-xs text-red-600">{{ errors.first('entry_type_ids') }}</p>
+                        {% endif %}
+                    </section>
                     {% endif %}
                 </div>
             </div>
