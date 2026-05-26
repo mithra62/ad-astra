@@ -28,7 +28,9 @@ class StoreEntryRequest extends FormRequest
                 'type_handle' => [
                     'required',
                     'string',
-                    'exists:entry_types,handle'
+                    Rule::exists('entry_types', 'handle')->where(fn ($q) =>
+                        $q->where('entry_group_id', $this->route()->parameter('group_id'))
+                    ),
                 ],
                 'title' => [
                     'required',

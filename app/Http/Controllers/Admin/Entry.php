@@ -17,7 +17,9 @@ class Entry extends Controller
     public function store(StoreEntryRequest $request)
     {
         $creator = app(CreateNewEntry::class);
-        $entry = $creator->create($request->validated());
+        $entry = $creator->create(array_merge($request->validated(),
+            ['entry_group_id' => $request->route()->parameter('group_id')])
+        );
 
         return redirect()
             ->route('entries.groups.show', $entry->entry_group_id)
