@@ -40,6 +40,16 @@ class Login extends Controller
                 ->withErrors(['email' => trans('auth.' . ($localUser->accessDeniedReason() ?? 'account_inactive'))]);
         }
 
+        Users::upsertOauthToken($localUser, $provider, [
+            'provider_account' => $socialUser->getNickname() ?? $socialUser->getEmail(),
+            'provider_user_id' => (string)$socialUser->getId(),
+            'access_token' => $socialUser->token,
+            'refresh_token' => $socialUser->refreshToken ?: null,
+            'token_type' => 'Bearer',
+            'expires_at' => $socialUser->expiresIn ? now()->addSeconds($socialUser->expiresIn) : null,
+            'id_token' => $socialUser->accessTokenResponseBody['id_token'] ?? null,
+        ]);
+
         Auth::login($localUser, true);
         $request->session()->regenerate();
         $request->session()->regenerateToken();
