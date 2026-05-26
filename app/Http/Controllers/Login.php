@@ -35,12 +35,14 @@ class Login extends Controller
         );
 
         // Block access if the account is not permitted to use the system.
-        if (! $localUser->canAccessSystem()) {
+        if (!$localUser->canAccessSystem()) {
             return redirect()->route('login')
                 ->withErrors(['email' => trans('auth.' . ($localUser->accessDeniedReason() ?? 'account_inactive'))]);
         }
 
         Auth::login($localUser, true);
+        $request->session()->regenerate();
+        $request->session()->regenerateToken();
 
         return redirect()->intended('/');
     }
