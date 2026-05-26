@@ -14,12 +14,7 @@ class TemplateRouteDriver implements RouteDriverInterface
         'password', 'sanctum', 'storage', 'assets', 'vendor',
     ];
 
-    public function __construct(
-        protected Request $request
-    )
-    {
-        View::replaceNamespace('admin', []);
-    }
+    public function __construct(protected Request $request) {}
 
     public function resolve(?string $uri): ?RouteResult
     {
@@ -57,6 +52,12 @@ class TemplateRouteDriver implements RouteDriverInterface
 
     protected function result(string $view, array $segments, array $extra = []): RouteResult
     {
+        // Refuse to leak admin views through the public catch-all even if a
+        // template happens to share a name with an admin partial.
+        if (str_starts_with($view, 'admin::')) {
+            throw new \RuntimeException('Refusing to render admin view from public router: ' . $view);
+        }
+
         return new RouteResult(
             type: 'template',
             template: $view,
