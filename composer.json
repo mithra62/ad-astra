@@ -19,6 +19,7 @@
         "laravel/socialite": "^5.24",
         "laravel/tinker": "^2.10.1",
         "laravolt/avatar": "^6.3",
+        "mews/purifier": "^3.4",
         "moneyphp/money": "^4.9",
         "rcrowe/twigbridge": "^0.14.6",
         "spatie/laravel-permission": "^6.21",
