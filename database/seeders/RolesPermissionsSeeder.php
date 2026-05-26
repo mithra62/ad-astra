@@ -91,6 +91,7 @@ class RolesPermissionsSeeder extends Seeder
                 'edit media library' => 'Allow users to edit media libraries',
                 'delete media library' => 'Allow users to delete media libraries',
                 'reorder media library' => 'Allow users to reorder media libraries',
+                'upload media' => 'Allow users to upload media files',
             ],
         ];
 
