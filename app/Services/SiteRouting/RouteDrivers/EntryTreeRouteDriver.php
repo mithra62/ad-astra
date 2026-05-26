@@ -32,7 +32,7 @@ class EntryTreeRouteDriver implements RouteDriverInterface
                 template: '',
                 data: [
                     'url' => $node->redirect_url,
-                    'status' => 302,
+                    'status' => $node->redirect_status ?: 302,
                 ],
                 resource: $node,
             );

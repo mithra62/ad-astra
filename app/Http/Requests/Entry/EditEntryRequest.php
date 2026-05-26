@@ -112,6 +112,11 @@ class EditEntryRequest extends FormRequest
                     'url:http,https',
                     'max:2048',
                 ],
+                'redirect_status' => [
+                    'nullable',
+                    'integer',
+                    'in:301,302,307,308'
+                ],
             ],
             $this->schemaFieldRules($groupSchema),
             $this->schemaFieldRules($typeSchema)

@@ -31,6 +31,7 @@ return new class extends Migration {
 
             $table->string('template')->nullable();
             $table->string('redirect_url')->nullable();
+            $table->unsignedSmallInteger('redirect_status')->default(302);
             $table->boolean('is_home')->default(false);
 
             $table->timestamps();
