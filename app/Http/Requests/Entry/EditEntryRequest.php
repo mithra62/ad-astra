@@ -65,7 +65,14 @@ class EditEntryRequest extends FormRequest
                 ],
                 'categories.*' => [
                     'integer',
-                    'exists:categories,id'
+                    'exists:categories,id',
+                    Rule::exists('categories', 'id')->where(fn ($q) => $q->whereIn(
+                        'group_id',
+                        \DB::table('category_groupables')
+                            ->where('group_type', (new EntryGroup)->getMorphClass())
+                            ->where('group_id', $this->route()->parameter('group_id'))
+                            ->pluck('category_group_id')
+                    )),
                 ],
                 'fields' => [
                     'nullable',

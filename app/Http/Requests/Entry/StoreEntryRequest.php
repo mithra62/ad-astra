@@ -28,8 +28,7 @@ class StoreEntryRequest extends FormRequest
                 'type_handle' => [
                     'required',
                     'string',
-                    Rule::exists('entry_types', 'handle')->where(fn ($q) =>
-                        $q->where('entry_group_id', $this->route()->parameter('group_id'))
+                    Rule::exists('entry_types', 'handle')->where(fn($q) => $q->where('entry_group_id', $this->route()->parameter('group_id'))
                     ),
                 ],
                 'title' => [
@@ -71,7 +70,14 @@ class StoreEntryRequest extends FormRequest
                 ],
                 'categories.*' => [
                     'integer',
-                    'exists:categories,id'
+                    'exists:categories,id',
+                    Rule::exists('categories', 'id')->where(fn($q) => $q->whereIn(
+                        'group_id',
+                        \DB::table('category_groupables')
+                            ->where('group_type', (new EntryGroup)->getMorphClass())
+                            ->where('group_id', $this->route()->parameter('group_id'))
+                            ->pluck('category_group_id')
+                    )),
                 ],
                 'fields' => [
                     'nullable',
