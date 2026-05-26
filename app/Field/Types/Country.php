@@ -40,7 +40,7 @@ class Country extends AbstractField
     public function settingsFormOptions(): array
     {
         $countries = array_map(
-            fn ($c) => ['value' => $c['code'], 'label' => $c['name']],
+            fn($c) => ['value' => $c['code'], 'label' => $c['name']],
             Countries::all(),
         );
 
@@ -63,7 +63,7 @@ class Country extends AbstractField
         return [
             'nullable',
             'string',
-            new CountryCodeRule((array) $this->getSetting('allowed_countries', [])),
+            new CountryCodeRule((array)$this->getSetting('allowed_countries', [])),
         ];
     }
 
@@ -72,7 +72,7 @@ class Country extends AbstractField
         if ($value === null || $value === '') {
             return null;
         }
-        return strtoupper((string) $value);
+        return strtoupper((string)$value);
     }
 
     public function cast(mixed $value): mixed
@@ -88,24 +88,24 @@ class Country extends AbstractField
         if ($raw === null || $raw === '') {
             return null;
         }
-        $code = strtoupper((string) $raw);
+        $code = strtoupper((string)$raw);
         return ['code' => $code, 'name' => Countries::name($code)];
     }
 
     public function render(array $params): string
     {
-        $allowed = (array) $this->getSetting('allowed_countries', []);
+        $allowed = (array)$this->getSetting('allowed_countries', []);
         $all = Countries::all();
 
         if (!empty($allowed)) {
             $all = array_values(array_filter(
                 $all,
-                fn ($c) => in_array($c['code'], $allowed, true),
+                fn($c) => in_array($c['code'], $allowed, true),
             ));
         }
 
         $params['country_options'] = $all;
-        $params['placeholder'] = (string) $this->getSetting('placeholder', '— Select —');
+        $params['placeholder'] = (string)$this->getSetting('placeholder', '— Select —');
 
         return view('_fields.country', $params)->render();
     }

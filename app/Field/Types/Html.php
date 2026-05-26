@@ -59,12 +59,12 @@ class Html extends AbstractField
         }
 
         $allowed = $this->getSetting('allowed_tags');
-        $config  = config('purifier.adastra');
+        $config = config('purifier.adastra');
 
-        if (! empty($allowed)) {
+        if (!empty($allowed)) {
             $config['HTML.Allowed'] = $allowed;
         }
 
-        return Purifier::clean((string) $value, $config);
+        return Purifier::clean((string)$value, $config);
     }
 }

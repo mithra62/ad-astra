@@ -49,11 +49,11 @@ class Relationship extends AbstractField
         return [
             'entry_groups' => EntryGroup::orderBy('name')
                 ->get(['id', 'handle', 'name'])
-                ->map(fn ($g) => ['value' => $g->handle, 'label' => $g->name])
+                ->map(fn($g) => ['value' => $g->handle, 'label' => $g->name])
                 ->all(),
             'entry_types' => EntryType::orderBy('name')
                 ->get(['id', 'handle', 'name'])
-                ->map(fn ($t) => ['value' => $t->handle, 'label' => $t->name])
+                ->map(fn($t) => ['value' => $t->handle, 'label' => $t->name])
                 ->all(),
         ];
     }
@@ -83,7 +83,7 @@ class Relationship extends AbstractField
             return true;
         }
 
-        if (! is_array($value)) {
+        if (!is_array($value)) {
             return 'Relationship field value must be an array of entry IDs.';
         }
 
@@ -99,7 +99,7 @@ class Relationship extends AbstractField
     {
         $params['entries'] = $this->fetchAvailableEntries();
         $params['selected_ids'] = $this->extractSelectedIds($params['value'] ?? null);
-        $params['limit'] = (int) $this->getSetting('limit', 0);
+        $params['limit'] = (int)$this->getSetting('limit', 0);
 
         return view('_fields.relationship', $params)->render();
     }
@@ -113,14 +113,14 @@ class Relationship extends AbstractField
     {
         $entryGroup = $this->getSetting('entry_groups');
 
-        if (! $entryGroup) {
+        if (!$entryGroup) {
             return collect();
         }
 
         $handles = is_array($entryGroup) ? $entryGroup : [$entryGroup];
 
         return Entry::query()
-            ->whereHas('entryGroup', fn ($q) => $q->whereIn('handle', $handles))
+            ->whereHas('entryGroup', fn($q) => $q->whereIn('handle', $handles))
             ->orderBy('title')
             ->get(['id', 'title']);
     }
@@ -137,7 +137,7 @@ class Relationship extends AbstractField
     private function extractSelectedIds(mixed $value): array
     {
         if ($value instanceof Collection) {
-            return $value->pluck('id')->map(fn ($id) => (int) $id)->all();
+            return $value->pluck('id')->map(fn($id) => (int)$id)->all();
         }
 
         if (is_array($value)) {

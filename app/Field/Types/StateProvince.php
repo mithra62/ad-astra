@@ -48,7 +48,7 @@ class StateProvince extends AbstractField
     {
         return [
             'country' => array_map(
-                fn ($c) => ['value' => $c['code'], 'label' => $c['name']],
+                fn($c) => ['value' => $c['code'], 'label' => $c['name']],
                 Countries::all(),
             ),
         ];
@@ -65,8 +65,8 @@ class StateProvince extends AbstractField
             'nullable',
             'string',
             new SubdivisionCodeRule(
-                country: (string) $this->getSetting('country', 'US'),
-                allowFreetextFallback: (bool) $this->getSetting('allow_freetext_fallback', true),
+                country: (string)$this->getSetting('country', 'US'),
+                allowFreetextFallback: (bool)$this->getSetting('allow_freetext_fallback', true),
             ),
         ];
     }
@@ -76,7 +76,7 @@ class StateProvince extends AbstractField
         if ($value === null || $value === '') {
             return null;
         }
-        return (string) $value;
+        return (string)$value;
     }
 
     public function cast(mixed $value): mixed
@@ -92,8 +92,8 @@ class StateProvince extends AbstractField
         if ($raw === null || $raw === '') {
             return null;
         }
-        $code = (string) $raw;
-        $country = (string) $this->getSetting('country', 'US');
+        $code = (string)$raw;
+        $country = (string)$this->getSetting('country', 'US');
         $name = Subdivisions::hasData($country)
             ? Subdivisions::name($country, $code)
             : $code;
@@ -102,12 +102,12 @@ class StateProvince extends AbstractField
 
     public function render(array $params): string
     {
-        $country = (string) $this->getSetting('country', 'US');
+        $country = (string)$this->getSetting('country', 'US');
         $params['country'] = $country;
         $params['country_name'] = Countries::name($country);
         $params['has_subdivisions'] = Subdivisions::hasData($country);
         $params['subdivision_options'] = Subdivisions::forCountry($country);
-        $params['placeholder'] = (string) $this->getSetting('placeholder', '— Select —');
+        $params['placeholder'] = (string)$this->getSetting('placeholder', '— Select —');
 
         return view('_fields.state_province', $params)->render();
     }

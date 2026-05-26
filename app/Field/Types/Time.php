@@ -62,7 +62,7 @@ class Time extends AbstractField
             'nullable',
             'string',
             new TimeFormatRule(
-                includeSeconds: (bool) $this->getSetting('include_seconds', false),
+                includeSeconds: (bool)$this->getSetting('include_seconds', false),
                 minTime: $this->getSetting('min_time'),
                 maxTime: $this->getSetting('max_time'),
             ),
@@ -91,7 +91,7 @@ class Time extends AbstractField
         $hh = str_pad($m[1], 2, '0', STR_PAD_LEFT);
         $mm = $m[2];
         $ss = $m[3] ?? null;
-        $includeSeconds = (bool) $this->getSetting('include_seconds', false);
+        $includeSeconds = (bool)$this->getSetting('include_seconds', false);
 
         if ($includeSeconds) {
             return "{$hh}:{$mm}:" . ($ss ?? '00');
@@ -110,14 +110,14 @@ class Time extends AbstractField
         if ($raw === null || $raw === '') {
             return null;
         }
-        return TimeValue::fromCanonical((string) $raw);
+        return TimeValue::fromCanonical((string)$raw);
     }
 
     public function render(array $params): string
     {
-        $stepMinutes = (int) $this->getSetting('step_minutes', 1);
+        $stepMinutes = (int)$this->getSetting('step_minutes', 1);
         $params['step_seconds'] = $stepMinutes * 60;
-        $params['include_seconds'] = (bool) $this->getSetting('include_seconds', false);
+        $params['include_seconds'] = (bool)$this->getSetting('include_seconds', false);
         $params['min_time'] = $this->getSetting('min_time');
         $params['max_time'] = $this->getSetting('max_time');
 

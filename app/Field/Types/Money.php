@@ -56,7 +56,7 @@ class Money extends AbstractField
     {
         return [
             'currency' => array_map(
-                fn ($c) => ['value' => $c['code'], 'label' => "{$c['code']} — {$c['name']}"],
+                fn($c) => ['value' => $c['code'], 'label' => "{$c['code']} — {$c['name']}"],
                 Currencies::all(),
             ),
         ];
@@ -69,7 +69,7 @@ class Money extends AbstractField
 
     public function getRules(): array
     {
-        $currency = (string) $this->getSetting('currency', 'USD');
+        $currency = (string)$this->getSetting('currency', 'USD');
         return [
             'nullable',
             new MoneyDecimalFormatRule($currency),
@@ -96,8 +96,8 @@ class Money extends AbstractField
             throw new InvalidArgumentException('Money value must be a numeric scalar.');
         }
 
-        $currency = (string) $this->getSetting('currency', 'USD');
-        $str = (string) $value;
+        $currency = (string)$this->getSetting('currency', 'USD');
+        $str = (string)$value;
 
         // moneyphp's parser silently rounds excess precision, but our contract
         // is "no implicit rounding". Pre-check the fractional digit count and
@@ -119,12 +119,12 @@ class Money extends AbstractField
             );
         }
 
-        return (int) $money->getAmount();
+        return (int)$money->getAmount();
     }
 
     public function cast(mixed $value): mixed
     {
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (int)$value;
     }
 
     /**
@@ -137,13 +137,13 @@ class Money extends AbstractField
         if ($raw === null || $raw === '') {
             return null;
         }
-        $currency = (string) $this->getSetting('currency', 'USD');
-        return new PhpMoney((string) $raw, new Currency($currency));
+        $currency = (string)$this->getSetting('currency', 'USD');
+        return new PhpMoney((string)$raw, new Currency($currency));
     }
 
     public function render(array $params): string
     {
-        $currency = (string) $this->getSetting('currency', 'USD');
+        $currency = (string)$this->getSetting('currency', 'USD');
         $decimals = Currencies::decimals($currency);
         $params['currency_symbol'] = Currencies::symbol($currency);
         $params['currency_code'] = $currency;
@@ -154,7 +154,7 @@ class Money extends AbstractField
         // via moneyphp's formatter so the precision is exact.
         $stored = $params['value'] ?? null;
         if ($stored !== null && $stored !== '') {
-            $money = new PhpMoney((string) $stored, new Currency($currency));
+            $money = new PhpMoney((string)$stored, new Currency($currency));
             $params['value'] = (new DecimalMoneyFormatter(new ISOCurrencies()))->format($money);
         }
 

@@ -51,7 +51,7 @@ class Media extends AbstractField implements SyncsToMediables
         return [
             'libraries' => Library::orderBy('name')
                 ->get(['id', 'name'])
-                ->map(fn ($lib) => ['value' => $lib->id, 'label' => $lib->name])
+                ->map(fn($lib) => ['value' => $lib->id, 'label' => $lib->name])
                 ->all(),
         ];
     }
@@ -88,7 +88,7 @@ class Media extends AbstractField implements SyncsToMediables
     public function validate(mixed $value): bool|string
     {
         $ids = $this->cast($value);
-        $min = (int) $this->getSetting('min', 0);
+        $min = (int)$this->getSetting('min', 0);
         $max = $this->getSetting('max');
 
         if ($min > 0 && count($ids) < $min) {
@@ -96,8 +96,8 @@ class Media extends AbstractField implements SyncsToMediables
             return "At least {$min} {$noun} must be selected.";
         }
 
-        if ($max !== null && count($ids) > (int) $max) {
-            $noun = (int) $max === 1 ? 'item' : 'items';
+        if ($max !== null && count($ids) > (int)$max) {
+            $noun = (int)$max === 1 ? 'item' : 'items';
             return "No more than {$max} {$noun} may be selected.";
         }
 
@@ -140,7 +140,7 @@ class Media extends AbstractField implements SyncsToMediables
         return MediaModel::whereIn('id', $ids)
             ->with('fieldValues.field.fieldType')
             ->get()
-            ->sortBy(fn ($m) => array_search($m->id, $ids))
+            ->sortBy(fn($m) => array_search($m->id, $ids))
             ->values();
     }
 
