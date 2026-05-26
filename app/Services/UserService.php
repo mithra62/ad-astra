@@ -519,7 +519,7 @@ class UserService
      */
     public function create(array $data): User
     {
-        $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation', 'is_author', 'author_display_name']);
+        $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation', 'is_author', 'author_display_name', 'banned_at', 'locked_until']);
 
         if (!empty($attributes['password'])) {
             $attributes['password'] = Hash::make($attributes['password']);
