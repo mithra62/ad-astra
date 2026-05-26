@@ -7,6 +7,7 @@ use App\Http\Requests\FormRequest;
 use App\Support\UserFieldLayout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use App\Models\Role;
 
 class StoreUserRequest extends FormRequest
 {
@@ -18,6 +19,7 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         $schema = UserFieldLayout::resolve();
+        $assignable = $this->assignableRoleNames();
 
         return array_merge(
             [
@@ -27,7 +29,7 @@ class StoreUserRequest extends FormRequest
                 'password_confirmation' => ['required'],
                 'status' => ['nullable', 'string', Rule::in(UserStatus::CREATION_ALLOWED)],
                 'roles' => ['required', 'array'],
-                'roles.*' => ['string', 'exists:roles,name'],
+                'roles.*' => ['string', Rule::in($assignable)],
                 'fields' => ['nullable', 'array'],
                 'is_author' => ['nullable', 'boolean'],
                 'author_display_name' => ['nullable', 'string', 'max:255'],
@@ -60,5 +62,15 @@ class StoreUserRequest extends FormRequest
             ],
             $this->schemaFieldAttributes($schema)
         );
+    }
+
+    protected function assignableRoleNames(): array
+    {
+        $actor = Auth::user();
+
+        return Role::query()
+            ->when(! $actor?->hasRole('super admin'), fn ($q) => $q->where('name', '!=', 'super admin'))
+            ->pluck('name')
+            ->all();
     }
 }
