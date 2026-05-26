@@ -3,6 +3,7 @@
 namespace App\Field\Types;
 
 use App\Field\AbstractField;
+use Mews\Purifier\Facades\Purifier;
 
 class Html extends AbstractField
 {
@@ -49,5 +50,21 @@ class Html extends AbstractField
     public function render(array $params): string
     {
         return view('_fields.html', $params)->render();
+    }
+
+    public function prepareForStorage(mixed $value): mixed
+    {
+        if (blank($value)) {
+            return $value;
+        }
+
+        $allowed = $this->getSetting('allowed_tags');
+        $config  = config('purifier.adastra');
+
+        if (! empty($allowed)) {
+            $config['HTML.Allowed'] = $allowed;
+        }
+
+        return Purifier::clean((string) $value, $config);
     }
 }
