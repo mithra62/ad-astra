@@ -70,7 +70,7 @@
                         {% for group in groups %}
                             <tr class="hover:bg-slate-50">
                                 <td class="px-5 py-3.5">
-                                    <a class="font-medium text-slate-900 hover:text-emerald-700" href="{{ route('entries.groups.show', group) }}">{{ group.name }} <span class="mt-0.5 font-mono text-xs text-slate-400">{{ group.handle }}</span></a>
+                                    <a class="font-medium text-slate-900 hover:text-emerald-700" href="{{ route('statuses.groups.show', group) }}">{{ group.name }} <span class="mt-0.5 font-mono text-xs text-slate-400">{{ group.handle }}</span></a>
                                     <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
                                         <a href="{{ route('statuses.groups.show', group) }}" class="text-emerald-600 hover:underline">View</a>
                                         <span class="text-slate-300">|</span>

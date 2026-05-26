@@ -26,7 +26,7 @@ class EntryTreeRouteDriver implements RouteDriverInterface
             return null;
         }
 
-        if (filled($node->redirect_url)) {
+        if (filled($node->redirect_url) && $this->isSafeRedirect($node->redirect_url)) {
             return new RouteResult(
                 type: 'entry_tree_redirect',
                 template: '',
@@ -54,5 +54,19 @@ class EntryTreeRouteDriver implements RouteDriverInterface
             ],
             resource: $node,
         );
+    }
+
+    private function isSafeRedirect(?string $url): bool
+    {
+        if (! $url) {
+            return false;
+        }
+
+        if (str_starts_with($url, '/') && ! str_starts_with($url, '//')) {
+            return true;  // relative
+        }
+
+        $scheme = parse_url($url, PHP_URL_SCHEME);
+        return in_array(strtolower((string) $scheme), ['http', 'https'], true);
     }
 }
