@@ -17,7 +17,7 @@ class Group extends Controller
      */
     public function index()
     {
-        $groups = FieldGroup::with('fields')->paginate($this->total_per_page);
+        $groups = FieldGroup::with('fields')->orderBy('name')->paginate($this->total_per_page);
         return $this->view('fields.groups.index', ['groups' => $groups]);
     }
 
@@ -49,7 +49,7 @@ class Group extends Controller
             abort(404);
         }
 
-        $groups = FieldGroup::all();
+        $groups = FieldGroup::orderBy('name')->get();
         $fields = $group->fields()->get();
         $data = [
             'group' => $group,
