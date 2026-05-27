@@ -95,6 +95,13 @@
                         <input value="{{ old('label') }}" class="w-full rounded-md border {% if errors.has('label') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="label" name="label" type="text" placeholder="">
                         {% if errors.has('label') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('label') }}</p>{% endif %}
                     </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="instructions">Instructions</label>
+                        <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                  id="instructions" name="instructions" rows="3"
+                                  placeholder="Any details on how to use the field" maxlength="160">{{ old('instructions') }}</textarea>
+                        {% if errors.has('instructions') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('instructions') }}</p>{% endif %}
+                    </div>
                 </div>
             </div>
 
