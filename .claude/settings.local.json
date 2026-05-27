@@ -82,7 +82,10 @@
       "Bash(echo \"--- 3. Current Admin\\\\\\\\Account\\\\\\\\Settings::update\\(\\) ---\")",
       "Bash(sed -n '50,62p' D:/Projects/mithra62/laravel-base/develop/app/Http/Controllers/Admin/Account/Settings.php)",
       "Bash(echo \"--- 2. Mentions of MediaPicker / media\\\\\\\\.picker: ---\")",
-      "Bash(echo \"--- 3. Mentions of settings\\\\\\\\.user \\(should be zero in active claims\\): ---\")"
+      "Bash(echo \"--- 3. Mentions of settings\\\\\\\\.user \\(should be zero in active claims\\): ---\")",
+      "Bash(grep -rn 'typeInstance\\(\\)->validate\\\\b\\\\|fieldType.*->validate\\\\b\\\\|$instance->validate\\\\b' D:/Projects/mithra62/laravel-base/develop/app)",
+      "Bash(grep -v \"AbstractEntryType\\\\|FormRequest::\\\\|EntryService\\\\|Validator::\\\\|ValidationRule\\\\|Validation\\\\\\\\\\\\\\\\Rule\")",
+      "Bash(grep -nE \"^##### \\\\`[A-Z]\" D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)"
     ]
   }
 }

@@ -69,6 +69,8 @@
     - [Adding a Setting](#adding-a-setting)
 - [Field Types](#field-types)
     - [Built-in Types](#built-in-types)
+        - [Write pipeline at a glance](#write-pipeline-at-a-glance)
+        - [Per-type reference](#per-type-reference)
         - [Money field — design notes](#money-field--design-notes)
     - [Creating a Custom Field Type](#creating-a-custom-field-type)
 - [Field Groups and Fields](#field-groups-and-fields)
@@ -1483,6 +1485,357 @@ row stores the **fully-qualified class name** in `field_types.object`.
 > classes), `database/seeders/FieldTypeSeeder.php` (23 seeded rows), and
 > `resources/views/_fields/*.twig` (22 partials — `html.twig` is missing;
 > see [Recommendations & Remedies](#recommendations--remedies) item R-1).
+
+#### Write pipeline at a glance
+
+Understanding which method runs when matters for any field-level
+hardening:
+
+```
+HTTP POST/PUT
+  └── FormRequest
+        └── rules() returns merge of static + schemaFieldRules()
+              └── For each layout element:
+                    'fields.<handle>' => $field->typeInstance()->getRules()
+                                       merged with [required] / [nullable]
+        └── Laravel validation fires using the merged rules
+                                  ↓
+                            (on success)
+                                  ↓
+  └── Controller → Action → Service
+        └── EntryRepository / AbstractFieldableRepository
+              └── applyFieldValues($model, $fields)
+                    For each handle in the submitted payload:
+                      ├── $field->typeInstance()->storageColumn()
+                      ├── $field->typeInstance()->prepareForStorage($value)
+                      └── FieldValue::updateOrCreate(...) — race-safe SQLSTATE-23000 retry
+```
+
+On the read side, `$entry->field('handle')` resolves through
+`FieldValue::resolvedValue()`, which calls
+`$instance->value($this->{$column})` — the field type's `value()` is the
+post-read transform.
+
+> **[Accuracy Note: `AbstractField::validate()` is unwired].** Nine
+> concrete types (`FileUpload`, `Media`, `MultiSelect`, `RadioGroup`,
+> `Relationship`, `Select`, `Slider`, `StructuredRows`, `Users`)
+> override `validate(mixed $value): bool|string`, but **no caller
+> invokes it anywhere in the codebase** (verified by grep of
+> `app/Repositories`, `app/Services`, `app/Http`, `app/EntryTypes`,
+> `app/Models`). The author comments on `FileUpload` and `Relationship`
+> say `@todo convert into Laravel validation rules` — the in-place
+> validation never ran. See [Recommendations & Remedies](#recommendations--remedies)
+> item R-31.
+
+#### Per-type reference
+
+Each entry below documents the storage contract, settings catalogue,
+validation surface, and read-side output. **The "Validation today"
+line documents what Laravel actually enforces** through `getRules()`;
+in-class `validate()` methods are dead per the accuracy note above
+unless otherwise stated.
+
+##### `Text` — single-line input
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` |
+| `getRules()` | `['string']` (plus required/nullable from layout) |
+| Settings | `placeholder`, `max_length`, `min_length` |
+| Read API | Returns the raw string |
+
+**Potential issue.** `min_length` and `max_length` settings are
+declared but never reach `getRules()`. The admin UI promises a
+constraint the validation pipeline doesn't enforce.
+
+##### `Textarea` — multi-line text
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` |
+| `getRules()` | `[]` (no defaults — accepts anything that survives the layout `required`/`nullable`) |
+| Settings | `placeholder`, `max_length`, `rows` (default 4) |
+| Read API | Returns the raw string |
+
+**Potential issue.** Same as `Text` — `max_length` is decorative.
+
+##### `Html` — rich text
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` |
+| `getRules()` | `['nullable']` |
+| Settings | `toolbar` (`basic` / `full` / `minimal`), `allowed_tags` |
+| Write transform | `prepareForStorage()` runs `Purifier::clean()` against `config('purifier.adastra')`, with the field's `allowed_tags` overriding `HTML.Allowed` when set. |
+| Read API | Returns the sanitised HTML string. |
+
+**Potential issue.** The Twig partial `_fields/html.twig` does not
+exist (R-1). Rendering any field layout that contains an `Html` field
+will throw `View [_fields.html] not found`.
+
+##### `Number` — integer or float
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_integer` when `decimals === 0`, else `value_float` (via `HasDecimalStorage` trait) |
+| `getRules()` | `['numeric']` |
+| Settings | `min`, `max`, `step`, `decimals` (0–10), `default` |
+| Read API | Cast by `FieldValue::$casts` (`integer` or `float` depending on storage column) |
+
+**Potential issue.** `min`, `max`, and `step` settings are not pushed
+into `getRules()`. The admin form claims constraints that the
+validator doesn't honour.
+
+##### `Boolean` — toggle
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_boolean` |
+| `getRules()` | `['boolean']` |
+| Settings | `default` (toggle), `label_on`, `label_off` |
+| Read API | `cast()` returns `(bool)`. `FieldValue::$casts` also casts the column. |
+
+No known issues.
+
+##### `Date` — calendar date
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_date` |
+| `getRules()` | `['date']` |
+| Settings | `min_date`, `max_date`, `default` (date string or `"today"`), `format` |
+| Read API | `FieldValue::$casts` returns `Carbon` (`'value_date' => 'datetime'`). |
+
+**Potential issue.** `min_date` and `max_date` settings are not
+enforced by `getRules()`.
+
+##### `Time` — time of day
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` (canonical `HH:MM` or `HH:MM:SS`) |
+| `getRules()` | `['nullable', 'string', new TimeFormatRule(...)]` |
+| Settings | `include_seconds`, `min_time`, `max_time`, `step_minutes`, `default` (literal value or `"now"`) |
+| Write transform | `prepareForStorage()` validates the pattern, zero-pads the hour, and aligns the seconds component with `include_seconds`. Throws `InvalidArgumentException` on malformed input. |
+| Read API | `value()` returns `App\Support\Iso\TimeValue`. |
+
+Custom validator (`TimeFormatRule`) honours `min_time` / `max_time`.
+
+##### `EmailAddress` — email
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` |
+| `getRules()` | `[]` |
+| Settings | None |
+| Read API | Returns the raw string |
+
+**Potential issue (High).** `protected $rules = []` and no
+`getRules()` override — **no `email` rule is applied**. Submitting
+arbitrary strings ("not-an-email") will store successfully. See R-33.
+
+##### `Url` — URL
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` |
+| `getRules()` | `['string', 'url']` |
+| Settings | None |
+| Read API | Returns the raw string |
+
+No known issues. The Laravel `url` rule accepts any scheme by default;
+tighten with `'url:http,https'` if needed at the field level.
+
+##### `Telephone` — phone number
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` |
+| `getRules()` | `['string', 'telephone']` |
+| Settings | None |
+| Read API | Returns the raw string |
+
+**Potential issue (Critical).** `telephone` is **not a registered
+Laravel validator** — no `Validator::extend('telephone', …)` call
+anywhere in `app/`, `bootstrap/`, or `config/`. Submitting a form
+that includes a `Telephone` field will throw
+`BadMethodCallException: Method Illuminate\Validation\Validator::validateTelephone does not exist`.
+Until either a rule is registered or the rule string is changed (to
+something built-in such as `regex:/.../` or `string`), this field type
+is effectively broken. See R-32.
+
+##### `ColorPicker` — color value
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` |
+| `getRules()` | `[]` |
+| Settings | `format` (`hex` / `rgb` / `hsl`), `alpha` (toggle), `presets` (key/value swatches) |
+| Read API | Returns the raw string |
+
+**Potential issue.** No format validation — the picker chooses a
+format but the backend accepts any string. `presets` are read by the
+Twig partial only.
+
+##### `Relationship` — entries M2M
+
+| Aspect | Value |
+|---|---|
+| Storage | `isRelational() === true` — writes to `entry_relationships(entry_id, related_entry_id, field_id, sort_order)`, not `field_values` |
+| `getRules()` | `['array']` |
+| Settings | `entry_groups[]` (handles), `entry_types[]` (handles), `limit` |
+| Read API | `Entry::field()` resolves to `Collection<Entry>` ordered by `sort_order`. |
+
+**Potential issue.** `entry_types` setting is declared and shown in
+the admin form but **not read by `fetchAvailableEntries()`** — only
+`entry_groups` filters the picker list. The setting has no effect.
+
+**Potential issue.** `validate()` (dead code) is the only place that
+enforces `limit`. Submitting beyond `limit` via the API silently
+ignores the limit.
+
+##### `FileUpload` — multi-media via upload + picker
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_json` (int[] of Media IDs) |
+| Marker | Implements `App\Contracts\SyncsToMediables` — `FieldValueObserver` mirrors the array into the `mediables` pivot table on save |
+| `getRules()` | `[]` (relies on dead `validate()` plus library-level upload rules at upload time) |
+| Settings | `library` (select_multiple of Library IDs), `allowed_types` (per-field MIME override), `min`, `max` |
+| Read API | `value()` returns `Collection<Media>` sorted by stored array index |
+
+**Potential issue.** `min`/`max`/library scoping is enforced only by
+the dead `validate()`. The Laravel pipeline doesn't reject violations.
+
+##### `Media` — same storage as FileUpload, different UX
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_json` (int[] of Media IDs) |
+| Marker | Also implements `SyncsToMediables` |
+| `getRules()` | `[]` |
+| Settings | `libraries` (required, multi-select), `min`, `max` |
+| Read API | `value()` returns `Collection<Media>` sorted by stored array index |
+| Render | Passes the matching `media.picker.index` URL into the partial; the picker chip strip lazy-loads via JSON |
+
+**Potential issue.** Same dead-`validate()` issue — the configured
+`min`/`max` and library scoping are not enforced by the request layer.
+
+> **[Accuracy Note: FileUpload vs Media].** Storage and observer
+> integration are identical. The split exists so a `FileUpload` field
+> can also accept inline uploads from the form, while `Media` is a
+> pure picker chip strip backed by an existing library. They are
+> separate seeded `field_types` rows.
+
+##### `Users` — user picker
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_json` (int[] of User IDs) |
+| `getRules()` | `['nullable', 'array']` |
+| Settings | `roles[]` (restrict to users with these role IDs), `limit`, `display` (`dropdown` / `checkboxes` / `tokens`) |
+| Read API | `value()` returns `Collection<User>` with `[id, name, email]` only — **never exposes password, tokens, remember_token** |
+
+**Potential issue.** Limit and role-membership checks live only in
+dead `validate()`. Layer adopts `User::select(['id','name','email'])`
+defensively on the read path, which is the right call.
+
+##### `Select` — single-choice dropdown
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` |
+| `getRules()` | `['nullable', 'string']` |
+| Settings | `options` (key/value, required), `placeholder`, `default`, `strict_options` (toggle) |
+| Read API | Returns the raw string key |
+| Trait | `ValidatesAgainstOptions` |
+
+**Potential issue.** `validateAgainstOptions()` is the only thing
+that respects `strict_options`, and it's invoked only from the dead
+`validate()`. Today an editor can submit any string and it stores.
+
+##### `MultiSelect` — multi-choice
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_json` (string[] of keys) |
+| `getRules()` | `['nullable', 'array']` |
+| Settings | `options` (required), `min`, `max`, `display` (`checkboxes` / `multiselect`), `strict_options` |
+| Read API | `cast()` returns `string[]` |
+| Trait | `ValidatesAgainstOptions` |
+
+Same dead-`validate()` caveat as `Select`. `min`/`max` are
+unenforced via Laravel rules.
+
+##### `RadioGroup` — single-choice radio
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` |
+| `getRules()` | `['nullable', 'string']` |
+| Settings | `options` (required), `default`, `layout` (`stacked` / `inline`), `strict_options` |
+| Read API | Returns the raw string key |
+| Trait | `ValidatesAgainstOptions` |
+
+Same dead-`validate()` caveat as `Select`.
+
+##### `Slider` — bounded numeric range
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_integer` when `decimals === 0`, else `value_float` (via `HasDecimalStorage`) |
+| `getRules()` | `[]` (no default rules) |
+| Settings | `min` (required, default 0), `max` (required, default 100), `step` (default 1), `suffix`, `decimals`, `default` |
+| Read API | Cast by `FieldValue::$casts` |
+
+**Potential issue.** `min`/`max` enforcement is in dead
+`validate()`. Submitting out-of-range values via the API saves
+without complaint.
+
+##### `Country` — ISO 3166-1 country code
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` (uppercase ISO 3166-1 alpha-2) |
+| `getRules()` | `['nullable', 'string', new CountryCodeRule($allowed)]` |
+| Settings | `allowed_countries[]`, `default`, `placeholder` |
+| Write transform | `prepareForStorage()` uppercases the value |
+| Read API | `value()` returns `['code' => 'US', 'name' => 'United States']` (or `null`) |
+
+`CountryCodeRule` enforces both validity (every ISO 3166-1 country)
+and the optional `allowed_countries` allowlist. Active validation.
+
+##### `StateProvince` — ISO 3166-2 subdivision
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_text` (typically `US-CA`-style code) |
+| `getRules()` | `['nullable', 'string', new SubdivisionCodeRule($country, $allowFreetextFallback)]` |
+| Settings | `country` (required, default `'US'`), `default`, `placeholder`, `allow_freetext_fallback` (toggle, default `true`) |
+| Read API | `value()` returns `['code', 'name', 'country']`. Falls back to `code` when no subdivision data exists for the country. |
+
+**Note.** The field is single-country per instance. To support
+country-conditional dropdowns the entry must declare a `Country`
+field separately and the JS resolves the pair at render time. Not
+shipped today; document if the requirement comes up.
+
+##### `Money` — currency-typed monetary value
+
+See [Money field — design notes](#money-field--design-notes) below.
+
+##### `StructuredRows` — repeatable rows of typed columns
+
+| Aspect | Value |
+|---|---|
+| Storage column | `value_json` (array of row objects keyed by column handle) |
+| `getRules()` | `['nullable', 'array']` |
+| Settings | `columns[]` (handle/label/type triples — declared via the `structured_rows_columns` settings widget), `min_rows`, `max_rows`, `add_label` |
+| Read API | `cast()` returns the raw array; `render()` fills missing column keys with `null` so the template never hits undefined indices |
+
+**Potential issue.** Same dead-`validate()` story — `min_rows`,
+`max_rows`, and per-row column-presence checks live only in
+unreachable code. An API caller can submit rows with missing or extra
+keys and they will store.
 
 #### Money field — design notes
 
@@ -3399,6 +3752,31 @@ code are not re-listed — see the
 - **R-30 (Low)**: `Entry::$fillable` includes `created_by_user_id`.
   Same defence-in-depth argument as R-22.
 
+#### Field Types layer (2026-05-26 audit)
+
+- **R-31 (Medium)**: `AbstractField::validate(mixed $value): bool|string`
+  is implemented by nine concrete types but **never invoked** by the
+  repository or the FormRequest pipeline. Settings such as
+  `strict_options`, `min`/`max` selection counts, `Relationship`
+  `limit` / `entry_types`, and library scoping on `FileUpload` /
+  `Media` are therefore unenforced.
+- **R-32 (Critical)**: `Telephone::$rules` references the validator
+  `'telephone'`, which is **not registered**. Any form whose layout
+  includes a Telephone field throws `BadMethodCallException` at
+  submission time.
+- **R-33 (Medium)**: `EmailAddress::$rules` is empty. The field
+  type stores arbitrary strings — no `email:` rule is applied.
+- **R-34 (Low)**: Several field types declare settings that don't
+  reach `getRules()`: `Text::min_length`/`max_length`,
+  `Textarea::max_length`, `Number::min`/`max`/`step`,
+  `Date::min_date`/`max_date`, `ColorPicker::format`/`alpha`,
+  `Relationship::entry_types`. The admin form advertises constraints
+  the validator doesn't honour.
+- **R-35 (Low)**: `ValidatesAgainstOptions::renderOrphanedValue()` is
+  a helper for visibly flagging stale select values; no partial calls
+  it. Either wire it into `select.twig` / `multi_select.twig` /
+  `radio_group.twig` or delete the method.
+
 See [Recommendations & Remedies](#recommendations--remedies) for proposed
 fixes and consequences.
 
@@ -3857,14 +4235,18 @@ so we can pick them up in any order. **No code has been changed yet.**
 **R-1 through R-16** came out of the 2026-05-26 documentation refresh.
 **R-17 through R-30** were absorbed from `docs/ALPHA_READINESS_REPORT.md`
 after a verification pass on the same day — items the alpha report
-flagged that the live code has not yet resolved. Items the alpha report
-flagged that **have** since been fixed (C-2 upload permission, H-1
-OAuth session regeneration + throttling, H-3 redirect-URL scheme
-validation, H-7 HTML Purifier on the write path, M-1 category-group
-membership rule, L-1 admin-namespace clobber, L-6 configurable redirect
-status, plus the four "Info" docs items) are not listed here. They are
-recorded in the [Accuracy Notes Log](#accuracy-notes-log) so the
-provenance is visible without bloating the active list.
+flagged that the live code has not yet resolved. **R-31 through R-35**
+came out of a focused 2026-05-26 audit of `app/Field/Types/*.php` and
+the related write pipeline (see
+[Per-type reference](#per-type-reference) for the data behind each
+item). Items the alpha report flagged that **have** since been fixed
+(C-2 upload permission, H-1 OAuth session regeneration + throttling,
+H-3 redirect-URL scheme validation, H-7 HTML Purifier on the write
+path, M-1 category-group membership rule, L-1 admin-namespace
+clobber, L-6 configurable redirect status, plus the four "Info" docs
+items) are not listed here. They are recorded in the
+[Accuracy Notes Log](#accuracy-notes-log) so the provenance is
+visible without bloating the active list.
 
 Severity legend:
 
@@ -4881,6 +5263,248 @@ needed.
 
 ---
 
+### Field Types layer findings (2026-05-26 audit)
+
+The items below — **R-31 through R-35** — were raised by a focused
+audit of `app/Field/Types/*.php` and related infrastructure. See the
+[Per-type reference](#per-type-reference) for the data underlying each
+item.
+
+---
+
+### R-31 — `AbstractField::validate()` is unreachable infrastructure (Medium)
+
+**Symptom.** Nine concrete field types override
+`AbstractField::validate(mixed $value): bool|string` with substantive
+checks (`FileUpload`, `Media`, `MultiSelect`, `RadioGroup`,
+`Relationship`, `Select`, `Slider`, `StructuredRows`, `Users`). A
+grep across `app/Repositories`, `app/Services`, `app/Http`,
+`app/EntryTypes`, and `app/Models` finds **zero call sites**. The
+write pipeline runs only `getRules()` (for the Laravel validator)
+and `prepareForStorage()` (for the value cast). The `@todo convert
+into Laravel validation rules` comment on `FileUpload` and
+`Relationship` confirms this is known but unfixed.
+
+Practical consequence:
+
+- `Select` / `MultiSelect` / `RadioGroup` `strict_options` toggles do
+  nothing.
+- `MultiSelect` and `StructuredRows` `min` / `max` thresholds do
+  nothing.
+- `Relationship` `limit` and entry-group/type restriction do nothing
+  at the request layer.
+- `Slider` `min` / `max` do nothing.
+- `FileUpload` and `Media` `min`/`max`/library scoping do nothing.
+- `Users` `limit` and role-restriction do nothing.
+
+**Fix options.**
+
+A. **(Direct path)** Invoke `validate()` from
+   `AbstractFieldableRepository::applyFieldValues()` and throw a
+   `ValidationException` on string return — wires it in everywhere
+   without touching FormRequests.
+
+```php
+$result = $instance->validate($value);
+if (is_string($result)) {
+    throw \Illuminate\Validation\ValidationException::withMessages([
+        "fields.{$field->handle}" => $result,
+    ]);
+}
+```
+
+B. **(Per the @todo comments)** Convert each `validate()` body into
+   real Laravel validation rules and surface them via `getRules()`.
+   Some checks (e.g. "every selected media's library_id is in the
+   field's allowed libraries") would need custom `ValidationRule`
+   classes — pattern already established for `CountryCodeRule`,
+   `TimeFormatRule`, etc.
+
+C. **(Tactical)** Delete the dead methods and ship the field types
+   with their stated behaviour limited to what `getRules()` enforces.
+
+**Recommendation.** Option A as a one-commit fix that closes every
+visible gap, then migrate one type at a time to Option B at leisure.
+Option C is the wrong tradeoff because the dead methods document
+intended behaviour that admins can see in the field-settings UI.
+
+**Consequences.**
+
+- Pro: makes nine field types behave the way the settings forms
+  advertise.
+- Con: any test that has been passing because validation didn't run
+  will start to fail. Sweep tests before merging.
+
+---
+
+### R-32 — `Telephone::$rules` references unregistered `'telephone'` validator (Critical)
+
+**Symptom.** `app/Field/Types/Telephone.php` declares
+`protected array $rules = ['string', 'telephone'];`. The string
+`telephone` is not a built-in Laravel validation rule and no
+`Validator::extend('telephone', …)` call exists anywhere in `app/`,
+`bootstrap/`, or `config/`. Any field layout containing a `Telephone`
+field that survives request validation will trigger Laravel to
+resolve a `validateTelephone` method on the validator — none exists,
+so the framework throws `BadMethodCallException: Method
+Illuminate\Validation\Validator::validateTelephone does not exist`.
+
+This is a runtime exception thrown at form-submission time, not a
+silent failure. Every entry form, user-profile form, or category
+form whose layout references a Telephone field is **currently
+unsubmittable**.
+
+**Fix options.**
+
+A. **(Smallest)** Drop the bogus rule:
+
+```php
+// app/Field/Types/Telephone.php
+protected array $rules = ['string'];
+```
+
+   Phones can take so many regional formats that "string + library-side
+   cleanup" is often the right tradeoff for a CMS field.
+
+B. **(Hardened)** Register a custom validator and a permissive regex:
+
+```php
+// app/Providers/AppServiceProvider.php — boot()
+Validator::extend('telephone', function ($attribute, $value) {
+    return is_string($value) && preg_match('/^[0-9+\-\s().]{4,30}$/', $value) === 1;
+}, 'The :attribute must be a valid phone number.');
+```
+
+C. **(Best for a strict product)** Adopt `propaganistas/laravel-phone`
+   and bind it as the rule. Heavier dependency but produces
+   E.164-normalised storage.
+
+**Recommendation.** Option A for the Alpha fix; revisit at product
+maturity. The `Telephone` field type rarely justifies the dependency
+weight of Option C.
+
+**Consequences.**
+
+- Pro: forms that include a Telephone field stop throwing.
+- Con: validation is loose — but it always was, since the broken
+  rule didn't actually run. Net change is zero from the user's POV;
+  the gap is purely operational.
+
+---
+
+### R-33 — `EmailAddress::$rules` is empty — no format validation (Medium)
+
+**Symptom.** `EmailAddress::$rules` is `[]` (no default declaration).
+The Laravel validator therefore enforces only the layout-level
+`required`/`nullable`. Submitting `'not-an-email'`,
+`'<script>alert(1)</script>'`, or an empty string stores successfully.
+
+**Fix.**
+
+```php
+// app/Field/Types/EmailAddress.php
+protected array $rules = ['email:rfc'];
+```
+
+Or, if a more permissive shape is desired (accept gmail-style
+`+tag` addresses but still reject obvious junk),
+`['email:rfc,dns']` adds an MX-record check.
+
+**Consequences.**
+
+- Pro: an `EmailAddress` field actually validates email shape.
+- Con: existing data may include junk. Run a one-off audit before
+  shipping if customers have populated this field in the wild.
+
+---
+
+### R-34 — Field-type setting forms advertise unenforced constraints (Low)
+
+**Symptom.** Several field types declare admin-facing settings that
+the validation pipeline does not honour because `getRules()` doesn't
+push them through. Per the [Per-type reference](#per-type-reference):
+
+| Field          | Declared settings that don't reach the validator        |
+|----------------|---------------------------------------------------------|
+| `Text`         | `min_length`, `max_length`                              |
+| `Textarea`     | `max_length`                                            |
+| `Number`       | `min`, `max`, `step`                                    |
+| `Date`         | `min_date`, `max_date`                                  |
+| `ColorPicker`  | `format` (any string accepted), `alpha`                 |
+| `Relationship` | `entry_types` (not even read at render time)            |
+
+`MultiSelect` / `Slider` / `Users` / `FileUpload` / `Media` /
+`Relationship` `min`/`max`/`limit` are covered separately by R-31 —
+they live in the dead `validate()` method.
+
+**Fix.** Have each affected type override `getRules()` and push the
+relevant settings into Laravel rule strings:
+
+```php
+// Example for Text
+public function getRules(): array
+{
+    $rules = ['string'];
+
+    if ($min = $this->getSetting('min_length')) {
+        $rules[] = "min:{$min}";
+    }
+    if ($max = $this->getSetting('max_length')) {
+        $rules[] = "max:{$max}";
+    }
+
+    return $rules;
+}
+```
+
+Apply analogously for `Number` (`min:`/`max:`), `Date`
+(`after_or_equal:`/`before_or_equal:`), `ColorPicker` (a `regex:`
+per format), and friends. For `Relationship::entry_types`, either
+filter `fetchAvailableEntries()` by the configured handles or
+remove the setting from `$settings_form`.
+
+**Consequences.**
+
+- Pro: the admin form stops lying to its users.
+- Con: existing data may violate the new constraints. Migration
+  plan: log violations first, fix the data, then enforce.
+
+---
+
+### R-35 — `ValidatesAgainstOptions::renderOrphanedValue()` is dead helper (Low)
+
+**Symptom.** The trait `App\Traits\Field\ValidatesAgainstOptions`
+defines a `renderOrphanedValue()` helper that returns an HTML
+`<option disabled selected>` for orphaned select values. A grep of
+`app/`, `resources/views/`, and `resources/templates/` finds **no
+caller**. The intent (visibly flag stale stored values in
+`Select` / `MultiSelect` / `RadioGroup` admin partials) never
+shipped.
+
+**Fix options.**
+
+A. Wire the helper into each of the three partials so editors can
+   see when an entry's stored value is no longer in the option list.
+   Pair with `strict_options` (which will start working once R-31
+   lands).
+B. Delete the helper.
+
+**Recommendation.** Option A — orphan visibility is genuinely useful
+in an admin UI where editors maintain Select options over years.
+But it's Low priority until R-31 lands; without
+`strict_options` actually firing, an orphaned value is just a stale
+selection rather than an error.
+
+**Consequences.**
+
+- Pro: editors can see "this entry references an option that no
+  longer exists" without reading the database.
+- Con: changing the partial output may shift the visual layout of
+  the select widgets. Coordinate with whatever CSS expects the
+  current shape.
+
+---
+
 ## Ambivalences for Review
 
 Items where the code is ambiguous, drifting, or where the team should
@@ -5068,6 +5692,21 @@ corrections made in the 2026-05-26 refresh pass:
     Media Library, plus a row in the Admin Route Map. Documents the
     JSON shape, query parameters, validation rules, and thumbnail
     behaviour. No code change.
+21. **Field Types layer audited (2026-05-26)**: 23 concrete field
+    types reviewed; full per-type reference added under
+    [Built-in Types → Per-type reference](#per-type-reference) with
+    storage column, settings catalogue, validation surface, read
+    API, and per-type "potential issues" callouts. Cross-cutting
+    findings raised as R-31 through R-35 in
+    [Recommendations & Remedies](#recommendations--remedies). The
+    biggest finding: **`AbstractField::validate()` is never invoked**
+    by the repository or FormRequest pipeline (R-31), so nine field
+    types' settings (`strict_options`, selection min/max, relationship
+    limits, etc.) silently fail to enforce. The most embarrassing
+    finding: **`Telephone::$rules` references an unregistered
+    `'telephone'` validator** (R-32), which throws
+    `BadMethodCallException` on any form whose layout includes a
+    Telephone field.
 
 ### Items absorbed from ALPHA_READINESS_REPORT.md (2026-05-26)
 
