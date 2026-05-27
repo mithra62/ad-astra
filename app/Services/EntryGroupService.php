@@ -29,15 +29,13 @@ class EntryGroupService extends AbstractService
      */
     public function create(array $data): EntryGroup
     {
-        $layout = FieldLayout::create(['name' => $data['name'] . ' Entries', 'handle' => $data['handle'] . '-layout-entry']);
-
         $group = EntryGroup::create([
             'name' => $data['name'],
             'handle' => $data['handle'],
             'description' => $data['description'] ?? null,
             'sort_order' => $data['sort_order'] ?? 0,
             'status_group_id' => $data['status_group_id'] ?? null,
-            'field_layout_id' => $layout->id,
+            'field_layout_id' => $data['field_layout_id'],
         ]);
 
         $group->categoryGroups()->sync($data['category_groups'] ?? []);
