@@ -60,7 +60,11 @@
       "Bash(C:/php/php.exe artisan *)",
       "Bash(vendor/bin/pint --preset psr12 --dirty)",
       "PowerShell(php artisan migrate:fresh --env=testing --force)",
-      "PowerShell($dirs = @\\(\"app\\\\Support\\\\Iso\",\"tests\\\\Unit\\\\Support\\\\Iso\",\"app\\\\Rules\\\\Field\",\"tests\\\\Unit\\\\Rules\\\\Field\",\"tests\\\\Feature\\\\Field\"\\); foreach \\($d in $dirs\\) { if \\(-not \\(Test-Path $d\\)\\) { New-Item -ItemType Directory -Force $d | Out-Null } }; \"ok\")"
+      "PowerShell($dirs = @\\(\"app\\\\Support\\\\Iso\",\"tests\\\\Unit\\\\Support\\\\Iso\",\"app\\\\Rules\\\\Field\",\"tests\\\\Unit\\\\Rules\\\\Field\",\"tests\\\\Feature\\\\Field\"\\); foreach \\($d in $dirs\\) { if \\(-not \\(Test-Path $d\\)\\) { New-Item -ItemType Directory -Force $d | Out-Null } }; \"ok\")",
+      "Bash(perl -i -pe 's/\\(\\\\S\\)\\\\s{2,}=>/\\\\1 =>/g' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(perl -i -pe 's/\\(,\\)\\\\s{2,}\\(\\\\S\\)/$1 $2/g' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(grep -cE \\\\\"',\\\\\\\\S\\\\\" D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md || true\\)\"; echo \"lines: $\\(wc -l < D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md\\)\"; rm -f D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md.bak; echo \"backup removed\")",
+      "Bash(echo \"no-space-after-comma: $\\(grep -cE \\\\\"',\\\\\\\\S\\\\\" D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md || true\\)\"; echo \"lines: $\\(wc -l < D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md\\)\"; rm -f D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md.bak; echo \"backup removed\")"
     ]
   }
 }

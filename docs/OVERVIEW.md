@@ -1,13 +1,19 @@
 # Laravel CMS — Project Overview
 
-> **Documentation status (2026-05-07).** This file is synchronised against
-> the live source in `app/`, `database/`, `routes/`, and `config/`.
-> Project-specific code snippets are copy-paste accurate against the current
-> codebase; generic tutorial snippets use placeholder model names where noted.
+> **Documentation status (2026-05-26 — Refresh Pass).** This file has been
+> reconciled against the live source in `app/`, `database/`, `routes/`,
+> `config/`, and `resources/`. Sections marked **[Accuracy Note]** call out
+> places where prior copy had drifted from the code, or where current code
+> is incomplete. See also **Recommendations & Remedies** and **Ambivalences
+> for Review** at the end of the document.
+>
 > The codebase consistently uses **`handle`** (not `slug`) on every model
 > that carries a developer-facing identifier — `Field`, `FieldGroup`,
-> `EntryGroup`, `EntryType`, `StatusGroup`, `Status`, `CategoryGroup`,
-> `Category`, and `Entry`.
+> `EntryGroup`, `EntryType`, `EntryBehavior`, `StatusGroup`, `Status`,
+> `CategoryGroup`, `Category`, `Entry`, and `Media\Library`.
+>
+> **When this document and the code disagree, the code wins.** Items still
+> uncertain are listed in the Ambivalences section rather than asserted.
 
 ## Table of Contents
 
@@ -133,6 +139,8 @@
     - [Read path (entry query)](#read-path-entry-query)
     - [Field value storage](#field-value-storage)
     - [Morph map aliases at a glance](#morph-map-aliases-at-a-glance)
+- [Media Status Governance](#media-status-governance)
+- [HasStatus and the Status Sync Registry](#hasstatus-and-the-status-sync-registry)
 - [Technical Tutorials](#technical-tutorials)
     - [Adding Custom Fields to Any Model](#adding-custom-fields-to-any-model)
     - [How the Field Layer Works](#how-the-field-layer-works)
@@ -143,6 +151,9 @@
     - [Step 5 - Read Field Values](#step-5---read-field-values)
     - [Step 6 - Attach Field Groups to the Owning Configuration Model](#step-6---attach-field-groups-to-the-owning-configuration-model)
     - [Morph Map Note](#morph-map-note)
+- [Recommendations & Remedies](#recommendations--remedies)
+- [Ambivalences for Review](#ambivalences-for-review)
+- [Accuracy Notes Log](#accuracy-notes-log)
 
 ---
 
@@ -150,14 +161,27 @@
 
 This is an **ExpressionEngine-inspired headless CMS** built on Laravel 12. The
 core philosophy: all content structure is admin-defined at runtime. Entry types
-can be backed by concrete PHP classes; when no class is configured the registry
-falls back to `GeneralEntryType`. Everything else (fields, layouts, statuses,
+are backed by concrete PHP classes through the **EntryBehavior registry**
+(see [Accuracy Note] below); when no behavior is configured the registry falls
+back to `GeneralEntryType`. Everything else (fields, layouts, statuses,
 categories) is database-driven.
 
+> **[Accuracy Note: EntryType binding column].** Prior copy of this document
+> said `entry_types` had a `class` column storing a fully-qualified class
+> name. **It does not.** `entry_types.entry_behavior_id` is a foreign key to
+> the `entry_behaviors` table. `entry_behaviors.class` stores a **morph
+> alias** (e.g. `behavior.blog-post`) registered in
+> `AppServiceProvider::boot()` and resolved through `Relation::getMorphedModel()`.
+> See [Entry Groups and Entry Types](#entry-groups-and-entry-types) for the
+> corrected flow.
+
 ```
-FieldType          — system-level type registry (Text, Textarea, Number, Date,
-                     EmailAddress, Url, Telephone, ColorPicker, Relationship,
-                     Boolean)
+FieldType          — system-level type registry. 23 types are seeded
+                     (Text, Textarea, Html, Number, Date, EmailAddress, Url,
+                      Telephone, ColorPicker, Relationship, Boolean, FileUpload,
+                      Media, Select, MultiSelect, RadioGroup, Slider, Users,
+                      StructuredRows, Money, Country, StateProvince, Time)
+                     Each row stores the FQCN in `field_types.object`.
   └── Field        — admin-created field instances with settings (handle, label,
                      instructions, hidden, JSON settings)
         └── FieldGroup — reusable bundles of fields, attached to anything that
@@ -166,7 +190,8 @@ FieldType          — system-level type registry (Text, Textarea, Number, Date,
                          field_groupables pivot
 
 StatusGroup
-  └── Status       — named statuses with handle, color, is_default, is_public
+  └── Status       — named statuses with handle, color, is_default, is_public.
+                     Seeded groups: `publication`, `job-status`, `product-status`.
 
 CategoryGroup     — owns a FieldLayout (HasFieldLayout) and FieldGroups
   └── Category    — hierarchical tree; uses Fieldable for custom values
@@ -177,12 +202,14 @@ FieldLayout
 
 EntryGroup        — owns a FieldLayout, a StatusGroup, plus polymorphic
                     CategoryGroups and FieldGroups
-  └── EntryType   — optional PHP class extending AbstractEntryType.
-                    Schema: name, handle, class, default_template,
+  └── EntryType   — Schema: name, handle, entry_behavior_id (FK),
+                    default_template, default_schema_type (SEO),
                     has_entry_tree, max_depth, allowed_parent_types,
                     field_layout_id (optional override), sort_order
+        │   The PHP behaviour comes from the joined EntryBehavior row whose
+        │   `class` column is a morph alias.
         └── Entry — title, handle, status_id + status_handle + status_is_public,
-                    published_at, created_by_user_id
+                    published_at, schema_type, created_by_user_id
               ├── FieldValue        — scalar custom field data (polymorphic)
               ├── EntryRelationship — relational field data (M2M to other Entries)
               ├── EntryAuthor (entry_authors) + entry_author_entry pivot
@@ -242,26 +269,42 @@ php artisan migrate
 php artisan db:seed
 ```
 
-The `DatabaseSeeder` runs in this order (ten always run; the eleventh runs
+The `DatabaseSeeder` runs in this order (twelve always run; three more run
 only in `local`/`testing`):
 
-1. `RolesPermissionsSeeder` — permissions + 3 roles
+1. `RolesPermissionsSeeder` — permissions + 3 roles (`super admin`, `admin`, `user`)
 2. `UsersSeeder` — seeds a single **super-admin** user (Eric Lamb,
    `eric@mithra62.com`, password `password`)
-3. `FieldTypeSeeder` — 10 field type rows (Text, Textarea, Number, Date,
-   Email Address, URL, Telephone, Color Picker, Relationship, Boolean)
-4. `StatusGroupSeeder` — `publication` status group (`draft`, `published`, `archived`)
-5. `CategoryGroupSeeder` — category groups + categories
-6. `FieldGroupSeeder` — field groups + fields (`content-fields`, `seo-fields`,
+3. `EntryBehaviorSeeder` — 11 behaviour rows that bind `entry_types` to PHP
+   classes via morph alias (must run before any `entry_types` row is created)
+4. `FieldTypeSeeder` — **23 field type rows** (see [Built-in Types](#built-in-types))
+5. `MediaLibrarySeeder` — `avatars` library used by `User::avatar()`, plus
+   any other seeded libraries
+6. `StatusGroupSeeder` — three status groups: `publication`
+   (`draft`, `published`, `archived`), `job-status`
+   (`draft`, `published`, `expired`, `closed`), and `product-status`
+   (`draft`, `published`, `out-of-stock`, `pre-order`, `discontinued`)
+7. `CategoryGroupSeeder` — category groups + categories
+8. `FieldGroupSeeder` — field groups + fields (`content-fields`, `seo-fields`,
    `relationship-fields`, plus per-group field bundles)
-7. `EntryGroupSeeder` — `blog` and `products` entry groups, layouts, and types
-8. `ExtendedEntryGroupSeeder` — `events`, `news`, `pages`, `jobs`, `podcast`,
-   `portfolio`, `videos`, `recipes` entry groups + types
-9. `UserSchemaSeeder` — user profile schema (Profile and Bio tabs, fields like
-   `first_name`, `last_name`, `gender`, `date_of_birth`, `website`, `bio`,
-   `social_twitter`, `social_linkedin`)
-10. `SettingsDomainSeeder` — settings domains and system-level default values
-11. `EntrySeeder` *(local/testing only)* — sample blog posts and products
+9. `EntryGroupSeeder` — `blog` and `products` entry groups, layouts, and types
+10. `ExtendedEntryGroupSeeder` — `events`, `news`, `pages`, `jobs`, `podcast`,
+    `portfolio`, `videos`, `recipes`, plus a fallback `general` entry group
+11. `UserSchemaSeeder` — user profile schema (Profile and Bio tabs, fields like
+    `first_name`, `last_name`, `gender`, `date_of_birth`, `website`, `bio`,
+    `social_twitter`, `social_linkedin`)
+12. `SettingsDomainSeeder` — settings domains and system-level default values
+
+Local/testing only:
+
+13. `EntrySeeder` — sample blog posts and products
+14. `SandboxedEntryTreeSeeder` — sample entry-tree nodes for routing tests
+15. `SampleApiTokenSeeder` — sample Sanctum tokens
+
+> **[Accuracy Note: seeder list].** Prior copy listed 10 seeders and missed
+> `EntryBehaviorSeeder`, `MediaLibrarySeeder`, `SandboxedEntryTreeSeeder`,
+> and `SampleApiTokenSeeder`. Verified against
+> `database/seeders/DatabaseSeeder.php`.
 
 ---
 
@@ -295,9 +338,18 @@ For queue-backed features, run a queue worker appropriate for the target
 environment. The included `PruneApiLogs` job only runs if it is explicitly
 dispatched; the scheduler-based prune is the configured default.
 
-`app:validate-class-references` checks database-stored class names in
-`entry_types.class` and `field_types.object`, verifying that entry type classes
-extend `AbstractEntryType` and field type classes extend `AbstractField`.
+`app:validate-class-references` checks class-name strings stored in the
+database. It iterates `entry_behaviors.class` (morph alias keys) — resolving
+each via `Relation::getMorphedModel()` and verifying the resulting class
+extends `AbstractEntryType` — and then iterates `field_types.object`
+(FQCN strings) verifying each class extends `AbstractField`. Exits with
+`FAILURE` if any reference is broken.
+
+> **[Accuracy Note: validate command].** Prior copy claimed the command
+> checks `entry_types.class`. That column does not exist. The command
+> actually checks `entry_behaviors.class` (morph aliases) and
+> `field_types.object` (FQCNs). Verified against
+> `app/Console/Commands/ValidateClassReferences.php`.
 
 ---
 
@@ -347,18 +399,37 @@ resolves to a live class satisfying the expected base type. Exits with
 Polymorphic stability via **Eloquent Morph Maps** in `AppServiceProvider::boot()`:
 
 ```
-'entry'          => Entry::class
-'entry_group'    => EntryGroup::class
-'entry_type'     => EntryType::class
-'category'       => Category::class
+// Polymorphic model aliases (used by *_type morph columns)
+'entry' => Entry::class
+'entry_group' => EntryGroup::class
+'entry_type' => EntryType::class
+'category' => Category::class
 'category_group' => CategoryGroup::class
-'field_group'    => FieldGroup::class
-'media'          => Media::class
-'media_library'  => MediaLibrary::class
-'user'           => User::class
+'field_group' => FieldGroup::class
+'media' => Media::class
+'media_library' => MediaLibrary::class
+'user' => User::class
+
+// EntryBehavior class aliases (stored in entry_behaviors.class)
+'behavior.general' => GeneralEntryType::class
+'behavior.blog-post' => BlogPostEntryType::class
+'behavior.product' => ProductEntryType::class
+'behavior.page' => PageEntryType::class
+'behavior.event' => EventEntryType::class
+'behavior.job-listing' => JobListingEntryType::class
+'behavior.news-article' => NewsArticleEntryType::class
+'behavior.podcast-episode' => PodcastEpisodeEntryType::class
+'behavior.portfolio-item' => PortfolioItemEntryType::class
+'behavior.recipe' => RecipeEntryType::class
+'behavior.video' => VideoEntryType::class
 ```
 
-Always rely on `$model->getMorphClass()` for new writes.
+Always rely on `$model->getMorphClass()` for new writes to polymorphic
+columns. The `behavior.*` aliases are a separate lookup table used only by
+`EntryBehavior::instance()` (see [Entry Groups and Entry Types](#entry-groups-and-entry-types)).
+
+> **[Accuracy Note: morph map].** Prior copy omitted the `behavior.*`
+> entries entirely. Verified against `app/Providers/AppServiceProvider.php`.
 
 ---
 
@@ -421,13 +492,13 @@ receives only `access admin`. The `super admin` role bypasses all checks via
 use App\Facades\Users;
 
 $user = Users::create([
-    'name'     => 'Jane Doe',
-    'email'    => 'jane@example.com',
+    'name' => 'Jane Doe',
+    'email' => 'jane@example.com',
     'password' => 'secret-passphrase', // hashed by UserService
-    'roles'    => ['admin'],
-    'fields'   => [
+    'roles' => ['admin'],
+    'fields' => [
         'first_name' => 'Jane',
-        'last_name'  => 'Doe',
+        'last_name' => 'Doe',
     ],
 ]);
 ```
@@ -439,8 +510,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 $user = User::create([
-    'name'     => 'Jane Doe',
-    'email'    => 'jane@example.com',
+    'name' => 'Jane Doe',
+    'email' => 'jane@example.com',
     'password' => Hash::make('secret-passphrase'),
 ]);
 $user->assignRole('admin');
@@ -461,7 +532,7 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 $permission = Permission::create([
-    'name'        => 'publish entry',
+    'name' => 'publish entry',
     'description' => 'Allows user to set entries to published status',
 ]);
 
@@ -686,7 +757,7 @@ use App\Models\UserSchema;
 $text = FieldType::where('object', \App\Field\Types\Text::class)->firstOrFail();
 
 $firstName = Field::firstOrCreate(['handle' => 'first_name'], ['field_type_id' => $text->id, 'name' => 'First Name', 'label' => 'First Name']);
-$lastName  = Field::firstOrCreate(['handle' => 'last_name'],  ['field_type_id' => $text->id, 'name' => 'Last Name',  'label' => 'Last Name']);
+$lastName  = Field::firstOrCreate(['handle' => 'last_name'], ['field_type_id' => $text->id, 'name' => 'Last Name', 'label' => 'Last Name']);
 
 $group = FieldGroup::firstOrCreate(['handle' => 'user-profile'], ['name' => 'User Profile']);
 $group->fields()->syncWithoutDetaching([$firstName->id, $lastName->id]);
@@ -697,9 +768,9 @@ $tab    = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Profile', 's
 foreach ([$firstName, $lastName] as $i => $field) {
     TabElement::create([
         'field_layout_tab_id' => $tab->id,
-        'field_id'            => $field->id,
-        'required'            => false,
-        'sort_order'          => $i + 1,
+        'field_id' => $field->id,
+        'required' => false,
+        'sort_order' => $i + 1,
     ]);
 }
 
@@ -716,7 +787,7 @@ use App\Facades\Users;
 
 Users::setFields($user, [
     'first_name' => 'Jane',
-    'last_name'  => 'Doe',
+    'last_name' => 'Doe',
 ]);
 ```
 
@@ -731,8 +802,8 @@ $field = Field::where('handle', 'first_name')->firstOrFail();
 
 FieldValue::updateOrCreate(
     [
-        'field_id'       => $field->id,
-        'fieldable_id'   => $user->getKey(),
+        'field_id' => $field->id,
+        'fieldable_id' => $user->getKey(),
         'fieldable_type' => $user->getMorphClass(), // 'user'
     ],
     [$field->fieldType->instance()->storageColumn() => 'Jane']
@@ -755,9 +826,9 @@ public function show(User $user): array
 {
     $user->load('fieldValues.field.fieldType');
     return [
-        'name'       => $user->name,
+        'name' => $user->name,
         'first_name' => $user->field('first_name'),
-        'last_name'  => $user->field('last_name'),
+        'last_name' => $user->field('last_name'),
     ];
 }
 
@@ -867,10 +938,10 @@ use App\Facades\Users;
 
 // Create a user and immediately promote them as an author
 $user = Users::create([
-    'name'                => 'Jane Doe',
-    'email'               => 'jane@example.com',
-    'password'            => 'secret',
-    'is_author'           => true,
+    'name' => 'Jane Doe',
+    'email' => 'jane@example.com',
+    'password' => 'secret',
+    'is_author' => true,
     'author_display_name' => 'J. Doe',
 ]);
 
@@ -918,22 +989,22 @@ Validation rule in `StoreEntryRequest` / `EditEntryRequest`:
 use App\Facades\Users;
 
 $user = Users::create([
-    'name'                => 'Jane Doe',
-    'email'               => 'jane@example.com',
-    'password'            => 'secret',
-    'roles'               => ['admin'],
-    'fields'              => ['first_name' => 'Jane', 'last_name' => 'Doe'],
+    'name' => 'Jane Doe',
+    'email' => 'jane@example.com',
+    'password' => 'secret',
+    'roles' => ['admin'],
+    'fields' => ['first_name' => 'Jane', 'last_name' => 'Doe'],
     // Optional author eligibility keys (stripped before User::create()):
-    'is_author'           => true,
+    'is_author' => true,
     'author_display_name' => 'J. Doe',
 ]);
 
 $user = Users::update($user, [
-    'name'   => 'Jane Smith',
-    'roles'  => ['user'],
+    'name' => 'Jane Smith',
+    'roles' => ['user'],
     'fields' => ['last_name' => 'Smith'],
     // Optional — omit to leave eligibility unchanged:
-    'is_author'           => false,
+    'is_author' => false,
 ]);
 
 Users::delete($user);
@@ -964,8 +1035,8 @@ echo $user->field('first_name');
 Users::setPassword($user, 'newpassword123'); // admin force-set
 
 app(\App\Actions\User\UpdateUserPassword::class)->update($user, [
-    'current_password'      => 'oldpassword',
-    'password'              => 'newpassword123',
+    'current_password' => 'oldpassword',
+    'password' => 'newpassword123',
     'password_confirmation' => 'newpassword123',
 ]);
 ```
@@ -977,7 +1048,7 @@ use App\Enums\UserStatus;
 
 // Set any non-suspension status; manages banned_at automatically
 Users::setStatus($user, UserStatus::INACTIVE, 'Account deactivated');
-Users::setStatus($user, UserStatus::BANNED,   'Violated terms of service');
+Users::setStatus($user, UserStatus::BANNED, 'Violated terms of service');
 Users::setStatus($user, UserStatus::ACTIVE);   // reason optional for active
 
 // Suspend for a fixed window
@@ -1016,10 +1087,10 @@ Users::disableTwoFactor($user);
 
 ```php
 $token = Users::upsertOauthToken($user, 'google', [
-    'access_token'     => 'ya29.xxx',
-    'refresh_token'    => '1//xxx',
-    'expires_at'       => now()->addHour(),
-    'scopes'           => ['email', 'profile'],
+    'access_token' => 'ya29.xxx',
+    'refresh_token' => '1//xxx',
+    'expires_at' => now()->addHour(),
+    'scopes' => ['email', 'profile'],
     'provider_user_id' => '1234567890',
 ]);
 
@@ -1267,10 +1338,10 @@ non-boolean fields automatically receive `nullable`.
 use App\Actions\Settings\UpdateDomainSettings;
 
 app(UpdateDomainSettings::class)->execute('general', [
-    'site_name'      => 'Laravel Base',
-    'timezone'       => 'America/Phoenix',
-    'date_format'    => 'Y-m-d',
-    'time_format'    => 'H:i',
+    'site_name' => 'Laravel Base',
+    'timezone' => 'America/Phoenix',
+    'date_format' => 'Y-m-d',
+    'time_format' => 'H:i',
     'items_per_page' => 25,
 ]);
 ```
@@ -1301,9 +1372,9 @@ and `items_per_page` in the `general` domain.
 use App\Actions\Settings\UpdateUserSettings;
 
 app(UpdateUserSettings::class)->execute($user, [
-    'timezone'       => 'America/Phoenix',
-    'date_format'    => 'm/d/Y',
-    'time_format'    => 'g:i A',
+    'timezone' => 'America/Phoenix',
+    'date_format' => 'm/d/Y',
+    'time_format' => 'g:i A',
     'items_per_page' => 50,
 ]);
 ```
@@ -1352,18 +1423,40 @@ which validates `class_exists()` and `is_subclass_of(AbstractField::class)`.
 
 ### Built-in Types
 
-| Class          | `storageColumn()`                | Notes                                                      |
-|----------------|----------------------------------|------------------------------------------------------------|
-| `Text`         | `value_text`                     | Single-line input                                          |
-| `Textarea`     | `value_text`                     | Multi-line                                                 |
-| `Number`       | `value_integer` or `value_float` | Branches on `decimals` setting                             |
-| `Date`         | `value_date`                     | Cast as `datetime`; reads return `Carbon`                  |
-| `EmailAddress` | `value_text`                     |                                                            |
-| `Url`          | `value_text`                     |                                                            |
-| `Telephone`    | `value_text`                     |                                                            |
-| `ColorPicker`  | `value_text`                     | Hex value                                                  |
-| `Relationship` | *(unused)*                       | `isRelational() === true`; stores in `entry_relationships` |
-| `Boolean`      | `value_boolean`                  | Casts reads to `bool`                                      |
+All 23 types are registered in `database/seeders/FieldTypeSeeder.php`. Each
+row stores the **fully-qualified class name** in `field_types.object`.
+
+| Class            | Twig partial                       | `storageColumn()`                | Notes                                                      |
+|------------------|------------------------------------|----------------------------------|------------------------------------------------------------|
+| `Text`           | `_fields/text.twig`                | `value_text`                     | Single-line input                                          |
+| `Textarea`       | `_fields/textarea.twig`            | `value_text`                     | Multi-line                                                 |
+| `Html`           | **— no partial — see remedy**      | `value_text`                     | Rich-text; calls `view('_fields.html', $params)` (missing) |
+| `Number`         | `_fields/number.twig`              | `value_integer` or `value_float` | Branches on `decimals` setting                             |
+| `Date`           | `_fields/date.twig`                | `value_date`                     | Cast as `datetime`; reads return `Carbon`                  |
+| `Time`           | `_fields/time.twig`                | `value_text`                     | Time-of-day (`HH:MM` or `HH:MM:SS`); `value()` returns `App\Support\Iso\TimeValue` |
+| `EmailAddress`   | `_fields/email.twig`               | `value_text`                     |                                                            |
+| `Url`            | `_fields/url.twig`                 | `value_text`                     |                                                            |
+| `Telephone`      | `_fields/telephone.twig`           | `value_text`                     |                                                            |
+| `ColorPicker`    | `_fields/color_picker.twig`        | `value_text`                     | Hex value                                                  |
+| `Boolean`        | `_fields/boolean.twig`             | `value_boolean`                  | Casts reads to `bool`                                      |
+| `Relationship`   | `_fields/relationship.twig`        | *(none — relational)*            | `isRelational() === true`; stores in `entry_relationships` |
+| `FileUpload`     | `_fields/file_upload.twig`         | `value_json`                     | IDs synced to `mediables` pivot by `FieldValueObserver`    |
+| `Media`          | `_fields/media.twig`               | `value_json`                     | Media picker variant                                       |
+| `Select`         | `_fields/select.twig`              | `value_text`                     |                                                            |
+| `MultiSelect`    | `_fields/multi_select.twig`       | `value_json`                     |                                                            |
+| `RadioGroup`     | `_fields/radio_group.twig`         | `value_text`                     |                                                            |
+| `Slider`         | `_fields/slider.twig`              | `value_integer` or `value_float` |                                                            |
+| `Users`          | `_fields/users.twig`               | `value_json`                     | Picker for user IDs                                        |
+| `StructuredRows` | `_fields/structured_rows.twig`     | `value_json`                     | Repeatable rows; columns declared in field settings        |
+| `Money`          | `_fields/money.twig`               | `value_integer`                  | Stored as integer minor units; `value()` returns `Money\Money` object; currency from field settings |
+| `Country`        | `_fields/country.twig`             | `value_text`                     | ISO 3166-1 alpha-2 country code                            |
+| `StateProvince`  | `_fields/state_province.twig`      | `value_text`                     | ISO 3166-2 subdivision code                                |
+
+> **[Accuracy Note: field type catalogue].** Prior copy listed only the
+> original 10 types. Verified against `app/Field/Types/*.php` (23 PHP
+> classes), `database/seeders/FieldTypeSeeder.php` (23 seeded rows), and
+> `resources/views/_fields/*.twig` (22 partials — `html.twig` is missing;
+> see [Recommendations & Remedies](#recommendations--remedies) item R-1).
 
 ### Creating a Custom Field Type
 
@@ -1391,7 +1484,7 @@ use App\Models\Field\Type as FieldType;
 
 FieldType::firstOrCreate(
     ['object' => \App\Field\Types\Toggle::class],
-    ['name'   => 'Toggle']
+    ['name' => 'Toggle']
 );
 ```
 
@@ -1418,12 +1511,12 @@ $textType = FieldType::where('object', \App\Field\Types\Text::class)->firstOrFai
 
 $group = FieldGroup::firstOrCreate(
     ['handle' => 'product-details'],
-    ['name'   => 'Product Details', 'description' => 'Core product information.']
+    ['name' => 'Product Details', 'description' => 'Core product information.']
 );
 
 foreach ([
     ['handle' => 'price', 'name' => 'Price', 'label' => 'Price'],
-    ['handle' => 'sku',   'name' => 'SKU',   'label' => 'SKU Number'],
+    ['handle' => 'sku', 'name' => 'SKU', 'label' => 'SKU Number'],
 ] as $def) {
     $field = Field::firstOrCreate(
         ['handle' => $def['handle']],
@@ -1454,9 +1547,9 @@ $contentTab = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Content'
 foreach (['body', 'excerpt'] as $order => $handle) {
     TabElement::create([
         'field_layout_tab_id' => $contentTab->id,
-        'field_id'            => Field::where('handle', $handle)->value('id'),
-        'required'            => $handle === 'body',
-        'sort_order'          => $order + 1,
+        'field_id' => Field::where('handle', $handle)->value('id'),
+        'required' => $handle === 'body',
+        'sort_order' => $order + 1,
     ]);
 }
 
@@ -1465,9 +1558,9 @@ $seoTab = Tab::create(['field_layout_id' => $layout->id, 'name' => 'SEO', 'sort_
 foreach (['meta_title', 'meta_description'] as $order => $handle) {
     TabElement::create([
         'field_layout_tab_id' => $seoTab->id,
-        'field_id'            => Field::where('handle', $handle)->value('id'),
-        'required'            => false,
-        'sort_order'          => $order + 1,
+        'field_id' => Field::where('handle', $handle)->value('id'),
+        'required' => false,
+        'sort_order' => $order + 1,
     ]);
 }
 ```
@@ -1491,15 +1584,15 @@ use App\Models\Status;
 use App\Models\StatusGroup;
 
 $group = StatusGroup::create([
-    'name'       => 'Review Workflow',
-    'handle'     => 'review',
+    'name' => 'Review Workflow',
+    'handle' => 'review',
     'sort_order' => 2,
 ]);
 
 foreach ([
-    ['name' => 'Pending Review', 'handle' => 'pending',  'color' => '#F59E0B', 'is_default' => true,  'is_public' => false, 'sort_order' => 1],
-    ['name' => 'Approved',       'handle' => 'approved', 'color' => '#10B981', 'is_default' => false, 'is_public' => true,  'sort_order' => 2],
-    ['name' => 'Rejected',       'handle' => 'rejected', 'color' => '#EF4444', 'is_default' => false, 'is_public' => false, 'sort_order' => 3],
+    ['name' => 'Pending Review', 'handle' => 'pending', 'color' => '#F59E0B', 'is_default' => true, 'is_public' => false, 'sort_order' => 1],
+    ['name' => 'Approved', 'handle' => 'approved', 'color' => '#10B981', 'is_default' => false, 'is_public' => true, 'sort_order' => 2],
+    ['name' => 'Rejected', 'handle' => 'rejected', 'color' => '#EF4444', 'is_default' => false, 'is_public' => false, 'sort_order' => 3],
 ] as $s) {
     Status::create(array_merge($s, ['status_group_id' => $group->id]));
 }
@@ -1548,21 +1641,21 @@ use App\Models\Category\Group as CategoryGroup;
 
 $group = CategoryGroup::firstOrCreate(
     ['handle' => 'regions'],
-    ['name'   => 'Regions', 'sort_order' => 1]
+    ['name' => 'Regions', 'sort_order' => 1]
 );
 
 $europe = Category::create([
-    'group_id'   => $group->id,
-    'name'       => 'Europe',
-    'handle'     => 'europe',
+    'group_id' => $group->id,
+    'name' => 'Europe',
+    'handle' => 'europe',
     'sort_order' => 1,
 ]);
 
 Category::create([
-    'group_id'   => $group->id,
-    'parent_id'  => $europe->id,
-    'name'       => 'France',
-    'handle'     => 'france',
+    'group_id' => $group->id,
+    'parent_id' => $europe->id,
+    'name' => 'France',
+    'handle' => 'france',
     'sort_order' => 1,
 ]);
 ```
@@ -1619,8 +1712,8 @@ $tab    = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Details', 's
 foreach ([$description, $imageUrl] as $i => $field) {
     TabElement::create([
         'field_layout_tab_id' => $tab->id,
-        'field_id'            => $field->id,
-        'sort_order'          => $i + 1,
+        'field_id' => $field->id,
+        'sort_order' => $i + 1,
     ]);
 }
 
@@ -1634,11 +1727,11 @@ $categoryGroup->fieldGroups()->syncWithoutDetaching([$fieldGroup->id]);
 $categoryService = app(CategoryService::class);
 
 $category = $categoryService->create($categoryGroup, [
-    'name'   => 'PHP',
+    'name' => 'PHP',
     'handle' => 'php',
     'fields' => [
         'cat_description' => 'Articles about the PHP language.',
-        'cat_image_url'   => 'https://example.com/php.png',
+        'cat_image_url' => 'https://example.com/php.png',
     ],
 ]);
 
@@ -1661,24 +1754,62 @@ An **EntryGroup** is the section/channel (e.g. "Blog", "Products") tying
 together a FieldLayout, a StatusGroup, polymorphic CategoryGroups, and
 polymorphic FieldGroups.
 
-An **EntryType** row maps a group-scoped handle to an optional PHP class:
+An **EntryType** row maps a group-scoped handle to PHP behaviour through the
+`EntryBehavior` registry:
 
 | Column                                                | Description                              |
 |-------------------------------------------------------|------------------------------------------|
-| `entry_group_id`                                      | FK to `entry_groups`, cascade on delete  |
+| `entry_group_id`                                      | FK to `entry_groups`, nullable, nullOnDelete |
+| `entry_behavior_id`                                   | FK to `entry_behaviors`, nullable, nullOnDelete |
 | `field_layout_id`                                     | Optional override layout for this type   |
 | `name`, `handle`                                      | `(entry_group_id, handle)` unique        |
-| `class`                                               | Nullable FQCN of an `AbstractEntryType` subclass |
 | `default_template`                                    | Optional default template for SiteRouter |
+| `default_schema_type`                                 | Default schema.org type (SEO; reserved)  |
 | `has_entry_tree`, `max_depth`, `allowed_parent_types` | Tree config                              |
 | `sort_order`                                          | Display order within the group           |
 
-At runtime, `EntryTypeRegistry::resolveByHandle()` resolves by `handle` only,
-not by group. Keep entry type handles globally unique when using
+> **[Accuracy Note: EntryType has no `class` column].** Earlier copy of this
+> document described an `entry_types.class` column storing an
+> `AbstractEntryType` FQCN. **That column does not exist.** The behaviour
+> binding is two-step: `EntryType.entry_behavior_id` →
+> `EntryBehavior.class` (a morph alias such as `behavior.blog-post`) →
+> `Relation::getMorphedModel(...)` → the concrete PHP class. Verified
+> against `database/migrations/2026_04_18_000008_create_entry_types_table.php`,
+> `app/Models/EntryType.php`, `app/Models/EntryBehavior.php`, and
+> `app/EntryTypes/EntryTypeRegistry.php`.
+
+#### Runtime resolution (corrected)
+
+```
+EntryService::create($handle, ...)
+  └── EntryTypeRegistry::resolveByHandle($handle)
+        ├── Fetch EntryType row (with('entryGroup', 'entryBehavior', 'fieldLayout…'))
+        └── Instantiate:
+              ├── If entryBehavior IS NULL → GeneralEntryType (fallback)
+              └── Else → EntryBehavior::instance($record):
+                    ├── $fqcn = Relation::getMorphedModel($behavior->class)
+                    ├── Throws RuntimeException if morph key not registered
+                    ├── Throws RuntimeException if class does not exist
+                    ├── Throws RuntimeException if class does not extend AbstractEntryType
+                    └── return new $fqcn($record)
+```
+
+`EntryTypeRegistry::resolveByHandle()` resolves by `handle` only — it does
+**not** filter by group. Keep entry type handles globally unique when using
 `Content::create('type_handle', ...)` unless the creation API is extended to
-accept group context. If `class` is null or names a missing class, the registry
-logs a warning and falls back to `GeneralEntryType`. A configured class that
-exists but does not extend `AbstractEntryType` still throws a `RuntimeException`.
+accept group context (see Ambivalence A-1).
+
+#### Adding a new EntryType
+
+1. Write a PHP class extending `AbstractEntryType` in `app/EntryTypes/`.
+2. Register a morph alias in `AppServiceProvider::boot()`'s morph map under
+   the `behavior.*` prefix.
+3. Insert a row into `entry_behaviors` (the `EntryBehaviorSeeder` is the
+   canonical example) — `class` is the morph alias, not the FQCN.
+4. Insert (or update) the `entry_types` row with `entry_behavior_id`
+   pointing at the new behaviour.
+5. Run `php artisan app:validate-class-references` to confirm the morph
+   alias resolves to a real class extending `AbstractEntryType`.
 
 ### Seeded Entry Groups and Types
 
@@ -1686,19 +1817,23 @@ The seeders create one entry type per seeded entry group. The handles are
 currently globally unique, which is important because `Content::create()` and
 `EntryTypeRegistry::resolveByHandle()` resolve by type handle alone.
 
-| EntryGroup handle | EntryType handle   | Name             | Class                              | Status group      | Tree routing |
-|-------------------|--------------------|------------------|------------------------------------|-------------------|--------------|
-| `blog`            | `blog_post`        | Blog Post        | `BlogPostEntryType`                | `publication`     | No           |
-| `products`        | `product`          | Product          | `ProductEntryType`                 | `product-status`  | No           |
-| `events`          | `event`            | Event            | `EventEntryType`                   | `publication`     | No           |
-| `news`            | `news_article`     | News Article     | `NewsArticleEntryType`             | `publication`     | No           |
-| `pages`           | `page`             | Page             | `PageEntryType`                    | `publication`     | Yes          |
-| `jobs`            | `job_listing`      | Job Listing      | `JobListingEntryType`              | `job-status`      | No           |
-| `podcast`         | `podcast_episode`  | Podcast Episode  | `PodcastEpisodeEntryType`          | `publication`     | No           |
-| `portfolio`       | `portfolio_item`   | Portfolio Item   | `PortfolioItemEntryType`           | `publication`     | Yes          |
-| `videos`          | `video`            | Video            | `VideoEntryType`                   | `publication`     | Yes          |
-| `recipes`         | `recipe`           | Recipe           | `RecipeEntryType`                  | `publication`     | Yes          |
-| `general`         | `general`          | General          | `GeneralEntryType`                 | `publication`     | No           |
+| EntryGroup handle | EntryType handle   | Name             | Behaviour handle    | Resolves to                      | Status group      | Tree routing |
+|-------------------|--------------------|------------------|---------------------|----------------------------------|-------------------|--------------|
+| `blog`            | `blog_post`        | Blog Post        | `blog-post`         | `BlogPostEntryType`              | `publication`     | No           |
+| `products`        | `product`          | Product          | `product`           | `ProductEntryType`               | `product-status`  | No           |
+| `events`          | `event`            | Event            | `event`             | `EventEntryType`                 | `publication`     | No           |
+| `news`            | `news_article`     | News Article     | `news-article`      | `NewsArticleEntryType`           | `publication`     | No           |
+| `pages`           | `page`             | Page             | `page`              | `PageEntryType`                  | `publication`     | Yes          |
+| `jobs`            | `job_listing`      | Job Listing      | `job-listing`       | `JobListingEntryType`            | `job-status`      | No           |
+| `podcast`         | `podcast_episode`  | Podcast Episode  | `podcast-episode`   | `PodcastEpisodeEntryType`        | `publication`     | No           |
+| `portfolio`       | `portfolio_item`   | Portfolio Item   | `portfolio-item`    | `PortfolioItemEntryType`         | `publication`     | Yes          |
+| `videos`          | `video`            | Video            | `video`             | `VideoEntryType`                 | `publication`     | Yes          |
+| `recipes`         | `recipe`           | Recipe           | `recipe`            | `RecipeEntryType`                | `publication`     | Yes          |
+| `general`         | `general`          | General          | `general`           | `GeneralEntryType`               | `publication`     | No           |
+
+Mind the dialect: EntryType handles tend to use **underscores**
+(`blog_post`), behaviour handles use **kebab-case** (`blog-post`). The
+`behavior.*` morph alias keys (in `entry_behaviors.class`) also use kebab.
 
 `pages`, `portfolio`, `videos`, and `recipes` also seed
 `default_template = 'entries.page'`. If an Entry Tree node has its own
@@ -1790,12 +1925,12 @@ use App\Models\StatusGroup;
 $statusGroup = StatusGroup::where('handle', 'publication')->firstOrFail();
 
 $group = EntryGroup::create([
-    'name'            => 'News Articles',
-    'handle'          => 'news',
-    'description'     => 'News and press releases.',
+    'name' => 'News Articles',
+    'handle' => 'news',
+    'description' => 'News and press releases.',
     'field_layout_id' => $layout->id,
     'status_group_id' => $statusGroup->id,
-    'sort_order'      => 3,
+    'sort_order' => 3,
 ]);
 
 $group->fieldGroups()->syncWithoutDetaching([$fieldGroup->id]);
@@ -1840,20 +1975,32 @@ class NewsArticleEntryType extends AbstractEntryType
 ### Registering the Entry Type in the Database
 
 ```php
+use App\Models\EntryBehavior;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 
-$group = EntryGroup::where('handle', 'news')->firstOrFail();
+$group    = EntryGroup::where('handle', 'news')->firstOrFail();
+$behavior = EntryBehavior::where('handle', 'news-article')->firstOrFail();
+// EntryBehavior row was created by EntryBehaviorSeeder with
+// class = 'behavior.news-article' (a morph alias registered in
+// AppServiceProvider::boot()).
 
 EntryType::firstOrCreate(
     ['entry_group_id' => $group->id, 'handle' => 'news_article'],
     [
-        'name'       => 'News Article',
-        'class'      => \App\EntryTypes\NewsArticleEntryType::class,
+        'name' => 'News Article',
+        'entry_behavior_id' => $behavior->id,
         'sort_order' => 1,
     ]
 );
 ```
+
+> **[Accuracy Note: registration column].** The earlier sample showed
+> `'class' => \App\EntryTypes\NewsArticleEntryType::class` — that key is
+> ignored because no `class` column exists on `entry_types`. The behaviour
+> linkage is `entry_behavior_id`. Verified against
+> `database/seeders/EntryGroupSeeder.php` and
+> `database/seeders/ExtendedEntryGroupSeeder.php`.
 
 ---
 
@@ -1874,11 +2021,11 @@ $textarea = FieldType::where('object', \App\Field\Types\Textarea::class)->firstO
 $number   = FieldType::where('object', \App\Field\Types\Number::class)->firstOrFail();
 
 $fieldDefs = [
-    ['handle' => 'ingredients',    'name' => 'Ingredients',    'label' => 'Ingredients',    'type' => $textarea],
-    ['handle' => 'instructions',   'name' => 'Instructions',   'label' => 'Instructions',   'type' => $textarea],
-    ['handle' => 'prep_time_mins', 'name' => 'Prep Time',      'label' => 'Prep Time (min)','type' => $number],
-    ['handle' => 'servings',       'name' => 'Servings',       'label' => 'Servings',       'type' => $number],
-    ['handle' => 'video_url',      'name' => 'Video URL',      'label' => 'Video URL',      'type' => $text],
+    ['handle' => 'ingredients', 'name' => 'Ingredients', 'label' => 'Ingredients', 'type' => $textarea],
+    ['handle' => 'instructions', 'name' => 'Instructions', 'label' => 'Instructions', 'type' => $textarea],
+    ['handle' => 'prep_time_mins', 'name' => 'Prep Time', 'label' => 'Prep Time (min)', 'type' => $number],
+    ['handle' => 'servings', 'name' => 'Servings', 'label' => 'Servings', 'type' => $number],
+    ['handle' => 'video_url', 'name' => 'Video URL', 'label' => 'Video URL', 'type' => $text],
 ];
 
 foreach ($fieldDefs as $def) {
@@ -1907,9 +2054,9 @@ $recipeTab   = Tab::create(['field_layout_id' => $groupLayout->id, 'name' => 'Re
 foreach (Field::whereIn('handle', ['ingredients', 'instructions', 'prep_time_mins', 'servings'])->get() as $i => $field) {
     TabElement::create([
         'field_layout_tab_id' => $recipeTab->id,
-        'field_id'            => $field->id,
-        'required'            => in_array($field->handle, ['ingredients', 'instructions']),
-        'sort_order'          => $i + 1,
+        'field_id' => $field->id,
+        'required' => in_array($field->handle, ['ingredients', 'instructions']),
+        'sort_order' => $i + 1,
     ]);
 }
 
@@ -1918,9 +2065,9 @@ $videoLayout = FieldLayout::create(['name' => 'Video Recipe Layout']);
 $videoTab    = Tab::create(['field_layout_id' => $videoLayout->id, 'name' => 'Video', 'sort_order' => 1]);
 TabElement::create([
     'field_layout_tab_id' => $videoTab->id,
-    'field_id'            => Field::where('handle', 'video_url')->value('id'),
-    'required'            => true,
-    'sort_order'          => 1,
+    'field_id' => Field::where('handle', 'video_url')->value('id'),
+    'required' => true,
+    'sort_order' => 1,
 ]);
 ```
 
@@ -1933,12 +2080,12 @@ use App\Models\StatusGroup;
 $statusGroup = StatusGroup::where('handle', 'publication')->firstOrFail();
 
 $entryGroup = EntryGroup::create([
-    'name'            => 'Recipes',
-    'handle'          => 'recipes',
-    'description'     => 'Step-by-step cooking guides.',
+    'name' => 'Recipes',
+    'handle' => 'recipes',
+    'description' => 'Step-by-step cooking guides.',
     'field_layout_id' => $groupLayout->id,
     'status_group_id' => $statusGroup->id,
-    'sort_order'      => 10,
+    'sort_order' => 10,
 ]);
 
 $entryGroup->fieldGroups()->syncWithoutDetaching([$recipeGroup->id]);
@@ -1974,20 +2121,40 @@ class VideoRecipeEntryType extends RecipeEntryType
 ### 5. Register the EntryType rows
 
 ```php
+use App\Models\EntryBehavior;
 use App\Models\EntryType;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
+// 5a. Register the morph alias once (in AppServiceProvider::boot())
+Relation::morphMap([
+    // existing entries…
+    'behavior.recipe' => \App\EntryTypes\RecipeEntryType::class,
+    'behavior.video-recipe' => \App\EntryTypes\VideoRecipeEntryType::class,
+]);
+
+// 5b. Insert the EntryBehavior rows
+$standard = EntryBehavior::firstOrCreate(
+    ['handle' => 'recipe'],
+    ['name' => 'Recipe', 'class' => 'behavior.recipe']
+);
+$video = EntryBehavior::firstOrCreate(
+    ['handle' => 'video-recipe'],
+    ['name' => 'Video Recipe', 'class' => 'behavior.video-recipe']
+);
+
+// 5c. Bind EntryType rows to those behaviours
 EntryType::firstOrCreate(
     ['entry_group_id' => $entryGroup->id, 'handle' => 'recipe'],
-    ['name' => 'Standard Recipe', 'class' => \App\EntryTypes\RecipeEntryType::class, 'sort_order' => 1]
+    ['name' => 'Standard Recipe', 'entry_behavior_id' => $standard->id, 'sort_order' => 1]
 );
 
 EntryType::firstOrCreate(
     ['entry_group_id' => $entryGroup->id, 'handle' => 'video_recipe'],
     [
-        'name'            => 'Video Recipe',
-        'class'           => \App\EntryTypes\VideoRecipeEntryType::class,
+        'name' => 'Video Recipe',
+        'entry_behavior_id' => $video->id,
         'field_layout_id' => $videoLayout->id,
-        'sort_order'      => 2,
+        'sort_order' => 2,
     ]
 );
 ```
@@ -2002,25 +2169,25 @@ php artisan app:validate-class-references
 use App\Facades\Content;
 
 $recipe = Content::create('recipe', [
-    'title'  => 'Classic Carbonara',
+    'title' => 'Classic Carbonara',
     'status' => 'published',
     'fields' => [
-        'ingredients'    => "200g spaghetti\n2 eggs\n100g pancetta",
-        'instructions'   => "1. Boil pasta...\n2. Fry pancetta...",
+        'ingredients' => "200g spaghetti\n2 eggs\n100g pancetta",
+        'instructions' => "1. Boil pasta...\n2. Fry pancetta...",
         'prep_time_mins' => 15,
-        'servings'       => 2,
+        'servings' => 2,
     ],
 ]);
 
 $videoRecipe = Content::create('video_recipe', [
-    'title'  => 'Carbonara in 60 Seconds',
+    'title' => 'Carbonara in 60 Seconds',
     'status' => 'published',
     'fields' => [
-        'ingredients'    => "200g spaghetti\n2 eggs",
-        'instructions'   => 'Watch the video.',
+        'ingredients' => "200g spaghetti\n2 eggs",
+        'instructions' => 'Watch the video.',
         'prep_time_mins' => 5,
-        'servings'       => 2,
-        'video_url'      => 'https://youtube.com/watch?v=example',
+        'servings' => 2,
+        'video_url' => 'https://youtube.com/watch?v=example',
     ],
 ]);
 
@@ -2054,15 +2221,15 @@ $author   = User::find(1);
 $category = Category::where('handle', 'france')->firstOrFail();
 
 $entry = Content::create('news_article', [
-    'title'        => 'Election Results 2026',
+    'title' => 'Election Results 2026',
     'published_at' => now(),
-    'status'       => 'published',
-    'authors'      => [$author->id],      // ordered M2M — sort_order = array key
-    'categories'   => [$category->id],
-    'fields'       => [
-        'body'             => 'Full article text...',
-        'excerpt'          => 'Short summary.',
-        'meta_title'       => 'Election Results 2026 | News',
+    'status' => 'published',
+    'authors' => [$author->id], // ordered M2M — sort_order = array key
+    'categories' => [$category->id],
+    'fields' => [
+        'body' => 'Full article text...',
+        'excerpt' => 'Short summary.',
+        'meta_title' => 'Election Results 2026 | News',
         'meta_description' => 'Coverage of the 2026 election.',
     ],
 ]);
@@ -2077,7 +2244,7 @@ echo $entry->handle; // auto-generated via Str::slug($title) if not provided
 use App\Facades\Content;
 
 $updated = Content::update($entry, [
-    'title'  => 'Updated Title',
+    'title' => 'Updated Title',
     'status' => 'approved',
     'fields' => ['excerpt' => 'Revised summary.'],
 ]);
@@ -2100,7 +2267,7 @@ $relatedB = Content::query()->inGroup('products')->where('handle', 'widget-b')->
 
 // On create
 $post = Content::create('blog_post', [
-    'title'  => 'My Post',
+    'title' => 'My Post',
     'handle' => 'my-post',
     'fields' => [
         'related_products' => [$relatedA, $relatedB],
@@ -2508,16 +2675,24 @@ The Entry Tree layer maps entries to explicit public URLs. It is stored in
 
 `entry_trees` schema:
 
-| Column       | Notes                                                            |
-|--------------|------------------------------------------------------------------|
-| `entry_id`   | Unique FK to `entries`; each entry can have at most one tree node |
-| `parent_id`  | Nullable self-FK; deleting a parent sets direct children to root  |
-| `handle`     | URL-safe slug segment generated by `EntryTree::validatedHandle()` |
-| `uri`        | Full normalized URI, unique across the tree; home node uses `/`   |
-| `depth`      | Root depth is `0`; rebuilt when nodes move                       |
-| `sort_order` | Sibling order                                                    |
-| `template`   | Optional per-node template override                              |
-| `is_home`    | Marks the single home node                                       |
+| Column            | Notes                                                            |
+|-------------------|------------------------------------------------------------------|
+| `entry_id`        | Unique FK to `entries`; each entry can have at most one tree node |
+| `parent_id`       | Nullable self-FK; deleting a parent sets direct children to root  |
+| `handle`          | URL-safe slug segment generated by `EntryTree::validatedHandle()` |
+| `uri`             | Full normalized URI, unique across the tree; home node uses `/`   |
+| `depth`           | Root depth is `0`; rebuilt when nodes move                        |
+| `sort_order`      | Sibling order                                                     |
+| `template`        | Optional per-node template override                               |
+| `redirect_url`    | Optional URL to 30x to; takes precedence over `template`          |
+| `redirect_status` | HTTP status used with `redirect_url` (default `302`); column is `unsignedSmallInteger` |
+| `is_home`         | Marks the single home node                                        |
+
+> **[Accuracy Note: redirect columns].** Earlier copy omitted `redirect_url`
+> and `redirect_status`. Both exist on `entry_trees` and are honoured by
+> `EntryTreeRouteDriver`. Verified against
+> `database/migrations/2026_04_23_200641_create_entry_tree_table.php`
+> and `app/Services/SiteRouting/RouteDrivers/EntryTreeRouteDriver.php`.
 
 Important model helpers:
 
@@ -2587,8 +2762,7 @@ and `depth` stay consistent. Deleting the entry itself cascades its tree node.
 ### EntryTree Driver
 
 `EntryTreeRouteDriver` resolves a URI against `entry_trees`. Only entries
-passing `published()` are served. Template precedence: `EntryTree.template`
-→ `EntryType.default_template` → `'entries.show'`.
+passing `published()` are served.
 
 The driver eager-loads:
 
@@ -2599,6 +2773,15 @@ The driver eager-loads:
     'children.entry.entryType',
 ]
 ```
+
+**Redirect short-circuit.** If the matched node has a `redirect_url` and it
+passes `isSafeRedirect()` (relative path or `http`/`https` scheme), the
+driver returns a `RouteResult` with `type: 'entry_tree_redirect'` and
+`data = ['url' => $url, 'status' => $node->redirect_status ?: 302]`.
+
+**Template precedence (no redirect).** `EntryTree.template` →
+`EntryType.default_template` → `'entries.show'`, with the
+`templates::` namespace prefixed.
 
 ```php
 use App\Services\SiteRouting\SiteRouter;
@@ -2617,6 +2800,11 @@ The selected template receives:
 
 Entry Tree routes win over template routes when `entry_tree` appears before
 `template` in `site.routing.priority`, which is the default.
+
+> **[Accuracy Note: RouteResult shape].** `RouteResult` carries
+> `type, template, data, resource` only — there is no top-level
+> `redirect_url` property. Redirects piggy-back on the `data` array. Verified
+> against `app/Services/SiteRouting/RouteResult.php`.
 
 ### Template Driver
 
@@ -2730,22 +2918,48 @@ responses produce `api_logs` rows.
 
 ### API Resources and Current Limitations
 
-API response classes live under `app/Http/Resources/Api`. `UserResource`
-returns `id`, `name`, `email`, `created_at`, and `updated_at`.
+API response classes live under `app/Http/Resources/Api`.
 
-`EntryResource` currently returns `id`, `name`, `email`, `created_at`, and
-`updated_at`. That shape does not match the `Entry` model, which stores
-`title`, `handle`, `status_id`, `status_handle`, `status_is_public`,
-`published_at`, and entry-group/type relationships. Treat the Entry API schema
-as incomplete until the resource is brought in line with the content model.
+`UserResource` returns `id`, `name`, `email`, `created_at`, and `updated_at`.
 
-The `Entries` controller is also partially scaffolded: `show()` reads through
-`Content::find($id)`, but `index()`, `store()`, `update()`, `destroy()`, and
-`search()` return placeholder JSON messages.
+`EntryResource` now returns the proper entry shape: `id`, `entry_group_id`,
+`entry_type_id`, `title`, `handle`, `status_handle`, `status_is_public`,
+`published_at`, `fields` (via `fieldArray()`), `authors`
+(`{ id: user_id, display_name }`), `categories` (`{ id, title }`),
+`created_at`, `updated_at`. OpenAPI attributes on the class match the
+runtime shape.
 
-`Api\v1\User` gates reads with `$this->can('read users')`, while the seeded
-permission set uses `view user`. Either the API gate or the seeded permission
-name should be aligned before relying on this endpoint outside development.
+> **[Accuracy Note: EntryResource].** Earlier copy of this document
+> recorded `EntryResource` as still returning user-shaped fields
+> (`name`/`email`). That has been fixed in the codebase — see
+> `app/Http/Resources/Api/EntryResource.php`.
+
+`Api\v1\Account` is still mostly placeholder stubs — only `show` is routed
+and it returns `response()->json(['message' => 'Profile updated successfully'])`
+rather than the authenticated user's resource. See
+[Recommendations & Remedies](#recommendations--remedies) item R-6.
+
+#### API permission strings — current state
+
+| Endpoint                       | Permission required           | Status |
+|--------------------------------|-------------------------------|--------|
+| `GET /api/v1/users` (`index`)  | **`read user`** (singular)    | **Bug** — see R-3 below |
+| `GET /api/v1/users/{id}` (`show`) | `read users` (plural)      | Matches seeded permission |
+| `DELETE /api/v1/users/{id}`    | `delete user`                 | Matches seeded permission |
+| `GET /api/v1/entries`          | `read entries`                | Matches seeded permission |
+| `DELETE /api/v1/entries/{id}`  | `delete entry`                | Matches seeded permission |
+| `GET /api/v1/entry-groups`     | `read entry groups`           | Matches seeded permission |
+| `GET /api/v1/category-groups`  | `read category groups`        | Matches seeded permission |
+| `GET /api/v1/status-groups`    | `read status groups`          | Matches seeded permission |
+| `GET /api/v1/statuses`         | `read statuses`               | Matches seeded permission |
+
+> **[Accuracy Note: API/seeder drift].** Earlier copy noted that the User
+> API checked `read users` against a seeded `view user`. The seeder
+> currently defines **both** `view user` (admin UI) and `read users`
+> (API). The remaining drift is *within* `Api\v1\User`: `index()` checks
+> the singular `read user` (no such permission exists), while `show()`
+> and `destroy()` check the plural/correct strings. Verified against
+> `app/Http/Controllers/Api/v1/User.php`.
 
 ### API Request/Response Logging
 
@@ -2847,28 +3061,73 @@ native to the application.
 
 ## Known Gaps and Implementation Status
 
-The codebase is functional in the core CMS areas, but these implementation
-details should be kept visible:
+Refreshed against the live source on 2026-05-26. Items below are real today.
 
-- API `entries` endpoints are partially scaffolded; only `show()` attempts to
-  return real content.
-- `EntryResource` currently has user-shaped fields (`name`, `email`) instead of
-  entry-shaped fields (`title`, `handle`, status, type, group, fields).
-  The author sub-object now returns `{ id: user_id, display_name }` correctly,
-  but the broader entry shape is still incomplete.
-- `Api\v1\User` checks `read users`, while the seeded permission is `view user`.
-- `Api\v1\Account@show` returns a placeholder success message instead of the
-  authenticated user resource described by its OpenAPI annotation.
-- `EntryType.max_depth` and `EntryType.allowed_parent_types` are stored and
-  cast, but current Entry Tree service methods do not enforce them.
-- `app:refresh-tokens` is a scaffold and does not perform token refresh until
-  implementation code is added.
-- `site.templates.base_path` and `site.templates.not_found_template` are present
-  in config but are not read by the current route drivers.
-- `entry_author_entry` FK cascades are defined in the migration but `Entry::delete()`
-  only cascades through `entry_authors` if `entry_id` is present in that table —
-  with the current schema the `entry_author_entry` pivot rows are removed via the
-  cascade on `entry_author_entry.entry_id`; no manual cleanup is required.
+### Resolved since the original 2026-05-07 list
+
+- ✅ `EntryResource` now returns the proper entry shape (`title`, `handle`,
+  `status_handle`, `status_is_public`, `published_at`, `fields`, `authors`,
+  `categories`).
+- ✅ The Entries API has full CRUD landed via `Api\v1\Entries` and
+  `Api\v1\EntryGroups` (`index`, `store`, `show`, `update`, `destroy`).
+- ✅ The seeded permission set defines both `view user` (admin UI) and
+  `read users` (API). Authentication strings align *except* for the
+  `Api\v1\User::index` typo described below.
+- ✅ Native Media layer is in place (Spatie has been removed). Media is
+  `Fieldable`, supports transformations, and now has optional status
+  governance — see [Media Status Governance](#media-status-governance).
+- ✅ `default_template` is now read by `TemplateRouteDriver` when resolving
+  the home page (`/`).
+
+### Still real
+
+- **R-1**: `Html` field type calls `view('_fields.html', $params)` but no
+  `resources/views/_fields/html.twig` partial exists — entry forms containing
+  an Html field will throw `InvalidArgumentException: View [_fields.html]
+  not found`.
+- **R-2**: `Admin\Account\Settings::update()` and
+  `Admin\Settings\UserSettings::update()` both redirect to
+  `route('settings.user')`, which is not registered in `routes/admin.php`.
+  Submitting the user-preferences form will throw `RouteNotFoundException`.
+- **R-3**: `Api\v1\User::index()` checks `$this->can('read user')` (singular),
+  while the seeded permission is `read users` (plural). All non-super-admin
+  callers receive 404 from the API users list endpoint.
+- **R-4**: `Admin\Settings\UserSettings` (the controller class) is unrouted.
+  Routes point at `Admin\Account\Settings` (aliased as `UserSettings` in
+  `routes/admin.php`). The duplicate controller class is dead code.
+- **R-5**: `Admin\Settings\Domain::index()` is implemented and renders
+  `settings.index`, but no route binds it. `GET /admin/settings` is 404.
+- **R-6**: `Api\v1\Account@show` returns a placeholder success message
+  instead of the authenticated user resource described by its OpenAPI
+  annotation. `update`, `updatePassword`, `updateAvatar`, `updateEmail`
+  exist as stubs and aren't routed.
+- **R-7**: `EntryType.max_depth` and `EntryType.allowed_parent_types` are
+  stored, fillable, and cast, but `EntryService` tree methods do not
+  enforce them at insertion or move time.
+- **R-8**: `app:refresh-tokens` is a scaffold. `TokenRefreshService` is
+  implemented; the command just needs wiring plus a schedule entry.
+- **R-9**: `config('site.templates.base_path')` and
+  `config('site.templates.not_found_template')` are present but not read by
+  any route driver. `default_template` IS read.
+- **R-10**: `Admin\User\Layout` has six empty `//` methods (`index`,
+  `create`, `store`, `edit`, `update`, `destroy`); only `show()` is
+  implemented and routed (`users.layouts.show`).
+- **R-11**: `Admin\Index` contains unreachable code after an unconditional
+  `return redirect('/login');` on line 11. Not registered in any route.
+- **R-12**: `Admin\Field::index()` unconditionally `abort(404)`s. Either
+  add `->except(['index'])` to the resource registration or delete the
+  method.
+- **R-13**: `Admin\Role::show()` is empty (`//`).
+- **R-14**: `Admin\Dashboard::index` does its own SQL aggregation
+  (including `selectRaw`) rather than delegating to a service.
+- **R-15**: `EntryService::createTreeNode()` runs **after** the
+  `EntryRepository::create` transaction commits. A tree-create failure
+  leaves an entry without a tree row.
+- **R-16**: Two flash keys, `success` and `status`, are used
+  inconsistently across admin controllers. Pick one.
+
+See [Recommendations & Remedies](#recommendations--remedies) for proposed
+fixes and consequences.
 
 ---
 
@@ -2941,6 +3200,119 @@ entry_relationships  (relational fields only)
 | `category_group` | `App\Models\Category\Group` | No                                           |
 | `field_group`    | `App\Models\Field\Group`    | No                                           |
 | `media_library`  | `App\Models\Media\Library`  | No                                           |
+
+
+## Media Status Governance
+
+Media items can carry the same denormalised status triple as entries. The
+feature is **optional** at the library level: a library with a null
+`status_group_id` is "ungoverned" and its media rows leave the triple null.
+
+### Schema
+
+- `media_libraries.status_group_id` (nullable FK to `status_groups`,
+  `nullOnDelete`) declares the palette available to media owned by the
+  library. FK is wired in `2026_05_07_000003_add_media_foreign_keys.php`
+  (deferred — `status_groups` does not exist at the original media
+  migration timestamp).
+- `media.status_id` (nullable FK → `statuses`, `nullOnDelete`),
+  `media.status_handle` (string, indexed), `media.status_is_public`
+  (boolean, indexed, default false). The triple is added via the
+  `Blueprint::statusColumns()` macro registered in
+  `AppServiceProvider::register()`.
+
+### Model surface
+
+`Media` uses `App\Traits\HasStatus`, gaining `status(): BelongsTo`,
+`scopeWithStatus($handle)`, and `scopePublic()`. `Media::scopePublished()` is
+a backward-compatible alias delegating to `scopePublic()` — media has no
+`published_at`. `Media\Library` uses `App\Traits\HasStatusGroup`, exposing
+`statusGroup`, `statuses`, and `defaultStatus`.
+
+### Upload auto-assignment
+
+`HasMediaItems::addMediaFromUpload(UploadedFile, array $attributes)` resolves
+`$library->defaultStatus()` outside the transaction, then merges the status
+triple into the create payload as `array_merge([defaults], $statusAttributes, $attributes)`
+— caller-supplied attributes win. Ungoverned libraries leave the triple
+null. A governed library with no `is_default` status also produces a
+triple-null row (silent fallback).
+
+### Validation
+
+`EditMediaRequest::rules()` exposes:
+
+```php
+'status' => [
+    'nullable', 'string', 'max:100',
+    Rule::exists('statuses', 'handle')
+        ->where(fn ($q) => $q->where('status_group_id', $library?->status_group_id)),
+],
+```
+
+A non-null `status` submitted against an ungoverned library returns 422.
+
+### Admin UI
+
+- Library create/edit forms include a "Status Group" dropdown with a
+  `— None (ungoverned) —` option.
+- The libraries index shows the attached `StatusGroup.name` column
+  (or "Ungoverned").
+- Media edit ships a "Publishing" card on the right rail with a Status
+  dropdown, rendered only when the owning library has a status group.
+- The media show page surfaces the current status as a coloured badge.
+- The library grid view overlays a small status pill on each tile.
+
+### Known limits
+
+- Reassigning a library's `status_group_id` does **not** auto-migrate
+  existing media rows; the triple may go stale if the new group lacks the
+  old handle. (Pinned by `tests/Feature/Admin/MediaStatusTest.php`.)
+- `FileUpload::validate()` does not filter submitted media IDs by status.
+- No `MediaResource` exists yet for API consumption.
+- No bulk-status admin UI on the media index.
+
+---
+
+## HasStatus and the Status Sync Registry
+
+`StatusObserver` listens for `Status::updating` and cascades changes to
+denormalised consumer columns. The roster of consumers is supplied by
+`StatusSyncRegistry`, which each consumer registers itself with via the
+`HasStatus` trait's `bootHasStatus()` hook.
+
+### Contract
+
+A model adopting `HasStatus` must:
+
+1. `use HasStatus;` on the model.
+2. Declare `status_id`, `status_handle`, `status_is_public` in `$fillable`,
+   and cast `status_is_public` to `boolean`.
+3. Add a `$table->statusColumns()` macro to its create migration (and a
+   deferred FK migration to `statuses` later, à la `media`).
+4. Be added to the **force-boot list** in `AppServiceProvider::boot()`
+   alongside `Entry` and `Media`. Without this, a queue worker that only
+   touches `Status` (no consumer) would find an empty registry.
+
+`bootHasStatus()` in `local`/`testing` runs a contract check and throws
+`LogicException` if `$fillable` or the boolean cast is missing. Production
+skips the check.
+
+### What the observer does
+
+When a `Status` row's `is_public` or `handle` is dirty on save, the
+observer iterates `StatusSyncRegistry::consumers()` and bulk-updates the
+denormalised triple on each consumer inside a `DB::transaction`. Consumers
+using `SoftDeletes` are queried via `withTrashed()`.
+
+### Current consumers
+
+| Consumer | File | scopePublished |
+|---|---|---|
+| `Entry`  | `app/Models/Entry.php` | composes `scopePublic()` + `published_at <= now()` |
+| `Media`  | `app/Models/Media.php` | aliases `scopePublic()` (no scheduled-publish concept) |
+
+---
 
 
 ## Technical Tutorials
@@ -3056,9 +3428,9 @@ $tab = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Details', 'sort
 foreach ([$material, $care, $color] as $i => $field) {
     TabElement::create([
         'field_layout_tab_id' => $tab->id,
-        'field_id'            => $field->id,
-        'required'            => false,
-        'sort_order'          => $i + 1,
+        'field_id' => $field->id,
+        'required' => false,
+        'sort_order' => $i + 1,
     ]);
 }
 ```
@@ -3088,8 +3460,8 @@ class ProductVariantFieldService
 $service = new ProductVariantFieldService();
 $service->saveFields($variant, [
     'variant_material' => 'Organic cotton',
-    'variant_care'     => 'Machine wash cold.',
-    'variant_color'    => 'Blue',
+    'variant_care' => 'Machine wash cold.',
+    'variant_color' => 'Blue',
 ]);
 
 // Option B - write directly (mirrors what PersistsFieldValues does internally)
@@ -3098,8 +3470,8 @@ $field = Field::where('handle', 'variant_material')->firstOrFail();
 
 FieldValue::updateOrCreate(
     [
-        'field_id'       => $field->id,
-        'fieldable_id'   => $variant->getKey(),
+        'field_id' => $field->id,
+        'fieldable_id' => $variant->getKey(),
         'fieldable_type' => $variant->getMorphClass(), // 'product_variant'
     ],
     [$field->fieldType->instance()->storageColumn() => 'Organic cotton']
@@ -3194,5 +3566,519 @@ foreach ($type->fieldGroups as $group) {
 field values are written. If old code wrote a fully-qualified class name into
 `field_values.fieldable_type`, those rows will not resolve through the morph
 map until converted to the registered alias.
+
+---
+
+
+## Recommendations & Remedies
+
+The items below are the still-real Known Gaps with proposed fixes and the
+trade-offs of implementing each one. They're paired by R-number with
+[Known Gaps and Implementation Status](#known-gaps-and-implementation-status)
+so we can pick them up in any order. **No code has been changed yet.**
+
+Severity legend:
+
+- **High** — current user paths surface 500/4xx errors or silent permission
+  failures.
+- **Medium** — broken in normal use but not on a default path; or latent
+  bugs visible under planned features.
+- **Low** — style, hygiene, or dead-code cleanup.
+
+### R-1 — Missing `_fields/html.twig` partial (High)
+
+**Symptom.** Rendering any field layout that contains an `Html` field will
+throw `InvalidArgumentException: View [_fields.html] not found`. The
+`Html` field type IS seeded (see `FieldTypeSeeder`), but the partial it
+calls (`view('_fields.html', $params)`) does not exist.
+
+**Fix options.**
+
+A. Create `resources/views/_fields/html.twig` modelled on
+   `_fields/textarea.twig`, then layer a rich-text editor on top (TinyMCE,
+   CKEditor, or just a `<textarea>` with `class="js-html-editor"`).
+B. Temporarily change `Html::render()` to delegate to
+   `_fields/textarea.twig` until a proper editor lands.
+C. Remove `Html` from `FieldTypeSeeder` until the partial is ready.
+
+**Recommendation.** Option A. The settings form (`toolbar`, `allowed_tags`)
+already exists and `Html::prepareForStorage()` already runs Purifier. A
+plain `<textarea>` partial unblocks development immediately; the editor
+can be swapped in later.
+
+**Consequences.**
+
+- Pro: unblocks every entry form that wants rich text.
+- Con (Option A): commit timing — the editor choice changes the partial.
+  Pick a "good enough" textarea now; iterate.
+- Con (Option B/C): kicks the can.
+
+### R-2 — Broken `route('settings.user')` redirect (High)
+
+**Symptom.** Submitting the user-preferences form (PUT `/admin/account/settings`
+or PUT `/admin/settings` if `Admin\Settings\UserSettings` is ever wired)
+raises `RouteNotFoundException` on the redirect after save.
+
+**Fix options.**
+
+A. Change both controllers' `redirect()->route('settings.user')` to
+   `redirect()->route('account.settings')`.
+B. Add a named alias to `routes/admin.php`:
+   `Route::get('/settings/user', [UserSettings::class, 'show'])->name('settings.user');`
+   This also gives `Admin\Settings\UserSettings` a route, addressing R-4.
+
+**Recommendation.** Option A is the smallest change. Option B is only
+worth doing if we keep `Admin\Settings\UserSettings` (see R-4).
+
+**Consequences.**
+
+- Pro: form completes successfully on save.
+- Con: choosing A while keeping B would mean two reachable user-settings
+  screens; choose one strategy before implementing.
+
+### R-3 — `Api\v1\User::index` permission typo (High)
+
+**Symptom.** `GET /api/v1/users` returns `404` for every non-super-admin
+caller because `index()` checks `$this->can('read user')` (singular). No
+such seeded permission exists; `show()` and `destroy()` use the correct
+strings.
+
+**Fix.** Change line 60 of `app/Http/Controllers/Api/v1/User.php` from
+`'read user'` to `'read users'`.
+
+**Consequences.**
+
+- Pro: the API works as documented.
+- Con: anyone currently relying on the silent-404 behaviour as a feature
+  flag will see lists they didn't see before. Audit consumers first; in
+  practice the gate is currently effectively "super admin only".
+
+### R-4 — Duplicate user-settings controller, one unrouted (Medium)
+
+**Symptom.** Two near-identical controllers exist:
+
+- `Admin\Account\Settings` — routed at `/account/settings`; renders
+  `account.settings.twig`.
+- `Admin\Settings\UserSettings` — unrouted; renders `settings.user.twig`.
+
+The duplicate is dead code. Both have the broken `route('settings.user')`
+redirect (R-2). The duplicate views (`account.settings.twig` vs
+`settings.user.twig`) compound the confusion.
+
+**Fix options.**
+
+A. Delete `Admin\Settings\UserSettings` and `resources/views/admin/settings/user.twig`.
+B. Keep `Admin\Settings\UserSettings` and rewire routes to it; delete
+   `Admin\Account\Settings` and `account.settings.twig`.
+
+**Recommendation.** Option A. `Admin\Account\Settings` is the actively
+routed pair and matches the surrounding `/account/*` route family
+(profile, password, tokens). Per-user settings logically belong under the
+user's account.
+
+**Consequences.**
+
+- Pro: one truth.
+- Con (Option A): minor commit churn. Confirm nothing else imports the
+  deleted class.
+
+### R-5 — `Admin\Settings\Domain::index` unrouted (Low)
+
+**Symptom.** `Admin\Settings\Domain::index()` renders `settings.index`,
+but `routes/admin.php` only registers `settings.show` and `settings.update`.
+`GET /admin/settings` is 404.
+
+**Fix options.**
+
+A. Add `Route::get('settings', [SettingsDomain::class, 'index'])->name('settings');`
+   in `routes/admin.php`.
+B. Delete the unused `index()` method and `resources/views/admin/settings/index.twig`.
+
+**Recommendation.** Option A. The view already exists and presents a
+sensible domain list. Wire it.
+
+**Consequences.**
+
+- Pro: admins can browse domains without typing a handle into the URL.
+- Con: trivial — the navigation link needs to point at the new route.
+
+### R-6 — `Api\v1\Account` placeholder stubs (Medium)
+
+**Symptom.** Only `show` is routed; it returns
+`response()->json(['message' => 'Profile updated successfully'])` rather
+than the authenticated user resource. `update`, `updatePassword`,
+`updateAvatar`, `updateEmail` exist as stubs but aren't routed.
+
+**Fix.** Replace `show()` with `return new UserResource($request->user())`.
+Wire the four `update*` routes through dedicated FormRequests (mirroring
+the admin Account controller pattern), then back each with a `Users::*`
+service call.
+
+**Consequences.**
+
+- Pro: external consumers can self-service.
+- Con: every `update*` endpoint needs OpenAPI annotations, FormRequest
+  validation, and tests. Probably a dedicated mini-project rather than
+  a one-line patch.
+
+### R-7 — `EntryType.max_depth` / `allowed_parent_types` unenforced (Medium)
+
+**Symptom.** Both columns are stored, fillable, and cast on `EntryType`
+(`allowed_parent_types` as `array`), but `EntryService::createTreeNode()`
+and `moveTreeNode()` never read them. Admins can set them in the form
+and the values do nothing.
+
+**Fix.** In `EntryService::createTreeNode()` and `moveTreeNode()`, after
+resolving the target parent:
+
+1. Compute depth-after-insert; reject if `> entryType.max_depth`.
+2. If `entryType.allowed_parent_types` is non-empty, require the new
+   parent's entry's type handle to be in that list.
+
+Both checks belong in the existing `treeAssert*` helper neighbourhood.
+
+**Consequences.**
+
+- Pro: admins get the constraint they configured.
+- Con: any existing tree rows that already violate the constraints will
+  block subsequent moves until the constraints are relaxed or the
+  rows are repaired. Migration plan: scan first, then enforce.
+
+### R-8 — `app:refresh-tokens` is a scaffold (Medium)
+
+**Symptom.** `handle()` is empty except for commented-out example code.
+`TokenRefreshService` is implemented but never called by the command.
+`routes/console.php` does not schedule it either.
+
+**Fix.** Implement `handle()` to iterate active, non-revoked
+`OauthToken` rows whose `expires_at` is within a configurable window
+(e.g. 1 hour) and call `app(TokenRefreshService::class)->tryRefresh($t)`
+on each. Add a schedule entry in `routes/console.php` (every 15 minutes
+is fine for most providers).
+
+**Consequences.**
+
+- Pro: long-lived OAuth integrations don't grind to a halt every hour.
+- Con: a refresh storm against an upstream provider could trip rate
+  limits. The `tryRefresh` already swallows individual failures; cap the
+  batch size and use a jittered window.
+
+### R-9 — `site.templates.base_path` / `not_found_template` unread (Low)
+
+**Symptom.** Both keys exist in `config/site.php` but neither is consulted
+by `TemplateRouteDriver` or `EntryTreeRouteDriver`. `default_template`
+IS read.
+
+**Fix options.**
+
+A. Wire `base_path` into `TemplateRouteDriver::viewName()`
+   (prefix the namespace prefix) and `not_found_template` into the
+   `return null` branches of both drivers.
+B. Remove both keys from `config/site.php`.
+
+**Recommendation.** Option A. The keys exist because they were always
+intended to work; the driver was just never finished. Implementing them
+gives admins a 404 surface they can theme.
+
+**Consequences.**
+
+- Pro: brandable 404s, configurable template root.
+- Con: introducing a real `not_found_template` means the public site
+  starts returning 200 (or a custom code) instead of bubbling 404
+  upstream. Match the response code to expectations.
+
+### R-10 — `Admin\User\Layout` is mostly empty (Low)
+
+**Symptom.** Six of seven methods are `//` stubs. Only `show()` is wired.
+
+**Fix.** Use `Route::get('users/layouts', [UserLayout::class, 'show'])`
+(already present) and delete the unused methods. The actual layout edit
+flow goes through the generic `FieldLayout` admin (`Admin\FieldLayout`)
+because the user layout is just a `FieldLayout` instance.
+
+**Consequences.**
+
+- Pro: less misleading IDE navigation.
+- Con: minor commit churn.
+
+### R-11 — `Admin\Index` is dead code (Low)
+
+**Symptom.** First line of `index()` is `return redirect('/login');`;
+everything after is unreachable (including a `Rest\Client` call,
+`print_r`, and commented-out user-token spelunking). No route binding.
+
+**Fix.** Delete `app/Http/Controllers/Admin/Index.php`. If anything
+ever imported it, the IDE will flag it.
+
+**Consequences.**
+
+- Pro: cleaner directory.
+- Con: none expected.
+
+### R-12 — `Admin\Field::index` returns 404 (Low)
+
+**Symptom.** `GET /admin/fields` is reachable as a 404 because
+`Route::resource('fields', Field::class)` registers the route but the
+controller `abort(404)`s.
+
+**Fix.** Either:
+
+A. Change the resource registration to
+   `Route::resource('fields', Field::class)->except(['index']);`
+   and delete the `index()` method.
+B. Implement a real fields-by-group landing page (probably overlaps with
+   the existing `Admin\Field\Group`).
+
+**Recommendation.** Option A for now — fields are managed inside their
+group, not as a flat list.
+
+**Consequences.**
+
+- Pro: less surprise on `route:list`.
+- Con: `Route::resource` defaults change subtly; double-check that no
+  other action depends on the resource macro creating the `index` route
+  name.
+
+### R-13 — `Admin\Role::show()` is empty (Low)
+
+**Symptom.** Method exists, has `//` only.
+
+**Fix.** Either implement a role detail page (showing assigned users
+and permissions) or `->except(['show'])` the resource.
+
+**Consequences.** Minor.
+
+### R-14 — `Admin\Dashboard` does raw SQL aggregation (Low)
+
+**Symptom.** Aggregates dashboard counters inline, including a
+`selectRaw` for top API routes. The only admin controller doing direct
+query work.
+
+**Fix.** Extract to a `DashboardService`. Cache the result for 1 minute
+under `dashboard.counters`.
+
+**Consequences.**
+
+- Pro: testable, mockable, cacheable.
+- Con: minor reorg.
+
+### R-15 — Tree-create runs after the entry transaction commits (Medium)
+
+**Symptom.** `EntryService::create()` calls
+`EntryRepository::create($entryType, $data)` (which opens its own
+transaction and commits before returning), then calls
+`$this->createTreeNode(...)` *afterwards*. If `createTreeNode` throws,
+the entry exists without a tree row — meaning no public URL.
+
+**Fix options.**
+
+A. Move the `createTreeNode` call inside `EntryRepository::create`'s
+   transaction. Requires injecting `EntryService` into the repository
+   or duplicating the tree validation logic — non-trivial.
+B. Wrap `EntryService::create` itself in a `DB::transaction` that
+   contains both the repository call and the tree call. Easier; the
+   inner repository transaction nests harmlessly.
+C. Dispatch the tree creation as a retryable queued job. Reasonable if
+   tree creation is allowed to be eventually-consistent.
+
+**Recommendation.** Option B. Atomic, smallest change.
+
+**Consequences.**
+
+- Pro: no half-saved entries.
+- Con: tree validation errors now roll back the entry save (which may
+  feel surprising to admins who expect "entry saved, fix tree later").
+  Provide a clear error message and a path to retry.
+
+### R-16 — Two flash keys (`success` vs `status`) (Low)
+
+**Symptom.** Some admin controllers use `->with('success', '...')`;
+others use `->with('status', '...')`. The Twig `_message.twig` partial
+reads both, so it works either way, but the inconsistency is
+gratuitous.
+
+**Fix.** Standardise on `success` (it's the dominant pattern). Update
+the message partial to read only that key, then sweep controllers.
+
+**Consequences.** Minor.
+
+---
+
+## Ambivalences for Review
+
+Items where the code is ambiguous, drifting, or where the team should
+make a deliberate choice before doc updates lock in an answer.
+
+### A-1 — EntryTypeRegistry resolves by handle, not by group
+
+`EntryTypeRegistry::resolveByHandle($handle)` does a `EntryType::where('handle', $handle)->firstOrFail()`
+without filtering by `entry_group_id`. The unique constraint is
+`(entry_group_id, handle)`, so two groups can technically each register
+an entry type with handle `featured`. The registry then returns
+whichever the database happens to surface first, and caches it.
+
+The seeded data avoids this by using globally unique handles (`blog_post`,
+`product`, `news_article`, etc.). But there is no in-code enforcement.
+
+**Open question.** Do we want:
+
+A. To document the constraint informally (handles must be globally
+   unique) and add a deploy-time check.
+B. To extend `Content::create()` to accept group context
+   (`Content::create($groupHandle, $typeHandle, $data)`).
+C. To add a unique index on `entry_types.handle` (globally) and accept
+   the constraint at the schema level.
+
+We should not assert a "correct" answer in OVERVIEW.md until the team
+picks one.
+
+### A-2 — Two near-identical user-settings stacks
+
+Pre-fix (see R-4) there are two near-identical controllers and views:
+
+- `Admin\Account\Settings` ↔ `account.settings.twig` — routed.
+- `Admin\Settings\UserSettings` ↔ `settings.user.twig` — unrouted.
+
+Pick one before the next docs sweep so subsequent tutorials don't pin
+the wrong one.
+
+### A-3 — `Admin\Field::index` is intentional 404 vs scaffolding mistake
+
+The `index()` action exists and `abort(404)`s. We don't know whether
+this was a deliberate signal ("fields have no flat list") or an
+incomplete scaffold. R-12 picks A on the assumption it's intentional.
+Confirm before the cleanup.
+
+### A-4 — `MediaPicker` route and controller — undocumented
+
+`routes/admin.php:89` registers `media.picker.index` →
+`Admin\MediaPicker::index`. Neither this document nor the broader docs
+mention what the picker is, who uses it, or its expected payload shape.
+Worth a short section before it acquires consumers.
+
+### A-5 — `Money` field: storage convention is correct but undocumented in OVERVIEW
+
+> **Tertiary-review correction.** An earlier draft of this entry asserted
+> the minor-units convention was implicit and unenforced. Re-reading
+> `app/Field/Types/Money.php` shows the opposite: the field type enforces
+> minor units via `moneyphp/moneyphp` — `prepareForStorage()` parses a
+> decimal string with the configured ISO 4217 currency and throws
+> `InvalidArgumentException` on excess fractional digits; `value()`
+> returns a `Money\Money` instance; the currency code is a required
+> setting on the field. Behaviour is well-formed.
+
+What's *actually* worth flagging:
+
+- The storage column is `value_integer` — a single 64-bit signed integer
+  for the value. Currency lives in field settings, not next to the value.
+  This means a single Field instance is single-currency. If a use-case
+  ever needs multi-currency on the same field handle (e.g. "price in
+  whatever currency this entry is set to"), the model doesn't support it.
+- The convention "stored as integer minor units" is true at the column
+  level but **invisible at the model level** — `$entry->field('price')`
+  returns a `Money\Money` value object, not the raw integer. That's the
+  right surface, but the column-level documentation in OVERVIEW.md
+  should not leak the integer.
+- The field's row in the `FieldType` registry uses `value_integer`. Any
+  custom report or admin query reading the raw column needs to know the
+  scale comes from the field's `currency` setting, not from the schema.
+
+No code action required unless we add multi-currency support; just keep
+the documentation honest.
+
+### A-6 — `Entry::redirect_url` validation vs `EntryTree::redirect_url` storage
+
+`StoreEntryRequest` accepts `redirect_url` and `redirect_status` at the
+top level of the entry payload. The actual storage is on `entry_trees`,
+not `entries`. The form bundles entry + tree-node creation, and the
+service splits them at write time. This is fine, but worth either:
+documenting the tree-node payload keys separately from the entry's
+core fields, or considering a nested `tree` array in the validated
+payload for clarity.
+
+### A-7 — `MediaResource` not yet built
+
+The native Media layer is otherwise complete, but there is no
+`Http\Resources\Api\MediaResource`. Any API consumer of media will need
+this. Decide the shape (URL? transformed URLs? library handle? status?)
+before building, so the OpenAPI surface stays stable.
+
+### A-8 — `Entry` lacks `SoftDeletes` while `Media` has it
+
+`Media` uses `SoftDeletes` (two-stage delete + `PurgeDeletedMedia`
+purge). `Entry` does not. `TODOS.md` and the Shop plan both want soft
+deletes on entries. Adopting `SoftDeletes` on `Entry` has knock-on
+effects on every `whereHas`/`belongsToMany` relation that involves
+entries — eligibility scopes for authors, etc. Decision-and-design
+needed before the migration.
+
+### A-9 — `default_schema_type` on `entry_types` and `schema_type` on `entries`
+
+Both columns exist but are not yet referenced by any service or
+template (per `Grep` against the codebase as of this writing). They
+correspond to `SEO_SCHEMA_PLAN.md`. Document as **reserved for the SEO
+schema work**, not as live fields.
+
+### A-10 — Categorical handle uniqueness across groups
+
+`categories.handle` is unique per `(group_id, handle)`, but the
+admin-side validation rule in `StoreEntryRequest` validates category IDs
+without checking which group they belong to (relative to the entry's
+configured `categoryGroups`). The current rule does enforce
+membership in the entry group's category groups via a `whereIn`
+sub-query, but this only catches submission-time mismatches, not the
+case where an admin reassigns a category to a different group after
+content references it. Worth a short note about the lifecycle.
+
+---
+
+## Accuracy Notes Log
+
+Inline "[Accuracy Note]" boxes throughout this document call out specific
+drift items between prior doc copy and the live code. The full list of
+corrections made in the 2026-05-26 refresh pass:
+
+1. **EntryType column**: doc said `class`; code uses `entry_behavior_id`
+   plus the `entry_behaviors.class` morph-alias indirection.
+2. **EntryTypeRegistry**: doc described one-step instantiation; the
+   actual flow is `EntryType → EntryBehavior → morph map → PHP class`.
+3. **Field types**: doc listed 10 built-in types; the codebase has 23
+   seeded.
+4. **Field partials**: `_fields/html.twig` is missing despite `Html`
+   being seeded (R-1).
+5. **Seeder list**: doc had 10 base + 1 dev; the actual count is 12
+   base + 3 dev seeders (added `EntryBehaviorSeeder`,
+   `MediaLibrarySeeder`, `SandboxedEntryTreeSeeder`,
+   `SampleApiTokenSeeder`).
+6. **Status groups**: doc described `publication` only; three groups
+   are seeded (`publication`, `job-status`, `product-status`).
+7. **Morph map**: `behavior.*` aliases were omitted entirely.
+8. **`app:validate-class-references`**: command checks
+   `entry_behaviors.class` (morph keys) plus `field_types.object`
+   (FQCNs), not `entry_types.class` (which doesn't exist).
+9. **`entry_trees` columns**: `redirect_url` and `redirect_status` were
+   omitted from the schema table.
+10. **`RouteResult`**: doc implied a `redirect_url` property; the
+    object only has `type, template, data, resource`.
+11. **EntryResource shape**: doc said it returned user-shaped fields;
+    it now returns the proper entry shape.
+12. **Entries API completeness**: doc treated the resource controllers
+    as stubs; full CRUD has landed in `Api\v1\Entries` and
+    `Api\v1\EntryGroups`.
+13. **Media status governance**: feature was undocumented; full
+    section now added.
+14. **`HasStatus` / `StatusSyncRegistry`**: trait + registry abstraction
+    was undocumented; full section now added.
+15. **Permission strings**: `view user` and `read users` are both
+    seeded; the remaining drift is the typo in `Api\v1\User::index`
+    (R-3).
+16. **`Money` field rounding convention**: not asserted yet; see
+    Ambivalence A-5.
+17. **`entries.schema_type` / `entry_types.default_schema_type`**:
+    columns exist but are reserved for SEO plan work; see Ambivalence
+    A-9.
+
+If a future change touches an item in this log, update both the
+relevant section and this log so the corrected state is traceable.
 
 ---
