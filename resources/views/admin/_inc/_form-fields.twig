@@ -1,11 +1,11 @@
-{% macro input(name, label, value, type, description, placeholder, id, error_key) %}
+{% macro input(name, label, value, type, description, placeholder, id, error_key, required=false) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set field_type = type|default('text') %}
     {% set field_value = old(field_error_key, value|default('')) %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}{% if required %}<span class="text-red-500">*</span>{% endif %}</label>
         <input class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus:outline-none focus:ring-2 {% if has_error %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="{{ field_id }}" name="{{ name }}" type="{{ field_type }}" value="{{ field_value }}" placeholder="{{ placeholder|default('') }}" {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
         {% if description %}
             <p class="mt-1 text-xs leading-5 text-slate-400">{{ description }}</p>
@@ -16,13 +16,13 @@
     </div>
 {% endmacro %}
 
-{% macro password(name, label, value, description, placeholder, id, error_key) %}
+{% macro password(name, label, value, description, placeholder, id, error_key, required=false) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set field_value = old(field_error_key, value|default('')) %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div data-password-field>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}{% if required %}<span class="text-red-500">*</span>{% endif %}</label>
         <div class="flex items-center rounded-md border bg-white shadow-sm transition focus-within:ring-2 {% if has_error %}border-red-300 focus-within:border-red-500 focus-within:ring-red-500/20{% else %}border-slate-300 focus-within:border-emerald-500 focus-within:ring-emerald-500/20{% endif %}">
             <input class="min-w-0 flex-1 border-0 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-0" id="{{ field_id }}" name="{{ name }}" type="password" value="{{ field_value }}" placeholder="{{ placeholder|default('') }}" data-password-input {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
             <button class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-r-md text-slate-400 hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" type="button" data-password-toggle aria-controls="{{ field_id }}" aria-label="Show password">
@@ -84,12 +84,12 @@
     </script>
 {% endmacro %}
 
-{% macro file(name, label, description, accept, multiple, id, error_key) %}
+{% macro file(name, label, description, accept, multiple, id, error_key, required=false) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}{% if required %}<span class="text-red-500">*</span>{% endif %}</label>
         <label class="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed px-5 py-6 text-center transition {% if has_error %}border-red-300 bg-red-50 hover:border-red-400 hover:bg-red-50{% else %}border-slate-300 bg-slate-50 hover:border-emerald-400 hover:bg-emerald-50/40{% endif %}" for="{{ field_id }}">
             <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm ring-1 ring-slate-200">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0l-4 4m4-4l4 4M4 16.5V19a1 1 0 001 1h14a1 1 0 001-1v-2.5"/></svg>
@@ -106,7 +106,7 @@
     </div>
 {% endmacro %}
 
-{% macro textarea(name, label, value, rows, description, placeholder, id, error_key) %}
+{% macro textarea(name, label, value, rows, description, placeholder, id, error_key, required=false) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set field_value = old(field_error_key, value|default('')) %}
@@ -123,7 +123,7 @@
     </div>
 {% endmacro %}
 
-{% macro select(name, label, options, value, description, id, error_key, multiple) %}
+{% macro select(name, label, options, value, description, id, error_key, multiple, required=false) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% if multiple %}
@@ -133,7 +133,7 @@
     {% endif %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}{% if required %}<span class="text-red-500">*</span>{% endif %}</label>
         <select class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if has_error %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="{{ field_id }}" name="{{ name }}" {% if multiple %}multiple{% endif %} {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
             {% for option in options %}
                 {% set option_value = option.value|default(option.label) %}
@@ -150,13 +150,13 @@
     </div>
 {% endmacro %}
 
-{% macro color(name, label, value, description, id, error_key) %}
+{% macro color(name, label, value, description, id, error_key, required=false) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set field_value = old(field_error_key, value|default('#10b981')) %}
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div data-color-field>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}{% if required %}<span class="text-red-500">*</span>{% endif %}</label>
         <div class="flex items-center gap-3 rounded-md border bg-white px-3 py-2 shadow-sm transition focus-within:ring-2 {% if has_error %}border-red-300 focus-within:border-red-500 focus-within:ring-red-500/20{% else %}border-slate-300 focus-within:border-emerald-500 focus-within:ring-emerald-500/20{% endif %}">
             <input id="{{ field_id }}" name="{{ name }}" type="color" value="{{ field_value }}" class="h-8 w-10 shrink-0 cursor-pointer rounded border-0 bg-transparent p-0" data-color-input>
             <input name="{{ name }}_hex" type="text" value="{{ field_value }}" class="min-w-0 flex-1 border-0 bg-transparent p-0 font-mono text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0" data-color-hex {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
@@ -245,7 +245,7 @@
     </script>
 {% endmacro %}
 
-{% macro slider(name, label, value, min, max, step, description, id, suffix, error_key) %}
+{% macro slider(name, label, value, min, max, step, description, id, suffix, error_key, required=false) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set field_value = old(field_error_key, value|default(min|default(0))) %}
@@ -255,7 +255,7 @@
     {% set has_error = errors is defined and errors.has(field_error_key) %}
     <div data-range-field>
         <div class="mb-1.5 flex items-center justify-between gap-3">
-            <label class="block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}</label>
+            <label class="block text-sm font-medium text-slate-700" for="{{ field_id }}">{{ label }}{% if required %}<span class="text-red-500">*</span>{% endif %}</label>
             <span class="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs font-medium text-slate-600" data-range-value>{{ field_value }}{{ suffix|default('') }}</span>
         </div>
         <div class="group relative pt-7">
@@ -329,7 +329,7 @@
     </script>
 {% endmacro %}
 
-{% macro toggle(name, label, value, description, checked_value, id, error_key, copy_align) %}
+{% macro toggle(name, label, value, description, checked_value, id, error_key, copy_align, required=false) %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set field_value = checked_value|default('1') %}
@@ -369,7 +369,7 @@
     </div>
 {% endmacro %}
 
-{% macro checkbox_card(name, value, label, description, checked, id, error_key, checked_value) %}
+{% macro checkbox_card(name, value, label, description, checked, id, error_key, checked_value, required=false) %}
     {% set field_id = id|default((name ~ '_' ~ value)|replace({'[': '_', ']': '', '.': '_', ' ': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% set old_values = old(field_error_key) %}

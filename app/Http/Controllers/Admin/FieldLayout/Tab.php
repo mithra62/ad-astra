@@ -75,7 +75,6 @@ class Tab extends Controller
         }
 
         $availableFields = Field::orderBy('name')->get();
-
         return $this->view('field-layouts.tabs.edit', array_merge(
             $this->sidebarData(),
             [

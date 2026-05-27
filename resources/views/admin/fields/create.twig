@@ -1,5 +1,7 @@
 {% extends 'admin._inc._layout' %}
 
+{% import 'admin._inc._form-fields' as forms %}
+
 {% set page_title = 'Create Field' %}
 {% set page_heading = 'Field Group' %}
 {% set active_nav = 'settings' %}
@@ -69,17 +71,9 @@
                     <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
-                        <input value="{{ old('name') }}" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
-                        {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
-                        <input class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" value="{{ old('handle') }}" >
-                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
-                        {% if errors.has('handle') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>{% endif %}
-                    </div>
+                    {{ forms.input(name='name', label='Name', required=true) }}
+                    {{ forms.input('handle', 'Handle', required=true) }}
+
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Type <span class="text-red-500">*</span></label>
                         <select class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('field_type_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="field_type_id" name="field_type_id">
@@ -90,18 +84,8 @@
                         </select>
                         {% if errors.has('field_type_id') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_type_id') }}</p>{% endif %}
                     </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Label</label>
-                        <input value="{{ old('label') }}" class="w-full rounded-md border {% if errors.has('label') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="label" name="label" type="text" placeholder="">
-                        {% if errors.has('label') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('label') }}</p>{% endif %}
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="instructions">Instructions</label>
-                        <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                                  id="instructions" name="instructions" rows="3"
-                                  placeholder="Any details on how to use the field" maxlength="160">{{ old('instructions') }}</textarea>
-                        {% if errors.has('instructions') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('instructions') }}</p>{% endif %}
-                    </div>
+                    {{ forms.input('label', 'Label') }}
+                    {{ forms.textarea('instructions', 'Instructions', placeholder="Any details on how to use the field") }}
                 </div>
             </div>
 
