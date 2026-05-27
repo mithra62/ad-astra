@@ -40,6 +40,7 @@ class Login extends Controller
                 ->withErrors(['email' => trans('auth.' . ($localUser->accessDeniedReason() ?? 'account_inactive'))]);
         }
 
+        //save / update the oauth token
         Users::upsertOauthToken($localUser, $provider, [
             'provider_account' => $socialUser->getNickname() ?? $socialUser->getEmail(),
             'provider_user_id' => (string)$socialUser->getId(),
@@ -50,6 +51,7 @@ class Login extends Controller
             'id_token' => $socialUser->accessTokenResponseBody['id_token'] ?? null,
         ]);
 
+        //log the user in and refresh the session data
         Auth::login($localUser, true);
         $request->session()->regenerate();
         $request->session()->regenerateToken();
