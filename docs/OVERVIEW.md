@@ -3173,16 +3173,18 @@ Refreshed against the live source on 2026-05-26. Items below are real today.
   `resources/views/_fields/html.twig` partial exists — entry forms containing
   an Html field will throw `InvalidArgumentException: View [_fields.html]
   not found`.
-- **R-2**: `Admin\Account\Settings::update()` and
-  `Admin\Settings\UserSettings::update()` both redirect to
+- **R-2**: `Admin\Account\Settings::update()` redirects to
   `route('settings.user')`, which is not registered in `routes/admin.php`.
-  Submitting the user-preferences form will throw `RouteNotFoundException`.
+  Submitting the user-preferences form throws `RouteNotFoundException`.
+  Now a one-line fix since R-4 is resolved.
 - **R-3**: `Api\v1\User::index()` checks `$this->can('read user')` (singular),
   while the seeded permission is `read users` (plural). All non-super-admin
   callers receive 404 from the API users list endpoint.
-- **R-4**: `Admin\Settings\UserSettings` (the controller class) is unrouted.
-  Routes point at `Admin\Account\Settings` (aliased as `UserSettings` in
-  `routes/admin.php`). The duplicate controller class is dead code.
+- **R-4** *(Resolved 2026-05-26)*: `Admin\Settings\UserSettings`
+  deleted. The duplicate-controller decision (Ambivalence A-2) is
+  closed in favour of `Admin\Account\Settings`. Residual cleanup —
+  delete the orphan `resources/views/admin/settings/user.twig` —
+  rolls in with the R-2 fix.
 - **R-5**: `Admin\Settings\Domain::index()` is implemented and renders
   `settings.index`, but no route binds it. `GET /admin/settings` is 404.
 - **R-6**: `Api\v1\Account@show` returns a placeholder success message
@@ -3213,6 +3215,57 @@ Refreshed against the live source on 2026-05-26. Items below are real today.
   leaves an entry without a tree row.
 - **R-16**: Two flash keys, `success` and `status`, are used
   inconsistently across admin controllers. Pick one.
+
+#### Security & hardening (absorbed from `ALPHA_READINESS_REPORT.md`)
+
+The items below were brought forward after a 2026-05-26 verification
+pass against `docs/ALPHA_READINESS_REPORT.md`. Items already fixed in
+code are not re-listed — see the
+[Accuracy Notes Log](#accuracy-notes-log) for the resolved set.
+
+- **R-17 (Critical)**: `UpdateUserPassword::update()` no longer
+  validates `current_password` — the Fortify password-change endpoint
+  is a one-step takeover from any hijacked session.
+- **R-18 (Critical)**: `UserService::syncRoles()` accepts any role
+  name. The request-layer guard against assigning `super admin` is in
+  place; the service has no defence-in-depth.
+- **R-19 (High)**: `LogRequestResponse::handle()` never passes
+  `response_payload` into `ApiLog::create()`. Column is always `NULL`
+  in production despite `summarizeResponse()` existing.
+- **R-20 (High)**: Personal access token is string-concatenated into a
+  generic `success` flash, which then survives into the next page's
+  flash bag (and any tooling reading it).
+- **R-21 (High)**: `EntryTypeRegistry::resolveByHandle()` is
+  group-blind. Already mitigated at request + action layers; the
+  registry remains a defence-in-depth gap (see Ambivalence A-1).
+- **R-22 (High)**: `User::$fillable` includes `status`, `suspended_until`,
+  `banned_at`, `locked_until`. Mass-assignment can silently bypass the
+  status-change audit log.
+- **R-23 (High)**: `config/cors.php` ships with `*` origins, `*`
+  methods, `*` headers. Adopt the commented-out env-driven allowlist.
+- **R-24 (Medium)**: `Api\v1\User::update()`, `Api\v1\Entries::store()`,
+  and `Api\v1\Entries::update()` rely on the FormRequest's
+  `authorize()` alone — no controller-level `$this->can(…)` check
+  matching the rest of the API surface.
+- **R-25 (Medium)**: `UserService::updateToken()` does
+  `$token->update($data)` with no key filtering. The current
+  `EditUserTokenRequest` only validates `name`, but a non-request
+  caller could rewrite `tokenable_id` / `abilities`.
+- **R-26 (Medium)**: `users.default_status` and
+  `users.social_default_status` settings accept any
+  `UserStatus::ALL` value, including `suspended` and `banned` — both
+  nonsensical at creation time. Restrict to
+  `UserStatus::CREATION_ALLOWED`.
+- **R-27 (Low)**: Media library `handle` is not slug-restricted; an
+  admin can save `../../etc` and the upload path uses it as a
+  directory segment.
+- **R-28 (Low)**: Library can be configured to accept `image/svg+xml`
+  or `text/html`; on a public disk these become stored XSS. Requires
+  admin misconfiguration plus public-disk usage.
+- **R-29 (Low)**: `BotBlockRequest` only checks `POST` — future
+  unauthenticated `PUT`/`PATCH`/`DELETE` endpoints bypass the block.
+- **R-30 (Low)**: `Entry::$fillable` includes `created_by_user_id`.
+  Same defence-in-depth argument as R-22.
 
 See [Recommendations & Remedies](#recommendations--remedies) for proposed
 fixes and consequences.
@@ -3669,13 +3722,28 @@ trade-offs of implementing each one. They're paired by R-number with
 [Known Gaps and Implementation Status](#known-gaps-and-implementation-status)
 so we can pick them up in any order. **No code has been changed yet.**
 
+**R-1 through R-16** came out of the 2026-05-26 documentation refresh.
+**R-17 through R-30** were absorbed from `docs/ALPHA_READINESS_REPORT.md`
+after a verification pass on the same day — items the alpha report
+flagged that the live code has not yet resolved. Items the alpha report
+flagged that **have** since been fixed (C-2 upload permission, H-1
+OAuth session regeneration + throttling, H-3 redirect-URL scheme
+validation, H-7 HTML Purifier on the write path, M-1 category-group
+membership rule, L-1 admin-namespace clobber, L-6 configurable redirect
+status, plus the four "Info" docs items) are not listed here. They are
+recorded in the [Accuracy Notes Log](#accuracy-notes-log) so the
+provenance is visible without bloating the active list.
+
 Severity legend:
 
-- **High** — current user paths surface 500/4xx errors or silent permission
-  failures.
+- **Critical** — active security defect or data-integrity break. Fix before
+  any external eye sees the build.
+- **High** — exploitable under realistic conditions, current user paths
+  surface 500/4xx, or silent permission failures. Fix in Alpha week.
 - **Medium** — broken in normal use but not on a default path; or latent
   bugs visible under planned features.
-- **Low** — style, hygiene, or dead-code cleanup.
+- **Low** — style, hygiene, dead-code cleanup, or conditional risk (only
+  fires under specific opt-in configurations).
 
 ### R-1 — Missing `_fields/html.twig` partial (High)
 
@@ -3707,26 +3775,42 @@ can be swapped in later.
 
 ### R-2 — Broken `route('settings.user')` redirect (High)
 
-**Symptom.** Submitting the user-preferences form (PUT `/admin/account/settings`
-or PUT `/admin/settings` if `Admin\Settings\UserSettings` is ever wired)
-raises `RouteNotFoundException` on the redirect after save.
+**Symptom.** Submitting `PUT /admin/account/settings` still raises
+`RouteNotFoundException`. `Admin\Account\Settings::update()` (line 57)
+calls `redirect()->route('settings.user')` after save — that route
+name does not exist in `routes/admin.php` (it never has).
 
-**Fix options.**
+> **Status note (2026-05-26).** The duplicate `Admin\Settings\UserSettings`
+> controller has been deleted (resolving R-4 and Ambivalence A-2).
+> `Admin\Account\Settings` is now the only routed user-settings stack,
+> so the original Option A is unambiguous: redirect to
+> `route('account.settings')`. Option B (adding a `settings.user` named
+> alias) is no longer relevant.
 
-A. Change both controllers' `redirect()->route('settings.user')` to
-   `redirect()->route('account.settings')`.
-B. Add a named alias to `routes/admin.php`:
-   `Route::get('/settings/user', [UserSettings::class, 'show'])->name('settings.user');`
-   This also gives `Admin\Settings\UserSettings` a route, addressing R-4.
+**Fix.** One-line change:
 
-**Recommendation.** Option A is the smallest change. Option B is only
-worth doing if we keep `Admin\Settings\UserSettings` (see R-4).
+```php
+// app/Http/Controllers/Admin/Account/Settings.php (around line 57)
+return redirect()
+    ->route('account.settings')              // was: settings.user
+    ->with('success', 'Your preferences have been saved.');
+```
+
+**Cleanup follow-up.** `resources/views/admin/settings/user.twig` is
+now an orphan view (no route binds it). Its body still contains two
+`route('settings.user')` / `route('settings.user.update')` calls that
+would error if anyone tried to render it. Delete the file:
+
+```bash
+rm resources/views/admin/settings/user.twig
+```
 
 **Consequences.**
 
-- Pro: form completes successfully on save.
-- Con: choosing A while keeping B would mean two reachable user-settings
-  screens; choose one strategy before implementing.
+- Pro: the user-preferences form completes successfully on save.
+- Con: nothing — the redirect target view (`account.settings`) is the
+  same screen the user came from, so the post-save UX is identical to
+  the form rendering it expected.
 
 ### R-3 — `Api\v1\User::index` permission typo (High)
 
@@ -3745,34 +3829,18 @@ strings.
   flag will see lists they didn't see before. Audit consumers first; in
   practice the gate is currently effectively "super admin only".
 
-### R-4 — Duplicate user-settings controller, one unrouted (Medium)
+### R-4 — Duplicate user-settings controller, one unrouted (Resolved 2026-05-26)
 
-**Symptom.** Two near-identical controllers exist:
-
-- `Admin\Account\Settings` — routed at `/account/settings`; renders
-  `account.settings.twig`.
-- `Admin\Settings\UserSettings` — unrouted; renders `settings.user.twig`.
-
-The duplicate is dead code. Both have the broken `route('settings.user')`
-redirect (R-2). The duplicate views (`account.settings.twig` vs
-`settings.user.twig`) compound the confusion.
-
-**Fix options.**
-
-A. Delete `Admin\Settings\UserSettings` and `resources/views/admin/settings/user.twig`.
-B. Keep `Admin\Settings\UserSettings` and rewire routes to it; delete
-   `Admin\Account\Settings` and `account.settings.twig`.
-
-**Recommendation.** Option A. `Admin\Account\Settings` is the actively
-routed pair and matches the surrounding `/account/*` route family
-(profile, password, tokens). Per-user settings logically belong under the
-user's account.
-
-**Consequences.**
-
-- Pro: one truth.
-- Con (Option A): minor commit churn. Confirm nothing else imports the
-  deleted class.
+> **Status: Resolved.** `Admin\Settings\UserSettings` has been deleted.
+> `Admin\Account\Settings` is now the single routed user-settings stack.
+> Verified: no remaining `App\Http\Controllers\Admin\Settings\UserSettings`
+> imports anywhere in `app/`, `routes/`, or `resources/`.
+>
+> **Residual cleanup:** the orphan view
+> `resources/views/admin/settings/user.twig` still exists and contains
+> two `route('settings.user')` calls. No route binds it, so it's
+> harmless today, but `rm` it as part of the R-2 fix to remove the
+> trip hazard. See [Accuracy Notes Log](#accuracy-notes-log) item 18.
 
 ### R-5 — `Admin\Settings\Domain::index` unrouted (Low)
 
@@ -3996,6 +4064,710 @@ the message partial to read only that key, then sweep controllers.
 
 ---
 
+### Security & Hardening (Alpha review pass)
+
+The items below — **R-17 through R-30** — were brought forward from
+`docs/ALPHA_READINESS_REPORT.md` after a verification pass against the
+live code on 2026-05-26. Items resolved since the alpha report was
+filed (C-2 upload permission, H-1 OAuth session regeneration + throttle,
+H-3 redirect-URL scheme validation, H-7 HTML Purifier on the write
+path, M-1 category-group membership, L-1 admin-namespace clobber, L-6
+configurable redirect status, and four "Info" docs items) are **not**
+re-listed here — they are tracked in the
+[Accuracy Notes Log](#accuracy-notes-log) instead.
+
+Severity here uses the same legend as above, with **Critical** added
+for active security defects that should block any external
+sign-up link being shared.
+
+---
+
+### R-17 — `UpdateUserPassword` skips the current-password check (Critical)
+
+**Symptom.** `app/Actions/User/UpdateUserPassword.php` implements
+Fortify's `UpdatesUserPasswords` contract, but the validation block that
+should require the current password is gone — the action just calls
+`UserService::setPassword($user, $input['password'])`. Fortify's
+`/user/password` endpoint is therefore a one-step account-takeover from
+any hijacked session: no current-password challenge, no minimum-length
+guard, no complexity rules.
+
+`FortifyServiceProvider` binds this action via
+`Fortify::updateUserPasswordsUsing(UpdateUserPassword::class)`, so this
+covers every front-channel password change.
+
+**Fix.** Re-introduce the `Validator::make([...])` block that the
+class header still hints at:
+
+```php
+public function update(User $user, array $input): void
+{
+    Validator::make($input, [
+        'current_password' => ['required', 'string', 'current_password:web'],
+        'password' => $this->passwordRules(),
+    ], [
+        'current_password.current_password'
+            => __('The provided password does not match your current password.'),
+    ])->validateWithBag('updatePassword');
+
+    app(UserService::class)->setPassword($user, $input['password']);
+}
+```
+
+If the admin-driven "reset another user's password" flow needs to
+skip the current-password challenge, route that flow through the
+existing `ResetUserPassword` action (which is already current-check-free)
+and gate `PasswordUserRequest::authorize()` on
+`manage user status` (or a new `reset user password` permission) rather
+than `edit user`.
+
+**Consequences.**
+
+- Pro: closes the open back door on every password-update path.
+- Con: any test or seeder that calls `Users::setPassword(...)` directly
+  is unaffected (correctly — that's the admin path), but any test that
+  POSTs to `/user/password` without `current_password` will now fail.
+  Sweep tests and fix any that were exercising the broken path.
+
+---
+
+### R-18 — Role assignment hardening: service-layer defence-in-depth (Critical)
+
+**Symptom.** The request-layer fix is in: `StoreUserRequest::rules()`
+and `EditUserRequest::rules()` both use
+`Rule::in($this->assignableRoleNames())`, where the helper excludes
+`super admin` for non-super-admin actors. Good. But
+`UserService::syncRoles()` accepts any role names that survive
+validation, so any bypass of the FormRequest (a future endpoint that
+takes raw `Request $request`, a queue job, a seeder, etc.) would still
+allow privilege escalation.
+
+**Fix.** Belt-and-braces guard inside the service:
+
+```php
+// app/Services/UserService.php
+public function syncRoles(User $user, array $roles): User
+{
+    $actor = auth()->user();
+
+    if (in_array('super admin', $roles, true) && ! $actor?->hasRole('super admin')) {
+        throw new \Illuminate\Auth\Access\AuthorizationException(
+            'Only a super admin may assign the super admin role.'
+        );
+    }
+
+    $user->syncRoles($roles);
+
+    return $user;
+}
+```
+
+The same guard belongs around `assignRoles()` for symmetry.
+
+**Consequences.**
+
+- Pro: privilege escalation requires both layers to be broken; the
+  service throws cleanly with a translatable message.
+- Con: console/seeder code that legitimately assigns `super admin`
+  outside a request context (e.g. `UsersSeeder`) will need to either
+  authenticate a super-admin actor first, or call `$user->syncRoles(...)`
+  directly. Document the seeded escape hatch where it lands.
+
+---
+
+### R-19 — `LogRequestResponse` never writes `response_payload` (High)
+
+**Symptom.** `api_logs.response_payload` is declared in the schema and
+`LogRequestResponse::summarizeResponse()` is implemented, but the
+middleware never passes the value into `ApiLog::create([...])`. Every
+row goes in with `response_payload = NULL`. The doc claims this column
+carries the rendered body or error summary.
+
+**Fix.** Add the field to the `ApiLog::create` payload:
+
+```php
+ApiLog::create([
+    'request_route' => $request->getPathInfo(),
+    'method' => $request->method(),
+    'user_id' => Auth::id(),
+    'request_payload' => $this->encodeForLog($this->sanitizeValue($request->all())),
+    'request_headers' => $this->encodeForLog($this->sanitizeHeaders($request->headers->all())),
+    'response_payload' => $this->summarizeResponse($response),
+    'response_headers' => $this->encodeForLog($this->sanitizeHeaders($response->headers->all())),
+    'response_status_code' => $response->status(),
+]);
+```
+
+The dead `summarizeResponse()` method already redacts sensitive keys via
+`sanitizeValue()` and truncates with `truncate()`, so no new sanitiser
+is needed.
+
+**Consequences.**
+
+- Pro: postmortems on production 500s can read the rendered body. Bug
+  reports gain a useful payload.
+- Con: storage cost goes up. Today the table prunes at 90 days via
+  `model:prune`; verify the schedule entry is still active before
+  enabling this so logs don't grow without bound.
+
+---
+
+### R-20 — Personal access token flashed in URL/session (High)
+
+**Symptom.** `Admin\User\Token::store()` and the analogous
+`Admin\Account\Token` flow build a success-flash by string-concatenating
+the plain-text token onto a generic message:
+
+```php
+return redirect()->route('users.edit', $user)
+    ->with('success', __('user.token_created') . ' - ' . $token);
+```
+
+The plain-text token ends up in the next page's flash banner. From
+there it leaks into anything that captures session flash data
+(Telescope/Debugbar, Sentry breadcrumbs, screenshots, in-page logs).
+`LogRequestResponse` already lists `plain_text_token` and
+`one_time_token` in its sensitive-keys allowlist, but the current
+controller doesn't use either key — it concatenates the secret into a
+generic `success` string that the middleware can't detect.
+
+**Fix.** Show the plain-text token exactly once on a dedicated view,
+behind a one-shot session pull:
+
+```php
+// store()
+return redirect()
+    ->route('users.token.show_once', [
+        'id' => $user->id,
+        'token_id' => $newAccessToken->accessToken->id,
+    ])
+    ->with('one_time_token', $newAccessToken->plainTextToken);
+
+// new showOnce() action
+public function showOnce(string $id, string $token_id)
+{
+    $token = session()->pull('one_time_token'); // pull = read + forget
+
+    if (! $token) {
+        return redirect()->route('users.edit', $id)
+            ->with('failure', trans('user.token_already_revealed'));
+    }
+
+    return $this->view('users.tokens.show_once', [
+        'plain_text_token' => $token,
+        'user' => Users::find((int) $id),
+    ]);
+}
+```
+
+The sensitive-keys allowlist (`plain_text_token`, `one_time_token`)
+already redacts these out of `api_logs` if they ever leak into a
+request body, so the middleware-side defence is already in place.
+
+**Consequences.**
+
+- Pro: the secret appears once, on a page the user must keep open, and
+  is never present in the flash bag on subsequent pages.
+- Con: the create flow gets one extra redirect and a new view. If the
+  user closes the show-once page before copying the token, they have
+  to regenerate. That's the same property `composer create-project`
+  has when it emits an APP_KEY — acceptable tradeoff for the security
+  win.
+
+---
+
+### R-21 — `EntryTypeRegistry::resolveByHandle` is group-blind (High, defence-in-depth)
+
+**Symptom.** The user-facing surfaces are now safe — `StoreEntryRequest`
+constrains `type_handle` to the route's `group_id` via a closure rule,
+and `CreateNewEntry::create()` resolves the `EntryType` row by
+`(handle, entry_group_id)` before passing the handle on to
+`Content::create()`. Both layers will reject a cross-group submission.
+
+However, `EntryTypeRegistry::resolveByHandle()` still does a global
+`EntryType::where('handle', $handle)->firstOrFail()`. Any future caller
+that bypasses the action and goes straight to `Content::create($handle, …)`
+— a queue job, a console command, a different controller — would resolve
+to whichever row happens to match the handle globally. With today's
+seeded data the handles are globally unique so the issue is invisible.
+
+This overlaps with **Ambivalence A-1**.
+
+**Fix.** Pick one of three:
+
+A. **(Smallest)** Add an optional `?int $entryGroupId = null` parameter
+   to `EntryTypeRegistry::resolveByHandle()` and apply it as a
+   `where('entry_group_id', $entryGroupId)` filter when present. The
+   action passes the group ID through; legacy callers continue to work.
+
+B. **(Cleanest)** Add `Content::create(EntryType $record, array $data)`
+   and `EntryTypeRegistry::resolveByRecord(EntryType $record)` as the
+   preferred public API. Deprecate the handle-only form.
+
+C. **(Heaviest)** Make `entry_types.handle` globally unique with a
+   schema migration. Closes the loophole but loses the
+   `(entry_group_id, handle)` flexibility.
+
+**Recommendation.** Option A for Alpha; Option B at the next refactor;
+Option C only if the team genuinely wants global handle uniqueness.
+
+**Consequences.**
+
+- Pro: closes the indirection so future callers can't accidentally
+  resolve to the wrong type.
+- Con: caches keyed by handle in the registry have to either become
+  `(handle, group_id)` keyed, or accept that they no longer fully
+  short-circuit lookups for cross-group requests. Negligible perf cost.
+
+---
+
+### R-22 — `User::$fillable` exposes status columns to mass-assignment (High)
+
+**Symptom.** `User::$fillable` includes `status`, `suspended_until`,
+`banned_at`, and `locked_until`. The `UserService` methods that need
+to write these columns use `forceFill()` (correct), but the fillable
+also means any unguarded `User::create($request->validated())` call
+or `$user->update(...)` from a new endpoint can mass-assign them. The
+careful audit-log + event-firing infrastructure (`UserStatusChanged`,
+`WriteUserStatusLog`) is then silently bypassed.
+
+**Fix.** Narrow `$fillable` to the safely-assignable columns:
+
+```php
+protected $fillable = [
+    'name',
+    'email',
+    'password',
+];
+```
+
+Then update `UserService::create()` to `forceFill` the status:
+
+```php
+private function buildUserAttributes(array $data): array
+{
+    $attributes = Arr::only($data, ['name', 'email', 'password', 'status']);
+
+    if (! empty($attributes['password'])) {
+        $attributes['password'] = Hash::make($attributes['password']);
+    }
+
+    if (empty($attributes['status'])) {
+        $attributes['status'] = app(Settings::class)->get('users', 'default_status')
+            ?? UserStatus::ACTIVE;
+    }
+
+    return $attributes;
+}
+
+public function create(array $data): User
+{
+    $attributes = $this->buildUserAttributes($data);
+
+    $user = new User();
+    $user->forceFill($attributes)->save();
+    // ... roles / fields / is_author handling unchanged
+}
+```
+
+Update `firstOrCreateFromSocial()` similarly.
+
+**Consequences.**
+
+- Pro: status transitions are forced through `setStatus()`,
+  `suspend()`, `lockUser()` — the only paths that fire events and
+  write `user_status_logs`.
+- Con: any existing seeder or factory that relies on mass-assigning
+  `status` will need either `->forceFill(['status' => ...])` or a
+  call into `UserService::setStatus()`. Sweep factories + seeders.
+
+---
+
+### R-23 — CORS is wide-open (`*` origins, `*` methods, `*` headers) (High)
+
+**Symptom.** `config/cors.php` ships with:
+
+```php
+'paths' => ['api/*', 'sanctum/csrf-cookie'],
+'allowed_methods' => ['*'],
+'allowed_origins' => ['*'],
+'allowed_headers' => ['*'],
+```
+
+`supports_credentials` is `false`, so cookie-based exfiltration is
+blocked. But any third-party origin can issue Bearer-token requests
+against the API. A leaked customer token is a free key to any rogue
+site that wants to use it.
+
+The file already carries a commented-out env-driven allowlist block
+at the bottom — it just hasn't been adopted.
+
+**Fix.** Adopt the env-driven config:
+
+```php
+'paths' => ['api/*', 'sanctum/csrf-cookie'],
+'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+'allowed_origins' => array_filter(explode(',', (string) env('CORS_ALLOWED_ORIGINS', ''))),
+'allowed_origins_patterns' => array_filter(explode(',', (string) env('CORS_ALLOWED_ORIGINS_PATTERNS', ''))),
+'allowed_headers' => ['Accept', 'Authorization', 'Content-Type', 'X-Requested-With', 'X-XSRF-TOKEN'],
+'exposed_headers' => [],
+'max_age' => 600,
+'supports_credentials' => filter_var(env('CORS_SUPPORTS_CREDENTIALS', false), FILTER_VALIDATE_BOOLEAN),
+```
+
+```dotenv
+CORS_ALLOWED_ORIGINS=https://app.example.com,https://docs.example.com
+```
+
+If a future "public read-only" API surface is wanted, split it into
+its own `paths` entry with `*` origins.
+
+**Consequences.**
+
+- Pro: the API is no longer a cross-origin free-for-all.
+- Con: any current consumer (the admin SPA, customer integrations) is
+  now origin-gated. Inventory and add every legitimate origin to
+  `CORS_ALLOWED_ORIGINS` before flipping the config. Local
+  development needs `http://127.0.0.1:8000` etc. — coordinate with
+  the Vite config.
+
+---
+
+### R-24 — API mutator endpoints rely solely on FormRequest authorize (Medium)
+
+**Symptom.**
+
+- `Api\v1\User::update()` — no `$this->can(...)` check; gate is only in
+  `EditUserRequest::authorize()`.
+- `Api\v1\Entries::store()` — no `$this->can(...)` check; gate only in
+  `StoreEntryRequest`.
+- `Api\v1\Entries::update()` — same pattern.
+
+The peer methods (`Api\v1\User::store()`, `::show()`, `::destroy()`,
+and `Api\v1\Entries::show()`/`destroy()`) all gate explicitly with
+`$this->can(...)`. The asymmetry is brittle: a future refactor that
+swaps the FormRequest for `Request $request` (e.g. to relax
+validation) silently turns these into public endpoints.
+
+**Fix.** Add a matching controller-level guard to each:
+
+```php
+public function update(EditUserRequest $request, int $user): UserResource
+{
+    if (! $this->can('edit user')) {
+        abort(403);
+    }
+    // ... rest unchanged
+}
+
+public function store(StoreEntryRequest $request): JsonResponse
+{
+    if (! $this->can('create entry')) {
+        abort(403);
+    }
+    // ...
+}
+
+public function update(EditEntryRequest $request, int $group_id, int $entry): EntryResource
+{
+    if (! $this->can('edit entry')) {
+        abort(403);
+    }
+    // ...
+}
+```
+
+**Consequences.**
+
+- Pro: defence-in-depth matches the rest of the API surface.
+- Con: the gate now fires twice per request (FormRequest + controller).
+  Negligible perf cost; if it becomes noisy, extract a `requireCan()`
+  base helper.
+
+---
+
+### R-25 — `UserService::updateToken()` accepts arbitrary fields (Medium)
+
+**Symptom.** `UserService::updateToken(User $user, $tokenId, array $data)`
+calls `$token->update($data)` with no key filtering.
+`EditUserTokenRequest::rules()` currently validates only `name`, so in
+practice `$request->validated()` only carries `name` — the bug is
+latent today. But a future caller (queue job, seeder, console) that
+passes raw user input could rewrite `tokenable_id` (move the token to
+another user) or `abilities` (escalate to `['*']`).
+
+**Fix.** Filter at the service layer:
+
+```php
+public function updateToken(User $user, int|string $tokenId, array $data): ?PersonalAccessToken
+{
+    $token = $this->getToken($user, $tokenId);
+
+    if (! $token instanceof PersonalAccessToken) {
+        return null;
+    }
+
+    $allowed = Arr::only($data, ['name', 'abilities', 'expires_at']);
+
+    if (isset($allowed['abilities']) && ! is_array($allowed['abilities'])) {
+        $allowed['abilities'] = [];
+    }
+
+    $token->update($allowed);
+
+    return $token->refresh();
+}
+```
+
+If product genuinely wants admin-editable abilities/expiry, extend
+`EditUserTokenRequest::rules()` with explicit typed rules
+(`abilities` array of strings, `expires_at` date) and keep the
+service-layer filter as defence-in-depth.
+
+**Consequences.**
+
+- Pro: token mutation can't accidentally rewrite ownership or
+  abilities through future code paths.
+- Con: any caller currently passing extra keys (none today) will
+  see them silently dropped. Document the contract.
+
+---
+
+### R-26 — `users.default_status` / `social_default_status` accept post-creation statuses (Medium)
+
+**Symptom.** Both settings validate values against
+`Rule::in(UserStatus::ALL)`, which includes `suspended` and `banned`.
+Those statuses are nonsensical as defaults for newly-created accounts
+and the `UserStatus::CREATION_ALLOWED` constant
+(`active, inactive, pending`) exists specifically to describe the
+valid creation-time set. An admin can save `suspended` as the default
+today and every subsequent registration creates a user who can't log
+in.
+
+**Fix.** Tighten the `rules` array in `config/settings.php`:
+
+```php
+'default_status' => [
+    'handle' => 'default_status',
+    // ...
+    'rules' => ['required', Rule::in(UserStatus::CREATION_ALLOWED)],
+    // options_callback unchanged
+],
+'social_default_status' => [
+    'handle' => 'social_default_status',
+    // ...
+    'rules' => ['required', Rule::in(UserStatus::CREATION_ALLOWED)],
+],
+```
+
+The `options_callback` for both fields currently emits every status —
+restrict the callback to `CREATION_ALLOWED` so the admin select
+dropdown can't even present `suspended` / `banned` as choices.
+
+**Consequences.**
+
+- Pro: "auto-approve all OAuth signups" stops being a typo away from
+  "auto-suspend everything."
+- Con: nothing — `suspended` / `banned` were never useful at creation
+  time; the only behaviour change is the admin form rejects the
+  invalid choice with a clear error.
+
+---
+
+### R-27 — Media library handle is not slug-restricted (Low)
+
+**Symptom.** `StoreMediaLibraryFormRequest::rules()` validates `handle`
+as `['required', 'string', 'max:255', Rule::unique(...)]` with no
+character constraint. `HasMediaItems::addMediaFromUpload()` then uses
+the handle directly as the storage folder name via
+`storeAs($this->handle, $fileName, $disk)`. An admin can save a
+library with handle `../../etc` and place files outside the disk root.
+
+Impact is bounded by the disk visibility today (`local` is private,
+not web-served), but on the `public` disk this becomes a path-traversal
+that serves arbitrary disk contents at `storage/app/public/../...`.
+
+**Fix.** Two layers — request validation plus a runtime guard:
+
+```php
+// StoreMediaLibraryFormRequest::rules()
+'handle' => [
+    'required',
+    'string',
+    'max:255',
+    'regex:/^[a-z0-9][a-z0-9_-]*$/',
+    Rule::unique('media_libraries', 'handle')->ignore($library),
+],
+```
+
+```php
+// HasMediaItems::addMediaFromUpload(), before storeAs
+$folder = preg_replace('/[^a-z0-9_-]/i', '', (string) $this->handle);
+
+if ($folder === '' || $folder !== $this->handle) {
+    throw new \InvalidArgumentException(
+        "Library handle [{$this->handle}] is not a valid storage folder name."
+    );
+}
+```
+
+`EditMediaLibraryRequest` inherits from the store request, so the
+regex applies to both create and edit.
+
+**Consequences.**
+
+- Pro: closes the path-traversal vector regardless of disk visibility.
+- Con: any existing library row with a "weird" handle (none in the
+  seed data, but possible in dev installs) becomes uneditable until
+  the handle is normalised. A short data migration covers it.
+
+---
+
+### R-28 — SVG / HTML uploads on a public disk are stored-XSS vectors (Low, conditional)
+
+**Symptom.** `UploadMediaRequest::rules()` builds its `mimetypes:`
+allowlist from the owning library's `allowed_types`. If an admin
+explicitly allows `image/svg+xml` or `text/html` on a library backed
+by the **public** disk, an uploaded `evil.svg` containing inline
+`<script>` is served with the matching `Content-Type` and runs as
+top-level navigation in the visitor's browser — classic stored XSS on
+the application origin.
+
+Default seeded libraries do not allow these MIME types, so the bug is
+opt-in. Listed Low because it requires both an admin misconfiguration
+**and** a public disk.
+
+**Fix.** Two options:
+
+A. **(Conservative)** Reject SVG and HTML uploads outright in
+   `UploadMediaRequest::rules()` regardless of library config:
+
+```php
+'file' => [
+    'required',
+    'file',
+    'not_in_mimetypes:image/svg+xml,text/html,application/xhtml+xml',
+    // ... library-driven rules still apply
+],
+```
+
+   …registered via a custom `Validator::extend('not_in_mimetypes', …)`
+   in `AppServiceProvider::boot()`.
+
+B. **(Permissive)** Allow SVG via `enshrined/svg-sanitize` on the
+   upload path:
+
+```bash
+composer require enshrined/svg-sanitize
+```
+
+```php
+// in HasMediaItems::addMediaFromUpload(), before storeAs
+if ($file->getMimeType() === 'image/svg+xml') {
+    $sanitizer = new \enshrined\svgSanitize\Sanitizer();
+    file_put_contents(
+        $file->getRealPath(),
+        $sanitizer->sanitize(file_get_contents($file->getRealPath()))
+    );
+}
+```
+
+   …and pair it with `Content-Disposition: attachment` for
+   HTML/`text/*` mimetypes (or just deny those outright).
+
+**Recommendation.** Option B for SVG (admins ask for it), Option A
+for HTML/XHTML.
+
+**Consequences.**
+
+- Pro: removes the XSS vector even from misconfigured public-disk
+  libraries.
+- Con: legitimate SVG uploads now go through a sanitiser pass, which
+  occasionally rejects valid-but-exotic markup. The package's
+  defaults are sensible; we'd ship a config override only if a
+  customer hits a false positive.
+
+---
+
+### R-29 — `BotBlockRequest` only checks `POST` (Low)
+
+**Symptom.** `BotBlockRequest::handle()` only inspects the bot-block
+token when the request method is `POST` and the caller is
+unauthenticated. Today this is fine — every unauthenticated form
+(login, registration, password reset) is POST. But a future
+unauthenticated `PUT`/`PATCH` endpoint (e.g. a magic-link "set
+password" form) bypasses the block entirely.
+
+**Fix.** Broaden the method allowlist to every modifying verb:
+
+```php
+public function handle(Request $request, Closure $next): mixed
+{
+    $modifying = in_array(strtolower($request->method()), ['post', 'put', 'patch', 'delete'], true);
+
+    if ($modifying && ! Auth::user()) {
+        $bb = BbValue::where('field_value', $request->post('__bb'))->first();
+
+        if (! $bb instanceof BbValue) {
+            abort(403);
+        }
+
+        $bb->delete();
+    }
+
+    return $next($request);
+}
+```
+
+**Consequences.**
+
+- Pro: future unauthenticated mutation endpoints inherit the same
+  bot-block protection without each engineer having to remember.
+- Con: any internal automation that issues unauthenticated
+  `PUT`/`PATCH`/`DELETE` against the application will need the
+  bot-block token. None today; future infrastructure work to be
+  aware of.
+
+---
+
+### R-30 — `Entry::$fillable` exposes `created_by_user_id` (Low)
+
+**Symptom.** `Entry::$fillable` includes `created_by_user_id`. The
+canonical write path (`EntryRepository::create()`) assigns this from
+`Auth::id()` correctly. But a future caller doing
+`Entry::create($request->validated())` (skipping the repository)
+would let the requester pick the creator. Same defence-in-depth
+argument as R-22.
+
+**Fix.** Drop `created_by_user_id` from `$fillable`:
+
+```php
+protected $fillable = [
+    'entry_group_id',
+    'entry_type_id',
+    'title',
+    'handle',
+    'published_at',
+    'status_id',
+    'status_handle',
+    'status_is_public',
+];
+```
+
+The repository already assigns `created_by_user_id` directly with
+`$entry->created_by_user_id = Auth::id()`, so no other change is
+needed.
+
+**Consequences.**
+
+- Pro: the audit trail (`creator` relation) cannot be spoofed by a
+  future caller who bypasses the repository.
+- Con: any seeder or factory currently relying on mass-assigning
+  `created_by_user_id` (the EntrySeeder may; verify) needs to switch
+  to `forceFill` or set the column directly after `new Entry()`.
+
+---
+
 ## Ambivalences for Review
 
 Items where the code is ambiguous, drifting, or where the team should
@@ -4024,15 +4796,16 @@ C. To add a unique index on `entry_types.handle` (globally) and accept
 We should not assert a "correct" answer in OVERVIEW.md until the team
 picks one.
 
-### A-2 — Two near-identical user-settings stacks
+### A-2 — Two near-identical user-settings stacks (Resolved 2026-05-26)
 
-Pre-fix (see R-4) there are two near-identical controllers and views:
-
-- `Admin\Account\Settings` ↔ `account.settings.twig` — routed.
-- `Admin\Settings\UserSettings` ↔ `settings.user.twig` — unrouted.
-
-Pick one before the next docs sweep so subsequent tutorials don't pin
-the wrong one.
+> **Resolved.** Decision: `Admin\Account\Settings` (under `/account/*`)
+> is the canonical stack. `Admin\Settings\UserSettings` has been
+> deleted. Subsequent tutorials and docs should reference the
+> `account.settings` route name and `account.settings.twig` view only.
+>
+> Open follow-ups (not ambivalences, just cleanup): R-2 (one-line
+> redirect target fix in `Admin\Account\Settings::update()`) and
+> deletion of the orphan `resources/views/admin/settings/user.twig`.
 
 ### A-3 — `Admin\Field::index` is intentional 404 vs scaffolding mistake
 
@@ -4169,6 +4942,69 @@ corrections made in the 2026-05-26 refresh pass:
 17. **`entries.schema_type` / `entry_types.default_schema_type`**:
     columns exist but are reserved for SEO plan work; see Ambivalence
     A-9.
+18. **`Admin\Settings\UserSettings` deleted (2026-05-26)**: the
+    duplicate user-settings controller has been removed. Decision
+    recorded in Ambivalence A-2 (now resolved); R-4 marked Resolved
+    above. The orphan `resources/views/admin/settings/user.twig`
+    view still exists and should be deleted alongside the R-2 fix.
+    `Admin\Account\Settings` is now the single canonical user-settings
+    controller.
+
+### Items absorbed from ALPHA_READINESS_REPORT.md (2026-05-26)
+
+A separate review (`docs/ALPHA_READINESS_REPORT.md`, 2026-05-25) raised
+29 numbered findings ahead of an external Alpha announcement. A
+verification pass against the live code on 2026-05-26 reclassified
+each one:
+
+**Already resolved in code — no action remaining:**
+
+- **C-2** Upload endpoint now requires the `upload media` permission
+  (verified in `UploadMediaRequest::authorize()`).
+- **H-1** OAuth callback now calls `$request->session()->regenerate()`
+  and `regenerateToken()`; `routes/web.php` wraps social-login routes
+  in `throttle:10,1`.
+- **H-3** `redirect_url` is now validated as `url:http,https` in both
+  `StoreEntryRequest` and `EditEntryRequest`; `EntryTreeRouteDriver`
+  enforces a scheme allowlist at render time via `isSafeRedirect()`.
+- **H-7** `Html` field type calls `Purifier::clean()` in
+  `prepareForStorage()` and reads the `allowed_tags` setting (so I-3 is
+  also resolved — the setting is no longer dead).
+- **M-1** `categories.*` now scopes `Rule::exists` to the categories
+  whose group is attached to the entry's group via the
+  `category_groupables` pivot.
+- **L-1** `TemplateRouteDriver::__construct()` no longer mutates the
+  `admin` view namespace; the render-time guard
+  (`if (str_starts_with($view, 'admin::')) throw …`) is in place.
+- **L-6** `entry_trees.redirect_status` column exists and is honoured
+  by `EntryTreeRouteDriver`.
+- **I-1** `EntryResource` correctly returns entry-shaped fields.
+- **I-3** see H-7 above.
+
+**Still real and absorbed into the active list as R-17 through R-30:**
+
+- C-1 → R-17 (`UpdateUserPassword` skips current-password check).
+- C-3 → R-18 (role-assignment privilege escalation, service-layer
+  defence-in-depth).
+- H-2 → R-19 (`LogRequestResponse` never writes `response_payload`).
+- H-4 → R-20 (personal access token flashed in URL/session).
+- H-5 → R-21 (`EntryTypeRegistry::resolveByHandle` is group-blind;
+  partial mitigation already in place at request + action layers).
+- H-6 → R-22 (`User::$fillable` exposes status columns).
+- H-8 → R-23 (CORS wide open).
+- M-4 + M-5 → R-24 (API mutator endpoints lack controller-level
+  permission checks).
+- M-6 → R-25 (`UserService::updateToken` accepts arbitrary fields).
+- M-7 → R-26 (`users.default_status` / `social_default_status`
+  accept post-creation statuses).
+- L-2 → R-27 (media library handle not slug-restricted).
+- L-3 → R-28 (SVG/HTML uploads on public disk are XSS vectors).
+- L-4 → R-29 (`BotBlockRequest` only checks `POST`).
+- L-5 → R-30 (`Entry::$fillable` exposes `created_by_user_id`).
+- M-2 → already R-3 (`Api\v1\User::index` permission typo).
+- M-3, I-2 → already R-6 (`Api\v1\Account@show` placeholder).
+- I-4 → already R-8 (`app:refresh-tokens` scaffold).
+- I-5 → already R-9 (`site.templates.base_path` / `not_found_template`).
 
 If a future change touches an item in this log, update both the
 relevant section and this log so the corrected state is traceable.

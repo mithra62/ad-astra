@@ -64,7 +64,21 @@
       "Bash(perl -i -pe 's/\\(\\\\S\\)\\\\s{2,}=>/\\\\1 =>/g' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
       "Bash(perl -i -pe 's/\\(,\\)\\\\s{2,}\\(\\\\S\\)/$1 $2/g' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
       "Bash(grep -cE \\\\\"',\\\\\\\\S\\\\\" D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md || true\\)\"; echo \"lines: $\\(wc -l < D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md\\)\"; rm -f D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md.bak; echo \"backup removed\")",
-      "Bash(echo \"no-space-after-comma: $\\(grep -cE \\\\\"',\\\\\\\\S\\\\\" D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md || true\\)\"; echo \"lines: $\\(wc -l < D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md\\)\"; rm -f D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md.bak; echo \"backup removed\")"
+      "Bash(echo \"no-space-after-comma: $\\(grep -cE \\\\\"',\\\\\\\\S\\\\\" D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md || true\\)\"; echo \"lines: $\\(wc -l < D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md\\)\"; rm -f D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md.bak; echo \"backup removed\")",
+      "Bash(grep -nE '\\\\$\\\\w+\\\\s{2,}=\\([^=>]\\)' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(grep -cE '\\\\$\\\\w+\\\\s{2,}=\\([^=>]\\)' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(perl -i -pe 's/\\(\\\\$\\\\w+\\)\\\\s{2,}=\\(?![=>]\\)/$1 =/g' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(grep -nE '\\\\s{2,}as\\\\s' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(grep -cE '\\\\\\)\\\\s{2,}:' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(grep -cE '\\\\w\\\\s{2,}=\\(?!=|>\\)' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(grep -cE '\\(public|protected|private|static|readonly\\)\\\\s+\\\\w+\\\\s{2,}\\\\$' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(awk 'BEGIN{inblock=0} /^```php$/{inblock=1; next} /^```$/{inblock=0; next} inblock && length\\($0\\) > 110 { printf \"L%d \\(%d\\): %s\\\\n\", NR, length\\($0\\), $0 }' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(awk 'BEGIN{inblock=0} /^```php$/{inblock=1; next} /^```$/{inblock=0; next} inblock && length\\($0\\) > 95 && length\\($0\\) <= 110 { printf \"L%d \\(%d\\): %s\\\\n\", NR, length\\($0\\), $0 }' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(grep -cE '\\\\$\\\\w+\\\\s{2,}=[^=>]' D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(grep -nE '\\\\$this->can\\\\\\(' D:/Projects/mithra62/laravel-base/develop/app/Http/Controllers/Api/v1/Entries.php)",
+      "Bash(grep -nE '\\\\$this->can\\\\\\(' D:/Projects/mithra62/laravel-base/develop/app/Http/Controllers/Api/v1/User.php)",
+      "Bash(echo \"--- 2. Any code references to Admin\\\\\\\\Settings\\\\\\\\UserSettings? ---\")",
+      "Bash(grep -rn 'Admin\\\\\\\\\\\\\\\\Settings\\\\\\\\\\\\\\\\UserSettings\\\\|App\\\\\\\\\\\\\\\\Http\\\\\\\\\\\\\\\\Controllers\\\\\\\\\\\\\\\\Admin\\\\\\\\\\\\\\\\Settings\\\\\\\\\\\\\\\\UserSettings' D:/Projects/mithra62/laravel-base/develop/app D:/Projects/mithra62/laravel-base/develop/routes D:/Projects/mithra62/laravel-base/develop/resources)"
     ]
   }
 }

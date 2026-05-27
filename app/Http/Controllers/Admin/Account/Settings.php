@@ -54,7 +54,7 @@ class Settings extends Controller
         app(UpdateUserSettings::class)->execute(Auth::user(), $request->settingsPayload());
 
         return redirect()
-            ->route('settings.user')
+            ->route('account.settings')
             ->with('success', 'Your preferences have been saved.');
     }
 }
