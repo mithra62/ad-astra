@@ -30,7 +30,7 @@ class Group extends Controller
     {
         $creator = app(CreateNewCategoryGroup::class);
         $group = $creator->create($request->validated());
-        return redirect()->route('categories.groups.show', $group->id)->with('status', trans('category.group.created'));
+        return redirect()->route('categories.groups.show', $group->id)->with('success', trans('category.group.created'));
     }
 
     /**

@@ -35,6 +35,6 @@ class SuccessfulPasswordResetLinkRequestResponse implements SuccessfulPasswordRe
     {
         return $request->wantsJson()
             ? new JsonResponse(['message' => trans($this->status)], 200)
-            : redirect()->route('login')->with('status', trans($this->status));
+            : redirect()->route('login')->with('success', trans($this->status));
     }
 }

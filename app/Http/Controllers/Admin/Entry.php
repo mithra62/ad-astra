@@ -23,7 +23,7 @@ class Entry extends Controller
 
         return redirect()
             ->route('entries.groups.show', $entry->entry_group_id)
-            ->with('status', trans('entry.created'));
+            ->with('success', trans('entry.created'));
     }
 
     public function create(string $group_id, Request $request)

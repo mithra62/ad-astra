@@ -29,12 +29,12 @@ class Category extends Controller
         if ($parentId) {
             return redirect()
                 ->route('categories.edit', $parentId)
-                ->with('status', trans('category.created'));
+                ->with('success', trans('category.created'));
         }
 
         return redirect()
             ->route('categories.groups.show', $category->group_id)
-            ->with('status', trans('category.created'));
+            ->with('success', trans('category.created'));
     }
 
     public function create(string $group_id)

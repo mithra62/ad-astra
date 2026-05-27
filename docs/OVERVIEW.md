@@ -69,6 +69,7 @@
     - [Adding a Setting](#adding-a-setting)
 - [Field Types](#field-types)
     - [Built-in Types](#built-in-types)
+        - [Money field — design notes](#money-field--design-notes)
     - [Creating a Custom Field Type](#creating-a-custom-field-type)
 - [Field Groups and Fields](#field-groups-and-fields)
     - [Creating a Field Group with Fields](#creating-a-field-group-with-fields)
@@ -117,7 +118,9 @@
 - [Media Library](#media-library)
     - [Libraries](#libraries)
     - [Uploads](#uploads)
-    - [Categories and Field Groups](#categories-and-field-groups)
+    - [Attachments and Field Usage](#attachments-and-field-usage)
+    - [Media Picker Endpoint](#media-picker-endpoint)
+    - [Categories, Fields, Transformations, and Cleanup](#categories-fields-transformations-and-cleanup)
 - [Site Routing (Public-Facing URLs)](#site-routing-public-facing-urls)
     - [Frontend Catch-All Route](#frontend-catch-all-route)
     - [RouteResult](#routeresult)
@@ -1481,7 +1484,74 @@ row stores the **fully-qualified class name** in `field_types.object`.
 > `resources/views/_fields/*.twig` (22 partials — `html.twig` is missing;
 > see [Recommendations & Remedies](#recommendations--remedies) item R-1).
 
-### Creating a Custom Field Type
+#### Money field — design notes
+
+The `Money` field deserves a focused note because the storage convention
+is invisible at the column level and the design is deliberately
+single-currency-per-field-instance.
+
+**Storage contract.**
+
+- Column: `value_integer`. The stored value is the amount in the
+  currency's **minor unit** (cents for USD, pence for GBP, yen for JPY,
+  etc.). `prepareForStorage()` parses the submitted decimal string with
+  `moneyphp/moneyphp`'s `DecimalMoneyParser` against the field's
+  configured currency, then writes `$money->getAmount()` (an integer).
+- The minor-unit decimal precision comes from the ISO 4217 currency
+  metadata via `App\Support\Iso\Currencies::decimals($currency)`, so JPY
+  fields are stored as whole integers and BHD fields as thousandths
+  without any per-field configuration.
+
+**Write-path guard.**
+
+`prepareForStorage()` rejects values with more fractional digits than
+the configured currency allows. `19.999` against a `USD` field throws
+`InvalidArgumentException` rather than silently rounding. This is the
+behaviour the field-type contract promises — "no implicit rounding."
+
+**Read API.**
+
+```php
+$entry->field('price');  // Money\Money instance (NOT the raw integer)
+$entry->field('price')->getAmount();    // '1999' (string, minor units)
+$entry->field('price')->getCurrency();  // Money\Currency('USD')
+```
+
+`Money\Money` provides precision-safe arithmetic
+(`add()`/`subtract()`/`multiply()`) and formatting helpers via
+`moneyphp/moneyphp`'s built-in formatters. Never do raw integer math on
+the underlying column outside this API — the minor-unit scale is
+currency-dependent.
+
+**Settings.**
+
+| Setting    | Purpose                                                          |
+|------------|------------------------------------------------------------------|
+| `currency` | Required. ISO 4217 code. Sets minor-unit precision + parser.     |
+| `min`      | Optional. Major-unit decimal string. Enforced by `MoneyRangeRule`. |
+| `max`      | Optional. Major-unit decimal string. Same rule.                  |
+| `default`  | Optional. Pre-filled value, major-unit decimal string.           |
+
+**Design choice — single-currency per field instance.**
+
+The currency lives in field settings, not next to the value. A single
+`Field` row is therefore single-currency: `price` cannot be USD on one
+entry and EUR on another. The two intended patterns when multi-currency
+behaviour is actually needed:
+
+1. **Per-currency field handles** — declare `price_usd`, `price_eur`,
+   `price_gbp` as separate `Money` fields with different currency
+   settings.
+2. **A future "Currency" field type** — declare a currency-code field
+   alongside the money field and resolve the pair at render time. Not
+   shipped today; flag if the requirement comes up.
+
+**Raw-column awareness.**
+
+Any custom report, admin SQL query, or data export that reads
+`field_values.value_integer` directly must look up the field's
+`currency` setting to interpret the scale. The model-level API
+(`$entry->field('price')`) hides this; the raw column does not.
 
 ```php
 // app/Field/Types/Toggle.php
@@ -2684,6 +2754,67 @@ uses the real `fields.id`.
 `FieldValueObserver` keeps the `mediables` pivot synchronized so field-driven
 media usage remains queryable.
 
+### Media Picker Endpoint
+
+The admin field UIs for `FileUpload`, `Media`, and any other field that lets
+an editor pick existing media call a dedicated JSON endpoint to populate the
+picker chip strip rather than embedding the full library into the entry form.
+
+| Property        | Value                                                  |
+|-----------------|--------------------------------------------------------|
+| HTTP method     | `GET`                                                  |
+| URI             | `/admin/media/picker`                                  |
+| Route name      | `media.picker.index`                                   |
+| Controller      | `App\Http\Controllers\Admin\MediaPicker::index`        |
+| Auth guard      | `auth` middleware on the admin route group; `access admin` from `Admin\Controller` constructor |
+| Response format | JSON                                                   |
+
+**Query parameters:**
+
+| Param          | Rules                                | Notes                                          |
+|----------------|--------------------------------------|------------------------------------------------|
+| `library_id[]` | `required, array, min:1, integer.*`  | Allowed libraries; unknown IDs are dropped server-side |
+| `q`            | `nullable, string, max:200`          | Name search; SQL `LIKE` wildcards in the input are escaped with `\` |
+| `page`         | `nullable, integer, min:1`           | Paginator page (default 1)                     |
+| `per_page`     | `nullable, integer, min:1, max:100`  | Page size (default 24)                         |
+
+**Response shape:**
+
+```json
+{
+  "data": [
+    {
+      "id": 42,
+      "name": "Cover Image",
+      "original_name": "cover.jpg",
+      "mime_type": "image/jpeg",
+      "size": 184320,
+      "library_id": 3,
+      "library_name": "Editorial",
+      "url": "https://...",
+      "thumbnail_url": "https://...",
+      "is_image": true
+    }
+  ],
+  "meta": {
+    "total": 128,
+    "current_page": 1,
+    "last_page": 6,
+    "per_page": 24
+  }
+}
+```
+
+**Thumbnails.** For image media, the endpoint kicks a `picker` transformation
+(240×240, `cover` mode) idempotently. Subsequent picker calls re-use the
+existing transformation record rather than regenerating. Non-image media gets
+`thumbnail_url = null`; the field UIs fall back to a file-type icon.
+
+**Why a separate endpoint.** Embedding a media list inline in every entry
+form would scale badly once a library has thousands of items. The picker
+endpoint stays JSON-only so the field's JS can lazy-load and paginate without
+re-rendering the surrounding form.
+
 ### Categories, Fields, Transformations, and Cleanup
 
 Media items can be categorized through `categorizables` and can store custom
@@ -3090,6 +3221,7 @@ FormRequests enforce finer-grained authorization for specific actions.
 | Categories           | `/admin/categories/*`                              | `Admin\Category`                                    |
 | Media libraries      | `/admin/media/libraries/*`                         | `Admin\Media\Library`                               |
 | Media items          | `/admin/media/*`                                   | `Admin\Media`                                       |
+| Media picker (JSON)  | `/admin/media/picker`                              | `Admin\MediaPicker` (see [Media Picker Endpoint](#media-picker-endpoint)) |
 | Field groups         | `/admin/fields/groups/*`                           | `Admin\Field\Group`                                 |
 | Fields               | `/admin/fields/*`                                  | `Admin\Field`                                       |
 | Status groups        | `/admin/statuses/groups/*`                         | `Admin\Status\Group`                                |
@@ -3173,10 +3305,10 @@ Refreshed against the live source on 2026-05-26. Items below are real today.
   `resources/views/_fields/html.twig` partial exists — entry forms containing
   an Html field will throw `InvalidArgumentException: View [_fields.html]
   not found`.
-- **R-2**: `Admin\Account\Settings::update()` redirects to
-  `route('settings.user')`, which is not registered in `routes/admin.php`.
-  Submitting the user-preferences form throws `RouteNotFoundException`.
-  Now a one-line fix since R-4 is resolved.
+- **R-2** *(Resolved 2026-05-26)*: `Admin\Account\Settings::update()`
+  now redirects to `route('account.settings')`. Residual cleanup —
+  delete the orphan `resources/views/admin/settings/user.twig` view —
+  is documented in the R-2 Recommendation entry.
 - **R-3**: `Api\v1\User::index()` checks `$this->can('read user')` (singular),
   while the seeded permission is `read users` (plural). All non-super-admin
   callers receive 404 from the API users list endpoint.
@@ -3773,44 +3905,23 @@ can be swapped in later.
   Pick a "good enough" textarea now; iterate.
 - Con (Option B/C): kicks the can.
 
-### R-2 — Broken `route('settings.user')` redirect (High)
+### R-2 — Broken `route('settings.user')` redirect (Resolved 2026-05-26)
 
-**Symptom.** Submitting `PUT /admin/account/settings` still raises
-`RouteNotFoundException`. `Admin\Account\Settings::update()` (line 57)
-calls `redirect()->route('settings.user')` after save — that route
-name does not exist in `routes/admin.php` (it never has).
-
-> **Status note (2026-05-26).** The duplicate `Admin\Settings\UserSettings`
-> controller has been deleted (resolving R-4 and Ambivalence A-2).
-> `Admin\Account\Settings` is now the only routed user-settings stack,
-> so the original Option A is unambiguous: redirect to
-> `route('account.settings')`. Option B (adding a `settings.user` named
-> alias) is no longer relevant.
-
-**Fix.** One-line change:
-
-```php
-// app/Http/Controllers/Admin/Account/Settings.php (around line 57)
-return redirect()
-    ->route('account.settings')              // was: settings.user
-    ->with('success', 'Your preferences have been saved.');
-```
-
-**Cleanup follow-up.** `resources/views/admin/settings/user.twig` is
-now an orphan view (no route binds it). Its body still contains two
-`route('settings.user')` / `route('settings.user.update')` calls that
-would error if anyone tried to render it. Delete the file:
-
-```bash
-rm resources/views/admin/settings/user.twig
-```
-
-**Consequences.**
-
-- Pro: the user-preferences form completes successfully on save.
-- Con: nothing — the redirect target view (`account.settings`) is the
-  same screen the user came from, so the post-save UX is identical to
-  the form rendering it expected.
+> **Status: Resolved.** `Admin\Account\Settings::update()` now redirects
+> to `route('account.settings')`. Verified against
+> `app/Http/Controllers/Admin/Account/Settings.php` lines 56–58. The
+> user-preferences form completes cleanly on save.
+>
+> **Residual follow-up (Low).** The orphan view
+> `resources/views/admin/settings/user.twig` is still present. No
+> route binds it, so it's dead code today, but its body contains two
+> `route('settings.user')` and `route('settings.user.update')` calls
+> that would 500 if anyone ever did render it. Recommend deleting it
+> in the next cleanup pass:
+>
+> ```bash
+> rm resources/views/admin/settings/user.twig
+> ```
 
 ### R-3 — `Api\v1\User::index` permission typo (High)
 
@@ -3836,11 +3947,13 @@ strings.
 > Verified: no remaining `App\Http\Controllers\Admin\Settings\UserSettings`
 > imports anywhere in `app/`, `routes/`, or `resources/`.
 >
-> **Residual cleanup:** the orphan view
+> **Residual cleanup (Low).** The orphan view
 > `resources/views/admin/settings/user.twig` still exists and contains
 > two `route('settings.user')` calls. No route binds it, so it's
-> harmless today, but `rm` it as part of the R-2 fix to remove the
-> trip hazard. See [Accuracy Notes Log](#accuracy-notes-log) item 18.
+> harmless today, but it should be deleted to remove the trip hazard.
+> R-2 (the redirect-target fix that was originally the natural companion
+> to this deletion) has since been completed independently. See
+> [Accuracy Notes Log](#accuracy-notes-log) item 18.
 
 ### R-5 — `Admin\Settings\Domain::index` unrouted (Low)
 
@@ -4803,9 +4916,10 @@ picks one.
 > deleted. Subsequent tutorials and docs should reference the
 > `account.settings` route name and `account.settings.twig` view only.
 >
-> Open follow-ups (not ambivalences, just cleanup): R-2 (one-line
-> redirect target fix in `Admin\Account\Settings::update()`) and
-> deletion of the orphan `resources/views/admin/settings/user.twig`.
+> Open follow-up (cleanup only): deletion of the orphan view
+> `resources/views/admin/settings/user.twig`. R-2 (the redirect-target
+> fix on `Admin\Account\Settings::update()`) was completed
+> independently on the same day.
 
 ### A-3 — `Admin\Field::index` is intentional 404 vs scaffolding mistake
 
@@ -4814,42 +4928,33 @@ this was a deliberate signal ("fields have no flat list") or an
 incomplete scaffold. R-12 picks A on the assumption it's intentional.
 Confirm before the cleanup.
 
-### A-4 — `MediaPicker` route and controller — undocumented
+### A-4 — `MediaPicker` route and controller — undocumented (Resolved 2026-05-26)
 
-`routes/admin.php:89` registers `media.picker.index` →
-`Admin\MediaPicker::index`. Neither this document nor the broader docs
-mention what the picker is, who uses it, or its expected payload shape.
-Worth a short section before it acquires consumers.
+> **Resolved.** Documented under
+> [Media Library → Media Picker Endpoint](#media-picker-endpoint) and
+> added as a row in the [Admin Route Map](#admin-route-map). The
+> picker is a JSON endpoint (`GET /admin/media/picker`,
+> `media.picker.index`) that backs the `FileUpload` / `Media` field
+> picker chip UIs — it returns paginated media filtered by
+> `library_id[]`, with `picker`-keyed thumbnails (240×240 `cover`) for
+> images. Reference the section by anchor; do not re-explain inline.
 
-### A-5 — `Money` field: storage convention is correct but undocumented in OVERVIEW
+### A-5 — `Money` field: storage convention (Resolved 2026-05-26)
 
-> **Tertiary-review correction.** An earlier draft of this entry asserted
-> the minor-units convention was implicit and unenforced. Re-reading
-> `app/Field/Types/Money.php` shows the opposite: the field type enforces
-> minor units via `moneyphp/moneyphp` — `prepareForStorage()` parses a
-> decimal string with the configured ISO 4217 currency and throws
-> `InvalidArgumentException` on excess fractional digits; `value()`
-> returns a `Money\Money` instance; the currency code is a required
-> setting on the field. Behaviour is well-formed.
-
-What's *actually* worth flagging:
-
-- The storage column is `value_integer` — a single 64-bit signed integer
-  for the value. Currency lives in field settings, not next to the value.
-  This means a single Field instance is single-currency. If a use-case
-  ever needs multi-currency on the same field handle (e.g. "price in
-  whatever currency this entry is set to"), the model doesn't support it.
-- The convention "stored as integer minor units" is true at the column
-  level but **invisible at the model level** — `$entry->field('price')`
-  returns a `Money\Money` value object, not the raw integer. That's the
-  right surface, but the column-level documentation in OVERVIEW.md
-  should not leak the integer.
-- The field's row in the `FieldType` registry uses `value_integer`. Any
-  custom report or admin query reading the raw column needs to know the
-  scale comes from the field's `currency` setting, not from the schema.
-
-No code action required unless we add multi-currency support; just keep
-the documentation honest.
+> **Resolved.** A focused "Money field — design notes" subsection is
+> now under [Field Types → Built-in Types](#built-in-types). The
+> subsection records: (a) the integer minor-unit storage contract and
+> the `moneyphp/moneyphp` parser/formatter chain; (b) the no-implicit-
+> rounding write guard; (c) the read API (`Money\Money` value object);
+> (d) the deliberate **single-currency-per-field-instance** design
+> choice with two intended escape hatches (per-currency field handles
+> today, a future "Currency" field type tomorrow); (e) the awareness
+> note that raw-column readers must consult the field's `currency`
+> setting because the schema doesn't carry it.
+>
+> No code action required. If a multi-currency-per-instance
+> requirement ever lands, re-open as a fresh recommendation (R-N+1)
+> at that time.
 
 ### A-6 — `Entry::redirect_url` validation vs `EntryTree::redirect_url` storage
 
@@ -4937,18 +5042,32 @@ corrections made in the 2026-05-26 refresh pass:
 15. **Permission strings**: `view user` and `read users` are both
     seeded; the remaining drift is the typo in `Api\v1\User::index`
     (R-3).
-16. **`Money` field rounding convention**: not asserted yet; see
-    Ambivalence A-5.
+16. **`Money` field design**: documented in
+    [Built-in Types → Money field — design notes](#built-in-types) as
+    of 2026-05-26 (closes Ambivalence A-5). Storage contract, write
+    guard, read API, and single-currency-per-field design choice are
+    all asserted there.
 17. **`entries.schema_type` / `entry_types.default_schema_type`**:
     columns exist but are reserved for SEO plan work; see Ambivalence
     A-9.
 18. **`Admin\Settings\UserSettings` deleted (2026-05-26)**: the
     duplicate user-settings controller has been removed. Decision
     recorded in Ambivalence A-2 (now resolved); R-4 marked Resolved
-    above. The orphan `resources/views/admin/settings/user.twig`
-    view still exists and should be deleted alongside the R-2 fix.
-    `Admin\Account\Settings` is now the single canonical user-settings
-    controller.
+    above. `Admin\Account\Settings` is now the single canonical
+    user-settings controller.
+19. **R-2 redirect target fixed (2026-05-26)**:
+    `Admin\Account\Settings::update()` now redirects to
+    `route('account.settings')`. The `RouteNotFoundException` on
+    `PUT /admin/account/settings` no longer fires. The orphan
+    `resources/views/admin/settings/user.twig` view remains as dead
+    code containing broken `route('settings.user')` calls; flagged as
+    a Low-severity residual cleanup under the R-2 entry.
+20. **`MediaPicker` endpoint documented (2026-05-26)**: closes
+    Ambivalence A-4. New
+    [Media Picker Endpoint](#media-picker-endpoint) section under
+    Media Library, plus a row in the Admin Route Map. Documents the
+    JSON shape, query parameters, validation rules, and thumbnail
+    behaviour. No code change.
 
 ### Items absorbed from ALPHA_READINESS_REPORT.md (2026-05-26)
 

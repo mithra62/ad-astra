@@ -78,7 +78,11 @@
       "Bash(grep -nE '\\\\$this->can\\\\\\(' D:/Projects/mithra62/laravel-base/develop/app/Http/Controllers/Api/v1/Entries.php)",
       "Bash(grep -nE '\\\\$this->can\\\\\\(' D:/Projects/mithra62/laravel-base/develop/app/Http/Controllers/Api/v1/User.php)",
       "Bash(echo \"--- 2. Any code references to Admin\\\\\\\\Settings\\\\\\\\UserSettings? ---\")",
-      "Bash(grep -rn 'Admin\\\\\\\\\\\\\\\\Settings\\\\\\\\\\\\\\\\UserSettings\\\\|App\\\\\\\\\\\\\\\\Http\\\\\\\\\\\\\\\\Controllers\\\\\\\\\\\\\\\\Admin\\\\\\\\\\\\\\\\Settings\\\\\\\\\\\\\\\\UserSettings' D:/Projects/mithra62/laravel-base/develop/app D:/Projects/mithra62/laravel-base/develop/routes D:/Projects/mithra62/laravel-base/develop/resources)"
+      "Bash(grep -rn 'Admin\\\\\\\\\\\\\\\\Settings\\\\\\\\\\\\\\\\UserSettings\\\\|App\\\\\\\\\\\\\\\\Http\\\\\\\\\\\\\\\\Controllers\\\\\\\\\\\\\\\\Admin\\\\\\\\\\\\\\\\Settings\\\\\\\\\\\\\\\\UserSettings' D:/Projects/mithra62/laravel-base/develop/app D:/Projects/mithra62/laravel-base/develop/routes D:/Projects/mithra62/laravel-base/develop/resources)",
+      "Bash(echo \"--- 3. Current Admin\\\\\\\\Account\\\\\\\\Settings::update\\(\\) ---\")",
+      "Bash(sed -n '50,62p' D:/Projects/mithra62/laravel-base/develop/app/Http/Controllers/Admin/Account/Settings.php)",
+      "Bash(echo \"--- 2. Mentions of MediaPicker / media\\\\\\\\.picker: ---\")",
+      "Bash(echo \"--- 3. Mentions of settings\\\\\\\\.user \\(should be zero in active claims\\): ---\")"
     ]
   }
 }
