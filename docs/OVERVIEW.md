@@ -392,9 +392,13 @@ Coverage currently includes:
 php artisan app:validate-class-references
 ```
 
-Checks that every class name in `entry_types.class` and `field_types.object`
-resolves to a live class satisfying the expected base type. Exits with
-`FAILURE` if any reference is broken — wire into CI before deploys.
+Checks that every class-name string stored in the database still resolves
+to a real class. Iterates `entry_behaviors.class` (each row holds a morph
+alias such as `behavior.blog-post`) — resolves via `Relation::getMorphedModel()`
+and verifies the result extends `AbstractEntryType` — then iterates
+`field_types.object` (FQCN strings) and verifies each extends
+`AbstractField`. Exits with `FAILURE` if any reference is broken — wire
+into CI before deploys.
 
 Polymorphic stability via **Eloquent Morph Maps** in `AppServiceProvider::boot()`:
 
@@ -756,14 +760,33 @@ use App\Models\UserSchema;
 
 $text = FieldType::where('object', \App\Field\Types\Text::class)->firstOrFail();
 
-$firstName = Field::firstOrCreate(['handle' => 'first_name'], ['field_type_id' => $text->id, 'name' => 'First Name', 'label' => 'First Name']);
-$lastName  = Field::firstOrCreate(['handle' => 'last_name'], ['field_type_id' => $text->id, 'name' => 'Last Name', 'label' => 'Last Name']);
+$firstName = Field::firstOrCreate(
+    ['handle' => 'first_name'],
+    [
+        'field_type_id' => $text->id,
+        'name' => 'First Name',
+        'label' => 'First Name',
+    ]
+);
 
-$group = FieldGroup::firstOrCreate(['handle' => 'user-profile'], ['name' => 'User Profile']);
+$lastName = Field::firstOrCreate(
+    ['handle' => 'last_name'],
+    [
+        'field_type_id' => $text->id,
+        'name' => 'Last Name',
+        'label' => 'Last Name',
+    ]
+);
+
+$group = FieldGroup::firstOrCreate(
+    ['handle' => 'user-profile'],
+    ['name' => 'User Profile']
+);
+
 $group->fields()->syncWithoutDetaching([$firstName->id, $lastName->id]);
 
 $layout = FieldLayout::create(['name' => 'User Profile Layout']);
-$tab    = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Profile', 'sort_order' => 1]);
+$tab = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Profile', 'sort_order' => 1]);
 
 foreach ([$firstName, $lastName] as $i => $field) {
     TabElement::create([
@@ -1078,7 +1101,7 @@ $setup = Users::enableTwoFactor($user);
 Users::confirmTwoFactor($user, '123456'); // throws ValidationException if wrong
 Users::hasTwoFactor($user);              // true after confirmation
 
-$codes    = Users::getRecoveryCodes($user);
+$codes = Users::getRecoveryCodes($user);
 $newCodes = Users::regenerateRecoveryCodes($user);
 Users::disableTwoFactor($user);
 ```
@@ -1469,8 +1492,8 @@ use App\Field\AbstractField;
 class Toggle extends AbstractField
 {
     protected string $handle = 'toggle';
-    protected string $name   = 'Toggle';
-    protected array  $rules  = ['boolean'];
+    protected string $name = 'Toggle';
+    protected array $rules = ['boolean'];
 
     public function storageColumn(): string { return 'value_boolean'; }
     public function cast(mixed $value): bool { return (bool) $value; }
@@ -1541,7 +1564,7 @@ use App\Models\FieldLayout;
 use App\Models\FieldLayout\Tab;
 use App\Models\FieldLayout\TabElement;
 
-$layout     = FieldLayout::create(['name' => 'Article Layout']);
+$layout = FieldLayout::create(['name' => 'Article Layout']);
 $contentTab = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Content', 'sort_order' => 1]);
 
 foreach (['body', 'excerpt'] as $order => $handle) {
@@ -1589,11 +1612,34 @@ $group = StatusGroup::create([
     'sort_order' => 2,
 ]);
 
-foreach ([
-    ['name' => 'Pending Review', 'handle' => 'pending', 'color' => '#F59E0B', 'is_default' => true, 'is_public' => false, 'sort_order' => 1],
-    ['name' => 'Approved', 'handle' => 'approved', 'color' => '#10B981', 'is_default' => false, 'is_public' => true, 'sort_order' => 2],
-    ['name' => 'Rejected', 'handle' => 'rejected', 'color' => '#EF4444', 'is_default' => false, 'is_public' => false, 'sort_order' => 3],
-] as $s) {
+$statuses = [
+    [
+        'name' => 'Pending Review',
+        'handle' => 'pending',
+        'color' => '#F59E0B',
+        'is_default' => true,
+        'is_public' => false,
+        'sort_order' => 1,
+    ],
+    [
+        'name' => 'Approved',
+        'handle' => 'approved',
+        'color' => '#10B981',
+        'is_default' => false,
+        'is_public' => true,
+        'sort_order' => 2,
+    ],
+    [
+        'name' => 'Rejected',
+        'handle' => 'rejected',
+        'color' => '#EF4444',
+        'is_default' => false,
+        'is_public' => false,
+        'sort_order' => 3,
+    ],
+];
+
+foreach ($statuses as $s) {
     Status::create(array_merge($s, ['status_group_id' => $group->id]));
 }
 ```
@@ -1708,7 +1754,7 @@ $fieldGroup->fields()->syncWithoutDetaching([$description->id, $imageUrl->id]);
 
 // 3. Layout
 $layout = FieldLayout::create(['name' => 'Topic Category Layout']);
-$tab    = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Details', 'sort_order' => 1]);
+$tab = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Details', 'sort_order' => 1]);
 foreach ([$description, $imageUrl] as $i => $field) {
     TabElement::create([
         'field_layout_tab_id' => $tab->id,
@@ -1881,24 +1927,37 @@ safe validation/update logic that needs to inspect an existing field value.
 | `resolveByHandle()`     | `EntryService::create()`        | Looks up the first `entry_types.handle` match globally and caches by handle |
 | `resolveByRecord()`     | `EntryService::update()`        | Instantiates from the entry's existing `EntryType` row and caches by ID |
 
-The database allows `entry_types.class` to be nullable, and the registry falls
-back to `GeneralEntryType` when the class is null/empty or the named class is
-missing. The current admin create/edit form requests and `EntryTypeService`
-still require `class` and validate it with `ExtendsClass(AbstractEntryType::class)`.
+`entry_types.entry_behavior_id` is nullable. When a row's behaviour FK is
+null (or the linked behaviour's morph key has gone missing from
+`AppServiceProvider::boot()`), `EntryTypeRegistry::instantiate()` returns
+`GeneralEntryType` as a fallback. When the linked behaviour resolves but
+the resulting PHP class either doesn't exist or doesn't extend
+`AbstractEntryType`, `EntryBehavior::instance()` throws `RuntimeException`
+— that's a deploy-time failure, not a silent fallback.
+
+`StoreEntryTypeRequest` and `EditEntryTypeRequest` validate
+`entry_behavior_id` as `['nullable', 'integer', 'exists:entry_behaviors,id']`.
+The standalone `ExtendsClass` validation rule still lives in
+`app/Rules/ExtendsClass.php` but is **not** wired into the EntryType
+requests — the morph-alias indirection means the class linkage is now a
+deploy-time invariant (`app:validate-class-references`), not a form-time one.
+
 In practice:
 
-- Seeder-created types use explicit concrete classes.
-- Programmatic/database-created types can leave `class` empty and get
-  `GeneralEntryType` behavior.
-- Admin-created types currently need a valid concrete class name.
-- Existing but invalid classes throw `RuntimeException` instead of falling back.
+- Seeder-created types reference a concrete `entry_behaviors` row.
+- Programmatic types can leave `entry_behavior_id` null and get
+  `GeneralEntryType` behaviour.
+- Admin-created types can also leave the behaviour empty (the form field
+  is nullable). Pick a behaviour when the type needs hooks or validation.
+- Existing rows whose behaviour resolves to a missing or wrong-shape PHP
+  class throw `RuntimeException` at lookup time rather than falling back.
 
 ### Field Layering: Group Fields + Type Fields
 
 ```php
 // From EntryRepository::resolveLayoutFields()
 $groupFields = $entry->entryGroup->fieldLayout?->fields() ?? collect();
-$typeFields  = $entry->entryType->fieldLayout?->fields() ?? collect();
+$typeFields = $entry->entryType->fieldLayout?->fields() ?? collect();
 
 return $typeFields->merge($groupFields)->unique('id'); // type-level fields take precedence
 ```
@@ -1979,7 +2038,7 @@ use App\Models\EntryBehavior;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 
-$group    = EntryGroup::where('handle', 'news')->firstOrFail();
+$group = EntryGroup::where('handle', 'news')->firstOrFail();
 $behavior = EntryBehavior::where('handle', 'news-article')->firstOrFail();
 // EntryBehavior row was created by EntryBehaviorSeeder with
 // class = 'behavior.news-article' (a morph alias registered in
@@ -2016,22 +2075,51 @@ use App\Models\Field;
 use App\Models\Field\Group as FieldGroup;
 use App\Models\Field\Type as FieldType;
 
-$text     = FieldType::where('object', \App\Field\Types\Text::class)->firstOrFail();
+$text = FieldType::where('object', \App\Field\Types\Text::class)->firstOrFail();
 $textarea = FieldType::where('object', \App\Field\Types\Textarea::class)->firstOrFail();
-$number   = FieldType::where('object', \App\Field\Types\Number::class)->firstOrFail();
+$number = FieldType::where('object', \App\Field\Types\Number::class)->firstOrFail();
 
 $fieldDefs = [
-    ['handle' => 'ingredients', 'name' => 'Ingredients', 'label' => 'Ingredients', 'type' => $textarea],
-    ['handle' => 'instructions', 'name' => 'Instructions', 'label' => 'Instructions', 'type' => $textarea],
-    ['handle' => 'prep_time_mins', 'name' => 'Prep Time', 'label' => 'Prep Time (min)', 'type' => $number],
-    ['handle' => 'servings', 'name' => 'Servings', 'label' => 'Servings', 'type' => $number],
-    ['handle' => 'video_url', 'name' => 'Video URL', 'label' => 'Video URL', 'type' => $text],
+    [
+        'handle' => 'ingredients',
+        'name' => 'Ingredients',
+        'label' => 'Ingredients',
+        'type' => $textarea,
+    ],
+    [
+        'handle' => 'instructions',
+        'name' => 'Instructions',
+        'label' => 'Instructions',
+        'type' => $textarea,
+    ],
+    [
+        'handle' => 'prep_time_mins',
+        'name' => 'Prep Time',
+        'label' => 'Prep Time (min)',
+        'type' => $number,
+    ],
+    [
+        'handle' => 'servings',
+        'name' => 'Servings',
+        'label' => 'Servings',
+        'type' => $number,
+    ],
+    [
+        'handle' => 'video_url',
+        'name' => 'Video URL',
+        'label' => 'Video URL',
+        'type' => $text,
+    ],
 ];
 
 foreach ($fieldDefs as $def) {
     Field::firstOrCreate(
         ['handle' => $def['handle']],
-        ['name' => $def['name'], 'label' => $def['label'], 'field_type_id' => $def['type']->id]
+        [
+            'name' => $def['name'],
+            'label' => $def['label'],
+            'field_type_id' => $def['type']->id,
+        ]
     );
 }
 
@@ -2049,7 +2137,7 @@ use App\Models\FieldLayout\TabElement;
 
 // Shared group layout
 $groupLayout = FieldLayout::create(['name' => 'Recipe Group Layout']);
-$recipeTab   = Tab::create(['field_layout_id' => $groupLayout->id, 'name' => 'Recipe', 'sort_order' => 1]);
+$recipeTab = Tab::create(['field_layout_id' => $groupLayout->id, 'name' => 'Recipe', 'sort_order' => 1]);
 
 foreach (Field::whereIn('handle', ['ingredients', 'instructions', 'prep_time_mins', 'servings'])->get() as $i => $field) {
     TabElement::create([
@@ -2062,7 +2150,7 @@ foreach (Field::whereIn('handle', ['ingredients', 'instructions', 'prep_time_min
 
 // Video-specific type layout
 $videoLayout = FieldLayout::create(['name' => 'Video Recipe Layout']);
-$videoTab    = Tab::create(['field_layout_id' => $videoLayout->id, 'name' => 'Video', 'sort_order' => 1]);
+$videoTab = Tab::create(['field_layout_id' => $videoLayout->id, 'name' => 'Video', 'sort_order' => 1]);
 TabElement::create([
     'field_layout_tab_id' => $videoTab->id,
     'field_id' => Field::where('handle', 'video_url')->value('id'),
@@ -2193,7 +2281,7 @@ $videoRecipe = Content::create('video_recipe', [
 
 // Query
 $allRecipes = Content::query()->inGroup('recipes')->published()->get();
-$videos     = Content::query()->ofType('video_recipe')->published()->latest()->paginate(12);
+$videos = Content::query()->ofType('video_recipe')->published()->latest()->paginate(12);
 
 echo $recipe->field('ingredients');
 echo $videoRecipe->field('video_url');
@@ -2217,7 +2305,7 @@ use App\Facades\Content;
 use App\Models\Category;
 use App\Models\User;
 
-$author   = User::find(1);
+$author = User::find(1);
 $category = Category::where('handle', 'france')->firstOrFail();
 
 $entry = Content::create('news_article', [
@@ -2343,7 +2431,7 @@ $myPosts = Content::query()->inGroup('blog')->withAuthor(Auth::id())->latest()->
 
 // By category
 $technology = Category::where('handle', 'technology')->firstOrFail();
-$techPosts  = Content::query()
+$techPosts = Content::query()
     ->inGroup('blog')
     ->withCategory($technology->id)
     ->published()
@@ -3323,10 +3411,10 @@ The custom field layer used by Entries, Categories, and Users is reusable on
 any Eloquent model that should store dynamic, admin-defined scalar field values.
 The two reusable pieces are:
 
-1. **`Fieldable` trait** (`app/Traits/Fieldable.php`) - adds `fieldValues()`
+1. **`Fieldable` trait** (`app/Traits/Field/Fieldable.php`) - adds `fieldValues()`
    (morphMany to `field_values`), `field(string $handle): mixed`, and
    `fieldArray(): array`.
-2. **`PersistsFieldValues` trait** (`app/Traits/PersistsFieldValues.php`) -
+2. **`PersistsFieldValues` trait** (`app/Traits/Field/PersistsFieldValues.php`) -
    adds `setField()` and `setFields()` for writing.
 
 Use this pattern for any model that needs custom fields, such as media,
@@ -3371,7 +3459,8 @@ Add `Fieldable` to the Eloquent model that should read custom field values:
 // app/Models/ProductVariant.php
 namespace App\Models;
 
-use App\Traits\Field\Fieldable;use Illuminate\Database\Eloquent\Model;
+use App\Traits\Field\Fieldable;
+use Illuminate\Database\Eloquent\Model;
 
 class ProductVariant extends Model
 {
@@ -3444,7 +3533,10 @@ requires `Field` rows and the `Fieldable` model.
 correct value for `fieldable_type`.
 
 ```php
-use App\Models\Field;use App\Models\FieldValue;use App\Models\ProductVariant;use App\Traits\Field\PersistsFieldValues;
+use App\Models\Field;
+use App\Models\FieldValue;
+use App\Models\ProductVariant;
+use App\Traits\Field\PersistsFieldValues;
 
 // Option A - via PersistsFieldValues in a service
 class ProductVariantFieldService
