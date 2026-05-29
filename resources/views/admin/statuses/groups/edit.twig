@@ -1,5 +1,7 @@
 {% extends 'admin._inc._layout' %}
 
+{% import 'admin._inc._form-fields' as forms %}
+
 {% set page_title = 'Edit Status Group' %}
 {% set page_heading = 'Status Groups' %}
 {% set active_nav = 'content' %}
@@ -64,26 +66,11 @@
                     <h5 class="text-sm font-semibold text-slate-700">Status Group Details</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
-                        <input value="{{ old('name', group.name) }}" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
-                        {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
-                        <input class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" value="{{ old('handle', group.handle) }}" >
-                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
-                        {% if errors.has('handle') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>{% endif %}
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="sort_order">Sort Order</label>
-                        <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="sort_order" name="sort_order" type="number" min="0" value="{{ old('sort_order', 0) }}">
-                    </div>
-                    </div>
+                    {{ forms.input(name='name', label='Name', value=group.name, required=true) }}
+                    {{ forms.input('handle', 'Handle', value=group.handle, required=true) }}
+                    {{ forms.input('sort_order', 'Sort Order', type="number", value=group.sort_order, required=true) }}
                 </div>
-
+            </div>
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
                 <a href="{{ route('entries.groups.show', group) }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Cancel</a>
                 <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Edit Status Group</button>

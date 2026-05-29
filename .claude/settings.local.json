@@ -85,7 +85,11 @@
       "Bash(echo \"--- 3. Mentions of settings\\\\\\\\.user \\(should be zero in active claims\\): ---\")",
       "Bash(grep -rn 'typeInstance\\(\\)->validate\\\\b\\\\|fieldType.*->validate\\\\b\\\\|$instance->validate\\\\b' D:/Projects/mithra62/laravel-base/develop/app)",
       "Bash(grep -v \"AbstractEntryType\\\\|FormRequest::\\\\|EntryService\\\\|Validator::\\\\|ValidationRule\\\\|Validation\\\\\\\\\\\\\\\\Rule\")",
-      "Bash(grep -nE \"^##### \\\\`[A-Z]\" D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)"
+      "Bash(grep -nE \"^##### \\\\`[A-Z]\" D:/Projects/mithra62/laravel-base/develop/docs/OVERVIEW.md)",
+      "Bash(Get-ChildItem -Path \"D:\\\\Projects\\\\mithra62\\\\laravel-base\\\\develop\\\\app\\\\Field\" -Recurse -Include \"*.php\")",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"D:\\\\Projects\\\\mithra62\\\\laravel-base\\\\develop\" -Recurse -Include \"*Field*\" -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }
