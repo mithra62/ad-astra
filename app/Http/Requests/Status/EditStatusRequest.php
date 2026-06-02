@@ -16,12 +16,35 @@ class EditStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'handle' => ['required', 'string', 'max:255', new UniqueHandleByGroup(['status_id' => $this->route('status')])],
-            'color' => ['nullable', 'string', 'max:20'],
-            'is_default' => ['nullable', 'boolean'],
-            'is_public' => ['nullable', 'boolean'],
-            'sort_order' => ['required', 'integer', 'min:0'],
+            'name' => [
+                'required',
+                'string',
+                'max:255'
+            ],
+            'handle' => [
+                'required',
+                'string',
+                'max:255',
+                new UniqueHandleByGroup(['status_id' => $this->route('status')])
+            ],
+            'color' => [
+                'nullable',
+                'string',
+                'max:20'
+            ],
+            'is_default' => [
+                'nullable',
+                'boolean'
+            ],
+            'is_public' => [
+                'nullable',
+                'boolean'
+            ],
+            'sort_order' => [
+                'required',
+                'integer',
+                'min:0'
+            ],
         ];
     }
 }

@@ -72,13 +72,13 @@
                 <div class="space-y-5 px-5 py-5">
                     {{ forms.input(name='name', label='Name', required=true, placeholder="e.g. Open, Closed, etc...") }}
                     {{ forms.input('handle', 'Handle', required=true, description="Lowercase letters, numbers, and hyphens only.") }}
-                        {{ forms.color(
-                            name: 'color',
-                            label: 'Color',
-                            value: '#10b981',
-                            description: 'Used for this user avatar, labels, and personalized admin highlights.',
-                            id: 'accent_color'
-                        ) }}
+                    {{ forms.color(
+                        name: 'color',
+                        label: 'Color',
+                        value: '#10b981',
+                        description: 'Used for this user avatar, labels, and personalized admin highlights.',
+                        id: 'accent_color'
+                    ) }}
 
                     {{ forms.toggle(
                         name: 'is_default',
