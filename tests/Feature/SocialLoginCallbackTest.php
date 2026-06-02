@@ -19,6 +19,12 @@ class SocialLoginCallbackTest extends TestCase
         $socialUser = Mockery::mock();
         $socialUser->shouldReceive('getEmail')->andReturn($email);
         $socialUser->shouldReceive('getName')->andReturn($name);
+        $socialUser->shouldReceive('getNickname')->andReturn(null);
+        $socialUser->shouldReceive('getId')->andReturn('social-id-123');
+        $socialUser->token = 'access-token';
+        $socialUser->refreshToken = null;
+        $socialUser->expiresIn = null;
+        $socialUser->accessTokenResponseBody = [];
 
         $driver = Mockery::mock(Provider::class);
         $driver->shouldReceive('user')->andReturn($socialUser);
