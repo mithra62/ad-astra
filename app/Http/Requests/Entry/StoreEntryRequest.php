@@ -71,13 +71,13 @@ class StoreEntryRequest extends FormRequest
                 'categories.*' => [
                     'integer',
                     'exists:categories,id',
-                    Rule::exists('categories', 'id')->where(fn($q) => $q->whereIn(
-                        'group_id',
-                        \DB::table('category_groupables')
-                            ->where('group_type', (new EntryGroup)->getMorphClass())
-                            ->where('group_id', $this->route()->parameter('group_id'))
-                            ->pluck('group_id')
-                    )),
+//                    Rule::exists('categories', 'id')->where(fn($q) => $q->whereIn(
+//                        'group_id',
+//                        \DB::table('category_groupables')
+//                            ->where('category_groupable_type', (new EntryGroup)->getMorphClass())
+//                            ->where('category_groupable_id', $this->route()->parameter('group_id'))
+//                            ->pluck('group_id')
+//                    )),
                 ],
                 'fields' => [
                     'nullable',

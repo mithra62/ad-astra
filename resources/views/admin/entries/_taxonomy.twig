@@ -54,6 +54,9 @@
                 </label>
                     {% endfor %}
             </div>
+            {% if errors.has('categories') %}
+                <p class="mt-1 text-xs text-red-600">{{ errors.first('categories') }}</p>
+            {% endif %}
         </div>
             {% endfor %}
         {% endif %}

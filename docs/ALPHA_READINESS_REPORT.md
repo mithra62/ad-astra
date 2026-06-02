@@ -729,8 +729,8 @@ Any category ID is acceptable, even from a `CategoryGroup` not attached to this 
     Rule::exists('categories', 'id')->where(fn ($q) => $q->whereIn(
         'group_id',
         \DB::table('category_groupables')
-           ->where('group_type', (new \App\Models\EntryGroup)->getMorphClass())
-           ->where('group_id', $this->route()->parameter('group_id'))
+           ->where('category_groupable_type', (new \App\Models\EntryGroup)->getMorphClass())
+           ->where('category_groupable_id', $this->route()->parameter('group_id'))
            ->pluck('group_id')
     )),
 ],
