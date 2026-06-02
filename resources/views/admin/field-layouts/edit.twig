@@ -29,7 +29,7 @@
 {% endblock %}
 
 {% block secondary_sidebar %}
-    {{ include('admin.field-layouts._sidebar', {active: category.group.id}) }}
+    {{ include('admin.field-layouts._sidebar', {active: layout.id}) }}
 {% endblock %}
 
 {% block content %}
@@ -65,19 +65,8 @@
                     <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
-                        <input value="{{ old('name', layout.name) }}" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
-                        {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
-                        <input value="{{ old('handle', layout.handle) }}" class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" >
-                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
-                        {% if errors.has('handle') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>{% endif %}
-                    </div>
-
+                    {{ forms.input(name='name', label='Name', required=true, value=layout.name) }}
+                    {{ forms.input('handle', 'Handle', required=true, value=layout.handle) }}
                 </div>
             </div>
 

@@ -70,28 +70,8 @@
                     <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span
-                                class="text-red-500">*</span></label>
-                        <input value="{{ old('name') }}"
-                               class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2"
-                               id="name" name="name" type="text" placeholder="">
-                        {% if errors.has('name') %}
-                            <p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span
-                                class="text-red-500">*</span></label>
-                        <input
-                            class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
-                            id="handle" name="handle" type="text" value="{{ old('handle') }}">
-                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
-                        {% if errors.has('handle') %}
-                            <p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>
-                        {% endif %}
-                    </div>
+                    {{ forms.input(name='name', label='Name', required=true) }}
+                    {{ forms.input('handle', 'Handle', required=true, description="Lowercase letters, numbers, and hyphens only.") }}
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="entry_behavior_id">Behavior</label>
@@ -131,29 +111,8 @@
                     {% set entry_tree_enabled = old('has_entry_tree') == '1' %}
                     <div id="entry-tree-settings" class="{% if not entry_tree_enabled %}hidden {% endif %}rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
                         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                            <div>
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="max_depth">Max Depth</label>
-                                <input
-                                    class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 {% if errors.has('max_depth') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
-                                    id="max_depth" name="max_depth" type="number" min="0"
-                                    value="{{ old('max_depth') }}"
-                                    {% if errors.has('max_depth') %}aria-invalid="true" aria-describedby="max_depth-error"{% endif %}>
-                                {% if errors.has('max_depth') %}
-                                    <p id="max_depth-error" class="mt-1 text-xs text-red-600">{{ errors.first('max_depth') }}</p>
-                                {% endif %}
-                            </div>
-
-                            <div>
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="default_template">Default Template</label>
-                                <input
-                                    class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 {% if errors.has('default_template') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
-                                    id="default_template" name="default_template" type="text"
-                                    value="{{ old('default_template') }}" placeholder="entries/default"
-                                    {% if errors.has('default_template') %}aria-invalid="true" aria-describedby="default_template-error"{% endif %}>
-                                {% if errors.has('default_template') %}
-                                    <p id="default_template-error" class="mt-1 text-xs text-red-600">{{ errors.first('default_template') }}</p>
-                                {% endif %}
-                            </div>
+                            {{ forms.input(name='max_depth', label='Max Depth', type="number", required=true) }}
+                            {{ forms.input(name='default_template', label='Default Template', required=true) }}
                         </div>
                     </div>
 
