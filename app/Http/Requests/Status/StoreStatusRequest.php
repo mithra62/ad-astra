@@ -21,7 +21,7 @@ class StoreStatusRequest extends FormRequest
             'color' => ['nullable', 'string', 'max:20'],
             'is_default' => ['nullable', 'boolean'],
             'is_public' => ['nullable', 'boolean'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'sort_order' => ['required', 'integer', 'min:0'],
             'status_group_id' => ['integer', 'exists:status_groups,id'],
         ];
     }

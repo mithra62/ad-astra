@@ -63,18 +63,6 @@
             </a>
         </div>
 
-        <div class="rounded-lg border border-sky-200 bg-sky-50 p-4">
-            <div class="flex items-start gap-3">
-                <svg class="mt-0.5 h-5 w-5 shrink-0 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <div>
-                    <p class="text-sm font-semibold text-sky-800">Create a new reusable item.</p>
-                    <p class="mt-1 text-sm text-sky-700">Handles should be stable once this item is used by content or templates.</p>
-                </div>
-            </div>
-        </div>
-
         <form id="general-create-form" method="POST" action="{{ route('categories.update', category) }}" class="flex w-full min-w-0 flex-col gap-5">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
@@ -83,18 +71,9 @@
                     <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
-                        <input value="{{ old('name', category.name) }}" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
-                        {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
-                    </div>
 
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
-                        <input value="{{ old('handle', category.handle) }}" class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" >
-                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
-                        {% if errors.has('handle') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>{% endif %}
-                    </div>
+                    {{ forms.input(name='name', label='Name', required=true, placeholder="", value=category.name) }}
+                    {{ forms.input('handle', 'Handle', required=true, description="Lowercase letters, numbers, and hyphens only.", value=category.handle) }}
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Parent Category</label>
                         <select class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('parent_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="parent_id" name="parent_id">
