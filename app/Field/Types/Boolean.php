@@ -11,7 +11,9 @@ class Boolean extends AbstractField
     protected string $name = 'Boolean';
 
     protected array $rules = [
+        'required',
         'boolean',
+        'in:true,false,1,0'
     ];
 
     protected array $settings_form = [
