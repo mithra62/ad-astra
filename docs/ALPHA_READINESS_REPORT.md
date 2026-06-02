@@ -731,7 +731,7 @@ Any category ID is acceptable, even from a `CategoryGroup` not attached to this 
         \DB::table('category_groupables')
            ->where('group_type', (new \App\Models\EntryGroup)->getMorphClass())
            ->where('group_id', $this->route()->parameter('group_id'))
-           ->pluck('category_group_id')
+           ->pluck('group_id')
     )),
 ],
 ```

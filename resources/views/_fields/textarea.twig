@@ -1,2 +1,2 @@
 <textarea class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="{{ id }}" name="fields[{{ field.handle }}]"
-          placeholder="{{ field.instructions }}" rows="3">{{ old('fields.' ~ field.handle, value) }}</textarea>
+          placeholder="{{ field.instructions }}" rows="{{ field.settings.rows }}">{{ old('fields.' ~ field.handle, value) }}</textarea>
