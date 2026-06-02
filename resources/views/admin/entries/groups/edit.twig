@@ -71,18 +71,8 @@
                     <h5 class="text-sm font-semibold text-slate-700">Entry Group Details</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
-                        <input value="{{ old('name', group.name) }}" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
-                        {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
-                        <input class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" value="{{ old('handle', group.handle) }}" >
-                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
-                        {% if errors.has('handle') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>{% endif %}
-                    </div>
+                    {{ forms.input(name='name', label='Name', required=true, placeholder="e.g. Content, SEO, Settings", value=group.name) }}
+                    {{ forms.input('handle', 'Handle', required=true, description="Lowercase letters, numbers, and hyphens only.", value=group.handle) }}
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status_group_id">Status Group</label>
@@ -107,11 +97,8 @@
                         </select>
                         {% if errors.has('field_layout_id') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>{% endif %}
                     </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="description">Description</label>
-                        <textarea class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="description" name="description" rows="4" placeholder="Optional internal description...">{{ old('description', group.description) }}</textarea>
-                    </div>
 
+                    {{ forms.textarea('description', 'Description', placeholder="Optional internal description...", value=group.description) }}
                     {% if category_groups.count >= 1 %}
                     <section class="border-t border-slate-200 pt-5">
                         {% set selectedCatGroupIds = group.categoryGroups|map(attached => attached.id) %}

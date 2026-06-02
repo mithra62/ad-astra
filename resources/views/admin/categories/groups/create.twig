@@ -1,4 +1,5 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._form-fields' as forms %}
 
 {% set page_title = 'Category Groups' %}
 {% set page_heading = 'Category Groups' %}
@@ -52,18 +53,6 @@
             </a>
         </div>
 
-        <div class="rounded-lg border border-sky-200 bg-sky-50 p-4">
-            <div class="flex items-start gap-3">
-                <svg class="mt-0.5 h-5 w-5 shrink-0 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <div>
-                    <p class="text-sm font-semibold text-sky-800">Create a new reusable item.</p>
-                    <p class="mt-1 text-sm text-sky-700">Handles should be stable once this item is used by content or templates.</p>
-                </div>
-            </div>
-        </div>
-
         <form id="general-create-form" method="POST" action="{{ route('categories.groups.store') }}" class="flex w-full min-w-0 flex-col gap-5">
             {{ csrf_field() }}
             <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -71,18 +60,9 @@
                     <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
-                        <input value="{{ old('name') }}" class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 " id="name" name="name" type="text" placeholder="">
-                        {% if errors.has('name') %}<p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>{% endif %}
-                    </div>
+                    {{ forms.input(name='name', label='Name', required=true, placeholder="") }}
+                    {{ forms.input('handle', 'Handle', required=true, description="Lowercase letters, numbers, and hyphens only.") }}
 
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
-                        <input class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="handle" name="handle" type="text" value="{{ old('handle') }}" >
-                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
-                        {% if errors.has('handle') %}<p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>{% endif %}
-                    </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="field_layout_id">Field Layout</label>
                         <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm {% if errors.has('field_layout_id') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="field_layout_id" name="field_layout_id">
@@ -97,39 +77,25 @@
                     </div>
                     <div>
 
+
+
                         {% if field_groups.count >= 1 %}
-
-                            <div class="mb-12">
-                                <label class="form-label" for="category_groups">Field Groups</label>
-                                {% for group in field_groups %}
-                                    <div class="form-check d-flex">
-                                        <input class="form-check-input mg-2"
-                                               id="library.{{ group.handle }}"
-                                               type="checkbox"
-                                               name="field_groups[]"
-                                               value="{{ group.id }}"
-                                            {% if old('field_groups') %}
-                                                {% for key, field in old('field_groups') %}
-                                                    {% if old('field_groups.' ~ key) == group.id %}checked{% endif %}
-                                                {% endfor %}
-
-                                            {% else %}
-                                                {% for key, field in library.field_groups %}
-                                                    {% if field.id == group.id %}checked{% endif %}
-                                                {% endfor %}
-                                            {% endif %}
-                                        >
-                                        <label class="form-check-label ms-2" for="library.{{ group.handle }}">
-                                            {{ group.name }}
-                                        </label>
+                            <section class="border-t border-slate-200 pt-5">
+                                {% set selectedFieldGroupIds = old('field_groups') ?: [] %}
+                                <header class="mb-3 flex items-baseline justify-between gap-3">
+                                    <div>
+                                        <p class="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Associations</p>
+                                        <h3 class="mt-0.5 text-base font-semibold text-slate-900">Field Groups</h3>
+                                        <p class="mt-1 text-xs text-slate-500">Choose which field groups entries in this group can reference.</p>
                                     </div>
-                                {% endfor %}
-                                {% if errors.has('category_groups') %}
-                                    <p class="text-danger">{{ errors.first('category_groups') }}</p>
-                                {% endif %}
-                            </div>
-                        {% else %}
-
+                                    <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">{{ selectedFieldGroupIds|length }} / {{ field_groups.count }}</span>
+                                </header>
+                                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                    {% for fg in field_groups %}
+                                        {{ forms.checkbox_card('field_groups[]', fg.id, fg.name, fg.description, fg.id in selectedFieldGroupIds, 'fg_' ~ fg.id) }}
+                                    {% endfor %}
+                                </div>
+                            </section>
                         {% endif %}
 
                     </div>
