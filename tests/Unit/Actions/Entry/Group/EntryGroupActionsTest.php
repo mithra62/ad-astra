@@ -7,6 +7,7 @@ use App\Actions\Entry\Group\EditEntryGroup;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\EntryGroup;
 use App\Models\Field\Group as FieldGroup;
+use App\Models\FieldLayout;
 use App\Models\StatusGroup;
 use App\Services\EntryGroupService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,18 +23,21 @@ class EntryGroupActionsTest extends TestCase
 
     public function test_create_returns_entry_group_instance(): void
     {
-        $result = app(EntryGroupService::class)->create(['name' => 'Blog', 'handle' => 'blog']);
+        $layout = FieldLayout::factory()->create();
+        $result = app(EntryGroupService::class)->create(['name' => 'Blog', 'handle' => 'blog', 'field_layout_id' => $layout->id]);
 
         $this->assertInstanceOf(EntryGroup::class, $result);
     }
 
     public function test_create_persists_group_to_database(): void
     {
+        $layout = FieldLayout::factory()->create();
         app(EntryGroupService::class)->create([
             'name' => 'News',
             'handle' => 'news',
             'description' => 'News section',
             'sort_order' => 2,
+            'field_layout_id' => $layout->id,
         ]);
 
         $this->assertDatabaseHas('entry_groups', [
@@ -44,25 +48,24 @@ class EntryGroupActionsTest extends TestCase
         ]);
     }
 
-    public function test_create_auto_creates_field_layout(): void
+    public function test_create_stores_field_layout_id(): void
     {
-        $group = app(EntryGroupService::class)->create(['name' => 'Events', 'handle' => 'events']);
+        $layout = FieldLayout::factory()->create();
+        $group = app(EntryGroupService::class)->create(['name' => 'Events', 'handle' => 'events', 'field_layout_id' => $layout->id]);
 
-        $this->assertNotNull($group->field_layout_id);
-        $this->assertDatabaseHas('field_layouts', [
-            'id' => $group->field_layout_id,
-            'name' => 'Events Entries',
-        ]);
+        $this->assertEquals($layout->id, $group->field_layout_id);
     }
 
     public function test_create_stores_status_group_id_when_provided(): void
     {
         $statusGroup = StatusGroup::factory()->create();
+        $layout = FieldLayout::factory()->create();
 
         $group = app(EntryGroupService::class)->create([
             'name' => 'Portfolio',
             'handle' => 'portfolio',
             'status_group_id' => $statusGroup->id,
+            'field_layout_id' => $layout->id,
         ]);
 
         $this->assertEquals($statusGroup->id, $group->status_group_id);
@@ -71,11 +74,13 @@ class EntryGroupActionsTest extends TestCase
     public function test_create_syncs_category_groups(): void
     {
         $catGroup = CategoryGroup::factory()->create();
+        $layout = FieldLayout::factory()->create();
 
         $group = app(EntryGroupService::class)->create([
             'name' => 'Articles',
             'handle' => 'articles',
             'category_groups' => [$catGroup->id],
+            'field_layout_id' => $layout->id,
         ]);
 
         $this->assertTrue($group->categoryGroups()->where('group_id', $catGroup->id)->exists());
@@ -84,11 +89,13 @@ class EntryGroupActionsTest extends TestCase
     public function test_create_syncs_field_groups(): void
     {
         $fieldGroup = FieldGroup::factory()->create();
+        $layout = FieldLayout::factory()->create();
 
         $group = app(EntryGroupService::class)->create([
             'name' => 'Products',
             'handle' => 'products',
             'field_groups' => [$fieldGroup->id],
+            'field_layout_id' => $layout->id,
         ]);
 
         $this->assertTrue($group->fieldGroups()->where('group_id', $fieldGroup->id)->exists());
@@ -96,7 +103,8 @@ class EntryGroupActionsTest extends TestCase
 
     public function test_create_with_no_category_or_field_groups_does_not_error(): void
     {
-        $group = app(EntryGroupService::class)->create(['name' => 'Simple', 'handle' => 'simple']);
+        $layout = FieldLayout::factory()->create();
+        $group = app(EntryGroupService::class)->create(['name' => 'Simple', 'handle' => 'simple', 'field_layout_id' => $layout->id]);
 
         $this->assertCount(0, $group->categoryGroups);
         $this->assertCount(0, $group->fieldGroups);
