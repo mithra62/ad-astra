@@ -693,6 +693,9 @@ Sortable.create(document.getElementById('tabs-list'), { handle: '.drag-handle', 
 (function () {
     try {
 (function () {
+    // Admin implementation present — let its own script handle this page.
+    if (document.getElementById('bulk-save-form')) return;
+
     var assigned = document.getElementById('assigned-fields');
     var available = document.getElementById('available-fields');
     var resetBtn = document.getElementById('reset-btn');

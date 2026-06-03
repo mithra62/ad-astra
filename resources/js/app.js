@@ -1,5 +1,5 @@
 import './bootstrap';
-import './tailwind2.js';
+import './prototype.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const activeClasses = [
