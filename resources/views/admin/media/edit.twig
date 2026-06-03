@@ -1,4 +1,5 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._schema-tab-elements' as tabs %}
 
 {% set page_title = 'Edit Media' %}
 {% set page_heading = 'Edit Media' %}
@@ -72,32 +73,18 @@
 
                 {% set layout = media.library.fieldLayout %}
                 {% if layout and layout.tabs.count >= 1 %}
-                {% for tab in layout.tabs %}
-                <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700">{{ tab.name }}</h5>
-                </div>
-                        {% for element in tab.elements %}
-                            {% set field = element.field %}
+                    {% set field_values = media.fieldArray() %}
+                    {% for tab in layout.tabs %}
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <div class="border-b border-slate-200 px-5 py-3">
+                                <h5 class="text-sm font-semibold text-slate-700">{{ tab.name }}</h5>
+                            </div>
                             <div class="space-y-4 px-5 py-5">
-                            <div>
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                                       for="field_{{ field.handle }}">{{ field.label }}</label>
-                                {% if field.instructions %}
-                                    <small
-                                        class="text-secondary d-block mb-1">{{ field.instructions }}</small>
-                                {% endif %}
-                                {{ field.render({
-                                    id: 'field_' ~ field.handle,
-                                    class: 'w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20'
-                                })|raw }}
-                                {% if errors.has('fields.' ~ field.handle) %}
-                                    <p class="mt-1 text-xs text-red-600">{{ errors.first('fields.' ~ field.handle) }}</p>
-                                {% endif %}
+                                {{ tabs.tabFields(tab, field_values) }}
                             </div>
-                            </div>
-                        {% endfor %}
+                        </div>
                     {% endfor %}
-                    {% endif %}
+                {% endif %}
 
 
 

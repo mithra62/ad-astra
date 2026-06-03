@@ -8,65 +8,40 @@
     </button>
 {% endmacro %}
 
-{% macro tabContent(tab, title_field_set, entry, field_values) %}
+{% macro tabFields(tab, field_values) %}
+    {% for element in tab.elements %}
+        {% set field = element.field %}
+        {% if not element.hidden %}
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-slate-700"
+                       for="field_{{ field.handle }}">{{ element.label ?: field.label }}</label>
+                {% set instructions = element.instructions ?: field.instructions %}
+                {% if instructions %}
+                    <small class="text-secondary d-block mb-1">{{ instructions }}</small>
+                {% endif %}
+                <div class="input-group has-validation">
+                    {{ field.render({
+                        value: field_values[field.handle],
+                        id: 'field_' ~ field.handle,
+                    })|raw }}
+                </div>
+                {% if errors.has('fields.' ~ field.handle) %}
+                    <p class="mt-1 text-xs text-red-600">{{ errors.first('fields.' ~ field.handle) }}</p>
+                {% endif %}
+            </div>
+        {% else %}
+            <input type="hidden" name="fields[{{ field.handle }}]"
+                   value="{{ field_values[field.handle] }}">
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+
+{% macro tabContent(tab, field_values) %}
     <!-- ░░ TAB: Content ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
     <div id="tab-{{ tab.handle }}" class="tab-panel active" role="tabpanel" aria-labelledby="btn-{{ tab.handle }}" data-tab-panel="{{ tab.handle }}">
-
-        <!-- Title + slug -->
         <div class="border-b border-slate-100 px-5 py-5">
-            {#                        <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Basic Details -- {{ tab.name }} {{ loop.index }}</h5>#}
-
             <div class="space-y-4">
-                {% if title_field_set == false %}
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="title">
-                            Title <span class="text-red-500">*</span>
-                        </label>
-                        <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                               id="title" name="title" type="text"
-                               placeholder="Enter article title"
-                               value="{{ old('title', entry.title) }}">
-                        {% if errors.has('title') %}
-                            <p class="mt-1 text-xs text-red-600">{{ errors.first('title') }}</p>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Slug</label>
-                        <input class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                               id="handle" name="handle" type="text" value="{{ old('handle', entry.handle) }}">
-
-                        {% if errors.has('handle') %}
-                            <p class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>
-                        {% endif %}
-                    </div>
-                {% endif %}
-
-                {% for element in tab.elements %}
-                    {% set field = element.field %}
-                    {% if not element.hidden %}
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                                   for="field_{{ field.handle }}">{{ element.label ?: field.label }}</label>
-                            {% set instructions = element.instructions ?: field.instructions %}
-                            {% if instructions %}
-                                <small
-                                    class="text-secondary d-block mb-1">{{ instructions }}</small>
-                            {% endif %}
-                            <div class="input-group has-validation">
-                                {{ field.render({
-                                    value: field_values[field.handle],
-                                    id: 'field_' ~ field.handle,
-                                })|raw }}
-                            </div>
-                            {% if errors.has('fields.' ~ field.handle) %}
-                                <p class="mt-1 text-xs text-red-600">{{ errors.first('fields.' ~ field.handle) }}</p>
-                            {% endif %}
-                        </div>
-                    {% else %}
-                        <input type="hidden" name="fields[{{ field.handle }}]"
-                               value="{{ field_values[field.handle] }}">
-                    {% endif %}
-                {% endfor %}
+                {{ _self.tabFields(tab, field_values) }}
             </div>
         </div>
     </div>
