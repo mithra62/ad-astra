@@ -20,6 +20,7 @@ class Group extends Model
         'field_layout_id',
         'name',
         'handle',
+        'description',
         'sort_order',
     ];
 

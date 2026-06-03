@@ -15,6 +15,7 @@ return new class extends Migration {
                 ->nullOnDelete();
             $table->string('name');
             $table->string('handle')->unique();
+            $table->string('description')->nullable();
             $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
 

@@ -23,18 +23,30 @@ class StoreCategoryGroupRequest extends FormRequest
                 'nullable',
                 'array',
             ],
-            'field_groups.*' => ['integer', 'exists:field_groups,id'],
+            'field_groups.*' => [
+                'integer',
+                'exists:field_groups,id'
+            ],
             'name' => [
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('category_groups')->ignore($this->data('id')),
             ],
+            'description' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'handle' => [
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('category_groups', 'handle')->ignore($this->data('id')),
+            ],
+            'field_layout_id' => [
+                'nullable',
+                'integer',
             ],
         ];
     }
