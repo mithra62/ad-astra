@@ -87,14 +87,15 @@ class Tab extends Controller
 
     public function fields(string $layout_id, string $tab_id)
     {
-        $layout = FieldLayoutModel::with('tabs')->find($layout_id);
+        $layout = FieldLayoutModel::with('tabs.elements')->find($layout_id);
         $tab = TabModel::with(['elements.field.fieldType'])->find($tab_id);
 
         if (!$layout instanceof FieldLayoutModel || !$tab instanceof TabModel || $tab->field_layout_id != $layout->id) {
             abort(404);
         }
 
-        $assignedIds = $tab->elements->pluck('field_id')->all();
+        // Exclude any field already assigned to ANY tab in this layout, not just the current tab.
+        $assignedIds = $layout->tabs->flatMap(fn($t) => $t->elements->pluck('field_id'))->unique()->all();
         $availableFields = Field::with('fieldType')
             ->whereNotIn('id', $assignedIds)
             ->orderBy('name')
