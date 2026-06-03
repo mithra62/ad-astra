@@ -93,9 +93,6 @@
                         </p>
                     </div>
 
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                               for="has_entry_tree">Allow Entry Tree</label>
                         {{ forms.toggle(
                             name: 'has_entry_tree',
                             label: 'Allow Entry Tree',
@@ -106,7 +103,6 @@
                             error_key: null,
                             copy_align: 'inline'
                         ) }}
-                    </div>
 
                     {% set entry_tree_enabled = old('has_entry_tree') == '1' %}
                     <div id="entry-tree-settings" class="{% if not entry_tree_enabled %}hidden {% endif %}rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
