@@ -16,5 +16,6 @@ return [
         'added' => 'Field was added to the tab.',
         'updated' => 'Field assignment was updated.',
         'removed' => 'Field was removed from the tab.',
+        'bulk_updated' => 'Tab fields were saved.',
     ],
 ];

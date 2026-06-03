@@ -20,9 +20,15 @@ class CreateTabElement extends AbstractAction
         $nextSort = $tab->elements()->max('sort_order') + 1;
 
         return $tab->elements()->create([
-            'field_id' => $fieldId,
-            'required' => (bool)($input['required'] ?? false),
-            'sort_order' => $input['sort_order'] ?? $nextSort,
+            'field_id'        => $fieldId,
+            'required'        => (bool)($input['required'] ?? false),
+            'hidden'          => (bool)($input['hidden'] ?? false),
+            'readonly'        => (bool)($input['readonly'] ?? false),
+            'disabled'        => (bool)($input['disabled'] ?? false),
+            'label'           => $input['label'] ?? null,
+            'schema_property' => $input['schema_property'] ?? null,
+            'instructions'    => $input['instructions'] ?? null,
+            'sort_order'      => $input['sort_order'] ?? $nextSort,
         ]);
     }
 }

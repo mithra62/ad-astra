@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin\FieldLayout;
 
+use App\Actions\FieldLayout\Tab\Element\BulkUpdateTabElements;
 use App\Actions\FieldLayout\Tab\Element\CreateTabElement;
 use App\Actions\FieldLayout\Tab\Element\DeleteTabElement;
 use App\Actions\FieldLayout\Tab\Element\EditTabElement;
 use App\Http\Controllers\Admin\Controller;
+use App\Http\Requests\FieldLayout\Tab\Element\BulkUpdateElementsRequest;
 use App\Http\Requests\FieldLayout\Tab\Element\DeleteElementRequest;
 use App\Http\Requests\FieldLayout\Tab\Element\EditElementRequest;
 use App\Http\Requests\FieldLayout\Tab\Element\StoreElementRequest;
@@ -15,6 +17,22 @@ use App\Models\FieldLayout\TabElement as TabElementModel;
 
 class TabElement extends Controller
 {
+    public function bulkUpdate(BulkUpdateElementsRequest $request, string $layout_id, string $tab_id)
+    {
+        $layout = FieldLayoutModel::find($layout_id);
+        $tab = TabModel::with('elements')->find($tab_id);
+
+        if (!$layout instanceof FieldLayoutModel || !$tab instanceof TabModel || $tab->field_layout_id != $layout->id) {
+            abort(404);
+        }
+
+        app(BulkUpdateTabElements::class)->update($tab, $request->validated());
+
+        return redirect()
+            ->route('field-layouts.tabs.fields', ['layout_id' => $layout->id, 'tab_id' => $tab->id])
+            ->with('success', trans('field_layout.element.bulk_updated'));
+    }
+
     public function store(StoreElementRequest $request, string $layout_id, string $tab_id)
     {
         $layout = FieldLayoutModel::find($layout_id);

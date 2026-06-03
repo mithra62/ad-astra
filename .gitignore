@@ -28,3 +28,4 @@ Thumbs.db
 /boost.json
 /CLAUDE.md
 /coverage/*
+/.claude/settings.local.json

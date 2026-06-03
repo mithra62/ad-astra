@@ -55,12 +55,20 @@
                 <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Edit Tab</h1>
                 <p class="mt-1 text-sm text-slate-500">Create a reusable status, field, label, or option for content workflows.</p>
             </div>
-            <a href="{{ route('field-layouts.edit', layout) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-                </svg>
-                Back to {{ layout.name }}
-            </a>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('field-layouts.tabs.fields', {layout_id: layout.id, tab_id: tab.id}) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Fields
+                </a>
+                <a href="{{ route('field-layouts.edit', layout) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    Back to {{ layout.name }}
+                </a>
+            </div>
         </div>
 
         <div class="rounded-lg border border-sky-200 bg-sky-50 p-4">

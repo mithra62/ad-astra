@@ -150,9 +150,9 @@
                                     <td class="px-5 py-3.5">
                                         <a class="font-medium text-slate-900 hover:text-emerald-700" href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}">{{ tab.name }} <span class="mt-0.5 font-mono text-xs text-slate-400">{{ tab.handle }}</span></a>
                                         <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
-                                            <a href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}" class="text-emerald-600 hover:underline">View</a>
-                                            <span class="text-slate-300">|</span>
                                             <a href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}" class="text-emerald-600 hover:underline">Edit</a>
+                                            <span class="text-slate-300">|</span>
+                                            <a href="{{ route('field-layouts.tabs.fields', {layout_id: layout.id, tab_id: tab.id}) }}" class="text-emerald-600 hover:underline">Fields</a>
                                             <span class="text-slate-300">|</span>
                                             <a href="{{ route('field-layouts.tabs.confirm', {layout_id: layout.id, tab_id: tab.id}) }}" class="text-red-500 hover:underline">Delete</a>
                                         </div>
@@ -165,6 +165,12 @@
                                     </td>
                                     <td class="px-5 py-3.5">
                                         <div class="flex items-center justify-end gap-1">
+                                            <a href="{{ route('field-layouts.tabs.fields', {layout_id: layout.id, tab_id: tab.id}) }}" class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" title="Fields">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                                </svg>
+                                                <span class="sr-only">Fields</span>
+                                            </a>
                                             <a href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}" class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" title="Edit">
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>

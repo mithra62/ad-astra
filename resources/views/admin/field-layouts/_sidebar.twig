@@ -33,19 +33,29 @@
             <h5 class="text-sm font-semibold text-slate-700">Field Layouts</h5>
         </div>
         <nav class="p-2">
-            <a class="flex items-center gap-2 rounded-md  px-3 py-2 text-sm font-medium " href="index.twig">
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('field-layouts') }}">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
                 </svg>
-                All Entries
+                All Layouts
             </a>
             {% for layout in layouts %}
-                <a href="{{ route('field-layouts.edit', layout) }}" class="{% if active == layout.id %} text-emerald-700 bg-emerald-50 {% endif %} mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                <a href="{{ route('field-layouts.edit', layout) }}" class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium {% if active == layout.id %}bg-emerald-50 text-emerald-700{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
                     </svg>
                     {{ layout.name }}
                 </a>
+                {% if active == layout.id and layout.tabs is defined and layout.tabs|length > 0 %}
+                    <div class="my-1 border-t border-slate-100"></div>
+                    <p class="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Tabs</p>
+                    {% for tab in layout.tabs %}
+                        <a href="{{ route('field-layouts.tabs.fields', {layout_id: layout.id, tab_id: tab.id}) }}" class="ml-2 mt-0.5 flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium {% if active_tab is defined and active_tab == tab.id %}bg-emerald-50 text-emerald-700{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+                            {{ tab.name }}
+                        </a>
+                    {% endfor %}
+                    <div class="my-1 border-t border-slate-100"></div>
+                {% endif %}
             {% endfor %}
         </nav>
     </div>
