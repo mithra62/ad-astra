@@ -70,13 +70,17 @@
     }
 
     function attachRowListeners(li) {
-        li.querySelector('.toggle-field-settings').addEventListener('click', function () {
-            const panel = li.querySelector('.field-settings');
-            const chevron = this.querySelector('.settings-chevron');
-            const open = panel.classList.toggle('hidden');
-            chevron.style.transform = open ? '' : 'rotate(180deg)';
-            this.setAttribute('aria-expanded', !open);
-        });
+        const toggleBtn = li.querySelector('.toggle-field-settings');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function (evt) {
+                evt.stopPropagation();
+                const panel = li.querySelector('.field-settings');
+                const chevron = this.querySelector('.settings-chevron');
+                const isHidden = panel.classList.toggle('hidden');
+                chevron.style.transform = isHidden ? '' : 'rotate(180deg)';
+                this.setAttribute('aria-expanded', String(!isHidden));
+            });
+        }
 
         li.querySelector('.remove-field').addEventListener('click', function () {
             const elementId = li.dataset.elementId;
@@ -282,7 +286,7 @@
             <div class="border-b border-slate-100 px-5 py-3">
                 <input id="field-search" type="search" placeholder="Filter fields…" class="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
             </div>
-            <ul id="available-fields" class="min-h-[16rem] divide-y divide-slate-100 p-2">
+            <ul id="available-fields" class="min-h-[16rem] max-h-[32rem] overflow-y-auto divide-y divide-slate-100 p-2">
                 {% for field in available_fields %}
                 <li class="field-row flex items-center gap-3 rounded-md px-3 py-3 hover:bg-slate-50"
                     data-field-id="{{ field.id }}"
