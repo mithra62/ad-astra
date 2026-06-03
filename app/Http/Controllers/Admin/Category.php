@@ -40,6 +40,8 @@ class Category extends Controller
     public function create(string $group_id)
     {
         $group = CategoryGroup::with([
+            'fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'fieldLayout.tabs.elements.field.fieldType',
         ])->find($group_id);
 
@@ -114,6 +116,8 @@ class Category extends Controller
     public function update(EditCategoryRequest $request, string $id)
     {
         $category = CategoryModel::with([
+            'group.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'group.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'group.fieldLayout.tabs.elements.field.fieldType',
         ])->find($id);
 
@@ -132,6 +136,8 @@ class Category extends Controller
     public function edit(string $id)
     {
         $category = CategoryModel::with([
+            'group.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'group.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'group.fieldLayout.tabs.elements.field.fieldType',
             'fieldValues.field.fieldType',
             'children.children',

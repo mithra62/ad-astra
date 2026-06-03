@@ -194,7 +194,11 @@ class EntryRepository
     public function resolveLayoutFields(Entry $entry): Collection
     {
         $entry->loadMissing([
+            'entryGroup.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'entryGroup.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'entryGroup.fieldLayout.tabs.elements.field.fieldType',
+            'entryType.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'entryType.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'entryType.fieldLayout.tabs.elements.field.fieldType',
         ]);
 

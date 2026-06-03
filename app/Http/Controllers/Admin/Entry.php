@@ -29,7 +29,11 @@ class Entry extends Controller
     public function create(string $group_id, Request $request)
     {
         $group = EntryGroup::with([
+            'entryTypes.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'entryTypes.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'entryTypes.fieldLayout.tabs.elements.field.fieldType',
+            'fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'fieldLayout.tabs.elements.field.fieldType',
             'statusGroup.statuses',
             'categoryGroups.categories',
@@ -77,7 +81,11 @@ class Entry extends Controller
             'entryTree',
             'entryGroup.statusGroup.statuses',
             'entryGroup.categoryGroups.categories',
+            'entryGroup.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'entryGroup.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'entryGroup.fieldLayout.tabs.elements.field.fieldType',
+            'entryType.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'entryType.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'entryType.fieldLayout.tabs.elements.field.fieldType',
         ]);
 

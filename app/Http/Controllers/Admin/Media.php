@@ -53,6 +53,8 @@ class Media extends Controller
     public function update(EditMediaRequest $request, string $id): RedirectResponse
     {
         $media = MediaModel::with([
+            'library.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'library.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'library.fieldLayout.tabs.elements.field.fieldType',
             'library.statusGroup',
         ])->findOrFail($id);
