@@ -2019,6 +2019,18 @@ $layout->fields(); // Collection<Field>, flattened from all tabs in sort order
 
 `FieldLayout::fields()` calls `loadMissing('tabs.elements.field')` — N+1-safe.
 
+### Field Uniqueness Constraint
+
+A field may only be assigned **once per layout** — not once per tab. The
+`field_layout_tab_elements` table enforces uniqueness at the tab level
+(`field_layout_tab_id + field_id`), but the admin UI enforces it at the layout
+level: the Available Fields panel for a tab excludes any field already assigned
+to any other tab within the same layout.
+
+**Known gap — moving a field between tabs:** There is no single-step "move"
+operation. To reassign a field from Tab A to Tab B, remove it from Tab A (save),
+then add it to Tab B (save). A dedicated move UI has not been implemented.
+
 ---
 
 ## Status Groups and Statuses
