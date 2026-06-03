@@ -59,46 +59,35 @@
                 </div>
                 <div class="space-y-5 px-5 py-5">
                     {% for field in domainData.fields %}
-                    {% set val = domainData.field_values[field.handle] is defined ? domainData.field_values[field.handle] : (field.default ?? '') %}
-                    {% set hasOverride = field.handle in domainData.override_handles %}
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="field_{{ field.handle }}">{{ field.label }} <span class="text-red-500">*</span></label>
-                        {% if field.type == 'boolean' %}
-                            <div class="form-check form-switch">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="{{ field.handle }}"
-                                       id="field_{{ field.handle }}"
-                                       value="1"
-                                    {{ old(field.handle, val) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="field_{{ field.handle }}">
-                                    Enable
-                                </label>
-                            </div>
-                        {% elseif field.type == 'integer' or field.type == 'float' %}
-                            <input type="number"
-                                   class="w-full rounded-md border {% if errors.has(field.handle) %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 "
-                                   name="{{ field.handle }}"
-                                   id="field_{{ field.handle }}"
-                                   value="{{ old(field.handle, val) }}"
-                                {{ field.type == 'float' ? 'step="any"' : 'step="1"' }}>
-                        {% elseif field.type == 'textarea' %}
-                            <textarea class="w-full rounded-md border {% if errors.has(field.handle) %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 "
-                                      name="{{ field.handle }}"
-                                      id="field_{{ field.handle }}"
-                                      rows="4">{{ old(field.handle, val) }}</textarea>
+                        {% set val = domainData.field_values[field.handle] is defined ? domainData.field_values[field.handle] : (field.default ?? '') %}
+                        {% set hasOverride = field.handle in domainData.override_handles %}
+
+                        {% if hasOverride %}
+                            <p class="text-xs">
+                                <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-700/10">your override is active</span>
+                            </p>
                         {% else %}
-                            <input type="{{ field.type == 'email' ? 'email' : 'text' }}"
-                                   class="w-full rounded-md border {% if errors.has(field.handle) %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 "
-                                   name="{{ field.handle }}"
-                                   id="field_{{ field.handle }}"
-                                   value="{{ old(field.handle, val) }}">
+                            <p class="text-xs text-slate-500">
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">system default</span>
+                                currently: <em>{{ val != '' ? val : '—' }}</em>
+                            </p>
                         {% endif %}
 
-                        {% if errors.has(field.handle) %}
-                            <p class="mt-1 text-xs text-red-600">{{ errors.first(field.handle) }}</p>
+                        {% set field_description = field.instructions %}
+
+                        {% if field.type == 'boolean' %}
+                            {{ forms.toggle(field.handle, field.label, val, field_description) }}
+                        {% elseif field.type == 'textarea' %}
+                            {{ forms.textarea(field.handle, field.label, val, 4, field_description) }}
+                        {% elseif field.type == 'select' or (field.options is defined and field.options|length) %}
+                            {{ forms.select(field.handle, field.label, field.options|default([]), val, field_description) }}
+                        {% elseif field.type == 'integer' %}
+                            {{ forms.input(field.handle, field.label, val, 'number', field_description, '', '', field.handle, false, 'step="1"') }}
+                        {% elseif field.type == 'float' %}
+                            {{ forms.input(field.handle, field.label, val, 'number', field_description, '', '', field.handle, false, 'step="any"') }}
+                        {% else %}
+                            {{ forms.input(field.handle, field.label, val, field.type == 'email' ? 'email' : 'text', field_description) }}
                         {% endif %}
-                    </div>
                     {% endfor %}
                 </div>
             </div>

@@ -28,7 +28,7 @@ class Settings extends Controller
 
                 return [
                     'domain' => $domain,
-                    'fields' => $overridableFields,
+                    'fields' => $this->hydrateOptions($overridableFields),
                     'field_values' => $this->settings->all($domain->handle, $user),
                     'override_handles' => SettingValue::where('domain', $domain->handle)
                         ->where('user_id', $user->id)
@@ -44,6 +44,22 @@ class Settings extends Controller
             'all_domains' => $allDomains,
             'user' => $user,
         ]);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $fields
+     * @return array<int, array<string, mixed>>
+     */
+    private function hydrateOptions(array $fields): array
+    {
+        return array_map(function (array $field): array {
+            if (isset($field['options_callback']) && is_callable($field['options_callback'])) {
+                $field['options'] = ($field['options_callback'])();
+                unset($field['options_callback']);
+            }
+
+            return $field;
+        }, $fields);
     }
 
     /**
