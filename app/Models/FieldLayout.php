@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Field;
 use App\Models\FieldLayout\Tab;
 use App\Traits\Field\HasFieldGroups;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -52,6 +51,9 @@ class FieldLayout extends Model
             return Field::orderBy('name')->get();
         }
 
-        return $this->fieldGroups->flatMap(fn ($g) => $g->fields)->unique('id')->values();
+        return $this->fieldGroups->flatMap(fn ($g) => $g->fields)
+            ->unique('id')
+            ->sortBy('name')
+            ->values();
     }
 }

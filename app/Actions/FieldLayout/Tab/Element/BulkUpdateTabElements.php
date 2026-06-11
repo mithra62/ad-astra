@@ -14,7 +14,8 @@ class BulkUpdateTabElements extends AbstractAction
         private readonly EditTabElement $editElement,
         private readonly CreateTabElement $createElement,
         private readonly DeleteTabElement $deleteElement,
-    ) {}
+    ) {
+    }
 
     public function update(Tab $tab, array $input): Tab
     {
@@ -40,11 +41,12 @@ class BulkUpdateTabElements extends AbstractAction
             }
         }
 
-        $assignedFieldIds = $tab->elements()->pluck('field_id')->all();
+        $layoutTabIds = Tab::where('field_layout_id', $tab->field_layout_id)->pluck('id');
+        $assignedFieldIds = TabElement::whereIn('field_layout_tab_id', $layoutTabIds)->pluck('field_id')->all();
         foreach ($newFields as $row) {
             if (in_array((int)$row['field_id'], $assignedFieldIds)) {
                 throw ValidationException::withMessages([
-                    'new_fields' => 'One or more fields are already assigned to this tab.',
+                    'new_fields' => 'One or more fields are already assigned to a tab in this layout.',
                 ]);
             }
         }

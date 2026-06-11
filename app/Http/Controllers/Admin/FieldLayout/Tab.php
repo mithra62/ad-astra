@@ -67,14 +67,16 @@ class Tab extends Controller
 
     public function edit(string $layout_id, string $tab_id)
     {
-        $layout = FieldLayoutModel::with('fieldGroups.fields')->find($layout_id);
+        $layout = FieldLayoutModel::with('tabs.elements', 'fieldGroups.fields')->find($layout_id);
         $tab = TabModel::with(['elements.field.fieldType'])->find($tab_id);
 
         if (!$layout instanceof FieldLayoutModel || !$tab instanceof TabModel || $tab->field_layout_id != $layout->id) {
             abort(404);
         }
 
-        $availableFields = $layout->availableFields();
+        // Exclude any field already assigned to ANY tab in this layout, not just the current tab.
+        $assignedIds = $layout->tabs->flatMap(fn ($t) => $t->elements->pluck('field_id'))->unique()->all();
+        $availableFields = $layout->availableFields()->whereNotIn('id', $assignedIds)->values();
         return $this->view('field-layouts.tabs.edit', array_merge(
             $this->sidebarData(),
             [
@@ -95,7 +97,7 @@ class Tab extends Controller
         }
 
         // Exclude any field already assigned to ANY tab in this layout, not just the current tab.
-        $assignedIds = $layout->tabs->flatMap(fn($t) => $t->elements->pluck('field_id'))->unique()->all();
+        $assignedIds = $layout->tabs->flatMap(fn ($t) => $t->elements->pluck('field_id'))->unique()->all();
         $paletteIds  = $layout->availableFields()->pluck('id')->all();
         $availableFields = Field::with('fieldType')
             ->whereIn('id', $paletteIds)
