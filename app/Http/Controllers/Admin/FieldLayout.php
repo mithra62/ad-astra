@@ -8,6 +8,7 @@ use App\Actions\FieldLayout\EditFieldLayout;
 use App\Http\Requests\FieldLayout\DeleteFieldLayoutRequest;
 use App\Http\Requests\FieldLayout\EditFieldLayoutRequest;
 use App\Http\Requests\FieldLayout\StoreFieldLayoutRequest;
+use App\Models\Field\Group as FieldGroup;
 use App\Models\FieldLayout as FieldLayoutModel;
 
 class FieldLayout extends Controller
@@ -33,7 +34,10 @@ class FieldLayout extends Controller
 
     public function create()
     {
-        return $this->view('field-layouts.create', $this->sidebarData());
+        return $this->view('field-layouts.create', array_merge(
+            $this->sidebarData(),
+            ['field_groups' => FieldGroup::orderBy('name')->get()]
+        ));
     }
 
     private function sidebarData(): array
@@ -64,6 +68,7 @@ class FieldLayout extends Controller
             'tabs.elements.field.fieldType',
             'entryGroups',
             'entryTypes.entryGroup',
+            'fieldGroups',
         ])->find($id);
 
         if (!$layout instanceof FieldLayoutModel) {
@@ -72,7 +77,10 @@ class FieldLayout extends Controller
 
         return $this->view('field-layouts.edit', array_merge(
             $this->sidebarData(),
-            ['layout' => $layout]
+            [
+                'layout' => $layout,
+                'field_groups' => FieldGroup::orderBy('name')->get(),
+            ]
         ));
     }
 

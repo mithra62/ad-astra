@@ -16,7 +16,7 @@ class GroupTest extends TestCase
     {
         $model = new Group;
 
-        $this->assertEquals(['field_layout_id', 'name', 'handle', 'sort_order', 'description'], $model->getFillable());
+        $this->assertEquals(['field_layout_id', 'name', 'handle', 'description', 'sort_order'], $model->getFillable());
     }
 
     public function test_uses_category_groups_table(): void

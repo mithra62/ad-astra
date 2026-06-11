@@ -27,7 +27,8 @@ class StoreFieldLayoutRequest extends FormRequest
                 'max:255',
                 Rule::unique('field_layouts', 'handle'),
             ],
-
+            'field_groups' => ['nullable', 'array'],
+            'field_groups.*' => ['integer', 'exists:field_groups,id'],
         ];
     }
 }
