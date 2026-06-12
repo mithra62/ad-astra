@@ -159,12 +159,12 @@ class CategoryService extends AbstractService
      */
     public function resolveFieldGroups(Category $category): SupportCollection
     {
-        return $this->loadGroup($category)?->fieldGroups ?? collect();
+        return collect();
     }
 
     private function loadGroup(Category $category): ?CategoryGroup
     {
-        $category->loadMissing('group.fieldLayout', 'group.fieldGroups');
+        $category->loadMissing('group.fieldLayout');
 
         return $category->group;
     }

@@ -24,7 +24,6 @@ class EntryGroupService extends AbstractService
      *   sort_order (int, default 0)
      *   status_group_id (int|null)
      *   category_groups (int[], IDs to sync)
-     *   field_groups (int[], IDs to sync)
      *   entry_type_ids (int[], IDs of standalone Entry Types to attach)
      */
     public function create(array $data): EntryGroup
@@ -39,7 +38,6 @@ class EntryGroupService extends AbstractService
         ]);
 
         $group->categoryGroups()->sync($data['category_groups'] ?? []);
-        $group->fieldGroups()->sync($data['field_groups'] ?? []);
 
         $this->syncEntryTypes($group, $data['entry_type_ids'] ?? []);
 
@@ -63,7 +61,6 @@ class EntryGroupService extends AbstractService
         ]);
 
         $group->categoryGroups()->sync($data['category_groups'] ?? []);
-        $group->fieldGroups()->sync($data['field_groups'] ?? []);
 
         $this->syncEntryTypes($group, $data['entry_type_ids'] ?? []);
 

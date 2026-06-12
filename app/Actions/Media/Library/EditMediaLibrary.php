@@ -10,7 +10,6 @@ class EditMediaLibrary extends AbstractAction
     public function edit(Library $library, array $input): bool
     {
         $library->categoryGroups()->sync($input['category_groups'] ?? []);
-        $library->fieldGroups()->sync($input['field_groups'] ?? []);
 
         return $library->update($input);
     }

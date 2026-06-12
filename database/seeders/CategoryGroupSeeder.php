@@ -83,7 +83,6 @@ class CategoryGroupSeeder extends Seeder
         );
 
         $fieldGroup->fields()->syncWithoutDetaching([$description->id, $featuredLabel->id]);
-        $group->fieldGroups()->syncWithoutDetaching([$fieldGroup->id]);
 
         // --- Field Layout ----------------------------------------------------
 
@@ -220,7 +219,6 @@ class CategoryGroupSeeder extends Seeder
         );
 
         $fieldGroup->fields()->syncWithoutDetaching([$description->id, $displayName->id]);
-        $group->fieldGroups()->syncWithoutDetaching([$fieldGroup->id]);
 
         // --- Field Layout ----------------------------------------------------
 

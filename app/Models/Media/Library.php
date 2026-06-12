@@ -2,7 +2,6 @@
 
 namespace App\Models\Media;
 
-use App\Traits\Field\HasFieldGroups;
 use App\Traits\Field\HasFieldLayout;
 use App\Traits\HasCategoryGroups;
 use App\Traits\HasMediaItems;
@@ -15,7 +14,6 @@ class Library extends Model
 {
     use HasFactory;
     use HasCategoryGroups;
-    use HasFieldGroups;
     use HasFieldLayout;
     use HasMediaItems;
     use HasStatusGroup;

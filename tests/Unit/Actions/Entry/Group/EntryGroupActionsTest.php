@@ -6,7 +6,6 @@ use App\Actions\Entry\Group\CreateNewEntryGroup;
 use App\Actions\Entry\Group\EditEntryGroup;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\EntryGroup;
-use App\Models\Field\Group as FieldGroup;
 use App\Models\FieldLayout;
 use App\Models\StatusGroup;
 use App\Services\EntryGroupService;
@@ -86,30 +85,6 @@ class EntryGroupActionsTest extends TestCase
         $this->assertTrue($group->categoryGroups()->where('group_id', $catGroup->id)->exists());
     }
 
-    public function test_create_syncs_field_groups(): void
-    {
-        $fieldGroup = FieldGroup::factory()->create();
-        $layout = FieldLayout::factory()->create();
-
-        $group = app(EntryGroupService::class)->create([
-            'name' => 'Products',
-            'handle' => 'products',
-            'field_groups' => [$fieldGroup->id],
-            'field_layout_id' => $layout->id,
-        ]);
-
-        $this->assertTrue($group->fieldGroups()->where('group_id', $fieldGroup->id)->exists());
-    }
-
-    public function test_create_with_no_category_or_field_groups_does_not_error(): void
-    {
-        $layout = FieldLayout::factory()->create();
-        $group = app(EntryGroupService::class)->create(['name' => 'Simple', 'handle' => 'simple', 'field_layout_id' => $layout->id]);
-
-        $this->assertCount(0, $group->categoryGroups);
-        $this->assertCount(0, $group->fieldGroups);
-    }
-
     // -------------------------------------------------------------------------
     // update  (via EntryGroupService)
     // -------------------------------------------------------------------------
@@ -180,20 +155,6 @@ class EntryGroupActionsTest extends TestCase
         ]);
 
         $this->assertTrue($group->fresh()->categoryGroups()->where('group_id', $catGroup->id)->exists());
-    }
-
-    public function test_edit_syncs_field_groups(): void
-    {
-        $group = EntryGroup::factory()->create();
-        $fieldGroup = FieldGroup::factory()->create();
-
-        app(EntryGroupService::class)->update($group, [
-            'name' => $group->name,
-            'handle' => $group->handle,
-            'field_groups' => [$fieldGroup->id],
-        ]);
-
-        $this->assertTrue($group->fresh()->fieldGroups()->where('group_id', $fieldGroup->id)->exists());
     }
 
     public function test_edit_returns_fresh_model(): void

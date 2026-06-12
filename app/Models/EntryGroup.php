@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\Field\HasFieldGroups;
 use App\Traits\Field\HasFieldLayout;
 use App\Traits\HasCategoryGroups;
 use App\Traits\HasStatusGroup;
@@ -15,7 +14,6 @@ class EntryGroup extends Model
 {
     use HasCategoryGroups;
     use HasFactory;
-    use HasFieldGroups;
     use HasFieldLayout;
     use HasStatusGroup;
 

@@ -6,7 +6,6 @@ use App\Models\Category\Group as CategoryGroup;
 use App\Models\EntryBehavior;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
-use App\Models\Field\Group as FieldGroup;
 use App\Models\StatusGroup;
 use Database\Seeders\Concerns\BuildsLayouts;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -20,24 +19,15 @@ class EntryGroupSeeder extends Seeder
     {
         $publication       = StatusGroup::where('handle', 'publication')->firstOrFail();
         $productStatus     = StatusGroup::where('handle', 'product-status')->firstOrFail();
-        $contentFields     = FieldGroup::where('handle', 'content-fields')->firstOrFail();
-        $seoFields         = FieldGroup::where('handle', 'seo-fields')->firstOrFail();
-        $relationshipFields = FieldGroup::where('handle', 'relationship-fields')->firstOrFail();
-        $blogFields        = FieldGroup::where('handle', 'blog-fields')->firstOrFail();
-        $productFields     = FieldGroup::where('handle', 'product-fields')->firstOrFail();
         $topics            = CategoryGroup::where('handle', 'topics')->firstOrFail();
         $productCategories = CategoryGroup::where('handle', 'product-categories')->firstOrFail();
 
-        $this->seedBlogGroup($publication, $contentFields, $seoFields, $relationshipFields, $blogFields, $topics);
-        $this->seedProductsGroup($productStatus, $contentFields, $seoFields, $productFields, $productCategories);
+        $this->seedBlogGroup($publication, $topics);
+        $this->seedProductsGroup($productStatus, $productCategories);
     }
 
     private function seedBlogGroup(
         StatusGroup   $publication,
-        FieldGroup    $contentFields,
-        FieldGroup    $seoFields,
-        FieldGroup    $relationshipFields,
-        FieldGroup    $blogFields,
         CategoryGroup $topics,
     ): void {
         $layout = $this->createLayout('Blog Layout', [
@@ -57,12 +47,6 @@ class EntryGroupSeeder extends Seeder
             ]
         );
 
-        $group->fieldGroups()->syncWithoutDetaching([
-            $contentFields->id,
-            $seoFields->id,
-            $relationshipFields->id,
-            $blogFields->id,
-        ]);
         $group->categoryGroups()->syncWithoutDetaching([$topics->id]);
 
         // Add "Publishing" tab to the layout if not already present.
@@ -80,9 +64,6 @@ class EntryGroupSeeder extends Seeder
 
     private function seedProductsGroup(
         StatusGroup   $productStatus,
-        FieldGroup    $contentFields,
-        FieldGroup    $seoFields,
-        FieldGroup    $productFields,
         CategoryGroup $productCategories,
     ): void {
         $layout = $this->createLayout('Products Layout', [
@@ -104,11 +85,6 @@ class EntryGroupSeeder extends Seeder
         // Swap to product-status on existing group.
         $group->update(['status_group_id' => $productStatus->id]);
 
-        $group->fieldGroups()->syncWithoutDetaching([
-            $contentFields->id,
-            $seoFields->id,
-            $productFields->id,
-        ]);
         $group->categoryGroups()->syncWithoutDetaching([$productCategories->id]);
 
         $this->addTabIfMissing($group->field_layout_id, 'Pricing',   ['price', 'sale_price', 'sku'], 10);

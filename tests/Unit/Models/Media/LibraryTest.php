@@ -3,7 +3,6 @@
 namespace Tests\Unit\Models\Media;
 
 use App\Models\Category\Group as CategoryGroup;
-use App\Models\Field\Group as FieldGroup;
 use App\Models\Media\Library;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -103,16 +102,6 @@ class LibraryTest extends TestCase
         $this->assertInstanceOf(CategoryGroup::class, (new Library())->categoryGroups()->getRelated());
     }
 
-    public function test_field_groups_relationship_is_morph_to_many(): void
-    {
-        $this->assertInstanceOf(MorphToMany::class, (new Library())->fieldGroups());
-    }
-
-    public function test_field_groups_is_related_to_field_group_model(): void
-    {
-        $this->assertInstanceOf(FieldGroup::class, (new Library())->fieldGroups()->getRelated());
-    }
-
     public function test_media_relationship_is_has_many(): void
     {
         $this->assertInstanceOf(HasMany::class, (new Library())->media());
@@ -134,14 +123,4 @@ class LibraryTest extends TestCase
         $this->assertEquals($group->id, $library->fresh()->categoryGroups->first()->id);
     }
 
-    public function test_field_groups_can_be_attached_and_retrieved(): void
-    {
-        $library = Library::create(['name' => 'Gallery', 'handle' => 'gallery2']);
-        $group   = FieldGroup::factory()->create();
-
-        $library->fieldGroups()->attach($group->id);
-
-        $this->assertCount(1, $library->fresh()->fieldGroups);
-        $this->assertEquals($group->id, $library->fresh()->fieldGroups->first()->id);
-    }
 }

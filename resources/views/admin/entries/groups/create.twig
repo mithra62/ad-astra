@@ -107,25 +107,6 @@
                     </section>
                     {% endif %}
 
-                    {% if field_groups.count >= 1 %}
-                    <section class="border-t border-slate-200 pt-5">
-                        {% set selectedFieldGroupIds = old('field_groups') ?: [] %}
-                        <header class="mb-3 flex items-baseline justify-between gap-3">
-                            <div>
-                                <p class="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Associations</p>
-                                <h3 class="mt-0.5 text-base font-semibold text-slate-900">Field Groups</h3>
-                                <p class="mt-1 text-xs text-slate-500">Choose which field groups entries in this group can reference.</p>
-                            </div>
-                            <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">{{ selectedFieldGroupIds|length }} / {{ field_groups.count }}</span>
-                        </header>
-                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                            {% for fg in field_groups %}
-                                {{ forms.checkbox_card('field_groups[]', fg.id, fg.name, fg.description, fg.id in selectedFieldGroupIds, 'fg_' ~ fg.id) }}
-                            {% endfor %}
-                        </div>
-                    </section>
-                    {% endif %}
-
                     {% if available_entry_types.count >= 1 %}
                     <section class="border-t border-slate-200 pt-5">
                         {% set selectedEntryTypeIds = old('entry_type_ids') ?: [] %}

@@ -10,7 +10,6 @@ use App\Http\Requests\Entry\Group\StoreEntryGroupRequest;
 use App\Models\Category\Group as CategoryGroup;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
-use App\Models\Field\Group as FieldGroup;
 use App\Models\FieldLayout;
 use App\Models\StatusGroup;
 
@@ -55,7 +54,6 @@ class Group extends Controller
         return [
             'status_groups' => StatusGroup::ordered()->get(),
             'category_groups' => CategoryGroup::orderBy('name')->get(),
-            'field_groups' => FieldGroup::orderBy('name')->get(),
             'field_layouts' => FieldLayout::orderBy('name')->get(),
             'available_entry_types' => $availableTypesQuery->get(),
         ];
@@ -99,9 +97,7 @@ class Group extends Controller
             'entryTypes.fieldLayout',
             'statusGroup',
             'categoryGroups',
-            'fieldGroups',
             'fieldLayout',
-
         ])->find($id);
 
         if (! $group instanceof EntryGroup) {

@@ -18,14 +18,6 @@ class EditCategoryGroupRequest extends StoreCategoryGroupRequest
     public function rules(): array
     {
         return [
-            'field_groups' => [
-                'nullable',
-                'array',
-            ],
-            'field_groups.*' => [
-                'integer',
-                'exists:field_groups,id'
-            ],
             'field_layout_id' => [
                 'nullable',
                 'integer',

@@ -12,7 +12,6 @@ use App\Http\Requests\Media\Library\EditMediaLibraryRequest;
 use App\Http\Requests\Media\Library\StoreMediaLibraryFormRequest;
 use App\Http\Requests\Media\Library\UploadMediaRequest;
 use App\Models\Category\Group as CategoryGroup;
-use App\Models\Field\Group as FieldGroup;
 use App\Models\Media\Library as LibraryModel;
 use App\Models\StatusGroup;
 
@@ -43,11 +42,9 @@ class Library extends Controller
     public function create()
     {
         $files = app('files-service');
-        $field_groups = FieldGroup::all();
         $category_groups = CategoryGroup::all();
         $data = [
             'category_groups' => $category_groups,
-            'field_groups' => $field_groups,
             'status_groups' => StatusGroup::ordered()->get(),
             'disks' => config('filesystems.disks'),
             'allowed_types' => $files->getAllowedMimeTypes(),
@@ -96,18 +93,16 @@ class Library extends Controller
      */
     public function edit(string $id)
     {
-        $library = LibraryModel::with('categoryGroups', 'fieldGroups', 'statusGroup')->find($id);
+        $library = LibraryModel::with('categoryGroups', 'statusGroup')->find($id);
         if (!$library instanceof LibraryModel) {
             abort(404);
         }
 
         $files = app('files-service');
         $category_groups = CategoryGroup::all();
-        $field_groups = FieldGroup::all();
         $data = [
             'library' => $library,
             'category_groups' => $category_groups,
-            'field_groups' => $field_groups,
             'status_groups' => StatusGroup::ordered()->get(),
             'disks' => config('filesystems.disks'),
             'allowed_types' => $files->getAllowedMimeTypes(),
