@@ -7,25 +7,25 @@
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
+        <a class="hover:text-content" href="{{ route('dashboard') }}">
             <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
             </svg>
             Dashboard
         </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('field-layouts') }}">Field Layouts</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <a class="hover:text-content" href="{{ route('field-layouts') }}">Field Layouts</a>
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <a class="hover:text-content" href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <span class="text-slate-800">{{ tab.name }} Fields</span>
+        <span class="text-content">{{ tab.name }} Fields</span>
     </nav>
 {% endblock %}
 
@@ -89,15 +89,15 @@
             }
 
             const newAvailableLi = document.createElement('li');
-            newAvailableLi.className = 'field-row flex items-center gap-3 rounded-md px-3 py-3 hover:bg-slate-50';
+            newAvailableLi.className = 'field-row flex items-center gap-3 rounded-md px-3 py-3 hover:bg-subtle';
             newAvailableLi.dataset.fieldId  = li.dataset.fieldId;
             newAvailableLi.dataset.name     = li.dataset.name;
             newAvailableLi.dataset.handle   = li.dataset.handle || '';
             newAvailableLi.dataset.type     = li.dataset.type || '';
             newAvailableLi.innerHTML = li.querySelector('.drag-handle').outerHTML
                 + '<div class="min-w-0 flex-1">'
-                + '<p class="truncate text-sm font-medium text-slate-900">' + (li.querySelector('.field-display-name').textContent.trim()) + '</p>'
-                + '<p class="truncate font-mono text-xs text-slate-400">' + (li.querySelector('.field-meta') ? li.querySelector('.field-meta').textContent.trim() : '') + '</p>'
+                + '<p class="truncate text-sm font-medium text-content">' + (li.querySelector('.field-display-name').textContent.trim()) + '</p>'
+                + '<p class="truncate font-mono text-xs text-faint">' + (li.querySelector('.field-meta') ? li.querySelector('.field-meta').textContent.trim() : '') + '</p>'
                 + '</div>';
 
             availableList.appendChild(newAvailableLi);
@@ -152,17 +152,17 @@
                 || (item.dataset.handle && item.dataset.type ? item.dataset.handle + ' / ' + item.dataset.type : '');
 
             // Transform in place so Sortable's reference stays valid
-            item.className = 'field-row flex items-center gap-3 rounded-md px-3 py-3 hover:bg-slate-50';
+            item.className = 'field-row flex items-center gap-3 rounded-md px-3 py-3 hover:bg-subtle';
             const fieldId = item.dataset.fieldId;
             const dataName = item.dataset.name;
             // Clear all data attrs then re-set only what's needed for available rows
             Object.keys(item.dataset).forEach(k => delete item.dataset[k]);
             item.dataset.fieldId = fieldId;
             item.dataset.name    = dataName;
-            item.innerHTML = '<span class="drag-handle shrink-0 cursor-grab text-slate-300"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg></span>'
+            item.innerHTML = '<span class="drag-handle shrink-0 cursor-grab text-faint"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg></span>'
                 + '<div class="min-w-0 flex-1">'
-                + '<p class="truncate text-sm font-medium text-slate-900">' + displayName + '</p>'
-                + '<p class="truncate font-mono text-xs text-slate-400">' + metaText + '</p>'
+                + '<p class="truncate text-sm font-medium text-content">' + displayName + '</p>'
+                + '<p class="truncate font-mono text-xs text-faint">' + metaText + '</p>'
                 + '</div>';
 
             renumberBadges();
@@ -292,11 +292,11 @@ const fieldId     = item.dataset.fieldId;
 <div class="flex w-full min-w-0 flex-col gap-5">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{{ tab.name }} Tab Fields</h1>
-            <p class="mt-1 text-sm text-slate-500">Drag fields between columns and reorder the assigned fields for this tab.</p>
+            <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ tab.name }} Tab Fields</h1>
+            <p class="mt-1 text-sm text-muted">Drag fields between columns and reorder the assigned fields for this tab.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            <button type="button" id="reset-btn" class="hidden rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Reset</button>
+            <button type="button" id="reset-btn" class="hidden rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle">Reset</button>
             <button type="button" id="save-btn" class="rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">Save Field Order</button>
         </div>
     </div>
@@ -305,114 +305,114 @@ const fieldId     = item.dataset.fieldId;
 
     <div class="grid grid-cols-1 gap-5 xl:grid-cols-[22rem_1fr]">
         {# Available Fields panel #}
-        <div class="self-start overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-5 py-3">
+        <div class="self-start overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h5 class="text-sm font-semibold text-slate-700">Available Fields</h5>
-                        <p class="mt-0.5 text-xs text-slate-500">Drag fields into the tab.</p>
+                        <h5 class="text-sm font-semibold text-content">Available Fields</h5>
+                        <p class="mt-0.5 text-xs text-muted">Drag fields into the tab.</p>
                     </div>
-                    <span id="available-count" class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{{ available_fields|length }}</span>
+                    <span id="available-count" class="rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted">{{ available_fields|length }}</span>
                 </div>
             </div>
-            <div class="border-b border-slate-100 px-5 py-3">
-                <input id="field-search" type="search" placeholder="Filter fields…" class="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+            <div class="border-b border-edge px-5 py-3">
+                <input id="field-search" type="search" placeholder="Filter fields…" class="w-full rounded-md border border-edge px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
             </div>
             <div class="max-h-[32rem] overflow-y-auto">
             <ul id="available-fields" class="min-h-[16rem] divide-y divide-slate-100 p-2">
                 {% for field in available_fields %}
-                <li class="field-row flex items-center gap-3 rounded-md px-3 py-3 hover:bg-slate-50"
+                <li class="field-row flex items-center gap-3 rounded-md px-3 py-3 hover:bg-subtle"
                     data-field-id="{{ field.id }}"
                     data-name="{{ field.name|lower }} {{ field.handle|lower }}"
                     data-display-name="{{ field.name }}"
                     data-handle="{{ field.handle }}"
                     data-type="{{ field.fieldType.name ?? '' }}">
-                    <span class="drag-handle shrink-0 cursor-grab text-slate-300">
+                    <span class="drag-handle shrink-0 cursor-grab text-faint">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
                     </span>
                     <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-medium text-slate-900">{{ field.name }}</p>
-                        <p class="truncate font-mono text-xs text-slate-400">{{ field.handle }} / {{ field.fieldType.name ?? '—' }}</p>
+                        <p class="truncate text-sm font-medium text-content">{{ field.name }}</p>
+                        <p class="truncate font-mono text-xs text-faint">{{ field.handle }} / {{ field.fieldType.name ?? '—' }}</p>
                     </div>
                 </li>
                 {% else %}
-                <li class="flex items-center justify-center px-5 py-10 text-sm text-slate-400">All fields are assigned.</li>
+                <li class="flex items-center justify-center px-5 py-10 text-sm text-faint">All fields are assigned.</li>
                 {% endfor %}
             </ul>
             </div>
         </div>
 
         {# Assigned Fields panel #}
-        <div class="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-5 py-3">
+        <div class="flex flex-col overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h5 class="text-sm font-semibold text-slate-700">Assigned to {{ tab.name }}</h5>
-                        <p class="mt-0.5 text-xs text-slate-500">Order here controls how fields render on the tab.</p>
+                        <h5 class="text-sm font-semibold text-content">Assigned to {{ tab.name }}</h5>
+                        <p class="mt-0.5 text-xs text-muted">Order here controls how fields render on the tab.</p>
                     </div>
-                    <span id="assigned-count" class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">{{ tab.elements|length }} assigned</span>
+                    <span id="assigned-count" class="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">{{ tab.elements|length }} assigned</span>
                 </div>
             </div>
             <ul id="assigned-fields" class="flex-1 min-h-[24rem] divide-y divide-slate-100 p-2">
                 {% for element in tab.elements %}
-                <li class="field-row rounded-md hover:bg-slate-50"
+                <li class="field-row rounded-md hover:bg-subtle"
                     data-element-id="{{ element.id }}"
                     data-field-id="{{ element.field.id }}"
                     data-name="{{ element.field.name|lower }} {{ element.field.handle|lower }}">
                     <div class="flex items-center gap-3 px-3 py-3">
-                        <span class="drag-handle shrink-0 cursor-grab text-slate-300">
+                        <span class="drag-handle shrink-0 cursor-grab text-faint">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
                         </span>
-                        <span class="position-badge inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">{{ loop.index }}</span>
+                        <span class="position-badge inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-canvas text-xs font-semibold text-muted">{{ loop.index }}</span>
                         <div class="min-w-0 flex-1">
-                            <p class="field-display-name truncate text-sm font-medium text-slate-900">{{ element.field.label ?: element.field.name }}</p>
-                            <p class="truncate font-mono text-xs text-slate-400">{{ element.field.handle }} / {{ element.field.fieldType.name ?? '—' }}</p>
+                            <p class="field-display-name truncate text-sm font-medium text-content">{{ element.field.label ?: element.field.name }}</p>
+                            <p class="truncate font-mono text-xs text-faint">{{ element.field.handle }} / {{ element.field.fieldType.name ?? '—' }}</p>
                         </div>
                         <div class="hidden flex-wrap gap-1.5 sm:flex">
                             <span class="required-badge rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 {% if not element.required %}hidden{% endif %}">Required</span>
                             <span class="hidden-badge rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 {% if not element.hidden %}hidden{% endif %}">Hidden</span>
                             <span class="readonly-badge rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700 {% if not element.readonly %}hidden{% endif %}">Read-only</span>
-                            <span class="disabled-badge rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 {% if not element.disabled %}hidden{% endif %}">Disabled</span>
+                            <span class="disabled-badge rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted {% if not element.disabled %}hidden{% endif %}">Disabled</span>
                         </div>
-                        <button type="button" class="toggle-field-settings rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600" title="Field settings" aria-expanded="false">
+                        <button type="button" class="toggle-field-settings rounded p-1 text-faint hover:bg-subtle hover:text-muted" title="Field settings" aria-expanded="false">
                             <svg class="settings-chevron h-4 w-4 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
-                        <button type="button" class="remove-field rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600" title="Remove from tab">
+                        <button type="button" class="remove-field rounded p-1 text-faint hover:bg-red-50 hover:text-red-600" title="Remove from tab">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
-                    <div class="field-settings hidden border-t border-slate-100 bg-slate-50 px-3 py-4 sm:px-5">
+                    <div class="field-settings hidden border-t border-edge bg-subtle px-3 py-4 sm:px-5">
                         <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                             <div class="space-y-3">
-                                <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                                    <input type="checkbox" class="required-toggle mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if element.required %}checked{% endif %}>
-                                    <span><span class="font-medium text-slate-800">Required</span><span class="mt-0.5 block text-xs text-slate-500">Users must provide a value before saving.</span></span>
+                                <label class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                                    <input type="checkbox" class="required-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500" {% if element.required %}checked{% endif %}>
+                                    <span><span class="font-medium text-content">Required</span><span class="mt-0.5 block text-xs text-muted">Users must provide a value before saving.</span></span>
                                 </label>
-                                <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                                    <input type="checkbox" class="hidden-toggle mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if element.hidden %}checked{% endif %}>
-                                    <span><span class="font-medium text-slate-800">Hidden</span><span class="mt-0.5 block text-xs text-slate-500">Store the field on the layout without showing it by default.</span></span>
+                                <label class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                                    <input type="checkbox" class="hidden-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500" {% if element.hidden %}checked{% endif %}>
+                                    <span><span class="font-medium text-content">Hidden</span><span class="mt-0.5 block text-xs text-muted">Store the field on the layout without showing it by default.</span></span>
                                 </label>
-                                <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                                    <input type="checkbox" class="readonly-toggle mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if element.readonly %}checked{% endif %}>
-                                    <span><span class="font-medium text-slate-800">Read-only</span><span class="mt-0.5 block text-xs text-slate-500">Display the field value but prevent editing.</span></span>
+                                <label class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                                    <input type="checkbox" class="readonly-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500" {% if element.readonly %}checked{% endif %}>
+                                    <span><span class="font-medium text-content">Read-only</span><span class="mt-0.5 block text-xs text-muted">Display the field value but prevent editing.</span></span>
                                 </label>
-                                <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                                    <input type="checkbox" class="disabled-toggle mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if element.disabled %}checked{% endif %}>
-                                    <span><span class="font-medium text-slate-800">Disabled</span><span class="mt-0.5 block text-xs text-slate-500">Render the field as disabled in the form.</span></span>
+                                <label class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                                    <input type="checkbox" class="disabled-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500" {% if element.disabled %}checked{% endif %}>
+                                    <span><span class="font-medium text-content">Disabled</span><span class="mt-0.5 block text-xs text-muted">Render the field as disabled in the form.</span></span>
                                 </label>
                             </div>
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div class="sm:col-span-2">
-                                    <label class="mb-1.5 block text-xs font-medium text-slate-700">Label Override</label>
-                                    <input type="text" class="label-input w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Leave blank to use field default" value="{{ element.label ?: '' }}">
+                                    <label class="mb-1.5 block text-xs font-medium text-content">Label Override</label>
+                                    <input type="text" class="label-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Leave blank to use field default" value="{{ element.label ?: '' }}">
                                 </div>
                                 <div class="sm:col-span-2">
-                                    <label class="mb-1.5 block text-xs font-medium text-slate-700">Schema Property</label>
-                                    <input type="text" class="schema-property-input w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Optional schema key mapping" value="{{ element.schema_property ?: '' }}">
+                                    <label class="mb-1.5 block text-xs font-medium text-content">Schema Property</label>
+                                    <input type="text" class="schema-property-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Optional schema key mapping" value="{{ element.schema_property ?: '' }}">
                                 </div>
                                 <div class="sm:col-span-2">
-                                    <label class="mb-1.5 block text-xs font-medium text-slate-700">Instructions Override</label>
-                                    <textarea class="instructions-input w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows="2" placeholder="Optional helper text for editors…" maxlength="255">{{ element.instructions ?: '' }}</textarea>
+                                    <label class="mb-1.5 block text-xs font-medium text-content">Instructions Override</label>
+                                    <textarea class="instructions-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows="2" placeholder="Optional helper text for editors…" maxlength="255">{{ element.instructions ?: '' }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -420,7 +420,7 @@ const fieldId     = item.dataset.fieldId;
                 </li>
                 {% endfor %}
             </ul>
-            <div class="border-t border-slate-100 bg-slate-50 px-5 py-3 text-xs text-slate-500">Tip: drag fields back to Available Fields to remove them from this tab.</div>
+            <div class="border-t border-edge bg-subtle px-5 py-3 text-xs text-muted">Tip: drag fields back to Available Fields to remove them from this tab.</div>
         </div>
     </div>
 </div>
@@ -434,61 +434,61 @@ const fieldId     = item.dataset.fieldId;
 
 {# Template for a newly dragged-in assigned row — JS clones this and fills data- slots #}
 <template id="assigned-row-template">
-    <li class="field-row rounded-md hover:bg-slate-50" data-element-id="" data-field-id="" data-name="">
+    <li class="field-row rounded-md hover:bg-subtle" data-element-id="" data-field-id="" data-name="">
         <div class="flex items-center gap-3 px-3 py-3">
-            <span class="drag-handle shrink-0 cursor-grab text-slate-300">
+            <span class="drag-handle shrink-0 cursor-grab text-faint">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
             </span>
-            <span class="position-badge inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600"></span>
+            <span class="position-badge inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-canvas text-xs font-semibold text-muted"></span>
             <div class="min-w-0 flex-1">
-                <p class="field-display-name truncate text-sm font-medium text-slate-900"></p>
-                <p class="field-meta truncate font-mono text-xs text-slate-400"></p>
+                <p class="field-display-name truncate text-sm font-medium text-content"></p>
+                <p class="field-meta truncate font-mono text-xs text-faint"></p>
             </div>
             <div class="hidden flex-wrap gap-1.5 sm:flex">
                 <span class="required-badge hidden rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">Required</span>
                 <span class="hidden-badge hidden rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Hidden</span>
                 <span class="readonly-badge hidden rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700">Read-only</span>
-                <span class="disabled-badge hidden rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">Disabled</span>
+                <span class="disabled-badge hidden rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted">Disabled</span>
             </div>
-            <button type="button" class="toggle-field-settings rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600" title="Field settings" aria-expanded="false">
+            <button type="button" class="toggle-field-settings rounded p-1 text-faint hover:bg-subtle hover:text-muted" title="Field settings" aria-expanded="false">
                 <svg class="settings-chevron h-4 w-4 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <button type="button" class="remove-field rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600" title="Remove from tab">
+            <button type="button" class="remove-field rounded p-1 text-faint hover:bg-red-50 hover:text-red-600" title="Remove from tab">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <div class="field-settings hidden border-t border-slate-100 bg-slate-50 px-3 py-4 sm:px-5">
+        <div class="field-settings hidden border-t border-edge bg-subtle px-3 py-4 sm:px-5">
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                 <div class="space-y-3">
-                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                        <input type="checkbox" class="required-toggle mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                        <span><span class="font-medium text-slate-800">Required</span><span class="mt-0.5 block text-xs text-slate-500">Users must provide a value before saving.</span></span>
+                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                        <input type="checkbox" class="required-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                        <span><span class="font-medium text-content">Required</span><span class="mt-0.5 block text-xs text-muted">Users must provide a value before saving.</span></span>
                     </label>
-                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                        <input type="checkbox" class="hidden-toggle mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                        <span><span class="font-medium text-slate-800">Hidden</span><span class="mt-0.5 block text-xs text-slate-500">Store the field on the layout without showing it by default.</span></span>
+                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                        <input type="checkbox" class="hidden-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                        <span><span class="font-medium text-content">Hidden</span><span class="mt-0.5 block text-xs text-muted">Store the field on the layout without showing it by default.</span></span>
                     </label>
-                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                        <input type="checkbox" class="readonly-toggle mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                        <span><span class="font-medium text-slate-800">Read-only</span><span class="mt-0.5 block text-xs text-slate-500">Display the field value but prevent editing.</span></span>
+                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                        <input type="checkbox" class="readonly-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                        <span><span class="font-medium text-content">Read-only</span><span class="mt-0.5 block text-xs text-muted">Display the field value but prevent editing.</span></span>
                     </label>
-                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                        <input type="checkbox" class="disabled-toggle mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                        <span><span class="font-medium text-slate-800">Disabled</span><span class="mt-0.5 block text-xs text-slate-500">Render the field as disabled in the form.</span></span>
+                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                        <input type="checkbox" class="disabled-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                        <span><span class="font-medium text-content">Disabled</span><span class="mt-0.5 block text-xs text-muted">Render the field as disabled in the form.</span></span>
                     </label>
                 </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
-                        <label class="mb-1.5 block text-xs font-medium text-slate-700">Label Override</label>
-                        <input type="text" class="label-input w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Leave blank to use field default">
+                        <label class="mb-1.5 block text-xs font-medium text-content">Label Override</label>
+                        <input type="text" class="label-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Leave blank to use field default">
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="mb-1.5 block text-xs font-medium text-slate-700">Schema Property</label>
-                        <input type="text" class="schema-property-input w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Optional schema key mapping">
+                        <label class="mb-1.5 block text-xs font-medium text-content">Schema Property</label>
+                        <input type="text" class="schema-property-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Optional schema key mapping">
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="mb-1.5 block text-xs font-medium text-slate-700">Instructions Override</label>
-                        <textarea class="instructions-input w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows="2" placeholder="Optional helper text for editors…" maxlength="255"></textarea>
+                        <label class="mb-1.5 block text-xs font-medium text-content">Instructions Override</label>
+                        <textarea class="instructions-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows="2" placeholder="Optional helper text for editors…" maxlength="255"></textarea>
                     </div>
                 </div>
             </div>

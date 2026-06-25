@@ -9,29 +9,29 @@
 {% import 'admin._inc._schema-tab-elements' as tabs %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="#">
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
+        <a class="hover:text-content" href="#">
             <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
             </svg>
             Dashboard
         </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('entries.groups') }}">
+        <a class="hover:text-content" href="{{ route('entries.groups') }}">
             Entry Groups
         </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('entries.groups.show', entry.entryGroup.id) }}">
+        <a class="hover:text-content" href="{{ route('entries.groups.show', entry.entryGroup.id) }}">
             {{ entry.entryGroup.name }}
         </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <span class="text-slate-800">{{ entry.title }}</span>
+        <span class="text-content">{{ entry.title }}</span>
     </nav>
 {% endblock %}
 
@@ -46,10 +46,10 @@
         <!-- Page title + back link -->
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Edit Entry </h1>
-                <p class="mt-1 text-sm text-slate-500">Fill in the details below and save when ready.</p>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Edit Entry </h1>
+                <p class="mt-1 text-sm text-muted">Fill in the details below and save when ready.</p>
             </div>
-            <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto" href="#">
+            <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto" href="#">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                 Back to Entries
             </a>
@@ -64,16 +64,16 @@
             <div class="flex flex-col gap-4">
 
             <!-- Title + slug -->
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700">Content</h5>
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Content</h5>
                 </div>
                 <div class="space-y-4 px-5 py-5">
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="title">
+                        <label class="mb-1.5 block text-sm font-medium text-content" for="title">
                             Title <span class="text-red-500">*</span>
                         </label>
-                        <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                        <input class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                id="title" name="title" type="text"
                                placeholder="Enter title"
                                value="{{ old('title', entry.title) }}">
@@ -82,8 +82,8 @@
                         {% endif %}
                     </div>
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Slug</label>
-                        <input class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                        <label class="mb-1.5 block text-sm font-medium text-content" for="handle">Slug</label>
+                        <input class="w-full rounded-r-md border border-edge px-3 py-2 text-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                id="handle" name="handle" type="text" value="{{ old('handle', entry.handle) }}">
                         {% if errors.has('handle') %}
                             <p class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>
@@ -93,10 +93,10 @@
             </div>
 
             <!-- Tabbed content area -->
-            <div class="flex flex-col gap-0 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm" data-tabs>
+            <div class="flex flex-col gap-0 overflow-hidden rounded-lg border border-edge bg-surface shadow-sm" data-tabs>
 
                 <!-- Tab bar -->
-                <div class="border-b border-slate-200 bg-slate-50">
+                <div class="border-b border-edge bg-subtle">
                     <div class="flex overflow-x-auto" role="tablist" aria-label="Article sections">
 
                         {% set typeLayout = entry.entryType.fieldLayout %}
@@ -153,17 +153,17 @@
                 {% endif %}
 
                 <!-- Tab footer: prev/next navigation -->
-                <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-5 py-3">
+                <div class="flex items-center justify-between border-t border-edge bg-subtle px-5 py-3">
                     <button type="button" id="tab-prev"
                             data-tab-prev
-                            class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40">
+                            class="inline-flex items-center gap-1.5 rounded-md border border-edge bg-surface px-3 py-1.5 text-xs font-medium text-muted shadow-sm hover:bg-subtle disabled:pointer-events-none disabled:opacity-40">
                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                         Previous
                     </button>
-                    <span id="tab-position" data-tab-position class="text-xs text-slate-400">1 / 4</span>
+                    <span id="tab-position" data-tab-position class="text-xs text-faint">1 / 4</span>
                     <button type="button" id="tab-next"
                             data-tab-next
-                            class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40">
+                            class="inline-flex items-center gap-1.5 rounded-md border border-edge bg-surface px-3 py-1.5 text-xs font-medium text-muted shadow-sm hover:bg-subtle disabled:pointer-events-none disabled:opacity-40">
                         Next
                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </button>
@@ -176,16 +176,16 @@
             <div class="flex flex-col gap-4">
 
                 <!-- Publish settings -->
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Publishing</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Publishing</h5>
                     </div>
                     <div class="space-y-4 px-5 py-5">
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status">Status</label>
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="status">Status</label>
                             {% if entry.entryGroup.statusGroup and entry.entryGroup.statusGroup.statuses.count >= 1 %}
                                 <div class="col-md-4">
-                                    <select id="status" name="status" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                    <select id="status" name="status" class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                                         <option value="">— Default —</option>
                                         {% for s in entry.entryGroup.statusGroup.statuses %}
                                             <option value="{{ s.handle }}"
@@ -194,7 +194,7 @@
                                             </option>
                                         {% endfor %}
                                     </select>
-                                    <p class="mt-1 text-xs text-slate-400">Only statuses from the {{ entry.entryGroup.statusGroup.name }}
+                                    <p class="mt-1 text-xs text-faint">Only statuses from the {{ entry.entryGroup.statusGroup.name }}
                                         group are allowed.</p>
                                     {% if errors.has('status') %}
                                         <p class="text-danger">{{ errors.first('status', entry.status) }}</p>
@@ -203,15 +203,15 @@
                             {% endif %}
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="published_at">Publish Date</label>
-                            <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="published_at">Publish Date</label>
+                            <input class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                    id="published_at" name="published_at" type="datetime-local"
                                    value="{{ old('published_at', entry.published_at ? entry.published_at.format('Y-m-d\\TH:i') : '') }}">
-                            <p class="mt-1 text-xs text-slate-400">Leave blank to use status overrides.</p>
+                            <p class="mt-1 text-xs text-faint">Leave blank to use status overrides.</p>
                         </div>
                         {#                        <div>#}
-                        {#                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="entry_type">Entry Type</label>#}
-                        {#                            <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"#}
+                        {#                            <label class="mb-1.5 block text-sm font-medium text-content" for="entry_type">Entry Type</label>#}
+                        {#                            <select class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"#}
                         {#                                    id="entry_type" name="entry_type">#}
                         {#                                <option>Standard Article</option>#}
                         {#                                <option>Feature Story</option>#}
@@ -220,7 +220,7 @@
                         {#                            </select>#}
                         {#                        </div>#}
                     </div>
-                    <div class="space-y-2 border-t border-slate-100 px-5 py-4">
+                    <div class="space-y-2 border-t border-edge px-5 py-4">
                         <button class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                                 type="submit">
                             Edit Entry
@@ -238,15 +238,15 @@
                 </div>
 
                 <!-- Featured image -->
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Featured Image</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Featured Image</h5>
                     </div>
                     <div class="px-5 py-4">
-                        <label class="block cursor-pointer rounded-lg border-2 border-dashed border-slate-300 p-6 text-center hover:border-emerald-400 hover:bg-emerald-50/40 transition-colors" for="featured_image">
-                            <svg class="mx-auto h-8 w-8 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <p class="mt-2 text-xs font-medium text-slate-500">Click to upload</p>
-                            <p class="mt-0.5 text-xs text-slate-400">PNG, JPG, WebP up to 10 MB</p>
+                        <label class="block cursor-pointer rounded-lg border-2 border-dashed border-edge p-6 text-center hover:border-emerald-400 hover:bg-accent-soft/40 transition-colors" for="featured_image">
+                            <svg class="mx-auto h-8 w-8 text-faint" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <p class="mt-2 text-xs font-medium text-muted">Click to upload</p>
+                            <p class="mt-0.5 text-xs text-faint">PNG, JPG, WebP up to 10 MB</p>
                             <input id="featured_image" name="featured_image" type="file" accept="image/*" class="sr-only">
                         </label>
                     </div>

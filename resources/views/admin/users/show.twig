@@ -8,16 +8,16 @@
 {% set active_secondary_nav = 'view' %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
+        <a class="hover:text-content" href="{{ route('dashboard') }}">
             <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
             </svg>
             Dashboard</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-        <a class="hover:text-slate-800" href="{{ route('users.index') }}">Users</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-        <span class="text-slate-800">{{ user.name }}</span>
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <a class="hover:text-content" href="{{ route('users.index') }}">Users</a>
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-content">{{ user.name }}</span>
     </nav>
 {% endblock %}
 
@@ -29,7 +29,7 @@
 {% macro status_badge(status, label, extra_class) %}
     {% set colours = {
         'active':    'bg-emerald-100 text-emerald-800',
-        'inactive':  'bg-slate-100 text-slate-700',
+        'inactive':  'bg-canvas text-content',
         'pending':   'bg-amber-100 text-amber-800',
         'suspended': 'bg-orange-100 text-orange-800',
         'banned':    'bg-red-100 text-red-800'
@@ -41,7 +41,7 @@
         'suspended': 'bg-orange-500',
         'banned':    'bg-red-500'
     } %}
-    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold {{ colours[status] ?? 'bg-slate-100 text-slate-700' }} {{ extra_class }}">
+    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold {{ colours[status] ?? 'bg-canvas text-content' }} {{ extra_class }}">
         <span class="h-1.5 w-1.5 rounded-full {{ dot_colours[status] ?? 'bg-slate-400' }}"></span>
         {{ label }}
     </span>
@@ -50,7 +50,7 @@
 {% block content %}
     {# ── Flash messages ──────────────────────────────────────────────────── #}
     {% if session('success') %}
-        <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('success') }}</div>
+        <div class="rounded-lg border border-emerald-200 bg-accent-soft px-4 py-3 text-sm text-emerald-800">{{ session('success') }}</div>
     {% endif %}
     {% if session('failure') %}
         <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ session('failure') }}</div>
@@ -64,7 +64,7 @@
             </div>
             <div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{{ user.name }}</h1>
+                    <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ user.name }}</h1>
                     {{ _self.status_badge(user.status, user.statusLabel(), '') }}
                     {% if user.isLocked() %}
                         <span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-semibold text-yellow-800">
@@ -73,10 +73,10 @@
                         </span>
                     {% endif %}
                 </div>
-                <p class="mt-1 text-sm text-slate-500">{{ user.email }}</p>
+                <p class="mt-1 text-sm text-muted">{{ user.email }}</p>
                 <div class="mt-2 flex flex-wrap gap-1.5">
                     {% for role in user.roles %}
-                        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">{{ role.name }}</span>
+                        <span class="rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-content">{{ role.name }}</span>
                     {% endfor %}
                 </div>
             </div>
@@ -93,39 +93,39 @@
         <div class="flex flex-col gap-5">
 
             {# Basic Details #}
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700">Basic Details</h5>
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Basic Details</h5>
                 </div>
                 <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
                     <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                        <dt class="text-slate-500">Name</dt>
-                        <dd class="font-medium text-slate-900">{{ user.name }}</dd>
+                        <dt class="text-muted">Name</dt>
+                        <dd class="font-medium text-content">{{ user.name }}</dd>
                     </div>
                     <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                        <dt class="text-slate-500">Email</dt>
-                        <dd class="text-slate-700">{{ user.email }}</dd>
+                        <dt class="text-muted">Email</dt>
+                        <dd class="text-content">{{ user.email }}</dd>
                     </div>
                     <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                        <dt class="text-slate-500">Status</dt>
+                        <dt class="text-muted">Status</dt>
                         <dd>{{ _self.status_badge(user.status, user.statusLabel(), '') }}</dd>
                     </div>
                     {% if user.status == 'suspended' and user.suspended_until %}
                         <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                            <dt class="text-slate-500">Suspended until</dt>
-                            <dd class="text-slate-700">{{ user.suspended_until|date('M j, Y g:i A') }}</dd>
+                            <dt class="text-muted">Suspended until</dt>
+                            <dd class="text-content">{{ user.suspended_until|date('M j, Y g:i A') }}</dd>
                         </div>
                     {% endif %}
                     {% if user.status == 'banned' and user.banned_at %}
                         <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                            <dt class="text-slate-500">Banned at</dt>
-                            <dd class="text-slate-700">{{ user.banned_at|date('M j, Y g:i A') }}</dd>
+                            <dt class="text-muted">Banned at</dt>
+                            <dd class="text-content">{{ user.banned_at|date('M j, Y g:i A') }}</dd>
                         </div>
                     {% endif %}
                     {% if user.isLocked() %}
                         <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                            <dt class="text-slate-500">Locked until</dt>
-                            <dd class="text-slate-700">{{ user.locked_until|date('M j, Y g:i A') }}</dd>
+                            <dt class="text-muted">Locked until</dt>
+                            <dd class="text-content">{{ user.locked_until|date('M j, Y g:i A') }}</dd>
                         </div>
                     {% endif %}
                 </dl>
@@ -134,16 +134,16 @@
             {# Custom field tabs #}
             {% if layout %}
                 {% for tab in layout.tabs %}
-                    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                        <div class="border-b border-slate-200 px-5 py-3">
-                            <h5 class="text-sm font-semibold text-slate-700">{{ tab.name }}</h5>
+                    <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                        <div class="border-b border-edge px-5 py-3">
+                            <h5 class="text-sm font-semibold text-content">{{ tab.name }}</h5>
                         </div>
                         <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
                             {% for element in tab.elements %}
                                 {% set field = element.field %}
                                 <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                                    <dt class="text-slate-500">{{ field.label }}</dt>
-                                    <dd class="text-slate-700">{{ field_values[field.handle]|raw }}</dd>
+                                    <dt class="text-muted">{{ field.label }}</dt>
+                                    <dd class="text-content">{{ field_values[field.handle]|raw }}</dd>
                                 </div>
                             {% endfor %}
                         </dl>
@@ -153,9 +153,9 @@
 
             {# ── Status history log ──────────────────────────────────────── #}
             {% if status_logs is not empty %}
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm" id="status-history">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Status History</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm" id="status-history">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Status History</h5>
                     </div>
                     <ul class="divide-y divide-slate-100">
                         {% for log in status_logs %}
@@ -164,7 +164,7 @@
                                     <div class="flex items-center gap-2 flex-wrap">
                                         {% if log.previous_status %}
                                             {{ _self.status_badge(log.previous_status, log.previous_status|capitalize, 'opacity-60') }}
-                                            <svg class="h-3 w-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                            <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                                         {% endif %}
                                         {% if log.new_status %}
                                             {{ _self.status_badge(log.new_status, log.new_status|capitalize, '') }}
@@ -174,18 +174,18 @@
                                             <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">Lock removed</span>
                                         {% endif %}
                                     </div>
-                                    <time class="shrink-0 text-xs text-slate-400" title="{{ log.created_at|date('Y-m-d H:i:s') }}">
+                                    <time class="shrink-0 text-xs text-faint" title="{{ log.created_at|date('Y-m-d H:i:s') }}">
                                         {{ log.created_at|date('M j, Y g:i A') }}
                                     </time>
                                 </div>
                                 {% if log.reason %}
-                                    <p class="mt-1 text-xs text-slate-500 italic">&ldquo;{{ log.reason }}&rdquo;</p>
+                                    <p class="mt-1 text-xs text-muted italic">&ldquo;{{ log.reason }}&rdquo;</p>
                                 {% endif %}
                                 {% if log.actor %}
-                                    <p class="mt-0.5 text-xs text-slate-400">by {{ log.actor.name }}</p>
+                                    <p class="mt-0.5 text-xs text-faint">by {{ log.actor.name }}</p>
                                 {% endif %}
                                 {% if log.context and log.context.suspended_until is defined %}
-                                    <p class="mt-0.5 text-xs text-slate-400">Suspended until {{ log.context.suspended_until }}</p>
+                                    <p class="mt-0.5 text-xs text-faint">Suspended until {{ log.context.suspended_until }}</p>
                                 {% endif %}
                             </li>
                         {% endfor %}
@@ -199,25 +199,25 @@
         <div class="flex flex-col gap-5">
 
             {# Metadata card #}
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700">Metadata</h5>
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Metadata</h5>
                 </div>
                 <dl class="divide-y divide-slate-100 px-5 py-2 text-xs">
                     <div class="flex items-center justify-between py-2.5">
-                        <dt class="text-slate-500">ID</dt>
-                        <dd class="font-medium text-slate-700">{{ user.id }}</dd>
+                        <dt class="text-muted">ID</dt>
+                        <dd class="font-medium text-content">{{ user.id }}</dd>
                     </div>
                     <div class="flex items-center justify-between py-2.5">
-                        <dt class="text-slate-500">Created</dt>
-                        <dd class="text-slate-700">{{ user.created_at ? user.created_at|date('M j, Y') : '—' }}</dd>
+                        <dt class="text-muted">Created</dt>
+                        <dd class="text-content">{{ user.created_at ? user.created_at|date('M j, Y') : '—' }}</dd>
                     </div>
                     <div class="flex items-center justify-between py-2.5">
-                        <dt class="text-slate-500">2FA</dt>
+                        <dt class="text-muted">2FA</dt>
                         {% if user.two_factor_confirmed_at %}
-                            <dd class="text-emerald-700 font-medium">Enabled</dd>
+                            <dd class="text-accent font-medium">Enabled</dd>
                         {% else %}
-                            <dd class="text-slate-500">Disabled</dd>
+                            <dd class="text-muted">Disabled</dd>
                         {% endif %}
                     </div>
                 </dl>
@@ -225,15 +225,15 @@
 
             {# ── Status management card ───────────────────────────────── #}
             {% if can('manage user status') %}
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm" id="status-management">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Account Status</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm" id="status-management">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Account Status</h5>
                     </div>
 
                     {# Current status summary #}
-                    <div class="border-b border-slate-100 px-5 py-4">
+                    <div class="border-b border-edge px-5 py-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Current</span>
+                            <span class="text-xs font-medium text-muted uppercase tracking-wider">Current</span>
                             {{ _self.status_badge(user.status, user.statusLabel(), '') }}
                         </div>
                         {% if user.status == 'suspended' and user.suspended_until %}
@@ -265,12 +265,12 @@
 
                         {# Status select #}
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status-select">
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="status-select">
                                 Change Status
                             </label>
                             <select id="status-select"
                                     name="status"
-                                    class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                    class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                     onchange="handleStatusChange(this.value)">
                                 <option value="active"    {{ user.status == 'active'    ? 'selected' : '' }}>Active</option>
                                 <option value="inactive"  {{ user.status == 'inactive'  ? 'selected' : '' }}>Inactive</option>
@@ -285,7 +285,7 @@
 
                         {# Suspended-until picker — shown only when suspended is selected #}
                         <div id="suspended-until-wrap" class="{{ user.status == 'suspended' ? '' : 'hidden' }}">
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="suspended-until">
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="suspended-until">
                                 Suspend Until <span class="text-red-500">*</span>
                             </label>
 
@@ -293,27 +293,27 @@
                             <div class="mb-2 flex flex-wrap gap-1.5">
                                 <button type="button"
                                         onclick="setSuspendPreset(1, 'hour')"
-                                        class="rounded border border-slate-300 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100">
+                                        class="rounded border border-edge bg-subtle px-2 py-1 text-xs font-medium text-muted hover:bg-subtle">
                                     +1 h
                                 </button>
                                 <button type="button"
                                         onclick="setSuspendPreset(24, 'hour')"
-                                        class="rounded border border-slate-300 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100">
+                                        class="rounded border border-edge bg-subtle px-2 py-1 text-xs font-medium text-muted hover:bg-subtle">
                                     +24 h
                                 </button>
                                 <button type="button"
                                         onclick="setSuspendPreset(3, 'day')"
-                                        class="rounded border border-slate-300 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100">
+                                        class="rounded border border-edge bg-subtle px-2 py-1 text-xs font-medium text-muted hover:bg-subtle">
                                     +3 d
                                 </button>
                                 <button type="button"
                                         onclick="setSuspendPreset(7, 'day')"
-                                        class="rounded border border-slate-300 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100">
+                                        class="rounded border border-edge bg-subtle px-2 py-1 text-xs font-medium text-muted hover:bg-subtle">
                                     +7 d
                                 </button>
                                 <button type="button"
                                         onclick="setSuspendPreset(30, 'day')"
-                                        class="rounded border border-slate-300 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100">
+                                        class="rounded border border-edge bg-subtle px-2 py-1 text-xs font-medium text-muted hover:bg-subtle">
                                     +30 d
                                 </button>
                             </div>
@@ -322,8 +322,8 @@
                                    id="suspended-until"
                                    name="suspended_until"
                                    value="{{ old('suspended_until', user.status == 'suspended' and user.suspended_until ? user.suspended_until|date('Y-m-d\\TH:i') : '') }}"
-                                   class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                            <p class="mt-1 text-xs text-slate-400">Must be a future date and time.</p>
+                                   class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <p class="mt-1 text-xs text-faint">Must be a future date and time.</p>
                             {% if errors.has('suspended_until') %}
                                 <p class="mt-1 text-xs text-red-600">{{ errors.first('suspended_until') }}</p>
                             {% endif %}
@@ -331,18 +331,18 @@
 
                         {# Reason textarea — hidden only when active is selected #}
                         <div id="reason-wrap" class="{{ user.status == 'active' ? 'hidden' : '' }}">
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status-reason">
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="status-reason">
                                 Reason
                                 <span id="reason-required-marker" class="text-red-500 {{ user.status == 'active' ? 'hidden' : '' }}">*</span>
-                                <span id="reason-optional-marker" class="text-slate-400 font-normal {{ user.status == 'active' ? '' : 'hidden' }}">(optional)</span>
+                                <span id="reason-optional-marker" class="text-faint font-normal {{ user.status == 'active' ? '' : 'hidden' }}">(optional)</span>
                             </label>
                             <textarea id="status-reason"
                                       name="reason"
                                       rows="3"
                                       maxlength="500"
                                       placeholder="Brief explanation — visible in the audit log."
-                                      class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none">{{ old('reason') }}</textarea>
-                            <p class="mt-1 text-xs text-slate-400">Max 500 characters. Saved in the audit log.</p>
+                                      class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none">{{ old('reason') }}</textarea>
+                            <p class="mt-1 text-xs text-faint">Max 500 characters. Saved in the audit log.</p>
                             {% if errors.has('reason') %}
                                 <p class="mt-1 text-xs text-red-600">{{ errors.first('reason') }}</p>
                             {% endif %}
@@ -358,11 +358,11 @@
 
                     {# Unlock action — only shown when account is locked #}
                     {% if user.isLocked() %}
-                        <div class="border-t border-slate-100 px-5 py-4">
-                            <h6 class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Account Lock</h6>
-                            <p class="mb-3 text-xs text-slate-500">
+                        <div class="border-t border-edge px-5 py-4">
+                            <h6 class="mb-2 text-xs font-semibold uppercase tracking-wider text-faint">Account Lock</h6>
+                            <p class="mb-3 text-xs text-muted">
                                 This account is temporarily locked until
-                                <span class="font-medium text-slate-700">{{ user.locked_until|date('M j, Y g:i A') }}</span>.
+                                <span class="font-medium text-content">{{ user.locked_until|date('M j, Y g:i A') }}</span>.
                                 The lock lifts automatically; use the button below to remove it immediately.
                             </p>
                             <form method="POST"

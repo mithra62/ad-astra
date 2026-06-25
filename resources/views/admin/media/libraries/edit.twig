@@ -7,72 +7,72 @@
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
+        <a class="hover:text-content" href="{{ route('dashboard') }}">
             <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
             </svg>
             Dashboard
         </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('media.libraries') }}">Media Libraries</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <a class="hover:text-content" href="{{ route('media.libraries') }}">Media Libraries</a>
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('media.libraries.show', library) }}">{{ library.name }}</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <a class="hover:text-content" href="{{ route('media.libraries.show', library) }}">{{ library.name }}</a>
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <span class="text-slate-800">Edit</span>
+        <span class="text-content">Edit</span>
     </nav>
 {% endblock %}
 
 {% block secondary_sidebar %}
     <input id="secnav-toggle" type="checkbox">
 
-    <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 lg:hidden">
+    <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-edge bg-surface px-4 py-2.5 text-sm font-medium text-muted hover:bg-subtle lg:hidden">
         <span class="flex items-center gap-2">
-            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="h-4 w-4 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
             </svg>
             Section Navigation
         </span>
-        <span class="secnav-chevron text-slate-400">
+        <span class="secnav-chevron text-faint">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
             </svg>
         </span>
     </label>
 
-    <div id="secondary-nav-panel" class="hidden border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+    <div id="secondary-nav-panel" class="hidden border-b border-edge bg-surface px-4 py-3 lg:hidden">
         <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
-            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('media.libraries') }}">Libraries</a>
-            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('media.libraries.show', library) }}">View Library</a>
-            <a class="flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="{{ route('media.libraries.edit', library) }}">Edit Library</a>
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries') }}">Libraries</a>
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries.show', library) }}">View Library</a>
+            <a class="flex items-center gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm font-medium text-accent" href="{{ route('media.libraries.edit', library) }}">Edit Library</a>
         </nav>
     </div>
 
     <aside class="hidden h-fit lg:block">
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-4 py-3">
-                <h5 class="text-sm font-semibold text-slate-700">{{ library.name }}</h5>
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-4 py-3">
+                <h5 class="text-sm font-semibold text-content">{{ library.name }}</h5>
             </div>
             <nav class="p-2">
-                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('media.libraries') }}">
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries') }}">
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
                     </svg>
                     All Libraries
                 </a>
-                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('media.libraries.show', library) }}">
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries.show', library) }}">
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                     View Library
                 </a>
-                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700" href="{{ route('media.libraries.edit', library) }}">
+                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm font-medium text-accent" href="{{ route('media.libraries.edit', library) }}">
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
@@ -93,10 +93,10 @@
     <div class="flex min-w-0 flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Edit: {{ library.name }}</h1>
-                <p class="mt-1 text-sm text-slate-500">Update storage configuration and upload rules for this library.</p>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Edit: {{ library.name }}</h1>
+                <p class="mt-1 text-sm text-muted">Update storage configuration and upload rules for this library.</p>
             </div>
-            <a href="{{ route('media.libraries.show', library) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+            <a href="{{ route('media.libraries.show', library) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                 </svg>
@@ -109,24 +109,24 @@
             {{ method_field('PUT') }}
 
             <div class="flex min-w-0 flex-col gap-4">
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Basic Details</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Basic Details</h5>
                     </div>
                     <div class="space-y-4 px-5 py-5">
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span class="text-red-500">*</span></label>
-                            <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('name') %} border-red-400{% endif %}"
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="name">Name <span class="text-red-500">*</span></label>
+                            <input class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('name') %} border-red-400{% endif %}"
                                    id="name" name="name" type="text" value="{{ old('name', library.name) }}" placeholder="Marketing Assets">
                             {% if errors.has('name') %}
                                 <p class="mt-1 text-sm text-red-600">{{ errors.first('name') }}</p>
                             {% endif %}
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span class="text-red-500">*</span></label>
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="handle">Handle <span class="text-red-500">*</span></label>
                             <div class="flex rounded-md shadow-sm">
-                                <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-xs text-slate-500">media/</span>
-                                <input class="w-full rounded-r-md border border-slate-300 px-3 py-2 font-mono text-sm placeholder:font-sans placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('handle') %} border-red-400{% endif %}"
+                                <span class="inline-flex items-center rounded-l-md border border-r-0 border-edge bg-subtle px-3 text-xs text-muted">media/</span>
+                                <input class="w-full rounded-r-md border border-edge px-3 py-2 font-mono text-sm placeholder:font-sans placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('handle') %} border-red-400{% endif %}"
                                        id="handle" name="handle" type="text" value="{{ old('handle', library.handle) }}" placeholder="marketing-assets">
                             </div>
                             {% if errors.has('handle') %}
@@ -134,15 +134,15 @@
                             {% endif %}
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="status_group_id">Status Group</label>
-                            <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('status_group_id') %} border-red-400{% endif %}"
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="status_group_id">Status Group</label>
+                            <select class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('status_group_id') %} border-red-400{% endif %}"
                                     id="status_group_id" name="status_group_id">
                                 <option value="">— None (ungoverned) —</option>
                                 {% for sg in status_groups %}
                                     <option value="{{ sg.id }}" {% if old('status_group_id', library.status_group_id) == sg.id %}selected{% endif %}>{{ sg.name }}</option>
                                 {% endfor %}
                             </select>
-                            <p class="mt-1 text-xs text-slate-400">Changing or clearing this group does not retroactively migrate existing media — their saved status handle stays put.</p>
+                            <p class="mt-1 text-xs text-faint">Changing or clearing this group does not retroactively migrate existing media — their saved status handle stays put.</p>
                             {% if errors.has('status_group_id') %}
                                 <p class="mt-1 text-sm text-red-600">{{ errors.first('status_group_id') }}</p>
                             {% endif %}
@@ -150,15 +150,15 @@
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Storage</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Storage</h5>
                     </div>
                     <div class="space-y-4 px-5 py-5">
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="adapter">Storage Disk <span class="text-red-500">*</span></label>
-                                <select class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="adapter" name="adapter">
+                                <label class="mb-1.5 block text-sm font-medium text-content" for="adapter">Storage Disk <span class="text-red-500">*</span></label>
+                                <select class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" id="adapter" name="adapter">
                                     {% for key, disk in disks %}
                                         <option value="{{ key }}" {% if old('adapter', library.adapter) == key %}selected{% endif %}>{{ key|capitalize }}</option>
                                     {% endfor %}
@@ -168,21 +168,21 @@
                                 {% endif %}
                             </div>
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="max_size">Max File Size</label>
+                                <label class="mb-1.5 block text-sm font-medium text-content" for="max_size">Max File Size</label>
                                 <div class="flex rounded-md shadow-sm">
-                                    <input class="w-full rounded-l-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                    <input class="w-full rounded-l-md border border-edge px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                            id="max_size" name="max_size" type="number" min="0" value="{{ old('max_size', library.max_size) }}">
-                                    <span class="inline-flex items-center rounded-r-md border border-l-0 border-slate-300 bg-slate-50 px-3 text-xs text-slate-500">MB</span>
+                                    <span class="inline-flex items-center rounded-r-md border border-l-0 border-edge bg-subtle px-3 text-xs text-muted">MB</span>
                                 </div>
-                                <p class="mt-1 text-xs text-slate-400">Set to 0 for unlimited.</p>
+                                <p class="mt-1 text-xs text-faint">Set to 0 for unlimited.</p>
                                 {% if errors.has('max_size') %}
                                     <p class="mt-1 text-sm text-red-600">{{ errors.first('max_size') }}</p>
                                 {% endif %}
                             </div>
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="adapter_url">Base URL</label>
-                            <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="adapter_url">Base URL</label>
+                            <input class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                    id="adapter_url" name="adapter_settings[local][url]" type="text"
                                    value="{{ old('adapter_settings.local.url', library.adapter_settings.local.url ?? '') }}"
                                    placeholder="https://example.com/storage">
@@ -193,14 +193,14 @@
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Upload Rules</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Upload Rules</h5>
                     </div>
                     <div class="space-y-4 px-5 py-5">
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700">Allowed File Types</label>
-                            <p class="mb-2 text-xs text-slate-400">Leave all unchecked to accept any file type.</p>
+                            <label class="mb-1.5 block text-sm font-medium text-content">Allowed File Types</label>
+                            <p class="mb-2 text-xs text-faint">Leave all unchecked to accept any file type.</p>
                             <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 {% for handle, mime in allowed_types %}
                                     {% if old('allowed_types') is not null %}
@@ -208,8 +208,8 @@
                                     {% else %}
                                         {% set is_checked = library.allowed_types and mime in library.allowed_types %}
                                     {% endif %}
-                                    <label class="flex cursor-pointer items-start gap-2.5 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
-                                        <input type="checkbox" name="allowed_types[]" value="{{ mime }}" class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                    <label class="flex cursor-pointer items-start gap-2.5 rounded-md border border-edge bg-subtle px-3 py-2.5 text-sm text-content">
+                                        <input type="checkbox" name="allowed_types[]" value="{{ mime }}" class="mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500"
                                                {% if is_checked %}checked{% endif %}>
                                         <span class="capitalize">{{ handle }}</span>
                                     </label>
@@ -223,9 +223,9 @@
                 </div>
 
                 {% if category_groups.count >= 1 %}
-                    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                        <div class="border-b border-slate-200 px-5 py-3">
-                            <h5 class="text-sm font-semibold text-slate-700">Category Groups</h5>
+                    <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                        <div class="border-b border-edge px-5 py-3">
+                            <h5 class="text-sm font-semibold text-content">Category Groups</h5>
                         </div>
                         <div class="divide-y divide-slate-100 px-5 py-1">
                             {% for group in category_groups %}
@@ -237,8 +237,8 @@
                                         {% if cg.id == group.id %}{% set is_checked = true %}{% endif %}
                                     {% endfor %}
                                 {% endif %}
-                                <label class="flex cursor-pointer items-center gap-2.5 py-2.5 text-sm text-slate-700">
-                                    <input class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                <label class="flex cursor-pointer items-center gap-2.5 py-2.5 text-sm text-content">
+                                    <input class="rounded border-edge text-emerald-600 focus:ring-emerald-500"
                                            name="category_groups[]" type="checkbox" value="{{ group.id }}"
                                            {% if is_checked %}checked{% endif %}>
                                     {{ group.name }}
@@ -254,27 +254,27 @@
             </div>
 
             <div class="flex flex-col gap-4">
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Save</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Save</h5>
                     </div>
                     <div class="space-y-2 px-5 py-4">
                         <button type="submit" class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                             Save Changes
                         </button>
-                        <a href="{{ route('media.libraries.show', library) }}" class="block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-50">
+                        <a href="{{ route('media.libraries.show', library) }}" class="block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-muted shadow-sm hover:bg-subtle">
                             Cancel
                         </a>
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-lg border border-red-200 bg-white shadow-sm">
+                <div class="overflow-hidden rounded-lg border border-red-200 bg-surface shadow-sm">
                     <div class="border-b border-red-100 bg-red-50 px-5 py-3">
                         <h5 class="text-sm font-semibold text-red-800">Danger Zone</h5>
                     </div>
                     <div class="px-5 py-4">
-                        <p class="mb-3 text-xs text-slate-500">Deleting this library will queue all its media files for removal.</p>
-                        <a href="{{ route('media.libraries.confirm', library) }}" class="block w-full rounded-md border border-red-300 bg-white px-4 py-2 text-center text-sm font-medium text-red-600 shadow-sm hover:bg-red-50">
+                        <p class="mb-3 text-xs text-muted">Deleting this library will queue all its media files for removal.</p>
+                        <a href="{{ route('media.libraries.confirm', library) }}" class="block w-full rounded-md border border-red-300 bg-surface px-4 py-2 text-center text-sm font-medium text-red-600 shadow-sm hover:bg-red-50">
                             Delete Library
                         </a>
                     </div>

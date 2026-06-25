@@ -14,11 +14,11 @@
     {# Pre-populated chips from saved value or old() #}
     <div class="mb-3 flex flex-wrap gap-2" id="{{ field_id }}_chips">
         {% for media in prepopulated %}
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-canvas px-3 py-1 text-xs font-medium text-content"
                   data-chip="{{ media.id }}">
                 {{ media.original_name }}
                 <button type="button"
-                        class="ml-1 rounded-full text-slate-400 hover:text-red-500 focus:outline-none focus:ring-1 focus:ring-red-400"
+                        class="ml-1 rounded-full text-faint hover:text-red-500 focus:outline-none focus:ring-1 focus:ring-red-400"
                         aria-label="Remove {{ media.original_name }}">×</button>
                 <input type="hidden" name="{{ input_name|default('') }}[]" value="{{ media.id }}">
             </span>
@@ -71,11 +71,11 @@
             chipsEl.innerHTML = '';
         }
         var span = document.createElement('span');
-        span.className = 'inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700';
+        span.className = 'inline-flex items-center gap-1.5 rounded-full bg-canvas px-3 py-1 text-xs font-medium text-content';
         span.dataset.chip = id;
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'ml-1 rounded-full text-slate-400 hover:text-red-500 focus:outline-none focus:ring-1 focus:ring-red-400';
+        btn.className = 'ml-1 rounded-full text-faint hover:text-red-500 focus:outline-none focus:ring-1 focus:ring-red-400';
         btn.setAttribute('aria-label', 'Remove ' + name);
         btn.textContent = '×';
         btn.addEventListener('click', function () { span.remove(); enforceMax(); });

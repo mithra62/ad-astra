@@ -164,6 +164,18 @@ class AppServiceProvider extends ServiceProvider
         //setup template routing
         View::addNamespace('templates', resource_path('templates'));
         View::addNamespace('admin', resource_path('views/admin'));
+
+        // Expose the resolved appearance preference (light|dark|system) to every
+        // top-level view so the admin/auth layouts can apply the `.dark` class
+        // before first paint. Bound to '*' (not the layout names) because Twig
+        // resolves `{% extends %}` internally, so a composer on the layout view
+        // would never fire — only the controller's top-level view does, and the
+        // layout inherits its context. Settings::get() applies the authenticated
+        // user's override automatically and is cached, so this stays cheap.
+        View::composer('*', function ($view) {
+            $view->with('appearance', app(Settings::class)->get('general', 'appearance', 'light'));
+        });
+
         Paginator::useTailwind();
         Gate::before(function ($user, $ability) {
             return $user->hasRole('super admin') ? true : null;

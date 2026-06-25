@@ -4,12 +4,21 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>{% block title %}{{ page_title|default('Admin') }}{% endblock %} - {{ config('app.name', 'Laravel') }}</title>
+    {# Apply the resolved theme before first paint to avoid a flash of the wrong mode. #}
+    <script>
+        (function () {
+            var pref = '{{ appearance|default('light') }}';
+            var dark = pref === 'dark' ||
+                (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.classList.toggle('dark', dark);
+        })();
+    </script>
     {{ vite(['resources/css/app.css', 'resources/js/app.js']) }}
     {% block vendor_scripts %}{% endblock %}
 
     {% block head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+<body class="min-h-screen bg-canvas text-content antialiased">
 {% set primary_nav_sticky = primary_nav_sticky|default(true) %}
 {% set active_nav = active_nav|default('dashboard') %}
 {% set secondary_sidebar_template = secondary_sidebar_template|default(null) %}
@@ -27,91 +36,91 @@
 
 <div class="app-shell min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
     <aside id="primary-sidebar"
-           class="fixed inset-y-0 left-0 z-30 w-64 -translate-x-full overflow-y-auto border-r border-slate-200 bg-white px-5 py-6 transition-transform duration-200 lg:relative lg:inset-auto lg:z-40 lg:w-auto lg:translate-x-0 lg:overflow-visible lg:transition-none {{ primary_nav_sticky ? 'lg:sticky lg:top-0 lg:h-screen' : '' }}">
+           class="fixed inset-y-0 left-0 z-30 w-64 -translate-x-full overflow-y-auto border-r border-edge bg-surface px-5 py-6 transition-transform duration-200 lg:relative lg:inset-auto lg:z-40 lg:w-auto lg:translate-x-0 lg:overflow-visible lg:transition-none {{ primary_nav_sticky ? 'lg:sticky lg:top-0 lg:h-screen' : '' }}">
         <div class="mb-4 flex items-center justify-between lg:block">
             <a class="text-lg font-semibold tracking-tight" href="{{ route('dashboard') }}">{{ app_name|default('Admin') }}</a>
-            <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Close menu">
+            <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-muted hover:bg-subtle lg:hidden" aria-label="Close menu">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </label>
         </div>
 
         <nav class="mt-2 space-y-1 text-sm font-medium lg:mt-8">
             {% block primary_navigation %}
-                <a class="block rounded-md px-3 py-2 {{ active_nav == 'dashboard' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('dashboard') }}">Dashboard</a>
+                <a class="block rounded-md px-3 py-2 {{ active_nav == 'dashboard' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('dashboard') }}">Dashboard</a>
 
                 <div class="nav-group">
                     <input id="nav-content" type="checkbox" {{ active_nav == 'content' ? 'checked' : '' }}>
-                    <label for="nav-content" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['content', 'articles', 'categories', 'field-layouts'] ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <label for="nav-content" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['content', 'articles', 'categories', 'field-layouts'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
                         <span>Content</span>
                         <span class="nav-chevron">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </span>
                     </label>
 
-                    <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'entries' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('entries.groups') }}">Entries</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'categories' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('categories.groups') }}">Categories</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'statuses' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('statuses.groups') }}">Statuses</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'media' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('media.libraries') }}">Media</a></li>
+                    <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-edge pl-3">
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'entries' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('entries.groups') }}">Entries</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'categories' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('categories.groups') }}">Categories</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'statuses' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('statuses.groups') }}">Statuses</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'media' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('media.libraries') }}">Media</a></li>
 
                         {# <li class="nav-group nav-tertiary-group">
                             <input id="nav-entries-tertiary" type="checkbox" {{ active_nav in ['entries', 'entries-published', 'entries-drafts', 'entries-archived'] ? 'checked' : '' }}>
-                            <label for="nav-entries-tertiary" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-1.5 {{ active_nav in ['entries', 'entries-published', 'entries-drafts', 'entries-archived'] ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}">
+                            <label for="nav-entries-tertiary" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-1.5 {{ active_nav in ['entries', 'entries-published', 'entries-drafts', 'entries-archived'] ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}">
                                 <span>Entries</span>
                                 <span class="nav-chevron">
                                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                                 </span>
                             </label>
-                            <ul class="nav-subitems mt-1 space-y-0.5 border-l border-slate-200 pl-3">
-                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'entries-published' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" href="{{ entries_published_url|default('#') }}">Published</a></li>
-                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'entries-drafts' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" href="{{ entries_drafts_url|default('#') }}">Drafts</a></li>
-                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'entries-archived' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" href="{{ entries_archived_url|default('#') }}">Archived</a></li>
+                            <ul class="nav-subitems mt-1 space-y-0.5 border-l border-edge pl-3">
+                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'entries-published' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle hover:text-content' }}" href="{{ entries_published_url|default('#') }}">Published</a></li>
+                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'entries-drafts' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle hover:text-content' }}" href="{{ entries_drafts_url|default('#') }}">Drafts</a></li>
+                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'entries-archived' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle hover:text-content' }}" href="{{ entries_archived_url|default('#') }}">Archived</a></li>
                             </ul>
                         </li>
 
                         <li class="nav-popout-group relative">
-                            <a class="flex items-center justify-between rounded-md px-3 py-1.5 {{ active_nav in ['collections', 'collections-news', 'collections-guides', 'collections-releases'] ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ collections_url|default('#') }}">
+                            <a class="flex items-center justify-between rounded-md px-3 py-1.5 {{ active_nav in ['collections', 'collections-news', 'collections-guides', 'collections-releases'] ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ collections_url|default('#') }}">
                                 <span>Collections</span>
-                                <svg class="hidden h-3.5 w-3.5 text-slate-400 lg:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                <svg class="hidden h-3.5 w-3.5 text-faint lg:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                             </a>
-                            <ul class="nav-popout-menu mt-1 space-y-0.5 border-l border-slate-200 pl-3 lg:absolute lg:left-full lg:top-0 lg:z-40 lg:ml-2 lg:mt-0 lg:hidden lg:min-w-44 lg:rounded-md lg:border lg:border-slate-200 lg:bg-white lg:p-2 lg:shadow-lg">
-                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'collections-news' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" href="{{ collections_news_url|default('#') }}">Newsroom</a></li>
-                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'collections-guides' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" href="{{ collections_guides_url|default('#') }}">Guides</a></li>
-                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'collections-releases' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" href="{{ collections_releases_url|default('#') }}">Releases</a></li>
+                            <ul class="nav-popout-menu mt-1 space-y-0.5 border-l border-edge pl-3 lg:absolute lg:left-full lg:top-0 lg:z-40 lg:ml-2 lg:mt-0 lg:hidden lg:min-w-44 lg:rounded-md lg:border lg:border-edge lg:bg-surface lg:p-2 lg:shadow-lg">
+                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'collections-news' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle hover:text-content' }}" href="{{ collections_news_url|default('#') }}">Newsroom</a></li>
+                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'collections-guides' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle hover:text-content' }}" href="{{ collections_guides_url|default('#') }}">Guides</a></li>
+                                <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'collections-releases' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle hover:text-content' }}" href="{{ collections_releases_url|default('#') }}">Releases</a></li>
                             </ul>
                         </li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'field-layouts' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ field_layouts_url|default('edit-field-layout.twig') }}">Field Layouts</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_nav == 'field-layouts' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ field_layouts_url|default('edit-field-layout.twig') }}">Field Layouts</a></li>
                         #}
                     </ul>
                 </div>
 
                 <div class="nav-group">
                     <input id="nav-media" type="checkbox" {{ active_nav in ['members'] ? 'checked' : '' }}>
-                    <label for="nav-media" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['media', 'media-libraries'] ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <label for="nav-media" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['media', 'media-libraries'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
                         <span>Members</span>
                         <span class="nav-chevron">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </span>
                     </label>
-                    <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_user_section == 'users' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('users.index') }}">Users</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_user_section == 'roles' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('roles.index') }}">Roles</a></li>
+                    <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-edge pl-3">
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_user_section == 'users' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('users.index') }}">Users</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_user_section == 'roles' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('roles.index') }}">Roles</a></li>
                     </ul>
                 </div>
 
                 <div class="nav-group">
                     <input id="nav-settings" type="checkbox" {{ active_nav in ['settings'] ? 'checked' : '' }}>
-                    <label for="nav-settings" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['settings'] ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <label for="nav-settings" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['settings'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
                         <span>Settings</span>
                         <span class="nav-chevron">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </span>
                     </label>
-                    <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'system' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('settings.show', 'general') }}">System Settings</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'field_groups' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('fields.groups') }}">Field Groups</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'entry_types' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('entries.types') }}">Entry Types</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'field_layouts' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-slate-600 hover:bg-slate-100' }}" href="{{ route('field-layouts') }}">Field Layouts</a></li>
+                    <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-edge pl-3">
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'system' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('settings.show', 'general') }}">System Settings</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'field_groups' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('fields.groups') }}">Field Groups</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'entry_types' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('entries.types') }}">Entry Types</a></li>
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'field_layouts' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('field-layouts') }}">Field Layouts</a></li>
                     </ul>
                 </div>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST">
@@ -122,15 +131,15 @@
     </aside>
 
     <div class="flex min-w-0 flex-col">
-        <header class="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+        <header class="border-b border-edge bg-surface px-4 py-3 sm:px-6">
             {% block header %}
                 <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex min-w-0 items-center gap-3">
-                        <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Open menu">
+                        <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-muted hover:bg-subtle lg:hidden" aria-label="Open menu">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                         </label>
                         <div class="min-w-0">
-                            <h4 class="text-sm font-semibold text-slate-800 sm:text-base">{{ page_heading|default(page_title|default('Dashboard')) }}</h4>
+                            <h4 class="text-sm font-semibold text-content sm:text-base">{{ page_heading|default(page_title|default('Dashboard')) }}</h4>
                             {% block breadcrumbs %}{% endblock %}
                         </div>
                     </div>
@@ -138,7 +147,7 @@
                     <div class="flex min-w-0 items-center gap-2 sm:gap-3 lg:ml-auto">
                         <form action="{{ admin_search_url|default('#') }}" method="GET" class="relative min-w-0 flex-1 sm:w-72 sm:flex-none" role="search">
                             <label class="sr-only" for="admin-global-search">Search</label>
-                            <svg class="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <svg class="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.1-5.4a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"/>
                             </svg>
                             <input id="admin-global-search"
@@ -146,12 +155,12 @@
                                    type="input"
                                    value="{{ app.request.query.get(admin_search_parameter|default('q')) }}"
                                    placeholder="Search"
-                                   class="h-10 w-full rounded-md border border-slate-200 bg-slate-50 pl-3 pr-14 text-sm text-slate-700 shadow-inner placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                   class="h-10 w-full rounded-md border border-edge bg-subtle pl-3 pr-14 text-sm text-content shadow-inner placeholder:text-faint focus:border-emerald-500 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                         </form>
 
                         <div class="relative shrink-0" data-account-menu>
                             <button type="button"
-                                    class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white text-sm font-semibold text-emerald-700 shadow-sm ring-offset-2 hover:border-emerald-200 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-edge bg-surface text-sm font-semibold text-accent shadow-sm ring-offset-2 hover:border-emerald-200 hover:bg-accent-soft focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     aria-haspopup="true"
                                     aria-expanded="false"
                                     aria-label="Open account menu"
@@ -163,10 +172,10 @@
                                 {% endif %}
                             </button>
 
-                            <div class="absolute right-0 z-40 mt-2 hidden w-72 overflow-hidden rounded-md border border-slate-200 bg-white text-left shadow-lg"
+                            <div class="absolute right-0 z-40 mt-2 hidden w-72 overflow-hidden rounded-md border border-edge bg-surface text-left shadow-lg"
                                  role="menu"
                                  data-account-menu-panel>
-                                <div class="border-b border-slate-100 px-4 py-3">
+                                <div class="border-b border-edge px-4 py-3">
                                     <div class="flex items-center gap-3">
                                         <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-sm font-semibold text-white">
                                             {% if current_user.avatar() %}
@@ -176,10 +185,10 @@
                                             {% endif %}
                                         </div>
                                         <div class="min-w-0">
-                                            <p class="truncate text-sm font-semibold text-slate-900">{{ current_user.name }}</p>
-                                            <p class="truncate text-xs text-slate-500">{{ current_user.email }}</p>
+                                            <p class="truncate text-sm font-semibold text-content">{{ current_user.name }}</p>
+                                            <p class="truncate text-xs text-muted">{{ current_user.email }}</p>
                                             {% if current_user.title %}
-                                                <p class="mt-0.5 truncate text-xs text-slate-400">{{ current_user.title }}</p>
+                                                <p class="mt-0.5 truncate text-xs text-faint">{{ current_user.title }}</p>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -188,7 +197,7 @@
                                 <div class="py-1">
                                     {% for link in account_menu_links %}
                                         <a href="{{ link.url }}"
-                                           class="block px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 focus:bg-slate-50 focus:outline-none"
+                                           class="block px-4 py-2 text-sm font-medium text-muted hover:bg-subtle hover:text-content focus:bg-subtle focus:outline-none"
                                            role="menuitem"
                                            {% if link.logout|default(false) %}onclick="event.preventDefault(); document.getElementById('logout-form').submit();"{% endif %}>
                                             {{ link.label }}
@@ -224,15 +233,15 @@
             {% endif %}
         </main>
 
-        <footer class="mt-auto border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+        <footer class="mt-auto border-t border-edge bg-surface px-4 py-3 sm:px-6">
             {% block footer %}
                 <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="text-xs text-slate-400">&copy; {{ year|default('2026') }} {{ app_name|default('Admin') }} &mdash; All rights reserved.</p>
-                    <nav class="flex items-center gap-4 text-xs text-slate-400">
-                        <a class="hover:text-slate-600" href="{{ docs_url|default('#') }}">Documentation</a>
-                        <a class="hover:text-slate-600" href="{{ support_url|default('#') }}">Support</a>
-                        <a class="hover:text-slate-600" href="{{ privacy_url|default('#') }}">Privacy</a>
-                        <span class="text-slate-300">|</span>
+                    <p class="text-xs text-faint">&copy; {{ year|default('2026') }} {{ app_name|default('Admin') }} &mdash; All rights reserved.</p>
+                    <nav class="flex items-center gap-4 text-xs text-faint">
+                        <a class="hover:text-muted" href="{{ docs_url|default('#') }}">Documentation</a>
+                        <a class="hover:text-muted" href="{{ support_url|default('#') }}">Support</a>
+                        <a class="hover:text-muted" href="{{ privacy_url|default('#') }}">Privacy</a>
+                        <span class="text-faint">|</span>
                         <span>{{ app_version|default('v0.0.12') }}</span>
                     </nav>
                 </div>

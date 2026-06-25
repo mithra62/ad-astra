@@ -8,29 +8,29 @@
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
+        <a class="hover:text-content" href="{{ route('dashboard') }}">
             <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
             </svg>
             Dashboard
         </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('fields.groups') }}">
+        <a class="hover:text-content" href="{{ route('fields.groups') }}">
             Field Groups
         </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('fields.groups.show', field.groups.first) }}">
+        <a class="hover:text-content" href="{{ route('fields.groups.show', field.groups.first) }}">
             {{ field.groups.first.name }}
         </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <span class="text-slate-800">{{ field.name }}</span>
+        <span class="text-content">{{ field.name }}</span>
     </nav>
 {% endblock %}
 
@@ -43,14 +43,14 @@
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
                 <div class="flex flex-wrap items-center gap-2.5">
-                    <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{{ field.name }}</h1>
-                    <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">{{ field.fieldType.name }}</span>
-                    <span class="inline-flex rounded-full {{ field.hidden ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700' }} px-2.5 py-0.5 text-xs font-medium">{{ field.hidden ? 'Hidden' : 'Visible' }}</span>
+                    <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ field.name }}</h1>
+                    <span class="inline-flex rounded-full bg-canvas px-2.5 py-0.5 text-xs font-medium text-content">{{ field.fieldType.name }}</span>
+                    <span class="inline-flex rounded-full {{ field.hidden ? 'bg-amber-50 text-amber-700' : 'bg-accent-soft text-accent' }} px-2.5 py-0.5 text-xs font-medium">{{ field.hidden ? 'Hidden' : 'Visible' }}</span>
                 </div>
-                <p class="mt-1 text-sm text-slate-500">Field definition and placement within {{ layout.name }}.</p>
+                <p class="mt-1 text-sm text-muted">Field definition and placement within {{ layout.name }}.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2 self-start">
-                <a href="{{ route('fields.groups.show', field.groups.first) }}" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                <a href="{{ route('fields.groups.show', field.groups.first) }}" class="inline-flex items-center gap-1.5 rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle">
                     Back to {{ field.groups.first.name }}
                 </a>
                 <a href="{{ route('fields.edit', field) }}" class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
@@ -61,57 +61,57 @@
 
         <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
             <div class="flex flex-col gap-5">
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Field Details</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Field Details</h5>
                     </div>
                     <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
                         <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                            <dt class="text-slate-500">Name</dt>
-                            <dd class="font-medium text-slate-900">{{ field.name }}</dd>
+                            <dt class="text-muted">Name</dt>
+                            <dd class="font-medium text-content">{{ field.name }}</dd>
                         </div>
                         <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                            <dt class="text-slate-500">Handle</dt>
-                            <dd class="font-mono text-xs text-slate-700">{{ field.handle }}</dd>
+                            <dt class="text-muted">Handle</dt>
+                            <dd class="font-mono text-xs text-content">{{ field.handle }}</dd>
                         </div>
                         <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                            <dt class="text-slate-500">Label</dt>
-                            <dd class="text-slate-700">{{ field.label|default(field.name) }}</dd>
+                            <dt class="text-muted">Label</dt>
+                            <dd class="text-content">{{ field.label|default(field.name) }}</dd>
                         </div>
                         <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                            <dt class="text-slate-500">Instructions</dt>
-                            <dd class="text-slate-700">{{ field.instructions|default('None') }}</dd>
+                            <dt class="text-muted">Instructions</dt>
+                            <dd class="text-content">{{ field.instructions|default('None') }}</dd>
                         </div>
                         <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
-                            <dt class="text-slate-500">Type</dt>
-                            <dd class="break-all font-mono text-xs text-slate-700">{{ field.fieldType.name }}</dd>
+                            <dt class="text-muted">Type</dt>
+                            <dd class="break-all font-mono text-xs text-content">{{ field.fieldType.name }}</dd>
                         </div>
                     </dl>
                 </div>
 
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Placement in {{ layout.name }}</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Placement in {{ layout.name }}</h5>
                     </div>
                     <div class="divide-y divide-slate-100">
                         {% for tab in layout.tabs %}
                             <section id="tab-{{ tab.handle }}" class="px-5 py-4">
                                 <div class="mb-3 flex items-center justify-between gap-3">
                                     <div>
-                                        <h2 class="text-sm font-semibold text-slate-900">{{ tab.name }}</h2>
-                                        <p class="font-mono text-xs text-slate-400">{{ tab.handle }}</p>
+                                        <h2 class="text-sm font-semibold text-content">{{ tab.name }}</h2>
+                                        <p class="font-mono text-xs text-faint">{{ tab.handle }}</p>
                                     </div>
-                                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">{{ tab.elements|length }} fields</span>
+                                    <span class="rounded-full bg-canvas px-2.5 py-0.5 text-xs font-medium text-muted">{{ tab.elements|length }} fields</span>
                                 </div>
 
                                 <div class="space-y-2">
                                     {% for element in tab.elements %}
                                         {% set is_current = element.field.handle == field.handle %}
-                                        <div class="rounded-md border {{ is_current ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-white' }} px-4 py-3">
+                                        <div class="rounded-md border {{ is_current ? 'border-emerald-200 bg-accent-soft' : 'border-edge bg-surface' }} px-4 py-3">
                                             <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                                 <div class="min-w-0">
-                                                    <p class="truncate text-sm font-medium {{ is_current ? 'text-emerald-900' : 'text-slate-900' }}">{{ element.field.name }}</p>
-                                                    <p class="truncate font-mono text-xs {{ is_current ? 'text-emerald-700' : 'text-slate-400' }}">{{ element.field.handle }}</p>
+                                                    <p class="truncate text-sm font-medium {{ is_current ? 'text-emerald-900' : 'text-content' }}">{{ element.field.name }}</p>
+                                                    <p class="truncate font-mono text-xs {{ is_current ? 'text-accent' : 'text-faint' }}">{{ element.field.handle }}</p>
                                                 </div>
                                                 <div class="flex flex-wrap gap-1.5">
                                                     {% if element.required %}
@@ -120,7 +120,7 @@
                                                     {% if element.hidden %}
                                                         <span class="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Hidden</span>
                                                     {% endif %}
-                                                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{{ element.width|default('full') }}</span>
+                                                    <span class="rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted">{{ element.width|default('full') }}</span>
                                                 </div>
                                             </div>
                                             {% if is_current and element.instructions|default('') %}
@@ -128,7 +128,7 @@
                                             {% endif %}
                                         </div>
                                     {% else %}
-                                        <p class="rounded-md border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">No fields have been assigned to this tab.</p>
+                                        <p class="rounded-md border border-dashed border-edge px-4 py-6 text-center text-sm text-muted">No fields have been assigned to this tab.</p>
                                     {% endfor %}
                                 </div>
                             </section>
@@ -138,42 +138,42 @@
             </div>
 
             <div class="flex flex-col gap-5">
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Groups</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Groups</h5>
                     </div>
                     <div class="space-y-2 px-5 py-4">
                         {% for group in field.groups %}
-                            <a  href="{{ route('fields.groups.show', group) }}" class="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                            <a  href="{{ route('fields.groups.show', group) }}" class="flex items-center justify-between rounded-md border border-edge px-3 py-2 text-sm font-medium text-content hover:bg-subtle">
                                 <span>{{ group.name }}</span>
-                                <span class="font-mono text-xs text-slate-400">#{{ group.id }}</span>
+                                <span class="font-mono text-xs text-faint">#{{ group.id }}</span>
                             </a>
                         {% else %}
-                            <p class="text-sm text-slate-500">This field is not assigned to any field groups.</p>
+                            <p class="text-sm text-muted">This field is not assigned to any field groups.</p>
                         {% endfor %}
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Metadata</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Metadata</h5>
                     </div>
                     <dl class="divide-y divide-slate-100 px-5 py-2 text-xs">
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">ID</dt>
-                            <dd class="font-medium text-slate-700">{{ field.id }}</dd>
+                            <dt class="text-muted">ID</dt>
+                            <dd class="font-medium text-content">{{ field.id }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Layout</dt>
-                            <dd class="text-slate-700">{{ layout.name }}</dd>
+                            <dt class="text-muted">Layout</dt>
+                            <dd class="text-content">{{ layout.name }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Created</dt>
-                            <dd class="text-slate-700">{{ field.created_at|date('M j, Y') }}</dd>
+                            <dt class="text-muted">Created</dt>
+                            <dd class="text-content">{{ field.created_at|date('M j, Y') }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Updated</dt>
-                            <dd class="text-slate-700">{{ field.updated_at|date('M j, Y') }}</dd>
+                            <dt class="text-muted">Updated</dt>
+                            <dd class="text-content">{{ field.updated_at|date('M j, Y') }}</dd>
                         </div>
                     </dl>
                 </div>

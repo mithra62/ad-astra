@@ -137,6 +137,24 @@ return [
                 'hidden' => false,
                 'user_overridable' => true,
             ],
+            [
+                // Stored as text (not 'select', which routes to value_integer for FK ids).
+                // A non-empty 'options' set makes the form render it as a <select>.
+                'handle' => 'appearance',
+                'label' => 'Appearance',
+                'type' => 'text',
+                'default' => 'light',
+                'rules' => ['string', Rule::in(['light', 'dark', 'system'])],
+                'instructions' => 'Interface theme. "System" follows your operating system setting.',
+                'group' => 'Appearance',
+                'hidden' => false,
+                'user_overridable' => true,
+                'options_callback' => static fn () => [
+                    ['value' => 'light', 'label' => 'Light'],
+                    ['value' => 'dark', 'label' => 'Dark'],
+                    ['value' => 'system', 'label' => 'System'],
+                ],
+            ],
         ],
     ],
 
@@ -241,8 +259,8 @@ return [
                 'group' => 'Accounts',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn() => array_map(
-                    fn($s) => ['value' => $s, 'label' => UserStatus::label($s)],
+                'options_callback' => static fn () => array_map(
+                    fn ($s) => ['value' => $s, 'label' => UserStatus::label($s)],
                     UserStatus::ALL
                 ),
             ],
@@ -256,8 +274,8 @@ return [
                 'group' => 'Accounts',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn() => array_map(
-                    fn($s) => ['value' => $s, 'label' => UserStatus::label($s)],
+                'options_callback' => static fn () => array_map(
+                    fn ($s) => ['value' => $s, 'label' => UserStatus::label($s)],
                     UserStatus::ALL
                 ),
             ],
@@ -271,9 +289,9 @@ return [
                 'group' => 'Schema',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn() => FieldLayout::orderBy('name')
+                'options_callback' => static fn () => FieldLayout::orderBy('name')
                     ->get()
-                    ->map(fn($l) => ['value' => $l->id, 'label' => $l->name])
+                    ->map(fn ($l) => ['value' => $l->id, 'label' => $l->name])
                     ->toArray(),
             ],
         ],

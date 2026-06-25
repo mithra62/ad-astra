@@ -9,29 +9,29 @@
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="#">
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
+        <a class="hover:text-content" href="#">
             <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
             </svg>
             Dashboard
         </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('categories.groups') }}">
+        <a class="hover:text-content" href="{{ route('categories.groups') }}">
             Category Groups
         </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <a class="hover:text-slate-800" href="{{ route('categories.groups.show', group) }}">
+        <a class="hover:text-content" href="{{ route('categories.groups.show', group) }}">
             {{ group.name }}
         </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <span class="text-slate-800">Create Category</span>
+        <span class="text-content">Create Category</span>
     </nav>
 {% endblock %}
 
@@ -53,10 +53,10 @@
     <div class="flex w-full min-w-0 flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Create Category</h1>
-                <p class="mt-1 text-sm text-slate-500">Create a reusable status, field, label, or option for content workflows.</p>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Create Category</h1>
+                <p class="mt-1 text-sm text-muted">Create a reusable status, field, label, or option for content workflows.</p>
             </div>
-            <a href="{{ route('categories.groups.show', group) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+            <a href="{{ route('categories.groups.show', group) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                 </svg>
@@ -66,16 +66,16 @@
 
         <form id="general-create-form" method="POST" action="{{ route('categories.store', {group_id: group.id}) }}" class="flex w-full min-w-0 flex-col gap-5">
             {{ csrf_field() }}
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Item Details</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
                     {{ forms.input(name='name', label='Name', required=true, placeholder="e.g. Products, Topics, etc...") }}
                     {{ forms.input('handle', 'Handle', required=true, description="Lowercase letters, numbers, and hyphens only.") }}
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Parent Category</label>
-                        <select class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('parent_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="parent_id" name="parent_id">
+                        <label class="mb-1.5 block text-sm font-medium text-content" for="handle">Parent Category</label>
+                        <select class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('parent_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="parent_id" name="parent_id">
                             <option value="">— No Parent (top-level) —</option>
                             {% for cat in parent_categories %}
                                 <option value="{{ cat.id }}"
@@ -93,9 +93,9 @@
             {% set layout = group.fieldLayout %}
             {% if layout and layout.tabs.count >= 1 %}
                 {% for tab in layout.tabs %}
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700">{{ tab.name }}</h5>
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">{{ tab.name }}</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
                     {{ tabs.tabFields(tab, {}) }}
@@ -105,7 +105,7 @@
 
             </div>
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
-                <a href="{{ route('categories.groups.show', group) }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Cancel</a>
+                <a href="{{ route('categories.groups.show', group) }}" class="rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-semibold text-content shadow-sm hover:bg-subtle">Cancel</a>
                 <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Create Category</button>
             </div>
         </form>

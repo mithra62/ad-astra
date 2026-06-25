@@ -10,7 +10,7 @@
     <form method="POST" action="{{ route('login') }}" class="space-y-5 px-5 py-6 sm:px-6">
         {{ csrf_field() }}
         {% if session('status') %}
-            <div class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <div class="rounded-md border border-emerald-200 bg-accent-soft px-4 py-3 text-sm text-emerald-800">
                 {{ session('status') }}
             </div>
         {% endif %}
@@ -27,9 +27,9 @@
         </div>
 
         <div>
-            <label for="email" class="mb-1.5 block text-sm font-medium text-slate-700">Email address</label>
+            <label for="email" class="mb-1.5 block text-sm font-medium text-content">Email address</label>
             <input id="email" name="email" type="email" autocomplete="email"
-                   class="w-full rounded-md border {% if errors.has('email') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %} focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} px-3 py-2 text-sm shadow-sm placeholder:text-slate-400  focus:outline-none focus:ring-2 "
+                   class="w-full rounded-md border {% if errors.has('email') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %} focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} px-3 py-2 text-sm shadow-sm placeholder:text-faint  focus:outline-none focus:ring-2 "
                    aria-invalid="true" aria-describedby="email-error"
                    placeholder="you@example.com">
             {% if errors.has('email') %}
@@ -39,17 +39,17 @@
 
         <div>
             <div class="mb-1.5 flex items-center justify-between gap-3">
-                <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                <label for="password" class="block text-sm font-medium text-content">Password</label>
                 <a href="{{ route('password.request') }}"
-                   class="text-xs font-medium text-emerald-700 hover:text-emerald-800">Forgot password?</a>
+                   class="text-xs font-medium text-accent hover:text-emerald-800">Forgot password?</a>
             </div>
             <div class="relative">
                 <input id="password" name="password" type="password" autocomplete="current-password"
-                       class="w-full rounded-md border {% if errors.has('password') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %} focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} py-2 pr-10 text-sm shadow-sm placeholder:text-slate-400  focus:outline-none focus:ring-2
+                       class="w-full rounded-md border {% if errors.has('password') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %} focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} py-2 pr-10 text-sm shadow-sm placeholder:text-faint  focus:outline-none focus:ring-2
                    aria-invalid=" true" aria-describedby="password-error"
                 placeholder="Enter your password">
                 <button type="button"
-                        class="auth-password-toggle absolute inset-y-0 right-0 inline-flex items-center px-3 text-slate-400 hover:text-slate-600"
+                        class="auth-password-toggle absolute inset-y-0 right-0 inline-flex items-center px-3 text-faint hover:text-muted"
                         data-auth-password-toggle="password" aria-label="Show password">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -65,9 +65,9 @@
         </div>
 
         <div class="flex items-center justify-between gap-3">
-            <label class="flex items-center gap-2 text-sm text-slate-600">
+            <label class="flex items-center gap-2 text-sm text-muted">
                 <input type="checkbox" name="remember"
-                       class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                       class="rounded border-edge text-emerald-600 focus:ring-emerald-500">
                 Remember me
             </label>
         </div>
@@ -79,16 +79,16 @@
 
         <div class="relative">
             <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                <div class="w-full border-t border-slate-200"></div>
+                <div class="w-full border-t border-edge"></div>
             </div>
             <div class="relative flex justify-center">
-                <span class="bg-white px-3 text-xs font-medium text-slate-500">Or continue with</span>
+                <span class="bg-surface px-3 text-xs font-medium text-muted">Or continue with</span>
             </div>
         </div>
 
         <div class="grid grid-cols-3 gap-3 sm:grid-cols-6">
             <a href="{{ route('social.login.provider', 'facebook') }}"
-               class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+               class="inline-flex h-10 items-center justify-center rounded-md border border-edge bg-surface text-muted shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                aria-label="Sign in with Twitter">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path
@@ -96,7 +96,7 @@
                 </svg>
             </a>
             <a href="{{ route('social.login.provider', 'facebook') }}"
-               class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+               class="inline-flex h-10 items-center justify-center rounded-md border border-edge bg-surface text-muted shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                aria-label="Sign in with Bluesky">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path
@@ -104,7 +104,7 @@
                 </svg>
             </a>
             <a href="{{ route('social.login.provider', 'facebook') }}"
-               class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+               class="inline-flex h-10 items-center justify-center rounded-md border border-edge bg-surface text-muted shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                aria-label="Sign in with Facebook">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path
@@ -112,7 +112,7 @@
                 </svg>
             </a>
             <a href="{{ route('social.login.provider', 'linkedin') }}"
-               class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+               class="inline-flex h-10 items-center justify-center rounded-md border border-edge bg-surface text-muted shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                aria-label="Sign in with LinkedIn">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path
@@ -120,7 +120,7 @@
                 </svg>
             </a>
             <a href="{{ route('social.login.provider', 'github') }}"
-               class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-slate-400 hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+               class="inline-flex h-10 items-center justify-center rounded-md border border-edge bg-surface text-muted shadow-sm transition hover:border-slate-400 hover:bg-subtle hover:text-content focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                aria-label="Sign in with GitHub">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path
@@ -128,7 +128,7 @@
                 </svg>
             </a>
             <a href="{{ route('social.login.provider', 'facebook') }}"
-               class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+               class="inline-flex h-10 items-center justify-center rounded-md border border-edge bg-surface text-muted shadow-sm transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                aria-label="Sign in with Google">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                     <path fill="#4285F4"
@@ -145,8 +145,8 @@
         {{ include('_inc._bb') }}
     </form>
 
-    <div class="border-t border-slate-200 bg-slate-50 px-5 py-4 text-center text-sm text-slate-500 sm:px-6">
+    <div class="border-t border-edge bg-subtle px-5 py-4 text-center text-sm text-muted sm:px-6">
         Need an account?
-        <a href="register.twig" class="font-medium text-emerald-700 hover:text-emerald-800">Create one</a>
+        <a href="register.twig" class="font-medium text-accent hover:text-emerald-800">Create one</a>
     </div>
 {% endblock %}

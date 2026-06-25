@@ -4,14 +4,14 @@
     <div class="divide-y divide-slate-100">
 
         <div class="px-5 py-5">
-            <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Hierarchy</h5>
+            <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-faint">Hierarchy</h5>
             <div class="space-y-4">
                 <div>
                     {{ forms.checkbox_card('is_home', 1, 'Is Home?', 'Should this Entry be considered the Home Page content?') }}
                 </div>
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="parent_entry_id">Parent Entry</label>
-                    <select class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    <label class="mb-1.5 block text-sm font-medium text-content" for="parent_entry_id">Parent Entry</label>
+                    <select class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                             id="parent_entry_id" name="parent_entry_id" data-tab-dirty="structure">
                         <option value="">— None (top-level) —</option>
                         <option value="22060" {% if old('parent_entry_id') == 22060 %} selected {% endif %}>Vel Fugiat Nemo Animi.</option>
@@ -19,50 +19,50 @@
                         <option value="21970" {% if old('parent_entry_id') == 21970 %} selected {% endif %}>Aut Soluta Dolor Nostrum Explicabo Et Aut.</option>
                         <option value="21922" {% if old('parent_entry_id') == 21922 %} selected {% endif %}>Ullam Id Corporis Rem Dolores Dolorem.</option>
                     </select>
-                    <p class="mt-1 text-xs text-slate-400">Leave blank to place at the top level.</p>
+                    <p class="mt-1 text-xs text-faint">Leave blank to place at the top level.</p>
                     {% if errors.has('parent_entry_id') %}
                         <p class="mt-1 text-xs text-red-600">{{ errors.first('parent_entry_id', entry.entryType.parent_id) }}</p>
                     {% endif %}
                 </div>
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="sort_order">Sort Order</label>
-                    <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:max-w-[8rem]"
+                    <label class="mb-1.5 block text-sm font-medium text-content" for="sort_order">Sort Order</label>
+                    <input class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:max-w-[8rem]"
                            id="sort_order" name="sort_order" type="number" min="0" placeholder="0"
                            readonly
                            value="{{ old('sort_order', entry.entryTree.sort_order) }}"
                            data-tab-dirty="structure">
-                    <p class="mt-1 text-xs text-slate-400">Lower numbers appear first in ordered lists.</p>
+                    <p class="mt-1 text-xs text-faint">Lower numbers appear first in ordered lists.</p>
                 </div>
             </div>
         </div>
 
         <div class="px-5 py-5">
-            <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Routing</h5>
+            <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-faint">Routing</h5>
             <div class="space-y-4">
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="url">URL Override</label>
+                    <label class="mb-1.5 block text-sm font-medium text-content" for="url">URL Override</label>
                     <div class="flex rounded-md shadow-sm">
-                        <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-xs text-slate-500">https://example.com/</span>
-                        <input class="w-full rounded-r-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                        <span class="inline-flex items-center rounded-l-md border border-r-0 border-edge bg-subtle px-3 text-xs text-muted">https://example.com/</span>
+                        <input class="w-full rounded-r-md border border-edge px-3 py-2 text-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                id="url" name="url" type="text"
                                readonly
                                value="{{ old('url', entry.entryTree.url) }}"
                                placeholder="articles/my-article"
                                data-tab-dirty="structure">
                     </div>
-                    <p class="mt-1 text-xs text-slate-400">Leave blank to auto-build from slug and parent.</p>
+                    <p class="mt-1 text-xs text-faint">Leave blank to auto-build from slug and parent.</p>
                     {% if errors.has('entry_url') %}
                         <p class="mt-1 text-xs text-red-600">{{ errors.first('url', entry.entryTree.url) }}</p>
                     {% endif %}
                 </div>
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="redirect_url">Redirect URL</label>
-                    <input class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    <label class="mb-1.5 block text-sm font-medium text-content" for="redirect_url">Redirect URL</label>
+                    <input class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                            id="redirect_url" name="redirect_url" type="url"
                            value="{{ old('redirect_url', entry.entryTree.redirect_url) }}"
                            placeholder="https://example.com/new-location"
                            data-tab-dirty="structure">
-                    <p class="mt-1 text-xs text-slate-400">Optional. If set, visiting this entry's URL will redirect here.</p>
+                    <p class="mt-1 text-xs text-faint">Optional. If set, visiting this entry's URL will redirect here.</p>
                     {% if errors.has('redirect_url') %}
                         <p class="mt-1 text-xs text-red-600">{{ errors.first('redirect_url', entry.entryType.redirect_url) }}</p>
                     {% endif %}
@@ -71,15 +71,15 @@
         </div>
 
         <div class="px-5 py-5">
-            <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Template</h5>
+            <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-faint">Template</h5>
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="template">Template Path</label>
-                <input class="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm shadow-sm placeholder:text-slate-400 placeholder:font-sans focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                <label class="mb-1.5 block text-sm font-medium text-content" for="template">Template Path</label>
+                <input class="w-full rounded-md border border-edge px-3 py-2 font-mono text-sm shadow-sm placeholder:text-faint placeholder:font-sans focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                        id="template" name="template" type="text"
                        value="{{ old('template', entry.entryTree.template) }}"
                        placeholder="e.g. articles/default"
                        data-tab-dirty="structure">
-                <p class="mt-1 text-xs text-slate-400">Template path relative to the views root. Leave blank to use the entry type's default.</p>
+                <p class="mt-1 text-xs text-faint">Template path relative to the views root. Leave blank to use the entry type's default.</p>
                 {% if errors.has('template') %}
                     <p class="mt-1 text-xs text-red-600">{{ errors.first('template', entry.entryTree.template) }}</p>
                 {% endif %}

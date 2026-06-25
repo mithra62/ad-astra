@@ -2,7 +2,7 @@
 {% set current_value = old('fields.' ~ field.handle, value|default('')) %}
 {% if has_subdivisions %}
     <select id="{{ id }}" name="{{ input_name }}"
-        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+        class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
         {% if placeholder %}
             <option value="">{{ placeholder }}</option>
         {% endif %}
@@ -12,6 +12,6 @@
     </select>
 {% else %}
     <input value="{{ current_value }}" type="text" id="{{ id }}" name="{{ input_name }}" maxlength="100"
-        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+        class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
         placeholder="Enter {{ country_name }} subdivision">
 {% endif %}
