@@ -59,7 +59,7 @@ return [
                 'handle' => 'installed_version',
                 'label' => 'Installed Version',
                 'type' => 'text',
-                'default' => '0.1',
+                'default' => '0.0.1',
                 'rules' => ['required', 'string', 'max:255'],
                 'instructions' => 'The installed system version.',
                 'group' => null,
