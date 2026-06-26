@@ -14,10 +14,6 @@ class CreateNewMediaLibrary extends AbstractAction
             $library->categoryGroups()->sync($input['category_groups']);
         }
 
-        if (!empty($input['field_groups'])) {
-            $library->fieldGroups()->sync($input['field_groups']);
-        }
-
         return $library;
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Settings;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 abstract class Controller
 {
@@ -17,7 +18,7 @@ abstract class Controller
     public function __construct()
     {
         $this->settings = app(Settings::class);
-        $this->total_per_page = $this->settings->get('general', 'items_per_page', $this->total_per_page);
+        $this->total_per_page = $this->settings->get('general', 'items_per_page', $this->total_per_page, Auth::user());
     }
 
     /**

@@ -18,10 +18,6 @@ class EditCategoryGroupRequest extends StoreCategoryGroupRequest
     public function rules(): array
     {
         return [
-            'field_groups' => [
-                'nullable',
-                'array',
-            ],
             'field_layout_id' => [
                 'nullable',
                 'integer',
@@ -31,6 +27,11 @@ class EditCategoryGroupRequest extends StoreCategoryGroupRequest
                 'string',
                 'max:255',
                 Rule::unique('category_groups')->ignore($this->route()->parameter('group')),
+            ],
+            'description' => [
+                'nullable',
+                'string',
+                'max:255',
             ],
             'handle' => [
                 'required',

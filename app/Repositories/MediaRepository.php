@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Media;
+use App\Models\Status;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
@@ -57,6 +58,8 @@ class MediaRepository extends AbstractFieldableRepository
     public function resolveLayoutFields(Model $model): Collection
     {
         $model->loadMissing([
+            'library.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'library.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'library.fieldLayout.tabs.elements.field.fieldType',
         ]);
 
@@ -74,5 +77,40 @@ class MediaRepository extends AbstractFieldableRepository
         if (array_key_exists('sort_order', $data)) {
             $media->sort_order = (int) $data['sort_order'];
         }
+
+        if (isset($data['status'])) {
+            $this->applyStatus($media, $data['status']);
+        }
+    }
+
+    /**
+     * Resolve a status handle against the owning library's status group and
+     * write the denormalized triple onto the media row.
+     *
+     * Validation has already verified the handle belongs to this library's
+     * group, so the bottom guard is defense-in-depth for programmatic callers
+     * that bypass the request layer.
+     */
+    private function applyStatus(Media $media, string $handle): void
+    {
+        $media->loadMissing('library');
+
+        $groupId = $media->library?->status_group_id;
+        if (!$groupId) {
+            return;
+        }
+
+        $status = Status::query()
+            ->where('status_group_id', $groupId)
+            ->where('handle', $handle)
+            ->first();
+
+        if (!$status) {
+            return;
+        }
+
+        $media->status_id        = $status->id;
+        $media->status_handle    = $status->handle;
+        $media->status_is_public = $status->is_public;
     }
 }

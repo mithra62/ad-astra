@@ -47,11 +47,12 @@ class StoreMediaLibraryFormRequest extends FormRequest
             'max_size' => ['nullable', 'integer', 'min:0'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
 
-            // Relationship IDs — both optional.
+            // Optional — ungoverned libraries (null) skip status governance.
+            'status_group_id' => ['nullable', 'integer', 'exists:status_groups,id'],
+
+            // Relationship IDs — optional.
             'category_groups' => ['nullable', 'array'],
             'category_groups.*' => ['integer', 'exists:category_groups,id'],
-            'field_groups' => ['nullable', 'array'],
-            'field_groups.*' => ['integer', 'exists:field_groups,id'],
         ];
 
         // Require an explicit URL when storing files on a non-local adapter

@@ -37,20 +37,26 @@ class Media extends Controller
 
     public function show(string $id): \Illuminate\View\View
     {
-        $media = MediaModel::findOrFail($id);
+        $media = MediaModel::with(['library', 'status'])->findOrFail($id);
         return $this->view('media.show', compact('media'));
     }
 
     public function edit(string $id): \Illuminate\View\View
     {
-        $media = MediaModel::findOrFail($id);
+        $media = MediaModel::with([
+            'library.statusGroup.statuses',
+            'status',
+        ])->findOrFail($id);
         return $this->view('media.edit', compact('media'));
     }
 
     public function update(EditMediaRequest $request, string $id): RedirectResponse
     {
         $media = MediaModel::with([
+            'library.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'library.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'library.fieldLayout.tabs.elements.field.fieldType',
+            'library.statusGroup',
         ])->findOrFail($id);
         $editor = app(EditMediaAction::class);
         $media = $editor->edit($media, $request->validated());
@@ -71,7 +77,7 @@ class Media extends Controller
     public function destroy(DeleteMediaRequest $request, string $id): RedirectResponse
     {
         $media = MediaModel::findOrFail($id);
-        (new DeleteMediaAction)->delete($media);
+        (new DeleteMediaAction())->delete($media);
         return redirect()->route('media.index')
             ->with('success', trans('media.deleted'));
     }

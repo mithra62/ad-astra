@@ -5,6 +5,7 @@ namespace App\Http\Requests\Media;
 use App\Http\Requests\FormRequest;
 use App\Models\Media;
 use App\Models\Media\Library as MediaLibrary;
+use Illuminate\Validation\Rule;
 
 class EditMediaRequest extends FormRequest
 {
@@ -13,9 +14,21 @@ class EditMediaRequest extends FormRequest
 
     public function rules(): array
     {
+        $schema = $this->resolvedSchema();
+
         return array_merge(
-            ['name' => ['required', 'sometimes', 'string', 'max:255']],
-            $this->schemaFieldRules($this->resolvedSchema())
+            [
+                'name' => ['required', 'sometimes', 'string', 'max:255'],
+                'status' => [
+                    'nullable',
+                    'string',
+                    'max:100',
+                    Rule::exists('statuses', 'handle')->where(
+                        fn ($query) => $query->where('status_group_id', $schema?->status_group_id)
+                    ),
+                ],
+            ],
+            $this->schemaFieldRules($schema)
         );
     }
 

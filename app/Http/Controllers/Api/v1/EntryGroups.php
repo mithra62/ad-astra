@@ -90,7 +90,6 @@ class EntryGroups extends Controller
                     new OA\Property(property: 'status_group_id', type: 'integer', description: 'ID of the status group to use', example: 1),
                     new OA\Property(property: 'field_layout_id', type: 'integer', nullable: true, description: 'ID of an optional field layout'),
                     new OA\Property(property: 'category_groups', type: 'array', nullable: true, items: new OA\Items(type: 'integer'), description: 'IDs of category groups to attach'),
-                    new OA\Property(property: 'field_groups', type: 'array', nullable: true, items: new OA\Items(type: 'integer'), description: 'IDs of field groups to attach'),
                 ]
             )
         ),
@@ -177,7 +176,6 @@ class EntryGroups extends Controller
                     new OA\Property(property: 'status_group_id', type: 'integer', example: 1),
                     new OA\Property(property: 'field_layout_id', type: 'integer', nullable: true),
                     new OA\Property(property: 'category_groups', type: 'array', nullable: true, items: new OA\Items(type: 'integer')),
-                    new OA\Property(property: 'field_groups', type: 'array', nullable: true, items: new OA\Items(type: 'integer')),
                 ]
             )
         ),

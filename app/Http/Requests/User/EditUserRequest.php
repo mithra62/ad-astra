@@ -18,12 +18,13 @@ class EditUserRequest extends StoreUserRequest
     {
         $schema = UserFieldLayout::resolve();
         $userId = $this->route()->parameter('user') ?? $this->route()->parameter('id');
+        $assignable = $this->assignableRoleNames();
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
             'roles' => ['required', 'array'],
-            'roles.*' => ['string', 'exists:roles,name'],
+            'roles.*' => ['string', Rule::in($assignable)],
             'fields' => ['nullable', 'array'],
         ];
 

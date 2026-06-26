@@ -24,8 +24,6 @@ class StoreEntryGroupRequest extends FormRequest
             'field_layout_id' => ['nullable', 'integer', 'exists:field_layouts,id'],
             'category_groups' => ['nullable', 'array'],
             'category_groups.*' => ['integer', 'exists:category_groups,id'],
-            'field_groups' => ['nullable', 'array'],
-            'field_groups.*' => ['integer', 'exists:field_groups,id'],
             'entry_type_ids' => ['nullable', 'array'],
             'entry_type_ids.*' => ['integer', 'exists:entry_types,id'],
         ];

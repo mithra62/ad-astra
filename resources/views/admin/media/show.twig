@@ -1,4 +1,5 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = media.name ?: media.file_name %}
 {% set page_heading = media.name ?: media.file_name %}
@@ -7,23 +8,15 @@
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">Dashboard</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-slate-800" href="{{ route('media.libraries') }}">Media Libraries</a>
-        {% if media.library %}
-            <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-            </svg>
-            <a class="hover:text-slate-800" href="{{ route('media.libraries.show', media.library) }}">{{ media.library.name }}</a>
-        {% endif %}
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-slate-800">{{ media.name ?: media.file_name }}</span>
-    </nav>
+    {% set crumbs = [
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Media Libraries', href: route('media.libraries')}
+    ] %}
+    {% if media.library %}
+        {% set crumbs = crumbs|merge([{label: media.library.name, href: route('media.libraries.show', media.library)}]) %}
+    {% endif %}
+    {% set crumbs = crumbs|merge([{label: media.name ?: media.file_name}]) %}
+    {{ ui.breadcrumbs(crumbs) }}
 {% endblock %}
 
 {% block secondary_sidebar %}
@@ -34,13 +27,13 @@
     <div class="flex min-w-0 flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{{ media.name ?: media.file_name }}</h1>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ media.name ?: media.file_name }}</h1>
                 {% if media.library %}
-                    <p class="mt-1 text-sm text-slate-500">In <a class="text-emerald-600 hover:underline" href="{{ route('media.libraries.show', media.library) }}">{{ media.library.name }}</a></p>
+                    <p class="mt-1 text-sm text-muted">In <a class="text-emerald-600 hover:underline" href="{{ route('media.libraries.show', media.library) }}">{{ media.library.name }}</a></p>
                 {% endif %}
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('media.edit', media) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                <a href="{{ route('media.edit', media) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
@@ -56,9 +49,9 @@
         </div>
 
         <div class="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_20rem]">
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700">Preview</h5>
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Preview</h5>
                 </div>
                 <div class="flex min-h-64 items-center justify-center p-5">
                     {% set is_image = media.mime_type and ('image' in media.mime_type) %}
@@ -72,7 +65,7 @@
                                 <source src="{{ route('media.download', media) }}" type="{{ media.mime_type }}">
                             </video>
                         {% else %}
-                            <div class="flex flex-col items-center gap-3 text-slate-400">
+                            <div class="flex flex-col items-center gap-3 text-faint">
                                 <svg class="h-16 w-16" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
@@ -87,30 +80,30 @@
             </div>
 
             <div class="flex flex-col gap-4">
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">File Info</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">File Info</h5>
                     </div>
                     <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Name</dt>
-                            <dd class="font-medium text-slate-900">{{ media.name ?: '—' }}</dd>
+                            <dt class="text-muted">Name</dt>
+                            <dd class="font-medium text-content">{{ media.name ?: '—' }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Filename</dt>
-                            <dd class="font-mono text-xs text-slate-700 truncate max-w-[140px]" title="{{ media.file_name }}">{{ media.file_name }}</dd>
+                            <dt class="text-muted">Filename</dt>
+                            <dd class="font-mono text-xs text-content truncate max-w-[140px]" title="{{ media.file_name }}">{{ media.file_name }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Original</dt>
-                            <dd class="text-xs text-slate-500 truncate max-w-[140px]" title="{{ media.original_name }}">{{ media.original_name }}</dd>
+                            <dt class="text-muted">Original</dt>
+                            <dd class="text-xs text-muted truncate max-w-[140px]" title="{{ media.original_name }}">{{ media.original_name }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">MIME type</dt>
-                            <dd class="text-slate-700">{{ media.mime_type ?: '—' }}</dd>
+                            <dt class="text-muted">MIME type</dt>
+                            <dd class="text-content">{{ media.mime_type ?: '—' }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Size</dt>
-                            <dd class="text-slate-700">
+                            <dt class="text-muted">Size</dt>
+                            <dd class="text-content">
                                 {% if media.size > 1048576 %}
                                     {{ (media.size / 1048576)|number_format(1) }} MB
                                 {% elseif media.size > 1024 %}
@@ -121,34 +114,45 @@
                             </dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Disk</dt>
-                            <dd class="text-slate-700">{{ media.disk }}</dd>
+                            <dt class="text-muted">Disk</dt>
+                            <dd class="text-content">{{ media.disk }}</dd>
                         </div>
+                        {% if media.status_handle %}
+                            <div class="flex items-center justify-between py-2.5">
+                                <dt class="text-muted">Status</dt>
+                                <dd>
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {% if media.status_is_public %}bg-accent-soft text-accent{% else %}bg-canvas text-muted{% endif %}"
+                                          {% if media.status and media.status.color %}style="background-color: {{ media.status.color }}20; color: {{ media.status.color }};"{% endif %}>
+                                        {{ media.status ? media.status.name : media.status_handle }}
+                                    </span>
+                                </dd>
+                            </div>
+                        {% endif %}
                         {% if media.alt_text %}
                             <div class="flex items-center justify-between py-2.5">
-                                <dt class="text-slate-500">Alt text</dt>
-                                <dd class="text-slate-700">{{ media.alt_text }}</dd>
+                                <dt class="text-muted">Alt text</dt>
+                                <dd class="text-content">{{ media.alt_text }}</dd>
                             </div>
                         {% endif %}
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Uploaded</dt>
-                            <dd class="text-slate-700">{{ media.created_at|date('M j, Y') }}</dd>
+                            <dt class="text-muted">Uploaded</dt>
+                            <dd class="text-content">{{ media.created_at|date('M j, Y') }}</dd>
                         </div>
                     </dl>
                 </div>
 
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Actions</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Actions</h5>
                     </div>
                     <div class="space-y-2 px-5 py-4">
-                        <a href="{{ route('media.edit', media) }}" class="block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                        <a href="{{ route('media.edit', media) }}" class="block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">
                             Edit Details
                         </a>
-                        <a href="{{ route('media.download', media) }}" class="block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                        <a href="{{ route('media.download', media) }}" class="block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">
                             Download
                         </a>
-                        <a href="{{ route('media.confirm', media) }}" class="block w-full rounded-md border border-red-300 bg-white px-4 py-2 text-center text-sm font-medium text-red-600 shadow-sm hover:bg-red-50">
+                        <a href="{{ route('media.confirm', media) }}" class="block w-full rounded-md border border-red-300 bg-surface px-4 py-2 text-center text-sm font-medium text-red-600 shadow-sm hover:bg-red-50">
                             Delete File
                         </a>
                     </div>

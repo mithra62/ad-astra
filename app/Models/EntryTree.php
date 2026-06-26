@@ -24,6 +24,7 @@ class EntryTree extends Model
         'depth',
         'sort_order',
         'redirect_url',
+        'redirect_status',
         'template',
         'is_home',
     ];

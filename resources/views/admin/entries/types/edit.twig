@@ -1,5 +1,6 @@
 {% extends 'admin._inc._layout' %}
 {% import 'admin._inc._form-fields' as forms %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Edit Entry Type' %}
 {% set page_heading = 'Entry Types' %}
@@ -8,26 +9,11 @@
 {% set has_secondary_sidebar = false %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="#">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2"
-                 viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard
-        </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-slate-800" href="{{ route('entries.types') }}">
-            Entry Types
-        </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-slate-800">{{ type.name }}</span>
-    </nav>
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Entry Types', href: route('entries.types')},
+        {label: type.name}
+    ]) }}
 {% endblock %}
 
 {% block content %}
@@ -50,8 +36,8 @@
     <div class="flex w-full min-w-0 flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{{ type.name }}</h1>
-                <p class="mt-1 text-sm text-slate-500">
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ type.name }}</h1>
+                <p class="mt-1 text-sm text-muted">
                     {% if type.entryGroup %}
                         Assigned to <strong>{{ type.entryGroup.name }}</strong>
                     {% else %}
@@ -61,11 +47,11 @@
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('entries.types.confirm', type.id) }}"
-                   class="inline-flex items-center gap-1.5 self-start rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-semibold text-red-700 shadow-sm hover:bg-red-50 sm:self-auto">
+                   class="inline-flex items-center gap-1.5 self-start rounded-md border border-red-300 bg-surface px-3 py-2 text-sm font-semibold text-red-700 shadow-sm hover:bg-red-50 sm:self-auto">
                     Delete
                 </a>
                 <a href="{{ route('entries.types') }}"
-                   class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">
+                   class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                     </svg>
@@ -78,38 +64,18 @@
               class="flex w-full min-w-0 flex-col gap-5">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700">Item Details</h5>
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Item Details</h5>
                 </div>
                 <div class="space-y-5 px-5 py-5">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="name">Name <span
-                                class="text-red-500">*</span></label>
-                        <input value="{{ old('name', type.name) }}"
-                               class="w-full rounded-md border {% if errors.has('name') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2"
-                               id="name" name="name" type="text" placeholder="">
-                        {% if errors.has('name') %}
-                            <p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>
-                        {% endif %}
-                    </div>
+                    {{ forms.input(name='name', label='Name', required=true, value=type.name) }}
+                    {{ forms.input('handle', 'Handle', required=true, value=type.handle, description="Lowercase letters, numbers, and hyphens only.") }}
 
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="handle">Handle <span
-                                class="text-red-500">*</span></label>
-                        <input
-                            class="w-full rounded-md border {% if errors.has('handle') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
-                            id="handle" name="handle" type="text" value="{{ old('handle', type.handle) }}">
-                        <p class="mt-1 text-xs text-slate-400">Lowercase letters, numbers, and hyphens only.</p>
-                        {% if errors.has('handle') %}
-                            <p id="handle-error" class="mt-1 text-xs text-red-600">{{ errors.first('handle') }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="entry_behavior_id">Behavior</label>
+                        <label class="mb-1.5 block text-sm font-medium text-content" for="entry_behavior_id">Behavior</label>
                         <select
-                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm {% if errors.has('entry_behavior_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                            class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm {% if errors.has('entry_behavior_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                             id="entry_behavior_id" name="entry_behavior_id">
                             <option value="">— None (General) —</option>
                             {% for behavior in behaviors %}
@@ -122,14 +88,11 @@
                         {% if errors.has('entry_behavior_id') %}
                             <p id="entry_behavior_id-error" class="mt-1 text-xs text-red-600">{{ errors.first('entry_behavior_id') }}</p>
                         {% endif %}
-                        <p class="mt-1 text-xs text-slate-400">
+                        <p class="mt-1 text-xs text-faint">
                             Determines lifecycle hooks (e.g. reading time, stock status). Leave blank for general-purpose behavior.
                         </p>
                     </div>
 
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                               for="has_entry_tree">Allow Entry Tree</label>
                         {{ forms.toggle(
                             name: 'has_entry_tree',
                             label: 'Allow Entry Tree',
@@ -140,15 +103,14 @@
                             error_key: 'has_entry_tree',
                             copy_align: 'inline'
                         ) }}
-                    </div>
 
                     {% set entry_tree_enabled = old('has_entry_tree', type.has_entry_tree) == '1' or type.has_entry_tree %}
-                    <div id="entry-tree-settings" class="{% if not entry_tree_enabled %}hidden {% endif %}rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
+                    <div id="entry-tree-settings" class="{% if not entry_tree_enabled %}hidden {% endif %}rounded-lg border border-edge bg-subtle px-4 py-4">
                         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="max_depth">Max Depth</label>
+                                <label class="mb-1.5 block text-sm font-medium text-content" for="max_depth">Max Depth</label>
                                 <input
-                                    class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 {% if errors.has('max_depth') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                                    class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:outline-none focus:ring-2 {% if errors.has('max_depth') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                                     id="max_depth" name="max_depth" type="number" min="0"
                                     value="{{ old('max_depth', type.max_depth) }}"
                                     {% if errors.has('max_depth') %}aria-invalid="true" aria-describedby="max_depth-error"{% endif %}>
@@ -158,9 +120,9 @@
                             </div>
 
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="default_template">Default Template</label>
+                                <label class="mb-1.5 block text-sm font-medium text-content" for="default_template">Default Template</label>
                                 <input
-                                    class="w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 {% if errors.has('default_template') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                                    class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:outline-none focus:ring-2 {% if errors.has('default_template') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                                     id="default_template" name="default_template" type="text"
                                     value="{{ old('default_template', type.default_template) }}"
                                     placeholder="entries/default"
@@ -173,9 +135,9 @@
                     </div>
 
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="field_layout_id">Field Layout</label>
+                        <label class="mb-1.5 block text-sm font-medium text-content" for="field_layout_id">Field Layout</label>
                         <select
-                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm {% if errors.has('field_layout_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                            class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm {% if errors.has('field_layout_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                             id="field_layout_id" name="field_layout_id">
                             <option value="">— None —</option>
                             {% for layout in field_layouts %}
@@ -188,7 +150,7 @@
                         {% if errors.has('field_layout_id') %}
                             <p id="field_layout_id-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>
                         {% endif %}
-                        <p class="mt-1 text-xs text-slate-400">
+                        <p class="mt-1 text-xs text-faint">
                             Fields from this layout are specific to this entry type. Group-level fields are always included.
                         </p>
                     </div>
@@ -197,7 +159,7 @@
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
                 <a href="{{ route('entries.types') }}"
-                   class="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Cancel</a>
+                   class="rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-semibold text-content shadow-sm hover:bg-subtle">Cancel</a>
                 <button type="submit"
                         class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                     Save Changes

@@ -1,4 +1,5 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Delete Media Library' %}
 {% set page_heading = 'Delete Media Library' %}
@@ -7,60 +8,51 @@
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">Dashboard</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-slate-800" href="{{ route('media.libraries') }}">Media Libraries</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-slate-800" href="{{ route('media.libraries.show', library) }}">{{ library.name }}</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-red-600">Delete</span>
-    </nav>
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Media Libraries', href: route('media.libraries')},
+        {label: library.name, href: route('media.libraries.show', library)},
+        {label: 'Delete'}
+    ]) }}
 {% endblock %}
 
 {% block secondary_sidebar %}
     <input id="secnav-toggle" type="checkbox">
 
-    <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 lg:hidden">
+    <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-edge bg-surface px-4 py-2.5 text-sm font-medium text-muted hover:bg-subtle lg:hidden">
         <span class="flex items-center gap-2">
-            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="h-4 w-4 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
             </svg>
             Section Navigation
         </span>
-        <span class="secnav-chevron text-slate-400">
+        <span class="secnav-chevron text-faint">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
             </svg>
         </span>
     </label>
 
-    <div id="secondary-nav-panel" class="hidden border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+    <div id="secondary-nav-panel" class="hidden border-b border-edge bg-surface px-4 py-3 lg:hidden">
         <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
-            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('media.libraries') }}">Libraries</a>
-            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('media.libraries.show', library) }}">View Library</a>
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries') }}">Libraries</a>
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries.show', library) }}">View Library</a>
         </nav>
     </div>
 
     <aside class="hidden h-fit lg:block">
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-4 py-3">
-                <h5 class="text-sm font-semibold text-slate-700">{{ library.name }}</h5>
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-4 py-3">
+                <h5 class="text-sm font-semibold text-content">{{ library.name }}</h5>
             </div>
             <nav class="p-2">
-                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('media.libraries') }}">
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries') }}">
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
                     </svg>
                     All Libraries
                 </a>
-                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" href="{{ route('media.libraries.show', library) }}">
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries.show', library) }}">
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
@@ -75,10 +67,10 @@
     <div class="flex flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Delete Library</h1>
-                <p class="mt-1 text-sm text-slate-500">Review before permanently removing this media library.</p>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Delete Library</h1>
+                <p class="mt-1 text-sm text-muted">Review before permanently removing this media library.</p>
             </div>
-            <a href="{{ route('media.libraries.show', library) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">Cancel</a>
+            <a href="{{ route('media.libraries.show', library) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">Cancel</a>
         </div>
 
         <div class="rounded-lg border border-red-200 bg-red-50 p-4">
@@ -98,41 +90,41 @@
             {{ method_field('DELETE') }}
 
             <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">Library Being Deleted</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Library Being Deleted</h5>
                     </div>
                     <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Name</dt>
-                            <dd class="font-semibold text-slate-900">{{ library.name }}</dd>
+                            <dt class="text-muted">Name</dt>
+                            <dd class="font-semibold text-content">{{ library.name }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Handle</dt>
-                            <dd class="font-mono text-slate-700">{{ library.handle }}</dd>
+                            <dt class="text-muted">Handle</dt>
+                            <dd class="font-mono text-content">{{ library.handle }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Storage Disk</dt>
-                            <dd class="text-slate-700">{{ library.adapter }}</dd>
+                            <dt class="text-muted">Storage Disk</dt>
+                            <dd class="text-content">{{ library.adapter }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Created</dt>
-                            <dd class="text-slate-700">{{ library.created_at|date('M j, Y') }}</dd>
+                            <dt class="text-muted">Created</dt>
+                            <dd class="text-content">{{ library.created_at|date('M j, Y') }}</dd>
                         </div>
                     </dl>
                 </div>
 
                 <div class="flex flex-col gap-5">
-                    <div class="overflow-hidden rounded-lg border border-red-200 bg-white shadow-sm">
+                    <div class="overflow-hidden rounded-lg border border-red-200 bg-surface shadow-sm">
                         <div class="border-b border-red-100 bg-red-50 px-5 py-3">
                             <h5 class="text-sm font-semibold text-red-800">Confirm Deletion</h5>
                         </div>
                         <div class="px-5 py-4">
-                            <p class="mb-4 text-sm text-slate-600">Toggle the switch below to confirm you want to permanently delete <strong>{{ library.name }}</strong>.</p>
-                            <label class="flex cursor-pointer items-center justify-between gap-4 rounded-md border {% if errors.has('confirm_removal') %}border-red-300 bg-red-50{% else %}border-slate-200 bg-slate-50{% endif %} px-4 py-3">
-                                <span class="text-sm font-medium text-slate-700">I understand this library will be permanently deleted</span>
+                            <p class="mb-4 text-sm text-muted">Toggle the switch below to confirm you want to permanently delete <strong>{{ library.name }}</strong>.</p>
+                            <label class="flex cursor-pointer items-center justify-between gap-4 rounded-md border {% if errors.has('confirm_removal') %}border-red-300 bg-red-50{% else %}border-edge bg-subtle{% endif %} px-4 py-3">
+                                <span class="text-sm font-medium text-content">I understand this library will be permanently deleted</span>
                                 <input class="peer sr-only" type="checkbox" name="confirm_removal" value="1">
-                                <span class="h-6 w-11 shrink-0 rounded-full bg-slate-300 after:mt-1 after:ml-1 after:block after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow after:transition after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-red-500"></span>
+                                <span class="h-6 w-11 shrink-0 rounded-full bg-slate-300 after:mt-1 after:ml-1 after:block after:h-4 after:w-4 after:rounded-full after:bg-surface after:shadow after:transition after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-red-500"></span>
                             </label>
                             {% if errors.has('confirm_removal') %}
                                 <p class="mt-2 text-sm text-red-600">{{ errors.first('confirm_removal') }}</p>
@@ -140,7 +132,7 @@
                             <button type="submit" class="mt-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
                                 Delete Library
                             </button>
-                            <a href="{{ route('media.libraries.edit', library) }}" class="mt-2 block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                            <a href="{{ route('media.libraries.edit', library) }}" class="mt-2 block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">
                                 Back to Edit
                             </a>
                         </div>

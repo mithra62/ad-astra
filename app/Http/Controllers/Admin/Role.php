@@ -29,7 +29,7 @@ class Role extends Controller
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         $creator = app(CreateNewRole::class);
         $role = $creator->create($request->validated());
-        return redirect()->route('roles.show', $role->id)->with('status', trans('role.created'));
+        return redirect()->route('roles.show', $role->id)->with('success', trans('role.created'));
     }
 
     /**

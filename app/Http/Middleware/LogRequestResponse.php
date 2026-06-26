@@ -30,6 +30,8 @@ class LogRequestResponse
         'authorization',
         'cookie',
         'set-cookie',
+        'plain_text_token',
+        'one_time_token',
     ];
 
     /**

@@ -15,8 +15,7 @@ class EditEntryTypeRequest extends FormRequest
 
     public function rules(): array
     {
-        $ignore = $this->route()->parameter('type_id') ?? $this->route()->parameter('type');
-
+        $ignore = $this->route()->parameter('id');
         return [
             'name' => ['required', 'string', 'max:255'],
             'handle' => ['required', 'string', 'max:255', Rule::unique('entry_types', 'handle')->ignore($ignore)],

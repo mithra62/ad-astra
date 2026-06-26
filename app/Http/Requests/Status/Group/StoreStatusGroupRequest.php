@@ -18,7 +18,7 @@ class StoreStatusGroupRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'handle' => ['required', 'string', 'max:255', Rule::unique('status_groups')],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'sort_order' => ['required', 'integer', 'min:0'],
         ];
     }
 }

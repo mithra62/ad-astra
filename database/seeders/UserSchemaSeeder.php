@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Field\Types\Text;
+use App\Field\Types\Url;
+use App\Field\Types\Date;
 use App\Field\Types\Textarea;
 use App\Models\Field;
 use App\Models\Field\Group as FieldGroup;
@@ -23,9 +25,11 @@ class UserSchemaSeeder extends Seeder
     {
         $text = FieldType::where('object', Text::class)->firstOrFail();
         $textarea = FieldType::where('object', Textarea::class)->firstOrFail();
+        $url = FieldType::where('object', Url::class)->firstOrFail();
+        $date = FieldType::where('object', Date::class)->firstOrFail();
 
-        $profileGroup = $this->seedProfileFields($text);
-        $bioGroup = $this->seedBioFields($text, $textarea);
+        $profileGroup = $this->seedProfileFields($text, $url, $date);
+        $bioGroup = $this->seedBioFields($text, $textarea, $url);
 
         $layout = $this->buildLayout([
             'Profile' => ['first_name', 'last_name', 'gender', 'date_of_birth', 'website'],
@@ -35,7 +39,7 @@ class UserSchemaSeeder extends Seeder
         app(Settings::class)->set('users', 'user_field_layout_id', $layout->id);
     }
 
-    private function seedProfileFields(FieldType $text): FieldGroup
+    private function seedProfileFields(FieldType $text, FieldType $url, FieldType $date): FieldGroup
     {
         $group = FieldGroup::firstOrCreate(
             ['handle' => 'user-profile'],
@@ -65,14 +69,14 @@ class UserSchemaSeeder extends Seeder
                 'instructions' => "The user's gender identity.",
             ],
             [
-                'field_type_id' => $text->id,
+                'field_type_id' => $date->id,
                 'name' => 'Date of Birth',
                 'handle' => 'date_of_birth',
                 'label' => 'Date of Birth',
                 'instructions' => 'Format: YYYY-MM-DD.',
             ],
             [
-                'field_type_id' => $text->id,
+                'field_type_id' => $url->id,
                 'name' => 'Website',
                 'handle' => 'website',
                 'label' => 'Website URL',
@@ -88,7 +92,7 @@ class UserSchemaSeeder extends Seeder
         return $group;
     }
 
-    private function seedBioFields(FieldType $text, FieldType $textarea): FieldGroup
+    private function seedBioFields(FieldType $text, FieldType $textarea, FieldType $url): FieldGroup
     {
         $group = FieldGroup::firstOrCreate(
             ['handle' => 'user-bio'],
@@ -111,7 +115,7 @@ class UserSchemaSeeder extends Seeder
                 'instructions' => 'Without the @ symbol.',
             ],
             [
-                'field_type_id' => $text->id,
+                'field_type_id' => $url->id,
                 'name' => 'LinkedIn',
                 'handle' => 'social_linkedin',
                 'label' => 'LinkedIn Profile URL',

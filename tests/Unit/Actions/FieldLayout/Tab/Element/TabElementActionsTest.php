@@ -2,11 +2,14 @@
 
 namespace Tests\Unit\Actions\FieldLayout\Tab\Element;
 
+use App\Actions\FieldLayout\Tab\Element\BulkUpdateTabElements;
 use App\Actions\FieldLayout\Tab\Element\CreateTabElement;
 use App\Actions\FieldLayout\Tab\Element\DeleteTabElement;
 use App\Actions\FieldLayout\Tab\Element\EditTabElement;
 use App\Models\Field;
+use App\Models\Field\Group as FieldGroup;
 use App\Models\Field\Type;
+use App\Models\FieldLayout;
 use App\Models\FieldLayout\Tab;
 use App\Models\FieldLayout\TabElement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -97,6 +100,99 @@ class TabElementActionsTest extends TestCase
             $this->fail('Expected ValidationException was not thrown.');
         } catch (ValidationException $e) {
             $this->assertArrayHasKey('field_id', $e->errors());
+        }
+    }
+
+    public function test_create_tab_element_throws_when_field_not_in_layout_field_groups(): void
+    {
+        $layout = FieldLayout::factory()->create();
+        $tab = Tab::factory()->for($layout, 'layout')->create();
+        $type = Type::factory()->create();
+        $groupField = Field::factory()->create(['field_type_id' => $type->id]);
+        $outsideField = Field::factory()->create(['field_type_id' => $type->id]);
+
+        $group = FieldGroup::factory()->create();
+        $group->fields()->attach($groupField);
+        $layout->fieldGroups()->attach($group);
+
+        $action = app(CreateTabElement::class);
+
+        try {
+            $action->create($tab, ['field_id' => $outsideField->id]);
+            $this->fail('Expected ValidationException was not thrown.');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('field_id', $e->errors());
+        }
+    }
+
+    public function test_create_tab_element_allows_field_inside_layout_field_groups(): void
+    {
+        $layout = FieldLayout::factory()->create();
+        $tab = Tab::factory()->for($layout, 'layout')->create();
+        $field = Field::factory()->create();
+
+        $group = FieldGroup::factory()->create();
+        $group->fields()->attach($field);
+        $layout->fieldGroups()->attach($group);
+
+        $element = app(CreateTabElement::class)->create($tab, ['field_id' => $field->id]);
+
+        $this->assertDatabaseHas('field_layout_tab_elements', [
+            'id' => $element->id,
+            'field_layout_tab_id' => $tab->id,
+            'field_id' => $field->id,
+        ]);
+    }
+
+    public function test_create_tab_element_throws_when_field_assigned_to_another_tab_in_layout(): void
+    {
+        $layout = FieldLayout::factory()->create();
+        $tab1 = Tab::factory()->for($layout, 'layout')->create();
+        $tab2 = Tab::factory()->for($layout, 'layout')->create();
+        $field = Field::factory()->create();
+
+        TabElement::factory()->for($tab1, 'tab')->create(['field_id' => $field->id]);
+
+        $action = app(CreateTabElement::class);
+
+        $this->expectException(ValidationException::class);
+
+        $action->create($tab2, ['field_id' => $field->id]);
+    }
+
+    public function test_create_tab_element_allows_same_field_on_tabs_of_different_layouts(): void
+    {
+        $field = Field::factory()->create();
+        $tab1 = Tab::factory()->create();
+        $tab2 = Tab::factory()->create();
+
+        TabElement::factory()->for($tab1, 'tab')->create(['field_id' => $field->id]);
+
+        $element = app(CreateTabElement::class)->create($tab2, ['field_id' => $field->id]);
+
+        $this->assertDatabaseHas('field_layout_tab_elements', [
+            'id' => $element->id,
+            'field_layout_tab_id' => $tab2->id,
+            'field_id' => $field->id,
+        ]);
+    }
+
+    public function test_bulk_update_throws_when_new_field_assigned_to_another_tab_in_layout(): void
+    {
+        $layout = FieldLayout::factory()->create();
+        $tab1 = Tab::factory()->for($layout, 'layout')->create();
+        $tab2 = Tab::factory()->for($layout, 'layout')->create();
+        $field = Field::factory()->create();
+
+        TabElement::factory()->for($tab1, 'tab')->create(['field_id' => $field->id]);
+
+        $action = app(BulkUpdateTabElements::class);
+
+        try {
+            $action->update($tab2, ['new_fields' => [['field_id' => $field->id]]]);
+            $this->fail('Expected ValidationException was not thrown.');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('new_fields', $e->errors());
         }
     }
 

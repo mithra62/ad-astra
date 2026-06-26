@@ -11,7 +11,9 @@ class Boolean extends AbstractField
     protected string $name = 'Boolean';
 
     protected array $rules = [
+        'required',
         'boolean',
+        'in:true,false,1,0'
     ];
 
     protected array $settings_form = [
@@ -25,15 +27,15 @@ class Boolean extends AbstractField
             'type' => 'text',
             'label' => 'On Label',
             'instructions' => 'Label shown when toggled on.',
-            'default' => null,
-            'rules' => 'nullable|string|max:100'
+            'default' => "on",
+            'rules' => 'required|string|max:100'
         ],
         'label_off' => [
             'type' => 'text',
             'label' => 'Off Label',
             'instructions' => 'Label shown when toggled off.',
-            'default' => null,
-            'rules' => 'nullable|string|max:100'
+            'default' => 'Off',
+            'rules' => 'required|string|max:100'
         ],
     ];
 

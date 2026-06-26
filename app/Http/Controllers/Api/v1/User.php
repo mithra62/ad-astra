@@ -57,7 +57,7 @@ class User extends Controller
     )]
     public function index(Request $request): UserCollection
     {
-        if (!$this->can('read users')) {
+        if (!$this->can('read user')) {
             abort(404);
         }
 

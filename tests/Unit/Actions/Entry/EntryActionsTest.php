@@ -9,6 +9,7 @@ use App\Facades\Content;
 use App\Facades\Entries;
 use App\Models\Entry;
 use App\Models\EntryMetric;
+use App\Models\EntryType;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -23,31 +24,34 @@ class EntryActionsTest extends TestCase
 
     public function test_create_delegates_to_content_facade(): void
     {
+        $typeRecord = EntryType::factory()->create(['handle' => 'blog-post']);
         $entry = Entry::factory()->create();
         Content::shouldReceive('create')
             ->once()
-            ->with('blog-post', ['type_handle' => 'blog-post', 'title' => 'Hello'])
+            ->with('blog-post', ['type_handle' => 'blog-post', 'title' => 'Hello', 'entry_group_id' => $typeRecord->entry_group_id])
             ->andReturn($entry);
 
         $action = app(CreateNewEntry::class);
-        $result = $action->create(['type_handle' => 'blog-post', 'title' => 'Hello']);
+        $result = $action->create(['type_handle' => 'blog-post', 'title' => 'Hello', 'entry_group_id' => $typeRecord->entry_group_id]);
 
         $this->assertSame($entry, $result);
     }
 
     public function test_create_returns_entry_instance(): void
     {
+        $typeRecord = EntryType::factory()->create(['handle' => 'blog-post']);
         $entry = Entry::factory()->create();
         Content::shouldReceive('create')->once()->andReturn($entry);
 
         $action = app(CreateNewEntry::class);
-        $result = $action->create(['type_handle' => 'blog-post']);
+        $result = $action->create(['type_handle' => 'blog-post', 'entry_group_id' => $typeRecord->entry_group_id]);
 
         $this->assertInstanceOf(Entry::class, $result);
     }
 
     public function test_create_passes_type_handle_extracted_from_input(): void
     {
+        $typeRecord = EntryType::factory()->create(['handle' => 'news-article']);
         $entry = Entry::factory()->create();
         Content::shouldReceive('create')
             ->once()
@@ -55,7 +59,7 @@ class EntryActionsTest extends TestCase
             ->andReturn($entry);
 
         $action = app(CreateNewEntry::class);
-        $action->create(['type_handle' => 'news-article', 'title' => 'Big News']);
+        $action->create(['type_handle' => 'news-article', 'title' => 'Big News', 'entry_group_id' => $typeRecord->entry_group_id]);
     }
 
     // -------------------------------------------------------------------------

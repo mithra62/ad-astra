@@ -61,7 +61,7 @@ abstract class AbstractFieldableRepository implements RepositoryInterface
                 $model->getKey(),
                 $model->getMorphClass(),
                 $instance->storageColumn(),
-                $value
+                $instance->prepareForStorage($value),
             );
         }
     }

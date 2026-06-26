@@ -76,6 +76,8 @@ class CategoryRepository extends AbstractFieldableRepository
     public function resolveLayoutFields(Model $model): Collection
     {
         $model->loadMissing([
+            'group.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'group.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'group.fieldLayout.tabs.elements.field.fieldType',
         ]);
 

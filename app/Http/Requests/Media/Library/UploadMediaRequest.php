@@ -4,12 +4,13 @@ namespace App\Http\Requests\Media\Library;
 
 use App\Http\Requests\FormRequest;
 use App\Models\Media\Library as LibraryModel;
+use Illuminate\Support\Facades\Auth;
 
 class UploadMediaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return Auth::user()?->can('upload media') === true;
     }
 
     public function rules(): array

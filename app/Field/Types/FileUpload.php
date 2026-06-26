@@ -52,7 +52,7 @@ class FileUpload extends AbstractField implements SyncsToMediables
         return [
             'library' => Library::orderBy('name')
                 ->get(['id', 'name'])
-                ->map(fn ($lib) => ['value' => $lib->id, 'label' => $lib->name])
+                ->map(fn($lib) => ['value' => $lib->id, 'label' => $lib->name])
                 ->all(),
         ];
     }
@@ -81,7 +81,7 @@ class FileUpload extends AbstractField implements SyncsToMediables
     public function validate(mixed $value): bool|string
     {
         $ids = $this->normaliseIds($value);
-        $min = (int) $this->getSetting('min', 0);
+        $min = (int)$this->getSetting('min', 0);
         $max = $this->getSetting('max');
 
         if ($min > 0 && count($ids) < $min) {
@@ -90,8 +90,8 @@ class FileUpload extends AbstractField implements SyncsToMediables
             return "At least {$min} {$noun} must be selected.";
         }
 
-        if ($max !== null && count($ids) > (int) $max) {
-            $noun = (int) $max === 1 ? 'file' : 'files';
+        if ($max !== null && count($ids) > (int)$max) {
+            $noun = (int)$max === 1 ? 'file' : 'files';
 
             return "No more than {$max} {$noun} may be selected.";
         }
@@ -103,31 +103,31 @@ class FileUpload extends AbstractField implements SyncsToMediables
         // Verify all submitted IDs actually exist.
         $found = Media::whereIn('id', $ids)->pluck('id')->all();
         $missing = array_diff($ids, $found);
-        if (! empty($missing)) {
+        if (!empty($missing)) {
             return 'One or more selected files no longer exist.';
         }
 
         // If the field is scoped to a library, verify every item belongs to it.
         $libraryId = $this->getSetting('library_id');
-        if (! $libraryId && $handle = $this->getSetting('library_handle')) {
+        if (!$libraryId && $handle = $this->getSetting('library_handle')) {
             $libraryId = $this->resolveLibraryHandle($handle);
         }
 
         if ($libraryId) {
             $outsideLibrary = Media::whereIn('id', $ids)
-                ->where('library_id', '!=', (int) $libraryId)
+                ->where('library_id', '!=', (int)$libraryId)
                 ->pluck('id')
                 ->all();
-            if (! empty($outsideLibrary)) {
+            if (!empty($outsideLibrary)) {
                 return 'One or more selected files do not belong to the expected library.';
             }
         }
 
         // Field-level MIME type restriction (overrides the library setting).
         $allowedTypes = $this->getSetting('allowed_types');
-        if (! empty($allowedTypes)) {
+        if (!empty($allowedTypes)) {
             $badType = Media::whereIn('id', $ids)
-                ->whereNotIn('mime_type', (array) $allowedTypes)
+                ->whereNotIn('mime_type', (array)$allowedTypes)
                 ->exists();
             if ($badType) {
                 return 'One or more selected files have a disallowed file type.';
@@ -171,19 +171,19 @@ class FileUpload extends AbstractField implements SyncsToMediables
         return Media::whereIn('id', $ids)
             ->with('fieldValues.field.fieldType')
             ->get()
-            ->sortBy(fn ($m) => array_search($m->id, $ids))
+            ->sortBy(fn($m) => array_search($m->id, $ids))
             ->values();
     }
 
     public function render(array $params): string
     {
         $handle = $this->field?->handle;
-        $params['input_name'] = $params['input_name'] ?? ($handle ? 'fields['.$handle.']' : 'file_upload');
+        $params['input_name'] = $params['input_name'] ?? ($handle ? 'fields[' . $handle . ']' : 'file_upload');
 
         // After a validation error Laravel flashes the submitted input. Restore
         // the user's just-selected media IDs so the chip strip re-renders with
         // their work intact and the file doesn't have to be re-uploaded.
-        if ($handle && ($oldIds = old('fields.'.$handle)) !== null && is_array($oldIds)) {
+        if ($handle && ($oldIds = old('fields.' . $handle)) !== null && is_array($oldIds)) {
             $params['value'] = $this->value($oldIds);
         }
 
@@ -198,17 +198,17 @@ class FileUpload extends AbstractField implements SyncsToMediables
     {
         // New: library setting stores array of IDs from select_multiple
         $library = $this->getSetting('library');
-        if (! empty($library) && is_array($library)) {
+        if (!empty($library) && is_array($library)) {
             $first = reset($library);
             if (is_numeric($first)) {
-                return (int) $first;
+                return (int)$first;
             }
         }
 
         // Legacy fallbacks
         $libraryId = $this->getSetting('library_id');
         if ($libraryId) {
-            return (int) $libraryId;
+            return (int)$libraryId;
         }
 
         $handle = $this->getSetting('library_handle');
@@ -227,8 +227,8 @@ class FileUpload extends AbstractField implements SyncsToMediables
         }
 
         $mimes = [];
-        foreach ((array) $types as $entry) {
-            if (is_array($entry) && ! empty($entry['key'])) {
+        foreach ((array)$types as $entry) {
+            if (is_array($entry) && !empty($entry['key'])) {
                 $mimes[] = $entry['key'];
             } elseif (is_string($entry) && $entry !== '') {
                 $mimes[] = $entry;
@@ -240,7 +240,7 @@ class FileUpload extends AbstractField implements SyncsToMediables
 
     private function resolveLibraryHandle(string $handle): ?int
     {
-        if (! array_key_exists($handle, static::$libraryHandleCache)) {
+        if (!array_key_exists($handle, static::$libraryHandleCache)) {
             static::$libraryHandleCache[$handle] = Library::where('handle', $handle)->value('id');
         }
 

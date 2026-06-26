@@ -1,4 +1,5 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Status Groups' %}
 {% set page_heading = 'Status Groups' %}
@@ -7,47 +8,27 @@
 {% set has_secondary_sidebar = false %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard
-        </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-slate-800">{{ page_title }}</span>
-    </nav>
+    {{ ui.breadcrumbs([{label: 'Dashboard', href: route('dashboard'), icon: 'home'}, {label: page_title}]) }}
 {% endblock %}
 
 {% block content %}
     <div class="flex w-full min-w-0 flex-col gap-5">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{{ page_title }}</h1>
-                <p class="mt-1 text-sm text-slate-500">Select an entry group to view and manage its entries.</p>
-            </div>
-            <a href="{{ route('statuses.groups.create') }}" class="inline-flex items-center gap-1.5 self-start rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 sm:self-auto">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                </svg>
-                Create Status Group
-            </a>
-        </div>
+        {% embed 'admin._inc._page-header' with {title: page_title, subtitle: 'Select a status group to view and manage its statuses.'} %}
+            {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Create Status Group', route('statuses.groups.create'), icon='plus') }}{% endblock %}
+        {% endembed %}
 
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-5 py-3">
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <h5 class="text-sm font-semibold text-slate-700">All Items</h5>
+                    <h5 class="text-sm font-semibold text-content">All Items</h5>
                     <div class="flex flex-wrap items-center gap-2">
-                        <select id="type-filter" class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        <select id="type-filter" class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                             <option value="">All types</option>
                             <option value="status">Status</option>
                             <option value="field">Field</option>
                             <option value="option">Option</option>
                         </select>
-                        <input id="item-search" class="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-52" placeholder="Search items..." type="search">
+                        <input id="item-search" class="w-full rounded-md border border-edge px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-52" placeholder="Search items..." type="search">
                     </div>
                 </div>
             </div>
@@ -57,7 +38,7 @@
             {% if groups.count >= 1 %}
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
-                        <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <thead class="bg-subtle text-xs font-semibold uppercase tracking-wide text-muted">
                         <tr>
                             <th class="px-5 py-3" scope="col">Title</th>
                             <th class="hidden px-5 py-3 sm:table-cell" scope="col">Statuses</th>
@@ -66,36 +47,36 @@
                             <th class="px-5 py-3 text-right" scope="col">Actions</th>
                         </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-200 bg-white">
+                        <tbody class="divide-y divide-slate-200 bg-surface">
                         {% for group in groups %}
-                            <tr class="hover:bg-slate-50">
+                            <tr class="hover:bg-subtle">
                                 <td class="px-5 py-3.5">
-                                    <a class="font-medium text-slate-900 hover:text-emerald-700" href="{{ route('entries.groups.show', group) }}">{{ group.name }} <span class="mt-0.5 font-mono text-xs text-slate-400">{{ group.handle }}</span></a>
+                                    <a class="font-medium text-content hover:text-accent" href="{{ route('statuses.groups.show', group) }}">{{ group.name }} <span class="mt-0.5 font-mono text-xs text-faint">{{ group.handle }}</span></a>
                                     <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
                                         <a href="{{ route('statuses.groups.show', group) }}" class="text-emerald-600 hover:underline">View</a>
-                                        <span class="text-slate-300">|</span>
+                                        <span class="text-faint">|</span>
                                         <a href="{{ route('statuses.groups.edit', group) }}" class="text-emerald-600 hover:underline">Edit</a>
-                                        <span class="text-slate-300">|</span>
+                                        <span class="text-faint">|</span>
                                         <a href="{{ route('statuses.groups.confirm', group) }}" class="text-red-500 hover:underline">Delete</a>
                                     </div>
                                 </td>
-                                <td class="hidden px-5 py-3.5 text-slate-600 sm:table-cell">
+                                <td class="hidden px-5 py-3.5 text-muted sm:table-cell">
                                     {{ group.statuses_count }}
                                 </td>
                                 <td class="px-5 py-3.5">
                                     {{ group.entryGroups().count() }}
                                 </td>
-                                <td class="hidden px-5 py-3.5 text-slate-400 lg:table-cell">{{ group.updated_at.format('F j, Y') }}</td>
+                                <td class="hidden px-5 py-3.5 text-faint lg:table-cell">{{ group.updated_at.format('F j, Y') }}</td>
                                 <td class="px-5 py-3.5">
                                     <div class="flex items-center justify-end gap-1">
-                                        <a class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" href="{{ route('statuses.groups.show', group) }}" title="View">
+                                        <a class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:border-edge hover:bg-subtle hover:text-content" href="{{ route('statuses.groups.show', group) }}" title="View">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                             </svg>
                                             <span class="sr-only">View</span>
                                         </a>
-                                        <a class="inline-flex items-center justify-center rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700" href="{{ route('statuses.groups.edit', group) }}" title="Edit">
+                                        <a class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:border-edge hover:bg-subtle hover:text-content" href="{{ route('statuses.groups.edit', group) }}" title="Edit">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
@@ -117,13 +98,13 @@
             {% else %}
                 <div class="flex min-h-80 items-center justify-center px-6 py-14">
                     <div class="max-w-sm text-center">
-                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-faint">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                             </svg>
                         </div>
-                        <h2 class="mt-4 text-base font-semibold text-slate-900">No Entries found</h2>
-                        <p class="mt-1 text-sm text-slate-500">Create your first entry or adjust the filters to broaden the list.</p>
+                        <h2 class="mt-4 text-base font-semibold text-content">No Entries found</h2>
+                        <p class="mt-1 text-sm text-muted">Create your first entry or adjust the filters to broaden the list.</p>
                         <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
                             <a class="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700" href="{{ route('statuses.groups.create') }}">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -131,21 +112,21 @@
                                 </svg>
                                 Create Status Group
                             </a>
-                            <a class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50" href="index.twig">Clear filters</a>
+                            <a class="inline-flex items-center justify-center rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle" href="index.twig">Clear filters</a>
                         </div>
                     </div>
                 </div>
             {% endif %}
 
-            <div class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 px-4 py-3 text-sm lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex flex-col gap-3 border-t border-edge bg-subtle px-4 py-3 text-sm lg:flex-row lg:items-center lg:justify-between">
                 <div class="flex flex-wrap items-center gap-2">
-                    <select id="bulk-action" class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                    <select id="bulk-action" class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                         <option value="">Bulk action</option>
                         <option value="activate">Activate</option>
                         <option value="deactivate">Deactivate</option>
                         <option value="delete">Delete</option>
                     </select>
-                    <button type="button" onclick="applyBulk()" class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">Apply</button>
+                    <button type="button" onclick="applyBulk()" class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm font-medium text-content shadow-sm hover:bg-subtle">Apply</button>
                 </div>
                 {{ groups.links() }}
             </div>

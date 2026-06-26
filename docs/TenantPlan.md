@@ -4,6 +4,33 @@ Single authoritative reference for implementing multi-tenancy on `laravel-base`.
 
 ---
 
+## Deployment Mode
+
+This codebase supports two deployment modes from a single codebase, controlled by one environment variable:
+
+```
+TENANCY_ENABLED=false   # installed distribution (default)
+TENANCY_ENABLED=true    # SaaS multi-tenant
+```
+
+The flag lives in `config/tenancy.php`:
+
+```php
+return [
+    'enabled' => env('TENANCY_ENABLED', false),
+];
+```
+
+**Installed mode (`false`):** The tenant resolution middleware, `BelongsToTenant` global scopes, and all tenant-specific routing are inert. The app behaves as a conventional single-tenant Laravel application. No `tenants` table is required. Customers install and own their own instance.
+
+**SaaS mode (`true`):** The full multi-tenant stack described in this document is active. `ResolveTenant` runs on every request, all tenant-owned models are automatically scoped, and billing/plans are enforced.
+
+All tenant machinery gates on `config('tenancy.enabled')`. The core content model — entries, fields, media, statuses — is mode-agnostic and requires no changes between modes.
+
+Treat `TENANCY_ENABLED` as a **deploy-time constant**, not a runtime toggle. Switching an existing populated database from installed to SaaS mode requires a migration plan (seeding the `tenants` table and backfilling `tenant_id` on all tenant-owned tables).
+
+---
+
 ## Database Strategy
 
 Shared database, `tenant_id` column on every tenant-owned table. One misconfigured query is the risk; the mitigation is the fail-closed `BelongsToTenant` trait (see Step 1). This approach has lower operational cost, simpler migrations, and is the right starting point for an unknown tenant count. High-value tenants can be migrated to their own database later without rearchitecting the application.
@@ -229,6 +256,9 @@ trait BelongsToTenant
     public static function bootBelongsToTenant(): void
     {
         static::addGlobalScope('tenant', function (Builder $query) {
+            if (! config('tenancy.enabled')) {
+                return; // installed distribution mode — no scoping applied
+            }
             if (! app()->bound(Tenant::class)) {
                 if (app()->bound('tenant.scope.optional') && app('tenant.scope.optional') === true) {
                     return;
@@ -242,6 +272,9 @@ trait BelongsToTenant
         });
 
         static::creating(function ($model) {
+            if (! config('tenancy.enabled')) {
+                return; // installed distribution mode — tenant_id not stamped
+            }
             if (! empty($model->tenant_id)) {
                 return;
             }
@@ -322,6 +355,16 @@ HTTP Request
 ### 1c — `ResolveTenant` middleware
 
 - Create `app/Http/Middleware/ResolveTenant.php`
+- Short-circuit immediately when `TENANCY_ENABLED=false` — the middleware must be registered unconditionally so installed-mode deployments don't need to touch route files, but it does nothing in that mode:
+  ```php
+  public function handle(Request $request, Closure $next): Response
+  {
+      if (! config('tenancy.enabled')) {
+          return $next($request);
+      }
+      // ... resolution logic below
+  }
+  ```
 - Browser resolution order: custom domain → subdomain → path prefix
 - Reject inactive tenants; reject authenticated users not in `tenant_users`
 - Bind `app()->instance(Tenant::class, $tenant)` and call `setPermissionsTeamId($tenant->id)`
@@ -358,6 +401,18 @@ public function categories(): MorphToMany
 **`EntryRelationship` note:** Adding `tenant_id` scopes reads but does not prevent a write linking an entry from tenant A to an entry from tenant B. Add a model observer to `EntryRelationship` that validates both `entry_id` and `related_entry_id` share the same `tenant_id`.
 
 ### 1f — `AppServiceProvider` scoped bindings
+
+This step applies **only when `TENANCY_ENABLED=true`**. In installed mode, singletons are safe — there is only one tenant context per process, so no stale state can bleed across requests. Gate the conversion:
+
+```php
+if (config('tenancy.enabled')) {
+    $this->app->scoped(Settings::class, ...);
+    // ... other scoped bindings
+} else {
+    $this->app->singleton(Settings::class, ...);
+    // ... singletons as before
+}
+```
 
 Change every `singleton()` to `scoped()` for these bindings so they re-instantiate per request rather than per process:
 
@@ -641,3 +696,4 @@ public function index(Request $request)
 | Spatie permission cache stale after role writes | Medium | Call `PermissionRegistrar::forgetCachedPermissions()` after every role or permission change. |
 | Local dev subdomains require extra setup | Low | Decide whether local dev uses Herd wildcard subdomains, `dnsmasq`, or the path-prefix fallback. Document the dev environment setup before the team starts Step 1. |
 | Tenant deletion and data offboarding unplanned | Low | Plan before Step 6: soft-delete tenant row, schedule storage cleanup, define retention window. GDPR requires the ability to delete all personal data on request. |
+| `TENANCY_ENABLED` toggled on a populated installed-mode database | Medium | The flag is a deploy-time constant, not a runtime toggle. Switching a live installed-mode instance to SaaS mode requires first running the full Step 1e migration set (seed `tenants` table, backfill `tenant_id` on all 25+ tables). Document this explicitly in the upgrade guide; never flip the flag without the migrations in place. |

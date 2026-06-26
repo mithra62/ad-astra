@@ -165,6 +165,44 @@ class FileUploadTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // value() — status passthrough (intentional: value() is context-agnostic)
+    // -------------------------------------------------------------------------
+
+    public function test_value_returns_all_media_regardless_of_status(): void
+    {
+        $public = Media::factory()->create(['status_is_public' => true]);
+        $private = Media::factory()->create(['status_is_public' => false]);
+
+        $result = $this->make()->value(json_encode([$public->id, $private->id]));
+
+        $this->assertCount(2, $result);
+        $this->assertEqualsCanonicalizing(
+            [$public->id, $private->id],
+            $result->pluck('id')->all()
+        );
+    }
+
+    public function test_value_result_exposes_status_is_public_on_each_item(): void
+    {
+        $media = Media::factory()->create(['status_is_public' => true]);
+
+        $result = $this->make()->value(json_encode([$media->id]));
+
+        $this->assertTrue($result->first()->status_is_public);
+    }
+
+    public function test_validate_passes_regardless_of_media_status(): void
+    {
+        // Documents the intentional gap: validate() does not check status.
+        // Public file submission would require revisiting this — see plan.
+        $media = Media::factory()->create(['status_is_public' => false]);
+
+        $result = $this->make()->validate(json_encode([$media->id]));
+
+        $this->assertTrue($result);
+    }
+
+    // -------------------------------------------------------------------------
     // validate — min / max count
     // -------------------------------------------------------------------------
 

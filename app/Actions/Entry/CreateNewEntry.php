@@ -5,13 +5,17 @@ namespace App\Actions\Entry;
 use App\Actions\AbstractAction;
 use App\Facades\Content;
 use App\Models\Entry;
+use App\Models\EntryType;
 
 class CreateNewEntry extends AbstractAction
 {
     public function create(array $input): Entry
     {
-        $typeHandle = $input['type_handle'];
+        $groupId = $input['entry_group_id'] ?? request()->route()?->parameter('group_id');
+        $typeRecord = EntryType::where('handle', $input['type_handle'])
+            ->where('entry_group_id', $groupId)
+            ->firstOrFail();
 
-        return Content::create($typeHandle, $input);
+        return Content::create($typeRecord->handle, $input);
     }
 }

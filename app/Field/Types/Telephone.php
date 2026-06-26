@@ -12,7 +12,6 @@ class Telephone extends AbstractField
 
     protected array $rules = [
         'string',
-        'telephone',
     ];
 
     protected array $settings_form = [];

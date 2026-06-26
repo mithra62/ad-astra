@@ -27,7 +27,8 @@ class EditFieldLayoutRequest extends FormRequest
                 'max:255',
                 Rule::unique('field_layouts', 'handle')->ignore($this->route()->parameter('id')),
             ],
-
+            'field_groups' => ['nullable', 'array'],
+            'field_groups.*' => ['integer', 'exists:field_groups,id'],
         ];
     }
 }

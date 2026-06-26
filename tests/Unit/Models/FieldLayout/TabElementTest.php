@@ -16,7 +16,14 @@ class TabElementTest extends TestCase
     public function test_has_correct_fillable_attributes(): void
     {
         $this->assertEquals(
-            ['field_layout_tab_id', 'field_id', 'required', 'sort_order'],
+            ['field_layout_tab_id', 'field_id', 'required',
+                'sort_order',
+                'hidden',
+                'readonly',
+                'disabled',
+                'schema_property',
+                'label',
+                'instructions',],
             (new TabElement)->getFillable()
         );
     }

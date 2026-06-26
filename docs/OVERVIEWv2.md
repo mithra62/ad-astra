@@ -598,7 +598,12 @@ $tab->elements()->create([
 
 ## Status Groups and Statuses
 
-`StatusGroup` belongs-to `EntryGroup`. `Status` belongs to `StatusGroup` and carries `name`, `handle`, `is_public` (boolean), `is_default` (boolean), `sort_order`.
+The Status layer has two companion traits:
+
+- **`App\Traits\HasStatusGroup`** — for models that *own a palette* of statuses. Currently used by `EntryGroup` (required) and `Media\Library` (optional; null = ungoverned). Provides `statusGroup(): BelongsTo`, `statuses(): HasManyThrough`, and `defaultStatus(): ?Status` (delegates to `StatusGroup::defaultStatus` HasOne).
+- **`App\Traits\HasStatus`** — for models that *carry a status instance*. Currently used by `Entry` and `Media`; designed to grow to Orders, Discussions, and any future status-aware model. Provides `status(): BelongsTo`, `scopeWithStatus($handle)`, `scopePublic()`, plus a `bootHasStatus()` hook that self-registers with `StatusSyncRegistry` (see below). Every consumer must declare the denormalised triple `status_id` / `status_handle` / `status_is_public` in `$fillable`, cast `status_is_public` to `boolean`, and use the `Blueprint::statusColumns()` schema macro (see Schema Macros under Model Creation and Modification).
+
+`StatusGroup` has inverse `entryGroups()` and `mediaLibraries()` `hasMany` relations. `Status` belongs to `StatusGroup` and carries `name`, `handle`, `is_public` (boolean), `is_default` (boolean), `sort_order`, and an optional `color` for badge rendering.
 
 ### Creating a Status Group
 
@@ -610,15 +615,33 @@ $group->statuses()->createMany([
 ]);
 ```
 
-### How an Entry Stores its Status
+### How a Status Consumer Stores its Status
 
-Three denormalised columns: `entries.status_id`, `entries.status_handle`, `entries.status_is_public`. The handle and `is_public` flag are duplicated onto the entry for query efficiency (`Entry::published()` reads `status_is_public = true` without joining `statuses`).
+Any `HasStatus` consumer carries three denormalised columns: `status_id`, `status_handle`, `status_is_public`. The handle and `is_public` flag are duplicated onto the row for query efficiency — `$consumer::public()` reads `status_is_public = true` without joining `statuses`.
 
-### StatusObserver — keeping status_is_public consistent
+`Entry` adds a richer `scopePublished` (status_is_public + `published_at` IS NOT NULL + `published_at <= now`); `Media::published()` is identity-with-public since media has no scheduled-publish concept. `scopeWithStatus($handle)` is shared via the trait — filters by `status_handle`. `StatusObserver` keeps the denormalised triple in sync with the canonical `Status` row (see below).
 
-`App\Observers\StatusObserver` listens for `Status::updating`. When `is_public` flips, the observer bulk-updates every `entries` row pointing at the status (`Entry::where('status_id', $status->id)->update(['status_is_public' => $newValue])`).
+### StatusObserver — keeping the denormalised triple consistent
 
-> **Potential Issue.** `TODOS.md` item 13 calls for enforcing a "cannot change a status handle while entries are assigned" rule; `ENTRY_LAYER_OVERVIEW.md` issue #6 restates this. Neither is implemented. Likewise item 24 ("ensure deleting default status isn't possible") is not enforced.
+`App\Observers\StatusObserver` listens for `Status::updating`. When `is_public` or `handle` changes, the observer iterates `StatusSyncRegistry::consumers()` and bulk-updates every consumer pointing at the mutated status. Both columns sync together when both are dirty.
+
+Bulk updates run inside `DB::transaction` so they're atomic with each other (and join the outer transaction if the Status save is already wrapped). Consumers using `SoftDeletes` are queried via `withTrashed()` so soft-deleted rows stay consistent and won't drift if later restored.
+
+### StatusSyncRegistry and the HasStatus trait
+
+`App\Observers\StatusSyncRegistry` is a thin static class — `register($modelClass)`, `consumers(): array<class-string>`, `clear()` (for test isolation). Consumers self-register via the `HasStatus` trait's `bootHasStatus()` hook the first time the model class boots.
+
+Because Laravel only boots a model when it's first instantiated or queried, the registry could be empty in a queue worker or artisan command that touches `Status` without first touching any consumer. `AppServiceProvider::boot()` mitigates this by force-booting the consumer roster (`Entry`, `Media`) immediately before `Status::observe(StatusObserver::class)`. Adding a new status-aware model requires:
+
+1. `use HasStatus;` on the model.
+2. Declare `status_id`, `status_handle`, `status_is_public` in `$fillable`; cast `status_is_public` to `boolean`.
+3. Add the class to the force-boot list in `AppServiceProvider::boot()` (the one explicit roster — keeps the registry reliable across HTTP, queue, and CLI contexts).
+4. Migration uses `$table->statusColumns()` (Blueprint macro).
+5. Wire the `status_id` → `statuses` FK in a follow-up migration once `statuses` exists (deferred-FK pattern).
+
+`bootHasStatus()` runs a dev-mode contract check (`APP_ENV=local` or `testing`): it instantiates the consumer and verifies that the column triple is in `$fillable` and `status_is_public` is cast to boolean. Throws `\LogicException` with a clear message if either contract is violated — the check runs **before** registration so a misconfigured class never enters the registry. Production environments skip the check (zero overhead).
+
+> **Potential Issue.** `TODOS.md` item 13 calls for enforcing a "cannot change a status handle while consumers exist" rule; `ENTRY_LAYER_OVERVIEW.md` issue #6 restates this. The cascade now keeps denormalised columns consistent on rename, but the policy enforcement (forbid rename when consumers exist) is still unimplemented. Likewise item 24 ("ensure deleting default status isn't possible") is not enforced.
 
 ---
 
@@ -912,11 +935,11 @@ The native Media layer is the authoritative implementation; `MEDIA_LAYER_OVERVIE
 
 ### Libraries
 
-`Media\Library` (`app/Models/Media/Library.php`) owns disk/adapter settings, `allowed_types`, `max_size`, `sort_order`, an optional `field_layout_id`, attached `category_groups`, and attached `field_groups`. Traits: `HasFactory`, `HasCategoryGroups`, `HasFieldGroups`, `HasFieldLayout`, `HasMediaItems`.
+`Media\Library` (`app/Models/Media/Library.php`) owns disk/adapter settings, `allowed_types`, `max_size`, `sort_order`, an optional `field_layout_id`, an optional `status_group_id` (null = ungoverned), attached `category_groups`, and attached `field_groups`. Traits: `HasFactory`, `HasCategoryGroups`, `HasFieldGroups`, `HasFieldLayout`, `HasMediaItems`, `HasStatusGroup`.
 
 ### Uploads
 
-`Library::addMediaFromUpload(UploadedFile, array $attributes)` (from `HasMediaItems`) stores the file on the configured disk, creates the `Media` row inside a transaction, assigns a sequential `sort_order`, and deletes the physical file if DB persistence fails.
+`Library::addMediaFromUpload(UploadedFile, array $attributes)` (from `HasMediaItems`) stores the file on the configured disk, creates the `Media` row inside a transaction, assigns a sequential `sort_order`, and deletes the physical file if DB persistence fails. Before the transaction it resolves the library's `defaultStatus()` (from `HasStatusGroup`) and merges the status triple into the create payload as `array_merge([defaults], $statusAttributes, $attributes)` — caller-supplied attributes always win, ungoverned libraries leave the triple null.
 
 Admin uploads come in via `POST /admin/media/libraries/{library_id}/upload` → `Admin\Media\Library::upload(UploadMediaRequest, $id)` → `app(UploadMedia::class)->upload($request, $library)` → `app('media-service')->upload($library, $request->file('file'), $attributes)` → `$library->addMediaFromUpload(...)`.
 
@@ -942,7 +965,27 @@ Two stages:
 
 `media.library_id` deliberately has no FK constraint so the purge job can find rows whose parent library has been deleted.
 
-> **Potential Issue.** `media-status-implementation-plan.md` proposes adding status governance (`status_group_id` on `Media\Library`, `status_id`/`status_handle`/`status_is_public` on `Media`) modelled on `Entry`. Four known gaps in the plan: `FileUpload::validate()` needs a status check, bulk status update UI, `MediaResource` doesn't exist yet, and admin status filter UI.
+### Status Governance
+
+Optional status layer on media, modelled on `Entry`. Landed in two phases — see `media-status-implementation-plan.md` for the design.
+
+**Schema:** `media_libraries.status_group_id` (nullable FK → `status_groups`, `nullOnDelete`) declares the palette of statuses available to media owned by the library. `media.status_id` (nullable FK → `statuses`, `nullOnDelete`), `media.status_handle` (string, indexed), `media.status_is_public` (boolean, indexed, default false) — same denormalized triple Entry uses. Both FKs are wired in `2026_05_07_000003_add_media_foreign_keys.php` rather than the original create migrations (deferred-FK pattern: `status_groups` doesn't exist until April 2026).
+
+**Model surface:** `Media` uses the `App\Traits\HasStatus` trait, which provides `status(): BelongsTo`, `scopeWithStatus($handle)`, and `scopePublic()`. `Media::scopePublished()` is retained as a backward-compatible alias delegating to `scopePublic()` — media has no `published_at` concept. (`Entry`, which also uses `HasStatus`, defines its own `scopePublished` composing `scopePublic()` with `published_at` clauses.) See [Status Groups and Statuses → StatusSyncRegistry and the HasStatus trait](#statussyncregistry-and-the-hasstatus-trait).
+
+**Repository:** `MediaRepository::applyStatus()` (private; called from `applyCoreAttributes`) does `$media->loadMissing('library')`, then resolves the submitted handle via `Status::where('status_group_id', $media->library?->status_group_id)->where('handle', $handle)` and writes the triple. Ungoverned libraries fall through with no write.
+
+**Validation:** `EditMediaRequest::rules()` adds `'status' => ['nullable', 'string', 'max:100', Rule::exists('statuses', 'handle')->where(fn ($q) => $q->where('status_group_id', $schema?->status_group_id))]`. Exact Entry shape — no conditional fallback. Ungoverned library + non-null status submission → 422.
+
+**Upload auto-assignment:** see Uploads paragraph above. A governed library with no `is_default` status produces a media row with the triple all-null (silent fallback; documented in `MediaStatusTest::test_upload_leaves_status_null_when_governed_library_has_no_default`).
+
+**Admin UI:** Library create/edit forms ship a "Status Group" dropdown with a `— None (ungoverned) —` option. The libraries index column shows the attached `StatusGroup.name` (or "Ungoverned"). The media edit form ships a "Publishing" card with a Status dropdown in the right rail (rendered only when the owning library has a status group). The media show page surfaces the current status as a colored badge in File Info, using `status.color` when set. The library grid view (`media.libraries.show`) overlays a small status pill on each card.
+
+**Tests:** `tests/Feature/Admin/MediaStatusTest.php` (19 tests) covers model/relationship, scopes, soft-delete interaction, upload auto-assignment (governed/ungoverned/no-default/override), HTTP validation (accept/reject/null/ungoverned-rejects/sync), and stale-handle-after-library-status-group-reassignment. `tests/Unit/Field/Types/FileUploadTest.php` adds 3 tests pinning intentional status passthrough on `FileUpload::value()` and `validate()`.
+
+> **Potential Issue.** Three gaps remain after the status layer landed: `FileUpload::validate()` does not filter submitted media IDs by status (admin-only forms today; harden if public file submission is added). `MediaResource` does not exist yet — any future API consumer of media will need it built and should expose `status_handle`/`status_is_public`. No bulk-status update UI exists for the admin media index; switching many media items between statuses requires per-item edits.
+
+> **Potential Issue.** Reassigning a library's `status_group_id` does NOT auto-migrate existing media's `status_handle` / `status_id` / `status_is_public`. Existing rows keep their original handles even when those handles are no longer valid for the new group. Pinned by `test_stale_status_handle_after_library_status_group_reassignment`; documented intentionally for now.
 
 ---
 
@@ -1318,7 +1361,9 @@ Standard CRUD. `index()` paginates with `withCount('statuses')->withCount('entry
 - `index()` — paginate media.
 - `create($library_id)` — load library or redirect to `media.libraries` with `failure`.
 - `store()` — **stub**; redirects to `media.libraries`. Uploads happen via `Library::upload`.
-- `show($id)` / `edit($id)` / `update(EditMediaRequest)` — standard.
+- `show($id)` — eager-loads `library` and `status`.
+- `edit($id)` — eager-loads `library.statusGroup.statuses` and `status` so the right-rail Status dropdown renders without N+1.
+- `update(EditMediaRequest, $id)` — eager-loads `library.fieldLayout.tabs.elements.field.fieldType` and `library.statusGroup`, then `EditMediaAction::edit($media, validated())` (which calls `MediaRepository::applyData`, which calls `applyStatus`).
 - `destroy(DeleteMediaRequest, $id)` — `(new DeleteMediaAction)->delete($media)` (instantiated directly, not from container).
 - `confirm($id)` — delete view.
 - `download($id)` — `GET /admin/media/{id}/download`. `Storage::disk($media->disk)->download($media->path, $media->original_name)`.
@@ -1331,7 +1376,12 @@ Resource is wired as `->parameters(['media' => 'media_item'])` because `media` i
 
 Library CRUD via `CreateNewMediaLibrary`, `EditMediaLibrary`, `DeleteMediaLibrary`.
 
+- `index()` — eager-loads `statusGroup` so the libraries-index column shows the status-group name.
+- `create()` / `edit($id)` — pass `status_groups => StatusGroup::ordered()->get()` to the view so the "Status Group" dropdown can populate; `edit` also eager-loads `categoryGroups`, `fieldGroups`, and `statusGroup`.
+- `show($id)` — eager-loads `statusGroup` on the library and `status` on each media item (so the per-item grid pill renders without N+1).
 - `upload(UploadMediaRequest, $id)` — `POST /admin/media/libraries/{library_id}/upload`. Calls `app(UploadMedia::class)->upload($request, $library)`. **Content-negotiated** — returns JSON for `expectsJson()`, otherwise redirects.
+
+`StoreMediaLibraryFormRequest` adds `'status_group_id' => ['nullable', 'integer', 'exists:status_groups,id']`. Inherited by `EditMediaLibraryRequest`. Mass-assignment writes the column directly through the actions (which do `Library::create($input)` / `$library->update($input)`).
 
 #### `Admin\Settings\Domain`
 
@@ -1543,7 +1593,7 @@ Uniqueness scoping:
 
 | Observer | Model | Events | Behaviour |
 |---|---|---|---|
-| `StatusObserver` | `Status` | `updating` | When `is_public` changes, bulk-updates `entries.status_is_public` for every entry pointing at the status. |
+| `StatusObserver` | `Status` | `updating` | When `is_public` or `handle` changes, iterates `StatusSyncRegistry::consumers()` and bulk-updates the denormalised triple on each consumer inside a `DB::transaction` (with `withTrashed()` for consumers using `SoftDeletes`). |
 | `EntryTreeObserver` | `EntryTree` | `deleting`, `deleted` | `deleting` snapshots direct-child IDs into a static array; `deleted` re-fetches each child after the FK `nullOnDelete` runs at the DB level and calls `EntryService::rebuildTreeUri()` on each. |
 | `FieldValueObserver` | `FieldValue` | `saved`, `deleted` | Only acts when the field type is `FileUpload`. On save: parses `value_json`, batched upserts into the `mediables` pivot, deletes stale rows. On delete: removes the corresponding pivot rows. |
 
@@ -1564,6 +1614,20 @@ There is no `EventServiceProvider::$listen` array — everything is wired by han
 `NewSocialUserRegistered` has no in-tree listener.
 
 > **Potential Issue.** `FieldValueObserver::syncMediables()` prunes `mediables` rows scoped only by `(fieldable_type, fieldable_id, field_id)`. When the Multilingual plan lands, a FileUpload field will have one `field_values` row per locale and saving one locale will orphan the others' pivot rows. `MULTILINGUAL_PLAN.md` Fix 1 documents the union-across-all-locales correction. The same observer is also a candidate for a Category observer that doesn't yet exist (Category has no model-level observer registered).
+
+### Schema Macros
+
+Registered in `AppServiceProvider::register()`. First and currently only macro: `Blueprint::statusColumns()`.
+
+```php
+$table->statusColumns();
+// expands to:
+$table->unsignedBigInteger('status_id')->nullable()->index();
+$table->string('status_handle')->nullable()->index();
+$table->boolean('status_is_public')->default(false)->index();
+```
+
+The FK on `status_id` is deliberately NOT in the macro — this codebase uses a deferred-FK pattern (see `2026_05_07_000003_add_media_foreign_keys.php` as the canonical example) because `statuses` doesn't exist until April 2026. Add the FK in a follow-up migration with `nullOnDelete`. Future schema-contract patterns should follow the same shape: macro adds plain indexed columns; FKs are wired in a deferred migration when the referenced table exists.
 
 ### Transactional Behaviour
 
@@ -1647,9 +1711,9 @@ Entry-type lifecycle hook ordering:
 3. FormRequest: `UploadMediaRequest::rules()` builds `file` rules from the library's `allowed_types` (`mimetypes:` rule) and `max_size` (MB→KB).
 4. Action: `UploadMedia::upload(FormRequest, Library)` calls `app('media-service')->upload($library, $request->file('file'), $attributes)` and syncs `categories`.
 5. Service: `MediaStorageService::upload()` delegates to `$library->addMediaFromUpload($file, $attributes)` from the `HasMediaItems` trait.
-6. Trait: stores the file on the configured disk, creates the `Media` row inside a transaction, assigns `sort_order`, deletes the physical file on DB persistence failure.
+6. Trait: stores the file on the configured disk, resolves the library's `defaultStatus()` outside the transaction, creates the `Media` row inside a transaction (merging the status triple ahead of caller `$attributes` so callers can override), assigns `sort_order`, deletes the physical file on DB persistence failure.
 
-Note: `MediaRepository` is **not** involved on upload; it only handles `applyData` (edits) and `delete`.
+Note: `MediaRepository` is **not** involved on upload; it only handles `applyData` (edits) and `delete`. Status changes after the initial upload flow through `MediaRepository::applyStatus()` via the admin edit form.
 
 ### User create chain
 
@@ -1835,7 +1899,7 @@ Consolidated from the inline Potential Issue callouts throughout this document, 
 21. **`Api\v1\Account` is entirely placeholder stubs.** Known Gap.
 22. **`BASICS.md`** lists field types and omits eight of them (`Html`, `FileUpload`, `Slider`, `Select`, `MultiSelect`, `RadioGroup`, `Users`, `StructuredRows`).
 23. **`OVERVIEW.md`** is stale on four resolved Known Gaps — should be replaced by this document or updated in lockstep.
-24. **`StatusObserver`** keeps `entries.status_is_public` in sync but provides no enforcement of "cannot change status handle while entries are assigned" (`TODOS.md` item 13).
+24. **`StatusObserver`** now syncs `is_public` and `handle` across every `HasStatus` consumer via `StatusSyncRegistry`, but provides no enforcement of "cannot change status handle while consumers exist" (`TODOS.md` item 13). The cascade keeps the DB consistent; hardcoded handle references in code remain a developer-discipline concern.
 25. **`Category` has no observer.** Cycle prevention and field-value sync live elsewhere.
 26. **`CreateNewCategory` bypasses `CategoryService`** — calls `CategoryRepository::create` directly. Document or refactor.
 
@@ -1855,9 +1919,9 @@ The master triage and ordering document. Recommended sequence: **Step 0 OVERVIEW
 
 Authoritative reference for the native Media layer (complete and in testing). Describes `Media\Library`, `Media`, `HasMedia`, `HasMediaItems`, `HasTransformations`, `TransformationDriverInterface`, `mediables` pivot (with `field_id` sentinel), two-stage soft-delete + `PurgeDeletedMedia` purge, `FieldValueObserver`-driven FileUpload sync. `media.library_id` deliberately has no FK so the purge job can find rows after library deletion.
 
-#### `media-status-implementation-plan.md` — follow-up to native media
+#### `media-status-implementation-plan.md` — follow-up to native media (**implemented**)
 
-Adds optional status governance to the completed Media layer. **Schema:** `media_libraries` + `status_group_id` (nullable); `media` + `status_id` + `status_handle` + `status_is_public` (mirroring `Entry`). Extracts a `HasStatusGroup` trait shared with `EntryGroup`. **Known gaps in the plan itself:** `FileUpload::validate()` status check, bulk status update UI, missing `MediaResource`, missing admin status filter UI. Verified 2026-05-12.
+Optional status governance for the Media layer, landed in three phases. **Schema:** `media_libraries.status_group_id` (nullable); `media` + `status_id` + `status_handle` + `status_is_public` (mirroring `Entry`). Trait `App\Traits\HasStatusGroup` shared with `EntryGroup` (`statusGroup`/`statuses`/`defaultStatus`). Upload auto-assigns the library's default status. Validation rule mirrors Entry exactly (no conditional fallback — ungoverned libraries reject any non-null status submission). Admin UI: Status Group selector on library create/edit, Status dropdown on media edit, badges on show/grid, real status-group column on libraries index. **Phase 3 (status sync abstraction):** `App\Traits\HasStatus` + `App\Observers\StatusSyncRegistry` + refactored `StatusObserver` that iterates the registry, syncs `is_public` AND `handle` together, transactional, soft-delete-aware. `Blueprint::statusColumns()` macro codifies the schema contract for future consumers. Test coverage: `tests/Feature/Admin/MediaStatusTest.php` (19), `tests/Unit/Observers/StatusObserverTest.php` (7), `tests/Unit/Traits/HasStatusTest.php` (6), plus 3 additions to `FileUploadTest`. **Remaining gaps after landing:** `FileUpload::validate()` does not filter by status, `MediaResource` still missing, no bulk-status admin UI, library-status-group reassignment leaves stale handles on existing media, `TODOS.md` item 13 (forbid handle change when consumers exist) still unimplemented as a policy. Treat as a reference now — keep the plan doc for the design rationale.
 
 #### `TenantPlan.md` — multi-tenancy foundation
 

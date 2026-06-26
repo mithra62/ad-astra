@@ -11,7 +11,7 @@ trait PersistsFieldValues
     public function setField(Model $model, string $handle, mixed $value): void
     {
         $field = Field::where('handle', $handle)->firstOrFail();
-        $column = $field->typeInstance()->storageColumn();
+        $instance = $field->typeInstance();
 
         FieldValue::updateOrCreate(
             [
@@ -19,7 +19,7 @@ trait PersistsFieldValues
                 'fieldable_id' => $model->getKey(),
                 'fieldable_type' => $model->getMorphClass(),
             ],
-            [$column => $value]
+            [$instance->storageColumn() => $instance->prepareForStorage($value)]
         );
     }
 
@@ -43,7 +43,7 @@ trait PersistsFieldValues
                 continue;
             }
 
-            $column = $field->typeInstance()->storageColumn();
+            $instance = $field->typeInstance();
 
             FieldValue::updateOrCreate(
                 [
@@ -51,7 +51,7 @@ trait PersistsFieldValues
                     'fieldable_id' => $model->getKey(),
                     'fieldable_type' => $model->getMorphClass(),
                 ],
-                [$column => $value]
+                [$instance->storageColumn() => $instance->prepareForStorage($value)]
             );
         }
     }

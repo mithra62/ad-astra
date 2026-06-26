@@ -29,7 +29,7 @@ class Textarea extends AbstractField
             'label' => 'Rows',
             'instructions' => 'Visible row count for the textarea.',
             'default' => 4,
-            'rules' => 'nullable|integer|min:1|max:50'
+            'rules' => 'required|integer|min:1|max:50'
         ],
     ];
 

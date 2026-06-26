@@ -17,17 +17,23 @@ class Entry extends Controller
     public function store(StoreEntryRequest $request)
     {
         $creator = app(CreateNewEntry::class);
-        $entry = $creator->create($request->validated());
+        $entry = $creator->create(array_merge($request->validated(),
+            ['entry_group_id' => $request->route()->parameter('group_id')])
+        );
 
         return redirect()
             ->route('entries.groups.show', $entry->entry_group_id)
-            ->with('status', trans('entry.created'));
+            ->with('success', trans('entry.created'));
     }
 
     public function create(string $group_id, Request $request)
     {
         $group = EntryGroup::with([
+            'entryTypes.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'entryTypes.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'entryTypes.fieldLayout.tabs.elements.field.fieldType',
+            'fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'fieldLayout.tabs.elements.field.fieldType',
             'statusGroup.statuses',
             'categoryGroups.categories',
@@ -75,7 +81,11 @@ class Entry extends Controller
             'entryTree',
             'entryGroup.statusGroup.statuses',
             'entryGroup.categoryGroups.categories',
+            'entryGroup.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'entryGroup.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'entryGroup.fieldLayout.tabs.elements.field.fieldType',
+            'entryType.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'entryType.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
             'entryType.fieldLayout.tabs.elements.field.fieldType',
         ]);
 

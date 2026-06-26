@@ -1,4 +1,5 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Delete File' %}
 {% set page_heading = 'Delete File' %}
@@ -7,27 +8,18 @@
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="{{ route('dashboard') }}">Dashboard</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-slate-800" href="{{ route('media.libraries') }}">Media Libraries</a>
-        {% if media.library is defined and media.library %}
-            <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-            </svg>
-            <a class="hover:text-slate-800" href="{{ route('media.libraries.show', media.library) }}">{{ media.library.name }}</a>
-        {% endif %}
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-slate-800" href="{{ route('media.show', media) }}">{{ media.name ?: media.file_name }}</a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-red-600">Delete</span>
-    </nav>
+    {% set crumbs = [
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Media Libraries', href: route('media.libraries')}
+    ] %}
+    {% if media.library is defined and media.library %}
+        {% set crumbs = crumbs|merge([{label: media.library.name, href: route('media.libraries.show', media.library)}]) %}
+    {% endif %}
+    {% set crumbs = crumbs|merge([
+        {label: media.name ?: media.file_name, href: route('media.show', media)},
+        {label: 'Delete'}
+    ]) %}
+    {{ ui.breadcrumbs(crumbs) }}
 {% endblock %}
 
 {% block secondary_sidebar %}
@@ -38,10 +30,10 @@
     <div class="flex flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Delete File</h1>
-                <p class="mt-1 text-sm text-slate-500">This file will be soft-deleted and purged after the grace period.</p>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Delete File</h1>
+                <p class="mt-1 text-sm text-muted">This file will be soft-deleted and purged after the grace period.</p>
             </div>
-            <a href="{{ route('media.show', media) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:self-auto">Cancel</a>
+            <a href="{{ route('media.show', media) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">Cancel</a>
         </div>
 
         <div class="rounded-lg border border-red-200 bg-red-50 p-4">
@@ -61,22 +53,22 @@
             {{ method_field('DELETE') }}
 
             <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">File Being Deleted</h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">File Being Deleted</h5>
                     </div>
                     <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Name</dt>
-                            <dd class="font-semibold text-slate-900">{{ media.name ?: media.file_name }}</dd>
+                            <dt class="text-muted">Name</dt>
+                            <dd class="font-semibold text-content">{{ media.name ?: media.file_name }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Type</dt>
-                            <dd class="text-slate-700">{{ media.mime_type ?: '—' }}</dd>
+                            <dt class="text-muted">Type</dt>
+                            <dd class="text-content">{{ media.mime_type ?: '—' }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Size</dt>
-                            <dd class="text-slate-700">
+                            <dt class="text-muted">Size</dt>
+                            <dd class="text-content">
                                 {% if media.size > 1048576 %}
                                     {{ (media.size / 1048576)|number_format(1) }} MB
                                 {% elseif media.size > 1024 %}
@@ -88,28 +80,28 @@
                         </div>
                         {% if media.library %}
                             <div class="flex items-center justify-between py-2.5">
-                                <dt class="text-slate-500">Library</dt>
-                                <dd class="text-slate-700">{{ media.library.name }}</dd>
+                                <dt class="text-muted">Library</dt>
+                                <dd class="text-content">{{ media.library.name }}</dd>
                             </div>
                         {% endif %}
                         <div class="flex items-center justify-between py-2.5">
-                            <dt class="text-slate-500">Uploaded</dt>
-                            <dd class="text-slate-700">{{ media.created_at|date('M j, Y') }}</dd>
+                            <dt class="text-muted">Uploaded</dt>
+                            <dd class="text-content">{{ media.created_at|date('M j, Y') }}</dd>
                         </div>
                     </dl>
                 </div>
 
                 <div class="flex flex-col gap-5">
-                    <div class="overflow-hidden rounded-lg border border-red-200 bg-white shadow-sm">
+                    <div class="overflow-hidden rounded-lg border border-red-200 bg-surface shadow-sm">
                         <div class="border-b border-red-100 bg-red-50 px-5 py-3">
                             <h5 class="text-sm font-semibold text-red-800">Confirm Deletion</h5>
                         </div>
                         <div class="px-5 py-4">
-                            <p class="mb-4 text-sm text-slate-600">Confirm you want to delete <strong>{{ media.name ?: media.file_name }}</strong>. This cannot be undone.</p>
+                            <p class="mb-4 text-sm text-muted">Confirm you want to delete <strong>{{ media.name ?: media.file_name }}</strong>. This cannot be undone.</p>
                             <button type="submit" class="w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
                                 Delete File
                             </button>
-                            <a href="{{ route('media.show', media) }}" class="mt-2 block w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                            <a href="{{ route('media.show', media) }}" class="mt-2 block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">
                                 Cancel
                             </a>
                         </div>

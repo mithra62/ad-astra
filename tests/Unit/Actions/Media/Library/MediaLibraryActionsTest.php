@@ -6,7 +6,6 @@ use App\Actions\Media\Library\CreateNewMediaLibrary;
 use App\Actions\Media\Library\DeleteMediaLibrary;
 use App\Actions\Media\Library\EditMediaLibrary;
 use App\Models\Category\Group as CategoryGroup;
-use App\Models\Field\Group as FieldGroup;
 use App\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -165,32 +164,4 @@ class MediaLibraryActionsTest extends TestCase
         $this->assertCount(0, $library->fresh()->categoryGroups);
     }
 
-    public function test_edit_replaces_field_groups(): void
-    {
-        $fieldGroup1 = FieldGroup::factory()->create();
-        $fieldGroup2 = FieldGroup::factory()->create();
-        $library     = Library::create($this->makeLibraryData(['handle' => 'fg-replace']));
-        $library->fieldGroups()->attach($fieldGroup1->id);
-
-        app(EditMediaLibrary::class)->edit($library, [
-            'name'         => $library->name,
-            'handle'       => $library->handle,
-            'field_groups' => [$fieldGroup2->id],
-        ]);
-
-        $fresh = $library->fresh();
-        $this->assertFalse($fresh->fieldGroups()->where('group_id', $fieldGroup1->id)->exists());
-        $this->assertTrue($fresh->fieldGroups()->where('group_id', $fieldGroup2->id)->exists());
-    }
-
-    public function test_edit_detaches_all_field_groups_when_none_provided(): void
-    {
-        $fieldGroup = FieldGroup::factory()->create();
-        $library    = Library::create($this->makeLibraryData(['handle' => 'fg-detach']));
-        $library->fieldGroups()->attach($fieldGroup->id);
-
-        app(EditMediaLibrary::class)->edit($library, ['name' => $library->name, 'handle' => $library->handle]);
-
-        $this->assertCount(0, $library->fresh()->fieldGroups);
-    }
 }

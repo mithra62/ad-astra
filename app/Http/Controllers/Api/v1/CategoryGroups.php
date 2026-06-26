@@ -111,13 +111,6 @@ class CategoryGroups extends Controller
                 properties: [
                     new OA\Property(property: 'name', type: 'string', maxLength: 255, description: 'Human-readable name (must be unique)', example: 'Blog Tags'),
                     new OA\Property(property: 'handle', type: 'string', maxLength: 255, description: 'URL-safe identifier (must be unique)', example: 'blog-tags'),
-                    new OA\Property(
-                        property: 'field_groups',
-                        type: 'array',
-                        nullable: true,
-                        description: 'IDs of field groups whose fields should be available on categories in this group',
-                        items: new OA\Items(type: 'integer')
-                    ),
                 ]
             )
         ),
@@ -219,13 +212,6 @@ class CategoryGroups extends Controller
                 properties: [
                     new OA\Property(property: 'name', type: 'string', maxLength: 255, description: 'Human-readable name (must be unique)', example: 'Blog Tags'),
                     new OA\Property(property: 'handle', type: 'string', maxLength: 255, description: 'URL-safe identifier (must be unique)', example: 'blog-tags'),
-                    new OA\Property(
-                        property: 'field_groups',
-                        type: 'array',
-                        nullable: true,
-                        description: 'IDs of field groups to sync (replaces existing assignment)',
-                        items: new OA\Items(type: 'integer')
-                    ),
                 ]
             )
         ),

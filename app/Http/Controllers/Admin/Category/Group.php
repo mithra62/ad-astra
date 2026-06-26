@@ -9,7 +9,6 @@ use App\Http\Requests\Category\Group\DeleteCategoryGroupRequest;
 use App\Http\Requests\Category\Group\EditCategoryGroupRequest;
 use App\Http\Requests\Category\Group\StoreCategoryGroupRequest;
 use App\Models\Category\Group as CategoryGroup;
-use App\Models\Field\Group as FieldGroup;
 use App\Models\FieldLayout;
 
 class Group extends Controller
@@ -30,7 +29,7 @@ class Group extends Controller
     {
         $creator = app(CreateNewCategoryGroup::class);
         $group = $creator->create($request->validated());
-        return redirect()->route('categories.groups.show', $group->id)->with('status', trans('category.group.created'));
+        return redirect()->route('categories.groups.show', $group->id)->with('success', trans('category.group.created'));
     }
 
     /**
@@ -38,9 +37,7 @@ class Group extends Controller
      */
     public function create()
     {
-        $field_groups = FieldGroup::all();
         $data = [
-            'field_groups' => $field_groups,
             'field_layouts' => FieldLayout::orderBy('name')->get()
         ];
         return $this->view('categories.groups.create', $data);
@@ -87,18 +84,14 @@ class Group extends Controller
      */
     public function edit(string $id)
     {
-        $group = CategoryGroup::with('fieldGroups')->find($id);
+        $group = CategoryGroup::find($id);
         if (!$group instanceof CategoryGroup) {
             abort(404);
         }
 
         $groups = CategoryGroup::ordered()->get();
-        $group->fieldGroups()->allRelatedIds();
-
-        $field_groups = FieldGroup::all();
         $data = [
             'group' => $group,
-            'field_groups' => $field_groups,
             'groups' => $groups,
             'field_layouts' => FieldLayout::orderBy('name')->get()
         ];

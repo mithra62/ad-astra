@@ -23,7 +23,11 @@ class UserFieldLayout
             return null;
         }
 
-        return FieldLayout::with('tabs.elements.field')->find($id);
+        return FieldLayout::with([
+            'tabs' => fn($q) => $q->orderBy('sort_order'),
+            'tabs.elements' => fn($q) => $q->orderBy('sort_order'),
+            'tabs.elements.field',
+        ])->find($id);
     }
 
     /**

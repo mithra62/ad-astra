@@ -26,6 +26,7 @@ use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
 use Laravel\Sanctum\NewAccessToken;
 use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class UserService
 {
@@ -263,8 +264,14 @@ class UserService
      */
     public function syncRoles(User $user, array $roles): User
     {
-        $user->syncRoles($roles);
+        $actor = auth()->user();
 
+        if (in_array('super admin', $roles, true) && ! $actor?->hasRole('super admin')) {
+            throw AuthorizationException::class
+                ::denyAsNotFound('Only a super admin may assign the super admin role.');
+        }
+
+        $user->syncRoles($roles);
         return $user;
     }
 
@@ -512,7 +519,7 @@ class UserService
      */
     public function create(array $data): User
     {
-        $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation', 'is_author', 'author_display_name']);
+        $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation', 'is_author', 'author_display_name', 'banned_at', 'locked_until']);
 
         if (!empty($attributes['password'])) {
             $attributes['password'] = Hash::make($attributes['password']);

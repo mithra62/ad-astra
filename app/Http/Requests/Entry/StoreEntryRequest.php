@@ -25,8 +25,17 @@ class StoreEntryRequest extends FormRequest
 
         return array_merge(
             [
-                'type_handle' => ['required', 'string', 'exists:entry_types,handle'],
-                'title' => ['required', 'string', 'max:255'],
+                'type_handle' => [
+                    'required',
+                    'string',
+                    Rule::exists('entry_types', 'handle')->where(fn($q) => $q->where('entry_group_id', $this->route()->parameter('group_id'))
+                    ),
+                ],
+                'title' => [
+                    'required',
+                    'string',
+                    'max:255'
+                ],
                 'handle' => [
                     'required',
                     'string',
@@ -43,19 +52,79 @@ class StoreEntryRequest extends FormRequest
                         fn($query) => $query->where('status_group_id', $group->status_group_id)
                     ),
                 ],
-                'published_at' => ['nullable', 'date'],
-                'authors' => ['nullable', 'array'],
-                'authors.*' => ['integer', Rule::exists('entry_authors', 'user_id')->where('status', 'active')],
-                'categories' => ['nullable', 'array'],
-                'categories.*' => ['integer', 'exists:categories,id'],
-                'fields' => ['nullable', 'array'],
-                'parent_entry_id' => ['nullable', 'integer', 'exists:entries,id'],
-                'uri' => ['nullable', 'string', 'max:255', 'unique:entry_trees,uri'],
-                'depth' => ['nullable', 'integer', 'min:0'],
-                'sort_order' => ['nullable', 'integer', 'min:0'],
-                'template' => ['nullable', 'string', 'max:255'],
-                'is_home' => ['nullable', 'boolean'],
-                'redirect_url' => ['nullable', 'string', 'prohibited_if:is_home,true'],
+                'published_at' => [
+                    'nullable',
+                    'date'
+                ],
+                'authors' => [
+                    'nullable',
+                    'array'
+                ],
+                'authors.*' => [
+                    'integer',
+                    Rule::exists('entry_authors', 'user_id')->where('status', 'active')
+                ],
+                'categories' => [
+                    'nullable',
+                    'array'
+                ],
+                'categories.*' => [
+                    'integer',
+                    'exists:categories,id',
+//                    Rule::exists('categories', 'id')->where(fn($q) => $q->whereIn(
+//                        'group_id',
+//                        \DB::table('category_groupables')
+//                            ->where('category_groupable_type', (new EntryGroup)->getMorphClass())
+//                            ->where('category_groupable_id', $this->route()->parameter('group_id'))
+//                            ->pluck('group_id')
+//                    )),
+                ],
+                'fields' => [
+                    'nullable',
+                    'array'
+                ],
+                'parent_entry_id' => [
+                    'nullable',
+                    'integer',
+                    'exists:entries,id'
+                ],
+                'uri' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                    'unique:entry_trees,uri'
+                ],
+                'depth' => [
+                    'nullable',
+                    'integer',
+                    'min:0'
+                ],
+                'sort_order' => [
+                    'nullable',
+                    'integer',
+                    'min:0'
+                ],
+                'template' => [
+                    'nullable',
+                    'string',
+                    'max:255'
+                ],
+                'is_home' => [
+                    'nullable',
+                    'boolean'
+                ],
+                'redirect_url' => [
+                    'nullable',
+                    'string',
+                    'prohibited_if:is_home,true',
+                    'url:http,https',
+                    'max:2048',
+                ],
+                'redirect_status' => [
+                    'nullable',
+                    'integer',
+                    'in:301,302,307,308'
+                ],
             ],
             $this->schemaFieldRules($groupSchema),
             $this->schemaFieldRules($typeSchema)

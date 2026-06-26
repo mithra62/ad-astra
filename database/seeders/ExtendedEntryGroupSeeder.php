@@ -7,7 +7,6 @@ use App\Models\EntryBehavior;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use App\Models\Field;
-use App\Models\Field\Group as FieldGroup;
 use App\Models\FieldLayout;
 use App\Models\FieldLayout\Tab;
 use App\Models\FieldLayout\TabElement;
@@ -25,23 +24,20 @@ class ExtendedEntryGroupSeeder extends Seeder
     {
         $publication = StatusGroup::where('handle', 'publication')->firstOrFail();
         $jobStatus = StatusGroup::where('handle', 'job-status')->firstOrFail();
-        $contentFields = FieldGroup::where('handle', 'content-fields')->firstOrFail();
-        $seoFields = FieldGroup::where('handle', 'seo-fields')->firstOrFail();
 
-        $this->seedEventsGroup($publication, $contentFields, $seoFields);
-        $this->seedNewsGroup($publication, $contentFields, $seoFields);
-        $this->seedPagesGroup($publication, $contentFields, $seoFields);
-        $this->seedJobsGroup($jobStatus, $contentFields, $seoFields);
-        $this->seedPodcastGroup($publication, $contentFields, $seoFields);
-        $this->seedPortfolioGroup($publication, $contentFields, $seoFields);
-        $this->seedVideosGroup($publication, $contentFields, $seoFields);
-        $this->seedRecipesGroup($publication, $contentFields, $seoFields);
-        $this->seedGeneralGroup($publication, $contentFields, $seoFields);
+        $this->seedEventsGroup($publication);
+        $this->seedNewsGroup($publication);
+        $this->seedPagesGroup($publication);
+        $this->seedJobsGroup($jobStatus);
+        $this->seedPodcastGroup($publication);
+        $this->seedPortfolioGroup($publication);
+        $this->seedVideosGroup($publication);
+        $this->seedRecipesGroup($publication);
+        $this->seedGeneralGroup($publication);
     }
 
-    private function seedEventsGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
+    private function seedEventsGroup(StatusGroup $publication): void
     {
-        $eventFields = FieldGroup::where('handle', 'event-fields')->firstOrFail();
         $eventTypes = CategoryGroup::where('handle', 'event-types')->firstOrFail();
 
         $layout = $this->createLayout('Events Layout', [
@@ -60,7 +56,6 @@ class ExtendedEntryGroupSeeder extends Seeder
             ]
         );
 
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id, $eventFields->id]);
         $group->categoryGroups()->syncWithoutDetaching([$eventTypes->id]);
 
         $this->addTabIfMissing($group->field_layout_id, 'Event Details', [
@@ -74,10 +69,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         );
     }
 
-    private function seedNewsGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
+    private function seedNewsGroup(StatusGroup $publication): void
     {
-        $newsFields = FieldGroup::where('handle', 'news-fields')->firstOrFail();
-
         $layout = $this->createLayout('News Layout', [
             'Content' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
@@ -94,8 +87,6 @@ class ExtendedEntryGroupSeeder extends Seeder
             ]
         );
 
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id, $newsFields->id]);
-
         $this->addTabIfMissing($group->field_layout_id, 'Attribution', [
             'source', 'source_url', 'dateline',
         ], 10);
@@ -106,10 +97,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         );
     }
 
-    private function seedPagesGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
+    private function seedPagesGroup(StatusGroup $publication): void
     {
-        $pageFields = FieldGroup::where('handle', 'page-fields')->firstOrFail();
-
         $layout = $this->createLayout('Pages Layout', [
             'Content' => ['body'],
             'SEO' => ['meta_title', 'meta_description'],
@@ -125,8 +114,6 @@ class ExtendedEntryGroupSeeder extends Seeder
                 'sort_order' => 5,
             ]
         );
-
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id, $pageFields->id]);
 
         $this->addTabIfMissing($group->field_layout_id, 'Page Options', [
             'layout', 'cta_text', 'cta_url',
@@ -144,9 +131,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         );
     }
 
-    private function seedJobsGroup(StatusGroup $jobStatus, FieldGroup $contentFields, FieldGroup $seoFields): void
+    private function seedJobsGroup(StatusGroup $jobStatus): void
     {
-        $jobFields = FieldGroup::where('handle', 'job-fields')->firstOrFail();
         $employmentTypes = CategoryGroup::where('handle', 'employment-types')->firstOrFail();
         $experienceLevels = CategoryGroup::where('handle', 'experience-levels')->firstOrFail();
 
@@ -166,7 +152,6 @@ class ExtendedEntryGroupSeeder extends Seeder
             ]
         );
 
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id, $jobFields->id]);
         $group->categoryGroups()->syncWithoutDetaching([$employmentTypes->id, $experienceLevels->id]);
 
         $this->addTabIfMissing($group->field_layout_id, 'Role Details', [
@@ -180,10 +165,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         );
     }
 
-    private function seedPodcastGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
+    private function seedPodcastGroup(StatusGroup $publication): void
     {
-        $podcastFields = FieldGroup::where('handle', 'podcast-fields')->firstOrFail();
-
         $layout = $this->createLayout('Podcast Layout', [
             'Episode' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
@@ -200,8 +183,6 @@ class ExtendedEntryGroupSeeder extends Seeder
             ]
         );
 
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id, $podcastFields->id]);
-
         $this->addTabIfMissing($group->field_layout_id, 'Episode Details', [
             'episode_number', 'season_number', 'audio_url',
             'episode_duration', 'guest_names', 'sponsor',
@@ -214,10 +195,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         );
     }
 
-    private function seedPortfolioGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
+    private function seedPortfolioGroup(StatusGroup $publication): void
     {
-        $portfolioFields = FieldGroup::where('handle', 'portfolio-fields')->firstOrFail();
-
         $layout = $this->createLayout('Portfolio Layout', [
             'Case Study' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
@@ -233,8 +212,6 @@ class ExtendedEntryGroupSeeder extends Seeder
                 'sort_order' => 8,
             ]
         );
-
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id, $portfolioFields->id]);
 
         $this->addTabIfMissing($group->field_layout_id, 'Project Details', [
             'client_name', 'project_date', 'role',
@@ -253,10 +230,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         );
     }
 
-    private function seedVideosGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
+    private function seedVideosGroup(StatusGroup $publication): void
     {
-        $videoFields = FieldGroup::where('handle', 'video-fields')->firstOrFail();
-
         $layout = $this->createLayout('Videos Layout', [
             'Video' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
@@ -272,8 +247,6 @@ class ExtendedEntryGroupSeeder extends Seeder
                 'sort_order' => 9,
             ]
         );
-
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id, $videoFields->id]);
 
         $this->addTabIfMissing($group->field_layout_id, 'Video', [
             'video_platform', 'platform_id', 'video_url', 'video_duration', 'captions_url',
@@ -292,9 +265,8 @@ class ExtendedEntryGroupSeeder extends Seeder
         );
     }
 
-    private function seedRecipesGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
+    private function seedRecipesGroup(StatusGroup $publication): void
     {
-        $recipeFields = FieldGroup::where('handle', 'recipe-fields')->firstOrFail();
         $cuisines = CategoryGroup::where('handle', 'cuisines')->firstOrFail();
         $dietTypes = CategoryGroup::where('handle', 'diet-types')->firstOrFail();
 
@@ -314,7 +286,6 @@ class ExtendedEntryGroupSeeder extends Seeder
             ]
         );
 
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id, $recipeFields->id]);
         $group->categoryGroups()->syncWithoutDetaching([$cuisines->id, $dietTypes->id]);
 
         $this->addTabIfMissing($group->field_layout_id, 'Recipe Details', [
@@ -336,7 +307,7 @@ class ExtendedEntryGroupSeeder extends Seeder
         );
     }
 
-    private function seedGeneralGroup(StatusGroup $publication, FieldGroup $contentFields, FieldGroup $seoFields): void
+    private function seedGeneralGroup(StatusGroup $publication): void
     {
         $layout = $this->createLayout('General Layout', [
             'Content' => ['body', 'excerpt'],
@@ -353,8 +324,6 @@ class ExtendedEntryGroupSeeder extends Seeder
                 'sort_order' => 11,
             ]
         );
-
-        $group->fieldGroups()->syncWithoutDetaching([$contentFields->id, $seoFields->id]);
 
         EntryType::updateOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'general'],

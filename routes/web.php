@@ -4,8 +4,10 @@ use App\Http\Controllers\Login;
 use App\Http\Controllers\Site;
 use Illuminate\Support\Facades\Route;
 
-Route::get('login/{provider}', [Login::class, 'redirectToProvider'])->name('social.login.provider');
-Route::get('login/{provider}/callback', [Login::class, 'handleProviderCallback'])->name('social.login.callback');
+Route::middleware('throttle:10,1')->group(function () {
+    Route::get('login/{provider}',          [Login::class, 'redirectToProvider'])->name('social.login.provider');
+    Route::get('login/{provider}/callback', [Login::class, 'handleProviderCallback'])->name('social.login.callback');
+});
 
 Route::get('/{uri?}', [Site::class, 'show'])
     ->where('uri', '.*')

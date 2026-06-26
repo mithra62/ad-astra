@@ -1,163 +1,92 @@
-{{ include('admin::_inc._header', {title: 'My Preferences'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb -->
-        <div class="row m-1">
-            <div class="col-12">
-                <h4 class="main-title">Settings</h4>
-                <ul class="app-line-breadcrumbs mb-3">
-                    <li>
-                        <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                            <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="f-s-14 f-w-500" href="{{ route('settings') }}">Settings</a>
-                    </li>
-                    <li class="active">
-                        <a class="f-s-14 f-w-500" href="{{ route('settings.user') }}">My Preferences</a>
-                    </li>
-                </ul>
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._form-fields' as forms %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'My Preferences' %}
+{% set page_heading = 'My Preferences' %}
+{% set active_nav = 'settings' %}
+{% set active_secondary_nav = 'user' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Settings', href: route('settings.show', all_domains.first.handle)},
+        {label: 'My Preferences'}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.settings._sidebar', {all_domains: all_domains, current_handle: 'user'}) }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">My Preferences</h1>
+                <p class="mt-1 text-sm text-muted">These settings apply only to your account and override the system defaults. Leave a field unchanged to inherit the system value.</p>
             </div>
         </div>
 
-        {{ include('admin::_inc._message') }}
+        {% if domains|length > 0 %}
+            <form method="POST" action="{{ route('account.edit_settings') }}" class="flex w-full min-w-0 flex-col gap-5">
+                {{ csrf_field() }}
+                {{ method_field('PUT') }}
 
-        <div class="row">
-            {{ include('admin::settings._sidebar', {all_domains: all_domains, current_handle: 'user'}) }}
+                {% for domainData in domains %}
+                    {% set domain = domainData.domain %}
+                    <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                        <div class="border-b border-edge px-5 py-3">
+                            <h5 class="text-sm font-semibold text-content">{{ domain.name }}</h5>
+                        </div>
+                        <div class="space-y-5 px-5 py-5">
+                            {% for field in domainData.fields %}
+                                {% set val = domainData.field_values[field.handle] is defined ? domainData.field_values[field.handle] : (field.default ?? '') %}
+                                {% set hasOverride = field.handle in domainData.override_handles %}
 
-            <div class="col-lg-8 col-xxl-9">
-                <div class="card mb-3">
-                    <div class="card-header d-flex align-items-center gap-2">
-                        <i class="ti ti-user-cog f-s-20 text-success"></i>
-                        <h5 class="mb-0">My Preferences</h5>
+                                {% if hasOverride %}
+                                    <p class="text-xs">
+                                        <span class="inline-flex items-center rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent ring-1 ring-inset ring-emerald-700/10">your override is active</span>
+                                    </p>
+                                {% else %}
+                                    <p class="text-xs text-muted">
+                                        <span class="inline-flex items-center rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted ring-1 ring-inset ring-slate-500/10">system default</span>
+                                        currently: <em>{{ val != '' ? val : '—' }}</em>
+                                    </p>
+                                {% endif %}
+
+                                {% set field_description = field.instructions %}
+
+                                {% if field.type == 'boolean' %}
+                                    {{ forms.toggle(field.handle, field.label, val, field_description) }}
+                                {% elseif field.type == 'textarea' %}
+                                    {{ forms.textarea(field.handle, field.label, val, 4, field_description) }}
+                                {% elseif field.type == 'select' or (field.options is defined and field.options|length) %}
+                                    {{ forms.select(field.handle, field.label, field.options|default([]), val, field_description) }}
+                                {% elseif field.type == 'integer' %}
+                                    {{ forms.input(field.handle, field.label, val, 'number', field_description, '', '', field.handle, false, 'step="1"') }}
+                                {% elseif field.type == 'float' %}
+                                    {{ forms.input(field.handle, field.label, val, 'number', field_description, '', '', field.handle, false, 'step="any"') }}
+                                {% else %}
+                                    {{ forms.input(field.handle, field.label, val, field.type == 'email' ? 'email' : 'text', field_description) }}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <p class="text-muted mb-0">
-                            These settings apply only to your account and override the system defaults.
-                            Leave a field unchanged to inherit the system value.
-                        </p>
-                    </div>
+                {% endfor %}
+
+                <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                    <a href="{{ route('settings.show', all_domains.first.handle) }}" class="rounded-md border border-edge bg-surface px-4 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">Cancel</a>
+                    <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Save My Preferences</button>
                 </div>
-
-                {% if domains|length > 0 %}
-                    <form method="POST" action="{{ route('settings.user.update') }}"
-                          class="row g-3 needs-validation" novalidate>
-                        {{ csrf_field() }}
-                        {{ method_field('PUT') }}
-
-                        {% for domainData in domains %}
-                            {% set domain = domainData.domain %}
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header d-flex align-items-center gap-2">
-                                        {% if domain.icon %}
-                                            <i class="ti {{ domain.icon }} text-primary"></i>
-                                        {% endif %}
-                                        <h6 class="mb-0">{{ domain.name }}</h6>
-                                    </div>
-                                    <div class="card-body row g-3">
-                                        {% for field in domainData.fields %}
-                                            {% set val = domainData.field_values[field.handle] is defined ? domainData.field_values[field.handle] : (field.default ?? '') %}
-                                            {% set hasOverride = field.handle in domainData.override_handles %}
-
-                                            <div class="col-md-12">
-                                                <label class="form-label" for="field_{{ field.handle }}">
-                                                    {{ field.label }}
-                                                </label>
-                                                {% if field.instructions %}
-                                                    <small
-                                                        class="text-secondary d-block mb-1">{{ field.instructions }}</small>
-                                                {% endif %}
-
-                                                {% if hasOverride %}
-                                                    <small class="text-success d-block mb-1">
-                                                        <span
-                                                            class="badge bg-light-success">your override is active</span>
-                                                    </small>
-                                                {% else %}
-                                                    <small class="text-muted d-block mb-1">
-                                                        <span class="badge bg-light-secondary">system default</span>
-                                                        currently: <em>{{ val != '' ? val : '—' }}</em>
-                                                    </small>
-                                                {% endif %}
-
-                                                {% if field.type == 'boolean' %}
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input"
-                                                               type="checkbox"
-                                                               name="{{ field.handle }}"
-                                                               id="field_{{ field.handle }}"
-                                                               value="1"
-                                                            {{ old(field.handle, val) ? 'checked' : '' }}>
-                                                        <label class="form-check-label" for="field_{{ field.handle }}">
-                                                            Enable
-                                                        </label>
-                                                    </div>
-                                                {% elseif field.type == 'integer' or field.type == 'float' %}
-                                                    <input type="number"
-                                                           class="form-control"
-                                                           name="{{ field.handle }}"
-                                                           id="field_{{ field.handle }}"
-                                                           value="{{ old(field.handle, val) }}"
-                                                        {{ field.type == 'float' ? 'step="any"' : 'step="1"' }}>
-                                                {% elseif field.type == 'textarea' %}
-                                                    <textarea class="form-control"
-                                                              name="{{ field.handle }}"
-                                                              id="field_{{ field.handle }}"
-                                                              rows="4">{{ old(field.handle, val) }}</textarea>
-                                                {% elseif field.type == 'select' or (field.options is defined and field.options|length) %}
-                                                    <select name="{{ field.handle }}"
-                                                            id="field_{{ field.handle }}"
-                                                            class="form-control">
-                                                        <option value="">— Select —</option>
-                                                        {% for option in field.options|default([]) %}
-                                                            {% if option.options is defined %}
-                                                                <optgroup label="{{ option.label }}">
-                                                                    {% for sub in option.options %}
-                                                                        <option value="{{ sub.value }}" {% if (old(field.handle, val) ~ '') == (sub.value ~ '') %}selected{% endif %}>{{ sub.label }}</option>
-                                                                    {% endfor %}
-                                                                </optgroup>
-                                                            {% else %}
-                                                                <option value="{{ option.value }}" {% if (old(field.handle, val) ~ '') == (option.value ~ '') %}selected{% endif %}>{{ option.label }}</option>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </select>
-                                                {% else %}
-                                                    <input type="{{ field.type == 'email' ? 'email' : 'text' }}"
-                                                           class="form-control"
-                                                           name="{{ field.handle }}"
-                                                           id="field_{{ field.handle }}"
-                                                           value="{{ old(field.handle, val) }}">
-                                                {% endif %}
-
-                                                {% if errors.has(field.handle) %}
-                                                    <p class="text-danger mt-1">{{ errors.first(field.handle) }}</p>
-                                                {% endif %}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-
-                        <div class="col-12 d-flex justify-content-end gap-2 pt-2">
-                            <a href="{{ route('settings') }}" class="btn btn-outline-secondary">Cancel</a>
-                            <button class="btn btn-primary" type="submit">
-                                <i class="ti ti-device-floppy me-1"></i> Save My Preferences
-                            </button>
-                        </div>
-                    </form>
-                {% else %}
-                    <div class="card">
-                        <div class="card-body text-center py-5 text-muted">
-                            <i class="ti ti-settings f-s-40 d-block mb-2"></i>
-                            No user-overridable settings have been configured yet.
-                        </div>
-                    </div>
-                {% endif %}
+            </form>
+        {% else %}
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="px-5 py-10 text-center text-sm text-muted">
+                    No user-overridable settings have been configured yet.
+                </div>
             </div>
-        </div>
+        {% endif %}
     </div>
-</main>
-{{ include('admin::_inc._footer') }}
+{% endblock %}

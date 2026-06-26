@@ -3,7 +3,6 @@
 namespace App\Models\Category;
 
 use App\Models\Category;
-use App\Traits\Field\HasFieldGroups;
 use App\Traits\Field\HasFieldLayout;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Group extends Model
 {
-    use HasFactory, HasFieldGroups, HasFieldLayout;
+    use HasFactory, HasFieldLayout;
 
     protected $table = 'category_groups';
 
@@ -20,6 +19,7 @@ class Group extends Model
         'field_layout_id',
         'name',
         'handle',
+        'description',
         'sort_order',
     ];
 

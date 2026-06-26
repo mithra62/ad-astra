@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Media;
 use App\Models\Media\Library;
+use App\Models\Status;
+use App\Models\StatusGroup;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -55,6 +57,29 @@ class MediaFactory extends Factory
                 'original_name' => 'document.pdf',
                 'mime_type'     => 'application/pdf',
                 'path'          => 'uploads/' . $fileName,
+            ];
+        });
+    }
+
+    /**
+     * Create a fresh StatusGroup + default Status and pin this media to it.
+     * Each call creates a NEW group — to share a group across multiple media
+     * factories, build the status manually and pass status_id directly.
+     */
+    public function withStatus(bool $isPublic = false): static
+    {
+        return $this->state(function () use ($isPublic) {
+            $group = StatusGroup::factory()->create();
+            $status = Status::factory()->create([
+                'status_group_id' => $group->id,
+                'is_default'      => true,
+                'is_public'       => $isPublic,
+            ]);
+
+            return [
+                'status_id'        => $status->id,
+                'status_handle'    => $status->handle,
+                'status_is_public' => $status->is_public,
             ];
         });
     }

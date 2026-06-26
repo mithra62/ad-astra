@@ -181,7 +181,9 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::put('field-layouts/{layout_id}/tabs/{tab_id}', [FieldLayoutTab::class, 'update'])->name('field-layouts.tabs.update');
     Route::get('field-layouts/{layout_id}/tabs/{tab_id}/confirm', [FieldLayoutTab::class, 'confirm'])->name('field-layouts.tabs.confirm');
     Route::delete('field-layouts/{layout_id}/tabs/{tab_id}', [FieldLayoutTab::class, 'destroy'])->name('field-layouts.tabs.destroy');
-    // Elements within a tab
+    Route::get('field-layouts/{layout_id}/tabs/{tab_id}/fields', [FieldLayoutTab::class, 'fields'])->name('field-layouts.tabs.fields');
+    // Elements within a tab — bulk route must be before {element_id} to avoid route collision
+    Route::put('field-layouts/{layout_id}/tabs/{tab_id}/elements/bulk', [FieldLayoutTabElement::class, 'bulkUpdate'])->name('field-layouts.tabs.elements.bulk-update');
     Route::post('field-layouts/{layout_id}/tabs/{tab_id}/elements', [FieldLayoutTabElement::class, 'store'])->name('field-layouts.tabs.elements.store');
     Route::put('field-layouts/{layout_id}/tabs/{tab_id}/elements/{element_id}', [FieldLayoutTabElement::class, 'update'])->name('field-layouts.tabs.elements.update');
     Route::get('field-layouts/{layout_id}/tabs/{tab_id}/elements/{element_id}/confirm', [FieldLayoutTabElement::class, 'confirm'])->name('field-layouts.tabs.elements.confirm');

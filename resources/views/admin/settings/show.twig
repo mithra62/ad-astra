@@ -1,5 +1,6 @@
 {% extends 'admin._inc._layout' %}
 {% import 'admin._inc._form-fields' as forms %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Settings' %}
 {% set page_heading = 'Settings' %}
@@ -8,18 +9,7 @@
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="#">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard
-        </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-slate-800">Settings</span>
-    </nav>
+    {{ ui.breadcrumbs([{label: 'Dashboard', href: route('dashboard'), icon: 'home'}, {label: 'Settings'}]) }}
 {% endblock %}
 
 {% block secondary_sidebar %}
@@ -40,8 +30,8 @@
     <div class="flex w-full min-w-0 flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Settings</h1>
-                <p class="mt-1 text-sm text-slate-500">Create a reusable status, field, label, or option for content workflows.</p>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Settings</h1>
+                <p class="mt-1 text-sm text-muted">Create a reusable status, field, label, or option for content workflows.</p>
             </div>
         </div>
 
@@ -56,88 +46,35 @@
 
 
                 {% for groupName, fields in grouped_fields %}
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div class="border-b border-slate-200 px-5 py-3">
-                        <h5 class="text-sm font-semibold text-slate-700">
-                            {% if groupName %}
-                                <div class="col-12">
-                                    <h6 class="border-bottom pb-2 text-muted text-uppercase f-s-12 f-w-600">
-                                        {{ groupName }}
-                                    </h6>
-                                </div>
-                            {% endif %}
-                        </h5>
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">{{ groupName ? groupName : domain.name }}</h5>
                     </div>
                     <div class="space-y-5 px-5 py-5">
 
                     {% for field in fields %}
-                        <div class="col-md-12">
-                            <label class="form-label" for="field_{{ field.handle }}">
-                                {{ field.label }}
-                                {% if field.user_overridable %}
-                                    <span class="badge bg-light-primary text-primary ms-1 f-s-11">  user overridable</span>
-                                {% endif %}
-                            </label>
-                            {% if field.instructions %}
-                                <small
-                                    class="text-secondary d-block mb-1">{{ field.instructions }}</small>
-                            {% endif %}
+                        {% set val = field_values[field.handle] is defined ? field_values[field.handle] : (field.default ?? '') %}
+                        {% set field_description = field.instructions %}
 
-                            {% set val = field_values[field.handle] is defined ? field_values[field.handle] : (field.default ?? '') %}
+                        {% if field.user_overridable %}
+                            <p class="text-xs text-muted">
+                                <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">user overridable</span>
+                            </p>
+                        {% endif %}
 
-                            {% if field.type == 'boolean' %}
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input"
-                                           type="checkbox"
-                                           name="{{ field.handle }}"
-                                           id="field_{{ field.handle }}"
-                                           value="1"
-                                        {{ old(field.handle, val) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="field_{{ field.handle }}">
-                                        Enable
-                                    </label>
-                                </div>
-                            {% elseif field.type == 'integer' or field.type == 'float' %}
-                                <input type="number"
-                                       class="w-full rounded-md border {% if errors.has(field.handle) %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 "
-                                       name="{{ field.handle }}"
-                                       id="field_{{ field.handle }}"
-                                       value="{{ old(field.handle, val) }}"
-                                    {{ field.type == 'float' ? 'step="any"' : 'step="1"' }}>
-                            {% elseif field.type == 'textarea' %}
-                                <textarea class="w-full rounded-md border {% if errors.has(field.handle) %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 "
-                                          name="{{ field.handle }}"
-                                          id="field_{{ field.handle }}"
-                                          rows="4">{{ old(field.handle, val) }}</textarea>
-                            {% elseif field.type == 'select' or (field.options is defined and field.options|length) %}
-                                <select name="{{ field.handle }}"
-                                        id="field_{{ field.handle }}"
-                                        class="w-full rounded-md border {% if errors.has(field.handle) %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2">
-                                    <option value="">— Select —</option>
-                                    {% for option in field.options|default([]) %}
-                                        {% if option.options is defined %}
-                                            <optgroup label="{{ option.label }}">
-                                                {% for sub in option.options %}
-                                                    <option value="{{ sub.value }}" {% if (old(field.handle, val) ~ '') == (sub.value ~ '') %}selected{% endif %}>{{ sub.label }}</option>
-                                                {% endfor %}
-                                            </optgroup>
-                                        {% else %}
-                                            <option value="{{ option.value }}" {% if (old(field.handle, val) ~ '') == (option.value ~ '') %}selected{% endif %}>{{ option.label }}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                            {% else %}
-                                <input type="{{ field.type == 'email' ? 'email' : 'text' }}"
-                                       class="w-full rounded-md border {% if errors.has(field.handle) %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %} focus:outline-none focus:ring-2 "
-                                       name="{{ field.handle }}"
-                                       id="field_{{ field.handle }}"
-                                       value="{{ old(field.handle, val) }}">
-                            {% endif %}
-
-                            {% if errors.has(field.handle) %}
-                                <p class="mt-1 text-xs text-red-600">{{ errors.first(field.handle) }}</p>
-                            {% endif %}
-                        </div>
+                        {% if field.type == 'boolean' %}
+                            {{ forms.toggle(field.handle, field.label, val, field_description) }}
+                        {% elseif field.type == 'textarea' %}
+                            {{ forms.textarea(field.handle, field.label, val, 4, field_description) }}
+                        {% elseif field.type == 'select' or (field.options is defined and field.options|length) %}
+                            {{ forms.select(field.handle, field.label, field.options|default([]), val, field_description) }}
+                        {% elseif field.type == 'integer' %}
+                            {{ forms.input(field.handle, field.label, val, 'number', field_description, '', '', field.handle, false, 'step="1"') }}
+                        {% elseif field.type == 'float' %}
+                            {{ forms.input(field.handle, field.label, val, 'number', field_description, '', '', field.handle, false, 'step="any"') }}
+                        {% else %}
+                            {{ forms.input(field.handle, field.label, val, field.type == 'email' ? 'email' : 'text', field_description) }}
+                        {% endif %}
                     {% endfor %}
                     </div>
                 </div>

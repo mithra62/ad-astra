@@ -21,6 +21,7 @@ class Number extends AbstractField
         'min' => [
             'type' => 'number',
             'label' => 'Minimum',
+            'dynamic_rule' => 'min',
             'default' => null,
             'rules' => 'nullable|numeric'
         ],
@@ -28,6 +29,7 @@ class Number extends AbstractField
             'type' => 'number',
             'label' => 'Maximum',
             'default' => null,
+            'dynamic_rule' => 'max',
             'rules' => 'nullable|numeric'
         ],
         'step' => [

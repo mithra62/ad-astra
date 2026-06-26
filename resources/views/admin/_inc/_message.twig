@@ -12,7 +12,7 @@
 {% endif %}
 
 {% if session('success') %}
-    <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+    <div class="rounded-lg border border-emerald-200 bg-accent-soft p-4">
         <div class="flex items-start gap-3">
             <svg class="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2"
                  viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
             </svg>
             <div>
                 <p class="text-sm font-semibold text-emerald-800">Success!</p>
-                <p class="mt-1 text-sm text-emerald-700">{{ trans(session('success')) }}</p>
+                <p class="mt-1 text-sm text-accent">{{ trans(session('success')) }}</p>
             </div>
         </div>
     </div>

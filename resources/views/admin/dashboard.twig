@@ -1,50 +1,22 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Home' %}
 {% set page_heading = 'Dashboard' %}
 {% set active_nav = 'dashboard' %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-        <a class="hover:text-slate-800" href="#">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2"
-                 viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard
-        </a>
-        <svg class="h-3 w-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-slate-800">Home</span>
-    </nav>
+    {{ ui.breadcrumbs([{label: 'Dashboard', href: route('dashboard'), icon: 'home'}, {label: 'Home'}]) }}
 {% endblock %}
 
 {% block content %}
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-            <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">System Overview</h1>
-            <p class="mt-1 text-sm text-slate-500">Monitor content volume, user activity, and API usage.</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 self-start">
-            <button type="button" onclick="location.reload()"
-                    class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                Refresh
-            </button>
-            <a href="{{ route('entries.groups') }}"
-               class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m7-7v14"/>
-                </svg>
-                Manage Content
-            </a>
-        </div>
-    </div>
+    {% embed 'admin._inc._page-header' with {title: 'System Overview', subtitle: 'Monitor content volume, user activity, and API usage.'} %}
+        {% block actions %}
+            {% import 'admin._inc._ui' as ui %}
+            {{ ui.button('Refresh', null, 'secondary', attrs='onclick="location.reload()"') }}
+            {{ ui.button('Manage Content', route('entries.groups'), icon='plus') }}
+        {% endblock %}
+    {% endembed %}
 
     {% if recent_api_errors > 0 %}
         <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
@@ -61,7 +33,7 @@
             </div>
         </div>
     {% else %}
-        <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+        <div class="rounded-lg border border-emerald-200 bg-accent-soft p-4">
             <div class="flex items-start gap-3">
                 <svg class="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2"
                      viewBox="0 0 24 24">
@@ -69,62 +41,62 @@
                 </svg>
                 <div>
                     <p class="text-sm font-semibold text-emerald-800">No API errors in the last 24 hours.</p>
-                    <p class="mt-1 text-sm text-emerald-700">{{ total_api_requests|number_format }} total API requests logged.</p>
+                    <p class="mt-1 text-sm text-accent">{{ total_api_requests|number_format }} total API requests logged.</p>
                 </div>
             </div>
         </div>
     {% endif %}
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
             <div class="px-5 py-4">
                 <div class="flex items-center justify-between">
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Total Entries</p>
-                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">All</span>
+                    <p class="text-xs font-medium uppercase tracking-wide text-muted">Total Entries</p>
+                    <span class="rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted">All</span>
                 </div>
-                <p class="mt-2 text-3xl font-semibold text-slate-900">{{ total_entries|number_format }}</p>
-                <p class="mt-1 text-xs text-slate-400">Across all entry groups</p>
+                <p class="mt-2 text-3xl font-semibold text-content">{{ total_entries|number_format }}</p>
+                <p class="mt-1 text-xs text-faint">Across all entry groups</p>
             </div>
         </div>
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
             <div class="px-5 py-4">
                 <div class="flex items-center justify-between">
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Published</p>
-                    <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Live</span>
+                    <p class="text-xs font-medium uppercase tracking-wide text-muted">Published</p>
+                    <span class="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">Live</span>
                 </div>
-                <p class="mt-2 text-3xl font-semibold text-slate-900">{{ published_entries|number_format }}</p>
-                <p class="mt-1 text-xs text-slate-400">{{ draft_entries|number_format }} unpublished</p>
+                <p class="mt-2 text-3xl font-semibold text-content">{{ published_entries|number_format }}</p>
+                <p class="mt-1 text-xs text-faint">{{ draft_entries|number_format }} unpublished</p>
             </div>
         </div>
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
             <div class="px-5 py-4">
                 <div class="flex items-center justify-between">
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Users</p>
+                    <p class="text-xs font-medium uppercase tracking-wide text-muted">Users</p>
                     <span class="rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700">{{ active_users }} active</span>
                 </div>
-                <p class="mt-2 text-3xl font-semibold text-slate-900">{{ total_users|number_format }}</p>
-                <p class="mt-1 text-xs text-slate-400">Registered accounts</p>
+                <p class="mt-2 text-3xl font-semibold text-content">{{ total_users|number_format }}</p>
+                <p class="mt-1 text-xs text-faint">Registered accounts</p>
             </div>
         </div>
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
             <div class="px-5 py-4">
                 <div class="flex items-center justify-between">
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Media Files</p>
+                    <p class="text-xs font-medium uppercase tracking-wide text-muted">Media Files</p>
                     <span class="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">Library</span>
                 </div>
-                <p class="mt-2 text-3xl font-semibold text-slate-900">{{ total_media|number_format }}</p>
-                <p class="mt-1 text-xs text-slate-400">Stored across all libraries</p>
+                <p class="mt-2 text-3xl font-semibold text-content">{{ total_media|number_format }}</p>
+                <p class="mt-1 text-xs text-faint">Stored across all libraries</p>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
 
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-5 py-3">
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
                 <div>
-                    <h5 class="text-sm font-semibold text-slate-700">API Request Volume</h5>
-                    <p class="mt-0.5 text-xs text-slate-500">Daily requests over the last 14 days.</p>
+                    <h5 class="text-sm font-semibold text-content">API Request Volume</h5>
+                    <p class="mt-0.5 text-xs text-muted">Daily requests over the last 14 days.</p>
                 </div>
             </div>
             <div class="px-5 py-5">
@@ -135,49 +107,49 @@
         </div>
 
         <div class="flex flex-col gap-5">
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700">Entry Groups</h5>
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Entry Groups</h5>
                 </div>
                 {% if entry_groups is not empty %}
                     <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
                         {% for group in entry_groups %}
                             <div class="flex items-center justify-between py-2.5">
-                                <dt class="text-slate-600">
-                                    <a href="{{ route('entries.groups.show', group.id) }}" class="hover:text-emerald-700">{{ group.name }}</a>
+                                <dt class="text-muted">
+                                    <a href="{{ route('entries.groups.show', group.id) }}" class="hover:text-accent">{{ group.name }}</a>
                                 </dt>
-                                <dd class="font-semibold text-slate-900">{{ group.entries_count|number_format }}</dd>
+                                <dd class="font-semibold text-content">{{ group.entries_count|number_format }}</dd>
                             </div>
                         {% endfor %}
                     </dl>
                 {% else %}
-                    <div class="px-5 py-6 text-center text-sm text-slate-400">
+                    <div class="px-5 py-6 text-center text-sm text-faint">
                         No entry groups defined yet.
                         <a href="{{ route('entries.groups.create') }}" class="block mt-1 text-emerald-600 hover:underline">Create one</a>
                     </div>
                 {% endif %}
             </div>
 
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 px-5 py-3">
-                    <h5 class="text-sm font-semibold text-slate-700">Content Summary</h5>
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Content Summary</h5>
                 </div>
                 <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
                     <div class="flex items-center justify-between py-2.5">
-                        <dt class="text-slate-500">Published entries</dt>
-                        <dd class="font-semibold text-slate-900">{{ published_entries|number_format }}</dd>
+                        <dt class="text-muted">Published entries</dt>
+                        <dd class="font-semibold text-content">{{ published_entries|number_format }}</dd>
                     </div>
                     <div class="flex items-center justify-between py-2.5">
-                        <dt class="text-slate-500">Unpublished</dt>
-                        <dd class="font-semibold text-slate-900">{{ draft_entries|number_format }}</dd>
+                        <dt class="text-muted">Unpublished</dt>
+                        <dd class="font-semibold text-content">{{ draft_entries|number_format }}</dd>
                     </div>
                     <div class="flex items-center justify-between py-2.5">
-                        <dt class="text-slate-500">Media files</dt>
-                        <dd class="font-semibold text-slate-900">{{ total_media|number_format }}</dd>
+                        <dt class="text-muted">Media files</dt>
+                        <dd class="font-semibold text-content">{{ total_media|number_format }}</dd>
                     </div>
                     <div class="flex items-center justify-between py-2.5">
-                        <dt class="text-slate-500">Active users</dt>
-                        <dd class="font-semibold text-slate-900">{{ active_users|number_format }}</dd>
+                        <dt class="text-muted">Active users</dt>
+                        <dd class="font-semibold text-content">{{ active_users|number_format }}</dd>
                     </div>
                 </dl>
             </div>
@@ -185,16 +157,16 @@
     </div>
 
     <div class="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-5 py-3">
-                <h5 class="text-sm font-semibold text-slate-700">Recent Entries</h5>
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
+                <h5 class="text-sm font-semibold text-content">Recent Entries</h5>
             </div>
             {% if recent_entries is not empty %}
                 <div class="divide-y divide-slate-100">
                     {% for entry in recent_entries %}
                         <div class="flex items-center gap-3 px-5 py-3.5">
                             <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md
-                                {{ entry.status_is_public ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400' }}">
+                                {{ entry.status_is_public ? 'bg-accent-soft text-emerald-600' : 'bg-canvas text-faint' }}">
                                 {% if entry.status_is_public %}
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
@@ -206,8 +178,8 @@
                                 {% endif %}
                             </div>
                             <div class="min-w-0 flex-1">
-                                <a href="{{ route('entries.edit', entry.id) }}" class="truncate block text-sm font-medium text-slate-800 hover:text-emerald-700">{{ entry.title }}</a>
-                                <p class="text-xs text-slate-400">
+                                <a href="{{ route('entries.edit', entry.id) }}" class="truncate block text-sm font-medium text-content hover:text-accent">{{ entry.title }}</a>
+                                <p class="text-xs text-faint">
                                     {% if entry.entryGroup %}{{ entry.entryGroup.name }} &middot; {% endif %}
                                     {% if entry.creator %}{{ entry.creator.name }} &middot; {% endif %}
                                     {{ entry.created_at.diffForHumans() }}
@@ -217,34 +189,34 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="px-5 py-8 text-center text-sm text-slate-400">No entries yet.</div>
+                <div class="px-5 py-8 text-center text-sm text-faint">No entries yet.</div>
             {% endif %}
         </div>
 
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-5 py-3">
-                <h5 class="text-sm font-semibold text-slate-700">Top API Routes <span class="ml-1 text-xs font-normal text-slate-400">(last 7 days)</span></h5>
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
+                <h5 class="text-sm font-semibold text-content">Top API Routes <span class="ml-1 text-xs font-normal text-faint">(last 7 days)</span></h5>
             </div>
             {% if top_api_routes is not empty %}
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
-                        <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                        <thead class="bg-subtle text-xs uppercase tracking-wide text-muted">
                         <tr>
                             <th class="px-4 py-3 font-semibold">Route</th>
                             <th class="px-4 py-3 font-semibold text-right">Requests</th>
                             <th class="px-4 py-3 font-semibold text-right">Errors</th>
                         </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 bg-white">
+                        <tbody class="divide-y divide-slate-100 bg-surface">
                         {% for row in top_api_routes %}
                             <tr>
-                                <td class="px-4 py-3 font-medium text-slate-700 truncate max-w-[14rem]">{{ row.request_route }}</td>
-                                <td class="px-4 py-3 text-right text-slate-900 font-semibold">{{ row.hits|number_format }}</td>
+                                <td class="px-4 py-3 font-medium text-content truncate max-w-[14rem]">{{ row.request_route }}</td>
+                                <td class="px-4 py-3 text-right text-content font-semibold">{{ row.hits|number_format }}</td>
                                 <td class="px-4 py-3 text-right">
                                     {% if row.errors > 0 %}
                                         <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">{{ row.errors }}</span>
                                     {% else %}
-                                        <span class="text-slate-400">—</span>
+                                        <span class="text-faint">—</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -253,19 +225,19 @@
                     </table>
                 </div>
             {% else %}
-                <div class="px-5 py-8 text-center text-sm text-slate-400">No API activity in the last 7 days.</div>
+                <div class="px-5 py-8 text-center text-sm text-faint">No API activity in the last 7 days.</div>
             {% endif %}
         </div>
     </div>
 
     {% if api_logs is not empty %}
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-5 py-3">
-                <h5 class="text-sm font-semibold text-slate-700">Recent API Requests</h5>
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
+                <h5 class="text-sm font-semibold text-content">Recent API Requests</h5>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
-                    <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                    <thead class="bg-subtle text-xs uppercase tracking-wide text-muted">
                     <tr>
                         <th class="px-4 py-3 font-semibold">User</th>
                         <th class="px-4 py-3 font-semibold">Route</th>
@@ -274,28 +246,28 @@
                         <th class="px-4 py-3 font-semibold">Date</th>
                     </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 bg-white">
+                    <tbody class="divide-y divide-slate-100 bg-surface">
                     {% for log in api_logs %}
                         <tr>
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2">
                                     <img alt="" class="h-6 w-6 rounded-full object-cover"
                                          src="{{ log.user.avatar() }}">
-                                    <span class="font-medium text-slate-800">{{ log.user.name }}</span>
+                                    <span class="font-medium text-content">{{ log.user.name }}</span>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-slate-600 max-w-[16rem] truncate">{{ log.request_route }}</td>
+                            <td class="px-4 py-3 text-muted max-w-[16rem] truncate">{{ log.request_route }}</td>
                             <td class="px-4 py-3">
                                 {% if log.response_status_code == 200 %}
-                                    <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">{{ log.response_status_code }}</span>
+                                    <span class="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">{{ log.response_status_code }}</span>
                                 {% elseif log.response_status_code == 404 %}
                                     <span class="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">{{ log.response_status_code }}</span>
                                 {% else %}
                                     <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">{{ log.response_status_code }}</span>
                                 {% endif %}
                             </td>
-                            <td class="px-4 py-3 text-slate-500 uppercase text-xs font-medium">{{ log.method }}</td>
-                            <td class="px-4 py-3 text-slate-500">{{ log.created_at.format('M j, Y h:i A') }}</td>
+                            <td class="px-4 py-3 text-muted uppercase text-xs font-medium">{{ log.method }}</td>
+                            <td class="px-4 py-3 text-muted">{{ log.created_at.format('M j, Y h:i A') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
