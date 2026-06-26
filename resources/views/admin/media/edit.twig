@@ -1,5 +1,6 @@
 {% extends 'admin._inc._layout' %}
 {% import 'admin._inc._schema-tab-elements' as tabs %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Edit Media' %}
 {% set page_heading = 'Edit Media' %}
@@ -8,27 +9,18 @@
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
-        <a class="hover:text-content" href="{{ route('dashboard') }}">Dashboard</a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-content" href="{{ route('media.libraries') }}">Media Libraries</a>
-        {% if media.library %}
-            <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-            </svg>
-            <a class="hover:text-content" href="{{ route('media.libraries.show', media.library) }}">{{ media.library.name }}</a>
-        {% endif %}
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-content" href="{{ route('media.show', media) }}">{{ media.name ?: media.file_name }}</a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-content">Edit</span>
-    </nav>
+    {% set crumbs = [
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Media Libraries', href: route('media.libraries')}
+    ] %}
+    {% if media.library %}
+        {% set crumbs = crumbs|merge([{label: media.library.name, href: route('media.libraries.show', media.library)}]) %}
+    {% endif %}
+    {% set crumbs = crumbs|merge([
+        {label: media.name ?: media.file_name, href: route('media.show', media)},
+        {label: 'Edit'}
+    ]) %}
+    {{ ui.breadcrumbs(crumbs) }}
 {% endblock %}
 
 {% block secondary_sidebar %}

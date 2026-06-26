@@ -1,6 +1,7 @@
 {% extends 'admin._inc._layout' %}
 
 {% import 'admin._inc._form-fields' as forms %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Edit Status Group' %}
 {% set page_heading = 'Status Groups' %}
@@ -25,7 +26,11 @@
         <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <span class="text-content">{{ group.name }}</span>
+        <a class="hover:text-content" href="{{ route('statuses.groups.show', group) }}">{{ group.name }}</a>
+        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-content">Edit Status Group</span>
     </nav>
 {% endblock %}
 

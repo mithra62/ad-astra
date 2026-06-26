@@ -59,8 +59,8 @@
  */
 @layer base {
     input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
-    select,
-    textarea {
+    select:not([hidden]),
+    textarea:not([hidden]) {
         background-color: var(--app-surface);
         border-color: var(--app-edge);
         color: var(--app-content);

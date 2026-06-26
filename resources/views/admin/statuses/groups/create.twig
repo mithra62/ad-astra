@@ -1,6 +1,7 @@
 {% extends 'admin._inc._layout' %}
 
 {% import 'admin._inc._form-fields' as forms %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Status Groups' %}
 {% set page_heading = 'Status Groups' %}
@@ -9,24 +10,11 @@
 {% set has_secondary_sidebar = false %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
-        <a class="hover:text-content" href="#">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard
-        </a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-content" href="{{ route('statuses.groups') }}">
-            Status Groups
-        </a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-content">Create Status Group</span>
-    </nav>
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Status Groups', href: route('statuses.groups')},
+        {label: 'Create Status Group'}
+    ]) }}
 {% endblock %}
 
 {% block content %}

@@ -4,15 +4,15 @@ import './prototype.js';
 document.addEventListener('DOMContentLoaded', () => {
     const activeClasses = [
         'border-emerald-600',
-        'bg-white',
+        'bg-surface',
         'font-semibold',
-        'text-emerald-700',
+        'text-accent',
     ];
     const inactiveClasses = [
         'border-transparent',
-        'text-slate-500',
-        'hover:border-slate-300',
-        'hover:text-slate-700',
+        'text-muted',
+        'hover:border-edge',
+        'hover:text-content',
     ];
 
     const setClasses = (element, classes, enabled) => {

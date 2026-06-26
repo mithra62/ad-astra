@@ -40,6 +40,15 @@ class SectionsChromeRenderTest extends TestCase
             'entries.types' => ['entries.types'],
             'field-layouts' => ['field-layouts'],
             'media.libraries' => ['media.libraries'],
+            'account.settings' => ['account.settings'],
+            'account.tokens.index' => ['account.tokens.index'],
+            'roles.create' => ['roles.create'],
+            'statuses.groups.create' => ['statuses.groups.create'],
+            'fields.groups.create' => ['fields.groups.create'],
+            'entries.groups.create' => ['entries.groups.create'],
+            'entries.types.create' => ['entries.types.create'],
+            'field-layouts.create' => ['field-layouts.create'],
+            'media.libraries.create' => ['media.libraries.create'],
         ];
     }
 
