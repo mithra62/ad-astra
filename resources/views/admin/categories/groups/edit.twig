@@ -1,5 +1,6 @@
 {% extends 'admin._inc._layout' %}
 {% import 'admin._inc._form-fields' as forms %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Category Groups' %}
 {% set page_heading = 'Category Groups' %}
@@ -8,30 +9,12 @@
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
-        <a class="hover:text-content" href="#">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard
-        </a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-content" href="{{ route('categories.groups') }}">
-            Category Groups
-        </a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-content" href="{{ route('categories.groups.show', group) }}">
-            {{ group.name }}
-        </a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-content">Edit Category Group</span>
-    </nav>
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Category Groups', href: route('categories.groups')},
+        {label: group.name, href: route('categories.groups.show', group)},
+        {label: 'Edit Category Group'}
+    ]) }}
 {% endblock %}
 
 {% block secondary_sidebar %}
@@ -50,18 +33,9 @@
     </div>
 
     <div class="flex w-full min-w-0 flex-col gap-5">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Edit Category Group</h1>
-                <p class="mt-1 text-sm text-muted">Edit a collection of Categories.</p>
-            </div>
-            <a href="{{ route('categories.groups.show', group) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-                </svg>
-                Back to {{ group.name }}
-            </a>
-        </div>
+        {% embed 'admin._inc._page-header' with {title: 'Edit Category Group', subtitle: 'Edit a collection of Categories.'} %}
+            {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Back to ' ~ group.name, route('categories.groups.show', group), 'secondary', icon='chevron-left') }}{% endblock %}
+        {% endembed %}
 
         <form id="general-create-form" method="POST" action="{{ route('categories.groups.update', group) }}" class="flex w-full min-w-0 flex-col gap-5">
             {{ csrf_field() }}

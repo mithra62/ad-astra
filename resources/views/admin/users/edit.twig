@@ -1,5 +1,6 @@
 {% extends 'admin._inc._layout' %}
 {% import 'admin._inc._schema-tab-elements' as tabs %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Edit User' %}
 {% set page_heading = 'Edit User' %}
@@ -9,21 +10,12 @@
 {% set active_secondary_nav = 'edit' %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
-        <a class="hover:text-content" href="{{ route('dashboard') }}"><svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg> Dashboard</a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-        <a class="hover:text-content" href="{{ route('users.index') }}">Users</a>
-
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-content" href="{{ route('users.show', user) }}">
-            {{ user.name }}
-        </a>
-
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-        <span class="text-content">Create User</span>
-    </nav>
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Users', href: route('users.index')},
+        {label: user.name, href: route('users.show', user)},
+        {label: 'Edit User'}
+    ]) }}
 {% endblock %}
 
 {% block secondary_sidebar %}
@@ -31,13 +23,9 @@
 {% endblock %}
 
 {% block content %}
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Edit User</h1>
-            <p class="mt-1 text-sm text-muted">Add a new user and assign one or more roles.</p>
-        </div>
-        <a href="{{ route('users.show', user) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>Back to {{ user.name }}</a>
-    </div>
+    {% embed 'admin._inc._page-header' with {title: 'Edit User', subtitle: 'Update profile, roles, and account settings.'} %}
+        {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Back to ' ~ user.name, route('users.show', user), 'secondary', icon='chevron-left') }}{% endblock %}
+    {% endembed %}
 
     <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
         <div class="flex items-start gap-3">

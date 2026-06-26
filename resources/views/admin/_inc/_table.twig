@@ -1,0 +1,32 @@
+{# ============================================================================
+   List table shell — scroll wrapper, <table>, and <thead>. Rows stay flexible.
+
+   {% embed 'admin._inc._table' with {columns: ['User', 'Roles', 'Status', '']} %}
+       {% block rows %}
+           {% for user in users %}<tr class="hover:bg-subtle/60">...</tr>{% endfor %}
+       {% endblock %}
+   {% endembed %}
+
+   columns: list of header labels (string) or {label, class} maps. For a fully
+   custom header row (e.g. a select-all checkbox column) override the `thead`
+   block instead, which replaces the generated <tr>.
+   Dividers use the edge token so the table flips correctly in dark mode.
+   ============================================================================ #}
+{% set _rows %}{% block rows %}{% endblock %}{% endset %}
+{% set _thead %}{% block thead %}{% endblock %}{% endset %}
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-edge text-left text-sm">
+        <thead class="bg-subtle text-xs font-semibold uppercase tracking-wide text-muted">
+            {% if _thead|trim %}
+                {{ _thead|raw }}
+            {% else %}
+                <tr>
+                    {% for col in columns|default([]) %}
+                        <th scope="col" class="px-4 py-3 {{ col.class|default('') }}">{{ col.label|default(col) }}</th>
+                    {% endfor %}
+                </tr>
+            {% endif %}
+        </thead>
+        <tbody class="divide-y divide-edge bg-surface">{{ _rows|raw }}</tbody>
+    </table>
+</div>

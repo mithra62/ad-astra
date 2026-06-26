@@ -1,4 +1,5 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'View User' %}
 {% set page_heading = 'View User' %}
@@ -8,17 +9,11 @@
 {% set active_secondary_nav = 'view' %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
-        <a class="hover:text-content" href="{{ route('dashboard') }}">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard</a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-        <a class="hover:text-content" href="{{ route('users.index') }}">Users</a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-        <span class="text-content">{{ user.name }}</span>
-    </nav>
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Users', href: route('users.index')},
+        {label: user.name}
+    ]) }}
 {% endblock %}
 
 {% block secondary_sidebar %}
@@ -75,15 +70,13 @@
                 </div>
                 <p class="mt-1 text-sm text-muted">{{ user.email }}</p>
                 <div class="mt-2 flex flex-wrap gap-1.5">
-                    {% for role in user.roles %}
-                        <span class="rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-content">{{ role.name }}</span>
-                    {% endfor %}
+                    {% for role in user.roles %}{{ ui.badge(role.name) }}{% endfor %}
                 </div>
             </div>
         </div>
         <div class="flex flex-wrap items-center gap-2 self-start">
-            <a href="{{ route('users.edit', user) }}" class="rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">Edit User</a>
-            <a href="{{ route('users.confirm', user) }}" class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-100">Delete</a>
+            {{ ui.button('Edit User', route('users.edit', user)) }}
+            {{ ui.button('Delete', route('users.confirm', user), 'danger') }}
         </div>
     </div>
 
