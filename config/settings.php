@@ -60,7 +60,7 @@ return [
                 'label' => 'Installed Version',
                 'type' => 'text',
                 'default' => '0.0.1',
-                'rules' => ['required', 'string', 'max:255'],
+                'rules' => ['nullable', 'string', 'max:255'],
                 'instructions' => 'The installed system version.',
                 'group' => null,
                 'hidden' => true,
