@@ -1,4 +1,5 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Field Groups' %}
 {% set page_heading = 'Field Groups' %}
@@ -7,34 +8,14 @@
 {% set has_secondary_sidebar = false %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
-        <a class="hover:text-content" href="{{ route('dashboard') }}">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard
-        </a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-content">{{ page_title }}</span>
-    </nav>
+    {{ ui.breadcrumbs([{label: 'Dashboard', href: route('dashboard'), icon: 'home'}, {label: page_title}]) }}
 {% endblock %}
 
 {% block content %}
     <div class="flex w-full min-w-0 flex-col gap-5">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ page_title }}</h1>
-                <p class="mt-1 text-sm text-muted">Select an field group to view and manage its entries.</p>
-            </div>
-            <a href="{{ route('fields.groups.create') }}" class="inline-flex items-center gap-1.5 self-start rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 sm:self-auto">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                </svg>
-                Create Field Group
-            </a>
-        </div>
+        {% embed 'admin._inc._page-header' with {title: page_title, subtitle: 'Select a field group to view and manage its fields.'} %}
+            {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Create Field Group', route('fields.groups.create'), icon='plus') }}{% endblock %}
+        {% endembed %}
 
         <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
             <div class="border-b border-edge px-5 py-3">

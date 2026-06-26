@@ -1,4 +1,5 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Status Groups' %}
 {% set page_heading = 'Status Groups' %}
@@ -7,24 +8,11 @@
 {% set has_secondary_sidebar = true %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
-        <a class="hover:text-content" href="#">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard
-        </a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a class="hover:text-content" href="{{ route('statuses.groups') }}">
-            Status Groups
-        </a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-content">{{ group.name }}</span>
-    </nav>
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Status Groups', href: route('statuses.groups')},
+        {label: group.name}
+    ]) }}
 {% endblock %}
 
 {% block secondary_sidebar %}
@@ -33,26 +21,13 @@
 
 {% block content %}
     <div class="flex w-full min-w-0 flex-col gap-5">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ group.name }}</h1>
-                <p class="mt-1 text-sm text-muted">Manage drafts, scheduled posts, and published article content.</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                <a href="{{ route('statuses.groups.edit', group.id) }}" class="inline-flex items-center gap-1.5 rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" >
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                    Edit Group
-                </a>
-                <a href="{{ route('statuses.create', {group_id: group.id}) }}" class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" >
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Create Status
-                </a>
-            </div>
-        </div>
+        {% embed 'admin._inc._page-header' with {title: group.name, subtitle: 'Manage the statuses that belong to this group.'} %}
+            {% block actions %}
+                {% import 'admin._inc._ui' as ui %}
+                {{ ui.button('Edit Group', route('statuses.groups.edit', group.id), 'secondary', icon='pencil') }}
+                {{ ui.button('Create Status', route('statuses.create', {group_id: group.id}), icon='plus') }}
+            {% endblock %}
+        {% endembed %}
 
         <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
             <div class="border-b border-edge px-5 py-3">

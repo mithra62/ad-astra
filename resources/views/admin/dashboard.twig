@@ -1,50 +1,22 @@
 {% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
 
 {% set page_title = 'Home' %}
 {% set page_heading = 'Dashboard' %}
 {% set active_nav = 'dashboard' %}
 
 {% block breadcrumbs %}
-    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
-        <a class="hover:text-content" href="#">
-            <svg class="inline-block h-3 w-3 align-middle" fill="none" stroke="currentColor" stroke-width="2"
-                 viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-            </svg>
-            Dashboard
-        </a>
-        <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-content">Home</span>
-    </nav>
+    {{ ui.breadcrumbs([{label: 'Dashboard', href: route('dashboard'), icon: 'home'}, {label: 'Home'}]) }}
 {% endblock %}
 
 {% block content %}
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-            <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">System Overview</h1>
-            <p class="mt-1 text-sm text-muted">Monitor content volume, user activity, and API usage.</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 self-start">
-            <button type="button" onclick="location.reload()"
-                    class="inline-flex items-center gap-1.5 rounded-md border border-edge bg-surface px-3 py-2 text-sm font-medium text-content shadow-sm hover:bg-subtle">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                Refresh
-            </button>
-            <a href="{{ route('entries.groups') }}"
-               class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m7-7v14"/>
-                </svg>
-                Manage Content
-            </a>
-        </div>
-    </div>
+    {% embed 'admin._inc._page-header' with {title: 'System Overview', subtitle: 'Monitor content volume, user activity, and API usage.'} %}
+        {% block actions %}
+            {% import 'admin._inc._ui' as ui %}
+            {{ ui.button('Refresh', null, 'secondary', attrs='onclick="location.reload()"') }}
+            {{ ui.button('Manage Content', route('entries.groups'), icon='plus') }}
+        {% endblock %}
+    {% endembed %}
 
     {% if recent_api_errors > 0 %}
         <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
