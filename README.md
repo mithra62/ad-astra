@@ -44,33 +44,33 @@ composer install
 npm install
 ```
 
-Create and configure your environment file:
+Create your environment file:
 
 ```powershell
 Copy-Item .env.example .env
-php artisan key:generate
 ```
 
 Or, from a Unix-style shell:
 
 ```bash
 cp .env.example .env
-php artisan key:generate
 ```
 
-Set the database values in `.env`, including `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`. The example environment uses MySQL and a `DB_TABLE_PREFIX` of `chp_`.
+Set the database values in `.env`, including `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`. The example environment uses MySQL and a `DB_TABLE_PREFIX` of `ada_`.
 
-Run migrations and seed the application:
+The seeded super-admin's credentials come from `.env`, not a fixed default — set `DEV_USER_EMAIL`, `DEV_USER_NAME`, and `DEV_USER_PASSWORD` for a predictable local login. Each of the three falls back independently to a random 16-character string if left blank, so leaving all three empty does **not** produce a known login. `UsersSeeder` also skips itself entirely when `APP_ENV=production` — see [Deployment](#deployment) below.
+
+Reset, migrate, and seed the database in one command:
 
 ```bash
-php artisan migrate
-php artisan db:seed
+php artisan migrate:fresh --seed
 ```
 
-The default seeder creates a super admin user:
+Generate the app key (run this last — it's the final setup step, not a prerequisite for migrating/seeding):
 
-- Email: `eric@mithra62.com`
-- Password: `password`
+```bash
+php artisan key:generate
+```
 
 For uploaded media, create the public storage link:
 
@@ -99,6 +99,30 @@ Build frontend assets for production:
 ```bash
 npm run build
 ```
+
+## Deployment
+
+`php artisan serve` and `composer run dev` are development-only. To run AdAstra
+under a real web server instead (upload and run, no PHP dev server), point the
+web root at `public/`, not the repo root — `public/index.php` is the front
+controller and `public/.htaccess` already has the standard Laravel Apache
+rewrite rules. Run `npm run build` before uploading; the server only needs PHP
+and Composer dependencies at runtime, not Node.
+
+- **Apache**: set `DocumentRoot` to `.../public` with `AllowOverride All` (or
+  an equivalent `mod_rewrite` block) so `.htaccess` is honored.
+- **Nginx + PHP-FPM**: route everything through `index.php` with
+  `try_files $uri $uri/ /index.php?$query_string;` and a `fastcgi_pass` to
+  your PHP-FPM socket.
+
+Full vhost/server-block examples and a production caveat — `UsersSeeder`
+skips itself when `APP_ENV=production`, so the super-admin user isn't seeded
+automatically and must be created manually (e.g. via `php artisan tinker`) —
+are in [docs/OVERVIEW_FINAL.md § Running without `php artisan serve`](docs/OVERVIEW_FINAL.md#running-without-php-artisan-serve-apachenginx--php-fpm).
+
+The scheduler cron and a queue worker are required in production regardless
+of which web server fronts the app — see [Useful Commands](#useful-commands)
+below.
 
 ## Testing
 
