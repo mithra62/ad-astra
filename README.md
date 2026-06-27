@@ -15,7 +15,9 @@ AdAstra is a Laravel 12 CMS/application foundation with an authenticated admin a
 - Laravel 12
 - Laravel Fortify for authentication
 - Laravel Sanctum for API token authentication
+- Laravel Socialite for OAuth/social login
 - Spatie Permission for roles and permissions
+- Spatie Webhook Client for inbound webhook handling
 - Native Laravel Media and Media Library layer for uploaded media
 - TwigBridge and Twig templates
 - L5 Swagger for API documentation
@@ -27,7 +29,9 @@ AdAstra is a Laravel 12 CMS/application foundation with an authenticated admin a
 - Public site routing through `SiteController`, with route drivers for entry-tree and template-based pages.
 - Admin UI under `/admin` for users, roles, account settings, tokens, entries, entry groups, entry types, categories, statuses, fields, field layouts, media libraries, and domain/user settings.
 - API routes under `/api/v1`, protected by Sanctum, for users, entries, and the current account.
+- OAuth/social login via Socialite (`app/Http/Controllers/Login.php`), with `app:refresh-tokens` available to refresh expiring OAuth tokens (not currently scheduled — run manually or add a schedule entry).
 - Content modeling through entry groups, entry types, fields, field groups, field layouts, statuses, categories, entry relationships, and entry tree routing.
+- Bot-blocking middleware (`BotBlockRequest`) and webhook-client infrastructure for external integrations.
 - Config-driven settings domains in `config/settings.php`.
 - Twig templates in `resources/views` and public templates in `resources/templates`.
 
@@ -115,8 +119,12 @@ Current API resources:
 - `GET /api/v1/account`
 - `/api/v1/users`
 - `/api/v1/entries`
+- `/api/v1/entry-groups`
+- `/api/v1/category-groups`
+- `/api/v1/status-groups`
+- `/api/v1/statuses`
 
-API request/response logging is handled by `LogRequestResponse` on the API routes. API log pruning is scheduled daily through Laravel's scheduler.
+Every API route is wrapped in `LogRequestResponse`, which records the request route, method, user ID, sanitized request payload/headers, sanitized response headers, and the response status code to `api_logs`. Response *bodies* are intentionally not captured — only an allowlist-based redaction was feasible for response shapes, which would require ongoing maintenance as resources change, so response-body logging was dropped rather than risk silently leaking sensitive data. `api_logs` rows are pruned daily (90-day retention) via Laravel's scheduler.
 
 Generate Swagger documentation with:
 
@@ -133,6 +141,11 @@ php artisan route:list --except-vendor
 php artisan app:validate-class-references
 php artisan schedule:run
 php artisan queue:work
+php artisan app:refresh-tokens
 ```
 
-`app:validate-class-references` checks database-backed entry type and field type class references before deployment.
+`app:validate-class-references` checks `entry_behaviors.class` (morph alias) and `field_types.object` (FQCN) references before deployment, failing if any are broken.
+
+`app:refresh-tokens` refreshes expiring OAuth tokens through `TokenRefreshService`. It is implemented but not registered in the scheduler, so run it manually or add a schedule entry if automatic refresh is needed.
+
+In production, run the Laravel scheduler every minute (e.g. via cron) so the daily jobs execute: `App\Jobs\PruneApiLogs` at 02:00 and `PurgeDeletedMedia` at 03:00 (`routes/console.php`). Both are dispatched as queued jobs, so an active queue worker must also be running for them to actually execute.
