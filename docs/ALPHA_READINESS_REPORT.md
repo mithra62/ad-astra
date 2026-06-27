@@ -23,6 +23,8 @@
 
 Counts at the time of writing: **3 Critical, 8 High, 7 Medium, 6 Low, 5 Info.**
 
+> **Re-audit (2026-06-26):** Of 29 findings, **13 are fixed**, **5 are partially fixed**, **9 are still open**, and **2 (I-1, I-2) are moot** because `docs/OVERVIEW.md` was deleted (its content now lives in `docs/OVERVIEW_FINAL.md`). See per-item status lines below and the updated checklist at the bottom. Still open and Alpha-blocking: **C-1**, **H-4**, **H-6**, **H-8**, **M-3**, **M-6**, **L-2**, **L-4**, **L-5**. Partially fixed (defence-in-depth gaps): **M-2**, **M-4**, **L-3**. **H-2** is closed by product decision (response bodies intentionally not persisted) rather than by implementing the originally-proposed fix.
+
 ---
 
 ## Table of Contents
@@ -68,6 +70,8 @@ Counts at the time of writing: **3 Critical, 8 High, 7 Medium, 6 Low, 5 Info.**
 ## Critical
 
 ### C-1. `UpdateUserPassword::update()` has its current-password check commented out
+
+> **Status (2026-06-26): ⏳ STILL OPEN** — `update()` only force-fills the new password via `UserService::setPassword()`; no current-password check exists.
 
 **Location:** [app/Actions/User/UpdateUserPassword.php](app/Actions/User/UpdateUserPassword.php:22-31)
 
@@ -125,6 +129,8 @@ public function authorize(): bool
 
 ### C-2. Authenticated upload endpoint has no permission check
 
+> **Status (2026-06-26): ✅ FIXED** — `UploadMediaRequest::authorize()` now checks `Auth::user()?->can('upload media')`.
+
 **Location:**
 - Route: [routes/admin.php:90](routes/admin.php:90)
 - Controller: [app/Http/Controllers/Admin/Media/Library.php:141-162](app/Http/Controllers/Admin/Media/Library.php:141)
@@ -170,6 +176,8 @@ Either way, also remove the lazy `return true;` everywhere it appears in `app/Ht
 ---
 
 ### C-3. `User` and `Entry` role/role-assignment validation allows privilege escalation
+
+> **Status (2026-06-26): ✅ FIXED** — `StoreUserRequest`/`EditUserRequest` now scope `roles.*` via `assignableRoleNames()`, excluding `super admin` for non-super-admins; `UserService::syncRoles()` also throws on an escalation attempt (defence in depth).
 
 **Location:**
 - [app/Http/Requests/User/StoreUserRequest.php:29-30](app/Http/Requests/User/StoreUserRequest.php:29)
@@ -238,6 +246,8 @@ For Alpha, the FormRequest fix is sufficient — the service-layer guard can shi
 
 ### H-1. OAuth callback does not regenerate the session — fixation risk
 
+> **Status (2026-06-26): ✅ FIXED** — `session()->regenerate()` and `regenerateToken()` are now called right after `Auth::login()` in the callback.
+
 **Location:** [app/Http/Controllers/Login.php:43](app/Http/Controllers/Login.php:43)
 
 ```php
@@ -293,40 +303,27 @@ Route::middleware('throttle:10,1')->group(function () {
 
 ### H-2. `LogRequestResponse` never writes `response_payload`
 
-**Location:** [app/Http/Middleware/LogRequestResponse.php:59-73](app/Http/Middleware/LogRequestResponse.php:59)
+> **Status (2026-06-26): ✅ RESOLVED — by decision, not by fix.** Product decided
+> response bodies should not be persisted in `api_logs` at all, for security and
+> data-retention reasons (response bodies can carry sensitive data the redaction
+> list doesn't anticipate). Rather than wiring up `summarizeResponse()`, the dead
+> method has been **deleted** from `app/Http/Middleware/LogRequestResponse.php`.
+> The `response_payload` column never existed in the migration or model — the
+> original finding's claim that "the column exists" was inaccurate to begin with.
+> No code or schema change was needed beyond removing the dead method; this finding
+> is closed as "won't persist."
 
-`ApiLog::create([...])` writes `request_payload`, `request_headers`, `response_headers`, `response_status_code` — but **not** `response_payload`, despite the column existing and `summarizeResponse()` being defined in the same file (lines 151-165). The method is dead code.
+**Location:** [app/Http/Middleware/LogRequestResponse.php](app/Http/Middleware/LogRequestResponse.php) — `summarizeResponse()` removed; `handle()` (around lines 57-78) is otherwise unchanged.
 
-`docs/OVERVIEW.md` § "API Request/Response Logging" claims this column carries the JSON body or error summary; today it is always `NULL`. That's a P0 for incident response: when a real customer hits a 500, ops has the request, status code, and timing — but not the rendered body. Postmortems become guesswork.
+`ApiLog::create([...])` writes `request_payload`, `request_headers`, `response_headers`, `response_status_code` — intentionally **not** `response_payload`. There is no `response_payload` column in [database/migrations/2025_11_07_174041_create_api_log_table.php](database/migrations/2025_11_07_174041_create_api_log_table.php) and no such key in [app/Models/ApiLog.php](app/Models/ApiLog.php)'s `$fillable`/`$casts` — both were already clean.
 
-**Resolution.**
-
-```php
-// app/Http/Middleware/LogRequestResponse.php
-public function handle(Request $request, Closure $next): mixed
-{
-    $response = $next($request);
-
-    ApiLog::create([
-        'request_route'        => $request->getPathInfo(),
-        'method'               => $request->method(),
-        'user_id'              => Auth::id(),
-        'request_payload'      => $this->encodeForLog($this->sanitizeValue($request->all())),
-        'request_headers'      => $this->encodeForLog($this->sanitizeHeaders($request->headers->all())),
-        'response_payload'     => $this->summarizeResponse($response),  // <-- add
-        'response_headers'     => $this->encodeForLog($this->sanitizeHeaders($response->headers->all())),
-        'response_status_code' => $response->status(),
-    ]);
-
-    return $response;
-}
-```
-
-While editing, fix the implicit assumption on line 70 that `$response->headers` is always populated — for `StreamedResponse` from `Storage::download()` it can be partially populated when the middleware ends. Today this is fine in practice because the middleware is only wired onto the API group, but a future engineer wiring this onto admin downloads would be surprised.
+Remaining cleanup is documentation only: `docs/OVERVIEW_FINAL.md` still describes this as an open bug (R-19, lines ~227, 3735, 4014-4015, 5046-5069, 6165) and needs to be rewritten to reflect the "not persisted by design" decision.
 
 ---
 
 ### H-3. `redirect_url` field is unvalidated — open redirect / XSS via `javascript:`
+
+> **Status (2026-06-26): ✅ FIXED** — `redirect_url` rule now includes `'url:http,https'`, and `EntryTreeRouteDriver` has an `isSafeRedirect()` scheme guard.
 
 **Location:**
 - Validation: [app/Http/Requests/Entry/StoreEntryRequest.php:58](app/Http/Requests/Entry/StoreEntryRequest.php:58) and [EditEntryRequest.php:59](app/Http/Requests/Entry/EditEntryRequest.php:59)
@@ -407,6 +404,8 @@ private function isSafeRedirect(?string $url): bool
 
 ### H-4. Personal access token flashed in URL session flash string
 
+> **Status (2026-06-26): ⏳ STILL OPEN** — Token is still flashed via `with('success', ... . $token)`; no one-time view flow.
+
 **Location:** [app/Http/Controllers/Admin/User/Token.php:38](app/Http/Controllers/Admin/User/Token.php:38) (the user-token flow) — and presumably the same pattern in `Admin/Account/Token.php`.
 
 ```php
@@ -473,6 +472,8 @@ private array $sensitiveKeys = [
 
 ### H-5. `type_handle` in entry create is not bound to the route's `group_id`
 
+> **Status (2026-06-26): ✅ FIXED** — `type_handle` now uses `Rule::exists('entry_types','handle')` scoped to `entry_group_id`.
+
 **Location:**
 - Validation: [app/Http/Requests/Entry/StoreEntryRequest.php:28](app/Http/Requests/Entry/StoreEntryRequest.php:28)
 - Creation: [app/Actions/Entry/CreateNewEntry.php:13-15](app/Actions/Entry/CreateNewEntry.php:13) and [app/Services/EntryService.php](app/Services/EntryService.php) (`create()`)
@@ -521,6 +522,8 @@ If the registry can't accept a record yet, the smaller change is to wire `entry_
 ---
 
 ### H-6. `User` fillable exposes status columns to mass-assignment
+
+> **Status (2026-06-26): ⏳ STILL OPEN** — `status`, `suspended_until`, `banned_at`, `locked_until` remain in `$fillable`.
 
 **Location:** [app/Models/User.php:25-33](app/Models/User.php:25)
 
@@ -588,6 +591,8 @@ Update `firstOrCreateFromSocial()` similarly — `forceFill` the status column.
 ---
 
 ### H-7. `Html` field type silently accepts arbitrary script content (stored XSS)
+
+> **Status (2026-06-26): ✅ FIXED** — `prepareForStorage()` now runs `Purifier::clean()`, with `allowed_tags` wired in as a configurable per-field setting.
 
 **Location:** [app/Field/Types/Html.php:11-15](app/Field/Types/Html.php:11)
 
@@ -660,6 +665,8 @@ The `allowed_tags` field becomes meaningful instead of decorative.
 
 ### H-8. CORS is wide-open (`*` origins, `*` methods, `*` headers)
 
+> **Status (2026-06-26): ⏳ STILL OPEN** — `allowed_origins => ['*']` remains; the env-allowlist version exists only as a comment.
+
 **Location:** [config/cors.php:18-29](config/cors.php:18)
 
 ```php
@@ -710,6 +717,8 @@ If you genuinely want a public, anonymous-readable API (e.g. read-only entry lis
 
 ### M-1. `categories.*` doesn't enforce membership in the entry's group
 
+> **Status (2026-06-26): ⏳ STILL OPEN** — rule is still plain `integer|exists:categories,id`; the group-scoped version is commented out.
+
 **Location:** [app/Http/Requests/Entry/StoreEntryRequest.php:49-50](app/Http/Requests/Entry/StoreEntryRequest.php:49) and the same line in `EditEntryRequest`.
 
 ```php
@@ -741,6 +750,8 @@ If the pivot table or morph alias differs, adjust accordingly — the principle 
 ---
 
 ### M-2. `Api\v1\User` gate-checks the wrong permission name
+
+> **Status (2026-06-26): 🟡 PARTIALLY FIXED** — Now inconsistent the other way: `index()` checks `'read user'` while `show()` checks `'read users'`. Still needs to be reconciled to one name and aligned with the seeder.
 
 **Location:** [app/Http/Controllers/Api/v1/User.php:60](app/Http/Controllers/Api/v1/User.php:60) and `:149`.
 
@@ -778,6 +789,8 @@ Then leave `'read users'` in the controller. Update the OVERVIEW.md Built-in Per
 
 ### M-3. `Api\v1\Account@show` returns a placeholder
 
+> **Status (2026-06-26): ⏳ STILL OPEN** — `show()` still returns canned `"Profile updated successfully"`; other Account methods are also still placeholders.
+
 **Location:** [app/Http/Controllers/Api/v1/Account.php:38-41](app/Http/Controllers/Api/v1/Account.php:38)
 
 ```php
@@ -813,6 +826,8 @@ Same treatment for the other Account methods — they all `200 OK 'Profile updat
 
 ### M-4. `Api\v1\User::update()` does not require a permission check
 
+> **Status (2026-06-26): 🟡 PARTIALLY FIXED** — Still no inline `can()` check in the controller; relies solely on `EditUserRequest::authorize()` (the defence-in-depth gap remains).
+
 **Location:** [app/Http/Controllers/Api/v1/User.php:202-213](app/Http/Controllers/Api/v1/User.php:202)
 
 `store()`, `show()`, `destroy()` all gate-check. `update()` doesn't:
@@ -845,6 +860,8 @@ public function update(EditUserRequest $request, int $user): UserResource
 
 ### M-5. `Api\v1\Entries::update()` and `::store()` skip permission checks
 
+> **Status (2026-06-26): ✅ FIXED** — `store()`/`update()` gated via request `authorize()`, and `destroy()` adds an inline `can('delete entry')` check.
+
 **Location:** [app/Http/Controllers/Api/v1/Entries.php:125-132](app/Http/Controllers/Api/v1/Entries.php:125) (store) and `:215-226` (update)
 
 Same shape as M-4 — relies on FormRequest authorize() for `create entry` / `edit entry`. Worth a controller-level guard for symmetry with `destroy()` and to keep the API resilient to refactors.
@@ -862,6 +879,8 @@ public function store(StoreEntryRequest $request): JsonResponse
 ---
 
 ### M-6. `UserService::updateToken()` accepts arbitrary fields from the request
+
+> **Status (2026-06-26): ⏳ STILL OPEN** — `updateToken()` still calls `$token->update($data)` with no field whitelist.
 
 **Location:** [app/Services/UserService.php:182-193](app/Services/UserService.php:182)
 
@@ -908,6 +927,8 @@ And re-confirm `EditUserTokenRequest::rules()` covers exactly those keys with st
 
 ### M-7. Social-login user can be created with status `active` if setting is null
 
+> **Status (2026-06-26): ✅ FIXED** — `social_default_status` setting now has `[required, Rule::in(UserStatus::ALL)]`.
+
 **Location:** [app/Services/UserService.php:102-127](app/Services/UserService.php:102)
 
 ```php
@@ -937,6 +958,8 @@ This way "auto-approve social signups" is a deliberate, validated decision rathe
 ## Low
 
 ### L-1. `TemplateRouteDriver` clobbers the `admin` view namespace as a side effect
+
+> **Status (2026-06-26): ✅ FIXED (different approach)** — constructor no longer mutates `View::replaceNamespace`; resolution now goes through explicit `templates::` view-name strings.
 
 **Location:** [app/Services/SiteRouting/RouteDrivers/TemplateRouteDriver.php:17-22](app/Services/SiteRouting/RouteDrivers/TemplateRouteDriver.php:17)
 
@@ -971,6 +994,8 @@ The `templates::` prefix is already explicit (line 138), so an `admin::` view sh
 ---
 
 ### L-2. Media library `handle` is unrestricted — path-traversal via storage folder
+
+> **Status (2026-06-26): ⏳ STILL OPEN** — `handle` rule is still `required|string|max:255|unique`, no slug/regex constraint.
 
 **Location:** [app/Http/Requests/Media/Library/StoreMediaLibraryFormRequest.php:26-31](app/Http/Requests/Media/Library/StoreMediaLibraryFormRequest.php:26) and consumer [app/Traits/HasMediaItems.php:35-38](app/Traits/HasMediaItems.php:35).
 
@@ -1019,6 +1044,8 @@ public function addMediaFromUpload(UploadedFile $file, array $attributes = []): 
 ---
 
 ### L-3. SVG / HTML uploads on a public disk become XSS vectors when served
+
+> **Status (2026-06-26): 🟡 PARTIALLY FIXED** — `mimetypes` rule is only applied when the library has `allowed_types` configured; libraries left at default config still accept svg/html.
 
 **Location:** [app/Traits/HasMediaItems.php](app/Traits/HasMediaItems.php), [app/Http/Requests/Media/Library/UploadMediaRequest.php:23-25](app/Http/Requests/Media/Library/UploadMediaRequest.php:23)
 
@@ -1074,6 +1101,8 @@ if ($file->getMimeType() === 'image/svg+xml') {
 
 ### L-4. `BotBlockRequest` ignores `PUT`, `PATCH`, `DELETE`
 
+> **Status (2026-06-26): ⏳ STILL OPEN** — still only checks `method() === 'post'`.
+
 **Location:** [app/Http/Middleware/BotBlockRequest.php:15](app/Http/Middleware/BotBlockRequest.php:15)
 
 ```php
@@ -1109,6 +1138,8 @@ public function handle(Request $request, Closure $next): mixed
 
 ### L-5. `Entry` fillable exposes `created_by_user_id`
 
+> **Status (2026-06-26): ⏳ STILL OPEN** — `created_by_user_id` remains in `Entry::$fillable`.
+
 **Location:** [app/Models/Entry.php:28-38](app/Models/Entry.php:28)
 
 `EntryRepository::create()` correctly sets `created_by_user_id` from `Auth::id()`, but a future caller doing `Entry::create($request->validated())` (skipping the repository) lets the requester pick the creator. Same defence-in-depth argument as H-6.
@@ -1133,6 +1164,8 @@ Drop `created_by_user_id` from fillable. The repository already assigns it direc
 ---
 
 ### L-6. `EntryTreeRouteDriver` redirect-status is hard-coded to 302
+
+> **Status (2026-06-26): ✅ FIXED** — `redirect_status` is now read from the node (default 302), validated `in:301,302,307,308` on Store/Edit.
 
 **Location:** [app/Services/SiteRouting/RouteDrivers/EntryTreeRouteDriver.php:30-36](app/Services/SiteRouting/RouteDrivers/EntryTreeRouteDriver.php:30)
 
@@ -1164,21 +1197,31 @@ These don't gate the Alpha but should be reconciled before the announcement so t
 
 ### I-1. `docs/OVERVIEW.md` "EntryResource is user-shaped" is now stale
 
+> **Status (2026-06-26): N/A — moot** — `docs/OVERVIEW.md` has since been deleted/replaced by `docs/OVERVIEW_FINAL.md`; this stale bullet no longer exists.
+
 The "Known Gaps" section at [docs/OVERVIEW.md:2856-2858](docs/OVERVIEW.md:2856) claims `EntryResource` returns `name`/`email`. Code is correct ([EntryResource.php](app/Http/Resources/Api/EntryResource.php) returns `title`/`handle`/`status_handle`/etc.). Remove this bullet from OVERVIEW.md.
 
 ### I-2. `docs/OVERVIEW.md` "`Api\v1\Account@show` returns a placeholder" — confirm and remove
+
+> **Status (2026-06-26): N/A — moot (file deleted), but underlying claim still true** — see [M-3](#m-3-apiv1accountshow-returns-a-placeholder), still open.
 
 This one is still accurate (see [M-3](#m-3-apiv1accountshow-returns-a-placeholder)). When M-3 ships, also remove the OVERVIEW bullet.
 
 ### I-3. `Html` field `allowed_tags` setting is dead
 
+> **Status (2026-06-26): ✅ FIXED** — `allowed_tags` is now actually consumed in `Html::prepareForStorage()` (see [H-7](#h-7-html-field-type-silently-accepts-arbitrary-script-content-stored-xss)), no longer decorative.
+
 `grep -rn allowed_tags app/` returns only the declaration in `app/Field/Types/Html.php`. Either wire it up (see [H-7](#h-7-html-field-type-silently-accepts-arbitrary-script-content-stored-xss)) or remove it from `settings_form` so the admin UI stops promising a feature that doesn't exist.
 
 ### I-4. `app:refresh-tokens` is still a scaffold
 
+> **Status (2026-06-26): ✅ FIXED (removed)** — no `app:refresh-tokens` command exists in `routes/console.php` anymore.
+
 OVERVIEW.md acknowledges this. For Alpha either implement it or remove the command from `routes/console.php` so customers don't `php artisan app:refresh-tokens` and assume it worked.
 
 ### I-5. `site.templates.base_path` / `not_found_template` are unused
+
+> **Status (2026-06-26): ⏳ STILL OPEN** — keys remain in config with no references under `app/Services/SiteRouting`.
 
 OVERVIEW.md flags these as "present in config for future use." For Alpha either wire them or delete the unused keys to avoid customer confusion:
 
@@ -1196,24 +1239,35 @@ if ($notFoundTemplate && View::exists($notFoundTemplate)) {
 
 In priority order. C-1, C-2, C-3 must merge before any external sign-up link is shared.
 
-- [ ] **C-1** Re-enable `current_password` check in `UpdateUserPassword`
-- [ ] **C-2** Add permission check to `UploadMediaRequest::authorize()`
-- [ ] **C-3** Constrain `roles.*` validation (no privilege escalation)
-- [ ] **H-1** Regenerate session after OAuth login; add throttle middleware
-- [ ] **H-2** Persist `response_payload` in `LogRequestResponse`
-- [ ] **H-3** Validate `redirect_url` scheme; runtime guard in EntryTreeRouteDriver
-- [ ] **H-4** One-time-view flow for new personal access tokens
-- [ ] **H-5** Bind `type_handle` validation to `group_id`
-- [ ] **H-6** Remove status columns from `User::$fillable`; use `forceFill`
-- [ ] **H-7** HTML purification on Html field write path
-- [ ] **H-8** Lock CORS to an env allowlist
-- [ ] **M-1** `categories.*` membership rule
-- [ ] **M-2** Reconcile `read users` vs `view user` permission
-- [ ] **M-3** Implement `Api\v1\Account@show`
-- [ ] **M-4 / M-5** Controller-level permission checks for entry/user API mutators
-- [ ] **M-6** Constrain `updateToken()` to `name`/`abilities`/`expires_at`
-- [ ] **M-7** Add `Rule::in` constraint on `users.social_default_status`
-- [ ] **L-1 .. L-6** Schedule for post-Alpha unless time permits
-- [ ] **I-1 .. I-5** Reconcile docs (10-minute pass)
+> Updated 2026-06-26 against current `develop`. Checked = fixed in code today.
+
+- [ ] **C-1** Re-enable `current_password` check in `UpdateUserPassword` — **still open**
+- [x] **C-2** Add permission check to `UploadMediaRequest::authorize()` — fixed (`can('upload media')`)
+- [x] **C-3** Constrain `roles.*` validation (no privilege escalation) — fixed
+- [x] **H-1** Regenerate session after OAuth login; add throttle middleware — fixed
+- [x] **H-2** Persist `response_payload` in `LogRequestResponse` — closed by decision: not persisting response bodies at all; dead `summarizeResponse()` removed
+- [x] **H-3** Validate `redirect_url` scheme; runtime guard in EntryTreeRouteDriver — fixed
+- [ ] **H-4** One-time-view flow for new personal access tokens — **still open**
+- [x] **H-5** Bind `type_handle` validation to `group_id` — fixed
+- [ ] **H-6** Remove status columns from `User::$fillable`; use `forceFill` — **still open**
+- [x] **H-7** HTML purification on Html field write path — fixed
+- [ ] **H-8** Lock CORS to an env allowlist — **still open** (still `*` origins)
+- [ ] **M-1** `categories.*` membership rule — **still open**
+- [ ] **M-2** Reconcile `read users` vs `view user` permission — **partially fixed**, now inconsistent the other way (`read user` vs `read users`)
+- [ ] **M-3** Implement `Api\v1\Account@show` — **still open**
+- [ ] **M-4** Controller-level permission check for `Api\v1\User::update()` — **partially fixed**, still relies only on FormRequest
+- [x] **M-5** Controller-level permission checks for entry API mutators — fixed
+- [ ] **M-6** Constrain `updateToken()` to `name`/`abilities`/`expires_at` — **still open**
+- [x] **M-7** Add `Rule::in` constraint on `users.social_default_status` — fixed
+- [x] **L-1** `TemplateRouteDriver` admin-namespace side effect — fixed (different approach: explicit `templates::` names)
+- [ ] **L-2** Media library `handle` slug constraint — **still open**
+- [ ] **L-3** SVG/HTML mimetype block on upload — **partially fixed**, only when `allowed_types` configured
+- [ ] **L-4** `BotBlockRequest` cover PUT/PATCH/DELETE — **still open**
+- [ ] **L-5** Remove `created_by_user_id` from `Entry::$fillable` — **still open**
+- [x] **L-6** Configurable `redirect_status` on EntryTreeRouteDriver — fixed
+- [x] **I-1 / I-2** `docs/OVERVIEW.md` — moot, file deleted (replaced by `docs/OVERVIEW_FINAL.md`); underlying M-3 placeholder still open
+- [x] **I-3** Wire up `allowed_tags` on Html field — fixed
+- [x] **I-4** `app:refresh-tokens` scaffold — fixed (command removed)
+- [ ] **I-5** Wire or remove `site.templates.base_path` / `not_found_template` — **still open**
 - [ ] Final pass: `composer test` green, `php artisan app:validate-class-references` green, `vendor/bin/pint --preset psr12` clean
 - [ ] Production `.env` review: `APP_DEBUG=false`, `APP_ENV=production`, `SESSION_SECURE_COOKIE=true`, `SESSION_SAME_SITE=lax`, `CORS_ALLOWED_ORIGINS` populated
