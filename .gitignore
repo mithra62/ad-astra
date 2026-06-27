@@ -31,3 +31,5 @@ Thumbs.db
 /.claude/settings.local.json
 /.ai/mcp/mcp.json
 /vite.config..js
+/docs
+/AGENTS.md
