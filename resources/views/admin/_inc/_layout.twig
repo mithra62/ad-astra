@@ -242,7 +242,7 @@
                         <a class="hover:text-muted" href="{{ support_url|default('#') }}">Support</a>
                         <a class="hover:text-muted" href="{{ privacy_url|default('#') }}">Privacy</a>
                         <span class="text-faint">|</span>
-                        <span>{{ app_version|default('v0.0.12') }}</span>
+                        <span>V{{ Settings.get('general', 'installed_version') }}</span>
                     </nav>
                 </div>
             {% endblock %}

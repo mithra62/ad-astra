@@ -157,7 +157,9 @@ return [
         | in order to be marked as safe.
         |
         */
-        'facades' => [],
+        'facades' => [
+            'Settings' => \App\Facades\Settings::class,
+        ],
 
         /*
         |--------------------------------------------------------------------------
