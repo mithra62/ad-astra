@@ -1,6 +1,6 @@
-# Laravel Base
+# AdAstra
 
-Laravel Base is a Laravel 12 CMS/application foundation with an authenticated admin area, a Sanctum-protected API, Twig-based views, configurable content types, field layouts, media libraries, settings, users, roles, and permissions.
+AdAstra is a Laravel 12 CMS/application foundation with an authenticated admin area, a Sanctum-protected API, Twig-based views, configurable content types, field layouts, media libraries, settings, users, roles, and permissions.
 
 ## Requirements
 
