@@ -4,12 +4,10 @@ namespace App\Http\Middleware;
 
 use App\Models\ApiLog;
 use Closure;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class LogRequestResponse
 {
@@ -148,21 +146,5 @@ class LogRequestResponse
         }
 
         return $sanitized;
-    }
-
-    private function summarizeResponse(SymfonyResponse $response): ?string
-    {
-        $payload = [
-            'content_type' => $response->headers->get('Content-Type'),
-            'content_length' => strlen((string)$response->getContent()),
-        ];
-
-        if ($response instanceof JsonResponse) {
-            $payload['body'] = $this->sanitizeValue($response->getData(true));
-        } elseif ($response->isClientError() || $response->isServerError()) {
-            $payload['body_preview'] = $this->truncate((string)$response->getContent());
-        }
-
-        return $this->encodeForLog($payload);
     }
 }
