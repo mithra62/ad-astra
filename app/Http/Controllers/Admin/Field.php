@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\Field\CreateNewField;
 use App\Actions\Field\EditField;
+use App\Facades\Fields;
 use App\Field\AbstractField;
 use App\Field\Types\Text;
 use App\Http\Requests\Field\DeleteFieldRequest;
@@ -45,7 +46,7 @@ class Field extends Controller
         $data = [
             'group' => $group,
             'groups' => $groups,
-            'field_types' => app('fields-service')->getFieldOptions(),
+            'field_types' => Fields::getFieldOptions(),
             'initial_settings_form' => $defaultType ? $this->buildSettingsForm($defaultType->instance()) : [],
             'current_values' => old('settings', []),
         ];
@@ -128,7 +129,7 @@ class Field extends Controller
         $data = [
             'field' => $field,
             'groups' => $groups,
-            'field_types' => app('fields-service')->getFieldOptions(),
+            'field_types' => Fields::getFieldOptions(),
             'active_group' => $active_group,
             'current_type_handle' => $field->fieldType ? $field->typeInstance()->handle() : null,
             'initial_settings_form' => $field->fieldType ? $this->buildSettingsForm($field->typeInstance()) : [],

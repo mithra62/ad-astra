@@ -29,3 +29,7 @@ Thumbs.db
 /CLAUDE.md
 /coverage/*
 /.claude/settings.local.json
+/.ai/mcp/mcp.json
+/vite.config..js
+/docs
+/AGENTS.md

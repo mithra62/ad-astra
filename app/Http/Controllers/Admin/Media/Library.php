@@ -6,6 +6,7 @@ use App\Actions\Media\Library\CreateNewMediaLibrary;
 use App\Actions\Media\Library\DeleteMediaLibrary;
 use App\Actions\Media\Library\EditMediaLibrary;
 use App\Actions\Media\Library\UploadMedia;
+use App\Facades\Files;
 use App\Http\Controllers\Admin\Controller;
 use App\Http\Requests\Media\Library\DeleteMediaLibraryRequest;
 use App\Http\Requests\Media\Library\EditMediaLibraryRequest;
@@ -41,13 +42,12 @@ class Library extends Controller
      */
     public function create()
     {
-        $files = app('files-service');
         $category_groups = CategoryGroup::all();
         $data = [
             'category_groups' => $category_groups,
             'status_groups' => StatusGroup::ordered()->get(),
             'disks' => config('filesystems.disks'),
-            'allowed_types' => $files->getAllowedMimeTypes(),
+            'allowed_types' => Files::getAllowedMimeTypes(),
         ];
         return $this->view('media.libraries.create', $data);
     }
@@ -98,14 +98,13 @@ class Library extends Controller
             abort(404);
         }
 
-        $files = app('files-service');
         $category_groups = CategoryGroup::all();
         $data = [
             'library' => $library,
             'category_groups' => $category_groups,
             'status_groups' => StatusGroup::ordered()->get(),
             'disks' => config('filesystems.disks'),
-            'allowed_types' => $files->getAllowedMimeTypes(),
+            'allowed_types' => Files::getAllowedMimeTypes(),
         ];
 
         return $this->view('media.libraries.edit', $data);

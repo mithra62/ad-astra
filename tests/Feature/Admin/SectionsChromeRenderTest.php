@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -52,7 +53,7 @@ class SectionsChromeRenderTest extends TestCase
         ];
     }
 
-    /** @dataProvider routes */
+    #[DataProvider('routes')]
     public function test_screen_renders(string $routeName): void
     {
         $this->actingAs($this->admin)
