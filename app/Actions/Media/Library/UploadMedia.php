@@ -3,6 +3,7 @@
 namespace App\Actions\Media\Library;
 
 use App\Actions\AbstractAction;
+use App\Facades\MediaStorage;
 use App\Http\Requests\FormRequest;
 use App\Models\Media;
 use App\Models\Media\Library as LibraryModel;
@@ -15,7 +16,7 @@ class UploadMedia extends AbstractAction
             'name' => $request->input('name'),
         ], fn ($v) => $v !== null);
 
-        $media = app('media-service')->upload($library, $request->file('file'), $attributes);
+        $media = MediaStorage::upload($library, $request->file('file'), $attributes);
 
         if (!empty($request->input('categories'))) {
             $media->categories()->sync($request->input('categories'));
