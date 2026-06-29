@@ -115,10 +115,9 @@ and Composer dependencies at runtime, not Node.
   `try_files $uri $uri/ /index.php?$query_string;` and a `fastcgi_pass` to
   your PHP-FPM socket.
 
-Full vhost/server-block examples and a production caveat — `UsersSeeder`
-skips itself when `APP_ENV=production`, so the super-admin user isn't seeded
-automatically and must be created manually (e.g. via `php artisan tinker`) —
-are in [docs/OVERVIEW_FINAL.md § Running without `php artisan serve`](docs/OVERVIEW_FINAL.md#running-without-php-artisan-serve-apachenginx--php-fpm).
+**Production caveat:** `UsersSeeder` skips itself when `APP_ENV=production`,
+so the super-admin user isn't seeded automatically and must be created
+manually (e.g. via `php artisan tinker`).
 
 The scheduler cron and a queue worker are required in production regardless
 of which web server fronts the app — see [Useful Commands](#useful-commands)
