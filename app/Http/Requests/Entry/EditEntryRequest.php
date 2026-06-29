@@ -6,8 +6,8 @@ use App\Http\Requests\FormRequest;
 use App\Models\Entry;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
+use App\Rules\CategoryAttachedToGroupable;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class EditEntryRequest extends FormRequest
@@ -66,13 +66,7 @@ class EditEntryRequest extends FormRequest
                 ],
                 'categories.*' => [
                     'integer',
-                    Rule::exists('categories', 'id')->where(fn ($q) => $q->whereIn(
-                        'group_id',
-                        DB::table('category_groupables')
-                            ->where('category_groupable_type', (new EntryGroup())->getMorphClass())
-                            ->where('category_groupable_id', $entry->entry_group_id)
-                            ->pluck('group_id')
-                    )),
+                    new CategoryAttachedToGroupable($entry->entryGroup),
                 ],
                 'fields' => [
                     'nullable',

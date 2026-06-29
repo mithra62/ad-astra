@@ -5,8 +5,8 @@ namespace App\Http\Requests\Entry;
 use App\Http\Requests\FormRequest;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
+use App\Rules\CategoryAttachedToGroupable;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class StoreEntryRequest extends FormRequest
@@ -72,13 +72,7 @@ class StoreEntryRequest extends FormRequest
                 ],
                 'categories.*' => [
                     'integer',
-                    Rule::exists('categories', 'id')->where(fn ($q) => $q->whereIn(
-                        'group_id',
-                        DB::table('category_groupables')
-                            ->where('category_groupable_type', (new EntryGroup())->getMorphClass())
-                            ->where('category_groupable_id', $group->id)
-                            ->pluck('group_id')
-                    )),
+                    new CategoryAttachedToGroupable($group),
                 ],
                 'fields' => [
                     'nullable',

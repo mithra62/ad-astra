@@ -2,12 +2,15 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Category;
+use App\Models\Category\Group as CategoryGroup;
 use App\Models\Media;
 use App\Models\Media\Library;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -99,6 +102,41 @@ class MediaControllerTest extends TestCase
         $this->actingAs($this->makeSuperAdmin())
             ->post(route('media.store', $library->id))
             ->assertRedirect(route('media.libraries'));
+    }
+
+    // -------------------------------------------------------------------------
+    // upload — category-group scoping
+    // -------------------------------------------------------------------------
+
+    public function test_upload_rejects_category_from_unattached_category_group(): void
+    {
+        Storage::fake('local');
+        $library = $this->makeLibrary();
+        $categoryGroup = CategoryGroup::factory()->create();
+        $category = Category::factory()->for($categoryGroup, 'group')->create();
+
+        $this->actingAs($this->makeSuperAdmin())
+            ->post(route('media.libraries.upload', $library->id), [
+                'file' => UploadedFile::fake()->image('photo.jpg'),
+                'categories' => [$category->id],
+            ])
+            ->assertSessionHasErrors('categories.0');
+    }
+
+    public function test_upload_accepts_category_from_attached_category_group(): void
+    {
+        Storage::fake('local');
+        $library = $this->makeLibrary();
+        $categoryGroup = CategoryGroup::factory()->create();
+        $library->categoryGroups()->syncWithoutDetaching([$categoryGroup->id]);
+        $category = Category::factory()->for($categoryGroup, 'group')->create();
+
+        $this->actingAs($this->makeSuperAdmin())
+            ->post(route('media.libraries.upload', $library->id), [
+                'file' => UploadedFile::fake()->image('photo.jpg'),
+                'categories' => [$category->id],
+            ])
+            ->assertSessionHasNoErrors();
     }
 
     // -------------------------------------------------------------------------

@@ -4,6 +4,7 @@ namespace App\Http\Requests\Media\Library;
 
 use App\Http\Requests\FormRequest;
 use App\Models\Media\Library as LibraryModel;
+use App\Rules\CategoryAttachedToGroupable;
 use Illuminate\Support\Facades\Auth;
 
 class UploadMediaRequest extends FormRequest
@@ -35,7 +36,10 @@ class UploadMediaRequest extends FormRequest
             'file' => $fileRules,
             'name' => ['nullable', 'string', 'max:255'],
             'categories' => ['nullable', 'array'],
-            'categories.*' => ['integer', 'exists:categories,id'],
+            'categories.*' => [
+                'integer',
+                $library instanceof LibraryModel ? new CategoryAttachedToGroupable($library) : 'exists:categories,id',
+            ],
         ];
     }
 
