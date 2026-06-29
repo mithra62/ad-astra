@@ -1,6 +1,93 @@
 # AdAstra
 
-AdAstra is a Laravel 12 CMS/application foundation with an authenticated admin area, a Sanctum-protected API, Twig-based views, configurable content types, field layouts, media libraries, settings, users, roles, and permissions.
+> **A content platform built around your content model.**
+
+AdAstra is an opinionated content platform built for developers who want complete control over how content is modeled, managed, and delivered.
+
+Most CMSs begin with pages, posts, or products, then expect your content to fit within those predefined structures.
+
+AdAstra takes a different approach.
+
+Your content model comes first.
+
+From there, authoring experiences, APIs, routing, templates, workflows, and administration are built around that model.
+
+Built on Laravel 12, AdAstra provides a modern application foundation with an authenticated administration area, REST APIs, Twig templating, configurable content types, media management, users, roles, permissions, and the infrastructure expected from a modern content platform.
+
+---
+
+## Why AdAstra?
+
+After more than twenty years building websites, e-commerce platforms, and custom CMS solutions, I found myself solving the same architectural problems over and over again.
+
+Too often, the platform dictated the content model instead of adapting to it.
+
+AdAstra exists to reverse that relationship.
+
+Instead of asking, "How do I make my content fit this CMS?", the better question becomes, "What does my content actually look like?"
+
+Everything grows from that answer.
+
+Entry types, field layouts, APIs, routing, templates, publishing workflows, and administration all exist to serve the content model, not define it.
+
+---
+
+## Core Principles
+
+* **Content first.** Model your data before building the authoring experience.
+* **Built for developers.** The platform should stay out of your way, not fight your architecture.
+* **API first.** Every piece of content should be available through a clean, consistent API.
+* **Designed to evolve.** Behaviors, field types, routing, and services should grow alongside your application.
+* **Modern by default.** Laravel, Twig, Tailwind, queues, testing, and automation are part of the foundation.
+
+---
+
+## The Content Model
+
+At the heart of AdAstra is a flexible content model.
+
+```text
+Entry Group
+├── Entry Type
+│   ├── Field Layout
+│   ├── Behaviors
+│   ├── Validation
+│   └── Publishing Rules
+└── Entries
+```
+
+Instead of treating blog posts, products, events, documentation, and landing pages as entirely separate systems, AdAstra allows them to share common structure while giving each entry type its own fields, workflows, behaviors, and publishing rules.
+
+The result is a platform that adapts to your application instead of forcing your application to adapt to the platform.
+
+---
+
+## Current Status
+
+AdAstra is currently in active alpha development.
+
+Core systems are functional, but breaking changes should be expected while the platform continues to evolve.
+
+The project is being built in public, and thoughtful feedback is always welcome.
+
+---
+
+## Technology
+
+AdAstra is built on a modern Laravel stack, including:
+
+* Laravel 12
+* Twig
+* Sanctum
+* Fortify
+* Tailwind CSS
+* Vite
+* PHPUnit
+* Swagger / OpenAPI
+
+The technology stack supports the architecture. It is not the architecture.
+
+---
 
 ## Requirements
 
