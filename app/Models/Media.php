@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Category\HasCategories;
 use App\Traits\Field\Fieldable;
 use App\Traits\HasStatus;
 use App\Traits\HasTransformations;
@@ -10,7 +11,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -20,6 +20,7 @@ class Media extends Model
 {
     use HasFactory;
     use Fieldable;
+    use HasCategories;
     use HasStatus;
     use HasTransformations;
     use SoftDeletes;
@@ -66,13 +67,6 @@ class Media extends Model
     public function transformations(): HasMany
     {
         return $this->hasMany(Media\Transformation::class);
-    }
-
-    /** Preserved — used by UploadMedia action. */
-    public function categories(): MorphToMany
-    {
-        return $this->morphToMany(Category::class, 'categorizable')
-            ->withTimestamps();
     }
 
     /**
