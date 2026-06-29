@@ -122,6 +122,16 @@ The technology stack supports the architecture. It is not the architecture.
 - Config-driven settings domains in `config/settings.php`.
 - Twig templates in `resources/views` and public templates in `resources/templates`.
 
+## Data Modeling Philosophy
+
+AdAstra makes no fixed assumptions about what data a piece of content holds. Rather than hardcoding columns per content type, schemas are composed at runtime through a small set of shared traits, and any model can opt in.
+
+**Fields, everywhere.** The `Fieldable` trait (`app/Traits/Field/Fieldable.php`) gives a model arbitrary, typed field values through one shared mechanism — `fieldValues()`, `field($handle)`, and `fieldArray()`. **Entries, Media, Categories, and Users all use it**, so the same field system that powers a blog post also powers a user profile or a media asset's metadata. Entries, Media, and Categories go a step further and attach to a `FieldLayout` (via `EntryType`/`EntryGroup`, `Media\Library`, and `Category\Group` respectively) to organize those fields into tabs in the admin UI; Users store field values without a configurable layout.
+
+**Categories, everywhere relevant.** The `HasCategories` trait (`app/Traits/Category/HasCategories.php`) gives a model a `categories()` relation through a polymorphic `categorizable` pivot. **Entries and Media both use it**, so arbitrary taxonomy can be applied to either without a content-type-specific tagging system. This is distinct from `HasCategoryGroups`, which `EntryGroup` and `Media\Library` use to scope *which category groups* are available to choose from — `HasCategories` is the tagging relation itself.
+
+The result: adding a new content type doesn't mean inventing a new way to store custom fields or apply categories — it means composing the traits that already exist.
+
 ## Setup
 
 Install PHP and JavaScript dependencies:
