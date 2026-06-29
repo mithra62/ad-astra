@@ -22,17 +22,23 @@ class UserTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $model = new User;
+        $model = new User();
 
-        // Core attributes plus the status columns added by the user-status system.
-        foreach (['name', 'email', 'password', 'status', 'suspended_until', 'banned_at', 'locked_until'] as $field) {
-            $this->assertContains($field, $model->getFillable(), "Expected '$field' to be fillable.");
+        $this->assertEquals(['name', 'email', 'password'], $model->getFillable());
+    }
+
+    public function test_status_columns_are_not_mass_assignable(): void
+    {
+        $model = new User();
+
+        foreach (['status', 'suspended_until', 'banned_at', 'locked_until'] as $field) {
+            $this->assertNotContains($field, $model->getFillable(), "Expected '$field' to NOT be fillable.");
         }
     }
 
     public function test_hides_password_and_remember_token(): void
     {
-        $model = new User;
+        $model = new User();
 
         $this->assertContains('password', $model->getHidden());
         $this->assertContains('remember_token', $model->getHidden());

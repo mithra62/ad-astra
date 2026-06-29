@@ -20,16 +20,18 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens, HasRoles, Fieldable, TwoFactorAuthenticatable, HasMedia;
+    use HasFactory;
+    use Notifiable;
+    use HasApiTokens;
+    use HasRoles;
+    use Fieldable;
+    use TwoFactorAuthenticatable;
+    use HasMedia;
 
     protected $fillable = [
         'name',
         'email',
         'password',
-        'status',
-        'suspended_until',
-        'banned_at',
-        'locked_until',
     ];
 
     protected $hidden = [
@@ -146,7 +148,7 @@ class User extends Authenticatable
     public function setAvatar(Media $media): void
     {
         $existing = $this->directMedia()
-            ->whereHas('library', fn($q) => $q->where('handle', 'avatars'))
+            ->whereHas('library', fn ($q) => $q->where('handle', 'avatars'))
             ->get();
 
         foreach ($existing as $old) {

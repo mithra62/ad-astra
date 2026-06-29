@@ -18,6 +18,16 @@ class UserFactory extends Factory
     protected static ?string $password;
 
     /**
+     * Build via forceFill — status/suspended_until/banned_at/locked_until are
+     * intentionally not mass-assignable on User, but the factory states still
+     * need to set them.
+     */
+    public function newModel(array $attributes = [])
+    {
+        return (new \App\Models\User())->forceFill($attributes);
+    }
+
+    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
@@ -42,7 +52,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
     }
@@ -53,28 +63,28 @@ class UserFactory extends Factory
 
     public function active(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => UserStatus::ACTIVE,
         ]);
     }
 
     public function pending(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => UserStatus::PENDING,
         ]);
     }
 
     public function inactive(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => UserStatus::INACTIVE,
         ]);
     }
 
     public function suspended(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status'          => UserStatus::SUSPENDED,
             'suspended_until' => now()->addDays(7),
         ]);
@@ -82,7 +92,7 @@ class UserFactory extends Factory
 
     public function banned(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status'    => UserStatus::BANNED,
             'banned_at' => now(),
         ]);
@@ -94,7 +104,7 @@ class UserFactory extends Factory
      */
     public function locked(int $minutes = 30): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'locked_until' => now()->addMinutes($minutes),
         ]);
     }

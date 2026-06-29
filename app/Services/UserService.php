@@ -104,19 +104,20 @@ class UserService
     {
         $created = false;
 
-        $socialDefaultStatus = app(Settings::class)->get('users', 'social_default_status')
-            ?? UserStatus::PENDING;
+        $user = User::where('email', $email)->first();
 
-        $user = User::firstOrCreate(
-            ['email' => $email],
-            [
+        if (!$user) {
+            $socialDefaultStatus = app(Settings::class)->get('users', 'social_default_status')
+                ?? UserStatus::PENDING;
+
+            $user = new User();
+            $user->forceFill([
+                'email'    => $email,
                 'name'     => $name,
                 'password' => Hash::make(\Illuminate\Support\Str::random(32)),
                 'status'   => $socialDefaultStatus,
-            ],
-        );
+            ])->save();
 
-        if ($user->wasRecentlyCreated) {
             $created = true;
         }
 
@@ -267,8 +268,7 @@ class UserService
         $actor = auth()->user();
 
         if (in_array('super admin', $roles, true) && ! $actor?->hasRole('super admin')) {
-            throw AuthorizationException::class
-                ::denyAsNotFound('Only a super admin may assign the super admin role.');
+            throw AuthorizationException::class::denyAsNotFound('Only a super admin may assign the super admin role.');
         }
 
         $user->syncRoles($roles);
@@ -519,19 +519,21 @@ class UserService
      */
     public function create(array $data): User
     {
-        $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation', 'is_author', 'author_display_name', 'banned_at', 'locked_until']);
+        $attributes = Arr::except($data, ['roles', 'fields', 'password_confirmation', 'is_author', 'author_display_name', 'banned_at', 'locked_until', 'status']);
 
         if (!empty($attributes['password'])) {
             $attributes['password'] = Hash::make($attributes['password']);
         }
 
         // Apply system default status when none is supplied.
-        if (empty($attributes['status'])) {
-            $attributes['status'] = app(Settings::class)->get('users', 'default_status')
+        $status = $data['status'] ?? null;
+        if (empty($status)) {
+            $status = app(Settings::class)->get('users', 'default_status')
                 ?? UserStatus::ACTIVE;
         }
 
-        $user = User::create($attributes);
+        $user = new User();
+        $user->forceFill(array_merge($attributes, ['status' => $status]))->save();
 
         if (!empty($data['roles'])) {
             $user->syncRoles((array)$data['roles']);
