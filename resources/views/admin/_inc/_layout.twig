@@ -123,6 +123,21 @@
                         <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'field_layouts' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('field-layouts') }}">Field Layouts</a></li>
                     </ul>
                 </div>
+
+
+                <div class="nav-group">
+                    <input id="nav-tools" type="checkbox" {{ active_nav in ['tools'] ? 'checked' : '' }}>
+                    <label for="nav-tools" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['tools'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
+                        <span>Tools</span>
+                        <span class="nav-chevron">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </span>
+                    </label>
+                    <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-edge pl-3">
+                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'system' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="/api/documentation" target="_blank">API Playground</a></li>
+                    </ul>
+                </div>
+
                 <form id="logout-form" action="{{ route('logout') }}" method="POST">
                     {{ csrf_field() }}
                 </form>
