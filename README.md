@@ -64,11 +64,11 @@ The result is a platform that adapts to your application instead of forcing your
 
 AdAstra makes no fixed assumptions about what data a piece of content holds. Rather than hardcoding columns per content type, schemas are composed at runtime through a small set of shared traits, and any model can opt in.
 
-**Fields, everywhere.** The `Fieldable` trait (`app/Traits/Field/Fieldable.php`) gives a model arbitrary, typed field values through one shared mechanism — `fieldValues()`, `field($handle)`, and `fieldArray()`. **Entries, Media, Categories, and Users all use it**, so the same field system that powers a blog post also powers a user profile or a media asset's metadata. Entries, Media, and Categories go a step further and attach to a `FieldLayout` (via `EntryType`/`EntryGroup`, `Media\Library`, and `Category\Group` respectively) to organize those fields into tabs in the admin UI; Users store field values without a configurable layout.
+**Fields, everywhere.** The `Fieldable` trait (`app/Traits/Field/Fieldable.php`) gives a model arbitrary, typed field values through one shared mechanism: `fieldValues()`, `field($handle)`, and `fieldArray()`. **Entries, Media, Categories, and Users all use it**, so the same field system that powers a blog post also powers a user profile or a media asset's metadata. Entries, Media, and Categories go a step further and attach to a `FieldLayout` (via `EntryType`/`EntryGroup`, `Media\Library`, and `Category\Group` respectively) to organize those fields into tabs in the admin UI; Users store field values without a configurable layout.
 
-**Categories, everywhere relevant.** The `HasCategories` trait (`app/Traits/Category/HasCategories.php`) gives a model a `categories()` relation through a polymorphic `categorizable` pivot. **Entries and Media both use it**, so arbitrary taxonomy can be applied to either without a content-type-specific tagging system. This is distinct from `HasCategoryGroups`, which `EntryGroup` and `Media\Library` use to scope *which category groups* are available to choose from — `HasCategories` is the tagging relation itself.
+**Categories, everywhere relevant.** The `HasCategories` trait (`app/Traits/Category/HasCategories.php`) gives a model a `categories()` relation through a polymorphic `categorizable` pivot. **Entries and Media both use it**, so arbitrary taxonomy can be applied to either without a content-type-specific tagging system. This is distinct from `HasCategoryGroups`, which `EntryGroup` and `Media\Library` use to scope *which category groups* are available to choose from; `HasCategories` is the tagging relation itself.
 
-The result: adding a new content type doesn't mean inventing a new way to store custom fields or apply categories — it means composing the traits that already exist.
+The result: adding a new content type doesn't mean inventing a new way to store custom fields or apply categories; it means composing the traits that already exist.
 
 
 ---
@@ -127,7 +127,7 @@ The technology stack supports the architecture. It is not the architecture.
 - Public site routing through `SiteController`, with route drivers for entry-tree and template-based pages.
 - Admin UI under `/admin` for users, roles, account settings, tokens, entries, entry groups, entry types, categories, statuses, fields, field layouts, media libraries, and domain/user settings.
 - API routes under `/api/v1`, protected by Sanctum, for users, entries, and the current account.
-- OAuth/social login via Socialite (`app/Http/Controllers/Login.php`), with `app:refresh-tokens` available to refresh expiring OAuth tokens (not currently scheduled — run manually or add a schedule entry).
+- OAuth/social login via Socialite (`app/Http/Controllers/Login.php`), with `app:refresh-tokens` available to refresh expiring OAuth tokens (not currently scheduled; run manually or add a schedule entry).
 - Content modeling through entry groups, entry types, fields, field groups, field layouts, statuses, categories, entry relationships, and entry tree routing.
 - Bot-blocking middleware (`BotBlockRequest`) and webhook-client infrastructure for external integrations.
 - Config-driven settings domains in `config/settings.php`.
@@ -156,7 +156,7 @@ cp .env.example .env
 
 Set the database values in `.env`, including `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`. The example environment uses MySQL and a `DB_TABLE_PREFIX` of `ada_`.
 
-The seeded super-admin's credentials come from `.env`, not a fixed default — set `DEV_USER_EMAIL`, `DEV_USER_NAME`, and `DEV_USER_PASSWORD` for a predictable local login. Each of the three falls back independently to a random 16-character string if left blank, so leaving all three empty does **not** produce a known login. `UsersSeeder` also skips itself entirely when `APP_ENV=production` — see [Deployment](#deployment) below.
+The seeded super-admin's credentials come from `.env`, not a fixed default; set `DEV_USER_EMAIL`, `DEV_USER_NAME`, and `DEV_USER_PASSWORD` for a predictable local login. Each of the three falls back independently to a random 16-character string if left blank, so leaving all three empty does **not** produce a known login. `UsersSeeder` also skips itself entirely when `APP_ENV=production`; see [Deployment](#deployment) below.
 
 Reset, migrate, and seed the database in one command:
 
@@ -164,7 +164,7 @@ Reset, migrate, and seed the database in one command:
 php artisan migrate:fresh --seed
 ```
 
-Generate the app key (run this last — it's the final setup step, not a prerequisite for migrating/seeding):
+Generate the app key (run this last; it's the final setup step, not a prerequisite for migrating/seeding):
 
 ```bash
 php artisan key:generate
@@ -202,7 +202,7 @@ npm run build
 
 `php artisan serve` and `composer run dev` are development-only. To run AdAstra
 under a real web server instead (upload and run, no PHP dev server), point the
-web root at `public/`, not the repo root — `public/index.php` is the front
+web root at `public/`, not the repo root; `public/index.php` is the front
 controller and `public/.htaccess` already has the standard Laravel Apache
 rewrite rules. Run `npm run build` before uploading; the server only needs PHP
 and Composer dependencies at runtime, not Node.
@@ -218,7 +218,7 @@ so the super-admin user isn't seeded automatically and must be created
 manually (e.g. via `php artisan tinker`).
 
 The scheduler cron and a queue worker are required in production regardless
-of which web server fronts the app — see [Useful Commands](#useful-commands)
+of which web server fronts the app; see [Useful Commands](#useful-commands)
 below.
 
 ## Testing
@@ -245,7 +245,7 @@ Current API resources:
 - `/api/v1/status-groups`
 - `/api/v1/statuses`
 
-Every API route is wrapped in `LogRequestResponse`, which records the request route, method, user ID, sanitized request payload/headers, sanitized response headers, and the response status code to `api_logs`. Response *bodies* are intentionally not captured — only an allowlist-based redaction was feasible for response shapes, which would require ongoing maintenance as resources change, so response-body logging was dropped rather than risk silently leaking sensitive data. `api_logs` rows are pruned daily (90-day retention) via Laravel's scheduler.
+Every API route is wrapped in `LogRequestResponse`, which records the request route, method, user ID, sanitized request payload/headers, sanitized response headers, and the response status code to `api_logs`. Response *bodies* are intentionally not captured; only an allowlist-based redaction was feasible for response shapes, which would require ongoing maintenance as resources change, so response-body logging was dropped rather than risk silently leaking sensitive data. `api_logs` rows are pruned daily (90-day retention) via Laravel's scheduler.
 
 Generate Swagger documentation with:
 
