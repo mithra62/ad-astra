@@ -6,6 +6,7 @@ use App\Http\Requests\FormRequest;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class StoreEntryRequest extends FormRequest
@@ -28,7 +29,8 @@ class StoreEntryRequest extends FormRequest
                 'type_handle' => [
                     'required',
                     'string',
-                    Rule::exists('entry_types', 'handle')->where(fn($q) => $q->where('entry_group_id', $this->route()->parameter('group_id'))
+                    Rule::exists('entry_types', 'handle')->where(
+                        fn ($q) => $q->where('entry_group_id', $this->route()->parameter('group_id'))
                     ),
                 ],
                 'title' => [
@@ -41,7 +43,7 @@ class StoreEntryRequest extends FormRequest
                     'string',
                     'max:255',
                     Rule::unique('entries', 'handle')->where(
-                        fn($query) => $query->where('entry_group_id', $group->id)
+                        fn ($query) => $query->where('entry_group_id', $group->id)
                     ),
                 ],
                 'status' => [
@@ -49,7 +51,7 @@ class StoreEntryRequest extends FormRequest
                     'string',
                     'max:100',
                     Rule::exists('statuses', 'handle')->where(
-                        fn($query) => $query->where('status_group_id', $group->status_group_id)
+                        fn ($query) => $query->where('status_group_id', $group->status_group_id)
                     ),
                 ],
                 'published_at' => [
@@ -70,14 +72,13 @@ class StoreEntryRequest extends FormRequest
                 ],
                 'categories.*' => [
                     'integer',
-                    'exists:categories,id',
-//                    Rule::exists('categories', 'id')->where(fn($q) => $q->whereIn(
-//                        'group_id',
-//                        \DB::table('category_groupables')
-//                            ->where('category_groupable_type', (new EntryGroup)->getMorphClass())
-//                            ->where('category_groupable_id', $this->route()->parameter('group_id'))
-//                            ->pluck('group_id')
-//                    )),
+                    Rule::exists('categories', 'id')->where(fn ($q) => $q->whereIn(
+                        'group_id',
+                        DB::table('category_groupables')
+                            ->where('category_groupable_type', (new EntryGroup())->getMorphClass())
+                            ->where('category_groupable_id', $group->id)
+                            ->pluck('group_id')
+                    )),
                 ],
                 'fields' => [
                     'nullable',

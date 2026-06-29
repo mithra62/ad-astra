@@ -7,6 +7,7 @@ use App\Models\Entry;
 use App\Models\EntryGroup;
 use App\Models\EntryType;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class EditEntryRequest extends FormRequest
@@ -36,7 +37,7 @@ class EditEntryRequest extends FormRequest
                     'string',
                     'max:255',
                     Rule::unique('entries', 'handle')
-                        ->where(fn($query) => $query->where('entry_group_id', $entry->entry_group_id))
+                        ->where(fn ($query) => $query->where('entry_group_id', $entry->entry_group_id))
                         ->ignore($entry->id),
                 ],
                 'status' => [
@@ -44,7 +45,7 @@ class EditEntryRequest extends FormRequest
                     'string',
                     'max:100',
                     Rule::exists('statuses', 'handle')->where(
-                        fn($query) => $query->where('status_group_id', $entry->entryGroup->status_group_id)
+                        fn ($query) => $query->where('status_group_id', $entry->entryGroup->status_group_id)
                     ),
                 ],
                 'published_at' => [
@@ -65,14 +66,13 @@ class EditEntryRequest extends FormRequest
                 ],
                 'categories.*' => [
                     'integer',
-                    'exists:categories,id',
-//                    Rule::exists('categories', 'id')->where(fn ($q) => $q->whereIn(
-//                        'group_id',
-//                        \DB::table('category_groupables')
-//                            ->where('category_groupable_type', (new EntryGroup)->getMorphClass())
-//                            ->where('category_groupable_id', $this->route()->parameter('group_id'))
-//                            ->pluck('group_id')
-//                    )),
+                    Rule::exists('categories', 'id')->where(fn ($q) => $q->whereIn(
+                        'group_id',
+                        DB::table('category_groupables')
+                            ->where('category_groupable_type', (new EntryGroup())->getMorphClass())
+                            ->where('category_groupable_id', $entry->entry_group_id)
+                            ->pluck('group_id')
+                    )),
                 ],
                 'fields' => [
                     'nullable',
