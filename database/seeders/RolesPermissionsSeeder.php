@@ -17,7 +17,6 @@ class RolesPermissionsSeeder extends Seeder
 
         $permissions = [
             'users' => [
-                'view user' => 'Allows for viewing users',
                 'read users' => 'Allows for listing and reading users via the API',
                 'create user' => 'Allows for creating users',
                 'edit user' => 'Allows for editing users',
