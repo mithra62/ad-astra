@@ -33,6 +33,8 @@ class EntryGroupService extends AbstractService
             'description' => $data['description'] ?? null,
             'sort_order' => $data['sort_order'] ?? 0,
             'status_group_id' => $data['status_group_id'] ?? null,
+            // Required at the validation layer (StoreEntryGroupRequest); every
+            // entry group must have a field layout assigned on creation.
             'field_layout_id' => $data['field_layout_id'],
         ]);
 

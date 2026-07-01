@@ -16,6 +16,13 @@ readonly class UniqueHandleByGroup implements ValidationRule
     {
         if (!empty($this->payload['status_id'])) {
             $status = Status::where('id', $this->payload['status_id'])->first();
+
+            // No such status: nothing to conflict with. Skip the uniqueness
+            // check and let the controller resolve the missing record (404).
+            if (!$status) {
+                return;
+            }
+
             $check = Status::where('status_group_id', $status->status_group_id)->where('handle', $value)->where('id', '!=', $status->id)->first();
             if ($check) {
                 $fail("The :attribute has already been taken.");

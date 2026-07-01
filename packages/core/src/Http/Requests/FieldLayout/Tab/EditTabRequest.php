@@ -25,7 +25,7 @@ class EditTabRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('field_layout_tabs', 'handle')->ignore($this->route()->parameter('id')),
+                Rule::unique('field_layout_tabs', 'field_layout_id')->ignore($this->route()->parameter('layout_id')),
             ],
             'sort_order' => [
                 'nullable',
