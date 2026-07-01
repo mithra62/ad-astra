@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use AdAstra\Models\EntryGroup;
+use AdAstra\Models\FieldLayout;
 use AdAstra\Models\StatusGroup;
 use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,8 +15,8 @@ use Tests\TestCase;
  * mutation actions (store/update/destroy) and create/confirm renders that the
  * existing view tests do not exercise.
  *
- * The store path also guards the EntryGroupService::create field_layout_id
- * regression (creating without a field layout must not error).
+ * A field layout is mandatory on creation (StoreEntryGroupRequest); the store
+ * tests below cover both the happy path and the missing-layout rejection.
  */
 class EntryGroupAdminTest extends TestCase
 {
@@ -76,15 +77,17 @@ class EntryGroupAdminTest extends TestCase
     // store
     // -------------------------------------------------------------------------
 
-    public function test_store_creates_group_without_field_layout_and_redirects(): void
+    public function test_store_creates_group_and_redirects(): void
     {
         $statusGroup = StatusGroup::factory()->create();
+        $layout = FieldLayout::factory()->create();
 
         $this->actingAs($this->admin)
             ->post(route('entries.groups.store'), [
                 'name' => 'Blog Posts',
                 'handle' => 'blog-posts',
                 'status_group_id' => $statusGroup->id,
+                'field_layout_id' => $layout->id,
             ])
             ->assertSessionHas('success')
             ->assertRedirectContains('/admin/entries/groups/');
@@ -92,11 +95,11 @@ class EntryGroupAdminTest extends TestCase
         $this->assertDatabaseHas('entry_groups', ['handle' => 'blog-posts']);
     }
 
-    public function test_store_requires_name_handle_and_status_group(): void
+    public function test_store_requires_name_handle_status_group_and_field_layout(): void
     {
         $this->actingAs($this->admin)
             ->post(route('entries.groups.store'), [])
-            ->assertSessionHasErrors(['name', 'handle', 'status_group_id']);
+            ->assertSessionHasErrors(['name', 'handle', 'status_group_id', 'field_layout_id']);
     }
 
     // -------------------------------------------------------------------------

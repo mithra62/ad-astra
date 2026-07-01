@@ -19,7 +19,7 @@ class StoreEntryTypeRequest extends FormRequest
             'handle' => ['required', 'string', 'max:255'],
             'entry_behavior_id' => ['nullable', 'integer', 'exists:entry_behaviors,id'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
-            'field_layout_id' => ['nullable', 'integer', 'exists:field_layouts,id'],
+            'field_layout_id' => ['required', 'integer', 'exists:field_layouts,id'],
             'has_entry_tree' => ['nullable', 'boolean'],
             'max_depth' => ['nullable', 'integer', 'min:0', 'max:10'],
             'allowed_parent_types' => 'nullable|array',

@@ -21,6 +21,13 @@ class EditCategoryRequest extends FormRequest
     public function rules(): array
     {
         $category = Category::find($this->route()->parameter('category'));
+
+        // Missing record: skip schema resolution and let the controller return
+        // a 404 rather than dereferencing a null category here.
+        if (!$category) {
+            return ['name' => ['required', 'string', 'max:255']];
+        }
+
         $schema = CategoryGroup::resolvedFields($category->group_id);
         return array_merge(
             [
@@ -53,6 +60,10 @@ class EditCategoryRequest extends FormRequest
     public function messages(): array
     {
         $category = Category::find($this->route()->parameter('category'));
+        if (!$category) {
+            return [];
+        }
+
         $schema = CategoryGroup::resolvedFields($category->group_id);
         return $this->schemaFieldMessages($schema);
     }
@@ -63,6 +74,10 @@ class EditCategoryRequest extends FormRequest
     public function attributes(): array
     {
         $category = Category::find($this->route()->parameter('category'));
+        if (!$category) {
+            return [];
+        }
+
         $schema = CategoryGroup::resolvedFields($category->group_id);
         return $this->schemaFieldAttributes($schema);
     }

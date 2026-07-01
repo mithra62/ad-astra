@@ -143,19 +143,26 @@ class UserAdminTest extends TestCase
     // password
     // -------------------------------------------------------------------------
 
-    public function test_password_updates_and_redirects(): void
+    /**
+     * KNOWN BUG (not fixed here — needs a design decision): the admin
+     * "change another user's password" form submits only password +
+     * password_confirmation, but the controller delegates to Fortify's
+     * self-service UpdateUserPassword action, which requires current_password
+     * via MatchCurrentPassword. So an admin password reset always fails with a
+     * current_password validation error. This test documents the current
+     * behavior and will start failing (a good prompt to update it) once the
+     * controller stops requiring re-authentication for admin resets.
+     */
+    public function test_password_reset_currently_blocked_by_current_password_requirement(): void
     {
         $user = User::factory()->create();
 
-        // UpdateUserPassword re-authenticates the acting admin via
-        // current_password (MatchCurrentPassword checks auth()->user()).
         $this->actingAs($this->admin)
             ->put(route('users.password', $user->id), [
-                'current_password' => 'password',
                 'password' => 'newsecret123',
                 'password_confirmation' => 'newsecret123',
             ])
-            ->assertSessionHas('success');
+            ->assertSessionHasErrors('current_password');
     }
 
     public function test_password_validation_failure(): void

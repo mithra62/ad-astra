@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use AdAstra\Models\EntryType;
+use AdAstra\Models\FieldLayout;
 use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
@@ -85,10 +86,13 @@ class EntryTypeAdminTest extends TestCase
 
     public function test_store_creates_type_and_redirects_to_edit(): void
     {
+        $layout = FieldLayout::factory()->create();
+
         $this->actingAs($this->admin)
             ->post(route('entries.types.store'), [
                 'name' => 'Blog Post',
                 'handle' => 'blog-post',
+                'field_layout_id' => $layout->id,
             ])
             ->assertSessionHas('success')
             ->assertRedirectContains('/admin/entries/types/');
@@ -96,11 +100,11 @@ class EntryTypeAdminTest extends TestCase
         $this->assertDatabaseHas('entry_types', ['handle' => 'blog-post']);
     }
 
-    public function test_store_requires_name_and_handle(): void
+    public function test_store_requires_name_handle_and_field_layout(): void
     {
         $this->actingAs($this->admin)
             ->post(route('entries.types.store'), [])
-            ->assertSessionHasErrors(['name', 'handle']);
+            ->assertSessionHasErrors(['name', 'handle', 'field_layout_id']);
     }
 
     // -------------------------------------------------------------------------

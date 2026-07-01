@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api;
 
 use AdAstra\Models\EntryGroup;
+use AdAstra\Models\FieldLayout;
 use AdAstra\Models\Role;
 use AdAstra\Models\StatusGroup;
 use AdAstra\Models\User;
@@ -110,6 +111,7 @@ class EntryGroupsApiTest extends TestCase
     public function test_store_creates_a_group_for_super_admin(): void
     {
         $statusGroup = StatusGroup::factory()->create();
+        $layout = FieldLayout::factory()->create();
 
         Sanctum::actingAs($this->superAdmin(), ['*']);
 
@@ -117,28 +119,33 @@ class EntryGroupsApiTest extends TestCase
             'name' => 'Blog Posts',
             'handle' => 'blog-posts',
             'status_group_id' => $statusGroup->id,
+            'field_layout_id' => $layout->id,
         ])->assertCreated()->assertJsonPath('data.name', 'Blog Posts');
 
         $this->assertDatabaseHas('entry_groups', ['handle' => 'blog-posts']);
     }
 
-    public function test_store_requires_name_handle_and_status_group(): void
+    public function test_store_requires_name_handle_status_group_and_field_layout(): void
     {
         Sanctum::actingAs($this->superAdmin(), ['*']);
 
+        // A field layout is mandatory on creation.
         $this->postJson('/api/v1/entry-groups', [])
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['name', 'handle', 'status_group_id']);
+            ->assertJsonValidationErrors(['name', 'handle', 'status_group_id', 'field_layout_id']);
     }
 
     public function test_store_rejects_nonexistent_status_group(): void
     {
+        $layout = FieldLayout::factory()->create();
+
         Sanctum::actingAs($this->superAdmin(), ['*']);
 
         $this->postJson('/api/v1/entry-groups', [
             'name' => 'Bad',
             'handle' => 'bad',
             'status_group_id' => 999999,
+            'field_layout_id' => $layout->id,
         ])->assertStatus(422)->assertJsonValidationErrors('status_group_id');
     }
 
