@@ -4,6 +4,7 @@ namespace Tests\Unit\Observers;
 
 use AdAstra\Field\Types\FileUpload;
 use AdAstra\Field\Types\Media as MediaField;
+use AdAstra\Field\Types\Text;
 use AdAstra\Models\Entry;
 use AdAstra\Models\Field;
 use AdAstra\Models\Field\Type as FieldType;
@@ -62,40 +63,40 @@ class FieldValueObserverTest extends TestCase
 
     public function test_saving_file_upload_field_value_creates_mediable_rows(): void
     {
-        $field   = $this->makeFileUploadField();
+        $field = $this->makeFileUploadField();
         $library = $this->makeLibrary();
-        $media   = Media::factory()->create(['library_id' => $library->id]);
-        $entry   = $this->makeEntry();
-        $type    = $entry->getMorphClass(); // 'entry' via morphMap
+        $media = Media::factory()->create(['library_id' => $library->id]);
+        $entry = $this->makeEntry();
+        $type = $entry->getMorphClass(); // 'entry' via morphMap
 
         FieldValue::create([
             'fieldable_type' => $type,
-            'fieldable_id'   => $entry->id,
-            'field_id'       => $field->id,
-            'value_json'     => json_encode([$media->id]),
+            'fieldable_id' => $entry->id,
+            'field_id' => $field->id,
+            'value_json' => json_encode([$media->id]),
         ]);
 
         $this->assertDatabaseHas('mediables', [
-            'media_id'      => $media->id,
+            'media_id' => $media->id,
             'mediable_type' => $type,
-            'mediable_id'   => $entry->id,
-            'field_id'      => $field->id,
+            'mediable_id' => $entry->id,
+            'field_id' => $field->id,
         ]);
     }
 
     public function test_saving_with_updated_ids_removes_stale_rows(): void
     {
-        $field   = $this->makeFileUploadField();
+        $field = $this->makeFileUploadField();
         $library = $this->makeLibrary();
-        $mediaA  = Media::factory()->create(['library_id' => $library->id]);
-        $mediaB  = Media::factory()->create(['library_id' => $library->id]);
-        $entry   = $this->makeEntry();
+        $mediaA = Media::factory()->create(['library_id' => $library->id]);
+        $mediaB = Media::factory()->create(['library_id' => $library->id]);
+        $entry = $this->makeEntry();
 
         $fieldValue = FieldValue::create([
             'fieldable_type' => $entry->getMorphClass(),
-            'fieldable_id'   => $entry->id,
-            'field_id'       => $field->id,
-            'value_json'     => json_encode([$mediaA->id]),
+            'fieldable_id' => $entry->id,
+            'field_id' => $field->id,
+            'value_json' => json_encode([$mediaA->id]),
         ]);
 
         // Update to B only — A should be removed.
@@ -113,24 +114,24 @@ class FieldValueObserverTest extends TestCase
 
     public function test_saving_with_empty_ids_clears_all_mediable_rows(): void
     {
-        $field   = $this->makeFileUploadField();
+        $field = $this->makeFileUploadField();
         $library = $this->makeLibrary();
-        $media   = Media::factory()->create(['library_id' => $library->id]);
-        $entry   = $this->makeEntry();
+        $media = Media::factory()->create(['library_id' => $library->id]);
+        $entry = $this->makeEntry();
 
         $fieldValue = FieldValue::create([
             'fieldable_type' => $entry->getMorphClass(),
-            'fieldable_id'   => $entry->id,
-            'field_id'       => $field->id,
-            'value_json'     => json_encode([$media->id]),
+            'fieldable_id' => $entry->id,
+            'field_id' => $field->id,
+            'value_json' => json_encode([$media->id]),
         ]);
 
         $fieldValue->update(['value_json' => json_encode([])]);
 
         $this->assertDatabaseMissing('mediables', [
             'mediable_type' => $entry->getMorphClass(),
-            'mediable_id'   => $entry->id,
-            'field_id'      => $field->id,
+            'mediable_id' => $entry->id,
+            'field_id' => $field->id,
         ]);
     }
 
@@ -140,15 +141,15 @@ class FieldValueObserverTest extends TestCase
 
     public function test_saving_non_file_upload_field_does_not_touch_mediables(): void
     {
-        $textType  = FieldType::firstOrCreate(['object' => \AdAstra\Field\Types\Text::class], ['name' => 'Text', 'object' => \AdAstra\Field\Types\Text::class]);
-        $field     = Field::factory()->create(['field_type_id' => $textType->id]);
-        $entry     = $this->makeEntry();
+        $textType = FieldType::firstOrCreate(['object' => Text::class], ['name' => 'Text', 'object' => Text::class]);
+        $field = Field::factory()->create(['field_type_id' => $textType->id]);
+        $entry = $this->makeEntry();
 
         FieldValue::create([
             'fieldable_type' => $entry->getMorphClass(),
-            'fieldable_id'   => $entry->id,
-            'field_id'       => $field->id,
-            'value_text'     => 'hello',
+            'fieldable_id' => $entry->id,
+            'field_id' => $field->id,
+            'value_text' => 'hello',
         ]);
 
         $this->assertEquals(0, DB::table('mediables')->count());
@@ -160,16 +161,16 @@ class FieldValueObserverTest extends TestCase
 
     public function test_deleting_file_upload_field_value_removes_mediable_rows(): void
     {
-        $field   = $this->makeFileUploadField();
+        $field = $this->makeFileUploadField();
         $library = $this->makeLibrary();
-        $media   = Media::factory()->create(['library_id' => $library->id]);
-        $entry   = $this->makeEntry();
+        $media = Media::factory()->create(['library_id' => $library->id]);
+        $entry = $this->makeEntry();
 
         $fieldValue = FieldValue::create([
             'fieldable_type' => $entry->getMorphClass(),
-            'fieldable_id'   => $entry->id,
-            'field_id'       => $field->id,
-            'value_json'     => json_encode([$media->id]),
+            'fieldable_id' => $entry->id,
+            'field_id' => $field->id,
+            'value_json' => json_encode([$media->id]),
         ]);
 
         $this->assertDatabaseHas('mediables', ['media_id' => $media->id]);
@@ -188,38 +189,38 @@ class FieldValueObserverTest extends TestCase
 
     public function test_saving_media_field_value_creates_mediable_rows(): void
     {
-        $field   = $this->makeMediaField();
+        $field = $this->makeMediaField();
         $library = $this->makeLibrary();
-        $media   = Media::factory()->create(['library_id' => $library->id]);
-        $entry   = $this->makeEntry();
+        $media = Media::factory()->create(['library_id' => $library->id]);
+        $entry = $this->makeEntry();
 
         FieldValue::create([
             'fieldable_type' => $entry->getMorphClass(),
-            'fieldable_id'   => $entry->id,
-            'field_id'       => $field->id,
-            'value_json'     => json_encode([$media->id]),
+            'fieldable_id' => $entry->id,
+            'field_id' => $field->id,
+            'value_json' => json_encode([$media->id]),
         ]);
 
         $this->assertDatabaseHas('mediables', [
-            'media_id'      => $media->id,
+            'media_id' => $media->id,
             'mediable_type' => $entry->getMorphClass(),
-            'mediable_id'   => $entry->id,
-            'field_id'      => $field->id,
+            'mediable_id' => $entry->id,
+            'field_id' => $field->id,
         ]);
     }
 
     public function test_deleting_media_field_value_removes_mediable_rows(): void
     {
-        $field   = $this->makeMediaField();
+        $field = $this->makeMediaField();
         $library = $this->makeLibrary();
-        $media   = Media::factory()->create(['library_id' => $library->id]);
-        $entry   = $this->makeEntry();
+        $media = Media::factory()->create(['library_id' => $library->id]);
+        $entry = $this->makeEntry();
 
         $fieldValue = FieldValue::create([
             'fieldable_type' => $entry->getMorphClass(),
-            'fieldable_id'   => $entry->id,
-            'field_id'       => $field->id,
-            'value_json'     => json_encode([$media->id]),
+            'fieldable_id' => $entry->id,
+            'field_id' => $field->id,
+            'value_json' => json_encode([$media->id]),
         ]);
 
         $this->assertDatabaseHas('mediables', ['media_id' => $media->id]);
@@ -234,19 +235,19 @@ class FieldValueObserverTest extends TestCase
 
     public function test_media_field_value_preserves_sort_order_across_mixed_libraries(): void
     {
-        $field   = $this->makeMediaField();
-        $libA    = Library::create(['name' => 'A', 'handle' => 'a', 'adapter' => 'local']);
-        $libB    = Library::create(['name' => 'B', 'handle' => 'b', 'adapter' => 'local']);
-        $mA      = Media::factory()->create(['library_id' => $libA->id]);
-        $mB      = Media::factory()->create(['library_id' => $libB->id]);
-        $entry   = $this->makeEntry();
-        $ids     = [$mB->id, $mA->id]; // intentional order
+        $field = $this->makeMediaField();
+        $libA = Library::create(['name' => 'A', 'handle' => 'a', 'adapter' => 'local']);
+        $libB = Library::create(['name' => 'B', 'handle' => 'b', 'adapter' => 'local']);
+        $mA = Media::factory()->create(['library_id' => $libA->id]);
+        $mB = Media::factory()->create(['library_id' => $libB->id]);
+        $entry = $this->makeEntry();
+        $ids = [$mB->id, $mA->id]; // intentional order
 
         FieldValue::create([
             'fieldable_type' => $entry->getMorphClass(),
-            'fieldable_id'   => $entry->id,
-            'field_id'       => $field->id,
-            'value_json'     => json_encode($ids),
+            'fieldable_id' => $entry->id,
+            'field_id' => $field->id,
+            'value_json' => json_encode($ids),
         ]);
 
         foreach ($ids as $sortOrder => $mediaId) {
@@ -261,17 +262,17 @@ class FieldValueObserverTest extends TestCase
 
     public function test_upsert_preserves_sort_order(): void
     {
-        $field   = $this->makeFileUploadField();
+        $field = $this->makeFileUploadField();
         $library = $this->makeLibrary();
-        $media   = Media::factory()->count(3)->create(['library_id' => $library->id]);
-        $entry   = $this->makeEntry();
-        $ids     = $media->pluck('id')->all();
+        $media = Media::factory()->count(3)->create(['library_id' => $library->id]);
+        $entry = $this->makeEntry();
+        $ids = $media->pluck('id')->all();
 
         FieldValue::create([
             'fieldable_type' => $entry->getMorphClass(),
-            'fieldable_id'   => $entry->id,
-            'field_id'       => $field->id,
-            'value_json'     => json_encode($ids),
+            'fieldable_id' => $entry->id,
+            'field_id' => $field->id,
+            'value_json' => json_encode($ids),
         ]);
 
         foreach (array_values($ids) as $sortOrder => $mediaId) {

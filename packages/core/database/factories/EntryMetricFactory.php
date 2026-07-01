@@ -16,9 +16,9 @@ class EntryMetricFactory extends Factory
     public function definition(): array
     {
         return [
-            'entry_id'      => Entry::factory(),
-            'metric'        => fake()->randomElement(['views', 'downloads', 'plays']),
-            'value'         => fake()->numberBetween(1, 1000),
+            'entry_id' => Entry::factory(),
+            'metric' => fake()->randomElement(['views', 'downloads', 'plays']),
+            'value' => fake()->numberBetween(1, 1000),
             'recorded_date' => fake()->dateTimeBetween('-30 days', 'now')->format('Y-m-d'),
         ];
     }

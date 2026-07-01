@@ -47,7 +47,7 @@ class EntryServiceValidationTest extends TestCase
         // Publishing a job listing without application_url or application_email
         // triggers JobListingEntryType::validate() to return an error.
         $this->service->create($type->handle, [
-            'title'  => 'Software Engineer',
+            'title' => 'Software Engineer',
             'handle' => 'software-engineer',
             'status' => 'published',
             'fields' => [],
@@ -60,7 +60,7 @@ class EntryServiceValidationTest extends TestCase
 
         try {
             $this->service->create($type->handle, [
-                'title'  => 'Software Engineer',
+                'title' => 'Software Engineer',
                 'handle' => 'software-engineer',
                 'status' => 'published',
                 'fields' => [],
@@ -78,7 +78,7 @@ class EntryServiceValidationTest extends TestCase
 
         // Draft status bypasses the publish-gate in JobListingEntryType::validate().
         $entry = $this->service->create($type->handle, [
-            'title'  => 'Software Engineer',
+            'title' => 'Software Engineer',
             'handle' => 'software-engineer',
             'status' => 'draft',
             'fields' => [],
@@ -94,7 +94,7 @@ class EntryServiceValidationTest extends TestCase
 
         try {
             $this->service->create($type->handle, [
-                'title'  => 'Software Engineer',
+                'title' => 'Software Engineer',
                 'handle' => 'software-engineer',
                 'status' => 'published',
                 'fields' => [],
@@ -116,7 +116,7 @@ class EntryServiceValidationTest extends TestCase
 
         $entry = Entry::factory()->create([
             'entry_group_id' => $group->id,
-            'entry_type_id'  => $type->id,
+            'entry_type_id' => $type->id,
         ]);
 
         $this->expectException(ValidationException::class);
@@ -134,7 +134,7 @@ class EntryServiceValidationTest extends TestCase
 
         $entry = Entry::factory()->create([
             'entry_group_id' => $group->id,
-            'entry_type_id'  => $type->id,
+            'entry_type_id' => $type->id,
         ]);
 
         try {
@@ -155,13 +155,13 @@ class EntryServiceValidationTest extends TestCase
 
         $entry = Entry::factory()->create([
             'entry_group_id' => $group->id,
-            'entry_type_id'  => $type->id,
-            'title'          => 'Original',
+            'entry_type_id' => $type->id,
+            'title' => 'Original',
         ]);
 
         // Draft status bypasses the publish-gate in ProductEntryType::validate().
         $updated = $this->service->update($entry, [
-            'title'  => 'Updated',
+            'title' => 'Updated',
             'status' => 'draft',
             'fields' => [],
         ]);
@@ -175,13 +175,13 @@ class EntryServiceValidationTest extends TestCase
 
         $entry = Entry::factory()->create([
             'entry_group_id' => $group->id,
-            'entry_type_id'  => $type->id,
-            'title'          => 'Original Title',
+            'entry_type_id' => $type->id,
+            'title' => 'Original Title',
         ]);
 
         try {
             $this->service->update($entry, [
-                'title'  => 'Changed Title',
+                'title' => 'Changed Title',
                 'status' => 'published',
                 'fields' => [],
             ]);
@@ -190,7 +190,7 @@ class EntryServiceValidationTest extends TestCase
         }
 
         $this->assertDatabaseHas('entries', [
-            'id'    => $entry->id,
+            'id' => $entry->id,
             'title' => 'Original Title',
         ]);
     }
@@ -208,14 +208,14 @@ class EntryServiceValidationTest extends TestCase
     private function makeJobListingSetup(): array
     {
         $statusGroup = StatusGroup::factory()->create();
-        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft',     'is_default' => true,  'is_public' => false]);
+        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft', 'is_default' => true, 'is_public' => false]);
         Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'published', 'is_default' => false, 'is_public' => true]);
 
         $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
 
         $type = EntryType::factory()->create([
-            'entry_group_id'    => $group->id,
-            'handle'            => 'job_listing_' . uniqid(),
+            'entry_group_id' => $group->id,
+            'handle' => 'job_listing_' . uniqid(),
             'entry_behavior_id' => EntryBehavior::where('handle', 'job-listing')->value('id'),
         ]);
 
@@ -230,14 +230,14 @@ class EntryServiceValidationTest extends TestCase
     private function makeProductSetup(): array
     {
         $statusGroup = StatusGroup::factory()->create();
-        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft',     'is_default' => true,  'is_public' => false]);
+        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft', 'is_default' => true, 'is_public' => false]);
         Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'published', 'is_default' => false, 'is_public' => true]);
 
         $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
 
         $type = EntryType::factory()->create([
-            'entry_group_id'    => $group->id,
-            'handle'            => 'product_' . uniqid(),
+            'entry_group_id' => $group->id,
+            'handle' => 'product_' . uniqid(),
             'entry_behavior_id' => EntryBehavior::where('handle', 'product')->value('id'),
         ]);
 

@@ -31,7 +31,7 @@ class FieldSettingsSaveTest extends TestCase
                 'handle' => 'colour',
                 'settings' => [
                     'options' => [
-                        ['key' => 'red',  'label' => 'Red'],
+                        ['key' => 'red', 'label' => 'Red'],
                         ['key' => 'blue', 'label' => 'Blue'],
                     ],
                 ],
@@ -96,8 +96,8 @@ class FieldSettingsSaveTest extends TestCase
 
         $field = FieldModel::where('handle', 'rating')->first();
         $this->assertNotNull($field);
-        $this->assertSame(1, (int) ($field->settings['min'] ?? null));
-        $this->assertSame(10, (int) ($field->settings['max'] ?? null));
+        $this->assertSame(1, (int)($field->settings['min'] ?? null));
+        $this->assertSame(10, (int)($field->settings['max'] ?? null));
     }
 
     // -------------------------------------------------------------------------
@@ -114,7 +114,7 @@ class FieldSettingsSaveTest extends TestCase
             'settings' => [
                 'columns' => [
                     ['handle' => 'title', 'label' => 'Title', 'type' => 'text'],
-                    ['handle' => 'qty',   'label' => 'Qty',   'type' => 'number'],
+                    ['handle' => 'qty', 'label' => 'Qty', 'type' => 'number'],
                 ],
             ],
         ]);
@@ -177,7 +177,7 @@ class FieldSettingsSaveTest extends TestCase
                 'settings' => [
                     'options' => [
                         ['key' => 'active', 'label' => 'Active'],
-                        ['key' => '',       'label' => 'Orphan'],
+                        ['key' => '', 'label' => 'Orphan'],
                     ],
                 ],
             ])

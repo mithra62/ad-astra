@@ -25,7 +25,7 @@ class JobListingEntryTypeTest extends TestCase
 
     public function test_before_update_returns_early_when_status_is_expired(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->published()->create();
 
         // closing_date in payload would normally trigger auto-expire logic,
@@ -40,7 +40,7 @@ class JobListingEntryTypeTest extends TestCase
 
     public function test_before_update_returns_early_when_status_is_closed(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->published()->create();
 
         $result = $type->beforeUpdate($entry, ['status' => 'closed']);
@@ -54,7 +54,7 @@ class JobListingEntryTypeTest extends TestCase
 
     public function test_before_update_auto_expires_when_closing_date_has_passed(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->published()->create();
 
         $result = $type->beforeUpdate($entry, [
@@ -66,7 +66,7 @@ class JobListingEntryTypeTest extends TestCase
 
     public function test_before_update_does_not_expire_when_closing_date_is_future(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->published()->create();
 
         $result = $type->beforeUpdate($entry, [
@@ -78,7 +78,7 @@ class JobListingEntryTypeTest extends TestCase
 
     public function test_before_update_does_not_expire_when_no_closing_date(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->published()->create();
 
         $result = $type->beforeUpdate($entry, ['title' => 'Updated Title']);

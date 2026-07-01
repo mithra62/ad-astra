@@ -12,6 +12,7 @@ use AdAstra\Models\EntryMetric;
 use AdAstra\Models\EntryType;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
 use Tests\TestCase;
 
 class EntryActionsTest extends TestCase
@@ -55,7 +56,7 @@ class EntryActionsTest extends TestCase
         $entry = Entry::factory()->create();
         Content::shouldReceive('create')
             ->once()
-            ->with('news-article', \Mockery::any())
+            ->with('news-article', Mockery::any())
             ->andReturn($entry);
 
         $action = app(CreateNewEntry::class);

@@ -33,7 +33,7 @@ class Field extends Controller
     public function create($group_id)
     {
         $group = FieldGroup::find($group_id);
-        if (! $group instanceof FieldGroup) {
+        if (!$group instanceof FieldGroup) {
             abort(404);
         }
 
@@ -73,14 +73,14 @@ class Field extends Controller
     public function show(string $id)
     {
         $field = FieldModel::with('groups')->find($id);
-        if (! $field instanceof FieldModel) {
+        if (!$field instanceof FieldModel) {
             abort(404);
         }
 
         $groups = FieldGroup::all();
         $active_group = $field->groups->first();
         $layouts = FieldLayoutModel::with(['entryGroups', 'entryTypes.entryGroup'])
-            ->whereHas('tabs.elements', fn ($q) => $q->where('field_id', $field->id))
+            ->whereHas('tabs.elements', fn($q) => $q->where('field_id', $field->id))
             ->orderBy('name')
             ->get();
 
@@ -120,7 +120,7 @@ class Field extends Controller
     public function edit(string $id)
     {
         $field = FieldModel::find($id);
-        if (! $field instanceof FieldModel) {
+        if (!$field instanceof FieldModel) {
             abort(404);
         }
 
@@ -167,7 +167,7 @@ class Field extends Controller
         ]);
 
         $type = FieldType::find($request->type_id);
-        if (! $type instanceof FieldType) {
+        if (!$type instanceof FieldType) {
             abort(404);
         }
 
@@ -214,7 +214,7 @@ class Field extends Controller
     public function confirm(string $id)
     {
         $field = FieldModel::find($id);
-        if (! $field instanceof FieldModel) {
+        if (!$field instanceof FieldModel) {
             abort(404);
         }
 

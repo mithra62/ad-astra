@@ -2,6 +2,29 @@
 
 namespace Database\Seeders;
 
+use AdAstra\Field\Types\Boolean;
+use AdAstra\Field\Types\ColorPicker;
+use AdAstra\Field\Types\Country;
+use AdAstra\Field\Types\Date;
+use AdAstra\Field\Types\EmailAddress;
+use AdAstra\Field\Types\FileUpload;
+use AdAstra\Field\Types\Html;
+use AdAstra\Field\Types\Media;
+use AdAstra\Field\Types\Money;
+use AdAstra\Field\Types\MultiSelect;
+use AdAstra\Field\Types\Number;
+use AdAstra\Field\Types\RadioGroup;
+use AdAstra\Field\Types\Relationship;
+use AdAstra\Field\Types\Select;
+use AdAstra\Field\Types\Slider;
+use AdAstra\Field\Types\StateProvince;
+use AdAstra\Field\Types\StructuredRows;
+use AdAstra\Field\Types\Telephone;
+use AdAstra\Field\Types\Text;
+use AdAstra\Field\Types\Textarea;
+use AdAstra\Field\Types\Time;
+use AdAstra\Field\Types\Url;
+use AdAstra\Field\Types\Users;
 use AdAstra\Models\Field\Type;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -13,29 +36,29 @@ class FieldTypeSeeder extends Seeder
     public function run(): void
     {
         $types = [
-            ['name' => 'Text', 'object' => \AdAstra\Field\Types\Text::class],
-            ['name' => 'Textarea', 'object' => \AdAstra\Field\Types\Textarea::class],
-            ['name' => 'Number', 'object' => \AdAstra\Field\Types\Number::class],
-            ['name' => 'Date', 'object' => \AdAstra\Field\Types\Date::class],
-            ['name' => 'Email Address', 'object' => \AdAstra\Field\Types\EmailAddress::class],
-            ['name' => 'URL', 'object' => \AdAstra\Field\Types\Url::class],
-            ['name' => 'Telephone', 'object' => \AdAstra\Field\Types\Telephone::class],
-            ['name' => 'Color Picker', 'object' => \AdAstra\Field\Types\ColorPicker::class],
-            ['name' => 'Relationship', 'object' => \AdAstra\Field\Types\Relationship::class],
-            ['name' => 'Boolean', 'object' => \AdAstra\Field\Types\Boolean::class],
-            ['name' => 'File Upload', 'object' => \AdAstra\Field\Types\FileUpload::class],
-            ['name' => 'Media', 'object' => \AdAstra\Field\Types\Media::class],
-            ['name' => 'Select', 'object' => \AdAstra\Field\Types\Select::class],
-            ['name' => 'Multi Select', 'object' => \AdAstra\Field\Types\MultiSelect::class],
-            ['name' => 'Radio Group', 'object' => \AdAstra\Field\Types\RadioGroup::class],
-            ['name' => 'Slider', 'object' => \AdAstra\Field\Types\Slider::class],
-            ['name' => 'Users', 'object' => \AdAstra\Field\Types\Users::class],
-            ['name' => 'Structured Rows', 'object' => \AdAstra\Field\Types\StructuredRows::class],
-            ['name' => 'Money', 'object' => \AdAstra\Field\Types\Money::class],
-            ['name' => 'Country', 'object' => \AdAstra\Field\Types\Country::class],
-            ['name' => 'State/Province', 'object' => \AdAstra\Field\Types\StateProvince::class],
-            ['name' => 'Time', 'object' => \AdAstra\Field\Types\Time::class],
-            ['name' => 'Html', 'object' => \AdAstra\Field\Types\Html::class],
+            ['name' => 'Text', 'object' => Text::class],
+            ['name' => 'Textarea', 'object' => Textarea::class],
+            ['name' => 'Number', 'object' => Number::class],
+            ['name' => 'Date', 'object' => Date::class],
+            ['name' => 'Email Address', 'object' => EmailAddress::class],
+            ['name' => 'URL', 'object' => Url::class],
+            ['name' => 'Telephone', 'object' => Telephone::class],
+            ['name' => 'Color Picker', 'object' => ColorPicker::class],
+            ['name' => 'Relationship', 'object' => Relationship::class],
+            ['name' => 'Boolean', 'object' => Boolean::class],
+            ['name' => 'File Upload', 'object' => FileUpload::class],
+            ['name' => 'Media', 'object' => Media::class],
+            ['name' => 'Select', 'object' => Select::class],
+            ['name' => 'Multi Select', 'object' => MultiSelect::class],
+            ['name' => 'Radio Group', 'object' => RadioGroup::class],
+            ['name' => 'Slider', 'object' => Slider::class],
+            ['name' => 'Users', 'object' => Users::class],
+            ['name' => 'Structured Rows', 'object' => StructuredRows::class],
+            ['name' => 'Money', 'object' => Money::class],
+            ['name' => 'Country', 'object' => Country::class],
+            ['name' => 'State/Province', 'object' => StateProvince::class],
+            ['name' => 'Time', 'object' => Time::class],
+            ['name' => 'Html', 'object' => Html::class],
         ];
 
         foreach ($types as $type) {

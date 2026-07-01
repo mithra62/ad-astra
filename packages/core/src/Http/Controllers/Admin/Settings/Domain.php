@@ -45,7 +45,7 @@ class Domain extends Controller
     /**
      * Invoke any options_callback closures so select fields receive a live options list.
      *
-     * @param  array<int, array<string, mixed>>  $fields
+     * @param array<int, array<string, mixed>> $fields
      * @return array<int, array<string, mixed>>
      */
     private function hydrateOptions(array $fields): array

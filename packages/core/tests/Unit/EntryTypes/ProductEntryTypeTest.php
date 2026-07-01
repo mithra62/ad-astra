@@ -65,7 +65,7 @@ class ProductEntryTypeTest extends TestCase
 
     public function test_before_update_sets_out_of_stock_when_stock_quantity_reaches_zero(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->published()->create();
 
         $result = $type->beforeUpdate($entry, ['fields' => ['stock_quantity' => 0]]);
@@ -75,7 +75,7 @@ class ProductEntryTypeTest extends TestCase
 
     public function test_before_update_does_not_change_status_when_stock_is_positive(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->published()->create();
 
         $result = $type->beforeUpdate($entry, ['fields' => ['stock_quantity' => 5]]);
@@ -85,7 +85,7 @@ class ProductEntryTypeTest extends TestCase
 
     public function test_before_update_does_not_change_status_when_stock_absent(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->create();
 
         $result = $type->beforeUpdate($entry, ['title' => 'Updated Product']);

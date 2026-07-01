@@ -84,6 +84,6 @@ class EntryTree extends Model
 
     public function getUrlAttribute(): string
     {
-        return $this->uri === '/' ? '/' : '/'.$this->uri;
+        return $this->uri === '/' ? '/' : '/' . $this->uri;
     }
 }

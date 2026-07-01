@@ -29,7 +29,7 @@ class NewsArticleEntryTypeTest extends TestCase
         $errors = $type->validate([
             'fields' => [
                 'source_url' => 'https://reuters.com/article/123',
-                'source'     => '',
+                'source' => '',
             ],
         ]);
 
@@ -43,7 +43,7 @@ class NewsArticleEntryTypeTest extends TestCase
         $errors = $type->validate([
             'fields' => [
                 'source_url' => 'https://reuters.com/article/123',
-                'source'     => 'Reuters',
+                'source' => 'Reuters',
             ],
         ]);
 

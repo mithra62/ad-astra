@@ -17,8 +17,8 @@ class UserStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status'          => ['required', 'string', Rule::in(UserStatus::ALL)],
-            'reason'          => [
+            'status' => ['required', 'string', Rule::in(UserStatus::ALL)],
+            'reason' => [
                 'required_unless:status,' . UserStatus::ACTIVE,
                 'nullable',
                 'string',
@@ -36,10 +36,10 @@ class UserStatusRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'status.in'               => 'The selected status is not valid.',
-            'reason.required_unless'  => 'A reason is required when changing to this status.',
+            'status.in' => 'The selected status is not valid.',
+            'reason.required_unless' => 'A reason is required when changing to this status.',
             'suspended_until.required_if' => 'A suspension end date is required.',
-            'suspended_until.after'   => 'The suspension end date must be in the future.',
+            'suspended_until.after' => 'The suspension end date must be in the future.',
         ];
     }
 }

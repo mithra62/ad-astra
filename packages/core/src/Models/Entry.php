@@ -87,14 +87,14 @@ class Entry extends Model
     public function field(string $handle): mixed
     {
         // Scalar field values (text, number, date, etc.)
-        $fv = $this->fieldValues->first(fn ($v) => $v->field?->handle === $handle);
+        $fv = $this->fieldValues->first(fn($v) => $v->field?->handle === $handle);
         if ($fv) {
             return $fv->resolvedValue();
         }
 
         // Relational field values stored in entry_relationships
         $related = $this->entryRelationships
-            ->filter(fn ($r) => $r->field?->handle === $handle)
+            ->filter(fn($r) => $r->field?->handle === $handle)
             ->sortBy('sort_order')
             ->pluck('relatedEntry')
             ->filter(); // remove any null entries from broken FKs
@@ -124,7 +124,7 @@ class Entry extends Model
         }
 
         if (is_string($group)) {
-            return $query->whereHas('entryGroup', fn ($q) => $q->where('handle', $group));
+            return $query->whereHas('entryGroup', fn($q) => $q->where('handle', $group));
         }
 
         return $query->where('entry_group_id', $group);
@@ -137,7 +137,7 @@ class Entry extends Model
         }
 
         if (is_string($type)) {
-            return $query->whereHas('entryType', fn ($q) => $q->where('handle', $type));
+            return $query->whereHas('entryType', fn($q) => $q->where('handle', $type));
         }
 
         return $query->where('entry_type_id', $type);
@@ -159,9 +159,9 @@ class Entry extends Model
      */
     public function metricTotal(string $metric, ?Carbon $from = null): int
     {
-        return (int) $this->metrics()
+        return (int)$this->metrics()
             ->where('metric', $metric)
-            ->when($from, fn ($q) => $q->where('recorded_date', '>=', $from->toDateString()))
+            ->when($from, fn($q) => $q->where('recorded_date', '>=', $from->toDateString()))
             ->sum('value');
     }
 }

@@ -4,6 +4,8 @@ namespace Tests\Unit\Models;
 
 use AdAstra\Models\Entry;
 use AdAstra\Models\EntryMetric;
+use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,18 +19,18 @@ class EntryMetricTest extends TestCase
 
     public function test_entry_metric_can_be_created(): void
     {
-        $entry  = Entry::factory()->create();
+        $entry = Entry::factory()->create();
         $metric = EntryMetric::create([
-            'entry_id'      => $entry->id,
-            'metric'        => 'views',
-            'value'         => 100,
+            'entry_id' => $entry->id,
+            'metric' => 'views',
+            'value' => 100,
             'recorded_date' => today()->toDateString(),
         ]);
 
         $this->assertDatabaseHas('entry_metrics', [
             'entry_id' => $entry->id,
-            'metric'   => 'views',
-            'value'    => 100,
+            'metric' => 'views',
+            'value' => 100,
         ]);
 
         $this->assertInstanceOf(EntryMetric::class, $metric);
@@ -36,7 +38,7 @@ class EntryMetricTest extends TestCase
 
     public function test_entry_metric_belongs_to_entry(): void
     {
-        $entry  = Entry::factory()->create();
+        $entry = Entry::factory()->create();
         $metric = EntryMetric::factory()->create(['entry_id' => $entry->id]);
 
         $this->assertEquals($entry->id, $metric->entry->id);
@@ -53,7 +55,7 @@ class EntryMetricTest extends TestCase
     {
         $metric = EntryMetric::factory()->make(['recorded_date' => '2026-01-15']);
 
-        $this->assertInstanceOf(\Carbon\Carbon::class, $metric->recorded_date);
+        $this->assertInstanceOf(Carbon::class, $metric->recorded_date);
         $this->assertSame('2026-01-15', $metric->recorded_date->toDateString());
     }
 
@@ -77,7 +79,7 @@ class EntryMetricTest extends TestCase
     {
         $entry = Entry::factory()->create();
         EntryMetric::factory()->count(2)->sequence(
-            ['metric' => 'views',     'recorded_date' => '2026-01-01'],
+            ['metric' => 'views', 'recorded_date' => '2026-01-01'],
             ['metric' => 'downloads', 'recorded_date' => '2026-01-01'],
         )->create(['entry_id' => $entry->id]);
 
@@ -93,12 +95,12 @@ class EntryMetricTest extends TestCase
     public function test_metric_total_sums_values_for_named_metric(): void
     {
         $entry = Entry::factory()->create();
-        EntryMetric::factory()->create(['entry_id' => $entry->id, 'metric' => 'views',     'value' => 100, 'recorded_date' => '2026-01-01']);
-        EntryMetric::factory()->create(['entry_id' => $entry->id, 'metric' => 'views',     'value' => 200, 'recorded_date' => '2026-01-02']);
-        EntryMetric::factory()->create(['entry_id' => $entry->id, 'metric' => 'downloads', 'value' => 50,  'recorded_date' => '2026-01-01']);
+        EntryMetric::factory()->create(['entry_id' => $entry->id, 'metric' => 'views', 'value' => 100, 'recorded_date' => '2026-01-01']);
+        EntryMetric::factory()->create(['entry_id' => $entry->id, 'metric' => 'views', 'value' => 200, 'recorded_date' => '2026-01-02']);
+        EntryMetric::factory()->create(['entry_id' => $entry->id, 'metric' => 'downloads', 'value' => 50, 'recorded_date' => '2026-01-01']);
 
         $this->assertSame(300, $entry->metricTotal('views'));
-        $this->assertSame(50,  $entry->metricTotal('downloads'));
+        $this->assertSame(50, $entry->metricTotal('downloads'));
     }
 
     public function test_metric_total_returns_zero_when_no_records(): void
@@ -115,7 +117,7 @@ class EntryMetricTest extends TestCase
         EntryMetric::factory()->create(['entry_id' => $entry->id, 'metric' => 'views', 'value' => 200, 'recorded_date' => '2026-02-01']);
         EntryMetric::factory()->create(['entry_id' => $entry->id, 'metric' => 'views', 'value' => 300, 'recorded_date' => '2026-03-01']);
 
-        $from = \Carbon\Carbon::parse('2026-02-01');
+        $from = Carbon::parse('2026-02-01');
 
         $this->assertSame(500, $entry->metricTotal('views', $from));
     }
@@ -126,10 +128,10 @@ class EntryMetricTest extends TestCase
         $entryB = Entry::factory()->create();
 
         EntryMetric::factory()->create(['entry_id' => $entryA->id, 'metric' => 'views', 'value' => 999, 'recorded_date' => today()]);
-        EntryMetric::factory()->create(['entry_id' => $entryB->id, 'metric' => 'views', 'value' => 1,   'recorded_date' => today()]);
+        EntryMetric::factory()->create(['entry_id' => $entryB->id, 'metric' => 'views', 'value' => 1, 'recorded_date' => today()]);
 
         $this->assertSame(999, $entryA->metricTotal('views'));
-        $this->assertSame(1,   $entryB->metricTotal('views'));
+        $this->assertSame(1, $entryB->metricTotal('views'));
     }
 
     // -------------------------------------------------------------------------
@@ -141,18 +143,18 @@ class EntryMetricTest extends TestCase
         $entry = Entry::factory()->create();
 
         EntryMetric::create([
-            'entry_id'      => $entry->id,
-            'metric'        => 'views',
-            'value'         => 10,
+            'entry_id' => $entry->id,
+            'metric' => 'views',
+            'value' => 10,
             'recorded_date' => '2026-01-01',
         ]);
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
 
         EntryMetric::create([
-            'entry_id'      => $entry->id,
-            'metric'        => 'views',
-            'value'         => 20,
+            'entry_id' => $entry->id,
+            'metric' => 'views',
+            'value' => 20,
             'recorded_date' => '2026-01-01',
         ]);
     }

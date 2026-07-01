@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use AdAstra\Models\Field as FieldModel;
 use AdAstra\Models\FieldValue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use RuntimeException;
 use Tests\Feature\Admin\Concerns\MakesFieldTestFixtures;
 use Tests\TestCase;
 
@@ -142,7 +143,7 @@ class FieldSettingsValidationTest extends TestCase
         FieldValue::factory()->create(['field_id' => $field->id, 'value_text' => 'hello']);
 
         $this->withoutExceptionHandling();
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
 
         $this->actingAs($user)
             ->put(route('fields.update', $field->id), [

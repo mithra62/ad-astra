@@ -9,6 +9,7 @@ use AdAstra\Models\EntryType;
 use AdAstra\Models\FieldLayout;
 use AdAstra\Services\EntryTypeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
 use Tests\TestCase;
 
 class EntryTypeActionsTest extends TestCase
@@ -25,7 +26,7 @@ class EntryTypeActionsTest extends TestCase
 
         $result = app(EntryTypeService::class)->create([
             'entry_group_id' => $group->id,
-            'name'   => 'Blog Post',
+            'name' => 'Blog Post',
             'handle' => 'blog-post',
         ]);
 
@@ -38,13 +39,13 @@ class EntryTypeActionsTest extends TestCase
 
         app(EntryTypeService::class)->create([
             'entry_group_id' => $group->id,
-            'name'   => 'Page',
+            'name' => 'Page',
             'handle' => 'page',
         ]);
 
         $this->assertDatabaseHas('entry_types', [
             'entry_group_id' => $group->id,
-            'name'   => 'Page',
+            'name' => 'Page',
             'handle' => 'page',
         ]);
     }
@@ -55,7 +56,7 @@ class EntryTypeActionsTest extends TestCase
 
         $result = app(EntryTypeService::class)->create([
             'entry_group_id' => $group->id,
-            'name'   => 'News',
+            'name' => 'News',
             'handle' => 'news',
         ]);
 
@@ -68,7 +69,7 @@ class EntryTypeActionsTest extends TestCase
 
         $result = app(EntryTypeService::class)->create([
             'entry_group_id' => $group->id,
-            'name'   => 'Video',
+            'name' => 'Video',
             'handle' => 'video',
         ]);
 
@@ -81,8 +82,8 @@ class EntryTypeActionsTest extends TestCase
 
         $result = app(EntryTypeService::class)->create([
             'entry_group_id' => $group->id,
-            'name'       => 'Event',
-            'handle'     => 'event',
+            'name' => 'Event',
+            'handle' => 'event',
             'sort_order' => 4,
         ]);
 
@@ -95,7 +96,7 @@ class EntryTypeActionsTest extends TestCase
 
         $result = app(EntryTypeService::class)->create([
             'entry_group_id' => $group->id,
-            'name'   => 'Job',
+            'name' => 'Job',
             'handle' => 'job',
         ]);
 
@@ -104,13 +105,13 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_create_stores_field_layout_id_when_provided(): void
     {
-        $group  = EntryGroup::factory()->create();
+        $group = EntryGroup::factory()->create();
         $layout = FieldLayout::factory()->create();
 
         $result = app(EntryTypeService::class)->create([
-            'entry_group_id'  => $group->id,
-            'name'            => 'Product',
-            'handle'          => 'product',
+            'entry_group_id' => $group->id,
+            'name' => 'Product',
+            'handle' => 'product',
             'field_layout_id' => $layout->id,
         ]);
 
@@ -123,7 +124,7 @@ class EntryTypeActionsTest extends TestCase
 
         $result = app(EntryTypeService::class)->create([
             'entry_group_id' => $group->id,
-            'name'   => 'Podcast',
+            'name' => 'Podcast',
             'handle' => 'podcast',
         ]);
 
@@ -139,7 +140,7 @@ class EntryTypeActionsTest extends TestCase
         $type = EntryType::factory()->create();
 
         $result = app(EntryTypeService::class)->update($type, [
-            'name'   => 'Updated',
+            'name' => 'Updated',
             'handle' => 'updated',
         ]);
 
@@ -151,13 +152,13 @@ class EntryTypeActionsTest extends TestCase
         $type = EntryType::factory()->create(['name' => 'Old', 'handle' => 'old']);
 
         app(EntryTypeService::class)->update($type, [
-            'name'   => 'New Name',
+            'name' => 'New Name',
             'handle' => 'new-handle',
         ]);
 
         $this->assertDatabaseHas('entry_types', [
-            'id'     => $type->id,
-            'name'   => 'New Name',
+            'id' => $type->id,
+            'name' => 'New Name',
             'handle' => 'new-handle',
         ]);
     }
@@ -167,8 +168,8 @@ class EntryTypeActionsTest extends TestCase
         $type = EntryType::factory()->create(['sort_order' => 1]);
 
         $result = app(EntryTypeService::class)->update($type, [
-            'name'       => $type->name,
-            'handle'     => $type->handle,
+            'name' => $type->name,
+            'handle' => $type->handle,
             'sort_order' => 8,
         ]);
 
@@ -178,11 +179,11 @@ class EntryTypeActionsTest extends TestCase
     public function test_edit_updates_field_layout_id(): void
     {
         $layout = FieldLayout::factory()->create();
-        $type   = EntryType::factory()->create();
+        $type = EntryType::factory()->create();
 
         $result = app(EntryTypeService::class)->update($type, [
-            'name'            => $type->name,
-            'handle'          => $type->handle,
+            'name' => $type->name,
+            'handle' => $type->handle,
             'field_layout_id' => $layout->id,
         ]);
 
@@ -194,7 +195,7 @@ class EntryTypeActionsTest extends TestCase
         $type = EntryType::factory()->create(['name' => 'Before']);
 
         $result = app(EntryTypeService::class)->update($type, [
-            'name'   => 'After',
+            'name' => 'After',
             'handle' => 'after',
         ]);
 
@@ -207,7 +208,7 @@ class EntryTypeActionsTest extends TestCase
         $type = EntryType::factory()->create(['sort_order' => 3]);
 
         $result = app(EntryTypeService::class)->update($type, [
-            'name'   => $type->name,
+            'name' => $type->name,
             'handle' => $type->handle,
         ]);
 
@@ -220,12 +221,12 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_create_action_delegates_to_service_create(): void
     {
-        $group   = EntryGroup::factory()->create();
-        $type    = EntryType::factory()->create();
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->create();
         $service = $this->mock(EntryTypeService::class);
         $service->shouldReceive('create')
             ->once()
-            ->with(\Mockery::on(fn ($data) => ($data['entry_group_id'] ?? null) === $group->id
+            ->with(Mockery::on(fn($data) => ($data['entry_group_id'] ?? null) === $group->id
                 && ($data['name'] ?? null) === 'Blog Post'
                 && ($data['handle'] ?? null) === 'blog-post'))
             ->andReturn($type);
@@ -237,34 +238,34 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_create_action_casts_string_group_id_to_integer(): void
     {
-        $group   = EntryGroup::factory()->create();
-        $type    = EntryType::factory()->create();
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->create();
         $service = $this->mock(EntryTypeService::class);
         $service->shouldReceive('create')
             ->once()
-            ->with(\Mockery::on(fn ($data) => is_int($data['entry_group_id'] ?? null)))
+            ->with(Mockery::on(fn($data) => is_int($data['entry_group_id'] ?? null)))
             ->andReturn($type);
 
-        app(CreateNewEntryType::class)->create((string) $group->id, ['name' => 'Test', 'handle' => 'test']);
+        app(CreateNewEntryType::class)->create((string)$group->id, ['name' => 'Test', 'handle' => 'test']);
     }
 
     public function test_create_action_passes_correct_integer_value_for_string_group_id(): void
     {
-        $group   = EntryGroup::factory()->create();
-        $type    = EntryType::factory()->create();
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->create();
         $service = $this->mock(EntryTypeService::class);
         $service->shouldReceive('create')
             ->once()
-            ->with(\Mockery::on(fn ($data) => ($data['entry_group_id'] ?? null) === $group->id))
+            ->with(Mockery::on(fn($data) => ($data['entry_group_id'] ?? null) === $group->id))
             ->andReturn($type);
 
-        app(CreateNewEntryType::class)->create((string) $group->id, ['name' => 'Test', 'handle' => 'test']);
+        app(CreateNewEntryType::class)->create((string)$group->id, ['name' => 'Test', 'handle' => 'test']);
     }
 
     public function test_create_action_returns_entry_type_instance(): void
     {
-        $group   = EntryGroup::factory()->create();
-        $type    = EntryType::factory()->create();
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->create();
         $service = $this->mock(EntryTypeService::class);
         $service->shouldReceive('create')->once()->andReturn($type);
 
@@ -279,7 +280,7 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_edit_action_delegates_to_service_update(): void
     {
-        $type    = EntryType::factory()->create();
+        $type = EntryType::factory()->create();
         $updated = EntryType::factory()->create();
         $service = $this->mock(EntryTypeService::class);
         $service->shouldReceive('update')
@@ -294,7 +295,7 @@ class EntryTypeActionsTest extends TestCase
 
     public function test_edit_action_returns_entry_type_instance(): void
     {
-        $type    = EntryType::factory()->create();
+        $type = EntryType::factory()->create();
         $updated = EntryType::factory()->create();
         $service = $this->mock(EntryTypeService::class);
         $service->shouldReceive('update')->once()->andReturn($updated);

@@ -2,15 +2,18 @@
 
 namespace Tests\Unit\Traits;
 
+use AdAstra\Field\Types\Text;
 use AdAstra\Models\Field;
 use AdAstra\Models\Field\Type as FieldType;
 use AdAstra\Models\Media;
 use AdAstra\Models\Media\Library;
 use AdAstra\Models\User;
+use AdAstra\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use ReflectionProperty;
 use Tests\TestCase;
 
 /**
@@ -33,7 +36,7 @@ class HasMediaTest extends TestCase
 
     private function resetFieldHandleCache(): void
     {
-        $ref = new \ReflectionProperty(\AdAstra\Traits\HasMedia::class, 'fieldHandleCache');
+        $ref = new ReflectionProperty(HasMedia::class, 'fieldHandleCache');
         $ref->setAccessible(true);
         $ref->setValue(null, []);
     }
@@ -45,8 +48,8 @@ class HasMediaTest extends TestCase
     private function makeLibrary(string $handle = 'general'): Library
     {
         return Library::create([
-            'name'    => ucfirst($handle) . ' Library',
-            'handle'  => $handle,
+            'name' => ucfirst($handle) . ' Library',
+            'handle' => $handle,
             'adapter' => 'local',
         ]);
     }
@@ -55,8 +58,8 @@ class HasMediaTest extends TestCase
     {
         return Media::factory()->image()->create([
             'library_id' => $library->id,
-            'disk'       => 'local',
-            'path'       => $path,
+            'disk' => 'local',
+            'path' => $path,
         ]);
     }
 
@@ -76,7 +79,7 @@ class HasMediaTest extends TestCase
     public function test_attach_media_creates_pivot_row(): void
     {
         Storage::fake('local');
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $media = $this->makeMedia($this->makeLibrary());
 
         $user->attachMedia($media);
@@ -87,7 +90,7 @@ class HasMediaTest extends TestCase
     public function test_attach_media_is_idempotent(): void
     {
         Storage::fake('local');
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $media = $this->makeMedia($this->makeLibrary());
 
         $user->attachMedia($media);
@@ -99,16 +102,16 @@ class HasMediaTest extends TestCase
     public function test_attach_media_uses_sentinel_field_id_zero(): void
     {
         Storage::fake('local');
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $media = $this->makeMedia($this->makeLibrary());
 
         $user->attachMedia($media);
 
         $this->assertDatabaseHas('mediables', [
-            'media_id'      => $media->id,
+            'media_id' => $media->id,
             'mediable_type' => 'user',         // morphMap alias
-            'mediable_id'   => $user->id,
-            'field_id'      => 0,
+            'mediable_id' => $user->id,
+            'field_id' => 0,
         ]);
     }
 
@@ -119,7 +122,7 @@ class HasMediaTest extends TestCase
     public function test_detach_media_removes_pivot_row(): void
     {
         Storage::fake('local');
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $media = $this->makeMedia($this->makeLibrary());
 
         $user->attachMedia($media);
@@ -131,19 +134,19 @@ class HasMediaTest extends TestCase
     public function test_detach_media_removes_all_pivot_rows_for_item(): void
     {
         Storage::fake('local');
-        $user  = User::factory()->create();
-        $lib   = $this->makeLibrary();
+        $user = User::factory()->create();
+        $lib = $this->makeLibrary();
         $media = $this->makeMedia($lib);
 
         // Insert a field-driven row as well (field_id = 5) via raw insert.
-        \Illuminate\Support\Facades\DB::table('mediables')->insert([
-            'media_id'      => $media->id,
+        DB::table('mediables')->insert([
+            'media_id' => $media->id,
             'mediable_type' => 'user',
-            'mediable_id'   => $user->id,
-            'field_id'      => 5,
-            'sort_order'    => 0,
-            'created_at'    => now(),
-            'updated_at'    => now(),
+            'mediable_id' => $user->id,
+            'field_id' => 5,
+            'sort_order' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $user->detachMedia($media);
@@ -158,8 +161,8 @@ class HasMediaTest extends TestCase
     public function test_sync_media_replaces_direct_attachments(): void
     {
         Storage::fake('local');
-        $user   = User::factory()->create();
-        $lib    = $this->makeLibrary();
+        $user = User::factory()->create();
+        $lib = $this->makeLibrary();
         $mediaA = $this->makeMedia($lib, 'uploads/a.jpg');
         $mediaB = $this->makeMedia($lib, 'uploads/b.jpg');
 
@@ -184,7 +187,7 @@ class HasMediaTest extends TestCase
     public function test_first_media_returns_first_direct_attachment(): void
     {
         Storage::fake('local');
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $media = $this->makeMedia($this->makeLibrary());
 
         $user->attachMedia($media);
@@ -196,12 +199,12 @@ class HasMediaTest extends TestCase
     public function test_first_media_scoped_to_library_handle(): void
     {
         Storage::fake('local');
-        $user    = User::factory()->create();
+        $user = User::factory()->create();
         $avatars = $this->makeLibrary('avatars');
-        $docs    = $this->makeLibrary('docs');
+        $docs = $this->makeLibrary('docs');
 
         $avatar = $this->makeMedia($avatars, 'uploads/avatar.jpg');
-        $doc    = $this->makeMedia($docs,    'uploads/doc.jpg');
+        $doc = $this->makeMedia($docs, 'uploads/doc.jpg');
 
         $user->attachMedia($avatar);
         $user->attachMedia($doc);
@@ -215,7 +218,7 @@ class HasMediaTest extends TestCase
     public function test_first_media_returns_null_when_library_handle_does_not_match(): void
     {
         Storage::fake('local');
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $media = $this->makeMedia($this->makeLibrary('general'), 'uploads/g.jpg');
 
         $user->attachMedia($media);
@@ -230,19 +233,19 @@ class HasMediaTest extends TestCase
     public function test_media_for_field_scopes_by_field_id(): void
     {
         Storage::fake('local');
-        $user  = User::factory()->create();
-        $lib   = $this->makeLibrary();
+        $user = User::factory()->create();
+        $lib = $this->makeLibrary();
         $media = $this->makeMedia($lib);
 
         // Simulate a field-driven pivot (field_id = 7).
-        \Illuminate\Support\Facades\DB::table('mediables')->insert([
-            'media_id'      => $media->id,
+        DB::table('mediables')->insert([
+            'media_id' => $media->id,
             'mediable_type' => 'user',
-            'mediable_id'   => $user->id,
-            'field_id'      => 7,
-            'sort_order'    => 0,
-            'created_at'    => now(),
-            'updated_at'    => now(),
+            'mediable_id' => $user->id,
+            'field_id' => 7,
+            'sort_order' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $result = $user->mediaForField(7)->get();
@@ -254,7 +257,7 @@ class HasMediaTest extends TestCase
     public function test_media_for_field_does_not_return_direct_attachments(): void
     {
         Storage::fake('local');
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $media = $this->makeMedia($this->makeLibrary());
 
         $user->attachMedia($media); // field_id = 0 sentinel
@@ -269,19 +272,19 @@ class HasMediaTest extends TestCase
     public function test_media_for_field_with_string_handle_queries_db_once(): void
     {
         Storage::fake('local');
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $field = Field::factory()->create(['handle' => 'gallery']);
-        $lib   = $this->makeLibrary();
+        $lib = $this->makeLibrary();
         $media = $this->makeMedia($lib);
 
         DB::table('mediables')->insert([
-            'media_id'      => $media->id,
+            'media_id' => $media->id,
             'mediable_type' => 'user',
-            'mediable_id'   => $user->id,
-            'field_id'      => $field->id,
-            'sort_order'    => 0,
-            'created_at'    => now(),
-            'updated_at'    => now(),
+            'mediable_id' => $user->id,
+            'field_id' => $field->id,
+            'sort_order' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         DB::enableQueryLog();
@@ -304,9 +307,9 @@ class HasMediaTest extends TestCase
     public function test_media_for_field_caches_different_handles_independently(): void
     {
         Storage::fake('local');
-        $user    = User::factory()->create();
-        $type    = FieldType::firstOrCreate(['object' => \AdAstra\Field\Types\Text::class], ['name' => 'Text', 'settings' => []]);
-        $gallery  = Field::factory()->create(['handle' => 'gallery-a', 'field_type_id' => $type->id]);
+        $user = User::factory()->create();
+        $type = FieldType::firstOrCreate(['object' => Text::class], ['name' => 'Text', 'settings' => []]);
+        $gallery = Field::factory()->create(['handle' => 'gallery-a', 'field_type_id' => $type->id]);
         $featured = Field::factory()->create(['handle' => 'featured-a', 'field_type_id' => $type->id]);
 
         DB::enableQueryLog();
@@ -318,7 +321,7 @@ class HasMediaTest extends TestCase
         DB::disableQueryLog();
 
         $fieldQueries = collect($log)->filter(
-            fn ($q) => str_contains($q['query'], 'fields') && str_contains($q['query'], 'handle')
+            fn($q) => str_contains($q['query'], 'fields') && str_contains($q['query'], 'handle')
         );
 
         $this->assertSame(2, $fieldQueries->count(),
@@ -327,7 +330,7 @@ class HasMediaTest extends TestCase
 
     public function test_media_for_field_returns_null_field_id_for_unknown_handle(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $user->mediaForField('no-such-field')->get();
 
         $this->assertCount(0, $result);

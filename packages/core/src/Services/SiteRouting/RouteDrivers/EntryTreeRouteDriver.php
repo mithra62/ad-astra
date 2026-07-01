@@ -58,15 +58,15 @@ class EntryTreeRouteDriver implements RouteDriverInterface
 
     private function isSafeRedirect(?string $url): bool
     {
-        if (! $url) {
+        if (!$url) {
             return false;
         }
 
-        if (str_starts_with($url, '/') && ! str_starts_with($url, '//')) {
+        if (str_starts_with($url, '/') && !str_starts_with($url, '//')) {
             return true;  // relative
         }
 
         $scheme = parse_url($url, PHP_URL_SCHEME);
-        return in_array(strtolower((string) $scheme), ['http', 'https'], true);
+        return in_array(strtolower((string)$scheme), ['http', 'https'], true);
     }
 }

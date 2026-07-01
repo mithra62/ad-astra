@@ -70,11 +70,11 @@ class UserServiceOauthRevocationTest extends TestCase
 
     public function test_upsert_does_not_touch_already_revoked_tokens(): void
     {
-        $user  = User::factory()->create();
-        $past  = now()->subHour();
+        $user = User::factory()->create();
+        $past = now()->subHour();
         $token = OauthToken::factory()->create([
-            'user_id'    => $user->id,
-            'provider'   => 'google',
+            'user_id' => $user->id,
+            'provider' => 'google',
             'revoked_at' => $past,
         ]);
 
@@ -127,7 +127,7 @@ class UserServiceOauthRevocationTest extends TestCase
 
         $google1 = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'google', 'revoked_at' => null]);
         $google2 = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'google', 'revoked_at' => null]);
-        $github  = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'github', 'revoked_at' => null]);
+        $github = OauthToken::factory()->create(['user_id' => $user->id, 'provider' => 'github', 'revoked_at' => null]);
 
         $this->service->revokeAllOauthTokens($user, 'google');
 

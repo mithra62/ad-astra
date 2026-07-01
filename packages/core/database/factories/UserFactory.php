@@ -3,12 +3,13 @@
 namespace Database\Factories;
 
 use AdAstra\Enums\UserStatus;
+use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -24,7 +25,7 @@ class UserFactory extends Factory
      */
     public function newModel(array $attributes = [])
     {
-        return (new \AdAstra\Models\User())->forceFill($attributes);
+        return (new User())->forceFill($attributes);
     }
 
     /**
@@ -35,15 +36,15 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name'             => fake()->name(),
-            'email'            => fake()->unique()->safeEmail(),
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password'         => static::$password ??= Hash::make('password'),
-            'remember_token'   => Str::random(10),
-            'status'           => UserStatus::ACTIVE,
-            'suspended_until'  => null,
-            'banned_at'        => null,
-            'locked_until'     => null,
+            'password' => static::$password ??= Hash::make('password'),
+            'remember_token' => Str::random(10),
+            'status' => UserStatus::ACTIVE,
+            'suspended_until' => null,
+            'banned_at' => null,
+            'locked_until' => null,
         ];
     }
 
@@ -52,7 +53,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }
@@ -63,37 +64,37 @@ class UserFactory extends Factory
 
     public function active(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => UserStatus::ACTIVE,
         ]);
     }
 
     public function pending(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => UserStatus::PENDING,
         ]);
     }
 
     public function inactive(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => UserStatus::INACTIVE,
         ]);
     }
 
     public function suspended(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status'          => UserStatus::SUSPENDED,
+        return $this->state(fn(array $attributes) => [
+            'status' => UserStatus::SUSPENDED,
             'suspended_until' => now()->addDays(7),
         ]);
     }
 
     public function banned(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status'    => UserStatus::BANNED,
+        return $this->state(fn(array $attributes) => [
+            'status' => UserStatus::BANNED,
             'banned_at' => now(),
         ]);
     }
@@ -104,7 +105,7 @@ class UserFactory extends Factory
      */
     public function locked(int $minutes = 30): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'locked_until' => now()->addMinutes($minutes),
         ]);
     }

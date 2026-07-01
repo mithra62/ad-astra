@@ -29,17 +29,17 @@ class EntryGroupResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'                 => $this->id,
-            'name'               => $this->name,
-            'handle'             => $this->handle,
-            'description'        => $this->description,
-            'sort_order'         => $this->sort_order,
-            'status_group_id'    => $this->status_group_id,
-            'field_layout_id'    => $this->field_layout_id,
-            'entries_count'      => $this->whenCounted('entries'),
-            'entry_types_count'  => $this->whenCounted('entryTypes'),
-            'created_at'         => $this->created_at,
-            'updated_at'         => $this->updated_at,
+            'id' => $this->id,
+            'name' => $this->name,
+            'handle' => $this->handle,
+            'description' => $this->description,
+            'sort_order' => $this->sort_order,
+            'status_group_id' => $this->status_group_id,
+            'field_layout_id' => $this->field_layout_id,
+            'entries_count' => $this->whenCounted('entries'),
+            'entry_types_count' => $this->whenCounted('entryTypes'),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

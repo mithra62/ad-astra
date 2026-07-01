@@ -19,7 +19,8 @@
 {% block secondary_sidebar %}
     <input id="secnav-toggle" type="checkbox">
 
-    <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-edge bg-surface px-4 py-2.5 text-sm font-medium text-muted hover:bg-subtle lg:hidden">
+    <label for="secnav-toggle"
+           class="flex cursor-pointer items-center justify-between border-b border-edge bg-surface px-4 py-2.5 text-sm font-medium text-muted hover:bg-subtle lg:hidden">
         <span class="flex items-center gap-2">
             <svg class="h-4 w-4 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
@@ -35,9 +36,12 @@
 
     <div id="secondary-nav-panel" class="hidden border-b border-edge bg-surface px-4 py-3 lg:hidden">
         <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
-            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries') }}">Libraries</a>
-            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries.show', library) }}">View Library</a>
-            <a class="flex items-center gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm font-medium text-accent" href="{{ route('media.create', library) }}">Upload</a>
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle"
+               href="{{ route('media.libraries') }}">Libraries</a>
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle"
+               href="{{ route('media.libraries.show', library) }}">View Library</a>
+            <a class="flex items-center gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm font-medium text-accent"
+               href="{{ route('media.create', library) }}">Upload</a>
         </nav>
     </div>
 
@@ -47,21 +51,30 @@
                 <h5 class="text-sm font-semibold text-content">{{ library.name }}</h5>
             </div>
             <nav class="p-2">
-                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries') }}">
-                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle"
+                   href="{{ route('media.libraries') }}">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
                     </svg>
                     All Libraries
                 </a>
-                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries.show', library) }}">
-                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle"
+                   href="{{ route('media.libraries.show', library) }}">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                     View Library
                 </a>
-                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm font-medium text-accent" href="{{ route('media.create', library) }}">
-                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm font-medium text-accent"
+                   href="{{ route('media.create', library) }}">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                     </svg>
                     Upload Files
                 </a>
@@ -77,7 +90,8 @@
                 <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Upload Media</h1>
                 <p class="mt-1 text-sm text-muted">Add new files to the {{ library.name }} library.</p>
             </div>
-            <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto" href="{{ route('media.libraries.show', library) }}">
+            <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto"
+               href="{{ route('media.libraries.show', library) }}">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                 </svg>
@@ -85,7 +99,8 @@
             </a>
         </div>
 
-        <form method="POST" action="{{ route('media.libraries.upload', library) }}" enctype="multipart/form-data" class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_20rem] lg:items-start">
+        <form method="POST" action="{{ route('media.libraries.upload', library) }}" enctype="multipart/form-data"
+              class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_20rem] lg:items-start">
             {{ csrf_field() }}
 
             <div class="flex flex-col gap-4">
@@ -99,14 +114,19 @@
                                 <p class="text-sm text-red-600">{{ errors.first('file') }}</p>
                             </div>
                         {% endif %}
-                        <label for="file" class="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-edge bg-subtle px-6 py-14 text-center transition-colors hover:border-emerald-400 hover:bg-accent-soft/50">
-                            <svg class="h-10 w-10 text-faint" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                        <label for="file"
+                               class="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-edge bg-subtle px-6 py-14 text-center transition-colors hover:border-emerald-400 hover:bg-accent-soft/50">
+                            <svg class="h-10 w-10 text-faint" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
                             </svg>
                             <div>
-                                <p class="text-sm font-semibold text-content">Click to select a file <span class="text-emerald-600">or drag and drop</span></p>
+                                <p class="text-sm font-semibold text-content">Click to select a file <span
+                                        class="text-emerald-600">or drag and drop</span></p>
                                 {% if library.allowed_types %}
-                                    <p class="mt-1 text-xs text-faint">Allowed: {{ library.allowed_types|join(', ') }}</p>
+                                    <p class="mt-1 text-xs text-faint">
+                                        Allowed: {{ library.allowed_types|join(', ') }}</p>
                                 {% else %}
                                     <p class="mt-1 text-xs text-faint">Any file type accepted.</p>
                                 {% endif %}
@@ -127,7 +147,8 @@
                         <h5 class="text-sm font-semibold text-content">Upload</h5>
                     </div>
                     <div class="px-5 py-4">
-                        <button type="submit" class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                        <button type="submit"
+                                class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                             Upload File
                         </button>
                     </div>
@@ -151,7 +172,8 @@
                         {% if library.allowed_types %}
                             <li class="flex items-start justify-between gap-4 py-2">
                                 <span>Allowed types</span>
-                                <span class="text-right text-xs text-faint">{{ library.allowed_types|join(', ') }}</span>
+                                <span
+                                    class="text-right text-xs text-faint">{{ library.allowed_types|join(', ') }}</span>
                             </li>
                         {% else %}
                             <li class="flex items-center justify-between gap-4 py-2">

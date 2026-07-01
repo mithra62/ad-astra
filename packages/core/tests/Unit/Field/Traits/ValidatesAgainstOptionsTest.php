@@ -12,7 +12,9 @@ class ValidatesAgainstOptionsTest extends TestCase
         return new class($settings) {
             use ValidatesAgainstOptions;
 
-            public function __construct(private array $settings) {}
+            public function __construct(private array $settings)
+            {
+            }
 
             public function getSetting(string $key, mixed $default = null): mixed
             {
@@ -90,7 +92,7 @@ class ValidatesAgainstOptionsTest extends TestCase
 
     public function test_validate_against_options_checks_each_array_value_when_strict(): void
     {
-        $type   = $this->makeType(['options' => $this->sampleOptions(), 'strict_options' => true]);
+        $type = $this->makeType(['options' => $this->sampleOptions(), 'strict_options' => true]);
         $result = $type->validateAgainstOptions(['foo', 'invalid']);
         $this->assertIsString($result);
         $this->assertStringContainsString('invalid', $result);
@@ -114,7 +116,7 @@ class ValidatesAgainstOptionsTest extends TestCase
 
     public function test_render_orphaned_value_returns_html_for_invalid_value(): void
     {
-        $type   = $this->makeType();
+        $type = $this->makeType();
         $result = $type->renderOrphanedValue('gone', $this->sampleOptions());
         $this->assertStringContainsString('data-orphaned="true"', $result);
         $this->assertStringContainsString('[orphaned:', $result);

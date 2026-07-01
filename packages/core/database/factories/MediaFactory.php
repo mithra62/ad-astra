@@ -18,32 +18,32 @@ class MediaFactory extends Factory
 
     public function definition(): array
     {
-        $ext      = fake()->randomElement(['jpg', 'png', 'pdf', 'mp4']);
+        $ext = fake()->randomElement(['jpg', 'png', 'pdf', 'mp4']);
         $fileName = Str::uuid() . '.' . $ext;
 
         return [
-            'library_id'    => Library::factory(),
-            'name'          => fake()->words(2, true),
-            'file_name'     => $fileName,
+            'library_id' => Library::factory(),
+            'name' => fake()->words(2, true),
+            'file_name' => $fileName,
             'original_name' => fake()->word() . '.' . $ext,
-            'mime_type'     => $this->mimeForExt($ext),
-            'disk'          => 'local',
-            'path'          => 'uploads/' . $fileName,
-            'size'          => fake()->numberBetween(1024, 5 * 1024 * 1024),
-            'sort_order'    => 0,
+            'mime_type' => $this->mimeForExt($ext),
+            'disk' => 'local',
+            'path' => 'uploads/' . $fileName,
+            'size' => fake()->numberBetween(1024, 5 * 1024 * 1024),
+            'sort_order' => 0,
         ];
     }
 
     public function image(): static
     {
         return $this->state(function () {
-            $ext      = fake()->randomElement(['jpg', 'png', 'webp']);
+            $ext = fake()->randomElement(['jpg', 'png', 'webp']);
             $fileName = Str::uuid() . '.' . $ext;
             return [
-                'file_name'     => $fileName,
+                'file_name' => $fileName,
                 'original_name' => 'photo.' . $ext,
-                'mime_type'     => 'image/' . ($ext === 'jpg' ? 'jpeg' : $ext),
-                'path'          => 'uploads/' . $fileName,
+                'mime_type' => 'image/' . ($ext === 'jpg' ? 'jpeg' : $ext),
+                'path' => 'uploads/' . $fileName,
             ];
         });
     }
@@ -53,10 +53,10 @@ class MediaFactory extends Factory
         return $this->state(function () {
             $fileName = Str::uuid() . '.pdf';
             return [
-                'file_name'     => $fileName,
+                'file_name' => $fileName,
                 'original_name' => 'document.pdf',
-                'mime_type'     => 'application/pdf',
-                'path'          => 'uploads/' . $fileName,
+                'mime_type' => 'application/pdf',
+                'path' => 'uploads/' . $fileName,
             ];
         });
     }
@@ -72,13 +72,13 @@ class MediaFactory extends Factory
             $group = StatusGroup::factory()->create();
             $status = Status::factory()->create([
                 'status_group_id' => $group->id,
-                'is_default'      => true,
-                'is_public'       => $isPublic,
+                'is_default' => true,
+                'is_public' => $isPublic,
             ]);
 
             return [
-                'status_id'        => $status->id,
-                'status_handle'    => $status->handle,
+                'status_id' => $status->id,
+                'status_handle' => $status->handle,
                 'status_is_public' => $status->is_public,
             ];
         });
@@ -87,10 +87,10 @@ class MediaFactory extends Factory
     private function mimeForExt(string $ext): string
     {
         return match ($ext) {
-            'jpg'  => 'image/jpeg',
-            'png'  => 'image/png',
-            'pdf'  => 'application/pdf',
-            'mp4'  => 'video/mp4',
+            'jpg' => 'image/jpeg',
+            'png' => 'image/png',
+            'pdf' => 'application/pdf',
+            'mp4' => 'video/mp4',
             default => 'application/octet-stream',
         };
     }

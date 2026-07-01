@@ -20,14 +20,14 @@ class EventEntryType extends AbstractEntryType
     {
         $errors = [];
 
-        $endRaw   = $data['fields']['end_date']   ?? null;
+        $endRaw = $data['fields']['end_date'] ?? null;
         $startRaw = $data['fields']['start_date'] ?? $this->existingFieldValue($entry, 'start_date');
 
         if ($endRaw === null || $startRaw === null) {
             return $errors;
         }
 
-        $end   = Carbon::parse($endRaw);
+        $end = Carbon::parse($endRaw);
         $start = $startRaw instanceof Carbon ? $startRaw : Carbon::parse($startRaw);
 
         if ($end->lt($start)) {

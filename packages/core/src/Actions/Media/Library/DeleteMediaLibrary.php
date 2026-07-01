@@ -11,12 +11,12 @@ class DeleteMediaLibrary extends AbstractAction
     public function delete(Library $library): bool
     {
         $libraryId = $library->id;
-        $deleted   = $library->delete();
+        $deleted = $library->delete();
 
         if ($deleted) {
             ProcessMediaLibraryRemoval::dispatch($libraryId);
         }
 
-        return (bool) $deleted;
+        return (bool)$deleted;
     }
 }

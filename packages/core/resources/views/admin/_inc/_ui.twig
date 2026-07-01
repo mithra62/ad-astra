@@ -34,7 +34,8 @@
         'key':           '<path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>',
         'documents':     '<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>'
     } %}
-    <svg class="{{ classes }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">{{ (paths[name] ?? '')|raw }}</svg>
+    <svg class="{{ classes }}" fill="none" stroke="currentColor" stroke-width="2"
+         viewBox="0 0 24 24">{{ (paths[name] ?? '')|raw }}</svg>
 {% endmacro %}
 
 {# --- button ------------------------------------------------------------------
@@ -49,9 +50,11 @@
     {% set sizes = {'sm': 'px-3 py-1.5 text-sm', 'md': 'px-3 py-2 text-sm', 'lg': 'px-4 py-2 text-sm'} %}
     {% set cls = 'inline-flex items-center justify-center gap-1.5 rounded-md font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 ' ~ (variants[variant] ?? variants.primary) ~ ' ' ~ (sizes[size] ?? sizes.md) %}
     {% if href %}
-        <a href="{{ href }}" class="{{ cls }}" {{ attrs|raw }}>{% if icon %}{{ _self.icon(icon) }}{% endif %}{{ label }}</a>
+        <a href="{{ href }}"
+           class="{{ cls }}" {{ attrs|raw }}>{% if icon %}{{ _self.icon(icon) }}{% endif %}{{ label }}</a>
     {% else %}
-        <button type="{{ type|default('button') }}" class="{{ cls }}" {{ attrs|raw }}>{% if icon %}{{ _self.icon(icon) }}{% endif %}{{ label }}</button>
+        <button type="{{ type|default('button') }}"
+                class="{{ cls }}" {{ attrs|raw }}>{% if icon %}{{ _self.icon(icon) }}{% endif %}{{ label }}</button>
     {% endif %}
 {% endmacro %}
 
@@ -65,7 +68,8 @@
         'danger':  'bg-red-50 text-red-700',
         'warning': 'bg-amber-100 text-amber-800'
     } %}
-    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ variants[variant] ?? variants.neutral }}">{{ label }}</span>
+    <span
+        class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ variants[variant] ?? variants.neutral }}">{{ label }}</span>
 {% endmacro %}
 
 {# --- breadcrumbs -------------------------------------------------------------
@@ -75,7 +79,8 @@
     <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
         {% for item in items %}
             {% if item.href is defined and item.href %}
-                <a class="inline-flex items-center gap-1 hover:text-content" href="{{ item.href }}">{% if item.icon is defined %}{{ _self.icon(item.icon, 'inline-block h-3 w-3 align-middle') }}{% endif %}{{ item.label }}</a>
+                <a class="inline-flex items-center gap-1 hover:text-content"
+                   href="{{ item.href }}">{% if item.icon is defined %}{{ _self.icon(item.icon, 'inline-block h-3 w-3 align-middle') }}{% endif %}{{ item.label }}</a>
             {% else %}
                 <span class="text-content">{{ item.label }}</span>
             {% endif %}
@@ -99,7 +104,8 @@
     <div class="flex min-h-80 items-center justify-center px-6 py-14">
         <div class="max-w-sm text-center">
             {% if icon %}
-                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-faint">{{ _self.icon(icon, 'h-6 w-6') }}</div>
+                <div
+                    class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-faint">{{ _self.icon(icon, 'h-6 w-6') }}</div>
             {% endif %}
             <h2 class="mt-4 text-base font-semibold text-content">{{ title }}</h2>
             <p class="mt-1 text-sm text-muted">{{ description }}</p>
@@ -123,7 +129,8 @@
    prototype.js/prototype.css already wire up for the mobile toggle. #}
 {% macro section_nav(title, items) %}
     <input id="secnav-toggle" type="checkbox">
-    <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-edge bg-surface px-4 py-2.5 text-sm font-medium text-muted hover:bg-subtle lg:hidden">
+    <label for="secnav-toggle"
+           class="flex cursor-pointer items-center justify-between border-b border-edge bg-surface px-4 py-2.5 text-sm font-medium text-muted hover:bg-subtle lg:hidden">
         <span class="flex items-center gap-2">{{ _self.icon('menu', 'h-4 w-4 text-faint') }} Section Navigation</span>
         <span class="secnav-chevron text-faint">{{ _self.icon('chevron-down') }}</span>
     </label>
@@ -132,7 +139,8 @@
         <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
             {% for item in items %}
                 {% if item.href is defined %}
-                    <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium {% if item.active %}bg-accent-soft text-accent{% else %}text-muted hover:bg-subtle{% endif %}" href="{{ item.href }}">{{ item.label }}</a>
+                    <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium {% if item.active %}bg-accent-soft text-accent{% else %}text-muted hover:bg-subtle{% endif %}"
+                       href="{{ item.href }}">{{ item.label }}</a>
                 {% endif %}
             {% endfor %}
         </nav>
@@ -150,7 +158,8 @@
                     {% elseif item.heading is defined %}
                         <p class="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-faint">{{ item.heading }}</p>
                     {% else %}
-                        <a href="{{ item.href }}" class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium {% if item.active %}bg-accent-soft text-accent{% else %}text-muted hover:bg-subtle{% endif %}">{% if item.icon is defined %}{{ _self.icon(item.icon, 'h-4 w-4 shrink-0') }}{% endif %}{{ item.label }}</a>
+                        <a href="{{ item.href }}"
+                           class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium {% if item.active %}bg-accent-soft text-accent{% else %}text-muted hover:bg-subtle{% endif %}">{% if item.icon is defined %}{{ _self.icon(item.icon, 'h-4 w-4 shrink-0') }}{% endif %}{{ item.label }}</a>
                     {% endif %}
                 {% endfor %}
             </nav>

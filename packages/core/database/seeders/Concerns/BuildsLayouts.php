@@ -22,19 +22,19 @@ trait BuildsLayouts
      * Fields that do not exist in the database are silently skipped so that
      * seeders remain re-runnable even when the field registry is incomplete.
      *
-     * @param  array<string, string[]>  $tabs  Tab name => [field handles]
+     * @param array<string, string[]> $tabs Tab name => [field handles]
      */
     private function createLayout(string $name, array $tabs): FieldLayout
     {
-        $layout   = FieldLayout::create(['name' => $name, 'handle' => Str::slug($name)]);
+        $layout = FieldLayout::create(['name' => $name, 'handle' => Str::slug($name)]);
         $tabOrder = 1;
 
         foreach ($tabs as $tabName => $fieldHandles) {
             $tab = Tab::create([
                 'field_layout_id' => $layout->id,
-                'name'            => $tabName,
-                'handle'          => Str::slug($tabName),
-                'sort_order'      => $tabOrder++,
+                'name' => $tabName,
+                'handle' => Str::slug($tabName),
+                'sort_order' => $tabOrder++,
             ]);
 
             $elementOrder = 1;
@@ -46,9 +46,9 @@ trait BuildsLayouts
 
                 TabElement::create([
                     'field_layout_tab_id' => $tab->id,
-                    'field_id'            => $field->id,
-                    'required'            => false,
-                    'sort_order'          => $elementOrder++,
+                    'field_id' => $field->id,
+                    'required' => false,
+                    'sort_order' => $elementOrder++,
                 ]);
             }
         }
@@ -60,7 +60,7 @@ trait BuildsLayouts
      * Add a tab (with its fields) to an existing layout only if no tab with
      * that name already exists. Safe to re-run on existing databases.
      *
-     * @param  string[]  $fieldHandles
+     * @param string[] $fieldHandles
      */
     private function addTabIfMissing(int $layoutId, string $tabName, array $fieldHandles, int $sortOrder): void
     {
@@ -74,9 +74,9 @@ trait BuildsLayouts
 
         $tab = Tab::create([
             'field_layout_id' => $layoutId,
-            'name'            => $tabName,
-            'handle'          => Str::slug($tabName),
-            'sort_order'      => $sortOrder,
+            'name' => $tabName,
+            'handle' => Str::slug($tabName),
+            'sort_order' => $sortOrder,
         ]);
 
         $order = 1;
@@ -88,9 +88,9 @@ trait BuildsLayouts
 
             TabElement::create([
                 'field_layout_tab_id' => $tab->id,
-                'field_id'            => $field->id,
-                'required'            => false,
-                'sort_order'          => $order++,
+                'field_id' => $field->id,
+                'required' => false,
+                'sort_order' => $order++,
             ]);
         }
     }

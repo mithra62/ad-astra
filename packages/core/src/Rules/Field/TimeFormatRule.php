@@ -15,10 +15,11 @@ use Illuminate\Contracts\Validation\ValidationRule;
 readonly class TimeFormatRule implements ValidationRule
 {
     public function __construct(
-        private bool $includeSeconds = false,
+        private bool    $includeSeconds = false,
         private ?string $minTime = null,
         private ?string $maxTime = null,
-    ) {
+    )
+    {
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void

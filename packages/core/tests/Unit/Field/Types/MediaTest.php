@@ -4,6 +4,8 @@ namespace Tests\Unit\Field\Types;
 
 use AdAstra\Contracts\SyncsToMediables;
 use AdAstra\Field\Types\Media;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type;
 use AdAstra\Models\Media as MediaModel;
 use AdAstra\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,7 +23,7 @@ class MediaTest extends TestCase
         // The Media field's render() calls route('media.picker.index'); make
         // sure that name resolves under the testing route table.
         if (!Route::has('media.picker.index')) {
-            Route::get('/__test/picker', fn () => null)->name('media.picker.index');
+            Route::get('/__test/picker', fn() => null)->name('media.picker.index');
         }
     }
 
@@ -33,8 +35,8 @@ class MediaTest extends TestCase
     private function makeLibrary(string $handle = 'lib'): Library
     {
         return Library::create([
-            'name'    => ucfirst($handle) . ' Library',
-            'handle'  => $handle,
+            'name' => ucfirst($handle) . ' Library',
+            'handle' => $handle,
             'adapter' => 'local',
         ]);
     }
@@ -97,7 +99,7 @@ class MediaTest extends TestCase
 
     public function test_value_preserves_saved_sort_order(): void
     {
-        $first  = MediaModel::factory()->create();
+        $first = MediaModel::factory()->create();
         $second = MediaModel::factory()->create();
 
         $result = $this->make()->value(json_encode([$second->id, $first->id]));
@@ -232,7 +234,7 @@ class MediaTest extends TestCase
         $html = $type->render(['input_name' => 'fields[gallery]']);
 
         $this->assertStringContainsString('Browse / Upload', $html);
-        $this->assertStringContainsString((string) $lib->id, $html);
+        $this->assertStringContainsString((string)$lib->id, $html);
     }
 
     public function test_render_shows_warning_when_no_libraries_configured(): void
@@ -253,16 +255,16 @@ class MediaTest extends TestCase
     // which makes any `required` check fail even when media is selected.
     // -------------------------------------------------------------------------
 
-    private function makeFieldWithHandle(string $handle): \AdAstra\Models\Field
+    private function makeFieldWithHandle(string $handle): Field
     {
-        $fieldType = \AdAstra\Models\Field\Type::firstOrCreate(
+        $fieldType = Type::firstOrCreate(
             ['object' => Media::class],
             ['name' => 'Media', 'object' => Media::class]
         );
 
-        return \AdAstra\Models\Field::factory()->create([
+        return Field::factory()->create([
             'field_type_id' => $fieldType->id,
-            'handle'        => $handle,
+            'handle' => $handle,
         ]);
     }
 
@@ -319,9 +321,9 @@ class MediaTest extends TestCase
         $field->settings = ['libraries' => [$lib->id]];
         $field->save();
 
-        $stale  = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'stale.jpg']);
-        $userA  = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'just-uploaded-a.jpg']);
-        $userB  = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'just-uploaded-b.jpg']);
+        $stale = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'stale.jpg']);
+        $userA = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'just-uploaded-a.jpg']);
+        $userB = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'just-uploaded-b.jpg']);
 
         // Simulate post-redirect state: bind a session to the current Request
         // (unit tests don't go through HTTP middleware that does this) and

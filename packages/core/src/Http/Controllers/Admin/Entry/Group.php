@@ -66,7 +66,7 @@ class Group extends Controller
             'statusGroup.statuses',
         ])->find($id);
 
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
@@ -100,7 +100,7 @@ class Group extends Controller
             'fieldLayout',
         ])->find($id);
 
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
@@ -117,9 +117,9 @@ class Group extends Controller
 
     public function update(EditEntryGroupRequest $request, string $id)
     {
-        $group = EntryGroups::find((int) $id);
+        $group = EntryGroups::find((int)$id);
 
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             abort(404);
         }
 
@@ -132,9 +132,9 @@ class Group extends Controller
 
     public function destroy(DeleteEntryGroupRequest $request, string $id)
     {
-        $group = EntryGroups::find((int) $id);
+        $group = EntryGroups::find((int)$id);
 
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             return redirect()
                 ->route('entries.groups')
                 ->with('failure', trans('entry.group.not_found'));
@@ -151,7 +151,7 @@ class Group extends Controller
     {
         $group = EntryGroup::withCount('entries')->find($id);
 
-        if (! $group instanceof EntryGroup) {
+        if (!$group instanceof EntryGroup) {
             return redirect()->route('entries.groups')->with('failure', trans('entry.group.not_found'));
         }
 

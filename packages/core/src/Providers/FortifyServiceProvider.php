@@ -59,11 +59,11 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::authenticateUsing(function (Request $request) {
             $user = User::where('email', $request->email)->first();
 
-            if (! $user || ! Hash::check($request->password, $user->password)) {
+            if (!$user || !Hash::check($request->password, $user->password)) {
                 return null; // Fortify will handle "invalid credentials" error.
             }
 
-            if (! $user->canAccessSystem()) {
+            if (!$user->canAccessSystem()) {
                 throw ValidationException::withMessages([
                     Fortify::username() => [trans('auth.' . ($user->accessDeniedReason() ?? 'account_inactive'))],
                 ]);

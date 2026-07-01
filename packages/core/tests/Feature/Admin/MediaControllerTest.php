@@ -45,9 +45,9 @@ class MediaControllerTest extends TestCase
     {
         return Media::factory()->create([
             'library_id' => $library->id,
-            'disk'       => 'local',
-            'path'       => 'uploads/photo.jpg',
-            'file_name'  => 'photo.jpg',
+            'disk' => 'local',
+            'path' => 'uploads/photo.jpg',
+            'file_name' => 'photo.jpg',
         ]);
     }
 

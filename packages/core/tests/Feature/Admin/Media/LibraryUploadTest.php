@@ -45,7 +45,7 @@ class LibraryUploadTest extends TestCase
 
     public function test_upload_with_json_accept_returns_json_on_success(): void
     {
-        $user    = $this->makeSuperAdmin();
+        $user = $this->makeSuperAdmin();
         $library = $this->makeLibrary();
 
         $this->actingAs($user)
@@ -59,7 +59,7 @@ class LibraryUploadTest extends TestCase
 
     public function test_upload_with_json_accept_returns_422_json_when_no_file(): void
     {
-        $user    = $this->makeSuperAdmin();
+        $user = $this->makeSuperAdmin();
         $library = $this->makeLibrary();
 
         $this->actingAs($user)
@@ -84,7 +84,7 @@ class LibraryUploadTest extends TestCase
 
     public function test_upload_without_json_accept_returns_redirect_on_success(): void
     {
-        $user    = $this->makeSuperAdmin();
+        $user = $this->makeSuperAdmin();
         $library = $this->makeLibrary();
 
         $this->actingAs($user)

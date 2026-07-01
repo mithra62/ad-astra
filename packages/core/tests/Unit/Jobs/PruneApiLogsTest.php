@@ -57,13 +57,13 @@ class PruneApiLogsTest extends TestCase
 
     public function test_only_old_logs_are_pruned_leaving_recent_ones_intact(): void
     {
-        $old    = $this->apiLog(daysAgo: 91);
+        $old = $this->apiLog(daysAgo: 91);
         $recent = $this->apiLog(daysAgo: 10);
 
         (new PruneApiLogs)->handle();
 
         $this->assertDatabaseMissing('api_logs', ['id' => $old->id]);
-        $this->assertDatabaseHas('api_logs',    ['id' => $recent->id]);
+        $this->assertDatabaseHas('api_logs', ['id' => $recent->id]);
     }
 
     // -------------------------------------------------------------------------

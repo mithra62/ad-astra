@@ -49,7 +49,7 @@ class PodcastEpisodeEntryTypeTest extends TestCase
 
     public function test_before_update_throws_when_episode_duration_is_zero(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->create();
 
         $this->expectException(InvalidArgumentException::class);
@@ -59,7 +59,7 @@ class PodcastEpisodeEntryTypeTest extends TestCase
 
     public function test_before_update_throws_when_episode_duration_is_negative(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->create();
 
         $this->expectException(InvalidArgumentException::class);
@@ -69,7 +69,7 @@ class PodcastEpisodeEntryTypeTest extends TestCase
 
     public function test_before_update_throws_when_episode_duration_is_not_integer(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->create();
 
         $this->expectException(InvalidArgumentException::class);
@@ -79,7 +79,7 @@ class PodcastEpisodeEntryTypeTest extends TestCase
 
     public function test_before_update_passes_when_episode_duration_is_positive_integer(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->create();
 
         $result = $type->beforeUpdate($entry, ['fields' => ['episode_duration' => 3600]]);
@@ -89,7 +89,7 @@ class PodcastEpisodeEntryTypeTest extends TestCase
 
     public function test_before_update_passes_when_episode_duration_is_absent(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->create();
 
         $result = $type->beforeUpdate($entry, ['title' => 'Episode Update']);

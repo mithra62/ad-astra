@@ -1,4 +1,5 @@
-<div id="tab-taxonomy" class="tab-panel" role="tabpanel" aria-labelledby="btn-taxonomy" data-tab-panel="taxonomy" hidden>
+<div id="tab-taxonomy" class="tab-panel" role="tabpanel" aria-labelledby="btn-taxonomy" data-tab-panel="taxonomy"
+     hidden>
 
     <div class="divide-y divide-slate-100">
 
@@ -7,8 +8,9 @@
             <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-faint">Authors</h5>
             <label class="mb-1.5 block text-sm font-medium text-content" for="authors">Assign Authors</label>
             {% if authors is not empty %}
-                <select class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                        id="authors" name="authors[]" multiple size="5" data-tab-dirty="taxonomy">
+                <select
+                    class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    id="authors" name="authors[]" multiple size="5" data-tab-dirty="taxonomy">
                     {% for author in authors %}
                         <option value="{{ author.user_id }}"
                             {% if entry is defined %}
@@ -25,39 +27,41 @@
                 </select>
                 <p class="mt-1 text-xs text-faint">Hold Ctrl / Cmd to select multiple authors.</p>
             {% else %}
-                <p class="text-sm text-faint italic">No eligible authors yet. Mark users as authors from the <a href="{{ route('users.index') }}" class="text-emerald-600 hover:underline">Users</a> section.</p>
+                <p class="text-sm text-faint italic">No eligible authors yet. Mark users as authors from the <a
+                        href="{{ route('users.index') }}" class="text-emerald-600 hover:underline">Users</a> section.
+                </p>
             {% endif %}
         </div>
 
 
         {% if group.categoryGroups().count >= 1 %}
             {% for group in group.categoryGroups %}
-        <!-- Categories -->
-        <div class="px-5 py-5">
-            <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-faint">{{ group.name }}</h5>
-            <div class="grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-3">
-                {% for category in group.categories %}
-                <label class="flex items-center gap-2.5 py-2 text-sm text-content">
-                    <input class="rounded border-edge text-emerald-600 focus:ring-emerald-500"
-                           name="categories[]" type="checkbox" value="{{ category.id }}"
-                           data-tab-dirty="taxonomy" data-badge="taxonomy"
-                        {% if old('categories') %}
-                            {% for key, val in old('categories') %}
-                                {% if old('categories.' ~ key) == category.id %}checked{% endif %}
-                            {% endfor %}
-                        {% else %}
-                            {% for entryCat in entry.categories %}
-                                {% if entryCat.id == category.id %}checked{% endif %}
-                            {% endfor %}
-                        {% endif %}
-                    > {{ category.name }}
-                </label>
-                    {% endfor %}
-            </div>
-            {% if errors.has('categories') %}
-                <p class="mt-1 text-xs text-red-600">{{ errors.first('categories') }}</p>
-            {% endif %}
-        </div>
+                <!-- Categories -->
+                <div class="px-5 py-5">
+                    <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-faint">{{ group.name }}</h5>
+                    <div class="grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-3">
+                        {% for category in group.categories %}
+                            <label class="flex items-center gap-2.5 py-2 text-sm text-content">
+                                <input class="rounded border-edge text-emerald-600 focus:ring-emerald-500"
+                                       name="categories[]" type="checkbox" value="{{ category.id }}"
+                                       data-tab-dirty="taxonomy" data-badge="taxonomy"
+                                    {% if old('categories') %}
+                                        {% for key, val in old('categories') %}
+                                            {% if old('categories.' ~ key) == category.id %}checked{% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        {% for entryCat in entry.categories %}
+                                            {% if entryCat.id == category.id %}checked{% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                > {{ category.name }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {% if errors.has('categories') %}
+                        <p class="mt-1 text-xs text-red-600">{{ errors.first('categories') }}</p>
+                    {% endif %}
+                </div>
             {% endfor %}
         {% endif %}
 

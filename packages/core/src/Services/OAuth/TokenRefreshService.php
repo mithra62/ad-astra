@@ -4,10 +4,13 @@ namespace AdAstra\Services\OAuth;
 
 use AdAstra\Exceptions\Services\OAuth\TokenRefreshException;
 use AdAstra\Models\User\OauthToken;
+use Exception;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class TokenRefreshService
 {
@@ -18,7 +21,7 @@ class TokenRefreshService
     {
         try {
             return $this->refresh($token, $force, $leewaySeconds);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::warning('OAuth token refresh failed', [
                 'provider' => $token->provider,
                 'token_id' => $token->id,
@@ -92,9 +95,9 @@ class TokenRefreshService
             $response = $request
                 ->asForm() // most token endpoints expect x-www-form-urlencoded
                 ->post($tokenUrl, $payload);
-        } catch (\Illuminate\Http\Client\RequestException $e) {
+        } catch (RequestException $e) {
             throw TokenRefreshException::httpFailed($provider, $e->getCode() ?: $e->response->status(), (string)$e->response->body());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw TokenRefreshException::httpFailed($provider, 0, $e->getMessage());
         }
 

@@ -7,12 +7,15 @@ use AdAstra\Services\Media\TransformationDriverInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Throwable;
 
 class ProcessTransformation implements ShouldQueue
 {
     use Dispatchable, Queueable;
 
-    public function __construct(public readonly int $transformationId) {}
+    public function __construct(public readonly int $transformationId)
+    {
+    }
 
     public function handle(TransformationDriverInterface $driver): void
     {
@@ -25,7 +28,7 @@ class ProcessTransformation implements ShouldQueue
         try {
             // Driver is responsible for calling markComplete() with full metadata.
             $driver->applySync($transformation);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $transformation->markFailed($e->getMessage());
         }
     }

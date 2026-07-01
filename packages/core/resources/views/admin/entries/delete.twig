@@ -25,79 +25,144 @@
             <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Delete Article</h1>
             <p class="mt-1 text-sm text-muted">Review the details below before permanently removing this article.</p>
         </div>
-        <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto" href="index.twig">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto"
+           href="index.twig">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
             Back to Entries
         </a>
     </div>
 
     <div class="flex gap-3 rounded-lg border border-red-200 bg-red-50 px-5 py-4">
         <div class="shrink-0 pt-0.5">
-            <svg class="h-5 w-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            <svg class="h-5 w-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
         </div>
         <div>
             <p class="text-sm font-semibold text-red-800">This action cannot be undone</p>
-            <p class="mt-0.5 text-sm text-red-700">Deleting this article will permanently remove it along with all associated metadata, category assignments, and tag relationships.</p>
+            <p class="mt-0.5 text-sm text-red-700">Deleting this article will permanently remove it along with all
+                associated metadata, category assignments, and tag relationships.</p>
         </div>
     </div>
 
-<form method="POST" action="{{ route('entries.destroy', entry) }}"
-      class="row g-3 needs-validation" novalidate>
-    {{ csrf_field() }}
-    {{ method_field('DELETE') }}
-    <div class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_20rem] lg:items-start">
-        <div class="flex flex-col gap-4">
-            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
-                <div class="border-b border-edge px-5 py-3"><h5 class="text-sm font-semibold text-content">Article Being Deleted</h5></div>
-                <div class="divide-y divide-slate-100">
-                    <div class="flex items-start gap-4 px-5 py-4">
-                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-red-50 text-red-400">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    <form method="POST" action="{{ route('entries.destroy', entry) }}"
+          class="row g-3 needs-validation" novalidate>
+        {{ csrf_field() }}
+        {{ method_field('DELETE') }}
+        <div class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_20rem] lg:items-start">
+            <div class="flex flex-col gap-4">
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3"><h5 class="text-sm font-semibold text-content">Article
+                            Being Deleted</h5></div>
+                    <div class="divide-y divide-slate-100">
+                        <div class="flex items-start gap-4 px-5 py-4">
+                            <div
+                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-red-50 text-red-400">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-content">Launching the Editorial Calendar</p>
+                                <p class="mt-0.5 text-xs text-faint">articles/launching-the-editorial-calendar</p>
+                                <div class="mt-2"><span
+                                        class="inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">Published</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="min-w-0">
-                            <p class="font-semibold text-content">Launching the Editorial Calendar</p>
-                            <p class="mt-0.5 text-xs text-faint">articles/launching-the-editorial-calendar</p>
-                            <div class="mt-2"><span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">Published</span></div>
-                        </div>
+                        <table class="w-full text-sm">
+                            <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <th class="w-2/5 px-5 py-2.5 text-left text-xs font-medium text-muted">Entry Group</th>
+                                <td class="px-5 py-2.5 text-content">Blog Posts</td>
+                            </tr>
+                            <tr>
+                                <th class="px-5 py-2.5 text-left text-xs font-medium text-muted">Entry Type</th>
+                                <td class="px-5 py-2.5 text-content">Standard Article</td>
+                            </tr>
+                            <tr>
+                                <th class="px-5 py-2.5 text-left text-xs font-medium text-muted">Author</th>
+                                <td class="px-5 py-2.5 text-content">Avery Stone</td>
+                            </tr>
+                            <tr>
+                                <th class="px-5 py-2.5 text-left text-xs font-medium text-muted">Published</th>
+                                <td class="px-5 py-2.5 text-content">Apr 24, 2026 9:00 AM</td>
+                            </tr>
+                            <tr>
+                                <th class="px-5 py-2.5 text-left text-xs font-medium text-muted">Template</th>
+                                <td class="px-5 py-2.5 font-mono text-xs text-content">articles/default</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <table class="w-full text-sm">
-                        <tbody class="divide-y divide-slate-100">
-                        <tr><th class="w-2/5 px-5 py-2.5 text-left text-xs font-medium text-muted">Entry Group</th><td class="px-5 py-2.5 text-content">Blog Posts</td></tr>
-                        <tr><th class="px-5 py-2.5 text-left text-xs font-medium text-muted">Entry Type</th><td class="px-5 py-2.5 text-content">Standard Article</td></tr>
-                        <tr><th class="px-5 py-2.5 text-left text-xs font-medium text-muted">Author</th><td class="px-5 py-2.5 text-content">Avery Stone</td></tr>
-                        <tr><th class="px-5 py-2.5 text-left text-xs font-medium text-muted">Published</th><td class="px-5 py-2.5 text-content">Apr 24, 2026 9:00 AM</td></tr>
-                        <tr><th class="px-5 py-2.5 text-left text-xs font-medium text-muted">Template</th><td class="px-5 py-2.5 font-mono text-xs text-content">articles/default</td></tr>
-                        </tbody>
-                    </table>
+                </div>
+
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3"><h5 class="text-sm font-semibold text-content">What Will
+                            Be Removed</h5></div>
+                    <ul class="divide-y divide-slate-100">
+                        <li class="flex items-center gap-3 px-5 py-3 text-sm text-content">
+                            <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" stroke="currentColor"
+                                 stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            The article record and all its field data
+                        </li>
+                        <li class="flex items-center gap-3 px-5 py-3 text-sm text-content">
+                            <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" stroke="currentColor"
+                                 stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Category and tag relationships
+                        </li>
+                        <li class="flex items-center gap-3 px-5 py-3 text-sm text-content">
+                            <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" stroke="currentColor"
+                                 stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Author assignments
+                        </li>
+                        <li class="flex items-center gap-3 px-5 py-3 text-sm text-muted">
+                            <svg class="h-4 w-4 shrink-0 text-faint" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Uploaded media files are retained in the media library
+                        </li>
+                    </ul>
                 </div>
             </div>
 
-            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
-                <div class="border-b border-edge px-5 py-3"><h5 class="text-sm font-semibold text-content">What Will Be Removed</h5></div>
-                <ul class="divide-y divide-slate-100">
-                    <li class="flex items-center gap-3 px-5 py-3 text-sm text-content"><svg class="h-4 w-4 shrink-0 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>The article record and all its field data</li>
-                    <li class="flex items-center gap-3 px-5 py-3 text-sm text-content"><svg class="h-4 w-4 shrink-0 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>Category and tag relationships</li>
-                    <li class="flex items-center gap-3 px-5 py-3 text-sm text-content"><svg class="h-4 w-4 shrink-0 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>Author assignments</li>
-                    <li class="flex items-center gap-3 px-5 py-3 text-sm text-muted"><svg class="h-4 w-4 shrink-0 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Uploaded media files are retained in the media library</li>
-                </ul>
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-red-200 bg-surface shadow-sm">
+                    <div class="border-b border-red-100 bg-red-50 px-5 py-3"><h5
+                            class="text-sm font-semibold text-red-800">Confirm Deletion</h5></div>
+                    <div class="mb-4 rounded-md bg-subtle px-4 py-3 text-sm text-content">Select the toggle to confirm
+                        deletion of <strong>{{ group.name }}</strong>.
+                    </div>
+                    <label
+                        class="flex cursor-pointer items-center justify-between gap-4 rounded-md border  {% if errors.has('confirm_removal') %} bg-red-300 border-red-300{% else %}bg-subtle border-edge{% endif %} px-4 py-3">
+                        <span class="text-sm font-medium text-content">I understand this Status Group will be permanently deleted</span>
+
+                        <input class="peer sr-only" type="checkbox" name="confirm_removal" required>
+                        <span
+                            class="h-6 w-11 shrink-0 rounded-full bg-slate-300 after:mt-1 after:ml-1 after:block after:h-4 after:w-4 after:rounded-full after:bg-surface after:shadow after:transition after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-red-500"></span>
+                    </label>
+                    <button id="delete-btn" type="submit"
+                            class="mt-5 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                        Permanently Delete Status Group
+                    </button>
+                    <a href=""
+                       class="mt-2 block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">Back
+                        to Edit</a>
+
+                </div>
             </div>
         </div>
-
-        <div class="flex flex-col gap-5">
-            <div class="overflow-hidden rounded-lg border border-red-200 bg-surface shadow-sm">
-                <div class="border-b border-red-100 bg-red-50 px-5 py-3"><h5 class="text-sm font-semibold text-red-800">Confirm Deletion</h5></div>
-                <div class="mb-4 rounded-md bg-subtle px-4 py-3 text-sm text-content">Select the toggle to confirm deletion of <strong>{{ group.name }}</strong>.</div>
-                <label class="flex cursor-pointer items-center justify-between gap-4 rounded-md border  {% if errors.has('confirm_removal') %} bg-red-300 border-red-300{% else %}bg-subtle border-edge{% endif %} px-4 py-3">
-                    <span class="text-sm font-medium text-content">I understand this Status Group will be permanently deleted</span>
-
-                    <input class="peer sr-only" type="checkbox" name="confirm_removal" required>
-                    <span class="h-6 w-11 shrink-0 rounded-full bg-slate-300 after:mt-1 after:ml-1 after:block after:h-4 after:w-4 after:rounded-full after:bg-surface after:shadow after:transition after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-red-500"></span>
-                </label>
-                <button id="delete-btn" type="submit" class="mt-5 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Permanently Delete Status Group</button>
-                <a href="" class="mt-2 block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">Back to Edit</a>
-
-            </div>
-        </div>
-    </div>
-</form>
+    </form>
 {% endblock %}

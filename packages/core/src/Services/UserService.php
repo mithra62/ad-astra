@@ -19,6 +19,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
@@ -112,10 +113,10 @@ class UserService
 
             $user = new User();
             $user->forceFill([
-                'email'    => $email,
-                'name'     => $name,
-                'password' => Hash::make(\Illuminate\Support\Str::random(32)),
-                'status'   => $socialDefaultStatus,
+                'email' => $email,
+                'name' => $name,
+                'password' => Hash::make(Str::random(32)),
+                'status' => $socialDefaultStatus,
             ])->save();
 
             $created = true;
@@ -248,7 +249,7 @@ class UserService
         if (array_key_exists('is_author', $data)) {
             app(EntryAuthorService::class)->sync(
                 $user,
-                (bool) $data['is_author'],
+                (bool)$data['is_author'],
                 $data['author_display_name'] ?? null,
             );
         }
@@ -267,7 +268,7 @@ class UserService
     {
         $actor = auth()->user();
 
-        if (in_array('super admin', $roles, true) && ! $actor?->hasRole('super admin')) {
+        if (in_array('super admin', $roles, true) && !$actor?->hasRole('super admin')) {
             throw AuthorizationException::class::denyAsNotFound('Only a super admin may assign the super admin role.');
         }
 
@@ -294,8 +295,8 @@ class UserService
      * Automatically manages the banned_at timestamp and fires UserStatusChanged.
      * Do not use this method for suspensions — use suspend() instead.
      *
-     * @param string $newStatus  One of UserStatus::ALL
-     * @param string|null $reason  Optional reason stored in the audit log
+     * @param string $newStatus One of UserStatus::ALL
+     * @param string|null $reason Optional reason stored in the audit log
      */
     public function setStatus(User $user, string $newStatus, ?string $reason = null): User
     {
@@ -333,9 +334,9 @@ class UserService
         $previousStatus = $user->status;
 
         $user->forceFill([
-            'status'         => UserStatus::SUSPENDED,
+            'status' => UserStatus::SUSPENDED,
             'suspended_until' => $until,
-            'banned_at'      => null,
+            'banned_at' => null,
         ])->save();
 
         event(new UserStatusChanged(
@@ -396,7 +397,7 @@ class UserService
             ]);
         }
 
-        return (bool) $user->delete();
+        return (bool)$user->delete();
     }
 
     /**
@@ -431,7 +432,7 @@ class UserService
      * Confirm 2FA setup with a valid TOTP code from the authenticator app.
      * Sets two_factor_confirmed_at on success.
      *
-     * @throws \Illuminate\Validation\ValidationException  if the code is invalid
+     * @throws ValidationException  if the code is invalid
      */
     public function confirmTwoFactor(User $user, string $code): void
     {
@@ -546,7 +547,7 @@ class UserService
         if (array_key_exists('is_author', $data)) {
             app(EntryAuthorService::class)->sync(
                 $user,
-                (bool) $data['is_author'],
+                (bool)$data['is_author'],
                 $data['author_display_name'] ?? null,
             );
         }

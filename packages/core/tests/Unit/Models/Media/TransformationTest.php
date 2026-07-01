@@ -67,10 +67,10 @@ class TransformationTest extends TestCase
         $media = Media::factory()->create();
         $t = Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'test/_t/img_thumb.jpg',
-            'status'   => 'pending',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'test/_t/img_thumb.jpg',
+            'status' => 'pending',
         ]);
 
         $t->markComplete('test/_t/img_thumb.jpg', 8192, 200, 150);
@@ -88,10 +88,10 @@ class TransformationTest extends TestCase
         $media = Media::factory()->create();
         $t = Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'test/_t/img_thumb.jpg',
-            'status'   => 'pending',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'test/_t/img_thumb.jpg',
+            'status' => 'pending',
         ]);
 
         $t->markFailed('Unsupported format');
@@ -112,10 +112,10 @@ class TransformationTest extends TestCase
         $media = Media::factory()->create(['disk' => 'local']);
         $t = Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'no/such/file.jpg',
-            'status'   => 'pending',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'no/such/file.jpg',
+            'status' => 'pending',
         ]);
 
         $this->assertFalse($t->fileExists());
@@ -129,10 +129,10 @@ class TransformationTest extends TestCase
         $media = Media::factory()->create(['disk' => 'local']);
         $t = Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'uploads/_t/thumb.jpg',
-            'status'   => 'complete',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'uploads/_t/thumb.jpg',
+            'status' => 'complete',
         ]);
 
         $this->assertTrue($t->fileExists());
@@ -147,11 +147,11 @@ class TransformationTest extends TestCase
         $media = Media::factory()->create();
         $t = Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'test/_t/img_thumb.jpg',
-            'params'   => ['width' => 100, 'height' => 100],
-            'status'   => 'pending',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'test/_t/img_thumb.jpg',
+            'params' => ['width' => 100, 'height' => 100],
+            'status' => 'pending',
         ]);
 
         $this->assertIsArray($t->fresh()->params);

@@ -36,7 +36,7 @@ class JobListingEntryType extends AbstractEntryType
         $requestedStatus = $data['status'] ?? ($entry?->status_handle);
 
         if ($requestedStatus === 'published') {
-            $url   = $data['fields']['application_url']   ?? $this->existingFieldValue($entry, 'application_url');
+            $url = $data['fields']['application_url'] ?? $this->existingFieldValue($entry, 'application_url');
             $email = $data['fields']['application_email'] ?? $this->existingFieldValue($entry, 'application_email');
 
             if (empty($url) && empty($email)) {

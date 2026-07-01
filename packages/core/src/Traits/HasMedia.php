@@ -2,6 +2,7 @@
 
 namespace AdAstra\Traits;
 
+use AdAstra\Models\Field;
 use AdAstra\Models\Media;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
@@ -21,7 +22,7 @@ trait HasMedia
      * Cleared automatically whenever a mutation method changes the pivot rows,
      * so reads within the same request never see stale data.
      *
-     * @var array<string, \AdAstra\Models\Media|null>
+     * @var array<string, Media|null>
      */
     private array $firstMediaCache = [];
 
@@ -29,19 +30,19 @@ trait HasMedia
     public function media(): MorphToMany
     {
         return $this->morphToMany(Media::class, 'mediable', 'mediables')
-                    ->withTimestamps()
-                    ->withPivot('sort_order', 'field_id')
-                    ->orderByPivot('sort_order');
+            ->withTimestamps()
+            ->withPivot('sort_order', 'field_id')
+            ->orderByPivot('sort_order');
     }
 
     /** Media attached directly (field_id = 0 sentinel). */
     public function directMedia(): MorphToMany
     {
         return $this->morphToMany(Media::class, 'mediable', 'mediables')
-                    ->wherePivot('field_id', self::DIRECT_ATTACHMENT)
-                    ->withTimestamps()
-                    ->withPivot('sort_order', 'field_id')
-                    ->orderByPivot('sort_order');
+            ->wherePivot('field_id', self::DIRECT_ATTACHMENT)
+            ->withTimestamps()
+            ->withPivot('sort_order', 'field_id')
+            ->orderByPivot('sort_order');
     }
 
     /**
@@ -65,16 +66,16 @@ trait HasMedia
             : $this->resolveFieldHandle($field);
 
         return $this->morphToMany(Media::class, 'mediable', 'mediables')
-                    ->wherePivot('field_id', $fieldId)
-                    ->withTimestamps()
-                    ->withPivot('sort_order', 'field_id')
-                    ->orderByPivot('sort_order');
+            ->wherePivot('field_id', $fieldId)
+            ->withTimestamps()
+            ->withPivot('sort_order', 'field_id')
+            ->orderByPivot('sort_order');
     }
 
     private function resolveFieldHandle(string $handle): ?int
     {
         if (!array_key_exists($handle, static::$fieldHandleCache)) {
-            static::$fieldHandleCache[$handle] = \AdAstra\Models\Field::where('handle', $handle)->value('id');
+            static::$fieldHandleCache[$handle] = Field::where('handle', $handle)->value('id');
         }
 
         return static::$fieldHandleCache[$handle];
@@ -127,8 +128,8 @@ trait HasMedia
 
         if (!array_key_exists($key, $this->firstMediaCache)) {
             $this->firstMediaCache[$key] = $this->directMedia()
-                ->when($libraryHandle, fn ($q) => $q->whereHas(
-                    'library', fn ($lq) => $lq->where('handle', $libraryHandle)
+                ->when($libraryHandle, fn($q) => $q->whereHas(
+                    'library', fn($lq) => $lq->where('handle', $libraryHandle)
                 ))
                 ->first();
         }

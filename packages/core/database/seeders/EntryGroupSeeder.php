@@ -17,9 +17,9 @@ class EntryGroupSeeder extends Seeder
 
     public function run(): void
     {
-        $publication       = StatusGroup::where('handle', 'publication')->firstOrFail();
-        $productStatus     = StatusGroup::where('handle', 'product-status')->firstOrFail();
-        $topics            = CategoryGroup::where('handle', 'topics')->firstOrFail();
+        $publication = StatusGroup::where('handle', 'publication')->firstOrFail();
+        $productStatus = StatusGroup::where('handle', 'product-status')->firstOrFail();
+        $topics = CategoryGroup::where('handle', 'topics')->firstOrFail();
         $productCategories = CategoryGroup::where('handle', 'product-categories')->firstOrFail();
 
         $this->seedBlogGroup($publication, $topics);
@@ -29,21 +29,22 @@ class EntryGroupSeeder extends Seeder
     private function seedBlogGroup(
         StatusGroup   $publication,
         CategoryGroup $topics,
-    ): void {
+    ): void
+    {
         $layout = $this->createLayout('Blog Layout', [
-            'Content'    => ['body', 'excerpt'],
-            'SEO'        => ['meta_title', 'meta_description'],
-            'Related'    => ['related_entries'],
+            'Content' => ['body', 'excerpt'],
+            'SEO' => ['meta_title', 'meta_description'],
+            'Related' => ['related_entries'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'blog'],
             [
-                'name'            => 'Blog',
-                'description'     => 'Blog posts and articles.',
+                'name' => 'Blog',
+                'description' => 'Blog posts and articles.',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $publication->id,
-                'sort_order'      => 1,
+                'sort_order' => 1,
             ]
         );
 
@@ -55,9 +56,9 @@ class EntryGroupSeeder extends Seeder
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'blog_post'],
             [
-                'name'              => 'Blog Post',
+                'name' => 'Blog Post',
                 'entry_behavior_id' => EntryBehavior::where('handle', 'blog-post')->value('id'),
-                'sort_order'        => 1,
+                'sort_order' => 1,
             ]
         );
     }
@@ -65,20 +66,21 @@ class EntryGroupSeeder extends Seeder
     private function seedProductsGroup(
         StatusGroup   $productStatus,
         CategoryGroup $productCategories,
-    ): void {
+    ): void
+    {
         $layout = $this->createLayout('Products Layout', [
             'Description' => ['body', 'excerpt'],
-            'SEO'         => ['meta_title', 'meta_description'],
+            'SEO' => ['meta_title', 'meta_description'],
         ]);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'products'],
             [
-                'name'            => 'Products',
-                'description'     => 'Product catalogue entries.',
+                'name' => 'Products',
+                'description' => 'Product catalogue entries.',
                 'field_layout_id' => $layout->id,
                 'status_group_id' => $productStatus->id,
-                'sort_order'      => 2,
+                'sort_order' => 2,
             ]
         );
 
@@ -87,15 +89,15 @@ class EntryGroupSeeder extends Seeder
 
         $group->categoryGroups()->syncWithoutDetaching([$productCategories->id]);
 
-        $this->addTabIfMissing($group->field_layout_id, 'Pricing',   ['price', 'sale_price', 'sku'], 10);
+        $this->addTabIfMissing($group->field_layout_id, 'Pricing', ['price', 'sale_price', 'sku'], 10);
         $this->addTabIfMissing($group->field_layout_id, 'Inventory', ['stock_quantity', 'weight', 'dimensions'], 11);
 
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'product'],
             [
-                'name'              => 'Product',
+                'name' => 'Product',
                 'entry_behavior_id' => EntryBehavior::where('handle', 'product')->value('id'),
-                'sort_order'        => 1,
+                'sort_order' => 1,
             ]
         );
     }

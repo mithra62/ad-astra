@@ -44,22 +44,22 @@ class MediaStatusTest extends TestCase
         $statusGroup = StatusGroup::factory()->create();
         $draft = Status::factory()->create([
             'status_group_id' => $statusGroup->id,
-            'handle'          => 'draft',
-            'name'            => 'Draft',
-            'is_default'      => true,
-            'is_public'       => false,
+            'handle' => 'draft',
+            'name' => 'Draft',
+            'is_default' => true,
+            'is_public' => false,
         ]);
         $published = Status::factory()->create([
             'status_group_id' => $statusGroup->id,
-            'handle'          => 'published',
-            'name'            => 'Published',
-            'is_default'      => false,
-            'is_public'       => true,
+            'handle' => 'published',
+            'name' => 'Published',
+            'is_default' => false,
+            'is_public' => true,
         ]);
         $library = Library::create([
-            'name'            => ucfirst($handle).' Library',
-            'handle'          => $handle,
-            'adapter'         => 'local',
+            'name' => ucfirst($handle) . ' Library',
+            'handle' => $handle,
+            'adapter' => 'local',
             'status_group_id' => $statusGroup->id,
         ]);
 
@@ -70,9 +70,9 @@ class MediaStatusTest extends TestCase
     {
         return Media::factory()->create(array_merge([
             'library_id' => $library->id,
-            'disk'       => 'local',
-            'path'       => 'uploads/photo.jpg',
-            'file_name'  => 'photo.jpg',
+            'disk' => 'local',
+            'path' => 'uploads/photo.jpg',
+            'file_name' => 'photo.jpg',
         ], $overrides));
     }
 
@@ -116,8 +116,8 @@ class MediaStatusTest extends TestCase
     public function test_library_default_status_returns_null_when_no_status_group(): void
     {
         $library = Library::create([
-            'name'    => 'Ungoverned',
-            'handle'  => 'ungoverned',
+            'name' => 'Ungoverned',
+            'handle' => 'ungoverned',
             'adapter' => 'local',
         ]);
 
@@ -139,18 +139,18 @@ class MediaStatusTest extends TestCase
     {
         [$library, , $draft, $published] = $this->makeLibraryWithStatuses();
         $this->makeMedia($library, [
-            'status_id'        => $draft->id,
-            'status_handle'    => $draft->handle,
+            'status_id' => $draft->id,
+            'status_handle' => $draft->handle,
             'status_is_public' => false,
-            'file_name'        => 'draft.jpg',
-            'path'             => 'uploads/draft.jpg',
+            'file_name' => 'draft.jpg',
+            'path' => 'uploads/draft.jpg',
         ]);
         $public = $this->makeMedia($library, [
-            'status_id'        => $published->id,
-            'status_handle'    => $published->handle,
+            'status_id' => $published->id,
+            'status_handle' => $published->handle,
             'status_is_public' => true,
-            'file_name'        => 'public.jpg',
-            'path'             => 'uploads/public.jpg',
+            'file_name' => 'public.jpg',
+            'path' => 'uploads/public.jpg',
         ]);
 
         $results = Media::published()->get();
@@ -164,13 +164,13 @@ class MediaStatusTest extends TestCase
         [$library, , $draft, $published] = $this->makeLibraryWithStatuses();
         $this->makeMedia($library, [
             'status_handle' => $draft->handle,
-            'file_name'     => 'a.jpg',
-            'path'          => 'uploads/a.jpg',
+            'file_name' => 'a.jpg',
+            'path' => 'uploads/a.jpg',
         ]);
         $this->makeMedia($library, [
             'status_handle' => $published->handle,
-            'file_name'     => 'b.jpg',
-            'path'          => 'uploads/b.jpg',
+            'file_name' => 'b.jpg',
+            'path' => 'uploads/b.jpg',
         ]);
 
         $this->assertSame(1, Media::withStatus('draft')->count());
@@ -181,14 +181,14 @@ class MediaStatusTest extends TestCase
     {
         [$library, , , $published] = $this->makeLibraryWithStatuses();
         $alive = $this->makeMedia($library, [
-            'status_handle'    => $published->handle,
+            'status_handle' => $published->handle,
             'status_is_public' => true,
         ]);
         $deleted = $this->makeMedia($library, [
-            'status_handle'    => $published->handle,
+            'status_handle' => $published->handle,
             'status_is_public' => true,
-            'file_name'        => 'deleted.jpg',
-            'path'             => 'uploads/deleted.jpg',
+            'file_name' => 'deleted.jpg',
+            'path' => 'uploads/deleted.jpg',
         ]);
         $deleted->delete();
 
@@ -217,8 +217,8 @@ class MediaStatusTest extends TestCase
     {
         Storage::fake('local');
         $library = Library::create([
-            'name'    => 'Ungoverned',
-            'handle'  => 'ungoverned',
+            'name' => 'Ungoverned',
+            'handle' => 'ungoverned',
             'adapter' => 'local',
         ]);
 
@@ -235,14 +235,14 @@ class MediaStatusTest extends TestCase
         // No status has is_default = true.
         Status::factory()->create([
             'status_group_id' => $statusGroup->id,
-            'handle'          => 'draft',
-            'is_default'      => false,
-            'is_public'       => false,
+            'handle' => 'draft',
+            'is_default' => false,
+            'is_public' => false,
         ]);
         $library = Library::create([
-            'name'            => 'No Default',
-            'handle'          => 'no-default',
-            'adapter'         => 'local',
+            'name' => 'No Default',
+            'handle' => 'no-default',
+            'adapter' => 'local',
             'status_group_id' => $statusGroup->id,
         ]);
 
@@ -258,8 +258,8 @@ class MediaStatusTest extends TestCase
         [$library, , , $published] = $this->makeLibraryWithStatuses();
 
         $media = $library->addMediaFromUpload(UploadedFile::fake()->image('x.jpg'), [
-            'status_id'        => $published->id,
-            'status_handle'    => $published->handle,
+            'status_id' => $published->id,
+            'status_handle' => $published->handle,
             'status_is_public' => $published->is_public,
         ]);
 
@@ -279,7 +279,7 @@ class MediaStatusTest extends TestCase
         $media = $this->makeMedia($library, ['status_handle' => 'draft', 'status_is_public' => false]);
 
         $response = $this->actingAs($user)->put(route('media.update', $media->id), [
-            'name'   => 'My Photo',
+            'name' => 'My Photo',
             'status' => 'published',
         ]);
 
@@ -298,14 +298,14 @@ class MediaStatusTest extends TestCase
         $otherGroup = StatusGroup::factory()->create();
         Status::factory()->create([
             'status_group_id' => $otherGroup->id,
-            'handle'          => 'other-status',
-            'name'            => 'Other',
+            'handle' => 'other-status',
+            'name' => 'Other',
         ]);
 
         $response = $this->actingAs($user)
             ->from(route('media.edit', $media->id))
             ->put(route('media.update', $media->id), [
-                'name'   => 'My Photo',
+                'name' => 'My Photo',
                 'status' => 'other-status',
             ]);
 
@@ -320,7 +320,7 @@ class MediaStatusTest extends TestCase
         $media = $this->makeMedia($library, ['status_handle' => 'draft']);
 
         $response = $this->actingAs($user)->put(route('media.update', $media->id), [
-            'name'   => 'My Photo',
+            'name' => 'My Photo',
             'status' => null,
         ]);
 
@@ -331,8 +331,8 @@ class MediaStatusTest extends TestCase
     {
         $user = $this->makeSuperAdmin();
         $library = Library::create([
-            'name'    => 'Ungoverned',
-            'handle'  => 'ungoverned',
+            'name' => 'Ungoverned',
+            'handle' => 'ungoverned',
             'adapter' => 'local',
         ]);
         $media = $this->makeMedia($library);
@@ -340,7 +340,7 @@ class MediaStatusTest extends TestCase
         $response = $this->actingAs($user)
             ->from(route('media.edit', $media->id))
             ->put(route('media.update', $media->id), [
-                'name'   => 'My Photo',
+                'name' => 'My Photo',
                 'status' => 'anything-at-all',
             ]);
 
@@ -353,13 +353,13 @@ class MediaStatusTest extends TestCase
         $user = $this->makeSuperAdmin();
         [$library, , $draft, $published] = $this->makeLibraryWithStatuses();
         $media = $this->makeMedia($library, [
-            'status_id'        => $draft->id,
-            'status_handle'    => 'draft',
+            'status_id' => $draft->id,
+            'status_handle' => 'draft',
             'status_is_public' => false,
         ]);
 
         $this->actingAs($user)->put(route('media.update', $media->id), [
-            'name'   => 'My Photo',
+            'name' => 'My Photo',
             'status' => 'published',
         ]);
 
@@ -376,16 +376,16 @@ class MediaStatusTest extends TestCase
         // media row remains pinned to the original status.
         [$library, , $draft] = $this->makeLibraryWithStatuses();
         $media = $this->makeMedia($library, [
-            'status_id'        => $draft->id,
-            'status_handle'    => 'draft',
+            'status_id' => $draft->id,
+            'status_handle' => 'draft',
             'status_is_public' => false,
         ]);
 
         $newGroup = StatusGroup::factory()->create();
         Status::factory()->create([
             'status_group_id' => $newGroup->id,
-            'handle'          => 'archived',
-            'is_default'      => true,
+            'handle' => 'archived',
+            'is_default' => true,
         ]);
         $library->update(['status_group_id' => $newGroup->id]);
 

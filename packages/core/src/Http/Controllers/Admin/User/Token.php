@@ -9,6 +9,9 @@ use AdAstra\Http\Requests\User\Token\DeleteUserTokenRequest;
 use AdAstra\Http\Requests\User\Token\EditUserTokenRequest;
 use AdAstra\Http\Requests\User\Token\StoreUserTokenRequest;
 use AdAstra\Models\User as UserModel;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class Token extends AdminController
@@ -111,7 +114,7 @@ class Token extends AdminController
     /**
      * @param string $id
      * @param string $token_id
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return Factory|View|RedirectResponse
      */
     public function confirm(string $id, string $token_id)
     {

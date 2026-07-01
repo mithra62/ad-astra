@@ -59,7 +59,7 @@ class DeleteFieldLayoutRequestTest extends TestCase
     public function test_destroy_succeeds_when_layout_is_not_assigned_to_user_schema(): void
     {
         $assigned = FieldLayout::factory()->create();
-        $other    = FieldLayout::factory()->create();
+        $other = FieldLayout::factory()->create();
         app(Settings::class)->set('users', 'user_field_layout_id', $assigned->id, null);
 
         $response = $this->actingAs($this->admin)

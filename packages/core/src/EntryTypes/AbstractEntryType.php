@@ -73,8 +73,8 @@ abstract class AbstractEntryType
      * Concrete types override this; the repository does NOT call it automatically.
      * Invoke from a Form Request or controller before calling create/update.
      *
-     * @param  array       $data   The same payload that would be passed to create/update.
-     * @param  Entry|null  $entry  The existing entry when validating an update; null on create.
+     * @param array $data The same payload that would be passed to create/update.
+     * @param Entry|null $entry The existing entry when validating an update; null on create.
      * @return array<string, string>  ['field_handle' => 'error message']
      */
     public function validate(array $data, ?Entry $entry = null): array

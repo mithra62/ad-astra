@@ -13,5 +13,6 @@
         <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ title }}</h1>
         {% if subtitle is defined and subtitle %}<p class="mt-1 text-sm text-muted">{{ subtitle }}</p>{% endif %}
     </div>
-    {% if _actions|trim %}<div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">{{ _actions|raw }}</div>{% endif %}
+    {% if _actions|trim %}
+        <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">{{ _actions|raw }}</div>{% endif %}
 </div>

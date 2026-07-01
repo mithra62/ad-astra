@@ -18,7 +18,7 @@ class Entry extends Controller
     {
         $creator = app(CreateNewEntry::class);
         $entry = $creator->create(array_merge($request->validated(),
-            ['entry_group_id' => $request->route()->parameter('group_id')])
+                ['entry_group_id' => $request->route()->parameter('group_id')])
         );
 
         return redirect()

@@ -27,7 +27,8 @@
                           d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                 </svg>
                 <div>
-                    <p class="text-sm font-semibold text-amber-800">{{ recent_api_errors }} API error{{ recent_api_errors != 1 ? 's' : '' }} in the last 24 hours.</p>
+                    <p class="text-sm font-semibold text-amber-800">{{ recent_api_errors }} API
+                        error{{ recent_api_errors != 1 ? 's' : '' }} in the last 24 hours.</p>
                     <p class="mt-1 text-sm text-amber-700">Review the API request log below for details.</p>
                 </div>
             </div>
@@ -41,7 +42,8 @@
                 </svg>
                 <div>
                     <p class="text-sm font-semibold text-emerald-800">No API errors in the last 24 hours.</p>
-                    <p class="mt-1 text-sm text-accent">{{ total_api_requests|number_format }} total API requests logged.</p>
+                    <p class="mt-1 text-sm text-accent">{{ total_api_requests|number_format }} total API requests
+                        logged.</p>
                 </div>
             </div>
         </div>
@@ -82,7 +84,8 @@
             <div class="px-5 py-4">
                 <div class="flex items-center justify-between">
                     <p class="text-xs font-medium uppercase tracking-wide text-muted">Media Files</p>
-                    <span class="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">Library</span>
+                    <span
+                        class="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">Library</span>
                 </div>
                 <p class="mt-2 text-3xl font-semibold text-content">{{ total_media|number_format }}</p>
                 <p class="mt-1 text-xs text-faint">Stored across all libraries</p>
@@ -116,7 +119,8 @@
                         {% for group in entry_groups %}
                             <div class="flex items-center justify-between py-2.5">
                                 <dt class="text-muted">
-                                    <a href="{{ route('entries.groups.show', group.id) }}" class="hover:text-accent">{{ group.name }}</a>
+                                    <a href="{{ route('entries.groups.show', group.id) }}"
+                                       class="hover:text-accent">{{ group.name }}</a>
                                 </dt>
                                 <dd class="font-semibold text-content">{{ group.entries_count|number_format }}</dd>
                             </div>
@@ -125,7 +129,8 @@
                 {% else %}
                     <div class="px-5 py-6 text-center text-sm text-faint">
                         No entry groups defined yet.
-                        <a href="{{ route('entries.groups.create') }}" class="block mt-1 text-emerald-600 hover:underline">Create one</a>
+                        <a href="{{ route('entries.groups.create') }}"
+                           class="block mt-1 text-emerald-600 hover:underline">Create one</a>
                     </div>
                 {% endif %}
             </div>
@@ -168,17 +173,21 @@
                             <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md
                                 {{ entry.status_is_public ? 'bg-accent-soft text-emerald-600' : 'bg-canvas text-faint' }}">
                                 {% if entry.status_is_public %}
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                     </svg>
                                 {% else %}
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 {% endif %}
                             </div>
                             <div class="min-w-0 flex-1">
-                                <a href="{{ route('entries.edit', entry.id) }}" class="truncate block text-sm font-medium text-content hover:text-accent">{{ entry.title }}</a>
+                                <a href="{{ route('entries.edit', entry.id) }}"
+                                   class="truncate block text-sm font-medium text-content hover:text-accent">{{ entry.title }}</a>
                                 <p class="text-xs text-faint">
                                     {% if entry.entryGroup %}{{ entry.entryGroup.name }} &middot; {% endif %}
                                     {% if entry.creator %}{{ entry.creator.name }} &middot; {% endif %}
@@ -195,7 +204,8 @@
 
         <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
             <div class="border-b border-edge px-5 py-3">
-                <h5 class="text-sm font-semibold text-content">Top API Routes <span class="ml-1 text-xs font-normal text-faint">(last 7 days)</span></h5>
+                <h5 class="text-sm font-semibold text-content">Top API Routes <span
+                        class="ml-1 text-xs font-normal text-faint">(last 7 days)</span></h5>
             </div>
             {% if top_api_routes is not empty %}
                 <div class="overflow-x-auto">
@@ -214,7 +224,8 @@
                                 <td class="px-4 py-3 text-right text-content font-semibold">{{ row.hits|number_format }}</td>
                                 <td class="px-4 py-3 text-right">
                                     {% if row.errors > 0 %}
-                                        <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">{{ row.errors }}</span>
+                                        <span
+                                            class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">{{ row.errors }}</span>
                                     {% else %}
                                         <span class="text-faint">—</span>
                                     {% endif %}
@@ -259,11 +270,14 @@
                             <td class="px-4 py-3 text-muted max-w-[16rem] truncate">{{ log.request_route }}</td>
                             <td class="px-4 py-3">
                                 {% if log.response_status_code == 200 %}
-                                    <span class="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">{{ log.response_status_code }}</span>
+                                    <span
+                                        class="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">{{ log.response_status_code }}</span>
                                 {% elseif log.response_status_code == 404 %}
-                                    <span class="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">{{ log.response_status_code }}</span>
+                                    <span
+                                        class="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">{{ log.response_status_code }}</span>
                                 {% else %}
-                                    <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">{{ log.response_status_code }}</span>
+                                    <span
+                                        class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">{{ log.response_status_code }}</span>
                                 {% endif %}
                             </td>
                             <td class="px-4 py-3 text-muted uppercase text-xs font-medium">{{ log.method }}</td>
@@ -278,47 +292,49 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-    fetch('{{ route('dashboard-chart') }}')
-        .then(function (r) { return r.json(); })
-        .then(function (payload) {
-            var ctx = document.getElementById('requestChart');
-            if (!ctx) return;
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: payload.labels,
-                    datasets: [{
-                        data: payload.data,
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16,185,129,0.08)',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#10b981',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#94a3b8', font: { size: 11 } }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#e2e8f0' },
-                            ticks: { color: '#94a3b8', font: { size: 11 }, precision: 0 }
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        fetch('{{ route('dashboard-chart') }}')
+            .then(function (r) {
+                return r.json();
+            })
+            .then(function (payload) {
+                var ctx = document.getElementById('requestChart');
+                if (!ctx) return;
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: payload.labels,
+                        datasets: [{
+                            data: payload.data,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16,185,129,0.08)',
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {legend: {display: false}},
+                        scales: {
+                            x: {
+                                grid: {display: false},
+                                ticks: {color: '#94a3b8', font: {size: 11}}
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: {color: '#e2e8f0'},
+                                ticks: {color: '#94a3b8', font: {size: 11}, precision: 0}
+                            }
                         }
                     }
-                }
+                });
             });
-        });
-</script>
+    </script>
 {% endblock %}

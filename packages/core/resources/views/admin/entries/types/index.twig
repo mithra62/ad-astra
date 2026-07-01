@@ -22,11 +22,20 @@
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
                     <thead class="bg-subtle">
                     <tr>
-                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Name</th>
-                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Handle</th>
-                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Behavior</th>
-                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Entry Group</th>
-                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">Actions</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Name
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
+                            Handle
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
+                            Behavior
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Entry
+                            Group
+                        </th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">
+                            Actions
+                        </th>
                     </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -46,7 +55,8 @@
                                     <a href="{{ route('entries.groups.show', type.entryGroup.id) }}"
                                        class="text-accent hover:underline">{{ type.entryGroup.name }}</a>
                                 {% else %}
-                                    <span class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">Unattached</span>
+                                    <span
+                                        class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">Unattached</span>
                                 {% endif %}
                             </td>
                             <td class="px-5 py-3 text-right">
@@ -61,7 +71,9 @@
             <div>{{ types.links() }}</div>
         {% else %}
             <div class="rounded-lg border border-edge bg-surface px-5 py-10 text-center shadow-sm">
-                <p class="text-sm text-muted">No Entry Types yet. <a href="{{ route('entries.types.create') }}" class="font-medium text-emerald-600 hover:underline">Create the first one.</a></p>
+                <p class="text-sm text-muted">No Entry Types yet. <a href="{{ route('entries.types.create') }}"
+                                                                     class="font-medium text-emerald-600 hover:underline">Create
+                        the first one.</a></p>
             </div>
         {% endif %}
     </div>

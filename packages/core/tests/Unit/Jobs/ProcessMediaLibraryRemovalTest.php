@@ -20,8 +20,8 @@ class ProcessMediaLibraryRemovalTest extends TestCase
     private function makeLibrary(): Library
     {
         return Library::create([
-            'name'    => 'Test Library',
-            'handle'  => 'test-lib',
+            'name' => 'Test Library',
+            'handle' => 'test-lib',
             'adapter' => 'local',
         ]);
     }
@@ -35,8 +35,8 @@ class ProcessMediaLibraryRemovalTest extends TestCase
         Storage::fake('local');
 
         $library = $this->makeLibrary();
-        $media1  = Media::factory()->create(['library_id' => $library->id]);
-        $media2  = Media::factory()->create(['library_id' => $library->id]);
+        $media1 = Media::factory()->create(['library_id' => $library->id]);
+        $media2 = Media::factory()->create(['library_id' => $library->id]);
 
         (new ProcessMediaLibraryRemoval($library->id))->handle();
 
@@ -65,7 +65,7 @@ class ProcessMediaLibraryRemovalTest extends TestCase
         Storage::fake('local');
 
         $library = $this->makeLibrary();
-        $media   = Media::factory()->create(['library_id' => $library->id]);
+        $media = Media::factory()->create(['library_id' => $library->id]);
         $media->delete();
 
         $originalDeletedAt = $media->fresh()->deleted_at;
@@ -87,8 +87,8 @@ class ProcessMediaLibraryRemovalTest extends TestCase
         $library = $this->makeLibrary();
         Media::factory()->create([
             'library_id' => $library->id,
-            'disk'       => 'local',
-            'path'       => 'uploads/keep.jpg',
+            'disk' => 'local',
+            'path' => 'uploads/keep.jpg',
         ]);
 
         (new ProcessMediaLibraryRemoval($library->id))->handle();

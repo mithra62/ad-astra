@@ -42,7 +42,7 @@ class UserStatusTest extends TestCase
             ->assertRedirect(route('users.show', $target->id));
 
         $this->assertDatabaseHas('users', [
-            'id'     => $target->id,
+            'id' => $target->id,
             'status' => UserStatus::INACTIVE,
         ]);
     }
@@ -53,14 +53,14 @@ class UserStatusTest extends TestCase
 
         $this->actingAs($this->admin)
             ->patch(route('users.status.update', $target->id), [
-                'status'          => UserStatus::SUSPENDED,
-                'reason'          => 'Violation of terms.',
+                'status' => UserStatus::SUSPENDED,
+                'reason' => 'Violation of terms.',
                 'suspended_until' => now()->addDays(7)->format('Y-m-d H:i:s'),
             ])
             ->assertRedirect(route('users.show', $target->id));
 
         $this->assertDatabaseHas('users', [
-            'id'     => $target->id,
+            'id' => $target->id,
             'status' => UserStatus::SUSPENDED,
         ]);
     }
@@ -76,9 +76,9 @@ class UserStatusTest extends TestCase
             ]);
 
         $this->assertDatabaseHas('user_status_logs', [
-            'user_id'           => $target->id,
+            'user_id' => $target->id,
             'changed_by_user_id' => $this->admin->id,
-            'new_status'        => UserStatus::BANNED,
+            'new_status' => UserStatus::BANNED,
         ]);
     }
 
@@ -110,7 +110,7 @@ class UserStatusTest extends TestCase
     public function test_user_without_permission_cannot_change_status(): void
     {
         $unprivileged = User::factory()->active()->create();
-        $target       = User::factory()->active()->create();
+        $target = User::factory()->active()->create();
 
         $this->actingAs($unprivileged)
             ->patch(route('users.status.update', $target->id), [
@@ -143,7 +143,7 @@ class UserStatusTest extends TestCase
             ->delete(route('users.lock.destroy', $target->id));
 
         $this->assertDatabaseHas('user_status_logs', [
-            'user_id'         => $target->id,
+            'user_id' => $target->id,
             'new_locked_until' => null,
         ]);
     }
@@ -151,7 +151,7 @@ class UserStatusTest extends TestCase
     public function test_user_without_permission_cannot_unlock(): void
     {
         $unprivileged = User::factory()->active()->create();
-        $target       = User::factory()->active()->locked()->create();
+        $target = User::factory()->active()->locked()->create();
 
         $this->actingAs($unprivileged)
             ->delete(route('users.lock.destroy', $target->id))

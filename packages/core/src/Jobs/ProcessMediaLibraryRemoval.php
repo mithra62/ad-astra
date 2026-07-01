@@ -11,7 +11,9 @@ class ProcessMediaLibraryRemoval implements ShouldQueue
 {
     use Dispatchable, Queueable;
 
-    public function __construct(protected int $libraryId) {}
+    public function __construct(protected int $libraryId)
+    {
+    }
 
     public function handle(): void
     {

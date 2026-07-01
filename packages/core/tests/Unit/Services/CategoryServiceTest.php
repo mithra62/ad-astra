@@ -612,11 +612,11 @@ class CategoryServiceTest extends TestCase
         // Build: root → A → B → C → D → E  (5 levels deep)
         $group = $this->makeGroup();
         $root = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
-        $a    = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $root->id]);
-        $b    = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $a->id]);
-        $c    = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b->id]);
-        $d    = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $c->id]);
-        $e    = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $d->id]);
+        $a = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $root->id]);
+        $b = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $a->id]);
+        $c = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b->id]);
+        $d = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $c->id]);
+        $e = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $d->id]);
 
         // Moving $root under $e would require root to be a child of its own
         // 5th-generation descendant — a cycle the walk must detect.
@@ -629,12 +629,12 @@ class CategoryServiceTest extends TestCase
     {
         // 5-level chain in a separate branch — moving an unrelated node there
         // must not be misidentified as a cycle.
-        $group  = $this->makeGroup();
+        $group = $this->makeGroup();
         $branch = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
-        $b1     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $branch->id]);
-        $b2     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b1->id]);
-        $b3     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b2->id]);
-        $b4     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b3->id]);
+        $b1 = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $branch->id]);
+        $b2 = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b1->id]);
+        $b3 = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b2->id]);
+        $b4 = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b3->id]);
 
         $unrelated = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
 
@@ -648,8 +648,8 @@ class CategoryServiceTest extends TestCase
         // Arrange: A and B in a valid parent/child relationship,
         // then manually corrupt the DB so A ↔ B reference each other.
         $group = $this->makeGroup();
-        $a     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
-        $b     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $a->id]);
+        $a = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
+        $b = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $a->id]);
 
         // Corrupt stored data: give A a parent_id pointing back to B.
         // This bypasses move() so no cycle guard fires during setup.
@@ -672,10 +672,10 @@ class CategoryServiceTest extends TestCase
         // Moving $root under $c requires walking c → b → a → (finds root → cycle).
         // That is 3 ancestor-walk queries; each must select only "parent_id".
         $group = $this->makeGroup();
-        $root  = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
-        $a     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $root->id]);
-        $b     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $a->id]);
-        $c     = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b->id]);
+        $root = $this->makeCategory(['group_id' => $group->id, 'parent_id' => null]);
+        $a = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $root->id]);
+        $b = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $a->id]);
+        $c = $this->makeCategory(['group_id' => $group->id, 'parent_id' => $b->id]);
 
         DB::enableQueryLog();
 
@@ -693,7 +693,7 @@ class CategoryServiceTest extends TestCase
         $walkQueries = array_values(array_filter(
             $log,
             fn($q) => str_contains(strtolower($q['query']), 'parent_id')
-                   && str_contains(strtolower($q['query']), 'categories'),
+                && str_contains(strtolower($q['query']), 'categories'),
         ));
 
         // Exactly 3 steps: c → b → a → (parent_id === root → return true).

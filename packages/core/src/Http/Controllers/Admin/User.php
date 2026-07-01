@@ -56,13 +56,13 @@ class User extends Controller
      */
     public function show(string $id)
     {
-        $user = Users::find((int) $id);
-        if (! $user instanceof UserModel) {
+        $user = Users::find((int)$id);
+        if (!$user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
         $user->loadMissing(['roles', 'tokens', 'fieldValues.field.fieldType']);
-        $user->load(['statusLogs' => fn ($q) => $q->with('actor')->limit(10)]);
+        $user->load(['statusLogs' => fn($q) => $q->with('actor')->limit(10)]);
         $layout = UserFieldLayout::resolve();
 
         return $this->view('users.show', [
@@ -80,9 +80,9 @@ class User extends Controller
     {
         $layout = UserFieldLayout::resolve();
         $roles = RoleModel::all();
-        $user = Users::find((int) $id);
+        $user = Users::find((int)$id);
 
-        if (! $user instanceof UserModel) {
+        if (!$user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
@@ -101,7 +101,7 @@ class User extends Controller
      */
     public function destroy(DeleteUserRequest $request, string $id)
     {
-        $user = Users::find((int) $id);
+        $user = Users::find((int)$id);
         if ($user instanceof UserModel) {
             Users::delete($user);
 
@@ -116,8 +116,8 @@ class User extends Controller
      */
     public function confirm(string $id)
     {
-        $user = Users::find((int) $id);
-        if (! $user instanceof UserModel) {
+        $user = Users::find((int)$id);
+        if (!$user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
@@ -129,8 +129,8 @@ class User extends Controller
      */
     public function password(PasswordUserRequest $request, string $id)
     {
-        $user = Users::find((int) $id);
-        if (! $user instanceof UserModel) {
+        $user = Users::find((int)$id);
+        if (!$user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
@@ -142,8 +142,8 @@ class User extends Controller
 
     public function changePassword(string $id)
     {
-        $user = Users::find((int) $id);
-        if (! $user instanceof UserModel) {
+        $user = Users::find((int)$id);
+        if (!$user instanceof UserModel) {
             return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
@@ -155,7 +155,7 @@ class User extends Controller
      */
     public function update(EditUserRequest $request, string $id)
     {
-        $user = Users::find((int) $id);
+        $user = Users::find((int)$id);
         if ($user instanceof UserModel) {
             $editor = app(UpdateUserProfileInformation::class);
             $user = $editor->update($user, $request->validated());

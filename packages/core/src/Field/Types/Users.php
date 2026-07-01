@@ -3,6 +3,7 @@
 namespace AdAstra\Field\Types;
 
 use AdAstra\Field\AbstractField;
+use AdAstra\Models\Role;
 use AdAstra\Models\User;
 use Illuminate\Support\Collection;
 
@@ -58,7 +59,7 @@ class Users extends AbstractField
     public function settingsFormOptions(): array
     {
         return [
-            'roles' => \AdAstra\Models\Role::orderBy('name')
+            'roles' => Role::orderBy('name')
                 ->get(['id', 'name'])
                 ->map(fn($r) => ['value' => $r->id, 'label' => $r->name])
                 ->all(),
@@ -154,7 +155,7 @@ class Users extends AbstractField
 
     private function extractSelectedIds(mixed $value): array
     {
-        if ($value instanceof \Illuminate\Support\Collection) {
+        if ($value instanceof Collection) {
             return $value->pluck('id')->map(fn($id) => (int)$id)->all();
         }
 

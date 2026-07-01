@@ -37,6 +37,6 @@ class UserFieldLayout
     {
         $value = app(Settings::class)->get(self::DOMAIN, self::HANDLE, null, null);
 
-        return $value !== null ? (int) $value : null;
+        return $value !== null ? (int)$value : null;
     }
 }

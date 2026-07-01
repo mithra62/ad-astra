@@ -67,7 +67,7 @@ class SliderTest extends TestCase
 
     public function test_validate_returns_error_for_value_below_min(): void
     {
-        $type   = $this->make(['min' => 10, 'max' => 100]);
+        $type = $this->make(['min' => 10, 'max' => 100]);
         $result = $type->validate(5);
         $this->assertIsString($result);
         $this->assertStringContainsString('10', $result);
@@ -75,7 +75,7 @@ class SliderTest extends TestCase
 
     public function test_validate_returns_error_for_value_above_max(): void
     {
-        $type   = $this->make(['min' => 0, 'max' => 50]);
+        $type = $this->make(['min' => 0, 'max' => 50]);
         $result = $type->validate(75);
         $this->assertIsString($result);
         $this->assertStringContainsString('50', $result);

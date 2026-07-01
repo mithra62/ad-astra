@@ -7,6 +7,7 @@ use AdAstra\Models\EntryRelationship;
 use AdAstra\Models\Field;
 use AdAstra\Models\Field\Type as FieldType;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 class EditField
 {
@@ -17,7 +18,7 @@ class EditField
     public function edit(Field $field, array $input): bool
     {
         // Resolve type handle to field_type_id if submitted as a handle string.
-        if (isset($input['type']) && ! isset($input['field_type_id'])) {
+        if (isset($input['type']) && !isset($input['field_type_id'])) {
             $resolved = FieldType::where('handle', $input['type'])->first();
 
             if ($resolved) {
@@ -29,15 +30,15 @@ class EditField
 
         $typeChanged = isset($input['field_type_id'])
             && $field->field_type_id !== null
-            && (int) $input['field_type_id'] !== (int) $field->field_type_id;
+            && (int)$input['field_type_id'] !== (int)$field->field_type_id;
 
         if ($typeChanged && $this->fieldHasValues($field)) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 "Cannot change the type of field [{$field->handle}] — it has existing values. Migrate or clear the values first."
             );
         }
 
-        $newTypeId = isset($input['field_type_id']) ? (int) $input['field_type_id'] : (int) $field->field_type_id;
+        $newTypeId = isset($input['field_type_id']) ? (int)$input['field_type_id'] : (int)$field->field_type_id;
         $newType = FieldType::find($newTypeId);
 
         if ($newType) {
@@ -51,13 +52,13 @@ class EditField
                 $form = $newInstance->settingsForm();
                 if (
                     isset($form['strict_options']) &&
-                    ! empty($input['settings']['strict_options']) &&
+                    !empty($input['settings']['strict_options']) &&
                     $this->fieldHasValues($field)
                 ) {
-                    $message = "Field [{$field->handle}] has strict_options enabled with existing values. ".
+                    $message = "Field [{$field->handle}] has strict_options enabled with existing values. " .
                         'Orphaned values will be rejected on next edit.';
                     Log::warning($message);
-                    $this->warning = 'Strict options is enabled and this field has existing values. '.
+                    $this->warning = 'Strict options is enabled and this field has existing values. ' .
                         'Any stored values that are no longer valid options will be rejected on next entry edit.';
                 }
             }

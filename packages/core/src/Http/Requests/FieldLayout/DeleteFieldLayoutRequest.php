@@ -32,7 +32,7 @@ class DeleteFieldLayoutRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            if (UserFieldLayout::resolvedId() === (int) $this->route('id')) {
+            if (UserFieldLayout::resolvedId() === (int)$this->route('id')) {
                 $validator->errors()->add(
                     'confirm_removal',
                     'This field layout is assigned to the User Schema and cannot be deleted.'

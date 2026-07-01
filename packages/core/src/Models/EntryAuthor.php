@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class EntryAuthor extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'display_name',

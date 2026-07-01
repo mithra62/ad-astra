@@ -47,7 +47,7 @@ class MediaRepository extends AbstractFieldableRepository
      */
     public function delete(Media $media): bool
     {
-        return (bool) $media->delete();
+        return (bool)$media->delete();
     }
 
     /**
@@ -75,7 +75,7 @@ class MediaRepository extends AbstractFieldableRepository
         }
 
         if (array_key_exists('sort_order', $data)) {
-            $media->sort_order = (int) $data['sort_order'];
+            $media->sort_order = (int)$data['sort_order'];
         }
 
         if (isset($data['status'])) {
@@ -109,8 +109,8 @@ class MediaRepository extends AbstractFieldableRepository
             return;
         }
 
-        $media->status_id        = $status->id;
-        $media->status_handle    = $status->handle;
+        $media->status_id = $status->id;
+        $media->status_handle = $status->handle;
         $media->status_is_public = $status->is_public;
     }
 }

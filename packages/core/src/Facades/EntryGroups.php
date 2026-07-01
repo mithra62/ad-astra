@@ -3,6 +3,7 @@
 namespace AdAstra\Facades;
 
 use AdAstra\Models\EntryGroup;
+use AdAstra\Services\EntryGroupService;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -18,6 +19,6 @@ class EntryGroups extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return \AdAstra\Services\EntryGroupService::class;
+        return EntryGroupService::class;
     }
 }

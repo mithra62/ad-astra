@@ -7,6 +7,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
+use RuntimeException;
+use Throwable;
 
 trait HasMediaItems
 {
@@ -22,13 +25,13 @@ trait HasMediaItems
      * sort_order is computed inside the transaction with a write lock to prevent
      * duplicate order values under concurrent uploads.
      *
-     * @throws \InvalidArgumentException when the file fails library constraints.
+     * @throws InvalidArgumentException when the file fails library constraints.
      */
     public function addMediaFromUpload(UploadedFile $file, array $attributes = []): Media
     {
         $errors = $this->validateUpload($file);
         if (!empty($errors)) {
-            throw new \InvalidArgumentException(implode(' ', $errors));
+            throw new InvalidArgumentException(implode(' ', $errors));
         }
 
         $disk = $this->adapter;
@@ -38,7 +41,7 @@ trait HasMediaItems
         $path = $file->storeAs($folder, $fileName, $disk);
 
         if ($path === false) {
-            throw new \RuntimeException("Failed to store uploaded file on disk '{$disk}'.");
+            throw new RuntimeException("Failed to store uploaded file on disk '{$disk}'.");
         }
 
         // Resolved outside the transaction — this is a read-only lookup on the
@@ -51,8 +54,8 @@ trait HasMediaItems
                 $nextOrder = (int)$this->media()->lockForUpdate()->max('sort_order') + 1;
 
                 $statusAttributes = $defaultStatus ? [
-                    'status_id'        => $defaultStatus->id,
-                    'status_handle'    => $defaultStatus->handle,
+                    'status_id' => $defaultStatus->id,
+                    'status_handle' => $defaultStatus->handle,
                     'status_is_public' => $defaultStatus->is_public,
                 ] : [];
 
@@ -67,7 +70,7 @@ trait HasMediaItems
                     'sort_order' => $nextOrder,
                 ], $statusAttributes, $attributes));
             });
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Compensate: remove the physical file so it doesn't become orphaned.
             Storage::disk($disk)->delete($path);
             throw $e;

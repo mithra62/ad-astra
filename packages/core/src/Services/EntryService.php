@@ -94,8 +94,8 @@ class EntryService extends AbstractService
      * violation: if two processes both see no existing row and race to INSERT,
      * the loser retries as an UPDATE increment.
      *
-     * @param  int           $value  Amount to add (defaults to 1).
-     * @param  Carbon|null   $date   Date to record against; defaults to today.
+     * @param int $value Amount to add (defaults to 1).
+     * @param Carbon|null $date Date to record against; defaults to today.
      */
     public function recordMetric(Entry $entry, string $metric, int $value = 1, ?Carbon $date = null): EntryMetric
     {
@@ -104,7 +104,7 @@ class EntryService extends AbstractService
         EntryMetric::upsert(
             [['entry_id' => $entry->id, 'metric' => $metric, 'value' => $value, 'recorded_date' => $recordedDate]],
             ['entry_id', 'metric', 'recorded_date'],
-            ['value' => DB::raw('value + ' . (int) $value)],
+            ['value' => DB::raw('value + ' . (int)$value)],
         );
 
         return EntryMetric::where('entry_id', $entry->id)
@@ -125,7 +125,7 @@ class EntryService extends AbstractService
      */
     public function deleteTreeNode(EntryTree $node): bool
     {
-        return DB::transaction(fn () => (bool) $node->delete());
+        return DB::transaction(fn() => (bool)$node->delete());
     }
 
     /**
@@ -315,20 +315,20 @@ class EntryService extends AbstractService
             $this->treeAssertUniqueHandleWithinParent($normalizedHandle, $parent);
 
             $provisional = new EntryTree([
-                'handle'  => $normalizedHandle,
+                'handle' => $normalizedHandle,
                 'is_home' => $isHome,
             ]);
             $provisional->setRelation('parent', $parent);
 
             $node = EntryTree::create([
-                'entry_id'   => $entry->id,
-                'parent_id'  => $parent?->id,
-                'handle'     => $normalizedHandle,
-                'uri'        => $this->treeBuildUri($provisional),
-                'depth'      => $parent ? $parent->depth + 1 : 0,
+                'entry_id' => $entry->id,
+                'parent_id' => $parent?->id,
+                'handle' => $normalizedHandle,
+                'uri' => $this->treeBuildUri($provisional),
+                'depth' => $parent ? $parent->depth + 1 : 0,
                 'sort_order' => $this->treeNextSortOrder($parent),
-                'template'   => $template,
-                'is_home'    => $isHome,
+                'template' => $template,
+                'is_home' => $isHome,
             ]);
 
             return $node->fresh(['entry.entryType', 'parent']);
@@ -426,7 +426,7 @@ class EntryService extends AbstractService
                 handle: $entry->handle,
                 parent: $parentNode,
                 template: $data['template'] ?? null,
-                isHome: (bool) ($data['is_home'] ?? false),
+                isHome: (bool)($data['is_home'] ?? false),
             );
         }
 
@@ -457,8 +457,8 @@ class EntryService extends AbstractService
     {
         $node = $entry->entryTree;
 
-        if (! $node) {
-            if (! filled($entry->handle)) {
+        if (!$node) {
+            if (!filled($entry->handle)) {
                 return;
             }
             $parentNode = $this->resolveTreeParentNode($data['parent_id'] ?? null);
@@ -467,20 +467,20 @@ class EntryService extends AbstractService
                 handle: $entry->handle,
                 parent: $parentNode,
                 template: $data['template'] ?? null,
-                isHome: (bool) ($data['is_home'] ?? false),
+                isHome: (bool)($data['is_home'] ?? false),
             );
             return;
         }
 
         $handleChanged = false;
-        $dirty         = false;
+        $dirty = false;
 
         // Sync tree handle with the entry's (potentially renamed) handle.
         $normalizedHandle = EntryTree::normalizeHandle($entry->handle);
         if ($normalizedHandle !== '' && $node->handle !== $normalizedHandle) {
             $node->handle = $normalizedHandle;
             $handleChanged = true;
-            $dirty         = true;
+            $dirty = true;
         }
 
         // Sync template when the caller explicitly included the key.
@@ -517,7 +517,7 @@ class EntryService extends AbstractService
      */
     private function resolveTreeParentNode(?int $parentEntryId): ?EntryTree
     {
-        if (! $parentEntryId) {
+        if (!$parentEntryId) {
             return null;
         }
 

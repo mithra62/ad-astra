@@ -24,15 +24,19 @@
         <div class="border-b {{ _danger ? 'border-red-100 bg-red-50' : 'border-edge' }} px-5 py-3">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    {% if title is defined and title %}<h5 class="text-sm font-semibold {{ _danger ? 'text-red-800' : 'text-content' }}">{{ title }}</h5>{% endif %}
-                    {% if subtitle is defined and subtitle %}<p class="mt-0.5 text-xs text-muted">{{ subtitle }}</p>{% endif %}
+                    {% if title is defined and title %}<h5
+                        class="text-sm font-semibold {{ _danger ? 'text-red-800' : 'text-content' }}">{{ title }}</h5>{% endif %}
+                    {% if subtitle is defined and subtitle %}<p
+                        class="mt-0.5 text-xs text-muted">{{ subtitle }}</p>{% endif %}
                 </div>
-                {% if _actions|trim %}<div class="flex flex-wrap items-center gap-2">{{ _actions|raw }}</div>{% endif %}
+                {% if _actions|trim %}
+                    <div class="flex flex-wrap items-center gap-2">{{ _actions|raw }}</div>{% endif %}
             </div>
         </div>
     {% endif %}
     {{ _body|raw }}
     {% if _footer|trim %}
-        <div class="flex flex-col gap-3 border-t border-edge bg-subtle px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">{{ _footer|raw }}</div>
+        <div
+            class="flex flex-col gap-3 border-t border-edge bg-subtle px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">{{ _footer|raw }}</div>
     {% endif %}
 </div>

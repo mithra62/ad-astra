@@ -16,13 +16,13 @@ class TransformationFactory extends Factory
 
     public function definition(): array
     {
-        $fileName = Str::uuid().'.jpg';
+        $fileName = Str::uuid() . '.jpg';
 
         return [
             'media_id' => Media::factory(),
             'key' => fake()->randomElement(['thumb', 'medium', 'large', 'webp']),
             'disk' => 'local',
-            'path' => 'transformations/'.$fileName,
+            'path' => 'transformations/' . $fileName,
             'mime_type' => 'image/jpeg',
             'size' => fake()->numberBetween(1024, 512 * 1024),
             'width' => fake()->numberBetween(100, 2000),

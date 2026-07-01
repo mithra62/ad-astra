@@ -5,6 +5,7 @@ namespace Tests\Unit\Services;
 use AdAstra\Models\Media;
 use AdAstra\Models\Media\Library;
 use AdAstra\Services\MediaStorageService;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -26,8 +27,8 @@ class MediaStorageServiceTest extends TestCase
     private function makeLibrary(array $overrides = []): Library
     {
         return Library::create(array_merge([
-            'name'    => 'Test Library',
-            'handle'  => 'test-lib',
+            'name' => 'Test Library',
+            'handle' => 'test-lib',
             'adapter' => 'local',
             'max_size' => 10,
         ], $overrides));
@@ -42,7 +43,7 @@ class MediaStorageServiceTest extends TestCase
         Storage::fake('local');
 
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('photo.jpg');
+        $file = UploadedFile::fake()->image('photo.jpg');
 
         $media = $this->service()->upload($library, $file);
 
@@ -55,7 +56,7 @@ class MediaStorageServiceTest extends TestCase
         Storage::fake('local');
 
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('shot.png');
+        $file = UploadedFile::fake()->image('shot.png');
 
         $media = $this->service()->upload($library, $file);
 
@@ -67,7 +68,7 @@ class MediaStorageServiceTest extends TestCase
         Storage::fake('local');
 
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('hero.jpg');
+        $file = UploadedFile::fake()->image('hero.jpg');
 
         $media = $this->service()->upload($library, $file, ['name' => 'Hero Shot']);
 
@@ -84,7 +85,7 @@ class MediaStorageServiceTest extends TestCase
         Storage::disk('local')->put('uploads/soft.jpg', 'data');
 
         $library = $this->makeLibrary();
-        $media   = Media::factory()->create(['library_id' => $library->id, 'disk' => 'local', 'path' => 'uploads/soft.jpg']);
+        $media = Media::factory()->create(['library_id' => $library->id, 'disk' => 'local', 'path' => 'uploads/soft.jpg']);
 
         $this->service()->delete($media);
 
@@ -97,7 +98,7 @@ class MediaStorageServiceTest extends TestCase
         Storage::disk('local')->put('uploads/soft.jpg', 'data');
 
         $library = $this->makeLibrary();
-        $media   = Media::factory()->create(['library_id' => $library->id, 'disk' => 'local', 'path' => 'uploads/soft.jpg']);
+        $media = Media::factory()->create(['library_id' => $library->id, 'disk' => 'local', 'path' => 'uploads/soft.jpg']);
 
         $this->service()->delete($media);
 
@@ -126,7 +127,7 @@ class MediaStorageServiceTest extends TestCase
         Storage::disk('local')->put('uploads/hard.jpg', 'data');
 
         $library = $this->makeLibrary();
-        $media   = Media::factory()->create(['library_id' => $library->id, 'disk' => 'local', 'path' => 'uploads/hard.jpg']);
+        $media = Media::factory()->create(['library_id' => $library->id, 'disk' => 'local', 'path' => 'uploads/hard.jpg']);
 
         $this->service()->purge($media);
 
@@ -139,7 +140,7 @@ class MediaStorageServiceTest extends TestCase
         Storage::disk('local')->put('uploads/hard.jpg', 'data');
 
         $library = $this->makeLibrary();
-        $media   = Media::factory()->create(['library_id' => $library->id, 'disk' => 'local', 'path' => 'uploads/hard.jpg']);
+        $media = Media::factory()->create(['library_id' => $library->id, 'disk' => 'local', 'path' => 'uploads/hard.jpg']);
 
         $this->service()->purge($media);
 
@@ -188,6 +189,6 @@ class MediaStorageServiceTest extends TestCase
 
         $disk = $this->service()->disk($media);
 
-        $this->assertInstanceOf(\Illuminate\Contracts\Filesystem\Filesystem::class, $disk);
+        $this->assertInstanceOf(Filesystem::class, $disk);
     }
 }

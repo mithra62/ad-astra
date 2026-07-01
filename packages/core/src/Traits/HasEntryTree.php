@@ -24,7 +24,7 @@ trait HasEntryTree
     {
         $this->loadMissing('entryTree');
 
-        if (! $this->entryTree) {
+        if (!$this->entryTree) {
             return null;
         }
 
@@ -58,12 +58,12 @@ trait HasEntryTree
     {
         $this->loadMissing('entryTree.children.entry');
 
-        if (! $this->entryTree) {
+        if (!$this->entryTree) {
             return collect();
         }
 
         return $this->entryTree->children
-            ->map(fn (EntryTree $node) => $node->entry)
+            ->map(fn(EntryTree $node) => $node->entry)
             ->filter()
             ->values();
     }
@@ -84,7 +84,7 @@ trait HasEntryTree
     {
         $this->loadMissing('entryTree');
 
-        if (! $this->entryTree) {
+        if (!$this->entryTree) {
             return collect();
         }
 
@@ -95,7 +95,7 @@ trait HasEntryTree
             $node->load('parent.entry');
             $node = $node->parent;
 
-            if (! $node) {
+            if (!$node) {
                 break;
             }
 
@@ -123,7 +123,7 @@ trait HasEntryTree
     {
         $this->loadMissing('entryTree');
 
-        if (! $this->entryTree || $maxDepth < 1) {
+        if (!$this->entryTree || $maxDepth < 1) {
             return collect();
         }
 

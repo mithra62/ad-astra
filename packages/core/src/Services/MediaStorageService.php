@@ -4,6 +4,7 @@ namespace AdAstra\Services;
 
 use AdAstra\Models\Media;
 use AdAstra\Models\Media\Library;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -37,7 +38,7 @@ class MediaStorageService
             : $media->url();
     }
 
-    public function disk(Media $media): \Illuminate\Contracts\Filesystem\Filesystem
+    public function disk(Media $media): Filesystem
     {
         return Storage::disk($media->disk);
     }

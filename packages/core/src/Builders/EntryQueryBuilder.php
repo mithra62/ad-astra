@@ -50,7 +50,7 @@ class EntryQueryBuilder
 
     public function withAuthor(int $userId): static
     {
-        $this->query->whereHas('authors', fn ($q) => $q->where('entry_authors.user_id', $userId));
+        $this->query->whereHas('authors', fn($q) => $q->where('entry_authors.user_id', $userId));
 
         return $this;
     }
@@ -66,7 +66,7 @@ class EntryQueryBuilder
 
     public function withCategory(int $categoryId): static
     {
-        $this->query->whereHas('categories', fn ($q) => $q->where('categories.id', $categoryId));
+        $this->query->whereHas('categories', fn($q) => $q->where('categories.id', $categoryId));
 
         return $this;
     }
@@ -89,7 +89,7 @@ class EntryQueryBuilder
     {
         // Support two-argument shorthand: ->whereField('slug', 'my-post')
         if ($value === null) {
-            $value    = $operator;
+            $value = $operator;
             $operator = '=';
         }
 
@@ -97,7 +97,7 @@ class EntryQueryBuilder
         // targets the correct typed column rather than scanning all six.
         $field = Field::with('fieldType')->where('handle', $handle)->first();
 
-        if (! $field?->fieldType) {
+        if (!$field?->fieldType) {
             throw new InvalidArgumentException(
                 "whereField: no field with handle [{$handle}] exists."
             );
@@ -118,7 +118,7 @@ class EntryQueryBuilder
         // no need to set it explicitly.
         $this->query->whereHas('fieldValues', function ($q) use ($field, $column, $operator, $value) {
             $q->where('field_id', $field->getKey())
-              ->where($column, $operator, $value);
+                ->where($column, $operator, $value);
         });
 
         return $this;

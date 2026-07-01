@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use ReflectionClass;
 use Tests\TestCase;
 
 class FieldValueTest extends TestCase
@@ -37,7 +38,7 @@ class FieldValueTest extends TestCase
 
     public function test_always_eager_loads_field(): void
     {
-        $prop = (new \ReflectionClass(FieldValue::class))->getProperty('with');
+        $prop = (new ReflectionClass(FieldValue::class))->getProperty('with');
         $prop->setAccessible(true);
         $this->assertContains('field', $prop->getValue(new FieldValue));
     }
@@ -107,13 +108,13 @@ class FieldValueTest extends TestCase
 
     public function test_resolved_value_passes_field_settings_to_type_instance(): void
     {
-        $type  = Type::factory()->create(['object' => Text::class, 'settings' => []]);
+        $type = Type::factory()->create(['object' => Text::class, 'settings' => []]);
         $field = Field::factory()->create([
             'field_type_id' => $type->id,
-            'settings'      => ['placeholder' => 'My placeholder'],
+            'settings' => ['placeholder' => 'My placeholder'],
         ]);
         $fv = FieldValue::factory()->create([
-            'field_id'   => $field->id,
+            'field_id' => $field->id,
             'value_text' => 'hello',
         ]);
 

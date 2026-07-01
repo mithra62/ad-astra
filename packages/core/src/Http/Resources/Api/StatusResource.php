@@ -28,16 +28,16 @@ class StatusResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'              => $this->id,
+            'id' => $this->id,
             'status_group_id' => $this->status_group_id,
-            'name'            => $this->name,
-            'handle'          => $this->handle,
-            'color'           => $this->color,
-            'is_default'      => $this->is_default,
-            'is_public'       => $this->is_public,
-            'sort_order'      => $this->sort_order,
-            'created_at'      => $this->created_at,
-            'updated_at'      => $this->updated_at,
+            'name' => $this->name,
+            'handle' => $this->handle,
+            'color' => $this->color,
+            'is_default' => $this->is_default,
+            'is_public' => $this->is_public,
+            'sort_order' => $this->sort_order,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

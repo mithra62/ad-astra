@@ -12,7 +12,7 @@ trait ValidatesAgainstOptions
     public function isValidOption(mixed $value, array $options): bool
     {
         $keys = array_column($options, 'key');
-        return in_array((string) $value, array_map('strval', $keys), true);
+        return in_array((string)$value, array_map('strval', $keys), true);
     }
 
     /**
@@ -33,7 +33,7 @@ trait ValidatesAgainstOptions
             return true;
         }
 
-        $strict = (bool) $this->getSetting('strict_options', false);
+        $strict = (bool)$this->getSetting('strict_options', false);
 
         $values = is_array($value) ? $value : [$value];
 
@@ -57,7 +57,7 @@ trait ValidatesAgainstOptions
             return '';
         }
 
-        $escaped = htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+        $escaped = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
         return "<option value=\"{$escaped}\" disabled selected class=\"text-red-500\" data-orphaned=\"true\">[orphaned: {$escaped}]</option>";
     }
 }

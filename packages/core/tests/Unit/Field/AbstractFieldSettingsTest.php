@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Field;
 
+use AdAstra\Field\AbstractField;
 use AdAstra\Field\Types\EmailAddress;
 use AdAstra\Field\Types\Text;
 use Tests\TestCase;
@@ -104,11 +105,15 @@ class AbstractFieldSettingsTest extends TestCase
     public function test_settings_rules_falls_back_to_nullable_when_rules_key_absent(): void
     {
         // Use an anonymous subclass with a settings_form entry that has no 'rules' key
-        $type = new class([], null) extends \AdAstra\Field\AbstractField {
+        $type = new class([], null) extends AbstractField {
             protected array $settings_form = [
                 'my_setting' => ['type' => 'text', 'label' => 'My Setting'],
             ];
-            public function storageColumn(): string { return 'value_text'; }
+
+            public function storageColumn(): string
+            {
+                return 'value_text';
+            }
         };
 
         $rules = $type->settingsRules();

@@ -37,7 +37,7 @@ abstract class AbstractFieldableRepository implements RepositoryInterface
      * Skips handles not present in the model's resolved layout and silently
      * ignores handles whose FieldType cannot be resolved.
      *
-     * @param array<string, mixed> $fields  ['field_handle' => value, ...]
+     * @param array<string, mixed> $fields ['field_handle' => value, ...]
      */
     protected function applyFieldValues(Model $model, array $fields): void
     {
@@ -80,10 +80,11 @@ abstract class AbstractFieldableRepository implements RepositoryInterface
         string $fieldableType,
         string $column,
         mixed  $value,
-    ): void {
+    ): void
+    {
         $key = [
-            'field_id'       => $fieldId,
-            'fieldable_id'   => $fieldableId,
+            'field_id' => $fieldId,
+            'fieldable_id' => $fieldableId,
             'fieldable_type' => $fieldableType,
         ];
 

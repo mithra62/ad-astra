@@ -53,7 +53,7 @@ class FieldValue extends Model
         }
 
         $instance = $this->field->typeInstance();
-        $column   = $instance->storageColumn();
+        $column = $instance->storageColumn();
 
         return $instance->value($this->{$column});
     }

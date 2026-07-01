@@ -34,7 +34,7 @@ class UserStatusServiceTest extends TestCase
         $this->service->setStatus($user, UserStatus::INACTIVE);
 
         $this->assertDatabaseHas('users', [
-            'id'     => $user->id,
+            'id' => $user->id,
             'status' => UserStatus::INACTIVE,
         ]);
     }
@@ -90,7 +90,7 @@ class UserStatusServiceTest extends TestCase
     {
         Event::fake([UserStatusChanged::class]);
 
-        $user  = User::factory()->active()->create();
+        $user = User::factory()->active()->create();
         $until = now()->addDays(7)->toDateTime();
 
         $this->service->suspend($user, $until, 'Temporary violation');
@@ -104,7 +104,7 @@ class UserStatusServiceTest extends TestCase
     {
         Event::fake([UserStatusChanged::class]);
 
-        $user  = User::factory()->active()->create();
+        $user = User::factory()->active()->create();
         $until = now()->addDays(3)->toDateTime();
 
         $this->service->suspend($user, $until, 'spam');
@@ -123,7 +123,7 @@ class UserStatusServiceTest extends TestCase
     {
         Event::fake([UserLockChanged::class]);
 
-        $user  = User::factory()->active()->create();
+        $user = User::factory()->active()->create();
         $until = now()->addMinutes(30)->toDateTime();
 
         $this->service->lockUser($user, $until);
@@ -135,7 +135,7 @@ class UserStatusServiceTest extends TestCase
     {
         Event::fake([UserLockChanged::class]);
 
-        $user  = User::factory()->active()->create();
+        $user = User::factory()->active()->create();
         $until = now()->addMinutes(30)->toDateTime();
 
         $this->service->lockUser($user, $until);

@@ -4,6 +4,8 @@ namespace AdAstra\Http\Controllers\Admin;
 
 
 use AdAstra\Http\Controllers\Controller as DefaultController;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 
 abstract class Controller extends DefaultController
 {
@@ -18,7 +20,7 @@ abstract class Controller extends DefaultController
     /**
      * @param string $path
      * @param array $data
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     * @return Factory|View
      */
     protected function view(string $path, array $data = [])
     {

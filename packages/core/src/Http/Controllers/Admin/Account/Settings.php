@@ -47,7 +47,7 @@ class Settings extends Controller
     }
 
     /**
-     * @param  array<int, array<string, mixed>>  $fields
+     * @param array<int, array<string, mixed>> $fields
      * @return array<int, array<string, mixed>>
      */
     private function hydrateOptions(array $fields): array

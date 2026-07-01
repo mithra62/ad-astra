@@ -8,6 +8,7 @@ use AdAstra\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role as SpatieRole;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class RoleActionsTest extends TestCase
@@ -143,6 +144,6 @@ class RoleActionsTest extends TestCase
     {
         parent::setUp();
         // Clear the Spatie permission cache between tests
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 }

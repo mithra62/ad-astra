@@ -9,7 +9,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ApplyTimezone
 {
-    public function __construct(private Settings $settings) {}
+    public function __construct(private Settings $settings)
+    {
+    }
 
     public function handle(Request $request, Closure $next): Response
     {

@@ -37,7 +37,8 @@
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Create Entry Type</h1>
-                <p class="mt-1 text-sm text-muted">Define a reusable content schema. Assign it to an Entry Group when ready.</p>
+                <p class="mt-1 text-sm text-muted">Define a reusable content schema. Assign it to an Entry Group when
+                    ready.</p>
             </div>
             <a href="{{ route('entries.types') }}"
                class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
@@ -60,38 +61,43 @@
                     {{ forms.input('handle', 'Handle', required=true, description="Lowercase letters, numbers, and hyphens only.") }}
 
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-content" for="entry_behavior_id">Behavior</label>
+                        <label class="mb-1.5 block text-sm font-medium text-content"
+                               for="entry_behavior_id">Behavior</label>
                         <select
                             class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm {% if errors.has('entry_behavior_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                             id="entry_behavior_id" name="entry_behavior_id">
                             <option value="">— None (General) —</option>
                             {% for behavior in behaviors %}
-                                <option value="{{ behavior.id }}" {% if old('entry_behavior_id') == behavior.id %}selected{% endif %}>
+                                <option value="{{ behavior.id }}"
+                                        {% if old('entry_behavior_id') == behavior.id %}selected{% endif %}>
                                     {{ behavior.name }}
                                 </option>
                             {% endfor %}
                         </select>
                         {% if errors.has('entry_behavior_id') %}
-                            <p id="entry_behavior_id-error" class="mt-1 text-xs text-red-600">{{ errors.first('entry_behavior_id') }}</p>
+                            <p id="entry_behavior_id-error"
+                               class="mt-1 text-xs text-red-600">{{ errors.first('entry_behavior_id') }}</p>
                         {% endif %}
                         <p class="mt-1 text-xs text-faint">
-                            Determines lifecycle hooks (e.g. reading time, stock status). Leave blank for general-purpose behavior.
+                            Determines lifecycle hooks (e.g. reading time, stock status). Leave blank for
+                            general-purpose behavior.
                         </p>
                     </div>
 
-                        {{ forms.toggle(
-                            name: 'has_entry_tree',
-                            label: 'Allow Entry Tree',
-                            value: false,
-                            description: 'Allow Entries assigned to this Entry Type to have parent / child relationships.',
-                            checked_value: '1',
-                            id: 'has_entry_tree',
-                            error_key: null,
-                            copy_align: 'inline'
-                        ) }}
+                    {{ forms.toggle(
+                        name: 'has_entry_tree',
+                        label: 'Allow Entry Tree',
+                        value: false,
+                        description: 'Allow Entries assigned to this Entry Type to have parent / child relationships.',
+                        checked_value: '1',
+                        id: 'has_entry_tree',
+                        error_key: null,
+                        copy_align: 'inline'
+                    ) }}
 
                     {% set entry_tree_enabled = old('has_entry_tree') == '1' %}
-                    <div id="entry-tree-settings" class="{% if not entry_tree_enabled %}hidden {% endif %}rounded-lg border border-edge bg-subtle px-4 py-4">
+                    <div id="entry-tree-settings"
+                         class="{% if not entry_tree_enabled %}hidden {% endif %}rounded-lg border border-edge bg-subtle px-4 py-4">
                         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                             {{ forms.input(name='max_depth', label='Max Depth', type="number", required=true) }}
                             {{ forms.input(name='default_template', label='Default Template', required=true) }}
@@ -99,7 +105,8 @@
                     </div>
 
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-content" for="field_layout_id">Field Layout</label>
+                        <label class="mb-1.5 block text-sm font-medium text-content" for="field_layout_id">Field
+                            Layout</label>
                         <select
                             class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm {% if errors.has('field_layout_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                             id="field_layout_id" name="field_layout_id">
@@ -112,10 +119,12 @@
                             {% endfor %}
                         </select>
                         {% if errors.has('field_layout_id') %}
-                            <p id="field_layout_id-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>
+                            <p id="field_layout_id-error"
+                               class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>
                         {% endif %}
                         <p class="mt-1 text-xs text-faint">
-                            Fields from this layout are specific to this entry type. Group-level fields are always included.
+                            Fields from this layout are specific to this entry type. Group-level fields are always
+                            included.
                         </p>
                     </div>
                 </div>

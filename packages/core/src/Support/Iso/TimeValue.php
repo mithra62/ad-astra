@@ -17,7 +17,8 @@ final class TimeValue
         public readonly int $hours,
         public readonly int $minutes,
         public readonly int $seconds = 0,
-    ) {
+    )
+    {
         if ($this->hours < 0 || $this->hours > 23) {
             throw new InvalidArgumentException("Hours out of range: {$this->hours}.");
         }
@@ -39,7 +40,7 @@ final class TimeValue
         if (!preg_match('/^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/', $canonical, $m)) {
             throw new InvalidArgumentException("Not a canonical time: {$canonical}.");
         }
-        return new self((int) $m[1], (int) $m[2], isset($m[3]) ? (int) $m[3] : 0);
+        return new self((int)$m[1], (int)$m[2], isset($m[3]) ? (int)$m[3] : 0);
     }
 
     /**

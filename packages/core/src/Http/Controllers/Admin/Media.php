@@ -10,16 +10,18 @@ use AdAstra\Models\Media\Library as LibraryModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use AdAstra\Actions\Media\EditMedia as EditMediaAction;
+use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class Media extends Controller
 {
-    public function index(): \Illuminate\View\View
+    public function index(): View
     {
         $media = MediaModel::paginate(20);
         return $this->view('media.index', compact('media'));
     }
 
-    public function create(string $library_id): \Illuminate\View\View|RedirectResponse
+    public function create(string $library_id): View|RedirectResponse
     {
         $library = LibraryModel::with('categoryGroups')->find($library_id);
         if (!$library instanceof LibraryModel) {
@@ -35,13 +37,13 @@ class Media extends Controller
         return redirect()->route('media.libraries');
     }
 
-    public function show(string $id): \Illuminate\View\View
+    public function show(string $id): View
     {
         $media = MediaModel::with(['library', 'status'])->findOrFail($id);
         return $this->view('media.show', compact('media'));
     }
 
-    public function edit(string $id): \Illuminate\View\View
+    public function edit(string $id): View
     {
         $media = MediaModel::with([
             'library.statusGroup.statuses',
@@ -64,7 +66,7 @@ class Media extends Controller
             ->with('success', trans('media.updated'));
     }
 
-    public function confirm(string $id): \Illuminate\View\View|RedirectResponse
+    public function confirm(string $id): View|RedirectResponse
     {
         $media = MediaModel::find($id);
         if (!$media instanceof MediaModel) {
@@ -82,7 +84,7 @@ class Media extends Controller
             ->with('success', trans('media.deleted'));
     }
 
-    public function download(string $id): \Symfony\Component\HttpFoundation\Response
+    public function download(string $id): Response
     {
         $media = MediaModel::findOrFail($id);
         if (!Storage::disk($media->disk)->exists($media->path)) {

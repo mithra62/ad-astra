@@ -53,7 +53,7 @@ class RadioGroupTest extends TestCase
 
     public function test_orphaned_value_fails_when_strict(): void
     {
-        $type   = $this->make(['options' => $this->sampleOptions(), 'strict_options' => true]);
+        $type = $this->make(['options' => $this->sampleOptions(), 'strict_options' => true]);
         $result = $type->validate('gone');
         $this->assertIsString($result);
         $this->assertStringContainsString('gone', $result);

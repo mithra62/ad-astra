@@ -6,6 +6,7 @@ use AdAstra\Models\Status;
 use AdAstra\Observers\StatusSyncRegistry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use LogicException;
 
 /**
  * For models that carry a single Status instance via a denormalized triple.
@@ -29,7 +30,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * column predicate). Define scopePublished on each model as needed, typically
  * by composing this trait's scopePublic() with whatever extra clauses apply.
  *
- * @see \AdAstra\Observers\StatusSyncRegistry
+ * @see StatusSyncRegistry
  * @see \AdAstra\Observers\StatusObserver
  */
 trait HasStatus
@@ -70,7 +71,7 @@ trait HasStatus
                 $instance->getFillable()
             );
             if (!empty($missing)) {
-                throw new \LogicException(sprintf(
+                throw new LogicException(sprintf(
                     '%s uses HasStatus but is missing column(s) from $fillable: %s.',
                     static::class,
                     implode(', ', $missing)
@@ -79,7 +80,7 @@ trait HasStatus
 
             $cast = $instance->getCasts()['status_is_public'] ?? '(none)';
             if ($cast !== 'boolean' && $cast !== 'bool') {
-                throw new \LogicException(sprintf(
+                throw new LogicException(sprintf(
                     '%s uses HasStatus but $casts[\'status_is_public\'] is %s, expected boolean.',
                     static::class,
                     $cast

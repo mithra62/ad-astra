@@ -6,7 +6,7 @@ use AdAstra\Models\BbValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\BbValue>
+ * @extends Factory<BbValue>
  */
 class BbValueFactory extends Factory
 {

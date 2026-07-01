@@ -5,7 +5,7 @@
     throws, error pages must still render — Blade is always available as the
     base renderer, so keeping error views in Blade is a defensive safety net.
 --}}
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">

@@ -22,8 +22,9 @@ readonly class MoneyRangeRule implements ValidationRule
     public function __construct(
         private ?string $min,
         private ?string $max,
-        private string $currency,
-    ) {
+        private string  $currency,
+    )
+    {
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
@@ -40,7 +41,7 @@ readonly class MoneyRangeRule implements ValidationRule
         $currency = new Currency(strtoupper($this->currency));
 
         try {
-            $money = $parser->parse((string) $value, $currency);
+            $money = $parser->parse((string)$value, $currency);
         } catch (ParserException) {
             return;
         }

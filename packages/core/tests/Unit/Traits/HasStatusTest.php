@@ -10,6 +10,7 @@ use AdAstra\Traits\HasStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use LogicException;
 use Tests\TestCase;
 
 class HasStatusTest extends TestCase
@@ -96,7 +97,7 @@ class HasStatusTest extends TestCase
 
     public function test_dev_env_contract_check_throws_when_fillable_missing_columns(): void
     {
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessageMatches('/missing column\(s\) from \$fillable/');
 
         new class () extends Model {
@@ -112,7 +113,7 @@ class HasStatusTest extends TestCase
 
     public function test_dev_env_contract_check_throws_when_status_is_public_not_cast_to_bool(): void
     {
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessageMatches('/status_is_public.*expected boolean/');
 
         new class () extends Model {

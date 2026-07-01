@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>{% block title %}{{ page_title|default('Admin') }}{% endblock %} - {{ config('app.name', 'Laravel') }}</title>
+    <title>{% block title %}{{ page_title|default('Admin') }}{% endblock %}
+        - {{ config('app.name', 'Laravel') }}</title>
     {# Apply the resolved theme before first paint to avoid a flash of the wrong mode. #}
     <script>
         (function () {
@@ -32,36 +33,52 @@
 ]) %}
 
 <input id="sidebar-toggle" type="checkbox">
-<label for="sidebar-toggle" class="sidebar-overlay fixed inset-0 z-20 hidden bg-slate-900/40" aria-hidden="true"></label>
+<label for="sidebar-toggle" class="sidebar-overlay fixed inset-0 z-20 hidden bg-slate-900/40"
+       aria-hidden="true"></label>
 
 <div class="app-shell min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
     <aside id="primary-sidebar"
            class="fixed inset-y-0 left-0 z-30 w-64 -translate-x-full overflow-y-auto border-r border-edge bg-surface px-5 py-6 transition-transform duration-200 lg:relative lg:inset-auto lg:z-40 lg:w-auto lg:translate-x-0 lg:overflow-visible lg:transition-none {{ primary_nav_sticky ? 'lg:sticky lg:top-0 lg:h-screen' : '' }}">
         <div class="mb-4 flex items-center justify-between lg:block">
-            <a class="text-lg font-semibold tracking-tight" href="{{ route('dashboard') }}">{{ app_name|default('Admin') }}</a>
-            <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-muted hover:bg-subtle lg:hidden" aria-label="Close menu">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            <a class="text-lg font-semibold tracking-tight"
+               href="{{ route('dashboard') }}">{{ app_name|default('Admin') }}</a>
+            <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1 text-muted hover:bg-subtle lg:hidden"
+                   aria-label="Close menu">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
             </label>
         </div>
 
         <nav class="mt-2 space-y-1 text-sm font-medium lg:mt-8">
             {% block primary_navigation %}
-                <a class="block rounded-md px-3 py-2 {{ active_nav == 'dashboard' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('dashboard') }}">Dashboard</a>
+                <a class="block rounded-md px-3 py-2 {{ active_nav == 'dashboard' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                   href="{{ route('dashboard') }}">Dashboard</a>
 
                 <div class="nav-group">
                     <input id="nav-content" type="checkbox" {{ active_nav == 'content' ? 'checked' : '' }}>
-                    <label for="nav-content" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['content', 'articles', 'categories', 'field-layouts'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
+                    <label for="nav-content"
+                           class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['content', 'articles', 'categories', 'field-layouts'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
                         <span>Content</span>
                         <span class="nav-chevron">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path
+                                    stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </span>
                     </label>
 
                     <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-edge pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'entries' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('entries.groups') }}">Entries</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'categories' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('categories.groups') }}">Categories</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'statuses' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('statuses.groups') }}">Statuses</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'media' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('media.libraries') }}">Media</a></li>
+                        <li>
+                            <a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'entries' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                               href="{{ route('entries.groups') }}">Entries</a></li>
+                        <li>
+                            <a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'categories' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                               href="{{ route('categories.groups') }}">Categories</a></li>
+                        <li>
+                            <a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'statuses' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                               href="{{ route('statuses.groups') }}">Statuses</a></li>
+                        <li>
+                            <a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'media' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                               href="{{ route('media.libraries') }}">Media</a></li>
 
                         {# <li class="nav-group nav-tertiary-group">
                             <input id="nav-entries-tertiary" type="checkbox" {{ active_nav in ['entries', 'entries-published', 'entries-drafts', 'entries-archived'] ? 'checked' : '' }}>
@@ -96,45 +113,65 @@
 
                 <div class="nav-group">
                     <input id="nav-media" type="checkbox" {{ active_nav in ['members'] ? 'checked' : '' }}>
-                    <label for="nav-media" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['media', 'media-libraries'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
+                    <label for="nav-media"
+                           class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['media', 'media-libraries'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
                         <span>Members</span>
                         <span class="nav-chevron">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path
+                                    stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </span>
                     </label>
                     <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-edge pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_user_section == 'users' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('users.index') }}">Users</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_user_section == 'roles' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('roles.index') }}">Roles</a></li>
+                        <li>
+                            <a class="block rounded-md px-3 py-1.5 {{ active_user_section == 'users' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                               href="{{ route('users.index') }}">Users</a></li>
+                        <li>
+                            <a class="block rounded-md px-3 py-1.5 {{ active_user_section == 'roles' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                               href="{{ route('roles.index') }}">Roles</a></li>
                     </ul>
                 </div>
 
                 <div class="nav-group">
                     <input id="nav-settings" type="checkbox" {{ active_nav in ['settings'] ? 'checked' : '' }}>
-                    <label for="nav-settings" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['settings'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
+                    <label for="nav-settings"
+                           class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['settings'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
                         <span>Settings</span>
                         <span class="nav-chevron">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path
+                                    stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </span>
                     </label>
                     <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-edge pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'system' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('settings.show', 'general') }}">System Settings</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'field_groups' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('fields.groups') }}">Field Groups</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'entry_types' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('entries.types') }}">Entry Types</a></li>
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'field_layouts' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="{{ route('field-layouts') }}">Field Layouts</a></li>
+                        <li>
+                            <a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'system' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                               href="{{ route('settings.show', 'general') }}">System Settings</a></li>
+                        <li>
+                            <a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'field_groups' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                               href="{{ route('fields.groups') }}">Field Groups</a></li>
+                        <li>
+                            <a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'entry_types' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                               href="{{ route('entries.types') }}">Entry Types</a></li>
+                        <li>
+                            <a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'field_layouts' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                               href="{{ route('field-layouts') }}">Field Layouts</a></li>
                     </ul>
                 </div>
 
 
                 <div class="nav-group">
                     <input id="nav-tools" type="checkbox" {{ active_nav in ['tools'] ? 'checked' : '' }}>
-                    <label for="nav-tools" class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['tools'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
+                    <label for="nav-tools"
+                           class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 {{ active_nav in ['tools'] ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-subtle' }}">
                         <span>Tools</span>
                         <span class="nav-chevron">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path
+                                    stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </span>
                     </label>
                     <ul class="nav-subitems ml-3 mt-1 space-y-0.5 border-l border-edge pl-3">
-                        <li><a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'system' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}" href="/api/documentation" target="_blank">API Playground</a></li>
+                        <li>
+                            <a class="block rounded-md px-3 py-1.5 {{ active_secondary_nav == 'system' ? 'bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-subtle' }}"
+                               href="/api/documentation" target="_blank">API Playground</a></li>
                     </ul>
                 </div>
 
@@ -150,8 +187,12 @@
             {% block header %}
                 <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex min-w-0 items-center gap-3">
-                        <label for="sidebar-toggle" class="cursor-pointer rounded-md p-1.5 text-muted hover:bg-subtle lg:hidden" aria-label="Open menu">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        <label for="sidebar-toggle"
+                               class="cursor-pointer rounded-md p-1.5 text-muted hover:bg-subtle lg:hidden"
+                               aria-label="Open menu">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
                         </label>
                         <div class="min-w-0">
                             <h4 class="text-sm font-semibold text-content sm:text-base">{{ page_heading|default(page_title|default('Dashboard')) }}</h4>
@@ -160,10 +201,14 @@
                     </div>
 
                     <div class="flex min-w-0 items-center gap-2 sm:gap-3 lg:ml-auto">
-                        <form action="{{ admin_search_url|default('#') }}" method="GET" class="relative min-w-0 flex-1 sm:w-72 sm:flex-none" role="search">
+                        <form action="{{ admin_search_url|default('#') }}" method="GET"
+                              class="relative min-w-0 flex-1 sm:w-72 sm:flex-none" role="search">
                             <label class="sr-only" for="admin-global-search">Search</label>
-                            <svg class="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.1-5.4a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"/>
+                            <svg
+                                class="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-faint"
+                                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M21 21l-4.35-4.35m1.1-5.4a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"/>
                             </svg>
                             <input id="admin-global-search"
                                    name="{{ admin_search_parameter|default('q') }}"
@@ -187,14 +232,17 @@
                                 {% endif %}
                             </button>
 
-                            <div class="absolute right-0 z-40 mt-2 hidden w-72 overflow-hidden rounded-md border border-edge bg-surface text-left shadow-lg"
-                                 role="menu"
-                                 data-account-menu-panel>
+                            <div
+                                class="absolute right-0 z-40 mt-2 hidden w-72 overflow-hidden rounded-md border border-edge bg-surface text-left shadow-lg"
+                                role="menu"
+                                data-account-menu-panel>
                                 <div class="border-b border-edge px-4 py-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-sm font-semibold text-white">
+                                        <div
+                                            class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-sm font-semibold text-white">
                                             {% if current_user.avatar() %}
-                                                <img class="h-full w-full object-cover" src="{{ current_user.avatar() }}" alt="">
+                                                <img class="h-full w-full object-cover"
+                                                     src="{{ current_user.avatar() }}" alt="">
                                             {% else %}
                                                 {{ current_user.name|default('U')|slice(0, 2)|upper }}
                                             {% endif %}
@@ -251,7 +299,8 @@
         <footer class="mt-auto border-t border-edge bg-surface px-4 py-3 sm:px-6">
             {% block footer %}
                 <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="text-xs text-faint">&copy; {{ year|default('2026') }} {{ app_name|default('Admin') }} &mdash; All rights reserved.</p>
+                    <p class="text-xs text-faint">&copy; {{ year|default('2026') }} {{ app_name|default('Admin') }}
+                        &mdash; All rights reserved.</p>
                     <nav class="flex items-center gap-4 text-xs text-faint">
                         <a class="hover:text-muted" href="{{ docs_url|default('#') }}">Documentation</a>
                         <a class="hover:text-muted" href="{{ support_url|default('#') }}">Support</a>

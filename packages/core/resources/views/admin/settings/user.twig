@@ -25,12 +25,14 @@
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">My Preferences</h1>
-                <p class="mt-1 text-sm text-muted">These settings apply only to your account and override the system defaults. Leave a field unchanged to inherit the system value.</p>
+                <p class="mt-1 text-sm text-muted">These settings apply only to your account and override the system
+                    defaults. Leave a field unchanged to inherit the system value.</p>
             </div>
         </div>
 
         {% if domains|length > 0 %}
-            <form method="POST" action="{{ route('account.edit_settings') }}" class="flex w-full min-w-0 flex-col gap-5">
+            <form method="POST" action="{{ route('account.edit_settings') }}"
+                  class="flex w-full min-w-0 flex-col gap-5">
                 {{ csrf_field() }}
                 {{ method_field('PUT') }}
 
@@ -47,11 +49,13 @@
 
                                 {% if hasOverride %}
                                     <p class="text-xs">
-                                        <span class="inline-flex items-center rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent ring-1 ring-inset ring-emerald-700/10">your override is active</span>
+                                        <span
+                                            class="inline-flex items-center rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent ring-1 ring-inset ring-emerald-700/10">your override is active</span>
                                     </p>
                                 {% else %}
                                     <p class="text-xs text-muted">
-                                        <span class="inline-flex items-center rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted ring-1 ring-inset ring-slate-500/10">system default</span>
+                                        <span
+                                            class="inline-flex items-center rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted ring-1 ring-inset ring-slate-500/10">system default</span>
                                         currently: <em>{{ val != '' ? val : '—' }}</em>
                                     </p>
                                 {% endif %}
@@ -77,8 +81,12 @@
                 {% endfor %}
 
                 <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
-                    <a href="{{ route('settings.show', all_domains.first.handle) }}" class="rounded-md border border-edge bg-surface px-4 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">Cancel</a>
-                    <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Save My Preferences</button>
+                    <a href="{{ route('settings.show', all_domains.first.handle) }}"
+                       class="rounded-md border border-edge bg-surface px-4 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">Cancel</a>
+                    <button type="submit"
+                            class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                        Save My Preferences
+                    </button>
                 </div>
             </form>
         {% else %}

@@ -10,6 +10,8 @@ use AdAstra\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use ReflectionMethod;
+use ReflectionProperty;
 use Tests\TestCase;
 
 class FileUploadTest extends TestCase
@@ -19,7 +21,7 @@ class FileUploadTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $ref = new \ReflectionProperty(FileUpload::class, 'libraryHandleCache');
+        $ref = new ReflectionProperty(FileUpload::class, 'libraryHandleCache');
         $ref->setAccessible(true);
         $ref->setValue(null, []);
     }
@@ -35,7 +37,7 @@ class FileUploadTest extends TestCase
 
     private function callProtected(FileUpload $instance, string $method): mixed
     {
-        $ref = new \ReflectionMethod(FileUpload::class, $method);
+        $ref = new ReflectionMethod(FileUpload::class, $method);
         $ref->setAccessible(true);
 
         return $ref->invoke($instance);
@@ -44,7 +46,7 @@ class FileUploadTest extends TestCase
     private function makeLibrary(string $handle = 'uploads'): Library
     {
         return Library::create([
-            'name' => ucfirst($handle).' Library',
+            'name' => ucfirst($handle) . ' Library',
             'handle' => $handle,
             'adapter' => 'local',
         ]);
@@ -421,7 +423,7 @@ class FileUploadTest extends TestCase
         $type = $this->make([
             'allowed_types' => [
                 ['key' => 'image/jpeg', 'label' => 'JPEG'],
-                ['key' => 'image/png',  'label' => 'PNG'],
+                ['key' => 'image/png', 'label' => 'PNG'],
             ],
         ]);
 
@@ -459,7 +461,7 @@ class FileUploadTest extends TestCase
 
         $html = $type->render(['input_name' => 'fields[photo]', 'label' => 'Photo']);
 
-        $this->assertStringContainsString((string) $library->id, $html);
+        $this->assertStringContainsString((string)$library->id, $html);
     }
 
     public function test_render_includes_accept_attribute_when_allowed_types_set(): void
@@ -536,7 +538,7 @@ class FileUploadTest extends TestCase
     public function test_render_via_field_render_path_uses_handle_for_input_name(): void
     {
         $library = $this->makeLibrary('attachments');
-        $media   = Media::factory()->create(['library_id' => $library->id]);
+        $media = Media::factory()->create(['library_id' => $library->id]);
 
         $fieldType = Type::firstOrCreate(
             ['object' => FileUpload::class],
@@ -544,8 +546,8 @@ class FileUploadTest extends TestCase
         );
         $field = Field::factory()->create([
             'field_type_id' => $fieldType->id,
-            'handle'        => 'attachment',
-            'settings'      => ['library' => [$library->id]],
+            'handle' => 'attachment',
+            'settings' => ['library' => [$library->id]],
         ]);
 
         $html = $field->render(['value' => collect([$media])]);
@@ -556,9 +558,9 @@ class FileUploadTest extends TestCase
     public function test_render_repopulates_chips_from_old_input_after_validation_error(): void
     {
         $library = $this->makeLibrary('attachments');
-        $stale   = Media::factory()->create(['library_id' => $library->id, 'original_name' => 'stale.pdf']);
-        $userA   = Media::factory()->create(['library_id' => $library->id, 'original_name' => 'just-uploaded-a.pdf']);
-        $userB   = Media::factory()->create(['library_id' => $library->id, 'original_name' => 'just-uploaded-b.pdf']);
+        $stale = Media::factory()->create(['library_id' => $library->id, 'original_name' => 'stale.pdf']);
+        $userA = Media::factory()->create(['library_id' => $library->id, 'original_name' => 'just-uploaded-a.pdf']);
+        $userB = Media::factory()->create(['library_id' => $library->id, 'original_name' => 'just-uploaded-b.pdf']);
 
         $fieldType = Type::firstOrCreate(
             ['object' => FileUpload::class],
@@ -566,8 +568,8 @@ class FileUploadTest extends TestCase
         );
         $field = Field::factory()->create([
             'field_type_id' => $fieldType->id,
-            'handle'        => 'attachment',
-            'settings'      => ['library' => [$library->id]],
+            'handle' => 'attachment',
+            'settings' => ['library' => [$library->id]],
         ]);
 
         // Simulate post-redirect state: bind a session to the current Request
@@ -604,7 +606,7 @@ class FileUploadTest extends TestCase
         DB::disableQueryLog();
 
         $libraryLookups = collect($log)->filter(
-            fn ($q) => str_contains($q['query'], 'media_libraries') && str_contains($q['query'], 'handle')
+            fn($q) => str_contains($q['query'], 'media_libraries') && str_contains($q['query'], 'handle')
         );
 
         $this->assertSame(

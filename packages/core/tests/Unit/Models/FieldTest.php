@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use ReflectionClass;
+use ReflectionProperty;
 use Tests\TestCase;
 
 class FieldTest extends TestCase
@@ -43,7 +45,7 @@ class FieldTest extends TestCase
 
     public function test_always_eager_loads_field_type(): void
     {
-        $prop = (new \ReflectionClass(Field::class))->getProperty('with');
+        $prop = (new ReflectionClass(Field::class))->getProperty('with');
         $prop->setAccessible(true);
         $this->assertContains('fieldType', $prop->getValue(new Field()));
     }
@@ -87,7 +89,7 @@ class FieldTest extends TestCase
 
     public function test_type_instance_returns_abstract_field(): void
     {
-        $type  = Type::factory()->create(['object' => Text::class]);
+        $type = Type::factory()->create(['object' => Text::class]);
         $field = Field::factory()->create(['field_type_id' => $type->id]);
 
         $this->assertInstanceOf(AbstractField::class, $field->typeInstance());
@@ -95,10 +97,10 @@ class FieldTest extends TestCase
 
     public function test_type_instance_merges_field_settings_into_instance(): void
     {
-        $type  = Type::factory()->create(['object' => Text::class, 'settings' => []]);
+        $type = Type::factory()->create(['object' => Text::class, 'settings' => []]);
         $field = Field::factory()->create([
             'field_type_id' => $type->id,
-            'settings'      => ['placeholder' => 'Search…'],
+            'settings' => ['placeholder' => 'Search…'],
         ]);
 
         $instance = $field->typeInstance();
@@ -108,10 +110,10 @@ class FieldTest extends TestCase
 
     public function test_type_instance_field_settings_override_type_settings(): void
     {
-        $type  = Type::factory()->create(['object' => Text::class, 'settings' => ['placeholder' => 'Type default']]);
+        $type = Type::factory()->create(['object' => Text::class, 'settings' => ['placeholder' => 'Type default']]);
         $field = Field::factory()->create([
             'field_type_id' => $type->id,
-            'settings'      => ['placeholder' => 'Field override'],
+            'settings' => ['placeholder' => 'Field override'],
         ]);
 
         $instance = $field->typeInstance();
@@ -121,7 +123,7 @@ class FieldTest extends TestCase
 
     public function test_type_instance_handles_null_field_settings(): void
     {
-        $type  = Type::factory()->create(['object' => Text::class]);
+        $type = Type::factory()->create(['object' => Text::class]);
         $field = Field::factory()->create(['field_type_id' => $type->id, 'settings' => null]);
 
         $this->assertInstanceOf(AbstractField::class, $field->typeInstance());
@@ -129,7 +131,7 @@ class FieldTest extends TestCase
 
     public function test_type_instance_attaches_field_to_returned_instance(): void
     {
-        $type  = Type::factory()->create(['object' => Text::class]);
+        $type = Type::factory()->create(['object' => Text::class]);
         $field = Field::factory()->create(['field_type_id' => $type->id, 'handle' => 'attached']);
 
         $instance = $field->typeInstance();
@@ -137,7 +139,7 @@ class FieldTest extends TestCase
         // Read the protected `field` property via reflection — the field type
         // base class doesn't expose a getter, but production code reads it
         // directly (e.g. Media::render(), FileUpload::render()).
-        $ref = new \ReflectionProperty(AbstractField::class, 'field');
+        $ref = new ReflectionProperty(AbstractField::class, 'field');
         $ref->setAccessible(true);
 
         $attached = $ref->getValue($instance);
@@ -152,7 +154,7 @@ class FieldTest extends TestCase
 
     public function test_render_delegates_to_type_instance(): void
     {
-        $type  = Type::factory()->create(['object' => Text::class]);
+        $type = Type::factory()->create(['object' => Text::class]);
         $field = Field::factory()->create(['field_type_id' => $type->id]);
 
         // Text::render() calls a view; we just assert it returns a string

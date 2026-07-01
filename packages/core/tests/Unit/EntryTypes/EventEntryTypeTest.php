@@ -29,7 +29,7 @@ class EventEntryTypeTest extends TestCase
         $errors = $type->validate([
             'fields' => [
                 'start_date' => '2026-06-10',
-                'end_date'   => '2026-06-01',
+                'end_date' => '2026-06-01',
             ],
         ]);
 
@@ -44,7 +44,7 @@ class EventEntryTypeTest extends TestCase
         $errors = $type->validate([
             'fields' => [
                 'start_date' => '2026-06-10',
-                'end_date'   => '2026-06-10',
+                'end_date' => '2026-06-10',
             ],
         ]);
 
@@ -58,7 +58,7 @@ class EventEntryTypeTest extends TestCase
         $errors = $type->validate([
             'fields' => [
                 'start_date' => '2026-06-01',
-                'end_date'   => '2026-06-10',
+                'end_date' => '2026-06-10',
             ],
         ]);
 

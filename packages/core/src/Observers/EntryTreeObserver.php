@@ -18,7 +18,9 @@ class EntryTreeObserver
      */
     private static array $pendingReroot = [];
 
-    public function __construct(private readonly EntryService $entryService) {}
+    public function __construct(private readonly EntryService $entryService)
+    {
+    }
 
     /**
      * Before the node is deleted — snapshot IDs of all direct children while
@@ -47,7 +49,7 @@ class EntryTreeObserver
         foreach ($childIds as $childId) {
             $child = EntryTree::find($childId);
 
-            if (! $child) {
+            if (!$child) {
                 // Row was removed by a cascade; nothing to rebuild.
                 continue;
             }

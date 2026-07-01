@@ -16,11 +16,11 @@ class MediaLibrarySeeder extends Seeder
         MediaLibrary::firstOrCreate(
             ['handle' => 'avatars'],
             [
-                'name'          => 'User Avatars',
-                'adapter'       => config('filesystems.default', 'local'),
+                'name' => 'User Avatars',
+                'adapter' => config('filesystems.default', 'local'),
                 'allowed_types' => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-                'max_size'      => 2,
-                'sort_order'    => 0,
+                'max_size' => 2,
+                'sort_order' => 0,
             ]
         );
     }

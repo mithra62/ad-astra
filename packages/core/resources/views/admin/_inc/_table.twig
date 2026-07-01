@@ -17,15 +17,15 @@
 <div class="overflow-x-auto">
     <table class="min-w-full divide-y divide-edge text-left text-sm">
         <thead class="bg-subtle text-xs font-semibold uppercase tracking-wide text-muted">
-            {% if _thead|trim %}
-                {{ _thead|raw }}
-            {% else %}
-                <tr>
-                    {% for col in columns|default([]) %}
-                        <th scope="col" class="px-4 py-3 {{ col.class|default('') }}">{{ col.label|default(col) }}</th>
-                    {% endfor %}
-                </tr>
-            {% endif %}
+        {% if _thead|trim %}
+            {{ _thead|raw }}
+        {% else %}
+            <tr>
+                {% for col in columns|default([]) %}
+                    <th scope="col" class="px-4 py-3 {{ col.class|default('') }}">{{ col.label|default(col) }}</th>
+                {% endfor %}
+            </tr>
+        {% endif %}
         </thead>
         <tbody class="divide-y divide-edge bg-surface">{{ _rows|raw }}</tbody>
     </table>

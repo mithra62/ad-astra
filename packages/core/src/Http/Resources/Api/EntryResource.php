@@ -54,28 +54,28 @@ class EntryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'               => $this->id,
-            'entry_group_id'   => $this->entry_group_id,
-            'entry_type_id'    => $this->entry_type_id,
-            'title'            => $this->title,
-            'handle'           => $this->handle,
-            'status_handle'    => $this->status_handle,
+            'id' => $this->id,
+            'entry_group_id' => $this->entry_group_id,
+            'entry_type_id' => $this->entry_type_id,
+            'title' => $this->title,
+            'handle' => $this->handle,
+            'status_handle' => $this->status_handle,
             'status_is_public' => $this->status_is_public,
-            'published_at'     => $this->published_at,
-            'fields'           => $this->fieldArray(),
-            'authors'          => $this->whenLoaded(
+            'published_at' => $this->published_at,
+            'fields' => $this->fieldArray(),
+            'authors' => $this->whenLoaded(
                 'authors',
-                fn () => $this->authors->map(fn ($a) => [
-                    'id'           => $a->user_id,
+                fn() => $this->authors->map(fn($a) => [
+                    'id' => $a->user_id,
                     'display_name' => $a->display_name,
                 ])
             ),
-            'categories'       => $this->whenLoaded(
+            'categories' => $this->whenLoaded(
                 'categories',
-                fn () => $this->categories->map(fn ($c) => ['id' => $c->id, 'title' => $c->name])
+                fn() => $this->categories->map(fn($c) => ['id' => $c->id, 'title' => $c->name])
             ),
-            'created_at'       => $this->created_at,
-            'updated_at'       => $this->updated_at,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

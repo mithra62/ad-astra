@@ -30,7 +30,7 @@ class StoreEntryRequest extends FormRequest
                     'required',
                     'string',
                     Rule::exists('entry_types', 'handle')->where(
-                        fn ($q) => $q->where('entry_group_id', $this->route()->parameter('group_id'))
+                        fn($q) => $q->where('entry_group_id', $this->route()->parameter('group_id'))
                     ),
                 ],
                 'title' => [
@@ -43,7 +43,7 @@ class StoreEntryRequest extends FormRequest
                     'string',
                     'max:255',
                     Rule::unique('entries', 'handle')->where(
-                        fn ($query) => $query->where('entry_group_id', $group->id)
+                        fn($query) => $query->where('entry_group_id', $group->id)
                     ),
                 ],
                 'status' => [
@@ -51,7 +51,7 @@ class StoreEntryRequest extends FormRequest
                     'string',
                     'max:100',
                     Rule::exists('statuses', 'handle')->where(
-                        fn ($query) => $query->where('status_group_id', $group->status_group_id)
+                        fn($query) => $query->where('status_group_id', $group->status_group_id)
                     ),
                 ],
                 'published_at' => [

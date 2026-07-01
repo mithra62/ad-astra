@@ -19,7 +19,7 @@ class VideoEntryType extends AbstractEntryType
 
         if ($requestedStatus === 'published') {
             $platformId = $data['fields']['platform_id'] ?? $this->existingFieldValue($entry, 'platform_id');
-            $videoUrl   = $data['fields']['video_url']   ?? $this->existingFieldValue($entry, 'video_url');
+            $videoUrl = $data['fields']['video_url'] ?? $this->existingFieldValue($entry, 'video_url');
 
             if (empty($platformId) && empty($videoUrl)) {
                 $errors['platform_id'] = 'A video must have either a platform ID or a video URL before publishing.';

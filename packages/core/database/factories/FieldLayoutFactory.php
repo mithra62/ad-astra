@@ -16,7 +16,7 @@ class FieldLayoutFactory extends Factory
         $name = fake()->words(2, true);
 
         return [
-            'name'   => $name,
+            'name' => $name,
             'handle' => Str::slug($name),
         ];
     }

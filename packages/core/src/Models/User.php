@@ -148,7 +148,7 @@ class User extends Authenticatable
     public function setAvatar(Media $media): void
     {
         $existing = $this->directMedia()
-            ->whereHas('library', fn ($q) => $q->where('handle', 'avatars'))
+            ->whereHas('library', fn($q) => $q->where('handle', 'avatars'))
             ->get();
 
         foreach ($existing as $old) {

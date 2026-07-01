@@ -26,7 +26,7 @@ class SampleApiTokenSeeder extends Seeder
     {
         $admin = User::where('email', config('app.default_dev_email'))->first();
 
-        if (! $admin) {
+        if (!$admin) {
             $this->command->warn('SampleApiTokenSeeder: admin user not found — run UsersSeeder first.');
             return;
         }

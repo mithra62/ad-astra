@@ -116,13 +116,13 @@ class MediaModelTest extends TestCase
 
         // Insert a direct-attachment row (field_id = 0 sentinel).
         DB::table('mediables')->insert([
-            'media_id'      => $media->id,
+            'media_id' => $media->id,
             'mediable_type' => 'AdAstra\Models\User',
-            'mediable_id'   => 1,
-            'field_id'      => 0,   // sentinel — direct attachment
-            'sort_order'    => 0,
-            'created_at'    => now(),
-            'updated_at'    => now(),
+            'mediable_id' => 1,
+            'field_id' => 0,   // sentinel — direct attachment
+            'sort_order' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $this->assertFalse($media->isReferencedByField());
@@ -134,13 +134,13 @@ class MediaModelTest extends TestCase
 
         // Insert a field-driven row (field_id > 0).
         DB::table('mediables')->insert([
-            'media_id'      => $media->id,
+            'media_id' => $media->id,
             'mediable_type' => 'AdAstra\Models\Entry',
-            'mediable_id'   => 1,
-            'field_id'      => 99,  // some real field ID
-            'sort_order'    => 0,
-            'created_at'    => now(),
-            'updated_at'    => now(),
+            'mediable_id' => 1,
+            'field_id' => 99,  // some real field ID
+            'sort_order' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $this->assertTrue($media->isReferencedByField());

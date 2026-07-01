@@ -5,6 +5,7 @@ namespace Tests\Unit\Models\Settings;
 use AdAstra\Models\SettingValue;
 use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -141,7 +142,7 @@ class SettingValueTest extends TestCase
             'user_id' => $user->id, 'value_text' => 'UTC',
         ]);
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
 
         SettingValue::create([
             'domain' => 'general', 'field_handle' => 'timezone',

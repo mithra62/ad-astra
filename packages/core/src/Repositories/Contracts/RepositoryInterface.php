@@ -20,4 +20,6 @@ namespace AdAstra\Repositories\Contracts;
  * Psalm) can use `@implements RepositoryInterface` on concrete classes to
  * document the intended model type.
  */
-interface RepositoryInterface {}
+interface RepositoryInterface
+{
+}

@@ -7,6 +7,7 @@ use AdAstra\Models\User\OauthToken;
 use AdAstra\Services\UserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 use Tests\TestCase;
 
 class UserServiceOauthTransactionTest extends TestCase
@@ -48,23 +49,23 @@ class UserServiceOauthTransactionTest extends TestCase
 
     public function test_revocation_is_rolled_back_when_insert_fails(): void
     {
-        $user    = User::factory()->create();
+        $user = User::factory()->create();
         $existing = OauthToken::factory()->create([
-            'user_id'    => $user->id,
-            'provider'   => 'google',
+            'user_id' => $user->id,
+            'provider' => 'google',
             'revoked_at' => null,
         ]);
 
         // Force the INSERT to fail by making the connection throw after the UPDATE.
         DB::listen(function ($query) {
             if (str_contains(strtolower($query->sql), 'insert')) {
-                throw new \RuntimeException('Simulated INSERT failure');
+                throw new RuntimeException('Simulated INSERT failure');
             }
         });
 
         try {
             $this->service->upsertOauthToken($user, 'google', ['access_token' => 'new']);
-        } catch (\RuntimeException) {
+        } catch (RuntimeException) {
             // expected
         }
 

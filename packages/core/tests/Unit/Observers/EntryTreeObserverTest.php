@@ -33,8 +33,8 @@ class EntryTreeObserverTest extends TestCase
     private function makeTreeEntry(): Entry
     {
         $group = EntryGroup::factory()->create();
-        $type  = EntryType::factory()->for($group)->create([
-            'has_entry_tree'   => true,
+        $type = EntryType::factory()->for($group)->create([
+            'has_entry_tree' => true,
             'default_template' => 'entries.page',
         ]);
 
@@ -60,7 +60,7 @@ class EntryTreeObserverTest extends TestCase
     public function test_direct_child_depth_is_reset_to_zero_after_parent_deleted(): void
     {
         $parent = $this->makeRoot('blog');
-        $child  = $this->makeChild($parent, 'posts');
+        $child = $this->makeChild($parent, 'posts');
 
         $this->assertEquals(1, $child->depth);
 
@@ -72,8 +72,8 @@ class EntryTreeObserverTest extends TestCase
     public function test_grandchild_depth_is_decremented_after_grandparent_deleted(): void
     {
         $grandparent = $this->makeRoot('section');
-        $parent      = $this->makeChild($grandparent, 'category');
-        $grandchild  = $this->makeChild($parent, 'post');
+        $parent = $this->makeChild($grandparent, 'category');
+        $grandchild = $this->makeChild($parent, 'post');
 
         $this->assertEquals(2, $grandchild->depth);
 
@@ -92,7 +92,7 @@ class EntryTreeObserverTest extends TestCase
     public function test_direct_child_uri_is_rebuilt_to_its_own_handle_after_parent_deleted(): void
     {
         $parent = $this->makeRoot('blog');
-        $child  = $this->makeChild($parent, 'posts');
+        $child = $this->makeChild($parent, 'posts');
 
         $this->assertEquals('blog/posts', $child->uri);
 
@@ -104,8 +104,8 @@ class EntryTreeObserverTest extends TestCase
     public function test_grandchild_uri_is_rebuilt_after_grandparent_deleted(): void
     {
         $grandparent = $this->makeRoot('news');
-        $parent      = $this->makeChild($grandparent, '2025');
-        $grandchild  = $this->makeChild($parent, 'my-article');
+        $parent = $this->makeChild($grandparent, '2025');
+        $grandchild = $this->makeChild($parent, 'my-article');
 
         $this->assertEquals('news/2025/my-article', $grandchild->uri);
 
@@ -134,7 +134,7 @@ class EntryTreeObserverTest extends TestCase
 
         $this->assertEquals('intro', $childA->fresh()->uri);
         $this->assertEquals('guide', $childB->fresh()->uri);
-        $this->assertEquals('api',   $childC->fresh()->uri);
+        $this->assertEquals('api', $childC->fresh()->uri);
     }
 
     // -------------------------------------------------------------------------
@@ -153,20 +153,20 @@ class EntryTreeObserverTest extends TestCase
     public function test_delete_tree_node_triggers_observer_and_rebuilds_child(): void
     {
         $parent = $this->makeRoot('help');
-        $child  = $this->makeChild($parent, 'faq');
+        $child = $this->makeChild($parent, 'faq');
 
         $this->assertEquals(1, $child->depth);
         $this->assertEquals('help/faq', $child->uri);
 
         app(EntryService::class)->deleteTreeNode($parent);
 
-        $this->assertEquals(0,     $child->fresh()->depth);
+        $this->assertEquals(0, $child->fresh()->depth);
         $this->assertEquals('faq', $child->fresh()->uri);
     }
 
     public function test_delete_tree_node_returns_true_on_success(): void
     {
-        $node   = $this->makeRoot('terms');
+        $node = $this->makeRoot('terms');
         $result = app(EntryService::class)->deleteTreeNode($node);
 
         $this->assertTrue($result);
@@ -178,16 +178,16 @@ class EntryTreeObserverTest extends TestCase
 
     public function test_deleting_a_leaf_node_does_not_affect_its_siblings(): void
     {
-        $parent  = $this->makeRoot('portfolio');
+        $parent = $this->makeRoot('portfolio');
         $sibling = $this->makeChild($parent, 'project-a');
-        $leaf    = $this->makeChild($parent, 'project-b');
+        $leaf = $this->makeChild($parent, 'project-b');
 
         $leaf->delete();
 
         $this->assertDatabaseMissing('entry_trees', ['id' => $leaf->id]);
 
         // Sibling's depth and URI are untouched.
-        $this->assertEquals(1,                    $sibling->fresh()->depth);
+        $this->assertEquals(1, $sibling->fresh()->depth);
         $this->assertEquals('portfolio/project-a', $sibling->fresh()->uri);
     }
 
@@ -206,9 +206,9 @@ class EntryTreeObserverTest extends TestCase
 
     public function test_deleting_parent_of_non_home_root_preserves_home_node(): void
     {
-        $home   = app(EntryService::class)->createTreeNode($this->makeTreeEntry(), 'home', null, null, true);
+        $home = app(EntryService::class)->createTreeNode($this->makeTreeEntry(), 'home', null, null, true);
         $parent = $this->makeRoot('blog');
-        $child  = $this->makeChild($parent, 'post');
+        $child = $this->makeChild($parent, 'post');
 
         $parent->delete();
 
@@ -216,7 +216,7 @@ class EntryTreeObserverTest extends TestCase
         $this->assertDatabaseHas('entry_trees', ['id' => $home->id, 'uri' => '/']);
 
         // Child was rebuilt correctly.
-        $this->assertEquals(0,      $child->fresh()->depth);
+        $this->assertEquals(0, $child->fresh()->depth);
         $this->assertEquals('post', $child->fresh()->uri);
     }
 }

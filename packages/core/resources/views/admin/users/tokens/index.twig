@@ -41,13 +41,20 @@
                             {% import 'admin._inc._ui' as ui %}
                             {% for token in user.tokens %}
                                 <tr class="hover:bg-subtle">
-                                    <td class="px-4 py-3.5"><p class="font-medium text-content">{{ token.name }}</p></td>
-                                    <td class="hidden px-4 py-3.5 text-muted sm:table-cell">{% if token.expires_at %}{{ token.expires_at.format('F j, Y') }}{% else %}<span class="text-faint">Never</span>{% endif %}</td>
-                                    <td class="px-4 py-3.5">{% if token.last_used_at %}{{ token.last_used_at.format('F j, Y') }}{% else %}<span class="text-faint">Never</span>{% endif %}</td>
+                                    <td class="px-4 py-3.5"><p class="font-medium text-content">{{ token.name }}</p>
+                                    </td>
+                                    <td class="hidden px-4 py-3.5 text-muted sm:table-cell">{% if token.expires_at %}{{ token.expires_at.format('F j, Y') }}{% else %}
+                                            <span class="text-faint">Never</span>{% endif %}</td>
+                                    <td class="px-4 py-3.5">{% if token.last_used_at %}{{ token.last_used_at.format('F j, Y') }}{% else %}
+                                            <span class="text-faint">Never</span>{% endif %}</td>
                                     <td class="px-4 py-3.5">
                                         <div class="flex items-center justify-end gap-1">
-                                            <a class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:bg-subtle hover:text-content" href="{{ route('users.token.edit', {id: user.id, token_id: token.id}) }}" title="Edit">{{ ui.icon('pencil') }}<span class="sr-only">Edit</span></a>
-                                            <a class="inline-flex items-center justify-center rounded-md border border-red-100 p-1.5 text-red-400 hover:border-red-300 hover:bg-red-50 hover:text-red-600" href="{{ route('users.token.confirm', {id: user.id, token_id: token.id}) }}" title="Delete">{{ ui.icon('trash') }}<span class="sr-only">Delete</span></a>
+                                            <a class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:bg-subtle hover:text-content"
+                                               href="{{ route('users.token.edit', {id: user.id, token_id: token.id}) }}"
+                                               title="Edit">{{ ui.icon('pencil') }}<span class="sr-only">Edit</span></a>
+                                            <a class="inline-flex items-center justify-center rounded-md border border-red-100 p-1.5 text-red-400 hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                                               href="{{ route('users.token.confirm', {id: user.id, token_id: token.id}) }}"
+                                               title="Delete">{{ ui.icon('trash') }}<span class="sr-only">Delete</span></a>
                                         </div>
                                     </td>
                                 </tr>

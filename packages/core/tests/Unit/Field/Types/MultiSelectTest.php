@@ -82,7 +82,7 @@ class MultiSelectTest extends TestCase
 
     public function test_validate_enforces_minimum(): void
     {
-        $type   = $this->make(['options' => $this->sampleOptions(), 'min' => 2]);
+        $type = $this->make(['options' => $this->sampleOptions(), 'min' => 2]);
         $result = $type->validate(['a']);
         $this->assertIsString($result);
         $this->assertStringContainsString('2', $result);
@@ -90,7 +90,7 @@ class MultiSelectTest extends TestCase
 
     public function test_validate_enforces_maximum(): void
     {
-        $type   = $this->make(['options' => $this->sampleOptions(), 'max' => 1]);
+        $type = $this->make(['options' => $this->sampleOptions(), 'max' => 1]);
         $result = $type->validate(['a', 'b']);
         $this->assertIsString($result);
         $this->assertStringContainsString('1', $result);
@@ -110,7 +110,7 @@ class MultiSelectTest extends TestCase
 
     public function test_validate_orphaned_values_fail_when_strict(): void
     {
-        $type   = $this->make(['options' => $this->sampleOptions(), 'strict_options' => true]);
+        $type = $this->make(['options' => $this->sampleOptions(), 'strict_options' => true]);
         $result = $type->validate(['a', 'orphaned']);
         $this->assertIsString($result);
     }

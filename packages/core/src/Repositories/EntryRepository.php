@@ -16,6 +16,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use RuntimeException;
 
 class EntryRepository
 {
@@ -81,7 +82,7 @@ class EntryRepository
             $statusGroup = $entry->entryGroup?->statusGroup;
 
             if (!$statusGroup) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     "EntryGroup [{$entry->entryGroup?->handle}] has no status group configured."
                 );
             }
@@ -112,7 +113,7 @@ class EntryRepository
             $statusGroup = $entry->entryGroup?->statusGroup;
 
             if (!$statusGroup) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     "EntryGroup [{$entry->entryGroup?->handle}] has no status group configured."
                 );
             }
@@ -121,7 +122,7 @@ class EntryRepository
             $default = $statusGroup->statuses->firstWhere('is_default', true);
 
             if (!$default) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     "StatusGroup for EntryGroup [{$entry->entryGroup?->handle}] has no default status configured."
                 );
             }
@@ -218,7 +219,7 @@ class EntryRepository
         // using loadRelatedRecursive() or an equivalent depth-limited loader.
         $relatedIds = array_values(array_filter(
             $relatedIds,
-            fn ($id) => (int)$id !== $entry->getKey()
+            fn($id) => (int)$id !== $entry->getKey()
         ));
 
         // Delete existing pivots for this field on this entry.
@@ -247,7 +248,8 @@ class EntryRepository
         string $fieldableType,
         string $column,
         mixed  $value,
-    ): void {
+    ): void
+    {
         $key = ['field_id' => $fieldId, 'fieldable_id' => $fieldableId, 'fieldable_type' => $fieldableType];
 
         try {

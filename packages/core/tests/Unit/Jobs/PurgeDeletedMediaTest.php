@@ -114,10 +114,10 @@ class PurgeDeletedMediaTest extends TestCase
 
         Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'uploads/_t/photo_thumb.jpg',
-            'status'   => 'complete',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'uploads/_t/photo_thumb.jpg',
+            'status' => 'complete',
         ]);
 
         (new PurgeDeletedMedia(graceDays: 30))->handle();

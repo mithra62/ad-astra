@@ -66,7 +66,7 @@ class SelectTest extends TestCase
 
     public function test_validate_returns_error_for_orphaned_value_when_strict(): void
     {
-        $type   = $this->make(['options' => $this->sampleOptions(), 'strict_options' => true]);
+        $type = $this->make(['options' => $this->sampleOptions(), 'strict_options' => true]);
         $result = $type->validate('purple');
         $this->assertIsString($result);
         $this->assertStringContainsString('purple', $result);

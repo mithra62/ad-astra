@@ -80,7 +80,7 @@ class OauthToken extends Model
             ->whereBetween('expires_at', [now(), now()->addSeconds($seconds)]);
     }
 
-    public function scopeOidcIdentity(Builder $query, string  $issuer, string $subject): Builder
+    public function scopeOidcIdentity(Builder $query, string $issuer, string $subject): Builder
     {
         return $query
             ->where('issuer', $issuer)

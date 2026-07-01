@@ -19,7 +19,7 @@ class EnforceUserStatus
     {
         $user = $request->user();
 
-        if ($user && ! $user->canAccessSystem()) {
+        if ($user && !$user->canAccessSystem()) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

@@ -9,6 +9,7 @@ use AdAstra\Traits\Field\PersistsFieldValues;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as SupportCollection;
+use InvalidArgumentException;
 
 class CategoryService extends AbstractService
 {
@@ -53,12 +54,12 @@ class CategoryService extends AbstractService
     /**
      * Move a category to a new parent (or promote to root) and set sort order.
      *
-     * @throws \InvalidArgumentException if the move would create a circular reference
+     * @throws InvalidArgumentException if the move would create a circular reference
      */
     public function move(Category $category, ?int $parentId, int $sortOrder = 0): Category
     {
         if ($parentId !== null && $this->wouldCreateCycle($category, $parentId)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 "Moving category [{$category->id}] under [{$parentId}] would create a circular reference."
             );
         }
@@ -87,8 +88,8 @@ class CategoryService extends AbstractService
             return true;
         }
 
-        $visited  = [$targetParentId => true];
-        $current  = $targetParentId;
+        $visited = [$targetParentId => true];
+        $current = $targetParentId;
         $maxDepth = self::MAX_ANCESTOR_DEPTH;
 
         while ($maxDepth-- > 0) {

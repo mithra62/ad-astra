@@ -12,6 +12,7 @@ use AdAstra\Models\Field\Group as FieldGroup;
 use AdAstra\Models\Field\Type as FieldType;
 use AdAstra\Models\FieldValue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use RuntimeException;
 use Tests\TestCase;
 
 class FieldActionsTest extends TestCase
@@ -193,7 +194,7 @@ class FieldActionsTest extends TestCase
 
         $action = app(EditField::class);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Cannot change the type of field');
 
         $action->edit($field, [
@@ -228,16 +229,16 @@ class FieldActionsTest extends TestCase
 
     public function test_create_strips_undeclared_settings_keys(): void
     {
-        $type   = $this->textType();
+        $type = $this->textType();
         $action = app(CreateNewField::class);
 
         $field = $action->create([
             'field_type_id' => $type->id,
-            'name'          => 'Test',
-            'handle'        => 'test',
-            'settings'      => [
-                'placeholder'     => 'Enter…',
-                'unknown_key'     => 'should be stripped',
+            'name' => 'Test',
+            'handle' => 'test',
+            'settings' => [
+                'placeholder' => 'Enter…',
+                'unknown_key' => 'should be stripped',
                 'placeholder_hex' => '#aabbcc',
             ],
         ]);
@@ -249,14 +250,14 @@ class FieldActionsTest extends TestCase
 
     public function test_create_fills_defaults_for_missing_settings_keys(): void
     {
-        $type   = $this->textType();
+        $type = $this->textType();
         $action = app(CreateNewField::class);
 
         $field = $action->create([
             'field_type_id' => $type->id,
-            'name'          => 'Test2',
-            'handle'        => 'test2',
-            'settings'      => ['placeholder' => 'Hi'],
+            'name' => 'Test2',
+            'handle' => 'test2',
+            'settings' => ['placeholder' => 'Hi'],
         ]);
 
         $stored = $field->fresh()->settings;
@@ -269,26 +270,26 @@ class FieldActionsTest extends TestCase
 
     public function test_create_normalises_key_value_settings_stripping_empty_rows(): void
     {
-        $type   = $this->selectType();
+        $type = $this->selectType();
         $action = app(CreateNewField::class);
 
         $field = $action->create([
             'field_type_id' => $type->id,
-            'name'          => 'Colour',
-            'handle'        => 'colour',
-            'settings'      => [
+            'name' => 'Colour',
+            'handle' => 'colour',
+            'settings' => [
                 'options' => [
-                    ['key' => 'red',  'label' => 'Red'],
-                    ['key' => '',     'label' => ''],
+                    ['key' => 'red', 'label' => 'Red'],
+                    ['key' => '', 'label' => ''],
                     ['key' => 'blue', 'label' => 'Blue'],
-                    ['key' => '',     'label' => ''],
+                    ['key' => '', 'label' => ''],
                 ],
             ],
         ]);
 
         $stored = $field->fresh()->settings;
         $this->assertCount(2, $stored['options']);
-        $this->assertSame('red',  $stored['options'][0]['key']);
+        $this->assertSame('red', $stored['options'][0]['key']);
         $this->assertSame('blue', $stored['options'][1]['key']);
     }
 
@@ -298,17 +299,17 @@ class FieldActionsTest extends TestCase
 
     public function test_edit_strips_undeclared_settings_keys(): void
     {
-        $type   = $this->textType();
-        $field  = Field::factory()->create(['field_type_id' => $type->id, 'settings' => []]);
+        $type = $this->textType();
+        $field = Field::factory()->create(['field_type_id' => $type->id, 'settings' => []]);
         $action = app(EditField::class);
 
         $action->edit($field, [
-            'name'          => $field->name,
-            'handle'        => $field->handle,
+            'name' => $field->name,
+            'handle' => $field->handle,
             'field_type_id' => $type->id,
-            'settings'      => [
+            'settings' => [
                 'placeholder' => 'Hello',
-                'injected'    => 'should vanish',
+                'injected' => 'should vanish',
             ],
         ]);
 
@@ -319,18 +320,18 @@ class FieldActionsTest extends TestCase
 
     public function test_edit_resets_settings_when_type_changes_on_value_free_field(): void
     {
-        $textType    = $this->textType();
+        $textType = $this->textType();
         $booleanType = $this->booleanType();
 
         $field = Field::factory()->create([
             'field_type_id' => $textType->id,
-            'settings'      => ['placeholder' => 'saved value'],
+            'settings' => ['placeholder' => 'saved value'],
         ]);
 
         $action = app(EditField::class);
         $action->edit($field, [
-            'name'          => $field->name,
-            'handle'        => $field->handle,
+            'name' => $field->name,
+            'handle' => $field->handle,
             'field_type_id' => $booleanType->id,
         ]);
 

@@ -38,7 +38,7 @@ class ProductEntryType extends AbstractEntryType
     {
         $errors = [];
 
-        $price     = $data['fields']['price']      ?? null;
+        $price = $data['fields']['price'] ?? null;
         $salePrice = $data['fields']['sale_price'] ?? null;
 
         if ($price !== null) {
@@ -82,7 +82,7 @@ class ProductEntryType extends AbstractEntryType
         $stock = $data['fields']['stock_quantity']
             ?? $this->existingFieldValue($entry, 'stock_quantity');
 
-        if ($stock !== null && (int) $stock === 0) {
+        if ($stock !== null && (int)$stock === 0) {
             $data['status'] = 'out-of-stock';
         }
 

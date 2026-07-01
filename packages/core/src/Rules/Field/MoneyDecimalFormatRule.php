@@ -37,7 +37,7 @@ readonly class MoneyDecimalFormatRule implements ValidationRule
             return;
         }
 
-        $str = (string) $value;
+        $str = (string)$value;
 
         try {
             (new DecimalMoneyParser(new ISOCurrencies()))

@@ -33,17 +33,23 @@
                 <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Delete File</h1>
                 <p class="mt-1 text-sm text-muted">This file will be soft-deleted and purged after the grace period.</p>
             </div>
-            <a href="{{ route('media.show', media) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">Cancel</a>
+            <a href="{{ route('media.show', media) }}"
+               class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">Cancel</a>
         </div>
 
         <div class="rounded-lg border border-red-200 bg-red-50 p-4">
             <div class="flex items-start gap-3">
-                <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                 </svg>
                 <div>
-                    <p class="text-sm font-semibold text-red-800">The physical file will be removed after a 30-day grace period.</p>
-                    <p class="mt-1 text-sm text-red-700">The database record for <strong>{{ media.name ?: media.file_name }}</strong> will be soft-deleted immediately. The file on disk is purged automatically after the grace period.</p>
+                    <p class="text-sm font-semibold text-red-800">The physical file will be removed after a 30-day grace
+                        period.</p>
+                    <p class="mt-1 text-sm text-red-700">The database record for
+                        <strong>{{ media.name ?: media.file_name }}</strong> will be soft-deleted immediately. The file
+                        on disk is purged automatically after the grace period.</p>
                 </div>
             </div>
         </div>
@@ -97,11 +103,14 @@
                             <h5 class="text-sm font-semibold text-red-800">Confirm Deletion</h5>
                         </div>
                         <div class="px-5 py-4">
-                            <p class="mb-4 text-sm text-muted">Confirm you want to delete <strong>{{ media.name ?: media.file_name }}</strong>. This cannot be undone.</p>
-                            <button type="submit" class="w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                            <p class="mb-4 text-sm text-muted">Confirm you want to delete
+                                <strong>{{ media.name ?: media.file_name }}</strong>. This cannot be undone.</p>
+                            <button type="submit"
+                                    class="w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
                                 Delete File
                             </button>
-                            <a href="{{ route('media.show', media) }}" class="mt-2 block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">
+                            <a href="{{ route('media.show', media) }}"
+                               class="mt-2 block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">
                                 Cancel
                             </a>
                         </div>

@@ -39,13 +39,19 @@ class DeleteMediaActionTest extends TestCase
     {
         Storage::fake('local');
 
-        $media   = Media::factory()->create(['disk' => 'local', 'path' => 'uploads/x.jpg']);
+        $media = Media::factory()->create(['disk' => 'local', 'path' => 'uploads/x.jpg']);
         $deleted = false;
 
         $this->app->bind('media-service', function () use ($media, &$deleted) {
             return new class ($media, $deleted) {
-                public function __construct(private $media, private &$deleted) {}
-                public function delete($m): void { $this->deleted = true; }
+                public function __construct(private $media, private &$deleted)
+                {
+                }
+
+                public function delete($m): void
+                {
+                    $this->deleted = true;
+                }
             };
         });
 

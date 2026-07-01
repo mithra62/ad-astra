@@ -22,6 +22,7 @@ use AdAstra\Models\Entry;
 use AdAstra\Models\EntryGroup;
 use AdAstra\Models\EntryType;
 use AdAstra\Models\Field\Group as FieldGroup;
+use AdAstra\Models\FieldValue;
 use AdAstra\Models\Media;
 use AdAstra\Models\Media\Library as MediaLibrary;
 use AdAstra\Models\EntryTree;
@@ -36,6 +37,7 @@ use AdAstra\Services\EntryAuthorService;
 use AdAstra\Services\FieldService;
 use AdAstra\Services\FilesService;
 use AdAstra\Services\Media\GDTransformationDriver;
+use AdAstra\Services\Media\ImagickTransformationDriver;
 use AdAstra\Services\Media\NullTransformationDriver;
 use AdAstra\Services\Media\TransformationDriverInterface;
 use AdAstra\Services\MediaStorageService;
@@ -79,7 +81,7 @@ class AppServiceProvider extends ServiceProvider
         //
         // model -> factory, e.g. AdAstra\Models\Entry -> Database\Factories\EntryFactory
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Database\\Factories\\'
+            fn(string $modelName) => 'Database\\Factories\\'
                 . Str::after($modelName, 'AdAstra\\Models\\') . 'Factory'
         );
         // factory -> model (for factories that omit $model), e.g.
@@ -97,7 +99,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Bind by class name so constructor injection works in controllers,
         // then alias to 'settings' for backwards-compatible app('settings') calls.
-        $this->app->singleton(Settings::class, fn () => new Settings());
+        $this->app->singleton(Settings::class, fn() => new Settings());
         $this->app->alias(Settings::class, 'settings');
 
         $this->app->singleton('api', function ($app) {
@@ -112,21 +114,21 @@ class AppServiceProvider extends ServiceProvider
             return new FieldService($app);
         });
 
-        $this->app->singleton(UserService::class, fn () => new UserService());
-        $this->app->singleton(CategoryService::class, fn ($app) => new CategoryService($app));
-        $this->app->singleton(EntryAuthorService::class, fn () => new EntryAuthorService());
+        $this->app->singleton(UserService::class, fn() => new UserService());
+        $this->app->singleton(CategoryService::class, fn($app) => new CategoryService($app));
+        $this->app->singleton(EntryAuthorService::class, fn() => new EntryAuthorService());
 
         // Media layer
         $this->app->bind(TransformationDriverInterface::class, function () {
             if (extension_loaded('imagick')) {
-                return new \AdAstra\Services\Media\ImagickTransformationDriver();
+                return new ImagickTransformationDriver();
             }
             if (extension_loaded('gd')) {
                 return new GDTransformationDriver();
             }
             return new NullTransformationDriver();
         });
-        $this->app->singleton('media-service', fn () => new MediaStorageService());
+        $this->app->singleton('media-service', fn() => new MediaStorageService());
 
         // Schema macro for the status-denormalization column triple. FK to
         // `statuses` is intentionally NOT included — this codebase uses a
@@ -186,7 +188,7 @@ class AppServiceProvider extends ServiceProvider
         // Model observers
         Status::observe(StatusObserver::class);
         EntryTree::observe(EntryTreeObserver::class);
-        \AdAstra\Models\FieldValue::observe(FieldValueObserver::class);
+        FieldValue::observe(FieldValueObserver::class);
 
         // User status audit log listeners
         Event::listen(UserStatusChanged::class, WriteUserStatusLog::class);

@@ -19,7 +19,7 @@ class EnforceUserStatusApi
     {
         $user = $request->user();
 
-        if ($user && ! $user->canAccessSystem()) {
+        if ($user && !$user->canAccessSystem()) {
             return response()->json(['message' => __('auth.account_inactive')], 403);
         }
 

@@ -105,7 +105,7 @@ class MediaPickerTest extends TestCase
 
         Media::factory()->create(['library_id' => $lib->id, 'name' => 'sunset', 'original_name' => 'sunset.jpg']);
         Media::factory()->create(['library_id' => $lib->id, 'name' => 'forest', 'original_name' => 'forest.jpg']);
-        Media::factory()->create(['library_id' => $lib->id, 'name' => 'beach',  'original_name' => 'beach.jpg']);
+        Media::factory()->create(['library_id' => $lib->id, 'name' => 'beach', 'original_name' => 'beach.jpg']);
 
         $response = $this->actingAs($user)
             ->getJson(route('media.picker.index', ['library_id' => [$lib->id], 'q' => 'sun']))
@@ -159,11 +159,11 @@ class MediaPickerTest extends TestCase
         $user = $this->makeSuperAdmin();
         $lib = $this->makeLibrary('photos');
         $m = Media::factory()->create([
-            'library_id'    => $lib->id,
-            'mime_type'     => 'image/jpeg',
-            'name'          => 'pic',
+            'library_id' => $lib->id,
+            'mime_type' => 'image/jpeg',
+            'name' => 'pic',
             'original_name' => 'pic.jpg',
-            'size'          => 1234,
+            'size' => 1234,
         ]);
 
         $response = $this->actingAs($user)

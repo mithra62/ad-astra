@@ -44,8 +44,8 @@ class LibraryTest extends TestCase
     public function test_casts_adapter_settings_to_array(): void
     {
         $library = Library::create([
-            'name'             => 'Videos',
-            'handle'           => 'videos',
+            'name' => 'Videos',
+            'handle' => 'videos',
             'adapter_settings' => ['bucket' => 'my-bucket'],
         ]);
 
@@ -63,8 +63,8 @@ class LibraryTest extends TestCase
     public function test_casts_allowed_types_to_array(): void
     {
         $library = Library::create([
-            'name'          => 'Documents',
-            'handle'        => 'documents',
+            'name' => 'Documents',
+            'handle' => 'documents',
             'allowed_types' => ['pdf', 'docx'],
         ]);
 
@@ -115,7 +115,7 @@ class LibraryTest extends TestCase
     public function test_category_groups_can_be_attached_and_retrieved(): void
     {
         $library = Library::create(['name' => 'Gallery', 'handle' => 'gallery']);
-        $group   = CategoryGroup::factory()->create();
+        $group = CategoryGroup::factory()->create();
 
         $library->categoryGroups()->attach($group->id);
 

@@ -6,6 +6,7 @@ use AdAstra\Models\EntryTree;
 use AdAstra\Services\SiteRouting\RouteResult;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
+use RuntimeException;
 
 class TemplateRouteDriver implements RouteDriverInterface
 {
@@ -14,7 +15,9 @@ class TemplateRouteDriver implements RouteDriverInterface
         'password', 'sanctum', 'storage', 'assets', 'vendor',
     ];
 
-    public function __construct(protected Request $request) {}
+    public function __construct(protected Request $request)
+    {
+    }
 
     public function resolve(?string $uri): ?RouteResult
     {
@@ -55,7 +58,7 @@ class TemplateRouteDriver implements RouteDriverInterface
         // Refuse to leak admin views through the public catch-all even if a
         // template happens to share a name with an admin partial.
         if (str_starts_with($view, 'admin::')) {
-            throw new \RuntimeException('Refusing to render admin view from public router: ' . $view);
+            throw new RuntimeException('Refusing to render admin view from public router: ' . $view);
         }
 
         return new RouteResult(

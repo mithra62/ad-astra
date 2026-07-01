@@ -7,7 +7,7 @@ use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\ApiLog>
+ * @extends Factory<ApiLog>
  */
 class ApiLogFactory extends Factory
 {

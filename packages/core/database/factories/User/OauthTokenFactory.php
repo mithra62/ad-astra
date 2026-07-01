@@ -7,7 +7,7 @@ use AdAstra\Models\User\OauthToken;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\User\OauthToken>
+ * @extends Factory<OauthToken>
  */
 class OauthTokenFactory extends Factory
 {

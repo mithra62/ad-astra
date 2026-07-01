@@ -15,21 +15,27 @@
     <div data-matrix-field data-matrix-next-index="{{ row_count }}">
         <div class="mb-1.5 flex items-center justify-between gap-3">
             <label class="block text-sm font-medium text-content" for="{{ add_button_id }}">{{ label }}</label>
-            <button id="{{ add_button_id }}" type="button" class="{{ add_button_class }}" data-matrix-add{% for attribute, value in add_button_attributes %}{% if value is not same as(false) %} {{ attribute }}{% if value is not same as(true) %}="{{ value }}"{% endif %}{% endif %}{% endfor %}>
+            <button id="{{ add_button_id }}" type="button" class="{{ add_button_class }}"
+                    data-matrix-add{% for attribute, value in add_button_attributes %}{% if value is not same as(false) %} {{ attribute }}{% if value is not same as(true) %}="{{ value }}"{% endif %}{% endif %}{% endfor %}>
                 {% if add_button_icon %}
-                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/></svg>
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/>
+                    </svg>
                 {% endif %}
                 <span>{{ add_button_label }}</span>
             </button>
         </div>
 
-        <div class="overflow-hidden rounded-lg border bg-surface shadow-sm {% if has_error %}border-red-300{% else %}border-edge{% endif %}">
+        <div
+            class="overflow-hidden rounded-lg border bg-surface shadow-sm {% if has_error %}border-red-300{% else %}border-edge{% endif %}">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-slate-200">
                     <thead class="bg-subtle">
                     <tr>
                         {% for column in columns %}
-                            <th scope="col" class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted" {% if column.width is defined %}style="width: {{ column.width }}"{% endif %}>{{ column.label|default(column.handle) }}</th>
+                            <th scope="col"
+                                class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted"
+                                {% if column.width is defined %}style="width: {{ column.width }}"{% endif %}>{{ column.label|default(column.handle) }}</th>
                         {% endfor %}
                         <th scope="col" class="w-12 px-3 py-2">
                             <span class="sr-only">Actions</span>
@@ -49,29 +55,46 @@
                                     {% set input_id = field_id ~ '_' ~ row_index ~ '_' ~ column_handle %}
                                     <td class="min-w-40 px-3 py-2 align-top">
                                         {% if column_type == 'textarea' %}
-                                            <textarea id="{{ input_id }}" name="{{ input_name }}" rows="{{ column.rows|default(2) }}" placeholder="{{ column.placeholder|default('') }}" class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">{{ column_value }}</textarea>
+                                            <textarea id="{{ input_id }}" name="{{ input_name }}"
+                                                      rows="{{ column.rows|default(2) }}"
+                                                      placeholder="{{ column.placeholder|default('') }}"
+                                                      class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">{{ column_value }}</textarea>
                                         {% elseif column_type == 'select' %}
-                                            <select id="{{ input_id }}" name="{{ input_name }}" class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                            <select id="{{ input_id }}" name="{{ input_name }}"
+                                                    class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                                                 {% for option in column.options|default([]) %}
                                                     {% set option_value = option.value|default(option.label|default(option)) %}
                                                     {% set option_label = option.label|default(option) %}
-                                                    <option value="{{ option_value }}" {% if column_value == option_value %}selected{% endif %}>{{ option_label }}</option>
+                                                    <option value="{{ option_value }}"
+                                                            {% if column_value == option_value %}selected{% endif %}>{{ option_label }}</option>
                                                 {% endfor %}
                                             </select>
                                         {% elseif column_type == 'checkbox' %}
                                             <label class="inline-flex min-h-9 items-center">
                                                 <input type="hidden" name="{{ input_name }}" value="0">
-                                                <input id="{{ input_id }}" type="checkbox" name="{{ input_name }}" value="{{ column.value|default('1') }}" class="rounded border-edge text-emerald-600 focus:ring-emerald-500" {% if column_value %}checked{% endif %}>
+                                                <input id="{{ input_id }}" type="checkbox" name="{{ input_name }}"
+                                                       value="{{ column.value|default('1') }}"
+                                                       class="rounded border-edge text-emerald-600 focus:ring-emerald-500"
+                                                       {% if column_value %}checked{% endif %}>
                                                 <span class="sr-only">{{ column.label|default(column_handle) }}</span>
                                             </label>
                                         {% else %}
-                                            <input id="{{ input_id }}" name="{{ input_name }}" type="{{ column_type }}" value="{{ column_value }}" placeholder="{{ column.placeholder|default('') }}" class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                            <input id="{{ input_id }}" name="{{ input_name }}" type="{{ column_type }}"
+                                                   value="{{ column_value }}"
+                                                   placeholder="{{ column.placeholder|default('') }}"
+                                                   class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                                         {% endif %}
                                     </td>
                                 {% endfor %}
                                 <td class="px-3 py-2 align-top">
-                                    <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-md text-faint hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/20" data-matrix-remove aria-label="Remove row">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                                    <button type="button"
+                                            class="inline-flex h-9 w-9 items-center justify-center rounded-md text-faint hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                                            data-matrix-remove aria-label="Remove row">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M6 18 18 6M6 6l12 12"/>
+                                        </svg>
                                     </button>
                                 </td>
                             </tr>
@@ -98,29 +121,44 @@
                     {% set template_id = field_id ~ '_' ~ '__INDEX__' ~ '_' ~ column_handle %}
                     <td class="min-w-40 px-3 py-2 align-top">
                         {% if column_type == 'textarea' %}
-                            <textarea id="{{ template_id }}" name="{{ template_name }}" rows="{{ column.rows|default(2) }}" placeholder="{{ column.placeholder|default('') }}" class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">{{ column.default|default('') }}</textarea>
+                            <textarea id="{{ template_id }}" name="{{ template_name }}"
+                                      rows="{{ column.rows|default(2) }}"
+                                      placeholder="{{ column.placeholder|default('') }}"
+                                      class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">{{ column.default|default('') }}</textarea>
                         {% elseif column_type == 'select' %}
-                            <select id="{{ template_id }}" name="{{ template_name }}" class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <select id="{{ template_id }}" name="{{ template_name }}"
+                                    class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                                 {% for option in column.options|default([]) %}
                                     {% set option_value = option.value|default(option.label|default(option)) %}
                                     {% set option_label = option.label|default(option) %}
-                                    <option value="{{ option_value }}" {% if column.default|default('') == option_value %}selected{% endif %}>{{ option_label }}</option>
+                                    <option value="{{ option_value }}"
+                                            {% if column.default|default('') == option_value %}selected{% endif %}>{{ option_label }}</option>
                                 {% endfor %}
                             </select>
                         {% elseif column_type == 'checkbox' %}
                             <label class="inline-flex min-h-9 items-center">
                                 <input type="hidden" name="{{ template_name }}" value="0">
-                                <input id="{{ template_id }}" type="checkbox" name="{{ template_name }}" value="{{ column.value|default('1') }}" class="rounded border-edge text-emerald-600 focus:ring-emerald-500" {% if column.default|default(false) %}checked{% endif %}>
+                                <input id="{{ template_id }}" type="checkbox" name="{{ template_name }}"
+                                       value="{{ column.value|default('1') }}"
+                                       class="rounded border-edge text-emerald-600 focus:ring-emerald-500"
+                                       {% if column.default|default(false) %}checked{% endif %}>
                                 <span class="sr-only">{{ column.label|default(column_handle) }}</span>
                             </label>
                         {% else %}
-                            <input id="{{ template_id }}" name="{{ template_name }}" type="{{ column_type }}" value="{{ column.default|default('') }}" placeholder="{{ column.placeholder|default('') }}" class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <input id="{{ template_id }}" name="{{ template_name }}" type="{{ column_type }}"
+                                   value="{{ column.default|default('') }}"
+                                   placeholder="{{ column.placeholder|default('') }}"
+                                   class="w-full min-w-0 rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                         {% endif %}
                     </td>
                 {% endfor %}
                 <td class="px-3 py-2 align-top">
-                    <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-md text-faint hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/20" data-matrix-remove aria-label="Remove row">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                    <button type="button"
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-md text-faint hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                            data-matrix-remove aria-label="Remove row">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                        </svg>
                     </button>
                 </td>
             </tr>

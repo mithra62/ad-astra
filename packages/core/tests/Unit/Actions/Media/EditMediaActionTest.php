@@ -4,6 +4,7 @@ namespace Tests\Unit\Actions\Media;
 
 use AdAstra\Actions\Media\EditMedia;
 use AdAstra\Field\Types\FileUpload;
+use AdAstra\Field\Types\Text;
 use AdAstra\Models\Category;
 use AdAstra\Models\Field;
 use AdAstra\Models\Field\Type as FieldType;
@@ -66,21 +67,21 @@ class EditMediaActionTest extends TestCase
 
     public function test_edit_syncs_categories(): void
     {
-        $media    = Media::factory()->create();
+        $media = Media::factory()->create();
         $category = Category::factory()->create();
 
         $this->action->edit($media, ['categories' => [$category->id]]);
 
         $this->assertDatabaseHas('categorizables', [
             'categorizable_type' => $media->getMorphClass(),
-            'categorizable_id'   => $media->id,
-            'category_id'        => $category->id,
+            'categorizable_id' => $media->id,
+            'category_id' => $category->id,
         ]);
     }
 
     public function test_edit_detaches_categories_when_passed_empty_array(): void
     {
-        $media    = Media::factory()->create();
+        $media = Media::factory()->create();
         $category = Category::factory()->create();
         $media->categories()->attach($category->id);
 
@@ -97,19 +98,19 @@ class EditMediaActionTest extends TestCase
     {
         // Build: library → field layout → tab → element → text field
         $library = Library::factory()->create();
-        $layout  = FieldLayout::create(['name' => 'Media Test Layout', 'handle' => 'media-test-layout']);
+        $layout = FieldLayout::create(['name' => 'Media Test Layout', 'handle' => 'media-test-layout']);
         $library->update(['field_layout_id' => $layout->id]);
 
         $textType = FieldType::firstOrCreate(
-            ['object' => \AdAstra\Field\Types\Text::class],
+            ['object' => Text::class],
             ['name' => 'Text', 'settings' => []]
         );
         $field = Field::factory()->create([
-            'handle'        => 'caption',
+            'handle' => 'caption',
             'field_type_id' => $textType->id,
         ]);
 
-        $tab     = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Main', 'handle' => 'main', 'sort_order' => 0]);
+        $tab = Tab::create(['field_layout_id' => $layout->id, 'name' => 'Main', 'handle' => 'main', 'sort_order' => 0]);
         $element = TabElement::create(['field_layout_tab_id' => $tab->id, 'field_id' => $field->id, 'sort_order' => 0]);
 
         $media = Media::factory()->create(['library_id' => $library->id]);
@@ -118,9 +119,9 @@ class EditMediaActionTest extends TestCase
 
         $this->assertDatabaseHas('field_values', [
             'fieldable_type' => $media->getMorphClass(),
-            'fieldable_id'   => $media->id,
-            'field_id'       => $field->id,
-            'value_text'     => 'A nice caption',
+            'fieldable_id' => $media->id,
+            'field_id' => $field->id,
+            'value_text' => 'A nice caption',
         ]);
     }
 

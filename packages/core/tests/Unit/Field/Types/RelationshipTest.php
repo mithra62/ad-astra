@@ -167,7 +167,7 @@ class RelationshipTest extends TestCase
         $html = (new Relationship([]))->render(['id' => 'f1', 'value' => null, 'field' => $field]);
 
         $this->assertStringContainsString('<select', $html);
-        $this->assertStringContainsString('name="fields['.$field->handle.'][]"', $html);
+        $this->assertStringContainsString('name="fields[' . $field->handle . '][]"', $html);
         $this->assertStringContainsString('multiple', $html);
     }
 
@@ -200,8 +200,8 @@ class RelationshipTest extends TestCase
 
         $this->assertStringContainsString('Alpha Post', $html);
         $this->assertStringContainsString('Beta Post', $html);
-        $this->assertStringContainsString((string) $entryA->id, $html);
-        $this->assertStringContainsString((string) $entryB->id, $html);
+        $this->assertStringContainsString((string)$entryA->id, $html);
+        $this->assertStringContainsString((string)$entryB->id, $html);
     }
 
     /**
@@ -257,7 +257,7 @@ class RelationshipTest extends TestCase
             ]);
 
         $this->assertMatchesRegularExpression(
-            '/value="'.$entry->id.'"[^>]*selected/',
+            '/value="' . $entry->id . '"[^>]*selected/',
             $html
         );
     }
@@ -276,7 +276,7 @@ class RelationshipTest extends TestCase
             ]);
 
         $this->assertMatchesRegularExpression(
-            '/value="'.$entry->id.'"[^>]*selected/',
+            '/value="' . $entry->id . '"[^>]*selected/',
             $html
         );
     }
@@ -297,7 +297,7 @@ class RelationshipTest extends TestCase
 
         // The "Other" option must not carry the selected attribute.
         $this->assertDoesNotMatchRegularExpression(
-            '/value="'.$other->id.'"[^>]*selected/',
+            '/value="' . $other->id . '"[^>]*selected/',
             $html
         );
     }

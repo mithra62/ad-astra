@@ -217,7 +217,7 @@ class EntryAuthorServiceTest extends TestCase
     {
         $user = User::factory()->create();
         EntryAuthor::factory()->disabled()->create([
-            'user_id'      => $user->id,
+            'user_id' => $user->id,
             'display_name' => 'Preserved Name',
         ]);
 
@@ -375,7 +375,7 @@ class EntryAuthorServiceTest extends TestCase
         $this->service->sync($user, true, 'Alias');
 
         $this->assertDatabaseHas('entry_authors', [
-            'user_id'      => $user->id,
+            'user_id' => $user->id,
             'display_name' => 'Alias',
         ]);
     }

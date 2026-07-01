@@ -2,7 +2,9 @@
     <button type="button" role="tab" aria-selected="false"
             class="tab-btn" data-tab-target="{{ tab.handle }}"
             id="btn-{{ tab.handle }}" aria-controls="tab-{{ tab.handle }}">
-        <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
         {{ tab.name }}
         <span class="unsaved-dot"></span>
     </button>
@@ -38,7 +40,8 @@
 
 {% macro tabContent(tab, field_values) %}
     <!-- ░░ TAB: Content ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-    <div id="tab-{{ tab.handle }}" class="tab-panel active" role="tabpanel" aria-labelledby="btn-{{ tab.handle }}" data-tab-panel="{{ tab.handle }}">
+    <div id="tab-{{ tab.handle }}" class="tab-panel active" role="tabpanel" aria-labelledby="btn-{{ tab.handle }}"
+         data-tab-panel="{{ tab.handle }}">
         <div class="border-b border-edge px-5 py-5">
             <div class="space-y-4">
                 {{ _self.tabFields(tab, field_values) }}

@@ -53,8 +53,8 @@ class StatusObserverTest extends TestCase
     private function makeMedia(Status $status, array $overrides = []): Media
     {
         $library = Library::create([
-            'name' => 'Photos '.fake()->unique()->numberBetween(1, 999999),
-            'handle' => 'photos-'.fake()->unique()->regexify('[a-z]{6}'),
+            'name' => 'Photos ' . fake()->unique()->numberBetween(1, 999999),
+            'handle' => 'photos-' . fake()->unique()->regexify('[a-z]{6}'),
             'adapter' => 'local',
         ]);
 
@@ -148,7 +148,7 @@ class StatusObserverTest extends TestCase
         $draft->color = '#ff0000';
         $draft->save();
         $writeCount = collect(DB::getQueryLog())
-            ->filter(fn ($q) => str_starts_with(strtolower(trim($q['query'])), 'update'))
+            ->filter(fn($q) => str_starts_with(strtolower(trim($q['query'])), 'update'))
             ->count();
         DB::disableQueryLog();
 

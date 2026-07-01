@@ -11,12 +11,15 @@ use AdAstra\Models\EntryGroup;
 use AdAstra\Models\EntryType;
 use AdAstra\Models\User;
 use AdAstra\Services\UserService;
+use DateTimeInterface;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Throwable;
 
 /**
  * Stress-test seeder: users, categories, and entries across all types.
@@ -51,11 +54,11 @@ class FakeDataSeeder extends Seeder
     // Weighted user-status pool: ~75 % active, ~10 % pending, ~8 % inactive,
     // ~5 % suspended, ~2 % banned.
     private const USER_STATUS_WEIGHTS = [
-        UserStatus::ACTIVE    => 75,
-        UserStatus::PENDING   => 10,
-        UserStatus::INACTIVE  => 8,
+        UserStatus::ACTIVE => 75,
+        UserStatus::PENDING => 10,
+        UserStatus::INACTIVE => 8,
         UserStatus::SUSPENDED => 5,
-        UserStatus::BANNED    => 2,
+        UserStatus::BANNED => 2,
     ];
 
     // Preferred weights per status handle. Any handle not listed defaults to 1.
@@ -116,13 +119,13 @@ class FakeDataSeeder extends Seeder
             $status = $this->pickUserStatus();
 
             $data = [
-                'name'     => fake()->name(),
-                'email'    => fake()->unique()->safeEmail(),
+                'name' => fake()->name(),
+                'email' => fake()->unique()->safeEmail(),
                 'password' => $password,
                 'password_confirmation' => $password,
-                'status'   => $status,
-                'roles'    => [fake()->randomElement(self::ROLE_POOL)],
-                'fields'   => $this->fakeUserFields(),
+                'status' => $status,
+                'roles' => [fake()->randomElement(self::ROLE_POOL)],
+                'fields' => $this->fakeUserFields(),
             ];
 
             if (!$this->validateUser($data)) {
@@ -221,7 +224,7 @@ class FakeDataSeeder extends Seeder
         }
 
         // Distribute the total budget roughly evenly across all groups.
-        $perGroup = (int)ceil(self::CATEGORY_COUNT / $groups->count())*5;
+        $perGroup = (int)ceil(self::CATEGORY_COUNT / $groups->count()) * 5;
         $created = 0;
         $failed = 0;
 
@@ -273,7 +276,7 @@ class FakeDataSeeder extends Seeder
             ]);
             $created++;
             $budget--;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->command->warn("Category creation failed ({$group->handle}): " . $e->getMessage());
             $failed++;
             $budget--;
@@ -417,7 +420,7 @@ class FakeDataSeeder extends Seeder
         for ($i = 0; $i < self::ENTRY_COUNT; $i++) {
             $typeHandle = fake()->randomElement($typeHandles);
 
-            /** @var \AdAstra\Models\EntryType|null $entryType */
+            /** @var EntryType|null $entryType */
             $entryType = $entryTypes->get($typeHandle);
             if (!$entryType) {
                 $failed++;
@@ -445,7 +448,7 @@ class FakeDataSeeder extends Seeder
             try {
                 Content::create($typeHandle, $data);
                 $created++;
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $this->command->warn("Entry creation failed ({$typeHandle}): " . $e->getMessage());
                 $failed++;
             }
@@ -539,7 +542,7 @@ class FakeDataSeeder extends Seeder
         return Str::slug(fake()->word()) . '-' . Str::random(8);
     }
 
-    private function fakePublishedAt(string $status): ?\DateTimeInterface
+    private function fakePublishedAt(string $status): ?DateTimeInterface
     {
         return match ($status) {
             'published' => fake()->dateTimeBetween('-2 years', 'now'),
@@ -549,7 +552,7 @@ class FakeDataSeeder extends Seeder
     }
 
     /** @return int[] */
-    private function pickAuthorIds(\Illuminate\Support\Collection $users): array
+    private function pickAuthorIds(Collection $users): array
     {
         if ($users->isEmpty()) {
             return [];

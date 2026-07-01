@@ -73,69 +73,80 @@
                     {{ forms.input('handle', 'Handle', required=true, value=type.handle, description="Lowercase letters, numbers, and hyphens only.") }}
 
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-content" for="entry_behavior_id">Behavior</label>
+                        <label class="mb-1.5 block text-sm font-medium text-content"
+                               for="entry_behavior_id">Behavior</label>
                         <select
                             class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm {% if errors.has('entry_behavior_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                             id="entry_behavior_id" name="entry_behavior_id">
                             <option value="">— None (General) —</option>
                             {% for behavior in behaviors %}
                                 <option value="{{ behavior.id }}"
-                                    {% if old('entry_behavior_id', type.entry_behavior_id) == behavior.id %}selected{% endif %}>
+                                        {% if old('entry_behavior_id', type.entry_behavior_id) == behavior.id %}selected{% endif %}>
                                     {{ behavior.name }}
                                 </option>
                             {% endfor %}
                         </select>
                         {% if errors.has('entry_behavior_id') %}
-                            <p id="entry_behavior_id-error" class="mt-1 text-xs text-red-600">{{ errors.first('entry_behavior_id') }}</p>
+                            <p id="entry_behavior_id-error"
+                               class="mt-1 text-xs text-red-600">{{ errors.first('entry_behavior_id') }}</p>
                         {% endif %}
                         <p class="mt-1 text-xs text-faint">
-                            Determines lifecycle hooks (e.g. reading time, stock status). Leave blank for general-purpose behavior.
+                            Determines lifecycle hooks (e.g. reading time, stock status). Leave blank for
+                            general-purpose behavior.
                         </p>
                     </div>
 
-                        {{ forms.toggle(
-                            name: 'has_entry_tree',
-                            label: 'Allow Entry Tree',
-                            value: type.has_entry_tree,
-                            description: 'Allow Entries assigned to this Entry Type to have parent / child relationships.',
-                            checked_value: '1',
-                            id: 'has_entry_tree',
-                            error_key: 'has_entry_tree',
-                            copy_align: 'inline'
-                        ) }}
+                    {{ forms.toggle(
+                        name: 'has_entry_tree',
+                        label: 'Allow Entry Tree',
+                        value: type.has_entry_tree,
+                        description: 'Allow Entries assigned to this Entry Type to have parent / child relationships.',
+                        checked_value: '1',
+                        id: 'has_entry_tree',
+                        error_key: 'has_entry_tree',
+                        copy_align: 'inline'
+                    ) }}
 
                     {% set entry_tree_enabled = old('has_entry_tree', type.has_entry_tree) == '1' or type.has_entry_tree %}
-                    <div id="entry-tree-settings" class="{% if not entry_tree_enabled %}hidden {% endif %}rounded-lg border border-edge bg-subtle px-4 py-4">
+                    <div id="entry-tree-settings"
+                         class="{% if not entry_tree_enabled %}hidden {% endif %}rounded-lg border border-edge bg-subtle px-4 py-4">
                         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-content" for="max_depth">Max Depth</label>
+                                <label class="mb-1.5 block text-sm font-medium text-content" for="max_depth">Max
+                                    Depth</label>
                                 <input
                                     class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:outline-none focus:ring-2 {% if errors.has('max_depth') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                                     id="max_depth" name="max_depth" type="number" min="0"
                                     value="{{ old('max_depth', type.max_depth) }}"
-                                    {% if errors.has('max_depth') %}aria-invalid="true" aria-describedby="max_depth-error"{% endif %}>
+                                    {% if errors.has('max_depth') %}aria-invalid="true"
+                                    aria-describedby="max_depth-error"{% endif %}>
                                 {% if errors.has('max_depth') %}
-                                    <p id="max_depth-error" class="mt-1 text-xs text-red-600">{{ errors.first('max_depth') }}</p>
+                                    <p id="max_depth-error"
+                                       class="mt-1 text-xs text-red-600">{{ errors.first('max_depth') }}</p>
                                 {% endif %}
                             </div>
 
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-content" for="default_template">Default Template</label>
+                                <label class="mb-1.5 block text-sm font-medium text-content" for="default_template">Default
+                                    Template</label>
                                 <input
                                     class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:outline-none focus:ring-2 {% if errors.has('default_template') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                                     id="default_template" name="default_template" type="text"
                                     value="{{ old('default_template', type.default_template) }}"
                                     placeholder="entries/default"
-                                    {% if errors.has('default_template') %}aria-invalid="true" aria-describedby="default_template-error"{% endif %}>
+                                    {% if errors.has('default_template') %}aria-invalid="true"
+                                    aria-describedby="default_template-error"{% endif %}>
                                 {% if errors.has('default_template') %}
-                                    <p id="default_template-error" class="mt-1 text-xs text-red-600">{{ errors.first('default_template') }}</p>
+                                    <p id="default_template-error"
+                                       class="mt-1 text-xs text-red-600">{{ errors.first('default_template') }}</p>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-content" for="field_layout_id">Field Layout</label>
+                        <label class="mb-1.5 block text-sm font-medium text-content" for="field_layout_id">Field
+                            Layout</label>
                         <select
                             class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm {% if errors.has('field_layout_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                             id="field_layout_id" name="field_layout_id">
@@ -148,10 +159,12 @@
                             {% endfor %}
                         </select>
                         {% if errors.has('field_layout_id') %}
-                            <p id="field_layout_id-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>
+                            <p id="field_layout_id-error"
+                               class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>
                         {% endif %}
                         <p class="mt-1 text-xs text-faint">
-                            Fields from this layout are specific to this entry type. Group-level fields are always included.
+                            Fields from this layout are specific to this entry type. Group-level fields are always
+                            included.
                         </p>
                     </div>
                 </div>

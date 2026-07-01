@@ -7,6 +7,7 @@ use AdAstra\Actions\Category\EditCategory;
 use AdAstra\Models\Category;
 use AdAstra\Models\Category\Group;
 use AdAstra\Models\FieldLayout;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -131,7 +132,7 @@ class CategoryActionsTest extends TestCase
     {
         $action = app(CreateNewCategory::class);
 
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
 
         $action->create([
             'group_id' => 99999,

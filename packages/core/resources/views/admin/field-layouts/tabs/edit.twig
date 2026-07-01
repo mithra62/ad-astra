@@ -22,30 +22,40 @@
 {% endblock %}
 
 {% block content %}
-    <div id="unsaved-bar" class="unsaved-bar items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-2">
+    <div id="unsaved-bar"
+         class="unsaved-bar items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-2">
         <span class="flex items-center gap-2 text-sm text-amber-800">
-            <svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
             </svg>
             You have unsaved changes.
         </span>
-        <button type="submit" form="general-create-form" class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Save Now</button>
+        <button type="submit" form="general-create-form"
+                class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Save
+            Now
+        </button>
     </div>
 
     <div class="flex w-full min-w-0 flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Edit Tab</h1>
-                <p class="mt-1 text-sm text-muted">Create a reusable status, field, label, or option for content workflows.</p>
+                <p class="mt-1 text-sm text-muted">Create a reusable status, field, label, or option for content
+                    workflows.</p>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('field-layouts.tabs.fields', {layout_id: layout.id, tab_id: tab.id}) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
+                <a href="{{ route('field-layouts.tabs.fields', {layout_id: layout.id, tab_id: tab.id}) }}"
+                   class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                     Fields
                 </a>
-                <a href="{{ route('field-layouts.edit', layout) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
+                <a href="{{ route('field-layouts.edit', layout) }}"
+                   class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                     </svg>
@@ -56,17 +66,22 @@
 
         <div class="rounded-lg border border-sky-200 bg-sky-50 p-4">
             <div class="flex items-start gap-3">
-                <svg class="mt-0.5 h-5 w-5 shrink-0 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <svg class="mt-0.5 h-5 w-5 shrink-0 text-sky-500" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <div>
                     <p class="text-sm font-semibold text-sky-800">Create a new reusable item.</p>
-                    <p class="mt-1 text-sm text-sky-700">Handles should be stable once this item is used by content or templates.</p>
+                    <p class="mt-1 text-sm text-sky-700">Handles should be stable once this item is used by content or
+                        templates.</p>
                 </div>
             </div>
         </div>
 
-        <form id="general-create-form" method="POST" action="{{ route('field-layouts.tabs.update', {layout_id: layout.id, tab_id: tab.id}) }}" class="flex w-full min-w-0 flex-col gap-5">
+        <form id="general-create-form" method="POST"
+              action="{{ route('field-layouts.tabs.update', {layout_id: layout.id, tab_id: tab.id}) }}"
+              class="flex w-full min-w-0 flex-col gap-5">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
             <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
@@ -81,11 +96,14 @@
             </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
-                <a href="{{ route('field-layouts') }}" class="rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-semibold text-content shadow-sm hover:bg-subtle">Cancel</a>
-                <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Edit Tab</button>
+                <a href="{{ route('field-layouts') }}"
+                   class="rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-semibold text-content shadow-sm hover:bg-subtle">Cancel</a>
+                <button type="submit"
+                        class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                    Edit Tab
+                </button>
             </div>
         </form>
-
 
 
         <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
@@ -109,7 +127,8 @@
                             {% for element in tab.elements %}
                                 <tr class="hover:bg-subtle">
                                     <td class="px-5 py-3.5">
-                                        {{ element.field.label ?: element.field.name }} <span class="mt-0.5 font-mono text-xs text-faint">{{ element.field.handle }}</span>
+                                        {{ element.field.label ?: element.field.name }} <span
+                                            class="mt-0.5 font-mono text-xs text-faint">{{ element.field.handle }}</span>
                                     </td>
                                     <td class="hidden px-5 py-3.5 text-muted sm:table-cell">
                                         {{ element.field.fieldType.name ?? '—' }}
@@ -140,23 +159,33 @@
                                             {{ method_field('PUT') }}
                                             <input type="hidden" name="required"
                                                    value="{{ element.required ? '1' : '0' }}">
-                                            <input class="w-full rounded-md border focus:border-emerald-500 focus:ring-emerald-500/20" style="width:80px;"
-                                                   type="number"
-                                                   name="sort_order" value="{{ element.sort_order }}" min="0"
-                                                   onchange="this.form.submit()">
+                                            <input
+                                                class="w-full rounded-md border focus:border-emerald-500 focus:ring-emerald-500/20"
+                                                style="width:80px;"
+                                                type="number"
+                                                name="sort_order" value="{{ element.sort_order }}" min="0"
+                                                onchange="this.form.submit()">
                                         </form>
                                     </td>
                                     <td class="px-5 py-3.5">
                                         <div class="flex items-center justify-end gap-1">
-                                            <a href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}" class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:border-edge hover:bg-subtle hover:text-content" title="Edit">
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            <a href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}"
+                                               class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:border-edge hover:bg-subtle hover:text-content"
+                                               title="Edit">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
                                                 <span class="sr-only">Edit</span>
                                             </a>
-                                            <a href="{{ route('field-layouts.tabs.confirm', {layout_id: layout.id, tab_id: tab.id}) }}" class="inline-flex items-center justify-center rounded-md border border-red-100 p-1.5 text-red-400 hover:border-red-300 hover:bg-red-50 hover:text-red-600" title="Delete">
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            <a href="{{ route('field-layouts.tabs.confirm', {layout_id: layout.id, tab_id: tab.id}) }}"
+                                               class="inline-flex items-center justify-center rounded-md border border-red-100 p-1.5 text-red-400 hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                                               title="Delete">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                 </svg>
                                                 <span class="sr-only">Delete</span>
                                             </a>
@@ -170,13 +199,17 @@
                 {% else %}
                     <div class="flex min-h-80 items-center justify-center px-6 py-14">
                         <div class="max-w-sm text-center">
-                            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-faint">
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                            <div
+                                class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-faint">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                                 </svg>
                             </div>
                             <h2 class="mt-4 text-base font-semibold text-content">No Fields found</h2>
-                            <p class="mt-1 text-sm text-muted">Create your first entry or adjust the filters to broaden the list.</p>
+                            <p class="mt-1 text-sm text-muted">Create your first entry or adjust the filters to broaden
+                                the list.</p>
                         </div>
                     </div>
                 {% endif %}
@@ -196,7 +229,9 @@
 
                         <div class="col-md-6">
                             <label class="mb-1.5 block text-sm font-medium text-content" for="field_id">Field</label>
-                            <select class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('parent_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}" id="field_id" name="field_id" required>
+                            <select
+                                class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('parent_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                                id="field_id" name="field_id" required>
                                 <option value="">— Select a field —</option>
                                 {% for field in available_fields %}
                                     <option value="{{ field.id }}"
@@ -210,8 +245,10 @@
                                 class="text-danger">{{ errors.first('field_id') }}</p>{% endif %}
                         </div>
                         <div class="col-md-3">
-                            <label class="mb-1.5 block text-sm font-medium text-content" for="sort_order">Sort Order</label>
-                            <input class="w-full rounded-md border focus:border-emerald-500 focus:ring-emerald-500/20" id="sort_order" type="number"
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="sort_order">Sort
+                                Order</label>
+                            <input class="w-full rounded-md border focus:border-emerald-500 focus:ring-emerald-500/20"
+                                   id="sort_order" type="number"
                                    value="{{ old('sort_order', 0) }}" name="sort_order" min="0">
                         </div>
                         <div class="col-md-3 d-flex align-items-end">
@@ -223,7 +260,10 @@
                         </div>
 
                         <div class="col-12">
-                            <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Add Field to Tab</button>
+                            <button type="submit"
+                                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                Add Field to Tab
+                            </button>
                         </div>
                     </form>
                 {% else %}

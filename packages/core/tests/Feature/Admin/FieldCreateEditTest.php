@@ -55,7 +55,7 @@ class FieldCreateEditTest extends TestCase
 
     public function test_create_page_renders_settings_card(): void
     {
-        $user  = $this->makeSuperAdmin();
+        $user = $this->makeSuperAdmin();
         $group = $this->makeGroup();
         $this->textType();
 
@@ -67,7 +67,7 @@ class FieldCreateEditTest extends TestCase
 
     public function test_create_page_renders_initial_settings_for_text_type(): void
     {
-        $user  = $this->makeSuperAdmin();
+        $user = $this->makeSuperAdmin();
         $group = $this->makeGroup();
         $this->textType();
 
@@ -79,14 +79,14 @@ class FieldCreateEditTest extends TestCase
 
     public function test_create_page_repopulates_settings_after_validation_failure(): void
     {
-        $user  = $this->makeSuperAdmin();
+        $user = $this->makeSuperAdmin();
         $group = $this->makeGroup();
-        $type  = $this->textType();
+        $type = $this->textType();
 
         $this->actingAs($user)
             ->withSession(['_old_input' => [
-                'field_type_id' => (string) $type->id,
-                'settings'      => ['placeholder' => 'Repopulated value'],
+                'field_type_id' => (string)$type->id,
+                'settings' => ['placeholder' => 'Repopulated value'],
             ]])
             ->get(route('fields.create', $group->id))
             ->assertOk()
@@ -99,12 +99,12 @@ class FieldCreateEditTest extends TestCase
 
     public function test_edit_page_renders_settings_card(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->textType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->textType();
         $group = $this->makeGroup();
         $field = FieldModel::factory()->create([
             'field_type_id' => $type->id,
-            'settings'      => [],
+            'settings' => [],
         ]);
         $field->groups()->attach($group);
 
@@ -116,12 +116,12 @@ class FieldCreateEditTest extends TestCase
 
     public function test_edit_page_pre_populates_saved_settings(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->textType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->textType();
         $group = $this->makeGroup();
         $field = FieldModel::factory()->create([
             'field_type_id' => $type->id,
-            'settings'      => ['placeholder' => 'Saved placeholder'],
+            'settings' => ['placeholder' => 'Saved placeholder'],
         ]);
         $field->groups()->attach($group);
 
@@ -133,12 +133,12 @@ class FieldCreateEditTest extends TestCase
 
     public function test_edit_page_renders_no_settings_message_for_email_type(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->emailType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->emailType();
         $group = $this->makeGroup();
         $field = FieldModel::factory()->create([
             'field_type_id' => $type->id,
-            'settings'      => [],
+            'settings' => [],
         ]);
         $field->groups()->attach($group);
 

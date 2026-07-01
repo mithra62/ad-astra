@@ -42,10 +42,10 @@ class HasTransformationsTest extends TestCase
         $media = Media::factory()->create();
         Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'test/_t/img_thumb.jpg',
-            'status'   => 'pending',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'test/_t/img_thumb.jpg',
+            'status' => 'pending',
         ]);
 
         $this->assertNotNull($media->getTransformation('thumb'));
@@ -56,10 +56,10 @@ class HasTransformationsTest extends TestCase
         $media = Media::factory()->create();
         Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'test/_t/img_thumb.jpg',
-            'status'   => 'pending',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'test/_t/img_thumb.jpg',
+            'status' => 'pending',
         ]);
 
         $this->assertNull($media->transformation('thumb'));
@@ -70,10 +70,10 @@ class HasTransformationsTest extends TestCase
         $media = Media::factory()->create();
         Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'test/_t/img_thumb.jpg',
-            'status'   => 'complete',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'test/_t/img_thumb.jpg',
+            'status' => 'complete',
         ]);
 
         $this->assertNotNull($media->transformation('thumb'));
@@ -95,10 +95,10 @@ class HasTransformationsTest extends TestCase
         $media = Media::factory()->create();
         Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'test/_t/img_thumb.jpg',
-            'status'   => 'pending',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'test/_t/img_thumb.jpg',
+            'status' => 'pending',
         ]);
 
         $this->assertFalse($media->hasTransformation('thumb'));
@@ -109,10 +109,10 @@ class HasTransformationsTest extends TestCase
         $media = Media::factory()->create();
         Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'test/_t/img_thumb.jpg',
-            'status'   => 'complete',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'test/_t/img_thumb.jpg',
+            'status' => 'complete',
         ]);
 
         $this->assertTrue($media->hasTransformation('thumb'));
@@ -130,7 +130,7 @@ class HasTransformationsTest extends TestCase
 
         $this->assertDatabaseHas('media_transformations', [
             'media_id' => $media->id,
-            'key'      => 'thumb',
+            'key' => 'thumb',
         ]);
     }
 
@@ -139,10 +139,10 @@ class HasTransformationsTest extends TestCase
         $media = Media::factory()->create();
         $existing = Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'test/_t/img_thumb.jpg',
-            'status'   => 'complete',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'test/_t/img_thumb.jpg',
+            'status' => 'complete',
         ]);
 
         $result = $media->transform('thumb');
@@ -155,19 +155,19 @@ class HasTransformationsTest extends TestCase
     public function test_transform_resets_failed_record_with_current_params(): void
     {
         $media = Media::factory()->create([
-            'disk'      => 'local',
-            'path'      => 'uploads/photo.jpg',
+            'disk' => 'local',
+            'path' => 'uploads/photo.jpg',
             'file_name' => 'photo.jpg',
         ]);
 
         // Simulate a previously failed attempt with stale params.
         Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'uploads/_t/photo_thumb_old.webp',  // stale
-            'params'   => ['format' => 'webp'],               // stale
-            'status'   => 'failed',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'uploads/_t/photo_thumb_old.webp',  // stale
+            'params' => ['format' => 'webp'],               // stale
+            'status' => 'failed',
         ]);
 
         $result = $media->transform('thumb', ['format' => 'jpg']);
@@ -185,17 +185,17 @@ class HasTransformationsTest extends TestCase
     public function test_transform_returns_pending_record_without_creating_duplicate(): void
     {
         $media = Media::factory()->create([
-            'disk'      => 'local',
-            'path'      => 'uploads/photo.jpg',
+            'disk' => 'local',
+            'path' => 'uploads/photo.jpg',
             'file_name' => 'photo.jpg',
         ]);
 
         Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'uploads/_t/photo_thumb.jpg',
-            'status'   => 'pending',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'uploads/_t/photo_thumb.jpg',
+            'status' => 'pending',
         ]);
 
         $media->transform('thumb');
@@ -214,10 +214,10 @@ class HasTransformationsTest extends TestCase
         $media = Media::factory()->create(['disk' => 'local', 'path' => 'uploads/img.jpg']);
         Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'uploads/_t/img_thumb.jpg',
-            'status'   => 'complete',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'uploads/_t/img_thumb.jpg',
+            'status' => 'complete',
         ]);
 
         $media->clearTransformation('thumb');
@@ -248,10 +248,10 @@ class HasTransformationsTest extends TestCase
         foreach (['thumb', 'medium', 'large'] as $key) {
             Transformation::create([
                 'media_id' => $media->id,
-                'key'      => $key,
-                'disk'     => 'local',
-                'path'     => "uploads/_t/img_{$key}.jpg",
-                'status'   => 'complete',
+                'key' => $key,
+                'disk' => 'local',
+                'path' => "uploads/_t/img_{$key}.jpg",
+                'status' => 'complete',
             ]);
         }
 
@@ -268,8 +268,8 @@ class HasTransformationsTest extends TestCase
     public function test_transform_stores_derived_path_in_t_subdirectory(): void
     {
         $media = Media::factory()->create([
-            'disk'      => 'local',
-            'path'      => 'uploads/photo.jpg',
+            'disk' => 'local',
+            'path' => 'uploads/photo.jpg',
             'file_name' => 'photo.jpg',
         ]);
 
@@ -282,8 +282,8 @@ class HasTransformationsTest extends TestCase
     public function test_transform_respects_format_param_in_derived_path(): void
     {
         $media = Media::factory()->create([
-            'disk'      => 'local',
-            'path'      => 'uploads/photo.jpg',
+            'disk' => 'local',
+            'path' => 'uploads/photo.jpg',
             'file_name' => 'photo.jpg',
         ]);
 

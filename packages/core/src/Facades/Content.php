@@ -4,6 +4,7 @@ namespace AdAstra\Facades;
 
 use AdAstra\Builders\EntryQueryBuilder;
 use AdAstra\Models\Entry;
+use AdAstra\Services\ContentService;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -19,6 +20,6 @@ class Content extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return \AdAstra\Services\ContentService::class;
+        return ContentService::class;
     }
 }

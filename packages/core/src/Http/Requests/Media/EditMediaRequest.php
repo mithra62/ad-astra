@@ -24,7 +24,7 @@ class EditMediaRequest extends FormRequest
                     'string',
                     'max:100',
                     Rule::exists('statuses', 'handle')->where(
-                        fn ($query) => $query->where('status_group_id', $schema?->status_group_id)
+                        fn($query) => $query->where('status_group_id', $schema?->status_group_id)
                     ),
                 ],
             ],
@@ -48,7 +48,7 @@ class EditMediaRequest extends FormRequest
             $media = Media::find($this->route()->parameter('media_item'));
             $this->resolvedSchema = ($media && $media->library_id)
                 ? MediaLibrary::with('fieldLayout.tabs.elements.field.fieldType')
-                              ->find($media->library_id)
+                    ->find($media->library_id)
                 : null;
             $this->schemaResolved = true;
         }

@@ -16,7 +16,7 @@ class NewsArticleEntryType extends AbstractEntryType
         $errors = [];
 
         $sourceUrl = $data['fields']['source_url'] ?? $this->existingFieldValue($entry, 'source_url');
-        $source    = $data['fields']['source']     ?? $this->existingFieldValue($entry, 'source');
+        $source = $data['fields']['source'] ?? $this->existingFieldValue($entry, 'source');
 
         if (!empty($sourceUrl) && empty($source)) {
             $errors['source'] = 'Source name is required when a source URL is provided.';

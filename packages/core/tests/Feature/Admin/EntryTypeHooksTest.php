@@ -69,24 +69,24 @@ class EntryTypeHooksTest extends TestCase
 
         Status::factory()->default()->create([
             'status_group_id' => $statusGroup->id,
-            'handle'          => 'draft',
-            'name'            => 'Draft',
+            'handle' => 'draft',
+            'name' => 'Draft',
         ]);
 
         Status::factory()->create([
             'status_group_id' => $statusGroup->id,
-            'handle'          => 'published',
-            'name'            => 'Published',
-            'is_default'      => false,
-            'is_public'       => true,
+            'handle' => 'published',
+            'name' => 'Published',
+            'is_default' => false,
+            'is_public' => true,
         ]);
 
         foreach ($extraStatuses as $handle => $name) {
             Status::factory()->create([
                 'status_group_id' => $statusGroup->id,
-                'handle'          => $handle,
-                'name'            => $name,
-                'is_default'      => false,
+                'handle' => $handle,
+                'name' => $name,
+                'is_default' => false,
             ]);
         }
 
@@ -96,13 +96,13 @@ class EntryTypeHooksTest extends TestCase
         Relation::morphMap([$morphKey => $class]);
 
         $behavior = EntryBehavior::create([
-            'name'   => 'Test',
+            'name' => 'Test',
             'handle' => Str::slug('test-' . uniqid()),
-            'class'  => $morphKey,
+            'class' => $morphKey,
         ]);
 
         $type = EntryType::factory()->create([
-            'entry_group_id'    => $group->id,
+            'entry_group_id' => $group->id,
             'entry_behavior_id' => $behavior->id,
         ]);
 
@@ -125,9 +125,9 @@ class EntryTypeHooksTest extends TestCase
      */
     private function attachFieldToType(EntryType $type, string|array $handles): Field|array
     {
-        $handles   = (array) $handles;
-        $layout    = FieldLayout::factory()->create();
-        $tab       = Tab::factory()->create(['field_layout_id' => $layout->id]);
+        $handles = (array)$handles;
+        $layout = FieldLayout::factory()->create();
+        $tab = Tab::factory()->create(['field_layout_id' => $layout->id]);
         // Create one shared FieldType so all fields in this layout reuse the same
         // type row — TypeFactory always emits Text / AdAstra\Field\Types\Text, and
         // field_types.object has a unique constraint.
@@ -136,12 +136,12 @@ class EntryTypeHooksTest extends TestCase
         $fields = [];
         foreach ($handles as $handle) {
             $field = Field::factory()->create([
-                'handle'        => $handle,
+                'handle' => $handle,
                 'field_type_id' => $fieldType->id,
             ]);
             TabElement::factory()->create([
                 'field_layout_tab_id' => $tab->id,
-                'field_id'            => $field->id,
+                'field_id' => $field->id,
             ]);
             $fields[$handle] = $field;
         }
@@ -175,15 +175,15 @@ class EntryTypeHooksTest extends TestCase
         $response = $this->actingAs($user)
             ->post(route('entries.store', ['group_id' => $group->id]), [
                 'type_handle' => $type->handle,
-                'title'       => 'Test Blog Post',
-                'handle'      => 'test-blog-post',
-                'status'      => 'draft',
-                'fields'      => ['body' => $body],
+                'title' => 'Test Blog Post',
+                'handle' => 'test-blog-post',
+                'status' => 'draft',
+                'fields' => ['body' => $body],
             ]);
 
         $response->assertRedirect(route('entries.groups.show', $group->id));
 
-        $entry           = Entry::query()->where('title', 'Test Blog Post')->firstOrFail();
+        $entry = Entry::query()->where('title', 'Test Blog Post')->firstOrFail();
         $readingTimeField = Field::where('handle', 'reading_time')->firstOrFail();
 
         // Assert the field value row was written to the database by the hook.
@@ -192,7 +192,7 @@ class EntryTypeHooksTest extends TestCase
             ->first();
 
         $this->assertNotNull($fv, 'No field_values row found for reading_time — hook did not persist the value.');
-        $this->assertSame(2, (int) $fv->value_text);
+        $this->assertSame(2, (int)$fv->value_text);
     }
 
     /**
@@ -207,9 +207,9 @@ class EntryTypeHooksTest extends TestCase
         $this->actingAs($user)
             ->post(route('entries.store', ['group_id' => $group->id]), [
                 'type_handle' => $type->handle,
-                'title'       => 'Published Post',
-                'handle'      => 'published-post',
-                'status'      => 'published',
+                'title' => 'Published Post',
+                'handle' => 'published-post',
+                'status' => 'published',
             ]);
 
         $entry = Entry::query()->where('title', 'Published Post')->firstOrFail();
@@ -236,9 +236,9 @@ class EntryTypeHooksTest extends TestCase
             ->from(route('entries.create', ['group_id' => $group->id]))
             ->post(route('entries.store', ['group_id' => $group->id]), [
                 'type_handle' => $type->handle,
-                'title'       => 'Headphones Without SKU',
-                'handle'      => 'headphones-without-sku',
-                'status'      => 'published',
+                'title' => 'Headphones Without SKU',
+                'handle' => 'headphones-without-sku',
+                'status' => 'published',
             ]);
 
         $response->assertRedirect(route('entries.create', ['group_id' => $group->id]));
@@ -258,10 +258,10 @@ class EntryTypeHooksTest extends TestCase
         $response = $this->actingAs($user)
             ->post(route('entries.store', ['group_id' => $group->id]), [
                 'type_handle' => $type->handle,
-                'title'       => 'Headphones With SKU',
-                'handle'      => 'headphones-with-sku',
-                'status'      => 'published',
-                'fields'      => ['sku' => 'ELEC-001'],
+                'title' => 'Headphones With SKU',
+                'handle' => 'headphones-with-sku',
+                'status' => 'published',
+                'fields' => ['sku' => 'ELEC-001'],
             ]);
 
         $response->assertRedirect(route('entries.groups.show', $group->id));
@@ -284,20 +284,20 @@ class EntryTypeHooksTest extends TestCase
         [$group, $type] = $this->makeGroupAndType(JobListingEntryType::class, ['expired' => 'Expired']);
 
         $entry = Entry::factory()->create([
-            'entry_group_id'    => $group->id,
-            'entry_type_id'     => $type->id,
+            'entry_group_id' => $group->id,
+            'entry_type_id' => $type->id,
             'created_by_user_id' => $user->id,
-            'status_handle'     => 'published',
+            'status_handle' => 'published',
         ]);
 
         $response = $this->actingAs($user)
             ->put(route('entries.update', $entry), [
-                'title'  => $entry->title,
+                'title' => $entry->title,
                 'handle' => $entry->handle,
                 'status' => 'published',
                 'fields' => [
                     'application_url' => 'https://jobs.example.com/apply',
-                    'closing_date'    => Carbon::yesterday()->toDateString(),
+                    'closing_date' => Carbon::yesterday()->toDateString(),
                 ],
             ]);
 
@@ -314,20 +314,20 @@ class EntryTypeHooksTest extends TestCase
         [$group, $type] = $this->makeGroupAndType(JobListingEntryType::class, ['expired' => 'Expired']);
 
         $entry = Entry::factory()->create([
-            'entry_group_id'    => $group->id,
-            'entry_type_id'     => $type->id,
+            'entry_group_id' => $group->id,
+            'entry_type_id' => $type->id,
             'created_by_user_id' => $user->id,
-            'status_handle'     => 'published',
+            'status_handle' => 'published',
         ]);
 
         $response = $this->actingAs($user)
             ->put(route('entries.update', $entry), [
-                'title'  => $entry->title,
+                'title' => $entry->title,
                 'handle' => $entry->handle,
                 'status' => 'published',
                 'fields' => [
                     'application_url' => 'https://jobs.example.com/apply',
-                    'closing_date'    => Carbon::today()->addWeek()->toDateString(),
+                    'closing_date' => Carbon::today()->addWeek()->toDateString(),
                 ],
             ]);
 
@@ -351,21 +351,21 @@ class EntryTypeHooksTest extends TestCase
         [$group, $type] = $this->makeGroupAndType(EventEntryType::class);
 
         $entry = Entry::factory()->create([
-            'entry_group_id'    => $group->id,
-            'entry_type_id'     => $type->id,
+            'entry_group_id' => $group->id,
+            'entry_type_id' => $type->id,
             'created_by_user_id' => $user->id,
-            'title'             => 'Annual Conference',
+            'title' => 'Annual Conference',
         ]);
 
         $response = $this->actingAs($user)
             ->from(route('entries.edit', $entry))
             ->put(route('entries.update', $entry), [
-                'title'  => 'Annual Conference',
+                'title' => 'Annual Conference',
                 'handle' => $entry->handle,
                 'status' => 'draft',
                 'fields' => [
                     'start_date' => '2026-07-10',
-                    'end_date'   => '2026-07-01', // before start_date
+                    'end_date' => '2026-07-01', // before start_date
                 ],
             ]);
 
@@ -382,20 +382,20 @@ class EntryTypeHooksTest extends TestCase
         [$group, $type] = $this->makeGroupAndType(EventEntryType::class);
 
         $entry = Entry::factory()->create([
-            'entry_group_id'    => $group->id,
-            'entry_type_id'     => $type->id,
+            'entry_group_id' => $group->id,
+            'entry_type_id' => $type->id,
             'created_by_user_id' => $user->id,
-            'title'             => 'One Day Event',
+            'title' => 'One Day Event',
         ]);
 
         $response = $this->actingAs($user)
             ->put(route('entries.update', $entry), [
-                'title'  => 'One Day Event',
+                'title' => 'One Day Event',
                 'handle' => $entry->handle,
                 'status' => 'draft',
                 'fields' => [
                     'start_date' => '2026-07-10',
-                    'end_date'   => '2026-07-10', // same day — valid
+                    'end_date' => '2026-07-10', // same day — valid
                 ],
             ]);
 

@@ -45,7 +45,7 @@ class Layout extends Controller
             'entryTypes.entryGroup',
         ])->find($layoutId) : null;
 
-        if (! $layout instanceof FieldLayoutModel) {
+        if (!$layout instanceof FieldLayoutModel) {
             abort(404);
         }
 

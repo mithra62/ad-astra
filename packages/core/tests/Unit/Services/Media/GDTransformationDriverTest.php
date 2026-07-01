@@ -2,11 +2,14 @@
 
 namespace Tests\Unit\Services\Media;
 
+use AdAstra\Jobs\ProcessTransformation;
 use AdAstra\Models\Media;
 use AdAstra\Models\Media\Transformation;
 use AdAstra\Services\Media\GDTransformationDriver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Tests\TestCase;
 
 class GDTransformationDriverTest extends TestCase
@@ -42,8 +45,8 @@ class GDTransformationDriverTest extends TestCase
         @unlink($tmp);
 
         return Media::factory()->create([
-            'disk'      => 'local',
-            'path'      => $path,
+            'disk' => 'local',
+            'path' => $path,
             'file_name' => basename($path),
             'mime_type' => 'image/jpeg',
         ]);
@@ -53,11 +56,11 @@ class GDTransformationDriverTest extends TestCase
     {
         return Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb',
-            'disk'     => 'local',
-            'path'     => 'uploads/_t/photo_thumb.jpg',
-            'params'   => $params,
-            'status'   => 'pending',
+            'key' => 'thumb',
+            'disk' => 'local',
+            'path' => 'uploads/_t/photo_thumb.jpg',
+            'params' => $params,
+            'status' => 'pending',
         ]);
     }
 
@@ -68,7 +71,7 @@ class GDTransformationDriverTest extends TestCase
     public function test_apply_sync_writes_file_to_storage(): void
     {
         $media = $this->makeMediaWithImage(800, 600);
-        $t     = $this->makePendingTransformation($media, ['width' => 200, 'height' => 200]);
+        $t = $this->makePendingTransformation($media, ['width' => 200, 'height' => 200]);
 
         $this->driver->applySync($t);
 
@@ -78,7 +81,7 @@ class GDTransformationDriverTest extends TestCase
     public function test_apply_sync_marks_transformation_complete(): void
     {
         $media = $this->makeMediaWithImage(800, 600);
-        $t     = $this->makePendingTransformation($media, ['width' => 200, 'height' => 200]);
+        $t = $this->makePendingTransformation($media, ['width' => 200, 'height' => 200]);
 
         $this->driver->applySync($t);
         $t->refresh();
@@ -89,7 +92,7 @@ class GDTransformationDriverTest extends TestCase
     public function test_apply_sync_cover_produces_exact_target_dimensions(): void
     {
         $media = $this->makeMediaWithImage(800, 600);
-        $t     = $this->makePendingTransformation($media, ['width' => 200, 'height' => 200, 'mode' => 'cover']);
+        $t = $this->makePendingTransformation($media, ['width' => 200, 'height' => 200, 'mode' => 'cover']);
 
         $this->driver->applySync($t);
         $t->refresh();
@@ -105,7 +108,7 @@ class GDTransformationDriverTest extends TestCase
     public function test_apply_sync_contain_fits_within_bounds(): void
     {
         $media = $this->makeMediaWithImage(800, 400); // 2:1 ratio
-        $t     = $this->makePendingTransformation($media, ['width' => 200, 'height' => 200, 'mode' => 'contain']);
+        $t = $this->makePendingTransformation($media, ['width' => 200, 'height' => 200, 'mode' => 'contain']);
 
         $this->driver->applySync($t);
         $t->refresh();
@@ -122,7 +125,7 @@ class GDTransformationDriverTest extends TestCase
     public function test_apply_sync_exact_stretches_to_target_dimensions(): void
     {
         $media = $this->makeMediaWithImage(800, 600);
-        $t     = $this->makePendingTransformation($media, ['width' => 300, 'height' => 150, 'mode' => 'exact']);
+        $t = $this->makePendingTransformation($media, ['width' => 300, 'height' => 150, 'mode' => 'exact']);
 
         $this->driver->applySync($t);
         $t->refresh();
@@ -138,13 +141,13 @@ class GDTransformationDriverTest extends TestCase
     public function test_apply_sync_converts_to_png(): void
     {
         $media = $this->makeMediaWithImage();
-        $t     = Transformation::create([
+        $t = Transformation::create([
             'media_id' => $media->id,
-            'key'      => 'thumb-png',
-            'disk'     => 'local',
-            'path'     => 'uploads/_t/photo_thumb.png',
-            'params'   => ['width' => 100, 'height' => 100, 'format' => 'png'],
-            'status'   => 'pending',
+            'key' => 'thumb-png',
+            'disk' => 'local',
+            'path' => 'uploads/_t/photo_thumb.png',
+            'params' => ['width' => 100, 'height' => 100, 'format' => 'png'],
+            'status' => 'pending',
         ]);
 
         $this->driver->applySync($t);
@@ -161,7 +164,7 @@ class GDTransformationDriverTest extends TestCase
     public function test_apply_sync_with_no_params_copies_source_at_original_dimensions(): void
     {
         $media = $this->makeMediaWithImage(640, 480);
-        $t     = $this->makePendingTransformation($media, []);
+        $t = $this->makePendingTransformation($media, []);
 
         $this->driver->applySync($t);
         $t->refresh();
@@ -178,15 +181,15 @@ class GDTransformationDriverTest extends TestCase
     public function test_apply_sync_throws_when_source_file_missing(): void
     {
         $media = Media::factory()->create([
-            'disk'      => 'local',
-            'path'      => 'uploads/missing.jpg',
+            'disk' => 'local',
+            'path' => 'uploads/missing.jpg',
             'file_name' => 'missing.jpg',
             'mime_type' => 'image/jpeg',
         ]);
         // No file placed on the fake disk.
         $t = $this->makePendingTransformation($media);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessageMatches('/Source file not found/');
 
         $this->driver->applySync($t);
@@ -198,16 +201,16 @@ class GDTransformationDriverTest extends TestCase
 
     public function test_dispatch_queues_process_transformation_job(): void
     {
-        \Illuminate\Support\Facades\Queue::fake();
+        Queue::fake();
 
         $media = $this->makeMediaWithImage();
-        $t     = $this->makePendingTransformation($media);
+        $t = $this->makePendingTransformation($media);
 
         $this->driver->dispatch($t);
 
-        \Illuminate\Support\Facades\Queue::assertPushed(
-            \AdAstra\Jobs\ProcessTransformation::class,
-            fn ($job) => $job->transformationId === $t->id
+        Queue::assertPushed(
+            ProcessTransformation::class,
+            fn($job) => $job->transformationId === $t->id
         );
     }
 }

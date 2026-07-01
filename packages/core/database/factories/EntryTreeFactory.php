@@ -47,7 +47,7 @@ class EntryTreeFactory extends Factory
 
         return $this->state([
             'parent_id' => $parent->id,
-            'uri' => $parent->uri.'/'.$handle,
+            'uri' => $parent->uri . '/' . $handle,
             'handle' => $handle,
             'depth' => $parent->depth + 1,
         ]);

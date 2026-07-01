@@ -5,6 +5,7 @@ namespace Tests\Unit\Services;
 use AdAstra\Models\Entry;
 use AdAstra\Models\EntryAuthor;
 use AdAstra\Models\Role;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
 use AdAstra\Models\User;
 use AdAstra\Models\User\OauthToken;
@@ -113,7 +114,7 @@ class UserServiceTest extends TestCase
 
         $result = $this->service->getForDropdown();
 
-        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $result);
+        $this->assertInstanceOf(Collection::class, $result);
     }
 
     // -------------------------------------------------------------------------
@@ -172,7 +173,7 @@ class UserServiceTest extends TestCase
         User::factory()->count(3)->create();
 
         $this->assertInstanceOf(
-            \Illuminate\Database\Eloquent\Collection::class,
+            Collection::class,
             $this->service->getLatestUsers()
         );
     }
@@ -1219,9 +1220,9 @@ class UserServiceTest extends TestCase
     public function test_create_promotes_user_to_author_when_is_author_is_true(): void
     {
         $result = $this->service->create([
-            'name'      => 'Author',
-            'email'     => 'author@example.com',
-            'password'  => 'Secret1234!',
+            'name' => 'Author',
+            'email' => 'author@example.com',
+            'password' => 'Secret1234!',
             'is_author' => true,
         ]);
 
@@ -1231,9 +1232,9 @@ class UserServiceTest extends TestCase
     public function test_create_does_not_create_entry_author_when_is_author_is_false(): void
     {
         $result = $this->service->create([
-            'name'      => 'Non Author',
-            'email'     => 'nonauthor@example.com',
-            'password'  => 'Secret1234!',
+            'name' => 'Non Author',
+            'email' => 'nonauthor@example.com',
+            'password' => 'Secret1234!',
             'is_author' => false,
         ]);
 
@@ -1243,8 +1244,8 @@ class UserServiceTest extends TestCase
     public function test_create_skips_author_sync_when_is_author_key_is_absent(): void
     {
         $result = $this->service->create([
-            'name'     => 'Skippy',
-            'email'    => 'skippy@example.com',
+            'name' => 'Skippy',
+            'email' => 'skippy@example.com',
             'password' => 'Secret1234!',
         ]);
 
@@ -1254,15 +1255,15 @@ class UserServiceTest extends TestCase
     public function test_create_sets_author_display_name_when_provided(): void
     {
         $result = $this->service->create([
-            'name'                => 'Writer',
-            'email'               => 'writer@example.com',
-            'password'            => 'Secret1234!',
-            'is_author'           => true,
+            'name' => 'Writer',
+            'email' => 'writer@example.com',
+            'password' => 'Secret1234!',
+            'is_author' => true,
             'author_display_name' => 'The Wordsmith',
         ]);
 
         $this->assertDatabaseHas('entry_authors', [
-            'user_id'      => $result->id,
+            'user_id' => $result->id,
             'display_name' => 'The Wordsmith',
         ]);
     }
@@ -1272,9 +1273,9 @@ class UserServiceTest extends TestCase
         // If is_author were passed to User::create() it would throw a
         // MassAssignmentException — reaching this assertion means it was stripped.
         $result = $this->service->create([
-            'name'      => 'Safe',
-            'email'     => 'safe@example.com',
-            'password'  => 'Secret1234!',
+            'name' => 'Safe',
+            'email' => 'safe@example.com',
+            'password' => 'Secret1234!',
             'is_author' => true,
         ]);
 
@@ -1320,12 +1321,12 @@ class UserServiceTest extends TestCase
         $user = User::factory()->create();
 
         $this->service->update($user, [
-            'is_author'           => true,
+            'is_author' => true,
             'author_display_name' => 'New Alias',
         ]);
 
         $this->assertDatabaseHas('entry_authors', [
-            'user_id'      => $user->id,
+            'user_id' => $user->id,
             'display_name' => 'New Alias',
         ]);
     }

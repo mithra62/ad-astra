@@ -75,9 +75,9 @@ class UsersTest extends TestCase
     public function test_validate_enforces_limit(): void
     {
         $users = User::factory()->count(3)->create();
-        $ids   = $users->pluck('id')->all();
+        $ids = $users->pluck('id')->all();
 
-        $type   = $this->make(['limit' => 2]);
+        $type = $this->make(['limit' => 2]);
         $result = $type->validate($ids);
         $this->assertIsString($result);
         $this->assertStringContainsString('2', $result);
@@ -102,7 +102,7 @@ class UsersTest extends TestCase
 
     public function test_value_returns_collection_of_users(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->make()->value([$user->id]);
 
         $this->assertInstanceOf(Collection::class, $result);
@@ -111,7 +111,7 @@ class UsersTest extends TestCase
 
     public function test_value_does_not_expose_password_column(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->make()->value([$user->id]);
 
         $attributes = $result->first()->getAttributes();
@@ -121,7 +121,7 @@ class UsersTest extends TestCase
 
     public function test_value_exposes_safe_columns_only(): void
     {
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $result = $this->make()->value([$user->id]);
 
         $attributes = $result->first()->getAttributes();
@@ -140,7 +140,7 @@ class UsersTest extends TestCase
     public function test_value_preserves_order_of_ids(): void
     {
         $users = User::factory()->count(3)->create();
-        $ids   = $users->pluck('id')->reverse()->values()->all();
+        $ids = $users->pluck('id')->reverse()->values()->all();
 
         $result = $this->make()->value($ids);
         $this->assertEquals($ids, $result->pluck('id')->all());

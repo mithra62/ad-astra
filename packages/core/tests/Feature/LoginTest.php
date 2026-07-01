@@ -69,7 +69,7 @@ class LoginTest extends TestCase
     public function test_suspended_user_past_window_can_access_system(): void
     {
         $user = User::factory()->create([
-            'status'          => UserStatus::SUSPENDED,
+            'status' => UserStatus::SUSPENDED,
             'suspended_until' => Carbon::now()->subMinute(),
         ]);
         $this->assertTrue($user->canAccessSystem());
@@ -84,7 +84,7 @@ class LoginTest extends TestCase
     public function test_lock_expired_user_can_access_system(): void
     {
         $user = User::factory()->create([
-            'status'       => UserStatus::ACTIVE,
+            'status' => UserStatus::ACTIVE,
             'locked_until' => Carbon::now()->subMinute(),
         ]);
         $this->assertTrue($user->canAccessSystem());
@@ -120,7 +120,7 @@ class LoginTest extends TestCase
         $user = User::factory()->active()->create();
 
         $user->forceFill([
-            'status'    => UserStatus::BANNED,
+            'status' => UserStatus::BANNED,
             'banned_at' => now(),
         ])->save();
 
@@ -161,7 +161,7 @@ class LoginTest extends TestCase
         Role::firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
 
         $user = User::factory()->create([
-            'status'       => UserStatus::ACTIVE,
+            'status' => UserStatus::ACTIVE,
             'locked_until' => Carbon::now()->subMinute(),
         ]);
         $user->assignRole('super admin');

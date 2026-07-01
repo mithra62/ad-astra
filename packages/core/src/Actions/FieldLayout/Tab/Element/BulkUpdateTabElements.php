@@ -11,17 +11,18 @@ use Illuminate\Validation\ValidationException;
 class BulkUpdateTabElements extends AbstractAction
 {
     public function __construct(
-        private readonly EditTabElement $editElement,
+        private readonly EditTabElement   $editElement,
         private readonly CreateTabElement $createElement,
         private readonly DeleteTabElement $deleteElement,
-    ) {
+    )
+    {
     }
 
     public function update(Tab $tab, array $input): Tab
     {
-        $elements    = $input['elements'] ?? [];
-        $newFields   = $input['new_fields'] ?? [];
-        $removedIds  = $input['removed_elements'] ?? [];
+        $elements = $input['elements'] ?? [];
+        $newFields = $input['new_fields'] ?? [];
+        $removedIds = $input['removed_elements'] ?? [];
 
         $tabElementIds = $tab->elements()->pluck('id')->all();
 

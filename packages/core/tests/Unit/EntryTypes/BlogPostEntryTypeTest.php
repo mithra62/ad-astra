@@ -67,9 +67,9 @@ class BlogPostEntryTypeTest extends TestCase
 
     public function test_before_update_recomputes_reading_time_when_body_changes(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->create();
-        $body  = str_repeat('word ', 600); // 600 → ceil(600/200) = 3 min
+        $body = str_repeat('word ', 600); // 600 → ceil(600/200) = 3 min
 
         $result = $type->beforeUpdate($entry, ['fields' => ['body' => $body]]);
 
@@ -78,7 +78,7 @@ class BlogPostEntryTypeTest extends TestCase
 
     public function test_before_update_does_not_inject_reading_time_when_body_absent(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->create();
 
         $result = $type->beforeUpdate($entry, ['fields' => ['excerpt' => 'Only excerpt']]);

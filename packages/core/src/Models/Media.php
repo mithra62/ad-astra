@@ -56,8 +56,8 @@ class Media extends Model
      * unlike Entry::scopePublished, media has no published_at concept, so
      * "published" here is identity with "public".
      *
-     * @see \AdAstra\Traits\HasStatus::scopePublic
-     * @see \AdAstra\Models\Entry::scopePublished
+     * @see HasStatus::scopePublic
+     * @see Entry::scopePublished
      */
     public function scopePublished(EloquentBuilder $query): EloquentBuilder
     {

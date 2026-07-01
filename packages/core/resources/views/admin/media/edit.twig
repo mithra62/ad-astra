@@ -31,10 +31,12 @@
     <div class="flex min-w-0 flex-col gap-5">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Edit: {{ media.name ?: media.file_name }}</h1>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">
+                    Edit: {{ media.name ?: media.file_name }}</h1>
                 <p class="mt-1 text-sm text-muted">Update display name, alt text, and title for this file.</p>
             </div>
-            <a href="{{ route('media.show', media) }}" class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
+            <a href="{{ route('media.show', media) }}"
+               class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                 </svg>
@@ -42,7 +44,8 @@
             </a>
         </div>
 
-        <form method="POST" action="{{ route('media.update', media) }}" class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
+        <form method="POST" action="{{ route('media.update', media) }}"
+              class="flex flex-col gap-5 lg:grid lg:grid-cols-[1fr_18rem] lg:items-start">
             {{ csrf_field() }}
             {{ method_field('PUT') }}
 
@@ -53,9 +56,12 @@
                 <div class="space-y-4 px-5 py-5">
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-content" for="name">Display Name</label>
-                        <input class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('name') %} border-red-400{% endif %}"
-                               id="name" name="name" type="text" value="{{ old('name', media.name) }}" placeholder="{{ media.file_name }}">
-                        <p class="mt-1 text-xs text-faint">Human-readable label. Defaults to the filename if left blank.</p>
+                        <input
+                            class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('name') %} border-red-400{% endif %}"
+                            id="name" name="name" type="text" value="{{ old('name', media.name) }}"
+                            placeholder="{{ media.file_name }}">
+                        <p class="mt-1 text-xs text-faint">Human-readable label. Defaults to the filename if left
+                            blank.</p>
                         {% if errors.has('name') %}
                             <p class="mt-1 text-sm text-red-600">{{ errors.first('name') }}</p>
                         {% endif %}
@@ -79,7 +85,6 @@
                 {% endif %}
 
 
-
             </div>
 
             <div class="flex flex-col gap-4">
@@ -91,13 +96,16 @@
                         <div class="space-y-4 px-5 py-5">
                             <div>
                                 <label class="mb-1.5 block text-sm font-medium text-content" for="status">Status</label>
-                                <select id="status" name="status" class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('status') %} border-red-400{% endif %}">
+                                <select id="status" name="status"
+                                        class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20{% if errors.has('status') %} border-red-400{% endif %}">
                                     <option value="">— Default —</option>
                                     {% for s in media.library.statusGroup.statuses %}
-                                        <option value="{{ s.handle }}" {% if old('status', media.status_handle) == s.handle %}selected{% endif %}>{{ s.name }}</option>
+                                        <option value="{{ s.handle }}"
+                                                {% if old('status', media.status_handle) == s.handle %}selected{% endif %}>{{ s.name }}</option>
                                     {% endfor %}
                                 </select>
-                                <p class="mt-1 text-xs text-faint">Only statuses from the {{ media.library.statusGroup.name }} group are allowed.</p>
+                                <p class="mt-1 text-xs text-faint">Only statuses from
+                                    the {{ media.library.statusGroup.name }} group are allowed.</p>
                                 {% if errors.has('status') %}
                                     <p class="mt-1 text-sm text-red-600">{{ errors.first('status') }}</p>
                                 {% endif %}
@@ -111,10 +119,12 @@
                         <h5 class="text-sm font-semibold text-content">Save</h5>
                     </div>
                     <div class="space-y-2 px-5 py-4">
-                        <button type="submit" class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                        <button type="submit"
+                                class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                             Save Changes
                         </button>
-                        <a href="{{ route('media.show', media) }}" class="block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-muted shadow-sm hover:bg-subtle">
+                        <a href="{{ route('media.show', media) }}"
+                           class="block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-muted shadow-sm hover:bg-subtle">
                             Cancel
                         </a>
                     </div>
@@ -127,7 +137,8 @@
                     <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
                         <div class="flex items-center justify-between py-2">
                             <dt class="text-muted">Filename</dt>
-                            <dd class="font-mono text-xs text-content truncate max-w-[120px]" title="{{ media.file_name }}">{{ media.file_name }}</dd>
+                            <dd class="font-mono text-xs text-content truncate max-w-[120px]"
+                                title="{{ media.file_name }}">{{ media.file_name }}</dd>
                         </div>
                         <div class="flex items-center justify-between py-2">
                             <dt class="text-muted">Type</dt>
@@ -157,7 +168,8 @@
                         <h5 class="text-sm font-semibold text-red-800">Danger Zone</h5>
                     </div>
                     <div class="px-5 py-4">
-                        <a href="{{ route('media.confirm', media) }}" class="block w-full rounded-md border border-red-300 bg-surface px-4 py-2 text-center text-sm font-medium text-red-600 shadow-sm hover:bg-red-50">
+                        <a href="{{ route('media.confirm', media) }}"
+                           class="block w-full rounded-md border border-red-300 bg-surface px-4 py-2 text-center text-sm font-medium text-red-600 shadow-sm hover:bg-red-50">
                             Delete File
                         </a>
                     </div>

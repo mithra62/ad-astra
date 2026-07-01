@@ -17,6 +17,8 @@ use AdAstra\Models\User;
 use AdAstra\Repositories\EntryRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use InvalidArgumentException;
+use RuntimeException;
 use Tests\TestCase;
 
 class EntryRepositoryTest extends TestCase
@@ -137,7 +139,7 @@ class EntryRepositoryTest extends TestCase
 
         $entryType = $this->makeAbstractEntryType($type);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Status [published] does not belong to EntryGroup');
 
         $this->repo->create($entryType, ['title' => 'Live', 'handle' => 'live', 'status' => 'published']);
@@ -152,7 +154,7 @@ class EntryRepositoryTest extends TestCase
 
         $entryType = $this->makeAbstractEntryType($type);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Entry handle is required.');
 
         $this->repo->create($entryType, ['title' => 'My Blog Post']);
@@ -180,7 +182,7 @@ class EntryRepositoryTest extends TestCase
 
         $entryType = $this->makeAbstractEntryType($type);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessageMatches('/no status group/i');
 
         $this->repo->create($entryType, ['title' => 'Broken', 'handle' => 'broken']);
@@ -205,7 +207,7 @@ class EntryRepositoryTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('entry_author_entry', [
-            'entry_id'        => $entry->id,
+            'entry_id' => $entry->id,
             'entry_author_id' => $entryAuthor->id,
         ]);
     }
@@ -382,7 +384,7 @@ class EntryRepositoryTest extends TestCase
             'entry_type_id' => $type->id,
         ]);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Status [published] does not belong to EntryGroup');
 
         $this->repo->applyData($entry, ['status' => 'published']);
@@ -400,7 +402,7 @@ class EntryRepositoryTest extends TestCase
         $this->repo->applyData($entry, ['authors' => [$author->id]]);
 
         $this->assertDatabaseHas('entry_author_entry', [
-            'entry_id'        => $entry->id,
+            'entry_id' => $entry->id,
             'entry_author_id' => $entryAuthor->id,
         ]);
     }
@@ -518,11 +520,11 @@ class EntryRepositoryTest extends TestCase
         Status::factory()->default()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft', 'is_public' => false]);
         Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'live', 'is_public' => true]);
         $group = $this->makeEntryGroup($statusGroup);
-        $type  = $this->makeEntryType($group);
+        $type = $this->makeEntryType($group);
         $this->actingAs(User::factory()->create());
 
         $entry = $this->repo->create($this->makeAbstractEntryType($type), [
-            'title'  => 'Going Live',
+            'title' => 'Going Live',
             'handle' => 'going-live',
             'status' => 'live',
         ]);
@@ -534,7 +536,7 @@ class EntryRepositoryTest extends TestCase
     {
         $statusGroup = $this->makeStatusGroup(); // default draft, is_public=false
         $group = $this->makeEntryGroup($statusGroup);
-        $type  = $this->makeEntryType($group);
+        $type = $this->makeEntryType($group);
         $this->actingAs(User::factory()->create());
 
         $entry = $this->repo->create($this->makeAbstractEntryType($type), ['title' => 'Draft Entry', 'handle' => 'draft-entry']);
@@ -547,14 +549,14 @@ class EntryRepositoryTest extends TestCase
         $statusGroup = StatusGroup::factory()->create();
         Status::factory()->default()->create(['status_group_id' => $statusGroup->id, 'handle' => 'live', 'is_public' => true]);
         $group = $this->makeEntryGroup($statusGroup);
-        $type  = $this->makeEntryType($group);
+        $type = $this->makeEntryType($group);
         $this->actingAs(User::factory()->create());
 
         $explicit = now()->subWeek()->toDateTimeString();
 
         $entry = $this->repo->create($this->makeAbstractEntryType($type), [
-            'title'        => 'Backdated',
-            'handle'       => 'backdated',
+            'title' => 'Backdated',
+            'handle' => 'backdated',
             'published_at' => $explicit,
         ]);
 
@@ -566,7 +568,7 @@ class EntryRepositoryTest extends TestCase
         $statusGroup = StatusGroup::factory()->create();
         Status::factory()->default()->create(['status_group_id' => $statusGroup->id, 'handle' => 'live', 'is_public' => true]);
         $group = $this->makeEntryGroup($statusGroup);
-        $type  = $this->makeEntryType($group);
+        $type = $this->makeEntryType($group);
         $this->actingAs(User::factory()->create());
 
         // No explicit status passed — should pick up the default which is public.
@@ -580,11 +582,11 @@ class EntryRepositoryTest extends TestCase
         $statusGroup = $this->makeStatusGroup(); // draft, is_public=false
         Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'live', 'is_public' => true]);
         $group = $this->makeEntryGroup($statusGroup);
-        $type  = $this->makeEntryType($group);
+        $type = $this->makeEntryType($group);
         $entry = Entry::factory()->create([
             'entry_group_id' => $group->id,
-            'entry_type_id'  => $type->id,
-            'published_at'   => null,
+            'entry_type_id' => $type->id,
+            'published_at' => null,
         ]);
 
         $updated = $this->repo->applyData($entry, ['status' => 'live']);
@@ -597,12 +599,12 @@ class EntryRepositoryTest extends TestCase
         $statusGroup = $this->makeStatusGroup();
         Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'live', 'is_public' => true]);
         $group = $this->makeEntryGroup($statusGroup);
-        $type  = $this->makeEntryType($group);
+        $type = $this->makeEntryType($group);
         $original = now()->subDays(10);
         $entry = Entry::factory()->create([
             'entry_group_id' => $group->id,
-            'entry_type_id'  => $type->id,
-            'published_at'   => $original,
+            'entry_type_id' => $type->id,
+            'published_at' => $original,
         ]);
 
         $updated = $this->repo->applyData($entry, ['status' => 'live']);
@@ -614,11 +616,11 @@ class EntryRepositoryTest extends TestCase
     {
         $statusGroup = $this->makeStatusGroup(); // draft, is_public=false
         $group = $this->makeEntryGroup($statusGroup);
-        $type  = $this->makeEntryType($group);
+        $type = $this->makeEntryType($group);
         $entry = Entry::factory()->create([
             'entry_group_id' => $group->id,
-            'entry_type_id'  => $type->id,
-            'published_at'   => null,
+            'entry_type_id' => $type->id,
+            'published_at' => null,
         ]);
 
         $updated = $this->repo->applyData($entry, ['status' => 'draft']);

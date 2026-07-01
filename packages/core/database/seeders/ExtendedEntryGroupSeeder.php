@@ -334,7 +334,7 @@ class ExtendedEntryGroupSeeder extends Seeder
     /**
      * Local idempotent override for BuildsLayouts::createLayout().
      *
-     * @param  array<string, string[]>  $tabs
+     * @param array<string, string[]> $tabs
      */
     private function createLayout(string $name, array $tabs): FieldLayout
     {
@@ -343,7 +343,7 @@ class ExtendedEntryGroupSeeder extends Seeder
             ->orderBy('id')
             ->first();
 
-        if (! $layout instanceof FieldLayout) {
+        if (!$layout instanceof FieldLayout) {
             $layout = FieldLayout::create([
                 'name' => $name,
                 'handle' => Str::slug($name),
@@ -363,7 +363,7 @@ class ExtendedEntryGroupSeeder extends Seeder
     /**
      * Local idempotent override for BuildsLayouts::addTabIfMissing().
      *
-     * @param  string[]  $fieldHandles
+     * @param string[] $fieldHandles
      */
     private function addTabIfMissing(int $layoutId, string $tabName, array $fieldHandles, int $sortOrder): void
     {
@@ -387,7 +387,7 @@ class ExtendedEntryGroupSeeder extends Seeder
         foreach ($fieldHandles as $handle) {
             $field = $fields->get($handle);
 
-            if (! $field instanceof Field) {
+            if (!$field instanceof Field) {
                 continue;
             }
 

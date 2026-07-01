@@ -9,6 +9,7 @@ use AdAstra\Http\Requests\Role\EditRoleRequest;
 use AdAstra\Http\Requests\Role\StoreRoleRequest;
 use AdAstra\Models\Role as RoleModel;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class Role extends Controller
 {
@@ -26,7 +27,7 @@ class Role extends Controller
      */
     public function store(StoreRoleRequest $request)
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
         $creator = app(CreateNewRole::class);
         $role = $creator->create($request->validated());
         return redirect()->route('roles.show', $role->id)->with('success', trans('role.created'));
@@ -45,12 +46,12 @@ class Role extends Controller
     {
         $permissions = Permission::all();
         $groups = [];
-        foreach($permissions AS $permission) {
-            if(!isset($groups[$permission->domain])) {
+        foreach ($permissions as $permission) {
+            if (!isset($groups[$permission->domain])) {
                 $groups[$permission->domain] = [];
             }
 
-            if(!in_array($permission->name, $groups[$permission->domain])) {
+            if (!in_array($permission->name, $groups[$permission->domain])) {
                 $groups[$permission->domain][] = [
                     'name' => $permission->name,
                     'description' => $permission->description,

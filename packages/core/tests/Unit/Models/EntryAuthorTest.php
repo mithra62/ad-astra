@@ -138,7 +138,7 @@ class EntryAuthorTest extends TestCase
     {
         $user = User::factory()->create(['name' => 'Real Name']);
         $ea = EntryAuthor::factory()->create([
-            'user_id'      => $user->id,
+            'user_id' => $user->id,
             'display_name' => 'Pen Name',
         ]);
 

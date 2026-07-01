@@ -12,8 +12,7 @@ use Illuminate\Support\Facades\DB;
  * Fresh installs are unaffected: the seeders already write `AdAstra\` class names, so on
  * a freshly-seeded database this migration finds nothing to change (idempotent).
  */
-return new class extends Migration
-{
+return new class extends Migration {
     private const OLD = 'App\\';
     private const NEW = 'AdAstra\\';
 

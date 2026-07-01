@@ -21,12 +21,12 @@ class RecipeEntryType extends AbstractEntryType
     {
         if (isset($data['fields']['prep_time']) || isset($data['fields']['cook_time'])) {
             $prepTime = $data['fields']['prep_time']
-                ?? (int) $this->existingFieldValue($entry, 'prep_time');
+                ?? (int)$this->existingFieldValue($entry, 'prep_time');
 
             $cookTime = $data['fields']['cook_time']
-                ?? (int) $this->existingFieldValue($entry, 'cook_time');
+                ?? (int)$this->existingFieldValue($entry, 'cook_time');
 
-            $data['fields']['total_time'] = (int) $prepTime + (int) $cookTime;
+            $data['fields']['total_time'] = (int)$prepTime + (int)$cookTime;
         }
 
         return $data;
@@ -40,7 +40,7 @@ class RecipeEntryType extends AbstractEntryType
         $cookTime = $data['fields']['cook_time'] ?? null;
 
         if ($prepTime !== null || $cookTime !== null) {
-            $data['fields']['total_time'] = (int) $prepTime + (int) $cookTime;
+            $data['fields']['total_time'] = (int)$prepTime + (int)$cookTime;
         }
 
         return $data;

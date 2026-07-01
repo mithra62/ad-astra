@@ -14,7 +14,7 @@ class UploadMedia extends AbstractAction
     {
         $attributes = array_filter([
             'name' => $request->input('name'),
-        ], fn ($v) => $v !== null);
+        ], fn($v) => $v !== null);
 
         $media = MediaStorage::upload($library, $request->file('file'), $attributes);
 

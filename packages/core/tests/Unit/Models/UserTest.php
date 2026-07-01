@@ -154,16 +154,16 @@ class UserTest extends TestCase
     {
         Storage::fake('local');
 
-        $user    = User::factory()->create(['name' => 'John Smith']);
+        $user = User::factory()->create(['name' => 'John Smith']);
         $library = Library::create([
-            'name'    => 'User Avatars',
-            'handle'  => 'avatars',
+            'name' => 'User Avatars',
+            'handle' => 'avatars',
             'adapter' => 'local',
         ]);
         $media = Media::factory()->image()->create([
             'library_id' => $library->id,
-            'disk'       => 'local',
-            'path'       => 'avatars/test.jpg',
+            'disk' => 'local',
+            'path' => 'avatars/test.jpg',
         ]);
 
         $user->attachMedia($media);
@@ -175,16 +175,16 @@ class UserTest extends TestCase
     {
         Storage::fake('local');
 
-        $user    = User::factory()->create();
+        $user = User::factory()->create();
         $library = Library::create([
-            'name'    => 'User Avatars',
-            'handle'  => 'avatars',
+            'name' => 'User Avatars',
+            'handle' => 'avatars',
             'adapter' => 'local',
         ]);
         $media = Media::factory()->image()->create([
             'library_id' => $library->id,
-            'disk'       => 'local',
-            'path'       => 'avatars/new.jpg',
+            'disk' => 'local',
+            'path' => 'avatars/new.jpg',
         ]);
 
         $user->setAvatar($media);
@@ -198,10 +198,10 @@ class UserTest extends TestCase
     {
         Storage::fake('local');
 
-        $user    = User::factory()->create();
+        $user = User::factory()->create();
         $library = Library::create([
-            'name'    => 'User Avatars',
-            'handle'  => 'avatars',
+            'name' => 'User Avatars',
+            'handle' => 'avatars',
             'adapter' => 'local',
         ]);
         $old = Media::factory()->image()->create(['library_id' => $library->id, 'disk' => 'local', 'path' => 'avatars/old.jpg']);

@@ -6,7 +6,7 @@ use AdAstra\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\Role>
+ * @extends Factory<Role>
  */
 class RoleFactory extends Factory
 {

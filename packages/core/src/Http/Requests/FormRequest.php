@@ -12,7 +12,7 @@ class FormRequest extends LaravelFormRequest
     {
         $layout = $this->layoutFrom($schema);
         $attributes = [];
-        if (! $layout) {
+        if (!$layout) {
             return $attributes;
         }
 
@@ -27,7 +27,7 @@ class FormRequest extends LaravelFormRequest
     {
         $layout = $this->layoutFrom($schema);
         $rules = [];
-        if (! $layout) {
+        if (!$layout) {
             return $rules;
         }
 
@@ -51,7 +51,7 @@ class FormRequest extends LaravelFormRequest
 
     private function layoutFrom(?Model $schema): ?FieldLayout
     {
-        if (! $schema) {
+        if (!$schema) {
             return null;
         }
 

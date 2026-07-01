@@ -5,8 +5,11 @@ namespace AdAstra\Facades;
 use AdAstra\Builders\EntryQueryBuilder;
 use AdAstra\Models\Entry;
 use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryMetric;
 use AdAstra\Models\EntryTree;
 use AdAstra\Models\FieldLayout;
+use AdAstra\Services\EntryService;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 
@@ -30,7 +33,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static EntryTree createTreeNode(Entry $entry, string $handle, ?EntryTree $parent = null, ?string $template = null, bool $isHome = false)
  * @method static EntryTree moveTreeNode(EntryTree $node, ?EntryTree $newParent, int $sortOrder = 0)
  * @method static void rebuildTreeUri(EntryTree $node)
- * @method static \AdAstra\Models\EntryMetric recordMetric(Entry $entry, string $metric, int $value = 1, ?\Carbon\Carbon $date = null)
+ * @method static EntryMetric recordMetric(Entry $entry, string $metric, int $value = 1, ?Carbon $date = null)
  *
  * @see \AdAstra\Services\EntryService
  */
@@ -38,6 +41,6 @@ class Entries extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return \AdAstra\Services\EntryService::class;
+        return EntryService::class;
     }
 }

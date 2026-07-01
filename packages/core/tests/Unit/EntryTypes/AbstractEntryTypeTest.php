@@ -3,6 +3,7 @@
 namespace Tests\Unit\EntryTypes;
 
 use AdAstra\EntryTypes\AbstractEntryType;
+use AdAstra\Field\Types\Text;
 use AdAstra\Models\Entry;
 use AdAstra\Models\EntryGroup;
 use AdAstra\Models\EntryType;
@@ -44,7 +45,7 @@ class AbstractEntryTypeTest extends TestCase
     public function test_validate_accepts_entry_for_update_context(): void
     {
         $entry = Entry::factory()->create();
-        $type  = $this->makeAnonymousEntryType();
+        $type = $this->makeAnonymousEntryType();
 
         $result = $type->validate(['title' => 'Updated'], $entry);
 
@@ -79,10 +80,10 @@ class AbstractEntryTypeTest extends TestCase
         [$entry, $field] = $this->makeEntryWithTextField('headline');
 
         FieldValue::create([
-            'field_id'       => $field->id,
-            'fieldable_id'   => $entry->id,
+            'field_id' => $field->id,
+            'fieldable_id' => $entry->id,
             'fieldable_type' => $entry->getMorphClass(),
-            'value_text'     => 'Breaking News',
+            'value_text' => 'Breaking News',
         ]);
 
         $type = $this->makeAnonymousEntryType($entry->entryType);
@@ -97,10 +98,10 @@ class AbstractEntryTypeTest extends TestCase
         [$entry, $field] = $this->makeEntryWithTextField('intro');
 
         FieldValue::create([
-            'field_id'       => $field->id,
-            'fieldable_id'   => $entry->id,
+            'field_id' => $field->id,
+            'fieldable_id' => $entry->id,
             'fieldable_type' => $entry->getMorphClass(),
-            'value_text'     => 'Hello',
+            'value_text' => 'Hello',
         ]);
 
         // Fetch a bare entry — no eager-loads.
@@ -117,10 +118,10 @@ class AbstractEntryTypeTest extends TestCase
         [$entry, $field] = $this->makeEntryWithTextField('slug_field');
 
         FieldValue::create([
-            'field_id'       => $field->id,
-            'fieldable_id'   => $entry->id,
+            'field_id' => $field->id,
+            'fieldable_id' => $entry->id,
             'fieldable_type' => $entry->getMorphClass(),
-            'value_text'     => 'some-slug',
+            'value_text' => 'some-slug',
         ]);
 
         // Pre-load relations.
@@ -128,7 +129,7 @@ class AbstractEntryTypeTest extends TestCase
         $type = $this->makeAnonymousEntryType($entry->entryType);
 
         // Calling twice should return the same value and not throw.
-        $first  = $this->callExistingFieldValue($type, $entry, 'slug_field');
+        $first = $this->callExistingFieldValue($type, $entry, 'slug_field');
         $second = $this->callExistingFieldValue($type, $entry, 'slug_field');
 
         $this->assertSame($first, $second);
@@ -159,15 +160,15 @@ class AbstractEntryTypeTest extends TestCase
 
     private function makeEntryWithTextField(string $handle = 'body'): array
     {
-        $fieldType = FieldType::factory()->create(['object' => \AdAstra\Field\Types\Text::class]);
-        $field     = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => $handle]);
+        $fieldType = FieldType::factory()->create(['object' => Text::class]);
+        $field = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => $handle]);
 
         $layout = FieldLayout::factory()->create();
-        $tab    = Tab::factory()->create(['field_layout_id' => $layout->id]);
+        $tab = Tab::factory()->create(['field_layout_id' => $layout->id]);
         TabElement::factory()->create(['field_layout_tab_id' => $tab->id, 'field_id' => $field->id]);
 
         $group = EntryGroup::factory()->create(['field_layout_id' => $layout->id]);
-        $type  = EntryType::factory()->create(['entry_group_id' => $group->id]);
+        $type = EntryType::factory()->create(['entry_group_id' => $group->id]);
         $entry = Entry::factory()->create(['entry_group_id' => $group->id, 'entry_type_id' => $type->id]);
 
         return [$entry, $field];

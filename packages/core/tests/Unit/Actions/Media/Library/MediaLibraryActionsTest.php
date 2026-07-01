@@ -21,8 +21,8 @@ class MediaLibraryActionsTest extends TestCase
     private function makeLibraryData(array $overrides = []): array
     {
         return array_merge([
-            'name'    => 'Test Library',
-            'handle'  => 'test-library',
+            'name' => 'Test Library',
+            'handle' => 'test-library',
             'adapter' => 'local',
         ], $overrides);
     }
@@ -129,8 +129,8 @@ class MediaLibraryActionsTest extends TestCase
         app(EditMediaLibrary::class)->edit($library, ['name' => 'New Library', 'handle' => 'new-library']);
 
         $this->assertDatabaseHas('media_libraries', [
-            'id'     => $library->id,
-            'name'   => 'New Library',
+            'id' => $library->id,
+            'name' => 'New Library',
             'handle' => 'new-library',
         ]);
     }
@@ -139,12 +139,12 @@ class MediaLibraryActionsTest extends TestCase
     {
         $catGroup1 = CategoryGroup::factory()->create();
         $catGroup2 = CategoryGroup::factory()->create();
-        $library   = Library::create($this->makeLibraryData(['handle' => 'cat-replace']));
+        $library = Library::create($this->makeLibraryData(['handle' => 'cat-replace']));
         $library->categoryGroups()->attach($catGroup1->id);
 
         app(EditMediaLibrary::class)->edit($library, [
-            'name'            => $library->name,
-            'handle'          => $library->handle,
+            'name' => $library->name,
+            'handle' => $library->handle,
             'category_groups' => [$catGroup2->id],
         ]);
 
@@ -156,7 +156,7 @@ class MediaLibraryActionsTest extends TestCase
     public function test_edit_detaches_all_category_groups_when_none_provided(): void
     {
         $catGroup = CategoryGroup::factory()->create();
-        $library  = Library::create($this->makeLibraryData(['handle' => 'cat-detach']));
+        $library = Library::create($this->makeLibraryData(['handle' => 'cat-detach']));
         $library->categoryGroups()->attach($catGroup->id);
 
         app(EditMediaLibrary::class)->edit($library, ['name' => $library->name, 'handle' => $library->handle]);

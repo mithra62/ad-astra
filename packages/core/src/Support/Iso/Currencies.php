@@ -5,6 +5,8 @@ namespace AdAstra\Support\Iso;
 use Money\Currencies\ISOCurrencies;
 use Money\Currency;
 use Money\Exception\UnknownCurrencyException;
+use Money\Money;
+use ReflectionClass;
 
 /**
  * Thin facade over moneyphp/money's ISOCurrencies, augmented with a local
@@ -82,7 +84,7 @@ final class Currencies
             // location. Using reflection (rather than base_path() or a path relative to
             // this file) keeps it working without a booted application and regardless of
             // whether the package runs from packages/ or vendor/.
-            $moneySrc = dirname((new \ReflectionClass(\Money\Money::class))->getFileName());
+            $moneySrc = dirname((new ReflectionClass(Money::class))->getFileName());
             $data = require $moneySrc . '/../resources/currency.php';
         }
         return $data;

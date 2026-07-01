@@ -18,7 +18,8 @@
 {% block secondary_sidebar %}
     <input id="secnav-toggle" type="checkbox">
 
-    <label for="secnav-toggle" class="flex cursor-pointer items-center justify-between border-b border-edge bg-surface px-4 py-2.5 text-sm font-medium text-muted hover:bg-subtle lg:hidden">
+    <label for="secnav-toggle"
+           class="flex cursor-pointer items-center justify-between border-b border-edge bg-surface px-4 py-2.5 text-sm font-medium text-muted hover:bg-subtle lg:hidden">
         <span class="flex items-center gap-2">
             <svg class="h-4 w-4 text-faint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>
@@ -34,9 +35,12 @@
 
     <div id="secondary-nav-panel" class="hidden border-b border-edge bg-surface px-4 py-3 lg:hidden">
         <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
-            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries') }}">Libraries</a>
-            <a class="flex items-center gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm font-medium text-accent" href="{{ route('media.libraries.show', library) }}">View Library</a>
-            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.create', library) }}">Upload</a>
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle"
+               href="{{ route('media.libraries') }}">Libraries</a>
+            <a class="flex items-center gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm font-medium text-accent"
+               href="{{ route('media.libraries.show', library) }}">View Library</a>
+            <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle"
+               href="{{ route('media.create', library) }}">Upload</a>
         </nav>
     </div>
 
@@ -46,27 +50,39 @@
                 <h5 class="text-sm font-semibold text-content">{{ library.name }}</h5>
             </div>
             <nav class="p-2">
-                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries') }}">
-                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+                <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle"
+                   href="{{ route('media.libraries') }}">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
                     </svg>
                     All Libraries
                 </a>
-                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm font-medium text-accent" href="{{ route('media.libraries.show', library) }}">
-                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm font-medium text-accent"
+                   href="{{ route('media.libraries.show', library) }}">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                     View Library
                 </a>
-                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.libraries.edit', library) }}">
-                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle"
+                   href="{{ route('media.libraries.edit', library) }}">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
                     Edit Library
                 </a>
-                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle" href="{{ route('media.create', library) }}">
-                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                <a class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-subtle"
+                   href="{{ route('media.create', library) }}">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                     </svg>
                     Upload Files
                 </a>
@@ -82,9 +98,11 @@
                 <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ library.name }}</h1>
                 <p class="mt-1 text-sm text-muted">Browse, manage, and organize uploaded files.</p>
             </div>
-            <a href="{{ route('media.create', library) }}" class="inline-flex items-center gap-1.5 self-start rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:self-auto">
+            <a href="{{ route('media.create', library) }}"
+               class="inline-flex items-center gap-1.5 self-start rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:self-auto">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                 </svg>
                 Upload Files
             </a>
@@ -109,24 +127,32 @@
                         {% for item in media %}
                             {% set is_image = item.mime_type and ('image' in item.mime_type) %}
                             {% set is_video = item.mime_type and ('video' in item.mime_type) %}
-                            <a href="{{ route('media.show', item) }}" class="group relative overflow-hidden rounded-lg border border-edge bg-subtle transition-all hover:border-emerald-300 hover:shadow-sm">
+                            <a href="{{ route('media.show', item) }}"
+                               class="group relative overflow-hidden rounded-lg border border-edge bg-subtle transition-all hover:border-emerald-300 hover:shadow-sm">
                                 <div class="flex aspect-square items-center justify-center bg-canvas">
                                     {% if is_image %}
-                                        <svg class="h-10 w-10 text-sky-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        <svg class="h-10 w-10 text-sky-400" fill="none" stroke="currentColor"
+                                             stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                         </svg>
                                     {% elseif is_video %}
-                                        <svg class="h-10 w-10 text-emerald-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+                                        <svg class="h-10 w-10 text-emerald-400" fill="none" stroke="currentColor"
+                                             stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
                                         </svg>
                                     {% else %}
-                                        <svg class="h-10 w-10 text-amber-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        <svg class="h-10 w-10 text-amber-400" fill="none" stroke="currentColor"
+                                             stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                         </svg>
                                     {% endif %}
                                 </div>
                                 {% if item.status_handle %}
-                                    <span class="absolute right-1.5 top-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset {% if item.status_is_public %}bg-accent-soft text-accent ring-emerald-200{% else %}bg-surface/90 text-muted ring-slate-200{% endif %}">
+                                    <span
+                                        class="absolute right-1.5 top-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset {% if item.status_is_public %}bg-accent-soft text-accent ring-emerald-200{% else %}bg-surface/90 text-muted ring-slate-200{% endif %}">
                                         {{ item.status ? item.status.name : item.status_handle }}
                                     </span>
                                 {% endif %}
@@ -148,7 +174,8 @@
                 </div>
 
                 {% if media.lastPage() > 1 %}
-                    <div class="flex flex-col gap-3 border-t border-edge px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div
+                        class="flex flex-col gap-3 border-t border-edge px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
                         <p class="text-xs text-muted">
                             Showing {{ media.firstItem() }}–{{ media.lastItem() }} of {{ media.total() }} files
                         </p>
@@ -159,17 +186,22 @@
             {% else %}
                 <div class="flex min-h-64 items-center justify-center px-6 py-14">
                     <div class="max-w-sm text-center">
-                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-faint">
+                        <div
+                            class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-faint">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                         </div>
                         <h2 class="mt-4 text-base font-semibold text-content">No files yet</h2>
                         <p class="mt-1 text-sm text-muted">Upload the first file to this library.</p>
                         <div class="mt-5">
-                            <a href="{{ route('media.create', library) }}" class="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                            <a href="{{ route('media.create', library) }}"
+                               class="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                 </svg>
                                 Upload Files
                             </a>

@@ -55,14 +55,14 @@ class EntryQueryBuilderTest extends TestCase
             ['object' => Text::class],
             ['name' => 'Text', 'settings' => []]
         );
-        $field     = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => $handle]);
+        $field = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => $handle]);
 
-        $layout  = FieldLayout::factory()->create();
-        $tab     = Tab::factory()->create(['field_layout_id' => $layout->id]);
+        $layout = FieldLayout::factory()->create();
+        $tab = Tab::factory()->create(['field_layout_id' => $layout->id]);
         TabElement::factory()->create(['field_layout_tab_id' => $tab->id, 'field_id' => $field->id]);
 
         $group = EntryGroup::factory()->create(['field_layout_id' => $layout->id]);
-        $type  = EntryType::factory()->create(['entry_group_id' => $group->id, 'field_layout_id' => null]);
+        $type = EntryType::factory()->create(['entry_group_id' => $group->id, 'field_layout_id' => null]);
         $entry = Entry::factory()->create(['entry_group_id' => $group->id, 'entry_type_id' => $type->id]);
 
         return [$entry, $field];
@@ -74,10 +74,10 @@ class EntryQueryBuilderTest extends TestCase
     private function storeTextValue(Entry $entry, Field $field, string $value): void
     {
         FieldValue::create([
-            'field_id'       => $field->id,
-            'fieldable_id'   => $entry->id,
+            'field_id' => $field->id,
+            'fieldable_id' => $entry->id,
             'fieldable_type' => $entry->getMorphClass(),
-            'value_text'     => $value,
+            'value_text' => $value,
         ]);
     }
 
@@ -753,7 +753,7 @@ class EntryQueryBuilderTest extends TestCase
 
         $other = Entry::factory()->create([
             'entry_group_id' => $match->entry_group_id,
-            'entry_type_id'  => $match->entry_type_id,
+            'entry_type_id' => $match->entry_type_id,
         ]);
         $this->storeTextValue($other, $field, 'another-post');
 
@@ -771,7 +771,7 @@ class EntryQueryBuilderTest extends TestCase
 
         $other = Entry::factory()->create([
             'entry_group_id' => $match->entry_group_id,
-            'entry_type_id'  => $match->entry_type_id,
+            'entry_type_id' => $match->entry_type_id,
         ]);
         $this->storeTextValue($other, $field, 'red');
 
@@ -807,34 +807,34 @@ class EntryQueryBuilderTest extends TestCase
             ['object' => Text::class],
             ['name' => 'Text', 'settings' => []]
         );
-        $field     = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => 'region']);
-        $layout    = FieldLayout::factory()->create();
-        $tab       = Tab::factory()->create(['field_layout_id' => $layout->id]);
+        $field = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => 'region']);
+        $layout = FieldLayout::factory()->create();
+        $tab = Tab::factory()->create(['field_layout_id' => $layout->id]);
         TabElement::factory()->create(['field_layout_tab_id' => $tab->id, 'field_id' => $field->id]);
 
         $group = EntryGroup::factory()->create(['field_layout_id' => $layout->id]);
-        $type  = EntryType::factory()->create(['entry_group_id' => $group->id, 'field_layout_id' => null]);
+        $type = EntryType::factory()->create(['entry_group_id' => $group->id, 'field_layout_id' => null]);
 
         $match = Entry::factory()->create([
             'entry_group_id' => $group->id,
-            'entry_type_id'  => $type->id,
-            'status_handle'  => 'published',
+            'entry_type_id' => $type->id,
+            'status_handle' => 'published',
         ]);
         $this->storeTextValue($match, $field, 'europe');
 
         // Same group and field value, wrong status
         $wrongStatus = Entry::factory()->create([
             'entry_group_id' => $group->id,
-            'entry_type_id'  => $type->id,
-            'status_handle'  => 'draft',
+            'entry_type_id' => $type->id,
+            'status_handle' => 'draft',
         ]);
         $this->storeTextValue($wrongStatus, $field, 'europe');
 
         // Same group and status, wrong field value
         $wrongField = Entry::factory()->create([
             'entry_group_id' => $group->id,
-            'entry_type_id'  => $type->id,
-            'status_handle'  => 'published',
+            'entry_type_id' => $type->id,
+            'status_handle' => 'published',
         ]);
         $this->storeTextValue($wrongField, $field, 'asia');
 

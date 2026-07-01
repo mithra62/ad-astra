@@ -2,20 +2,21 @@
 
 namespace Database\Factories;
 
+use AdAstra\Models\EntryAuthor;
 use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\EntryAuthor>
+ * @extends Factory<EntryAuthor>
  */
 class EntryAuthorFactory extends Factory
 {
     public function definition(): array
     {
         return [
-            'user_id'      => User::factory(),
+            'user_id' => User::factory(),
             'display_name' => null,
-            'status'       => 'active',
+            'status' => 'active',
         ];
     }
 

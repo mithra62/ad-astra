@@ -13,23 +13,23 @@ return new class () extends Migration {
         // until April 2026.
         Schema::table('media_libraries', function (Blueprint $table) {
             $table->foreign('field_layout_id')
-                  ->references('id')
-                  ->on('field_layouts')
-                  ->nullOnDelete();
+                ->references('id')
+                ->on('field_layouts')
+                ->nullOnDelete();
 
             $table->foreign('status_group_id')
-                  ->references('id')
-                  ->on('status_groups')
-                  ->nullOnDelete();
+                ->references('id')
+                ->on('status_groups')
+                ->nullOnDelete();
         });
 
         // media.status_id → statuses
         // Same reason as above — statuses does not exist until April 2026.
         Schema::table('media', function (Blueprint $table) {
             $table->foreign('status_id')
-                  ->references('id')
-                  ->on('statuses')
-                  ->nullOnDelete();
+                ->references('id')
+                ->on('statuses')
+                ->nullOnDelete();
         });
 
         // NOTE: media.library_id intentionally has NO FK constraint.

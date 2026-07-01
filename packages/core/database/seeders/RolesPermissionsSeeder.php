@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesPermissionsSeeder extends Seeder
 {
@@ -13,7 +14,7 @@ class RolesPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permissions = [
             'users' => [
@@ -95,7 +96,7 @@ class RolesPermissionsSeeder extends Seeder
         ];
 
         $all = [];
-        foreach($permissions AS $domain => $perms) {
+        foreach ($permissions as $domain => $perms) {
             foreach ($perms as $name => $description) {
                 $all[] = $name;
                 Permission::firstOrCreate(['name' => $name], ['description' => $description, 'domain' => $domain]);
@@ -103,14 +104,14 @@ class RolesPermissionsSeeder extends Seeder
         }
 
         // update cache to know about the newly created permissions (required if using WithoutModelEvents in seeders)
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         Role::firstOrCreate(['name' => 'super admin', 'highlight' => '#0f172a', 'description' => 'Full platform access with permission bypass behavior.']);
 
-        $role = Role::firstOrCreate(['name' => 'user', 'highlight' => '#64748b','description' => 'Baseline authenticated account role with limited admin access.']);
+        $role = Role::firstOrCreate(['name' => 'user', 'highlight' => '#64748b', 'description' => 'Baseline authenticated account role with limited admin access.']);
         $role->givePermissionTo(['access admin']);
 
-        $role = Role::firstOrCreate(['name' => 'admin', 'highlight' => '#059669','description' => 'Allows base access to the administration panel']);
+        $role = Role::firstOrCreate(['name' => 'admin', 'highlight' => '#059669', 'description' => 'Allows base access to the administration panel']);
         $role->givePermissionTo($all);
     }
 }

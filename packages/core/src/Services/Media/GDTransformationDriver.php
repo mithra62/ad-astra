@@ -2,14 +2,17 @@
 
 namespace AdAstra\Services\Media;
 
+use AdAstra\Jobs\ProcessTransformation;
 use AdAstra\Models\Media\Transformation;
+use GdImage;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class GDTransformationDriver implements TransformationDriverInterface
 {
     public function dispatch(Transformation $transformation): void
     {
-        \AdAstra\Jobs\ProcessTransformation::dispatch($transformation->id);
+        ProcessTransformation::dispatch($transformation->id);
     }
 
     /**
@@ -24,25 +27,25 @@ class GDTransformationDriver implements TransformationDriverInterface
      */
     public function applySync(Transformation $transformation): string
     {
-        $media  = $transformation->media;
+        $media = $transformation->media;
         $params = $transformation->params ?? [];
 
         $sourcePath = $this->localPath($media->disk, $media->path);
-        $src        = $this->loadImage($sourcePath, $media->mime_type);
+        $src = $this->loadImage($sourcePath, $media->mime_type);
 
         $srcW = imagesx($src);
         $srcH = imagesy($src);
 
-        $targetW  = isset($params['width'])  ? (int)$params['width']  : $srcW;
-        $targetH  = isset($params['height']) ? (int)$params['height'] : $srcH;
-        $mode     = $params['mode']    ?? 'cover';
-        $format   = $params['format']  ?? $this->extensionFromPath($media->path);
-        $quality  = isset($params['quality']) ? (int)$params['quality'] : 85;
+        $targetW = isset($params['width']) ? (int)$params['width'] : $srcW;
+        $targetH = isset($params['height']) ? (int)$params['height'] : $srcH;
+        $mode = $params['mode'] ?? 'cover';
+        $format = $params['format'] ?? $this->extensionFromPath($media->path);
+        $quality = isset($params['quality']) ? (int)$params['quality'] : 85;
 
         $dst = match ($mode) {
             'contain' => $this->applyContain($src, $srcW, $srcH, $targetW, $targetH),
-            'exact'   => $this->applyExact($src, $srcW, $srcH, $targetW, $targetH),
-            default   => $this->applyCover($src, $srcW, $srcH, $targetW, $targetH),
+            'exact' => $this->applyExact($src, $srcW, $srcH, $targetW, $targetH),
+            default => $this->applyCover($src, $srcW, $srcH, $targetW, $targetH),
         };
 
         imagedestroy($src);
@@ -74,7 +77,7 @@ class GDTransformationDriver implements TransformationDriverInterface
     // Resize modes
     // -------------------------------------------------------------------------
 
-    private function applyCover(\GdImage $src, int $srcW, int $srcH, int $targetW, int $targetH): \GdImage
+    private function applyCover(GdImage $src, int $srcW, int $srcH, int $targetW, int $targetH): GdImage
     {
         $srcRatio = $srcW / $srcH;
         $dstRatio = $targetW / $targetH;
@@ -83,16 +86,16 @@ class GDTransformationDriver implements TransformationDriverInterface
             // Source is wider — fit on height, crop sides
             $scaledH = $targetH;
             $scaledW = (int)round($targetH * $srcRatio);
-            $srcX    = (int)round(($scaledW - $targetW) / 2 * ($srcW / $scaledW));
-            $srcY    = 0;
+            $srcX = (int)round(($scaledW - $targetW) / 2 * ($srcW / $scaledW));
+            $srcY = 0;
             $srcCropW = (int)round($targetW * ($srcW / $scaledW));
             $srcCropH = $srcH;
         } else {
             // Source is taller — fit on width, crop top/bottom
-            $scaledW  = $targetW;
-            $scaledH  = (int)round($targetW / $srcRatio);
-            $srcX     = 0;
-            $srcY     = (int)round(($scaledH - $targetH) / 2 * ($srcH / $scaledH));
+            $scaledW = $targetW;
+            $scaledH = (int)round($targetW / $srcRatio);
+            $srcX = 0;
+            $srcY = (int)round(($scaledH - $targetH) / 2 * ($srcH / $scaledH));
             $srcCropW = $srcW;
             $srcCropH = (int)round($targetH * ($srcH / $scaledH));
         }
@@ -102,18 +105,18 @@ class GDTransformationDriver implements TransformationDriverInterface
         return $dst;
     }
 
-    private function applyContain(\GdImage $src, int $srcW, int $srcH, int $targetW, int $targetH): \GdImage
+    private function applyContain(GdImage $src, int $srcW, int $srcH, int $targetW, int $targetH): GdImage
     {
-        $ratio   = min($targetW / $srcW, $targetH / $srcH);
-        $newW    = (int)round($srcW * $ratio);
-        $newH    = (int)round($srcH * $ratio);
+        $ratio = min($targetW / $srcW, $targetH / $srcH);
+        $newW = (int)round($srcW * $ratio);
+        $newH = (int)round($srcH * $ratio);
 
         $dst = $this->newCanvas($newW, $newH);
         imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $srcW, $srcH);
         return $dst;
     }
 
-    private function applyExact(\GdImage $src, int $srcW, int $srcH, int $targetW, int $targetH): \GdImage
+    private function applyExact(GdImage $src, int $srcW, int $srcH, int $targetW, int $targetH): GdImage
     {
         $dst = $this->newCanvas($targetW, $targetH);
         imagecopyresampled($dst, $src, 0, 0, 0, 0, $targetW, $targetH, $srcW, $srcH);
@@ -124,7 +127,7 @@ class GDTransformationDriver implements TransformationDriverInterface
     // GD helpers
     // -------------------------------------------------------------------------
 
-    private function newCanvas(int $w, int $h): \GdImage
+    private function newCanvas(int $w, int $h): GdImage
     {
         $img = imagecreatetruecolor($w, $h);
         // Preserve transparency for PNG/GIF output.
@@ -136,33 +139,33 @@ class GDTransformationDriver implements TransformationDriverInterface
         return $img;
     }
 
-    private function loadImage(string $path, ?string $mimeType): \GdImage
+    private function loadImage(string $path, ?string $mimeType): GdImage
     {
         $img = match (true) {
-            str_contains((string)$mimeType, 'png')  => imagecreatefrompng($path),
-            str_contains((string)$mimeType, 'gif')  => imagecreatefromgif($path),
+            str_contains((string)$mimeType, 'png') => imagecreatefrompng($path),
+            str_contains((string)$mimeType, 'gif') => imagecreatefromgif($path),
             str_contains((string)$mimeType, 'webp') => imagecreatefromwebp($path),
-            default                                  => imagecreatefromjpeg($path),
+            default => imagecreatefromjpeg($path),
         };
 
         if ($img === false) {
-            throw new \RuntimeException("GD could not load image: {$path}");
+            throw new RuntimeException("GD could not load image: {$path}");
         }
 
         return $img;
     }
 
-    private function saveImage(\GdImage $img, string $path, string $format, int $quality): void
+    private function saveImage(GdImage $img, string $path, string $format, int $quality): void
     {
         $ok = match (strtolower($format)) {
-            'png'  => imagepng($img, $path, (int)round((100 - $quality) / 10)),
-            'gif'  => imagegif($img, $path),
+            'png' => imagepng($img, $path, (int)round((100 - $quality) / 10)),
+            'gif' => imagegif($img, $path),
             'webp' => imagewebp($img, $path, $quality),
             default => imagejpeg($img, $path, $quality),
         };
 
         if ($ok === false) {
-            throw new \RuntimeException("GD could not save image to: {$path}");
+            throw new RuntimeException("GD could not save image to: {$path}");
         }
     }
 
@@ -176,7 +179,7 @@ class GDTransformationDriver implements TransformationDriverInterface
         $fullPath = Storage::disk($disk)->path($path);
 
         if (!file_exists($fullPath)) {
-            throw new \RuntimeException("Source file not found on disk '{$disk}': {$path}");
+            throw new RuntimeException("Source file not found on disk '{$disk}': {$path}");
         }
 
         return $fullPath;

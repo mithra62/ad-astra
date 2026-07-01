@@ -2,10 +2,12 @@
 
 namespace AdAstra\Http\Controllers\Admin\User;
 
+use AdAstra\Enums\UserStatus;
 use AdAstra\Facades\Users;
 use AdAstra\Http\Controllers\Admin\Controller;
 use AdAstra\Http\Requests\User\UserStatusRequest;
 use AdAstra\Models\User as UserModel;
+use DateTime;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -28,10 +30,10 @@ class Status extends Controller
 
         $validated = $request->validated();
 
-        if ($validated['status'] === \AdAstra\Enums\UserStatus::SUSPENDED) {
+        if ($validated['status'] === UserStatus::SUSPENDED) {
             Users::suspend(
                 $user,
-                new \DateTime($validated['suspended_until']),
+                new DateTime($validated['suspended_until']),
                 $validated['reason'] ?? '',
             );
         } else {

@@ -17,7 +17,7 @@ class RefreshTokens extends Command
     public function handle(TokenRefreshService $svc): void
     {
         $provider = $this->option('provider');
-        $window = (int) $this->option('window');
+        $window = (int)$this->option('window');
 
         $query = OauthToken::query()
             ->active()

@@ -149,7 +149,7 @@ return [
                 'group' => 'Appearance',
                 'hidden' => false,
                 'user_overridable' => true,
-                'options_callback' => static fn () => [
+                'options_callback' => static fn() => [
                     ['value' => 'light', 'label' => 'Light'],
                     ['value' => 'dark', 'label' => 'Dark'],
                     ['value' => 'system', 'label' => 'System'],
@@ -259,8 +259,8 @@ return [
                 'group' => 'Accounts',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn () => array_map(
-                    fn ($s) => ['value' => $s, 'label' => UserStatus::label($s)],
+                'options_callback' => static fn() => array_map(
+                    fn($s) => ['value' => $s, 'label' => UserStatus::label($s)],
                     UserStatus::ALL
                 ),
             ],
@@ -274,8 +274,8 @@ return [
                 'group' => 'Accounts',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn () => array_map(
-                    fn ($s) => ['value' => $s, 'label' => UserStatus::label($s)],
+                'options_callback' => static fn() => array_map(
+                    fn($s) => ['value' => $s, 'label' => UserStatus::label($s)],
                     UserStatus::ALL
                 ),
             ],
@@ -289,9 +289,9 @@ return [
                 'group' => 'Schema',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn () => FieldLayout::orderBy('name')
+                'options_callback' => static fn() => FieldLayout::orderBy('name')
                     ->get()
-                    ->map(fn ($l) => ['value' => $l->id, 'label' => $l->name])
+                    ->map(fn($l) => ['value' => $l->id, 'label' => $l->name])
                     ->toArray(),
             ],
         ],

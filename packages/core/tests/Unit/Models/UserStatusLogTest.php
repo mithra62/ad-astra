@@ -5,6 +5,7 @@ namespace Tests\Unit\Models;
 use AdAstra\Models\User;
 use AdAstra\Models\UserStatusLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class UserStatusLogTest extends TestCase
@@ -53,8 +54,8 @@ class UserStatusLogTest extends TestCase
             'new_locked_until' => '2026-02-01 00:00:00',
         ]);
 
-        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $log->previous_locked_until);
-        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $log->new_locked_until);
+        $this->assertInstanceOf(Carbon::class, $log->previous_locked_until);
+        $this->assertInstanceOf(Carbon::class, $log->new_locked_until);
     }
 
     public function test_user_relationship(): void

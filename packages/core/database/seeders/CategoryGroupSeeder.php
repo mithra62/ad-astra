@@ -91,9 +91,9 @@ class CategoryGroupSeeder extends Seeder
 
             $tab = Tab::create([
                 'field_layout_id' => $layout->id,
-                'name'            => 'Details',
-                'handle'          => 'details',
-                'sort_order'      => 1,
+                'name' => 'Details',
+                'handle' => 'details',
+                'sort_order' => 1,
             ]);
 
             foreach ([$description, $featuredLabel] as $order => $field) {
@@ -227,9 +227,9 @@ class CategoryGroupSeeder extends Seeder
 
             $tab = Tab::create([
                 'field_layout_id' => $layout->id,
-                'name'            => 'Category Info',
-                'handle'          => 'category-info',
-                'sort_order'      => 1,
+                'name' => 'Category Info',
+                'handle' => 'category-info',
+                'sort_order' => 1,
             ]);
 
             foreach ([$description, $displayName] as $order => $field) {

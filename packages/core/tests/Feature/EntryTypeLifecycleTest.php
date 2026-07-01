@@ -158,9 +158,9 @@ class EntryTypeLifecycleTest extends TestCase
         $statusGroup = StatusGroup::factory()->create();
         Status::factory()->create([
             'status_group_id' => $statusGroup->id,
-            'handle'          => 'draft',
-            'is_default'      => true,
-            'is_public'       => false,
+            'handle' => 'draft',
+            'is_default' => true,
+            'is_public' => false,
         ]);
 
         $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
@@ -169,14 +169,14 @@ class EntryTypeLifecycleTest extends TestCase
         Relation::morphMap([$morphKey => SpyEntryType::class]);
 
         $behavior = EntryBehavior::create([
-            'name'   => 'Spy',
+            'name' => 'Spy',
             'handle' => 'spy-' . uniqid(),
-            'class'  => $morphKey,
+            'class' => $morphKey,
         ]);
 
         $this->type = EntryType::factory()->create([
-            'entry_group_id'   => $group->id,
-            'handle'           => 'spy-type-' . uniqid(),
+            'entry_group_id' => $group->id,
+            'handle' => 'spy-type-' . uniqid(),
             'entry_behavior_id' => $behavior->id,
         ]);
     }
@@ -190,8 +190,8 @@ class EntryTypeLifecycleTest extends TestCase
         // Direct factory create — skips EntryService and its lifecycle hooks.
         $entry = Entry::factory()->create([
             'entry_group_id' => $this->type->entry_group_id,
-            'entry_type_id'  => $this->type->id,
-            'title'          => 'Original',
+            'entry_type_id' => $this->type->id,
+            'title' => 'Original',
         ]);
 
         // Reset counters so update tests start from zero.

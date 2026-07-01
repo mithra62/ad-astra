@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Repositories;
 
+use AdAstra\Models\Category;
 use AdAstra\Models\Media;
 use AdAstra\Models\Media\Library;
 use AdAstra\Repositories\MediaRepository;
@@ -74,21 +75,21 @@ class MediaRepositoryTest extends TestCase
     public function test_apply_data_syncs_categories(): void
     {
         $media = Media::factory()->create();
-        $category = \AdAstra\Models\Category::factory()->create();
+        $category = Category::factory()->create();
 
         $this->repo->applyData($media, ['categories' => [$category->id]]);
 
         $this->assertDatabaseHas('categorizables', [
             'categorizable_type' => $media->getMorphClass(),
-            'categorizable_id'   => $media->id,
-            'category_id'        => $category->id,
+            'categorizable_id' => $media->id,
+            'category_id' => $category->id,
         ]);
     }
 
     public function test_apply_data_does_not_touch_categories_when_key_absent(): void
     {
-        $media    = Media::factory()->create();
-        $category = \AdAstra\Models\Category::factory()->create();
+        $media = Media::factory()->create();
+        $category = Category::factory()->create();
         $media->categories()->attach($category->id);
 
         $this->repo->applyData($media, ['name' => 'Renamed']);
@@ -98,8 +99,8 @@ class MediaRepositoryTest extends TestCase
 
     public function test_apply_data_detaches_all_categories_when_passed_empty_array(): void
     {
-        $media    = Media::factory()->create();
-        $category = \AdAstra\Models\Category::factory()->create();
+        $media = Media::factory()->create();
+        $category = Category::factory()->create();
         $media->categories()->attach($category->id);
 
         $this->repo->applyData($media, ['categories' => []]);
@@ -134,7 +135,7 @@ class MediaRepositoryTest extends TestCase
     public function test_resolve_layout_fields_returns_empty_collection_when_library_has_no_layout(): void
     {
         $library = Library::factory()->create(['field_layout_id' => null]);
-        $media   = Media::factory()->for($library, 'library')->create();
+        $media = Media::factory()->for($library, 'library')->create();
 
         $fields = $this->repo->resolveLayoutFields($media);
 

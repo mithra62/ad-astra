@@ -29,7 +29,7 @@ class BlogPostEntryType extends AbstractEntryType
         $body = $data['fields']['body'] ?? null;
 
         if ($body !== null) {
-            $data['fields']['reading_time'] = (int) ceil(str_word_count((string) $body) / 200);
+            $data['fields']['reading_time'] = (int)ceil(str_word_count((string)$body) / 200);
         }
 
         return $data;

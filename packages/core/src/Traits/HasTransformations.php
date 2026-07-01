@@ -35,7 +35,7 @@ trait HasTransformations
 
         if ($existing && $existing->isFailed()) {
             $existing->update([
-                'path'   => $this->derivedPath($key, $params),
+                'path' => $this->derivedPath($key, $params),
                 'params' => $params,
                 'status' => 'pending',
             ]);
@@ -49,9 +49,9 @@ trait HasTransformations
         }
 
         $transformation = $this->transformations()->create([
-            'key'    => $key,
-            'disk'   => $this->disk,
-            'path'   => $this->derivedPath($key, $params),
+            'key' => $key,
+            'disk' => $this->disk,
+            'path' => $this->derivedPath($key, $params),
             'params' => $params,
             'status' => 'pending',
         ]);
@@ -85,9 +85,9 @@ trait HasTransformations
 
     protected function derivedPath(string $key, array $params = []): string
     {
-        $dir  = dirname($this->path);
+        $dir = dirname($this->path);
         $stem = pathinfo($this->file_name, PATHINFO_FILENAME);
-        $ext  = $params['format'] ?? pathinfo($this->file_name, PATHINFO_EXTENSION);
+        $ext = $params['format'] ?? pathinfo($this->file_name, PATHINFO_EXTENSION);
         return $dir . '/_t/' . $stem . '_' . $key . '.' . $ext;
     }
 }

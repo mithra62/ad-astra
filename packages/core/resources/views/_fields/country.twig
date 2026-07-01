@@ -1,11 +1,12 @@
 {% set input_name = 'fields[' ~ field.handle ~ ']' %}
 {% set current_value = old('fields.' ~ field.handle, value|default('')) %}
 <select id="{{ id }}" name="{{ input_name }}"
-    class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+        class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
     {% if placeholder %}
         <option value="">{{ placeholder }}</option>
     {% endif %}
     {% for option in country_options %}
-        <option value="{{ option.code }}" {% if current_value == option.code %}selected{% endif %}>{{ option.name }}</option>
+        <option value="{{ option.code }}"
+                {% if current_value == option.code %}selected{% endif %}>{{ option.name }}</option>
     {% endfor %}
 </select>

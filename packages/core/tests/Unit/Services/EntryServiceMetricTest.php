@@ -34,8 +34,8 @@ class EntryServiceMetricTest extends TestCase
         $this->assertInstanceOf(EntryMetric::class, $metric);
         $this->assertDatabaseHas('entry_metrics', [
             'entry_id' => $entry->id,
-            'metric'   => 'views',
-            'value'    => 1,
+            'metric' => 'views',
+            'value' => 1,
         ]);
     }
 
@@ -47,8 +47,8 @@ class EntryServiceMetricTest extends TestCase
 
         $this->assertDatabaseHas('entry_metrics', [
             'entry_id' => $entry->id,
-            'metric'   => 'downloads',
-            'value'    => 50,
+            'metric' => 'downloads',
+            'value' => 50,
         ]);
     }
 
@@ -95,7 +95,7 @@ class EntryServiceMetricTest extends TestCase
     public function test_record_metric_accepts_custom_date(): void
     {
         $entry = Entry::factory()->create();
-        $date  = Carbon::parse('2025-01-15');
+        $date = Carbon::parse('2025-01-15');
 
         $metric = $this->service->recordMetric($entry, 'views', 1, $date);
 
@@ -118,7 +118,7 @@ class EntryServiceMetricTest extends TestCase
     public function test_record_metric_increments_correctly_on_backdated_duplicate(): void
     {
         $entry = Entry::factory()->create();
-        $date  = Carbon::parse('2025-03-01');
+        $date = Carbon::parse('2025-03-01');
 
         $this->service->recordMetric($entry, 'views', 5, $date);
         $metric = $this->service->recordMetric($entry, 'views', 3, $date);
@@ -140,18 +140,18 @@ class EntryServiceMetricTest extends TestCase
         $this->service->recordMetric($entryB, 'views', 1);
 
         $this->assertSame(100, $entryA->metricTotal('views'));
-        $this->assertSame(1,   $entryB->metricTotal('views'));
+        $this->assertSame(1, $entryB->metricTotal('views'));
     }
 
     public function test_record_metric_does_not_affect_other_metric_names(): void
     {
         $entry = Entry::factory()->create();
 
-        $this->service->recordMetric($entry, 'views',     10);
+        $this->service->recordMetric($entry, 'views', 10);
         $this->service->recordMetric($entry, 'downloads', 5);
 
         $this->assertSame(10, $entry->metricTotal('views'));
-        $this->assertSame(5,  $entry->metricTotal('downloads'));
+        $this->assertSame(5, $entry->metricTotal('downloads'));
         $this->assertDatabaseCount('entry_metrics', 2);
     }
 

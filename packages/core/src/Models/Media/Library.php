@@ -2,6 +2,7 @@
 
 namespace AdAstra\Models\Media;
 
+use AdAstra\Models\Media;
 use AdAstra\Traits\Field\HasFieldLayout;
 use AdAstra\Traits\HasCategoryGroups;
 use AdAstra\Traits\HasMediaItems;
@@ -41,7 +42,7 @@ class Library extends Model
 
     public function media(): HasMany
     {
-        return $this->hasMany(\AdAstra\Models\Media::class, 'library_id')
+        return $this->hasMany(Media::class, 'library_id')
             ->orderBy('sort_order');
     }
 }

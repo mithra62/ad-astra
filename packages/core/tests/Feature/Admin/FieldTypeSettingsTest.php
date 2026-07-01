@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use AdAstra\Field\Types\EmailAddress;
+use AdAstra\Field\Types\FileUpload;
 use AdAstra\Field\Types\Text;
 use AdAstra\Models\Field as FieldModel;
 use AdAstra\Models\Field\Group as FieldGroup;
@@ -114,8 +115,8 @@ class FieldTypeSettingsTest extends TestCase
 
     public function test_file_upload_panel_includes_library_options(): void
     {
-        $user    = $this->makeSuperAdmin();
-        $type    = $this->typeFor(\AdAstra\Field\Types\FileUpload::class);
+        $user = $this->makeSuperAdmin();
+        $type = $this->typeFor(FileUpload::class);
         $library = Library::factory()->create(['name' => 'My Test Library']);
 
         $this->actingAs($user)
@@ -130,19 +131,19 @@ class FieldTypeSettingsTest extends TestCase
 
     public function test_pre_populates_current_values_when_field_id_provided(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->typeFor(Text::class);
+        $user = $this->makeSuperAdmin();
+        $type = $this->typeFor(Text::class);
         $group = FieldGroup::factory()->create();
 
         $field = FieldModel::factory()->create([
             'field_type_id' => $type->id,
-            'settings'      => ['placeholder' => 'My saved placeholder'],
+            'settings' => ['placeholder' => 'My saved placeholder'],
         ]);
         $field->groups()->attach($group);
 
         $this->actingAs($user)
             ->get(route('fields.type_settings', [
-                'type_id'  => $type->id,
+                'type_id' => $type->id,
                 'field_id' => $field->id,
             ]))
             ->assertOk()

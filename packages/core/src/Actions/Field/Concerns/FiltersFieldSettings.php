@@ -16,7 +16,7 @@ trait FiltersFieldSettings
             if (array_key_exists($key, $raw)) {
                 $value = $raw[$key];
                 if (($def['type'] ?? '') === 'key_value') {
-                    $value = $this->normaliseKeyValue((array) $value);
+                    $value = $this->normaliseKeyValue((array)$value);
                 }
                 $filtered[$key] = $value;
             } else {
@@ -32,7 +32,7 @@ trait FiltersFieldSettings
         return array_values(
             array_filter(
                 $raw,
-                fn ($row) => trim($row['key'] ?? '') !== ''
+                fn($row) => trim($row['key'] ?? '') !== ''
             )
         );
     }

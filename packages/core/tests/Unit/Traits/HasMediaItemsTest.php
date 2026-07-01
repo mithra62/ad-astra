@@ -4,9 +4,14 @@ namespace Tests\Unit\Traits;
 
 use AdAstra\Models\Media;
 use AdAstra\Models\Media\Library;
+use Illuminate\Contracts\Filesystem\Factory;
+use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
+use RuntimeException;
 use Tests\TestCase;
 
 /**
@@ -24,11 +29,11 @@ class HasMediaItemsTest extends TestCase
     private function makeLibrary(array $overrides = []): Library
     {
         return Library::create(array_merge([
-            'name'          => 'Test Library',
-            'handle'        => 'test-lib',
-            'adapter'       => 'local',
+            'name' => 'Test Library',
+            'handle' => 'test-lib',
+            'adapter' => 'local',
             'allowed_types' => null,
-            'max_size'      => 10,
+            'max_size' => 10,
         ], $overrides));
     }
 
@@ -40,7 +45,7 @@ class HasMediaItemsTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('photo.jpg', 100, 100)->size(100); // 100 KB
+        $file = UploadedFile::fake()->image('photo.jpg', 100, 100)->size(100); // 100 KB
 
         $errors = $library->validateUpload($file);
 
@@ -51,7 +56,7 @@ class HasMediaItemsTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary(['max_size' => 1]); // 1 MB limit
-        $file    = UploadedFile::fake()->image('big.jpg')->size(2 * 1024); // 2 MB
+        $file = UploadedFile::fake()->image('big.jpg')->size(2 * 1024); // 2 MB
 
         $errors = $library->validateUpload($file);
 
@@ -63,7 +68,7 @@ class HasMediaItemsTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary(['allowed_types' => ['image/jpeg', 'image/png']]);
-        $file    = UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf');
+        $file = UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf');
 
         $errors = $library->validateUpload($file);
 
@@ -75,7 +80,7 @@ class HasMediaItemsTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary(['allowed_types' => null]);
-        $file    = UploadedFile::fake()->create('anything.pdf', 100, 'application/pdf');
+        $file = UploadedFile::fake()->create('anything.pdf', 100, 'application/pdf');
 
         $errors = $library->validateUpload($file);
 
@@ -86,7 +91,7 @@ class HasMediaItemsTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary(['max_size' => 0]);
-        $file    = UploadedFile::fake()->image('large.jpg')->size(999 * 1024);
+        $file = UploadedFile::fake()->image('large.jpg')->size(999 * 1024);
 
         $errors = $library->validateUpload($file);
 
@@ -101,7 +106,7 @@ class HasMediaItemsTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('photo.jpg', 100, 100);
+        $file = UploadedFile::fake()->image('photo.jpg', 100, 100);
 
         $media = $library->addMediaFromUpload($file);
 
@@ -114,7 +119,7 @@ class HasMediaItemsTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('shot.png');
+        $file = UploadedFile::fake()->image('shot.png');
 
         $media = $library->addMediaFromUpload($file);
 
@@ -125,7 +130,7 @@ class HasMediaItemsTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('my-photo.jpg');
+        $file = UploadedFile::fake()->image('my-photo.jpg');
 
         $media = $library->addMediaFromUpload($file);
 
@@ -136,7 +141,7 @@ class HasMediaItemsTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('shot.png')->mimeType('image/png');
+        $file = UploadedFile::fake()->image('shot.png')->mimeType('image/png');
 
         $media = $library->addMediaFromUpload($file);
 
@@ -148,7 +153,7 @@ class HasMediaItemsTest extends TestCase
         Storage::fake('local');
         $library = $this->makeLibrary();
 
-        $first  = $library->addMediaFromUpload(UploadedFile::fake()->image('a.jpg'));
+        $first = $library->addMediaFromUpload(UploadedFile::fake()->image('a.jpg'));
         $second = $library->addMediaFromUpload(UploadedFile::fake()->image('b.jpg'));
 
         $this->assertGreaterThan($first->sort_order, $second->sort_order);
@@ -158,9 +163,9 @@ class HasMediaItemsTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary(['allowed_types' => ['image/jpeg']]);
-        $file    = UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf');
+        $file = UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf');
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $library->addMediaFromUpload($file);
     }
@@ -169,7 +174,7 @@ class HasMediaItemsTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('hero.jpg');
+        $file = UploadedFile::fake()->image('hero.jpg');
 
         $media = $library->addMediaFromUpload($file, ['name' => 'Hero Image']);
 
@@ -181,9 +186,9 @@ class HasMediaItemsTest extends TestCase
         $this->mockFailingDisk();
 
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('fail.jpg');
+        $file = UploadedFile::fake()->image('fail.jpg');
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessageMatches('/Failed to store/');
 
         $library->addMediaFromUpload($file);
@@ -194,11 +199,11 @@ class HasMediaItemsTest extends TestCase
         $this->mockFailingDisk();
 
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('fail.jpg');
+        $file = UploadedFile::fake()->image('fail.jpg');
 
         try {
             $library->addMediaFromUpload($file);
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             // expected
         }
 
@@ -216,14 +221,14 @@ class HasMediaItemsTest extends TestCase
      */
     private function mockFailingDisk(): void
     {
-        $mockDisk = $this->createMock(\Illuminate\Contracts\Filesystem\Filesystem::class);
+        $mockDisk = $this->createMock(Filesystem::class);
         $mockDisk->method('putFileAs')->willReturn(false);
 
-        $mockManager = $this->createMock(\Illuminate\Filesystem\FilesystemManager::class);
+        $mockManager = $this->createMock(FilesystemManager::class);
         $mockManager->method('disk')->willReturn($mockDisk);
 
         $this->app->instance('filesystem', $mockManager);
-        $this->app->instance(\Illuminate\Contracts\Filesystem\Factory::class, $mockManager);
+        $this->app->instance(Factory::class, $mockManager);
     }
 
 }

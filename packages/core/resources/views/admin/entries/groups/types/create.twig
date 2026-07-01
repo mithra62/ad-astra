@@ -86,7 +86,8 @@
                     </div>
 
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-content" for="class">Behavior {{ old('class') }}</label>
+                        <label class="mb-1.5 block text-sm font-medium text-content"
+                               for="class">Behavior {{ old('class') }}</label>
                         <select
                             class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm {% if errors.has('class') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                             id="class" name="class">
@@ -97,7 +98,8 @@
                             {% endfor %}
                         </select>
                         {% if errors.has('status_group_id') %}
-                            <p id="name-error" class="mt-1 text-xs text-red-600">{{ errors.first('status_group_id') }}</p>
+                            <p id="name-error"
+                               class="mt-1 text-xs text-red-600">{{ errors.first('status_group_id') }}</p>
                         {% endif %}
                         <small class="text-secondary d-block mb-1">
                             Select the behavior that implements this entry type's lifecycle hooks.
@@ -121,10 +123,12 @@
 
                     {% set entry_tree_enabled = old('has_entry_tree') == '1' %}
                     {% set allowed_parent_types = old('allowed_parent_types', []) %}
-                    <div id="entry-tree-settings" class="{% if not entry_tree_enabled %}hidden {% endif %}rounded-lg border border-edge bg-subtle px-4 py-4">
+                    <div id="entry-tree-settings"
+                         class="{% if not entry_tree_enabled %}hidden {% endif %}rounded-lg border border-edge bg-subtle px-4 py-4">
                         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-content" for="max_depth">Max Depth</label>
+                                <label class="mb-1.5 block text-sm font-medium text-content" for="max_depth">Max
+                                    Depth</label>
                                 <input
                                     class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:outline-none focus:ring-2 {% if errors.has('max_depth') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                                     id="max_depth"
@@ -132,14 +136,17 @@
                                     type="number"
                                     min="0"
                                     value="{{ old('max_depth') }}"
-                                    {% if errors.has('max_depth') %}aria-invalid="true" aria-describedby="max_depth-error"{% endif %}>
+                                    {% if errors.has('max_depth') %}aria-invalid="true"
+                                    aria-describedby="max_depth-error"{% endif %}>
                                 {% if errors.has('max_depth') %}
-                                    <p id="max_depth-error" class="mt-1 text-xs text-red-600">{{ errors.first('max_depth') }}</p>
+                                    <p id="max_depth-error"
+                                       class="mt-1 text-xs text-red-600">{{ errors.first('max_depth') }}</p>
                                 {% endif %}
                             </div>
 
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-content" for="default_template">Default Template</label>
+                                <label class="mb-1.5 block text-sm font-medium text-content" for="default_template">Default
+                                    Template</label>
                                 <input
                                     class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:outline-none focus:ring-2 {% if errors.has('default_template') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                                     id="default_template"
@@ -147,35 +154,42 @@
                                     type="text"
                                     value="{{ old('default_template') }}"
                                     placeholder="entries/default"
-                                    {% if errors.has('default_template') %}aria-invalid="true" aria-describedby="default_template-error"{% endif %}>
+                                    {% if errors.has('default_template') %}aria-invalid="true"
+                                    aria-describedby="default_template-error"{% endif %}>
                                 {% if errors.has('default_template') %}
-                                    <p id="default_template-error" class="mt-1 text-xs text-red-600">{{ errors.first('default_template') }}</p>
+                                    <p id="default_template-error"
+                                       class="mt-1 text-xs text-red-600">{{ errors.first('default_template') }}</p>
                                 {% endif %}
                             </div>
 
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-content" for="allowed_parent_types">Allowed Parent Types</label>
+                                <label class="mb-1.5 block text-sm font-medium text-content" for="allowed_parent_types">Allowed
+                                    Parent Types</label>
                                 <select
                                     class="min-h-24 w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 {% if errors.has('allowed_parent_types') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                                     id="allowed_parent_types"
                                     name="allowed_parent_types[]"
                                     multiple
-                                    {% if errors.has('allowed_parent_types') %}aria-invalid="true" aria-describedby="allowed_parent_types-error"{% endif %}>
+                                    {% if errors.has('allowed_parent_types') %}aria-invalid="true"
+                                    aria-describedby="allowed_parent_types-error"{% endif %}>
                                     {% for cls in type_classes %}
-                                        <option value="{{ cls }}" {% if cls in allowed_parent_types %}selected{% endif %}>
+                                        <option value="{{ cls }}"
+                                                {% if cls in allowed_parent_types %}selected{% endif %}>
                                             {{ cls }}
                                         </option>
                                     {% endfor %}
                                 </select>
                                 {% if errors.has('allowed_parent_types') %}
-                                    <p id="allowed_parent_types-error" class="mt-1 text-xs text-red-600">{{ errors.first('allowed_parent_types') }}</p>
+                                    <p id="allowed_parent_types-error"
+                                       class="mt-1 text-xs text-red-600">{{ errors.first('allowed_parent_types') }}</p>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-content" for="status_group_id">Field Layout</label>
+                        <label class="mb-1.5 block text-sm font-medium text-content" for="status_group_id">Field
+                            Layout</label>
                         <select
                             class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm {% if errors.has('status_group_id') %}border-red-300 px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-red-500 focus:ring-red-500/20{% else %}focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
                             id="field_layout_id" name="field_layout_id">
@@ -188,7 +202,8 @@
                             {% endfor %}
                         </select>
                         {% if errors.has('field_layout_id') %}
-                            <p id="field_layout_id-error" class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>
+                            <p id="field_layout_id-error"
+                               class="mt-1 text-xs text-red-600">{{ errors.first('field_layout_id') }}</p>
                         {% endif %}
                         <small class="text-secondary d-block mb-1">
                             Fields from this layout are specific to this

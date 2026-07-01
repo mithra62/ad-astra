@@ -11,6 +11,7 @@ use Database\Seeders\EntryBehaviorSeeder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
+use stdClass;
 use Tests\TestCase;
 
 class EntryTypeRegistryTest extends TestCase
@@ -49,12 +50,12 @@ class EntryTypeRegistryTest extends TestCase
         $this->expectExceptionMessageMatches('/must extend AbstractEntryType/');
 
         $morphKey = 'behavior.bad-' . uniqid();
-        Relation::morphMap([$morphKey => \stdClass::class]);
+        Relation::morphMap([$morphKey => stdClass::class]);
 
         $badBehavior = EntryBehavior::create([
-            'name'   => 'Bad',
+            'name' => 'Bad',
             'handle' => 'bad-class-' . uniqid(),
-            'class'  => $morphKey,
+            'class' => $morphKey,
         ]);
 
         $record = EntryType::factory()->create(['entry_behavior_id' => $badBehavior->id]);
@@ -72,7 +73,7 @@ class EntryTypeRegistryTest extends TestCase
             'entry_behavior_id' => EntryBehavior::where('handle', 'general')->value('id'),
         ]);
 
-        $first  = $this->registry->resolveByRecord($record);
+        $first = $this->registry->resolveByRecord($record);
         $second = $this->registry->resolveByRecord($record);
 
         $this->assertSame($first, $second);

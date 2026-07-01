@@ -95,7 +95,7 @@ abstract class Controller extends DefaultController
      */
     protected function sortDir(Request $request): string
     {
-        $dir = strtolower((string) $request->input('direction', 'asc'));
+        $dir = strtolower((string)$request->input('direction', 'asc'));
         return in_array($dir, ['asc', 'desc'], strict: true) ? $dir : 'asc';
     }
 

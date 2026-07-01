@@ -9,6 +9,7 @@ use AdAstra\Models\EntryType;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
+use stdClass;
 use Tests\TestCase;
 
 class EntryBehaviorTest extends TestCase
@@ -72,7 +73,7 @@ class EntryBehaviorTest extends TestCase
 
     public function test_instance_throws_runtime_exception_for_class_not_extending_abstract_entry_type(): void
     {
-        Relation::morphMap(['behavior.fake-stdclass' => \stdClass::class]);
+        Relation::morphMap(['behavior.fake-stdclass' => stdClass::class]);
 
         $behavior = EntryBehavior::factory()->create(['class' => 'behavior.fake-stdclass']);
         $entryType = EntryType::factory()->create(['entry_behavior_id' => $behavior->id]);

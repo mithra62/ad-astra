@@ -11,7 +11,7 @@ namespace AdAstra\Observers;
  * across every consumer that points at the mutated Status row.
  *
  * @see \AdAstra\Traits\HasStatus
- * @see \AdAstra\Observers\StatusObserver
+ * @see StatusObserver
  */
 class StatusSyncRegistry
 {

@@ -38,14 +38,14 @@ class CategoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'         => $this->id,
-            'group_id'   => $this->group_id,
-            'parent_id'  => $this->parent_id,
-            'name'       => $this->name,
-            'handle'     => $this->handle,
+            'id' => $this->id,
+            'group_id' => $this->group_id,
+            'parent_id' => $this->parent_id,
+            'name' => $this->name,
+            'handle' => $this->handle,
             'sort_order' => $this->sort_order,
-            'fields'     => $this->fieldArray(),
-            'children'   => self::collection($this->whenLoaded('children')),
+            'fields' => $this->fieldArray(),
+            'children' => self::collection($this->whenLoaded('children')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

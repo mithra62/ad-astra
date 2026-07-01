@@ -273,10 +273,10 @@ class StatusActionsTest extends TestCase
 
         app(CreateNewStatus::class)->create([
             'status_group_id' => $group->id,
-            'name'            => 'Draft',
-            'handle'          => 'draft',
-            'color'           => '#cccccc',
-            'is_default'      => true,
+            'name' => 'Draft',
+            'handle' => 'draft',
+            'color' => '#cccccc',
+            'is_default' => true,
         ]);
 
         $this->assertGreaterThanOrEqual(
@@ -288,8 +288,8 @@ class StatusActionsTest extends TestCase
 
     public function test_create_rolls_back_cleared_default_when_insert_fails(): void
     {
-        $group    = StatusGroup::factory()->create();
-        $original = Status::factory()->for($group, 'group')->create(['is_default' => true,  'handle' => 'original']);
+        $group = StatusGroup::factory()->create();
+        $original = Status::factory()->for($group, 'group')->create(['is_default' => true, 'handle' => 'original']);
 
         // Pre-occupy the handle we will attempt to create, guaranteeing a
         // unique-constraint violation on (status_group_id, handle).
@@ -300,10 +300,10 @@ class StatusActionsTest extends TestCase
         try {
             app(CreateNewStatus::class)->create([
                 'status_group_id' => $group->id,
-                'name'            => 'New Default',
-                'handle'          => 'collision',   // duplicate → QueryException
-                'color'           => '#0000ff',
-                'is_default'      => true,           // triggers the clear-then-insert path
+                'name' => 'New Default',
+                'handle' => 'collision',   // duplicate → QueryException
+                'color' => '#0000ff',
+                'is_default' => true,           // triggers the clear-then-insert path
             ]);
         } catch (QueryException $e) {
             $threw = true;
@@ -329,10 +329,10 @@ class StatusActionsTest extends TestCase
 
         app(CreateNewStatus::class)->createByGroup([
             'status_group_id' => $group->id,
-            'name'            => 'Draft',
-            'handle'          => 'draft',
-            'color'           => '#cccccc',
-            'is_default'      => true,
+            'name' => 'Draft',
+            'handle' => 'draft',
+            'color' => '#cccccc',
+            'is_default' => true,
         ]);
 
         $this->assertGreaterThanOrEqual(
@@ -344,8 +344,8 @@ class StatusActionsTest extends TestCase
 
     public function test_create_by_group_rolls_back_cleared_default_when_insert_fails(): void
     {
-        $group    = StatusGroup::factory()->create();
-        $original = Status::factory()->for($group, 'group')->create(['is_default' => true,  'handle' => 'original']);
+        $group = StatusGroup::factory()->create();
+        $original = Status::factory()->for($group, 'group')->create(['is_default' => true, 'handle' => 'original']);
         Status::factory()->for($group, 'group')->create(['is_default' => false, 'handle' => 'collision']);
 
         $threw = false;
@@ -353,10 +353,10 @@ class StatusActionsTest extends TestCase
         try {
             app(CreateNewStatus::class)->createByGroup([
                 'status_group_id' => $group->id,
-                'name'            => 'New Default',
-                'handle'          => 'collision',
-                'color'           => '#0000ff',
-                'is_default'      => true,
+                'name' => 'New Default',
+                'handle' => 'collision',
+                'color' => '#0000ff',
+                'is_default' => true,
             ]);
         } catch (QueryException $e) {
             $threw = true;
@@ -373,7 +373,7 @@ class StatusActionsTest extends TestCase
 
     public function test_edit_runs_inside_a_database_transaction(): void
     {
-        $group   = StatusGroup::factory()->create();
+        $group = StatusGroup::factory()->create();
         $subject = Status::factory()->for($group, 'group')->create(['is_default' => false, 'handle' => 'subject']);
         $observedLevel = 0;
 
@@ -382,9 +382,9 @@ class StatusActionsTest extends TestCase
         });
 
         app(EditStatus::class)->edit($subject, [
-            'name'       => $subject->name,
-            'handle'     => $subject->handle,
-            'color'      => $subject->color,
+            'name' => $subject->name,
+            'handle' => $subject->handle,
+            'color' => $subject->color,
             'is_default' => true,
         ]);
 
@@ -397,8 +397,8 @@ class StatusActionsTest extends TestCase
 
     public function test_edit_rolls_back_cleared_default_when_update_fails(): void
     {
-        $group   = StatusGroup::factory()->create();
-        $other   = Status::factory()->for($group, 'group')->create(['is_default' => true,  'handle' => 'other']);
+        $group = StatusGroup::factory()->create();
+        $other = Status::factory()->for($group, 'group')->create(['is_default' => true, 'handle' => 'other']);
         $subject = Status::factory()->for($group, 'group')->create(['is_default' => false, 'handle' => 'subject']);
 
         // Pre-occupy the handle we will try to assign to $subject.  When
@@ -410,9 +410,9 @@ class StatusActionsTest extends TestCase
 
         try {
             app(EditStatus::class)->edit($subject, [
-                'name'       => $subject->name,
-                'handle'     => 'collision',   // duplicate → QueryException on the UPDATE
-                'color'      => $subject->color,
+                'name' => $subject->name,
+                'handle' => 'collision',   // duplicate → QueryException on the UPDATE
+                'color' => $subject->color,
                 'is_default' => true,           // triggers the clear-other-defaults step first
             ]);
         } catch (QueryException $e) {

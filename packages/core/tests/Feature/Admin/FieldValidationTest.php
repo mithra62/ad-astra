@@ -43,10 +43,10 @@ class FieldValidationTest extends TestCase
     private function basePayload(FieldType $type, FieldGroup $group, array $overrides = []): array
     {
         return array_merge([
-            'group_id'      => $group->id,
+            'group_id' => $group->id,
             'field_type_id' => $type->id,
-            'name'          => 'Test Field',
-            'handle'        => 'test_field',
+            'name' => 'Test Field',
+            'handle' => 'test_field',
         ], $overrides);
     }
 
@@ -56,8 +56,8 @@ class FieldValidationTest extends TestCase
 
     public function test_store_fails_when_max_length_is_not_an_integer(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->textType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->textType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
@@ -71,8 +71,8 @@ class FieldValidationTest extends TestCase
 
     public function test_store_fails_when_max_length_is_below_minimum(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->textType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->textType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
@@ -86,8 +86,8 @@ class FieldValidationTest extends TestCase
 
     public function test_store_passes_with_valid_settings(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->textType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->textType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
@@ -99,8 +99,8 @@ class FieldValidationTest extends TestCase
 
     public function test_store_passes_when_no_settings_submitted(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->textType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->textType();
         $group = $this->makeGroup();
 
         $this->actingAs($user)
@@ -114,12 +114,12 @@ class FieldValidationTest extends TestCase
 
     public function test_update_fails_when_settings_invalid(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->textType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->textType();
         $group = $this->makeGroup();
         $field = FieldModel::factory()->create([
             'field_type_id' => $type->id,
-            'settings'      => [],
+            'settings' => [],
         ]);
         $field->groups()->attach($group);
 
@@ -127,9 +127,9 @@ class FieldValidationTest extends TestCase
             ->withHeader('Accept', 'application/json')
             ->put(route('fields.update', $field->id), [
                 'field_type_id' => $type->id,
-                'name'          => $field->name,
-                'handle'        => $field->handle,
-                'settings'      => ['max_length' => 'not-a-number'],
+                'name' => $field->name,
+                'handle' => $field->handle,
+                'settings' => ['max_length' => 'not-a-number'],
             ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['settings.max_length']);
@@ -137,21 +137,21 @@ class FieldValidationTest extends TestCase
 
     public function test_update_passes_with_valid_settings(): void
     {
-        $user  = $this->makeSuperAdmin();
-        $type  = $this->textType();
+        $user = $this->makeSuperAdmin();
+        $type = $this->textType();
         $group = $this->makeGroup();
         $field = FieldModel::factory()->create([
             'field_type_id' => $type->id,
-            'settings'      => [],
+            'settings' => [],
         ]);
         $field->groups()->attach($group);
 
         $this->actingAs($user)
             ->put(route('fields.update', $field->id), [
                 'field_type_id' => $type->id,
-                'name'          => $field->name,
-                'handle'        => $field->handle,
-                'settings'      => ['placeholder' => 'Updated', 'max_length' => 100],
+                'name' => $field->name,
+                'handle' => $field->handle,
+                'settings' => ['placeholder' => 'Updated', 'max_length' => 100],
             ])
             ->assertRedirect();
     }

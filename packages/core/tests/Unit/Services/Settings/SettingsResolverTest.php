@@ -328,7 +328,7 @@ class SettingsResolverTest extends TestCase
     {
         $this->makeDomain('rw3');
         SettingValue::create(['domain' => 'rw3', 'field_handle' => 'rw3_timezone', 'user_id' => null, 'value_text' => 'UTC']);
-        SettingValue::create(['domain' => 'rw3', 'field_handle' => 'rw3_count',    'user_id' => null, 'value_integer' => 5]);
+        SettingValue::create(['domain' => 'rw3', 'field_handle' => 'rw3_count', 'user_id' => null, 'value_integer' => 5]);
 
         // Prime the cache.
         $this->settings->system('rw3');

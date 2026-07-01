@@ -71,7 +71,7 @@ class RecipeEntryTypeTest extends TestCase
 
     public function test_before_update_recomputes_total_time_when_prep_time_changes(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->create();
 
         $result = $type->beforeUpdate($entry, [
@@ -83,7 +83,7 @@ class RecipeEntryTypeTest extends TestCase
 
     public function test_before_update_does_not_inject_total_time_when_neither_time_field_present(): void
     {
-        $type  = $this->makeType();
+        $type = $this->makeType();
         $entry = Entry::factory()->create();
 
         $result = $type->beforeUpdate($entry, ['fields' => ['servings' => 6]]);

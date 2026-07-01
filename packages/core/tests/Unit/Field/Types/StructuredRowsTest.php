@@ -11,7 +11,7 @@ class StructuredRowsTest extends TestCase
     {
         return [
             ['handle' => 'heading', 'label' => 'Heading', 'type' => 'text'],
-            ['handle' => 'body',    'label' => 'Body',    'type' => 'textarea'],
+            ['handle' => 'body', 'label' => 'Body', 'type' => 'textarea'],
         ];
     }
 
@@ -57,7 +57,7 @@ class StructuredRowsTest extends TestCase
 
     public function test_cast_returns_array_as_is(): void
     {
-        $rows   = [['heading' => 'A', 'body' => 'B']];
+        $rows = [['heading' => 'A', 'body' => 'B']];
         $result = $this->make()->cast($rows);
         $this->assertSame($rows, $result);
     }
@@ -83,7 +83,7 @@ class StructuredRowsTest extends TestCase
 
     public function test_validate_enforces_min_rows(): void
     {
-        $type   = $this->make(['columns' => $this->columns(), 'min_rows' => 2]);
+        $type = $this->make(['columns' => $this->columns(), 'min_rows' => 2]);
         $result = $type->validate([['heading' => 'A', 'body' => 'B']]);
         $this->assertIsString($result);
         $this->assertStringContainsString('2', $result);
@@ -96,7 +96,7 @@ class StructuredRowsTest extends TestCase
             ['heading' => 'C', 'body' => 'D'],
             ['heading' => 'E', 'body' => 'F'],
         ];
-        $type   = $this->make(['columns' => $this->columns(), 'max_rows' => 2]);
+        $type = $this->make(['columns' => $this->columns(), 'max_rows' => 2]);
         $result = $type->validate($rows);
         $this->assertIsString($result);
         $this->assertStringContainsString('2', $result);
@@ -104,7 +104,7 @@ class StructuredRowsTest extends TestCase
 
     public function test_validate_returns_error_for_row_missing_column(): void
     {
-        $type   = $this->make(['columns' => $this->columns()]);
+        $type = $this->make(['columns' => $this->columns()]);
         $result = $type->validate([['heading' => 'A']]);
         $this->assertIsString($result);
         $this->assertStringContainsString('body', $result);
@@ -128,7 +128,11 @@ class StructuredRowsTest extends TestCase
         $type = $this->make(['columns' => $this->columns()]);
 
         // Row only has 'heading', missing 'body'
-        $params = ['value' => [['heading' => 'Hello']], 'field' => new class { public string $handle = 'test'; public string $label = 'Test'; public ?string $instructions = null; }, 'id' => 'test'];
+        $params = ['value' => [['heading' => 'Hello']], 'field' => new class {
+            public string $handle = 'test';
+            public string $label = 'Test';
+            public ?string $instructions = null;
+        }, 'id' => 'test'];
 
         // We test the normalisation logic directly through the render method
         // by checking the cast + normalisation path manually
@@ -148,8 +152,8 @@ class StructuredRowsTest extends TestCase
 
     public function test_render_ignores_extra_keys_from_removed_columns(): void
     {
-        $columns  = [['handle' => 'heading', 'label' => 'Heading', 'type' => 'text']];
-        $rows     = [['heading' => 'Hello', 'old_column' => 'stale']];
+        $columns = [['handle' => 'heading', 'label' => 'Heading', 'type' => 'text']];
+        $rows = [['heading' => 'Hello', 'old_column' => 'stale']];
 
         // Normalisation: fill missing declared keys; extra keys survive
         $normalised = array_map(function (array $row) use ($columns): array {

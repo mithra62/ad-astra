@@ -26,16 +26,20 @@
             <div>
                 <div class="flex flex-wrap items-center gap-2.5">
                     <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ field.name }}</h1>
-                    <span class="inline-flex rounded-full bg-canvas px-2.5 py-0.5 text-xs font-medium text-content">{{ field.fieldType.name }}</span>
-                    <span class="inline-flex rounded-full {{ field.hidden ? 'bg-amber-50 text-amber-700' : 'bg-accent-soft text-accent' }} px-2.5 py-0.5 text-xs font-medium">{{ field.hidden ? 'Hidden' : 'Visible' }}</span>
+                    <span
+                        class="inline-flex rounded-full bg-canvas px-2.5 py-0.5 text-xs font-medium text-content">{{ field.fieldType.name }}</span>
+                    <span
+                        class="inline-flex rounded-full {{ field.hidden ? 'bg-amber-50 text-amber-700' : 'bg-accent-soft text-accent' }} px-2.5 py-0.5 text-xs font-medium">{{ field.hidden ? 'Hidden' : 'Visible' }}</span>
                 </div>
                 <p class="mt-1 text-sm text-muted">Field definition and placement within {{ layout.name }}.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2 self-start">
-                <a href="{{ route('fields.groups.show', field.groups.first) }}" class="inline-flex items-center gap-1.5 rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle">
+                <a href="{{ route('fields.groups.show', field.groups.first) }}"
+                   class="inline-flex items-center gap-1.5 rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle">
                     Back to {{ field.groups.first.name }}
                 </a>
-                <a href="{{ route('fields.edit', field) }}" class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                <a href="{{ route('fields.edit', field) }}"
+                   class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
                     Edit Field
                 </a>
             </div>
@@ -83,26 +87,32 @@
                                         <h2 class="text-sm font-semibold text-content">{{ tab.name }}</h2>
                                         <p class="font-mono text-xs text-faint">{{ tab.handle }}</p>
                                     </div>
-                                    <span class="rounded-full bg-canvas px-2.5 py-0.5 text-xs font-medium text-muted">{{ tab.elements|length }} fields</span>
+                                    <span
+                                        class="rounded-full bg-canvas px-2.5 py-0.5 text-xs font-medium text-muted">{{ tab.elements|length }} fields</span>
                                 </div>
 
                                 <div class="space-y-2">
                                     {% for element in tab.elements %}
                                         {% set is_current = element.field.handle == field.handle %}
-                                        <div class="rounded-md border {{ is_current ? 'border-emerald-200 bg-accent-soft' : 'border-edge bg-surface' }} px-4 py-3">
-                                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                        <div
+                                            class="rounded-md border {{ is_current ? 'border-emerald-200 bg-accent-soft' : 'border-edge bg-surface' }} px-4 py-3">
+                                            <div
+                                                class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                                 <div class="min-w-0">
                                                     <p class="truncate text-sm font-medium {{ is_current ? 'text-emerald-900' : 'text-content' }}">{{ element.field.name }}</p>
                                                     <p class="truncate font-mono text-xs {{ is_current ? 'text-accent' : 'text-faint' }}">{{ element.field.handle }}</p>
                                                 </div>
                                                 <div class="flex flex-wrap gap-1.5">
                                                     {% if element.required %}
-                                                        <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">Required</span>
+                                                        <span
+                                                            class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">Required</span>
                                                     {% endif %}
                                                     {% if element.hidden %}
-                                                        <span class="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Hidden</span>
+                                                        <span
+                                                            class="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Hidden</span>
                                                     {% endif %}
-                                                    <span class="rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted">{{ element.width|default('full') }}</span>
+                                                    <span
+                                                        class="rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted">{{ element.width|default('full') }}</span>
                                                 </div>
                                             </div>
                                             {% if is_current and element.instructions|default('') %}
@@ -110,7 +120,8 @@
                                             {% endif %}
                                         </div>
                                     {% else %}
-                                        <p class="rounded-md border border-dashed border-edge px-4 py-6 text-center text-sm text-muted">No fields have been assigned to this tab.</p>
+                                        <p class="rounded-md border border-dashed border-edge px-4 py-6 text-center text-sm text-muted">
+                                            No fields have been assigned to this tab.</p>
                                     {% endfor %}
                                 </div>
                             </section>
@@ -126,7 +137,8 @@
                     </div>
                     <div class="space-y-2 px-5 py-4">
                         {% for group in field.groups %}
-                            <a  href="{{ route('fields.groups.show', group) }}" class="flex items-center justify-between rounded-md border border-edge px-3 py-2 text-sm font-medium text-content hover:bg-subtle">
+                            <a href="{{ route('fields.groups.show', group) }}"
+                               class="flex items-center justify-between rounded-md border border-edge px-3 py-2 text-sm font-medium text-content hover:bg-subtle">
                                 <span>{{ group.name }}</span>
                                 <span class="font-mono text-xs text-faint">#{{ group.id }}</span>
                             </a>

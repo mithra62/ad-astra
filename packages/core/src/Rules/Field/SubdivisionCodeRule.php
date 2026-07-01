@@ -21,8 +21,9 @@ readonly class SubdivisionCodeRule implements ValidationRule
 {
     public function __construct(
         private string $country,
-        private bool $allowFreetextFallback = true,
-    ) {
+        private bool   $allowFreetextFallback = true,
+    )
+    {
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void

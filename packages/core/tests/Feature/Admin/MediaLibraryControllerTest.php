@@ -78,8 +78,8 @@ class MediaLibraryControllerTest extends TestCase
     {
         $this->actingAs($this->makeSuperAdmin())
             ->post(route('media.libraries.store'), [
-                'name'    => 'Documents',
-                'handle'  => 'documents',
+                'name' => 'Documents',
+                'handle' => 'documents',
                 'adapter' => 'local',
             ])
             ->assertRedirect();
@@ -117,8 +117,8 @@ class MediaLibraryControllerTest extends TestCase
     public function test_show_lists_media_in_sort_order(): void
     {
         $library = $this->makeLibrary();
-        $first   = Media::factory()->create(['library_id' => $library->id, 'sort_order' => 1, 'name' => 'First']);
-        $second  = Media::factory()->create(['library_id' => $library->id, 'sort_order' => 2, 'name' => 'Second']);
+        $first = Media::factory()->create(['library_id' => $library->id, 'sort_order' => 1, 'name' => 'First']);
+        $second = Media::factory()->create(['library_id' => $library->id, 'sort_order' => 2, 'name' => 'Second']);
 
         $response = $this->actingAs($this->makeSuperAdmin())
             ->get(route('media.libraries.show', $library->id))
@@ -162,8 +162,8 @@ class MediaLibraryControllerTest extends TestCase
 
         $this->actingAs($this->makeSuperAdmin())
             ->put(route('media.libraries.update', $library->id), [
-                'name'    => 'Updated Name',
-                'handle'  => $library->handle,
+                'name' => 'Updated Name',
+                'handle' => $library->handle,
                 'adapter' => $library->adapter,
             ])
             ->assertRedirect(route('media.libraries'));
@@ -214,7 +214,7 @@ class MediaLibraryControllerTest extends TestCase
     {
         Storage::fake('local');
         $library = $this->makeLibrary();
-        $file    = UploadedFile::fake()->image('photo.jpg');
+        $file = UploadedFile::fake()->image('photo.jpg');
 
         $this->actingAs($this->makeSuperAdmin())
             ->post(route('media.libraries.upload', $library->id), ['file' => $file])

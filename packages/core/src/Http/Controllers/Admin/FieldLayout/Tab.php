@@ -75,7 +75,7 @@ class Tab extends Controller
         }
 
         // Exclude any field already assigned to ANY tab in this layout, not just the current tab.
-        $assignedIds = $layout->tabs->flatMap(fn ($t) => $t->elements->pluck('field_id'))->unique()->all();
+        $assignedIds = $layout->tabs->flatMap(fn($t) => $t->elements->pluck('field_id'))->unique()->all();
         $availableFields = $layout->availableFields()->whereNotIn('id', $assignedIds)->values();
         return $this->view('field-layouts.tabs.edit', array_merge(
             $this->sidebarData(),
@@ -97,8 +97,8 @@ class Tab extends Controller
         }
 
         // Exclude any field already assigned to ANY tab in this layout, not just the current tab.
-        $assignedIds = $layout->tabs->flatMap(fn ($t) => $t->elements->pluck('field_id'))->unique()->all();
-        $paletteIds  = $layout->availableFields()->pluck('id')->all();
+        $assignedIds = $layout->tabs->flatMap(fn($t) => $t->elements->pluck('field_id'))->unique()->all();
+        $paletteIds = $layout->availableFields()->pluck('id')->all();
         $availableFields = Field::with('fieldType')
             ->whereIn('id', $paletteIds)
             ->whereNotIn('id', $assignedIds)

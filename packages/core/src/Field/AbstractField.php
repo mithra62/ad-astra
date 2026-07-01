@@ -3,6 +3,7 @@
 namespace AdAstra\Field;
 
 use AdAstra\Models\Field;
+use InvalidArgumentException;
 
 abstract class AbstractField
 {
@@ -118,7 +119,7 @@ abstract class AbstractField
     {
         try {
             return $this->prepareForStorage($value);
-        } catch (\InvalidArgumentException) {
+        } catch (InvalidArgumentException) {
             return $value;
         }
     }
@@ -136,14 +137,14 @@ abstract class AbstractField
     public function settingsDefaults(): array
     {
         return collect($this->settings_form)
-            ->map(fn ($def) => $def['default'] ?? null)
+            ->map(fn($def) => $def['default'] ?? null)
             ->all();
     }
 
     public function settingsRules(): array
     {
         return collect($this->settings_form)
-            ->mapWithKeys(fn ($def, $key) => [
+            ->mapWithKeys(fn($def, $key) => [
                 "settings.{$key}" => $def['rules'] ?? 'nullable',
             ])
             ->all();

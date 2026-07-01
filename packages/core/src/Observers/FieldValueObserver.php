@@ -47,12 +47,12 @@ class FieldValueObserver
 
     private function syncMediables(FieldValue $fieldValue): void
     {
-        $type    = $fieldValue->fieldable_type;
-        $id      = $fieldValue->fieldable_id;
+        $type = $fieldValue->fieldable_type;
+        $id = $fieldValue->fieldable_id;
         $fieldId = $fieldValue->field_id;
 
         $instance = $fieldValue->field->typeInstance();
-        $newIds   = $instance->cast($fieldValue->value_json);
+        $newIds = $instance->cast($fieldValue->value_json);
 
         // Remove stale pivot rows for this field on this model.
         DB::table('mediables')
@@ -72,13 +72,13 @@ class FieldValueObserver
         $rows = [];
         foreach ($newIds as $sortOrder => $mediaId) {
             $rows[] = [
-                'media_id'      => $mediaId,
+                'media_id' => $mediaId,
                 'mediable_type' => $type,
-                'mediable_id'   => $id,
-                'field_id'      => $fieldId,
-                'sort_order'    => $sortOrder,
-                'created_at'    => now(),
-                'updated_at'    => now(),
+                'mediable_id' => $id,
+                'field_id' => $fieldId,
+                'sort_order' => $sortOrder,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
         }
 

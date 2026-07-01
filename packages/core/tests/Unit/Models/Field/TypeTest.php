@@ -7,6 +7,7 @@ use AdAstra\Field\Types\Text;
 use AdAstra\Models\Field\Type;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
+use stdClass;
 use Tests\TestCase;
 
 class TypeTest extends TestCase
@@ -55,7 +56,7 @@ class TypeTest extends TestCase
 
     public function test_instance_throws_runtime_exception_for_class_not_extending_abstract_field(): void
     {
-        $type = Type::factory()->create(['object' => \stdClass::class]);
+        $type = Type::factory()->create(['object' => stdClass::class]);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessageMatches('/must extend AbstractField/');

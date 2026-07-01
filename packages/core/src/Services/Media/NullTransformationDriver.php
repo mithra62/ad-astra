@@ -3,6 +3,7 @@
 namespace AdAstra\Services\Media;
 
 use AdAstra\Models\Media\Transformation;
+use RuntimeException;
 
 class NullTransformationDriver implements TransformationDriverInterface
 {
@@ -13,7 +14,7 @@ class NullTransformationDriver implements TransformationDriverInterface
 
     public function applySync(Transformation $transformation): string
     {
-        throw new \RuntimeException('No transformation driver configured.');
+        throw new RuntimeException('No transformation driver configured.');
     }
 
 }
