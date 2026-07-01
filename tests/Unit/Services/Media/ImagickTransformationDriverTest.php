@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Services\Media;
 
-use App\Models\Media;
-use App\Models\Media\Transformation;
-use App\Services\Media\ImagickTransformationDriver;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Transformation;
+use AdAstra\Services\Media\ImagickTransformationDriver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -220,7 +220,7 @@ class ImagickTransformationDriverTest extends TestCase
         $this->driver->dispatch($t);
 
         Queue::assertPushed(
-            \App\Jobs\ProcessTransformation::class,
+            \AdAstra\Jobs\ProcessTransformation::class,
             fn ($job) => $job->transformationId === $t->id
         );
     }

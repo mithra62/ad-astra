@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Actions\Entry\Tree;
 
-use App\Actions\Entry\Tree\CreateEntryTreeNode;
-use App\Actions\Entry\Tree\MoveEntryTreeNode;
-use App\Actions\Entry\Tree\RebuildEntryTreeUri;
-use App\Models\Entry;
-use App\Models\EntryGroup;
-use App\Models\EntryTree;
-use App\Models\EntryType;
-use App\Services\EntryService;
+use AdAstra\Actions\Entry\Tree\CreateEntryTreeNode;
+use AdAstra\Actions\Entry\Tree\MoveEntryTreeNode;
+use AdAstra\Actions\Entry\Tree\RebuildEntryTreeUri;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryTree;
+use AdAstra\Models\EntryType;
+use AdAstra\Services\EntryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
 use Tests\TestCase;

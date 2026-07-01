@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Support\Iso;
 
-use App\Support\Iso\Currencies;
+use AdAstra\Support\Iso\Currencies;
 use PHPUnit\Framework\TestCase;
 
 class CurrenciesTest extends TestCase

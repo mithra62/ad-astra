@@ -2,8 +2,8 @@
 
 namespace Database\Factories\FieldLayout;
 
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

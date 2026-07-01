@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Field\Types\Text;
-use App\Field\Types\EmailAddress;
-use App\Models\Field as FieldModel;
-use App\Models\Field\Group as FieldGroup;
-use App\Models\Field\Type as FieldType;
-use App\Models\Role;
-use App\Models\User;
+use AdAstra\Field\Types\Text;
+use AdAstra\Field\Types\EmailAddress;
+use AdAstra\Models\Field as FieldModel;
+use AdAstra\Models\Field\Group as FieldGroup;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Models\Role;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Actions\Media;
 
-use App\Actions\Media\DeleteMedia;
-use App\Models\Media;
+use AdAstra\Actions\Media\DeleteMedia;
+use AdAstra\Models\Media;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;

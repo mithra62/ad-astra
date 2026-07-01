@@ -2,13 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Enums\UserStatus;
+use AdAstra\Enums\UserStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\User>
  */
 class UserFactory extends Factory
 {
@@ -24,7 +24,7 @@ class UserFactory extends Factory
      */
     public function newModel(array $attributes = [])
     {
-        return (new \App\Models\User())->forceFill($attributes);
+        return (new \AdAstra\Models\User())->forceFill($attributes);
     }
 
     /**

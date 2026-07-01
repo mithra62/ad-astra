@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Traits;
 
-use App\Field\Types\Number;
-use App\Field\Types\Text;
-use App\Models\Category;
-use App\Models\Field;
-use App\Models\Field\Type as FieldType;
-use App\Models\FieldValue;
-use App\Traits\Field\PersistsFieldValues;
+use AdAstra\Field\Types\Number;
+use AdAstra\Field\Types\Text;
+use AdAstra\Models\Category;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Models\FieldValue;
+use AdAstra\Traits\Field\PersistsFieldValues;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

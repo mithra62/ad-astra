@@ -2,15 +2,15 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\EntryBehavior;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\Field;
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
-use App\Models\FieldLayout\TabElement;
-use App\Models\StatusGroup;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\EntryBehavior;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\Field;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout\TabElement;
+use AdAstra\Models\StatusGroup;
 use Database\Seeders\Concerns\BuildsLayouts;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;

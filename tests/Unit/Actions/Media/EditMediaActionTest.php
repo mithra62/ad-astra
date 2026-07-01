@@ -2,16 +2,16 @@
 
 namespace Tests\Unit\Actions\Media;
 
-use App\Actions\Media\EditMedia;
-use App\Field\Types\FileUpload;
-use App\Models\Category;
-use App\Models\Field;
-use App\Models\Field\Type as FieldType;
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
-use App\Models\FieldLayout\TabElement;
-use App\Models\Media;
-use App\Models\Media\Library;
+use AdAstra\Actions\Media\EditMedia;
+use AdAstra\Field\Types\FileUpload;
+use AdAstra\Models\Category;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout\TabElement;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -101,7 +101,7 @@ class EditMediaActionTest extends TestCase
         $library->update(['field_layout_id' => $layout->id]);
 
         $textType = FieldType::firstOrCreate(
-            ['object' => \App\Field\Types\Text::class],
+            ['object' => \AdAstra\Field\Types\Text::class],
             ['name' => 'Text', 'settings' => []]
         );
         $field = Field::factory()->create([

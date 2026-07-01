@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Support\Iso;
 
-use App\Support\Iso\Countries;
+use AdAstra\Support\Iso\Countries;
 use PHPUnit\Framework\TestCase;
 
 class CountriesTest extends TestCase

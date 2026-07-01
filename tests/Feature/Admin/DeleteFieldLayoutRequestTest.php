@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\FieldLayout;
-use App\Models\User;
-use App\Settings;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\User;
+use AdAstra\Settings;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;

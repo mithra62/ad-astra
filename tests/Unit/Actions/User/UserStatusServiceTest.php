@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Actions\User;
 
-use App\Enums\UserStatus;
-use App\Events\UserLockChanged;
-use App\Events\UserStatusChanged;
-use App\Models\User;
-use App\Services\UserService;
+use AdAstra\Enums\UserStatus;
+use AdAstra\Events\UserLockChanged;
+use AdAstra\Events\UserStatusChanged;
+use AdAstra\Models\User;
+use AdAstra\Services\UserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;

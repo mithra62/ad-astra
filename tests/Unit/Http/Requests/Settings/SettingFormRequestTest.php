@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Http\Requests\Settings;
 
-use App\Http\Requests\Settings\SettingFormRequest;
+use AdAstra\Http\Requests\Settings\SettingFormRequest;
 use Tests\TestCase;
 
 /**

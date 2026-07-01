@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\FieldLayout;
+use AdAstra\Models\FieldLayout;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

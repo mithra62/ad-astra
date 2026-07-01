@@ -2,24 +2,24 @@
 
 namespace Tests\Feature\Admin;
 
-use App\EntryTypes\BlogPostEntryType;
-use App\EntryTypes\EventEntryType;
-use App\EntryTypes\JobListingEntryType;
-use App\EntryTypes\ProductEntryType;
-use App\Models\Entry;
-use App\Models\EntryBehavior;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\Field;
-use App\Models\Field\Type as FieldType;
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
-use App\Models\FieldLayout\TabElement;
-use App\Models\FieldValue;
-use App\Models\Role;
-use App\Models\Status;
-use App\Models\StatusGroup;
-use App\Models\User;
+use AdAstra\EntryTypes\BlogPostEntryType;
+use AdAstra\EntryTypes\EventEntryType;
+use AdAstra\EntryTypes\JobListingEntryType;
+use AdAstra\EntryTypes\ProductEntryType;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryBehavior;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout\TabElement;
+use AdAstra\Models\FieldValue;
+use AdAstra\Models\Role;
+use AdAstra\Models\Status;
+use AdAstra\Models\StatusGroup;
+use AdAstra\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -129,7 +129,7 @@ class EntryTypeHooksTest extends TestCase
         $layout    = FieldLayout::factory()->create();
         $tab       = Tab::factory()->create(['field_layout_id' => $layout->id]);
         // Create one shared FieldType so all fields in this layout reuse the same
-        // type row — TypeFactory always emits Text / App\Field\Types\Text, and
+        // type row — TypeFactory always emits Text / AdAstra\Field\Types\Text, and
         // field_types.object has a unique constraint.
         $fieldType = FieldType::factory()->create();
 

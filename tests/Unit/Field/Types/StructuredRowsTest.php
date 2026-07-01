@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\StructuredRows;
+use AdAstra\Field\Types\StructuredRows;
 use Tests\TestCase;
 
 class StructuredRowsTest extends TestCase

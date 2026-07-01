@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\Entry;
-use App\Models\EntryAuthor;
-use App\Models\User;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryAuthor;
+use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;

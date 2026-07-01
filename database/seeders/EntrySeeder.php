@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Facades\Content;
-use App\Models\Category;
-use App\Models\Entry;
-use App\Models\EntryAuthor;
-use App\Models\User;
+use AdAstra\Facades\Content;
+use AdAstra\Models\Category;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryAuthor;
+use AdAstra\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;

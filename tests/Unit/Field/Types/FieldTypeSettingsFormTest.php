@@ -2,17 +2,17 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\Boolean;
-use App\Field\Types\ColorPicker;
-use App\Field\Types\Date;
-use App\Field\Types\EmailAddress;
-use App\Field\Types\FileUpload;
-use App\Field\Types\Html;
-use App\Field\Types\Number;
-use App\Field\Types\Relationship;
-use App\Field\Types\Telephone;
-use App\Field\Types\Textarea;
-use App\Field\Types\Url;
+use AdAstra\Field\Types\Boolean;
+use AdAstra\Field\Types\ColorPicker;
+use AdAstra\Field\Types\Date;
+use AdAstra\Field\Types\EmailAddress;
+use AdAstra\Field\Types\FileUpload;
+use AdAstra\Field\Types\Html;
+use AdAstra\Field\Types\Number;
+use AdAstra\Field\Types\Relationship;
+use AdAstra\Field\Types\Telephone;
+use AdAstra\Field\Types\Textarea;
+use AdAstra\Field\Types\Url;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

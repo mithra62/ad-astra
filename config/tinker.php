@@ -14,7 +14,7 @@ return [
     */
 
     'commands' => [
-        // App\Console\Commands\ExampleCommand::class,
+        // AdAstra\Console\Commands\ExampleCommand::class,
     ],
 
     /*
@@ -44,7 +44,7 @@ return [
     */
 
     'dont_alias' => [
-        'App\Nova',
+        'AdAstra\Nova',
     ],
 
 ];

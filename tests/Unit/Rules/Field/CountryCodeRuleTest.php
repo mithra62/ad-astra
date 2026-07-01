@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Rules\Field;
 
-use App\Rules\Field\CountryCodeRule;
+use AdAstra\Rules\Field\CountryCodeRule;
 use PHPUnit\Framework\TestCase;
 
 class CountryCodeRuleTest extends TestCase

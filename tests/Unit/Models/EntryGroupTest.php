@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\Entry;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\StatusGroup;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\StatusGroup;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;

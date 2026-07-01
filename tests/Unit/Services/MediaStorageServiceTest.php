@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Services;
 
-use App\Models\Media;
-use App\Models\Media\Library;
-use App\Services\MediaStorageService;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
+use AdAstra\Services\MediaStorageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;

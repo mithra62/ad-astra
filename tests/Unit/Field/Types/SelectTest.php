@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\Select;
+use AdAstra\Field\Types\Select;
 use Tests\TestCase;
 
 class SelectTest extends TestCase

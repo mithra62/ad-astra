@@ -2,8 +2,8 @@
 
 namespace Database\Factories\Media;
 
-use App\Models\Media\Library;
-use App\Models\StatusGroup;
+use AdAstra\Models\Media\Library;
+use AdAstra\Models\StatusGroup;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

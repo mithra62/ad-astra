@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\ApiLog;
-use App\Models\User;
+use AdAstra\Models\ApiLog;
+use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ApiLog>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\ApiLog>
  */
 class ApiLogFactory extends Factory
 {

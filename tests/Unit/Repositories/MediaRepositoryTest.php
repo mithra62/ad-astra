@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Repositories;
 
-use App\Models\Media;
-use App\Models\Media\Library;
-use App\Repositories\MediaRepository;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
+use AdAstra\Repositories\MediaRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -74,7 +74,7 @@ class MediaRepositoryTest extends TestCase
     public function test_apply_data_syncs_categories(): void
     {
         $media = Media::factory()->create();
-        $category = \App\Models\Category::factory()->create();
+        $category = \AdAstra\Models\Category::factory()->create();
 
         $this->repo->applyData($media, ['categories' => [$category->id]]);
 
@@ -88,7 +88,7 @@ class MediaRepositoryTest extends TestCase
     public function test_apply_data_does_not_touch_categories_when_key_absent(): void
     {
         $media    = Media::factory()->create();
-        $category = \App\Models\Category::factory()->create();
+        $category = \AdAstra\Models\Category::factory()->create();
         $media->categories()->attach($category->id);
 
         $this->repo->applyData($media, ['name' => 'Renamed']);
@@ -99,7 +99,7 @@ class MediaRepositoryTest extends TestCase
     public function test_apply_data_detaches_all_categories_when_passed_empty_array(): void
     {
         $media    = Media::factory()->create();
-        $category = \App\Models\Category::factory()->create();
+        $category = \AdAstra\Models\Category::factory()->create();
         $media->categories()->attach($category->id);
 
         $this->repo->applyData($media, ['categories' => []]);

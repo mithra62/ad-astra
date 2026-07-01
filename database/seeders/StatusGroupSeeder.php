@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Status;
-use App\Models\StatusGroup;
+use AdAstra\Models\Status;
+use AdAstra\Models\StatusGroup;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Field\Types\Text;
-use App\Field\Types\Textarea;
-use App\Models\Category;
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\Field;
-use App\Models\Field\Group as FieldGroup;
-use App\Models\Field\Type as FieldType;
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
-use App\Models\FieldLayout\TabElement;
-use App\Models\FieldValue;
+use AdAstra\Field\Types\Text;
+use AdAstra\Field\Types\Textarea;
+use AdAstra\Models\Category;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Group as FieldGroup;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout\TabElement;
+use AdAstra\Models\FieldValue;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;

@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\StatusGroup;
+use AdAstra\Models\StatusGroup;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

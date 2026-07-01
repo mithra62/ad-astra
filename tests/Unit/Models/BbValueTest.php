@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\BbValue;
+use AdAstra\Models\BbValue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

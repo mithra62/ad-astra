@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\Entry;
-use App\Models\EntryRelationship;
-use App\Models\Field;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryRelationship;
+use AdAstra\Models\Field;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

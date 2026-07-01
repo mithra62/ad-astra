@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\EntryBehavior;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\StatusGroup;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\EntryBehavior;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\StatusGroup;
 use Database\Seeders\Concerns\BuildsLayouts;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;

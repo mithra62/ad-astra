@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Actions\Entry;
 
-use App\Actions\Entry\CreateNewEntry;
-use App\Actions\Entry\RecordEntryMetric;
-use App\Actions\Entry\UpdateEntry;
-use App\Facades\Content;
-use App\Facades\Entries;
-use App\Models\Entry;
-use App\Models\EntryMetric;
-use App\Models\EntryType;
+use AdAstra\Actions\Entry\CreateNewEntry;
+use AdAstra\Actions\Entry\RecordEntryMetric;
+use AdAstra\Actions\Entry\UpdateEntry;
+use AdAstra\Facades\Content;
+use AdAstra\Facades\Entries;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryMetric;
+use AdAstra\Models\EntryType;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

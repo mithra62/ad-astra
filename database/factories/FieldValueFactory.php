@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Field;
-use App\Models\FieldValue;
-use App\Models\User;
+use AdAstra\Models\Field;
+use AdAstra\Models\FieldValue;
+use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

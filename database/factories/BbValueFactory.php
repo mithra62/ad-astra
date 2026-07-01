@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Models\BbValue;
+use AdAstra\Models\BbValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\BbValue>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\BbValue>
  */
 class BbValueFactory extends Factory
 {

@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\Entry;
-use App\Models\EntryAuthor;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\FieldLayout;
-use App\Models\User;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryAuthor;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;

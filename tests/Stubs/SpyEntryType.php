@@ -2,8 +2,8 @@
 
 namespace Tests\Stubs;
 
-use App\EntryTypes\AbstractEntryType;
-use App\Models\Entry;
+use AdAstra\EntryTypes\AbstractEntryType;
+use AdAstra\Models\Entry;
 
 /**
  * Concrete EntryType stub that records every lifecycle hook invocation via

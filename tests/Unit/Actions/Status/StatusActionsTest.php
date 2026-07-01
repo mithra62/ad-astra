@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Actions\Status;
 
-use App\Actions\Status\CreateNewStatus;
-use App\Actions\Status\EditStatus;
-use App\Models\Status;
-use App\Models\StatusGroup;
+use AdAstra\Actions\Status\CreateNewStatus;
+use AdAstra\Actions\Status\EditStatus;
+use AdAstra\Models\Status;
+use AdAstra\Models\StatusGroup;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;

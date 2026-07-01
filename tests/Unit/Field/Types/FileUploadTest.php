@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\FileUpload;
-use App\Models\Field;
-use App\Models\Field\Type;
-use App\Models\Media;
-use App\Models\Media\Library;
+use AdAstra\Field\Types\FileUpload;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\ApiLog;
-use App\Models\User;
+use AdAstra\Models\ApiLog;
+use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

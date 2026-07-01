@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Actions\FieldLayout\Tab;
 
-use App\Actions\FieldLayout\Tab\CreateNewTab;
-use App\Actions\FieldLayout\Tab\DeleteTab;
-use App\Actions\FieldLayout\Tab\EditTab;
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
+use AdAstra\Actions\FieldLayout\Tab\CreateNewTab;
+use AdAstra\Actions\FieldLayout\Tab\DeleteTab;
+use AdAstra\Actions\FieldLayout\Tab\EditTab;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

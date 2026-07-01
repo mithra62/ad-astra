@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\Category;
-use App\Models\Category\Group;
-use App\Models\User;
+use AdAstra\Models\Category;
+use AdAstra\Models\Category\Group;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;

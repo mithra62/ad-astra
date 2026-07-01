@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Jobs;
 
-use App\Jobs\PurgeDeletedMedia;
-use App\Models\Media;
-use App\Models\Media\Transformation;
+use AdAstra\Jobs\PurgeDeletedMedia;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Transformation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;

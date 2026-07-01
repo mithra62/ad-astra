@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Actions\FieldLayout;
 
-use App\Actions\FieldLayout\CreateNewFieldLayout;
-use App\Actions\FieldLayout\DeleteFieldLayout;
-use App\Actions\FieldLayout\EditFieldLayout;
-use App\Models\FieldLayout;
+use AdAstra\Actions\FieldLayout\CreateNewFieldLayout;
+use AdAstra\Actions\FieldLayout\DeleteFieldLayout;
+use AdAstra\Actions\FieldLayout\EditFieldLayout;
+use AdAstra\Models\FieldLayout;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\Field\Type;
+use AdAstra\Models\Field\Type;
 
 class FieldTypes
 {
     public function run(): void
     {
-        Type::create(['name' => 'text', 'object' => 'App\\Fieldtypes\\Text']);
-        Type::create(['name' => 'textarea', 'object' => 'App\\Fieldtypes\\Textarea']);
-        Type::create(['name' => 'text', 'object' => 'App\\Fieldtypes\\Text']);
-        Type::create(['name' => 'text', 'object' => 'App\\Fieldtypes\\Text']);
-        Type::create(['name' => 'text', 'object' => 'App\\Fieldtypes\\Text']);
+        Type::create(['name' => 'text', 'object' => 'AdAstra\\Fieldtypes\\Text']);
+        Type::create(['name' => 'textarea', 'object' => 'AdAstra\\Fieldtypes\\Textarea']);
+        Type::create(['name' => 'text', 'object' => 'AdAstra\\Fieldtypes\\Text']);
+        Type::create(['name' => 'text', 'object' => 'AdAstra\\Fieldtypes\\Text']);
+        Type::create(['name' => 'text', 'object' => 'AdAstra\\Fieldtypes\\Text']);
     }
 }

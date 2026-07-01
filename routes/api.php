@@ -1,14 +1,14 @@
 <?php
 
-use App\Http\Controllers\Api\v1\Account;
-use App\Http\Controllers\Api\v1\Categories;
-use App\Http\Controllers\Api\v1\CategoryGroups;
-use App\Http\Controllers\Api\v1\Entries;
-use App\Http\Controllers\Api\v1\EntryGroups;
-use App\Http\Controllers\Api\v1\Statuses;
-use App\Http\Controllers\Api\v1\StatusGroups;
-use App\Http\Controllers\Api\v1\User;
-use App\Http\Middleware\LogRequestResponse;
+use AdAstra\Http\Controllers\Api\v1\Account;
+use AdAstra\Http\Controllers\Api\v1\Categories;
+use AdAstra\Http\Controllers\Api\v1\CategoryGroups;
+use AdAstra\Http\Controllers\Api\v1\Entries;
+use AdAstra\Http\Controllers\Api\v1\EntryGroups;
+use AdAstra\Http\Controllers\Api\v1\Statuses;
+use AdAstra\Http\Controllers\Api\v1\StatusGroups;
+use AdAstra\Http\Controllers\Api\v1\User;
+use AdAstra\Http\Middleware\LogRequestResponse;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {

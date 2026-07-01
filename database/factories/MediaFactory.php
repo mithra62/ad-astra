@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Media;
-use App\Models\Media\Library;
-use App\Models\Status;
-use App\Models\StatusGroup;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
+use AdAstra\Models\Status;
+use AdAstra\Models\StatusGroup;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

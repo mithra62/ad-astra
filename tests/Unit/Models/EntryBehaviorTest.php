@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Models;
 
-use App\EntryTypes\AbstractEntryType;
-use App\EntryTypes\BlogPostEntryType;
-use App\Models\EntryBehavior;
-use App\Models\EntryType;
+use AdAstra\EntryTypes\AbstractEntryType;
+use AdAstra\EntryTypes\BlogPostEntryType;
+use AdAstra\Models\EntryBehavior;
+use AdAstra\Models\EntryType;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
@@ -59,7 +59,7 @@ class EntryBehaviorTest extends TestCase
 
     public function test_instance_throws_runtime_exception_for_nonexistent_class(): void
     {
-        Relation::morphMap(['behavior.fake-missing' => 'App\\Nonexistent\\Behavior']);
+        Relation::morphMap(['behavior.fake-missing' => 'AdAstra\\Nonexistent\\Behavior']);
 
         $behavior = EntryBehavior::factory()->create(['class' => 'behavior.fake-missing']);
         $entryType = EntryType::factory()->create(['entry_behavior_id' => $behavior->id]);

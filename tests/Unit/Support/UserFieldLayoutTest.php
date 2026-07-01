@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Support;
 
-use App\Models\FieldLayout;
-use App\Settings;
-use App\Support\UserFieldLayout;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Settings;
+use AdAstra\Support\UserFieldLayout;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

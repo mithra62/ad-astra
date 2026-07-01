@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Field;
 
-use App\Field\Types\Money;
-use App\Models\Category;
-use App\Models\Field;
-use App\Models\Field\Type as FieldType;
-use App\Repositories\AbstractFieldableRepository;
-use App\Traits\Field\PersistsFieldValues;
+use AdAstra\Field\Types\Money;
+use AdAstra\Models\Category;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Repositories\AbstractFieldableRepository;
+use AdAstra\Traits\Field\PersistsFieldValues;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Tests\TestCase;
@@ -98,13 +98,13 @@ class PrepareForStoragePipelineTest extends TestCase
         // Two raw FieldValue rows: one priced at $42.50 (4250 cents) and one at $99.99 (9999 cents).
         $entryA = $this->makeEntry();
         $entryB = $this->makeEntry();
-        \App\Models\FieldValue::create([
+        \AdAstra\Models\FieldValue::create([
             'field_id' => $field->id,
             'fieldable_id' => $entryA->id,
             'fieldable_type' => $entryA->getMorphClass(),
             'value_integer' => 4250,
         ]);
-        \App\Models\FieldValue::create([
+        \AdAstra\Models\FieldValue::create([
             'field_id' => $field->id,
             'fieldable_id' => $entryB->id,
             'fieldable_type' => $entryB->getMorphClass(),
@@ -112,7 +112,7 @@ class PrepareForStoragePipelineTest extends TestCase
         ]);
 
         // Query with the wire-format "42.50" should match the entry stored as 4250.
-        $matches = (new \App\Builders\EntryQueryBuilder())
+        $matches = (new \AdAstra\Builders\EntryQueryBuilder())
             ->whereField('price', '42.50')
             ->get()
             ->pluck('id')
@@ -126,7 +126,7 @@ class PrepareForStoragePipelineTest extends TestCase
         $this->makeMoneyField('price', ['currency' => 'USD']);
 
         // Bad query input must not raise — just return zero results.
-        $matches = (new \App\Builders\EntryQueryBuilder())
+        $matches = (new \AdAstra\Builders\EntryQueryBuilder())
             ->whereField('price', 'garbage')
             ->get()
             ->pluck('id')
@@ -176,7 +176,7 @@ class PrepareForStoragePipelineTest extends TestCase
     private function makeTextField(string $handle): Field
     {
         $type = FieldType::firstOrCreate(
-            ['object' => \App\Field\Types\Text::class],
+            ['object' => \AdAstra\Field\Types\Text::class],
             ['name' => 'Text'],
         );
 
@@ -186,17 +186,17 @@ class PrepareForStoragePipelineTest extends TestCase
         ]);
     }
 
-    private function makeEntry(): \App\Models\Entry
+    private function makeEntry(): \AdAstra\Models\Entry
     {
-        $statusGroup = \App\Models\StatusGroup::factory()->create();
-        \App\Models\Status::factory()->default()->create([
+        $statusGroup = \AdAstra\Models\StatusGroup::factory()->create();
+        \AdAstra\Models\Status::factory()->default()->create([
             'status_group_id' => $statusGroup->id,
             'handle' => 'draft',
         ]);
-        $group = \App\Models\EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
-        $type = \App\Models\EntryType::factory()->create(['entry_group_id' => $group->id]);
+        $group = \AdAstra\Models\EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
+        $type = \AdAstra\Models\EntryType::factory()->create(['entry_group_id' => $group->id]);
 
-        return \App\Models\Entry::factory()->create([
+        return \AdAstra\Models\Entry::factory()->create([
             'entry_group_id' => $group->id,
             'entry_type_id' => $type->id,
         ]);

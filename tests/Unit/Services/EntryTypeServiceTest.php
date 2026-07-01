@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Services;
 
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Services\EntryTypeService;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Services\EntryTypeService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
+use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EntryAuthor>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\EntryAuthor>
  */
 class EntryAuthorFactory extends Factory
 {

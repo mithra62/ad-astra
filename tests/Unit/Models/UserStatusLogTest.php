@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\User;
-use App\Models\UserStatusLog;
+use AdAstra\Models\User;
+use AdAstra\Models\UserStatusLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

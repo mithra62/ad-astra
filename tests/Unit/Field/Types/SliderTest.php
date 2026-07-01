@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\Slider;
+use AdAstra\Field\Types\Slider;
 use Tests\TestCase;
 
 class SliderTest extends TestCase

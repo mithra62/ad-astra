@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Media\Library as MediaLibrary;
+use AdAstra\Models\Media\Library as MediaLibrary;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

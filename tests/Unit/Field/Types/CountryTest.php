@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\Country;
-use App\Rules\Field\CountryCodeRule;
+use AdAstra\Field\Types\Country;
+use AdAstra\Rules\Field\CountryCodeRule;
 use PHPUnit\Framework\TestCase;
 
 class CountryTest extends TestCase

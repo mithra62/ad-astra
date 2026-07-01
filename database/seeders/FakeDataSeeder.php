@@ -2,15 +2,15 @@
 
 namespace Database\Seeders;
 
-use App\Enums\UserStatus;
-use App\Facades\Categories;
-use App\Facades\Content;
-use App\Models\Category;
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\User;
-use App\Services\UserService;
+use AdAstra\Enums\UserStatus;
+use AdAstra\Facades\Categories;
+use AdAstra\Facades\Content;
+use AdAstra\Models\Category;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\User;
+use AdAstra\Services\UserService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
@@ -367,7 +367,7 @@ class FakeDataSeeder extends Seeder
 
     /**
      * Generate a single plausible fake value for a given field type class.
-     * Matched on the short class name so new types in App\Field\Types are
+     * Matched on the short class name so new types in AdAstra\Field\Types are
      * covered by the default arm without requiring changes here.
      */
     private function fakeFieldValue(string $typeClass): mixed
@@ -417,7 +417,7 @@ class FakeDataSeeder extends Seeder
         for ($i = 0; $i < self::ENTRY_COUNT; $i++) {
             $typeHandle = fake()->randomElement($typeHandles);
 
-            /** @var \App\Models\EntryType|null $entryType */
+            /** @var \AdAstra\Models\EntryType|null $entryType */
             $entryType = $entryTypes->get($typeHandle);
             if (!$entryType) {
                 $failed++;

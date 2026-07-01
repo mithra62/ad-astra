@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Actions\Status\Group;
 
-use App\Actions\Status\Group\CreateNewStatusGroup;
-use App\Actions\Status\Group\EditStatusGroup;
-use App\Models\StatusGroup;
+use AdAstra\Actions\Status\Group\CreateNewStatusGroup;
+use AdAstra\Actions\Status\Group\EditStatusGroup;
+use AdAstra\Models\StatusGroup;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

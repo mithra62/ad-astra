@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\EntryBehavior;
+use AdAstra\Models\EntryBehavior;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

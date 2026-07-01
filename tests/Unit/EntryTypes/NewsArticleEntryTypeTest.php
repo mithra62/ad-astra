@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\EntryTypes;
 
-use App\EntryTypes\NewsArticleEntryType;
-use App\Models\EntryBehavior;
-use App\Models\EntryType;
+use AdAstra\EntryTypes\NewsArticleEntryType;
+use AdAstra\Models\EntryBehavior;
+use AdAstra\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

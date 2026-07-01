@@ -1,9 +1,9 @@
 <?php
 
-use App\Providers\AppServiceProvider;
-use App\Providers\BotBlockServiceProvider;
-use App\Providers\ContentServiceProvider;
-use App\Providers\FortifyServiceProvider;
+use AdAstra\Providers\AppServiceProvider;
+use AdAstra\Providers\BotBlockServiceProvider;
+use AdAstra\Providers\ContentServiceProvider;
+use AdAstra\Providers\FortifyServiceProvider;
 
 return [
     AppServiceProvider::class,

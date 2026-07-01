@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Observers;
 
-use App\Field\Types\FileUpload;
-use App\Field\Types\Media as MediaField;
-use App\Models\Entry;
-use App\Models\Field;
-use App\Models\Field\Type as FieldType;
-use App\Models\FieldValue;
-use App\Models\Media;
-use App\Models\Media\Library;
+use AdAstra\Field\Types\FileUpload;
+use AdAstra\Field\Types\Media as MediaField;
+use AdAstra\Models\Entry;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Models\FieldValue;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -140,7 +140,7 @@ class FieldValueObserverTest extends TestCase
 
     public function test_saving_non_file_upload_field_does_not_touch_mediables(): void
     {
-        $textType  = FieldType::firstOrCreate(['object' => \App\Field\Types\Text::class], ['name' => 'Text', 'object' => \App\Field\Types\Text::class]);
+        $textType  = FieldType::firstOrCreate(['object' => \AdAstra\Field\Types\Text::class], ['name' => 'Text', 'object' => \AdAstra\Field\Types\Text::class]);
         $field     = Field::factory()->create(['field_type_id' => $textType->id]);
         $entry     = $this->makeEntry();
 

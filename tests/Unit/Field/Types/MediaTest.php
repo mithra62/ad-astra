@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Contracts\SyncsToMediables;
-use App\Field\Types\Media;
-use App\Models\Media as MediaModel;
-use App\Models\Media\Library;
+use AdAstra\Contracts\SyncsToMediables;
+use AdAstra\Field\Types\Media;
+use AdAstra\Models\Media as MediaModel;
+use AdAstra\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
@@ -253,14 +253,14 @@ class MediaTest extends TestCase
     // which makes any `required` check fail even when media is selected.
     // -------------------------------------------------------------------------
 
-    private function makeFieldWithHandle(string $handle): \App\Models\Field
+    private function makeFieldWithHandle(string $handle): \AdAstra\Models\Field
     {
-        $fieldType = \App\Models\Field\Type::firstOrCreate(
+        $fieldType = \AdAstra\Models\Field\Type::firstOrCreate(
             ['object' => Media::class],
             ['name' => 'Media', 'object' => Media::class]
         );
 
-        return \App\Models\Field::factory()->create([
+        return \AdAstra\Models\Field::factory()->create([
             'field_type_id' => $fieldType->id,
             'handle'        => $handle,
         ]);

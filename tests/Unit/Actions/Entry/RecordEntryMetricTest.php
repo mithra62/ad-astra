@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Actions\Entry;
 
-use App\Actions\Entry\RecordEntryMetric;
-use App\Models\Entry;
-use App\Models\EntryMetric;
+use AdAstra\Actions\Entry\RecordEntryMetric;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryMetric;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

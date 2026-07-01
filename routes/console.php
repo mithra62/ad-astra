@@ -1,7 +1,7 @@
 <?php
 
-use App\Jobs\PruneApiLogs;
-use App\Jobs\PurgeDeletedMedia;
+use AdAstra\Jobs\PruneApiLogs;
+use AdAstra\Jobs\PurgeDeletedMedia;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;

@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Support\Iso;
 
-use App\Support\Iso\TimeValue;
+use AdAstra\Support\Iso\TimeValue;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

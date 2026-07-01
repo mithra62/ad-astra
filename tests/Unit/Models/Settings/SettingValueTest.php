@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Models\Settings;
 
-use App\Models\SettingValue;
-use App\Models\User;
+use AdAstra\Models\SettingValue;
+use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

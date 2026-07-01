@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\Category;
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\Media;
-use App\Models\Media\Library;
-use App\Models\Role;
-use App\Models\User;
+use AdAstra\Models\Category;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
+use AdAstra\Models\Role;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;

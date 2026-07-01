@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Settings;
+use AdAstra\Settings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;

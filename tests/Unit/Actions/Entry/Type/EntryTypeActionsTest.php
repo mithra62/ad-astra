@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Actions\Entry\Type;
 
-use App\Actions\Entry\Type\CreateNewEntryType;
-use App\Actions\Entry\Type\EditEntryType;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\FieldLayout;
-use App\Services\EntryTypeService;
+use AdAstra\Actions\Entry\Type\CreateNewEntryType;
+use AdAstra\Actions\Entry\Type\EditEntryType;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Services\EntryTypeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\AbstractField;
-use App\Field\Types\Relationship;
-use App\Models\Entry;
-use App\Models\EntryGroup;
-use App\Models\Field;
+use AdAstra\Field\AbstractField;
+use AdAstra\Field\Types\Relationship;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\Field;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

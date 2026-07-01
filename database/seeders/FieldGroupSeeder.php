@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Field\Types\Boolean;
-use App\Field\Types\Date;
-use App\Field\Types\EmailAddress;
-use App\Field\Types\Number;
-use App\Field\Types\Relationship;
-use App\Field\Types\Text;
-use App\Field\Types\Textarea;
-use App\Field\Types\Url;
-use App\Models\Field;
-use App\Models\Field\Group as FieldGroup;
-use App\Models\Field\Type as FieldType;
+use AdAstra\Field\Types\Boolean;
+use AdAstra\Field\Types\Date;
+use AdAstra\Field\Types\EmailAddress;
+use AdAstra\Field\Types\Number;
+use AdAstra\Field\Types\Relationship;
+use AdAstra\Field\Types\Text;
+use AdAstra\Field\Types\Textarea;
+use AdAstra\Field\Types\Url;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Group as FieldGroup;
+use AdAstra\Models\Field\Type as FieldType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

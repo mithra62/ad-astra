@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Actions\Media\Library;
 
-use App\Actions\Media\Library\UploadMedia;
-use App\Http\Requests\FormRequest;
-use App\Models\Media;
-use App\Models\Media\Library;
-use App\Services\MediaStorageService;
+use AdAstra\Actions\Media\Library\UploadMedia;
+use AdAstra\Http\Requests\FormRequest;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
+use AdAstra\Services\MediaStorageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Mockery;

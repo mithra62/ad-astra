@@ -2,12 +2,12 @@
 
 namespace Database\Factories\User;
 
-use App\Models\User;
-use App\Models\User\OauthToken;
+use AdAstra\Models\User;
+use AdAstra\Models\User\OauthToken;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User\OauthToken>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\User\OauthToken>
  */
 class OauthTokenFactory extends Factory
 {

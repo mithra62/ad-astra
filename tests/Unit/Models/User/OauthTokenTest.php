@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Models\User;
 
-use App\Models\User;
-use App\Models\User\OauthToken;
+use AdAstra\Models\User;
+use AdAstra\Models\User\OauthToken;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;

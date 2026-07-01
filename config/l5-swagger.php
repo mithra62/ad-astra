@@ -44,7 +44,7 @@ return [
                  * Absolute paths to directory containing the swagger annotations are stored.
                  */
                 'annotations' => [
-                    base_path('app'),
+                    base_path('packages/core/src'),
                 ],
             ],
         ],
@@ -144,7 +144,7 @@ return [
              * @see \OpenApi\scan
              */
             'processors' => [
-                // new \App\SwaggerProcessors\SchemaQueryParameter(),
+                // new \AdAstra\SwaggerProcessors\SchemaQueryParameter(),
             ],
 
             /**

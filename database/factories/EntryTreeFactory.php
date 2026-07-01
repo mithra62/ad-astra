@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Entry;
-use App\Models\EntryTree;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryTree;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

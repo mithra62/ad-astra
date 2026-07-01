@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Services\Media;
 
-use App\Models\Media;
-use App\Models\Media\Transformation;
-use App\Services\Media\GDTransformationDriver;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Transformation;
+use AdAstra\Services\Media\GDTransformationDriver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -206,7 +206,7 @@ class GDTransformationDriverTest extends TestCase
         $this->driver->dispatch($t);
 
         \Illuminate\Support\Facades\Queue::assertPushed(
-            \App\Jobs\ProcessTransformation::class,
+            \AdAstra\Jobs\ProcessTransformation::class,
             fn ($job) => $job->transformationId === $t->id
         );
     }

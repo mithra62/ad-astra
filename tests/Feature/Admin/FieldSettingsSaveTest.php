@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\Field as FieldModel;
-use App\Models\FieldValue;
+use AdAstra\Models\Field as FieldModel;
+use AdAstra\Models\FieldValue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Admin\Concerns\MakesFieldTestFixtures;
 use Tests\TestCase;

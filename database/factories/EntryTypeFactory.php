@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\EntryBehavior;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
+use AdAstra\Models\EntryBehavior;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

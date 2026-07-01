@@ -1,0 +1,30 @@
+<?php
+
+namespace AdAstra\Models\Field;
+
+use AdAstra\Models\Field;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+
+class Group extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'handle',
+        'description',
+    ];
+
+    /**
+     * @var string
+     */
+    protected $table = 'field_groups';
+
+    public function fields(): MorphToMany
+    {
+        return $this->morphToMany(Field::class, 'fieldable')
+            ->withTimestamps();
+    }
+}

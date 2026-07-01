@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\StateProvince;
-use App\Rules\Field\SubdivisionCodeRule;
+use AdAstra\Field\Types\StateProvince;
+use AdAstra\Rules\Field\SubdivisionCodeRule;
 use PHPUnit\Framework\TestCase;
 
 class StateProvinceTest extends TestCase

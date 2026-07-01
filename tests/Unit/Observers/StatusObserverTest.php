@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Observers;
 
-use App\Models\Entry;
-use App\Models\Media;
-use App\Models\Media\Library;
-use App\Models\Status;
-use App\Models\StatusGroup;
+use AdAstra\Models\Entry;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
+use AdAstra\Models\Status;
+use AdAstra\Models\StatusGroup;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;

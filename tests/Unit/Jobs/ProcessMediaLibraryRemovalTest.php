@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Jobs;
 
-use App\Jobs\ProcessMediaLibraryRemoval;
-use App\Models\Media;
-use App\Models\Media\Library;
+use AdAstra\Jobs\ProcessMediaLibraryRemoval;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Models\Media;
 
-use App\Models\Media;
-use App\Models\Media\Transformation;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Transformation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;

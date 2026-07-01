@@ -2,15 +2,15 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\Category;
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\Entry;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\Role;
-use App\Models\Status;
-use App\Models\StatusGroup;
-use App\Models\User;
+use AdAstra\Models\Category;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\Role;
+use AdAstra\Models\Status;
+use AdAstra\Models\StatusGroup;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

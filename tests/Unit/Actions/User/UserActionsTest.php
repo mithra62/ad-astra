@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Actions\User;
 
-use App\Actions\User\CreateNewUser;
-use App\Actions\User\ResetUserPassword;
-use App\Actions\User\UpdateUserPassword;
-use App\Actions\User\UpdateUserProfileInformation;
-use App\Facades\Users as UsersFacade;
-use App\Models\User;
+use AdAstra\Actions\User\CreateNewUser;
+use AdAstra\Actions\User\ResetUserPassword;
+use AdAstra\Actions\User\UpdateUserPassword;
+use AdAstra\Actions\User\UpdateUserProfileInformation;
+use AdAstra\Facades\Users as UsersFacade;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;

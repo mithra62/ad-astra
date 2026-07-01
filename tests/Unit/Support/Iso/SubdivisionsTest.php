@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Support\Iso;
 
-use App\Support\Iso\Subdivisions;
+use AdAstra\Support\Iso\Subdivisions;
 use PHPUnit\Framework\TestCase;
 
 class SubdivisionsTest extends TestCase

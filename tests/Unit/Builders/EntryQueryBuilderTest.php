@@ -2,21 +2,21 @@
 
 namespace Tests\Unit\Builders;
 
-use App\Builders\EntryQueryBuilder;
-use App\Field\Types\Relationship;
-use App\Field\Types\Text;
-use App\Models\Category;
-use App\Models\Entry;
-use App\Models\EntryAuthor;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\Field;
-use App\Models\Field\Type;
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
-use App\Models\FieldLayout\TabElement;
-use App\Models\FieldValue;
-use App\Models\User;
+use AdAstra\Builders\EntryQueryBuilder;
+use AdAstra\Field\Types\Relationship;
+use AdAstra\Field\Types\Text;
+use AdAstra\Models\Category;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryAuthor;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout\TabElement;
+use AdAstra\Models\FieldValue;
+use AdAstra\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;

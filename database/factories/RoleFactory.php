@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Models\Role;
+use AdAstra\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Role>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdAstra\Models\Role>
  */
 class RoleFactory extends Factory
 {

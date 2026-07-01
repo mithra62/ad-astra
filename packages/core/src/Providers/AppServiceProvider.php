@@ -1,0 +1,210 @@
+<?php
+
+namespace AdAstra\Providers;
+
+use AdAstra\Events\UserLockChanged;
+use AdAstra\Events\UserStatusChanged;
+use AdAstra\Listeners\WriteUserStatusLog;
+use AdAstra\EntryTypes\BlogPostEntryType;
+use AdAstra\EntryTypes\EventEntryType;
+use AdAstra\EntryTypes\GeneralEntryType;
+use AdAstra\EntryTypes\JobListingEntryType;
+use AdAstra\EntryTypes\NewsArticleEntryType;
+use AdAstra\EntryTypes\PageEntryType;
+use AdAstra\EntryTypes\PodcastEpisodeEntryType;
+use AdAstra\EntryTypes\PortfolioItemEntryType;
+use AdAstra\EntryTypes\ProductEntryType;
+use AdAstra\EntryTypes\RecipeEntryType;
+use AdAstra\EntryTypes\VideoEntryType;
+use AdAstra\Models\Category;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\Field\Group as FieldGroup;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library as MediaLibrary;
+use AdAstra\Models\EntryTree;
+use AdAstra\Models\Status;
+use AdAstra\Models\User;
+use AdAstra\Observers\EntryTreeObserver;
+use AdAstra\Observers\FieldValueObserver;
+use AdAstra\Observers\StatusObserver;
+use AdAstra\Rest\Api;
+use AdAstra\Services\CategoryService;
+use AdAstra\Services\EntryAuthorService;
+use AdAstra\Services\FieldService;
+use AdAstra\Services\FilesService;
+use AdAstra\Services\Media\GDTransformationDriver;
+use AdAstra\Services\Media\NullTransformationDriver;
+use AdAstra\Services\Media\TransformationDriverInterface;
+use AdAstra\Services\MediaStorageService;
+use AdAstra\Services\UserService;
+use AdAstra\Settings;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        // Framework models live under AdAstra\Models\, but their factories remain in
+        // the Database\Factories\ namespace. Laravel's default guessers assume the
+        // application namespace (App\), so neither direction bridges to AdAstra\ on its
+        // own. Map both. (Stage 2 will move factories into the package and use per-model
+        // newFactory() instead.)
+        //
+        // model -> factory, e.g. AdAstra\Models\Entry -> Database\Factories\EntryFactory
+        Factory::guessFactoryNamesUsing(
+            fn (string $modelName) => 'Database\\Factories\\'
+                . Str::after($modelName, 'AdAstra\\Models\\') . 'Factory'
+        );
+        // factory -> model (for factories that omit $model), e.g.
+        // Database\Factories\StatusGroupFactory -> AdAstra\Models\StatusGroup
+        Factory::guessModelNamesUsing(function (Factory $factory) {
+            $basename = Str::replaceLast(
+                'Factory',
+                '',
+                Str::replaceFirst('Database\\Factories\\', '', get_class($factory))
+            );
+            $modelsClass = 'AdAstra\\Models\\' . $basename;
+
+            return class_exists($modelsClass) ? $modelsClass : 'AdAstra\\' . $basename;
+        });
+
+        // Bind by class name so constructor injection works in controllers,
+        // then alias to 'settings' for backwards-compatible app('settings') calls.
+        $this->app->singleton(Settings::class, fn () => new Settings());
+        $this->app->alias(Settings::class, 'settings');
+
+        $this->app->singleton('api', function ($app) {
+            return new Api($app);
+        });
+
+        $this->app->singleton('files-service', function ($app) {
+            return new FilesService($app);
+        });
+
+        $this->app->singleton('fields-service', function ($app) {
+            return new FieldService($app);
+        });
+
+        $this->app->singleton(UserService::class, fn () => new UserService());
+        $this->app->singleton(CategoryService::class, fn ($app) => new CategoryService($app));
+        $this->app->singleton(EntryAuthorService::class, fn () => new EntryAuthorService());
+
+        // Media layer
+        $this->app->bind(TransformationDriverInterface::class, function () {
+            if (extension_loaded('imagick')) {
+                return new \AdAstra\Services\Media\ImagickTransformationDriver();
+            }
+            if (extension_loaded('gd')) {
+                return new GDTransformationDriver();
+            }
+            return new NullTransformationDriver();
+        });
+        $this->app->singleton('media-service', fn () => new MediaStorageService());
+
+        // Schema macro for the status-denormalization column triple. FK to
+        // `statuses` is intentionally NOT included — this codebase uses a
+        // deferred-FK pattern (e.g. 2026_05_07_000003_add_media_foreign_keys.php)
+        // because `statuses` doesn't exist until April 2026. Add the FK in a
+        // follow-up migration once the table exists.
+        Blueprint::macro('statusColumns', function (): void {
+            /** @var Blueprint $this */
+            $this->unsignedBigInteger('status_id')->nullable()->index();
+            $this->string('status_handle')->nullable()->index();
+            $this->boolean('status_is_public')->default(false)->index();
+        });
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        // Decouple stored polymorphic type strings from class names so that
+        // model renames do not silently orphan rows in polymorphic tables.
+        Relation::morphMap([
+            'entry' => Entry::class,
+            'entry_group' => EntryGroup::class,
+            'entry_type' => EntryType::class,
+            'category' => Category::class,
+            'category_group' => CategoryGroup::class,
+            'field_group' => FieldGroup::class,
+            'media' => Media::class,
+            'media_library' => MediaLibrary::class,
+            'user' => User::class,
+
+            // Entry behavior concrete classes, keyed by behavior handle
+            'behavior.general' => GeneralEntryType::class,
+            'behavior.blog-post' => BlogPostEntryType::class,
+            'behavior.product' => ProductEntryType::class,
+            'behavior.page' => PageEntryType::class,
+            'behavior.event' => EventEntryType::class,
+            'behavior.job-listing' => JobListingEntryType::class,
+            'behavior.news-article' => NewsArticleEntryType::class,
+            'behavior.podcast-episode' => PodcastEpisodeEntryType::class,
+            'behavior.portfolio-item' => PortfolioItemEntryType::class,
+            'behavior.recipe' => RecipeEntryType::class,
+            'behavior.video' => VideoEntryType::class,
+        ]);
+
+        // Status sync: force-boot every HasStatus consumer so the trait's
+        // bootHasStatus() fires and registers each one with StatusSyncRegistry
+        // BEFORE StatusObserver might read the registry. Without this, a queue
+        // worker or artisan command that only touches Status (and no consumer)
+        // would find an empty registry and silently no-op the cascade.
+        // Add new consumers here when adopting HasStatus on a new model.
+        foreach ([Entry::class, Media::class] as $statusConsumer) {
+            new $statusConsumer();
+        }
+
+        // Model observers
+        Status::observe(StatusObserver::class);
+        EntryTree::observe(EntryTreeObserver::class);
+        \AdAstra\Models\FieldValue::observe(FieldValueObserver::class);
+
+        // User status audit log listeners
+        Event::listen(UserStatusChanged::class, WriteUserStatusLog::class);
+        Event::listen(UserLockChanged::class, WriteUserStatusLog::class);
+
+        //        Route::group([
+        //            'namespace' => 'mithra62\Shop\Http\Controllers',
+        //            'domain' => config('fortify.domain', null),
+        //            'prefix' => config('fortify.prefix'),
+        //        ], function () {
+        //            $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
+        //        });
+
+        //setup template routing
+        View::addNamespace('templates', resource_path('templates'));
+        View::addNamespace('admin', resource_path('views/admin'));
+
+        // Expose the resolved appearance preference (light|dark|system) to every
+        // top-level view so the admin/auth layouts can apply the `.dark` class
+        // before first paint. Bound to '*' (not the layout names) because Twig
+        // resolves `{% extends %}` internally, so a composer on the layout view
+        // would never fire — only the controller's top-level view does, and the
+        // layout inherits its context. Settings::get() applies the authenticated
+        // user's override automatically and is cached, so this stays cheap.
+        View::composer('*', function ($view) {
+            $view->with('appearance', app(Settings::class)->get('general', 'appearance', 'light'));
+        });
+
+        Paginator::useTailwind();
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('super admin') ? true : null;
+        });
+    }
+}

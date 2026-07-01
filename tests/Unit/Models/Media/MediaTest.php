@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Models\Media;
 
-use App\Models\Category;
-use App\Models\Media;
-use App\Models\Media\Library;
+use AdAstra\Models\Category;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;

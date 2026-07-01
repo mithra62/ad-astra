@@ -2,9 +2,9 @@
 
 namespace Database\Factories\FieldLayout;
 
-use App\Models\Field;
-use App\Models\FieldLayout\Tab;
-use App\Models\FieldLayout\TabElement;
+use AdAstra\Models\Field;
+use AdAstra\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout\TabElement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

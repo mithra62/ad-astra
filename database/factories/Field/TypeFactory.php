@@ -2,8 +2,8 @@
 
 namespace Database\Factories\Field;
 
-use App\Field\Types\Text;
-use App\Models\Field\Type;
+use AdAstra\Field\Types\Text;
+use AdAstra\Models\Field\Type;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Actions\User\Token;
 
-use App\Actions\User\Token\CreateNewUserToken;
-use App\Models\User;
+use AdAstra\Actions\User\Token\CreateNewUserToken;
+use AdAstra\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\NewAccessToken;

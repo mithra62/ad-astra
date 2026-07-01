@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Entry;
-use App\Models\EntryMetric;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryMetric;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

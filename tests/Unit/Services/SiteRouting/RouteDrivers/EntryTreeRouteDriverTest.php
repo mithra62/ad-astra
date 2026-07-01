@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Services\SiteRouting\RouteDrivers;
 
-use App\Models\Entry;
-use App\Models\EntryGroup;
-use App\Models\EntryTree;
-use App\Models\EntryType;
-use App\Services\SiteRouting\RouteDrivers\EntryTreeRouteDriver;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryTree;
+use AdAstra\Models\EntryType;
+use AdAstra\Services\SiteRouting\RouteDrivers\EntryTreeRouteDriver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\SettingDomain;
+use AdAstra\Models\SettingDomain;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

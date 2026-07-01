@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Models\Media;
 
-use App\Models\Media;
-use App\Models\Media\Library;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -117,7 +117,7 @@ class MediaModelTest extends TestCase
         // Insert a direct-attachment row (field_id = 0 sentinel).
         DB::table('mediables')->insert([
             'media_id'      => $media->id,
-            'mediable_type' => 'App\Models\User',
+            'mediable_type' => 'AdAstra\Models\User',
             'mediable_id'   => 1,
             'field_id'      => 0,   // sentinel — direct attachment
             'sort_order'    => 0,
@@ -135,7 +135,7 @@ class MediaModelTest extends TestCase
         // Insert a field-driven row (field_id > 0).
         DB::table('mediables')->insert([
             'media_id'      => $media->id,
-            'mediable_type' => 'App\Models\Entry',
+            'mediable_type' => 'AdAstra\Models\Entry',
             'mediable_id'   => 1,
             'field_id'      => 99,  // some real field ID
             'sort_order'    => 0,

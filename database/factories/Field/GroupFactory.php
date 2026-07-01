@@ -2,7 +2,7 @@
 
 namespace Database\Factories\Field;
 
-use App\Models\Field\Group;
+use AdAstra\Models\Field\Group;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

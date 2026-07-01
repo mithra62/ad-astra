@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Jobs;
 
-use App\Jobs\PruneApiLogs;
-use App\Models\ApiLog;
+use AdAstra\Jobs\PruneApiLogs;
+use AdAstra\Models\ApiLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\DB;

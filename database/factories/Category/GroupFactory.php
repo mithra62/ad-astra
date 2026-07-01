@@ -2,7 +2,7 @@
 
 namespace Database\Factories\Category;
 
-use App\Models\Category\Group;
+use AdAstra\Models\Category\Group;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

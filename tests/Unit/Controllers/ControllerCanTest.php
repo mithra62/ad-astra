@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\User;
+use AdAstra\Http\Controllers\Controller;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Permission;

@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Models\Field;
 
-use App\Field\AbstractField;
-use App\Field\Types\Text;
-use App\Models\Field\Type;
+use AdAstra\Field\AbstractField;
+use AdAstra\Field\Types\Text;
+use AdAstra\Models\Field\Type;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -45,7 +45,7 @@ class TypeTest extends TestCase
 
     public function test_instance_throws_runtime_exception_for_nonexistent_class(): void
     {
-        $type = Type::factory()->create(['object' => 'App\\Field\\Types\\NonExistent']);
+        $type = Type::factory()->create(['object' => 'AdAstra\\Field\\Types\\NonExistent']);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessageMatches('/does not exist/');

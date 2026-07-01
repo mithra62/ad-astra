@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\Users;
-use App\Models\User;
+use AdAstra\Field\Types\Users;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Tests\TestCase;

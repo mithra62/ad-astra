@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Models;
 
-use App\Field\AbstractField;
-use App\Field\Types\Text;
-use App\Models\Field;
-use App\Models\Field\Group;
-use App\Models\Field\Type;
+use AdAstra\Field\AbstractField;
+use AdAstra\Field\Types\Text;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Group;
+use AdAstra\Models\Field\Type;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;

@@ -1,30 +1,30 @@
 <?php
 
-use App\Http\Controllers\Admin\Account;
-use App\Http\Controllers\Admin\Account\Settings as UserSettings;
-use App\Http\Controllers\Admin\Account\Token as AccountTokens;
-use App\Http\Controllers\Admin\Category;
-use App\Http\Controllers\Admin\Category\Group as CategoryGroup;
-use App\Http\Controllers\Admin\Dashboard;
-use App\Http\Controllers\Admin\Entry;
-use App\Http\Controllers\Admin\Entry\Group as EntryGroup;
-use App\Http\Controllers\Admin\Entry\Type as EntryType;
-use App\Http\Controllers\Admin\Field;
-use App\Http\Controllers\Admin\Field\Group as FieldGroup;
-use App\Http\Controllers\Admin\FieldLayout as FieldLayoutController;
-use App\Http\Controllers\Admin\FieldLayout\Tab as FieldLayoutTab;
-use App\Http\Controllers\Admin\FieldLayout\TabElement as FieldLayoutTabElement;
-use App\Http\Controllers\Admin\Media;
-use App\Http\Controllers\Admin\Media\Library;
-use App\Http\Controllers\Admin\MediaPicker;
-use App\Http\Controllers\Admin\Role;
-use App\Http\Controllers\Admin\Settings\Domain as SettingsDomain;
-use App\Http\Controllers\Admin\Status;
-use App\Http\Controllers\Admin\Status\Group as StatusGroup;
-use App\Http\Controllers\Admin\User;
-use App\Http\Controllers\Admin\User\Layout as UserLayout;
-use App\Http\Controllers\Admin\User\Token as UserTokens;
-use App\Http\Controllers\Admin\User\Status as UserStatus;
+use AdAstra\Http\Controllers\Admin\Account;
+use AdAstra\Http\Controllers\Admin\Account\Settings as UserSettings;
+use AdAstra\Http\Controllers\Admin\Account\Token as AccountTokens;
+use AdAstra\Http\Controllers\Admin\Category;
+use AdAstra\Http\Controllers\Admin\Category\Group as CategoryGroup;
+use AdAstra\Http\Controllers\Admin\Dashboard;
+use AdAstra\Http\Controllers\Admin\Entry;
+use AdAstra\Http\Controllers\Admin\Entry\Group as EntryGroup;
+use AdAstra\Http\Controllers\Admin\Entry\Type as EntryType;
+use AdAstra\Http\Controllers\Admin\Field;
+use AdAstra\Http\Controllers\Admin\Field\Group as FieldGroup;
+use AdAstra\Http\Controllers\Admin\FieldLayout as FieldLayoutController;
+use AdAstra\Http\Controllers\Admin\FieldLayout\Tab as FieldLayoutTab;
+use AdAstra\Http\Controllers\Admin\FieldLayout\TabElement as FieldLayoutTabElement;
+use AdAstra\Http\Controllers\Admin\Media;
+use AdAstra\Http\Controllers\Admin\Media\Library;
+use AdAstra\Http\Controllers\Admin\MediaPicker;
+use AdAstra\Http\Controllers\Admin\Role;
+use AdAstra\Http\Controllers\Admin\Settings\Domain as SettingsDomain;
+use AdAstra\Http\Controllers\Admin\Status;
+use AdAstra\Http\Controllers\Admin\Status\Group as StatusGroup;
+use AdAstra\Http\Controllers\Admin\User;
+use AdAstra\Http\Controllers\Admin\User\Layout as UserLayout;
+use AdAstra\Http\Controllers\Admin\User\Token as UserTokens;
+use AdAstra\Http\Controllers\Admin\User\Status as UserStatus;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {

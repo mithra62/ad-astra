@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Traits;
 
-use App\Models\Media;
-use App\Models\Media\Transformation;
-use App\Services\Media\NullTransformationDriver;
-use App\Services\Media\TransformationDriverInterface;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Transformation;
+use AdAstra\Services\Media\NullTransformationDriver;
+use AdAstra\Services\Media\TransformationDriverInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;

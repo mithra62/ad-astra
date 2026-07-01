@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\Money;
-use App\Rules\Field\MoneyDecimalFormatRule;
-use App\Rules\Field\MoneyRangeRule;
+use AdAstra\Field\Types\Money;
+use AdAstra\Rules\Field\MoneyDecimalFormatRule;
+use AdAstra\Rules\Field\MoneyRangeRule;
 use InvalidArgumentException;
 use Money\Money as PhpMoney;
 use PHPUnit\Framework\TestCase;

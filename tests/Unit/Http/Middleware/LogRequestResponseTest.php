@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Http\Middleware;
 
-use App\Http\Middleware\LogRequestResponse;
-use App\Models\ApiLog;
-use App\Models\User;
+use AdAstra\Http\Middleware\LogRequestResponse;
+use AdAstra\Models\ApiLog;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Tests\TestCase;

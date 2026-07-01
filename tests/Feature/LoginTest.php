@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Enums\UserStatus;
-use App\Models\User;
+use AdAstra\Enums\UserStatus;
+use AdAstra\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;

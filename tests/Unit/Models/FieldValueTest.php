@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Models;
 
-use App\Field\Types\Text;
-use App\Models\Category;
-use App\Models\Field;
-use App\Models\Field\Type;
-use App\Models\FieldValue;
+use AdAstra\Field\Types\Text;
+use AdAstra\Models\Category;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type;
+use AdAstra\Models\FieldValue;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;

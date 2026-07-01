@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Models\Media;
 
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\Media\Library;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\Media\Library;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;

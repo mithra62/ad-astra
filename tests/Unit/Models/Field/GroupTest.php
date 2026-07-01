@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Models\Field;
 
-use App\Models\Field;
-use App\Models\Field\Group;
-use App\Models\Field\Type;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Group;
+use AdAstra\Models\Field\Type;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

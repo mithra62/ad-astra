@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\EntryBehavior;
+use AdAstra\Models\EntryBehavior;
 use Illuminate\Database\Seeder;
 
 class EntryBehaviorSeeder extends Seeder

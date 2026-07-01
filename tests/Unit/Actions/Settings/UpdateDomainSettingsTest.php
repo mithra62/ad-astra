@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Actions\Settings;
 
-use App\Actions\Settings\UpdateDomainSettings;
-use App\Models\SettingDomain;
-use App\Models\SettingValue;
+use AdAstra\Actions\Settings\UpdateDomainSettings;
+use AdAstra\Models\SettingDomain;
+use AdAstra\Models\SettingValue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;

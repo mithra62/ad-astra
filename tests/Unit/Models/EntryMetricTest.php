@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\Entry;
-use App\Models\EntryMetric;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryMetric;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Traits;
 
-use App\Models\Field;
-use App\Models\Field\Type as FieldType;
-use App\Models\Media;
-use App\Models\Media\Library;
-use App\Models\User;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
+use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +33,7 @@ class HasMediaTest extends TestCase
 
     private function resetFieldHandleCache(): void
     {
-        $ref = new \ReflectionProperty(\App\Traits\HasMedia::class, 'fieldHandleCache');
+        $ref = new \ReflectionProperty(\AdAstra\Traits\HasMedia::class, 'fieldHandleCache');
         $ref->setAccessible(true);
         $ref->setValue(null, []);
     }
@@ -305,7 +305,7 @@ class HasMediaTest extends TestCase
     {
         Storage::fake('local');
         $user    = User::factory()->create();
-        $type    = FieldType::firstOrCreate(['object' => \App\Field\Types\Text::class], ['name' => 'Text', 'settings' => []]);
+        $type    = FieldType::firstOrCreate(['object' => \AdAstra\Field\Types\Text::class], ['name' => 'Text', 'settings' => []]);
         $gallery  = Field::factory()->create(['handle' => 'gallery-a', 'field_type_id' => $type->id]);
         $featured = Field::factory()->create(['handle' => 'featured-a', 'field_type_id' => $type->id]);
 

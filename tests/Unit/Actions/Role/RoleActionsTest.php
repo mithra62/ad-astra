@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Actions\Role;
 
-use App\Actions\Role\CreateNewRole;
-use App\Actions\Role\EditRole;
-use App\Models\Role;
+use AdAstra\Actions\Role\CreateNewRole;
+use AdAstra\Actions\Role\EditRole;
+use AdAstra\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role as SpatieRole;

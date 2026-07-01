@@ -2,10 +2,10 @@
 
 namespace Database\Seeders\Concerns;
 
-use App\Models\Field;
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
-use App\Models\FieldLayout\TabElement;
+use AdAstra\Models\Field;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout\TabElement;
 use Illuminate\Support\Str;
 
 /**

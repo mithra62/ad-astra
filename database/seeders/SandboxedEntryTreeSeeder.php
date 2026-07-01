@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Facades\Entries;
-use App\Models\EntryBehavior;
-use App\Models\Entry;
-use App\Models\EntryGroup;
-use App\Models\EntryTree;
-use App\Models\EntryType;
-use App\Models\Status;
-use App\Models\StatusGroup;
-use App\Models\User;
-use App\Services\EntryAuthorService;
+use AdAstra\Facades\Entries;
+use AdAstra\Models\EntryBehavior;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryTree;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\Status;
+use AdAstra\Models\StatusGroup;
+use AdAstra\Models\User;
+use AdAstra\Services\EntryAuthorService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;

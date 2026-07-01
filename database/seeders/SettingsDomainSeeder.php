@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\SettingDomain;
-use App\Settings;
+use AdAstra\Models\SettingDomain;
+use AdAstra\Settings;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

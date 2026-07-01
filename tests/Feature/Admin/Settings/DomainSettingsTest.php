@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Admin\Settings;
 
-use App\Models\Role;
-use App\Models\SettingDomain;
-use App\Models\SettingValue;
-use App\Models\User;
+use AdAstra\Models\Role;
+use AdAstra\Models\SettingDomain;
+use AdAstra\Models\SettingValue;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;

@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\EntryTypes;
 
-use App\EntryTypes\RecipeEntryType;
-use App\Models\Entry;
-use App\Models\EntryBehavior;
-use App\Models\EntryType;
+use AdAstra\EntryTypes\RecipeEntryType;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryBehavior;
+use AdAstra\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

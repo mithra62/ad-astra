@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\EntryTypes;
 
-use App\EntryTypes\BlogPostEntryType;
-use App\Models\Entry;
-use App\Models\EntryBehavior;
-use App\Models\EntryType;
+use AdAstra\EntryTypes\BlogPostEntryType;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryBehavior;
+use AdAstra\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

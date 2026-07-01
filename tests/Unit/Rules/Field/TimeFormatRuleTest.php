@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Rules\Field;
 
-use App\Rules\Field\TimeFormatRule;
+use AdAstra\Rules\Field\TimeFormatRule;
 use PHPUnit\Framework\TestCase;
 
 class TimeFormatRuleTest extends TestCase

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -73,7 +73,7 @@ class EnforceUserStatusApiTest extends TestCase
     public function test_suspended_user_past_window_is_not_blocked(): void
     {
         $user = User::factory()->create([
-            'status'          => \App\Enums\UserStatus::SUSPENDED,
+            'status'          => \AdAstra\Enums\UserStatus::SUSPENDED,
             'suspended_until' => now()->subMinute(),
         ]);
 

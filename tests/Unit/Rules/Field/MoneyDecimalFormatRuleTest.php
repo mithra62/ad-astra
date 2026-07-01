@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Rules\Field;
 
-use App\Rules\Field\MoneyDecimalFormatRule;
+use AdAstra\Rules\Field\MoneyDecimalFormatRule;
 use PHPUnit\Framework\TestCase;
 
 class MoneyDecimalFormatRuleTest extends TestCase

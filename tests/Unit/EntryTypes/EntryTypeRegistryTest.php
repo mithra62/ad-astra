@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\EntryTypes;
 
-use App\EntryTypes\AbstractEntryType;
-use App\EntryTypes\EntryTypeRegistry;
-use App\EntryTypes\GeneralEntryType;
-use App\Models\EntryBehavior;
-use App\Models\EntryType;
+use AdAstra\EntryTypes\AbstractEntryType;
+use AdAstra\EntryTypes\EntryTypeRegistry;
+use AdAstra\EntryTypes\GeneralEntryType;
+use AdAstra\Models\EntryBehavior;
+use AdAstra\Models\EntryType;
 use Database\Seeders\EntryBehaviorSeeder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;

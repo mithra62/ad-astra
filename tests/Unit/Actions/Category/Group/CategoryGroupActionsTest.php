@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Actions\Category\Group;
 
-use App\Actions\Category\Group\CreateNewCategoryGroup;
-use App\Actions\Category\Group\EditCategoryGroup;
-use App\Models\Category\Group;
+use AdAstra\Actions\Category\Group\CreateNewCategoryGroup;
+use AdAstra\Actions\Category\Group\EditCategoryGroup;
+use AdAstra\Models\Category\Group;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

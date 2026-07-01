@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Enums\UserStatus;
-use App\Models\User;
-use App\Models\UserStatusLog;
+use AdAstra\Enums\UserStatus;
+use AdAstra\Models\User;
+use AdAstra\Models\UserStatusLog;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

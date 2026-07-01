@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Actions\Field\Group;
 
-use App\Actions\Field\Group\CreateNewFieldGroup;
-use App\Actions\Field\Group\EditFieldGroup;
-use App\Models\Field\Group;
+use AdAstra\Actions\Field\Group\CreateNewFieldGroup;
+use AdAstra\Actions\Field\Group\EditFieldGroup;
+use AdAstra\Models\Field\Group;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

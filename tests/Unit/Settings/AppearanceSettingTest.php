@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Settings;
 
-use App\Models\User;
-use App\Settings;
+use AdAstra\Models\User;
+use AdAstra\Settings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;

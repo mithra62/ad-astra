@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\EntryAuthor;
-use App\Models\Media;
-use App\Models\Media\Library;
-use App\Models\User;
-use App\Models\User\OauthToken;
+use AdAstra\Models\EntryAuthor;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library;
+use AdAstra\Models\User;
+use AdAstra\Models\User\OauthToken;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;

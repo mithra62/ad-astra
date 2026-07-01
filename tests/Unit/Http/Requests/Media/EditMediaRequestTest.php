@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Http\Requests\Media;
 
-use App\Http\Requests\Media\EditMediaRequest;
-use App\Models\Media;
-use App\Models\Media\Library as MediaLibrary;
+use AdAstra\Http\Requests\Media\EditMediaRequest;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Library as MediaLibrary;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\DB;

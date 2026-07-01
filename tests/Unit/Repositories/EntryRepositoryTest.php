@@ -2,19 +2,19 @@
 
 namespace Tests\Unit\Repositories;
 
-use App\EntryTypes\AbstractEntryType;
-use App\Models\Category;
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\Entry;
-use App\Models\EntryAuthor;
-use App\Models\EntryGroup;
-use App\Models\EntryRelationship;
-use App\Models\EntryType;
-use App\Models\Field;
-use App\Models\Status;
-use App\Models\StatusGroup;
-use App\Models\User;
-use App\Repositories\EntryRepository;
+use AdAstra\EntryTypes\AbstractEntryType;
+use AdAstra\Models\Category;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryAuthor;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryRelationship;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\Field;
+use AdAstra\Models\Status;
+use AdAstra\Models\StatusGroup;
+use AdAstra\Models\User;
+use AdAstra\Repositories\EntryRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

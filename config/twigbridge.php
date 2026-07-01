@@ -158,7 +158,7 @@ return [
         |
         */
         'facades' => [
-            'Settings' => \App\Facades\Settings::class,
+            'Settings' => \AdAstra\Facades\Settings::class,
         ],
 
         /*

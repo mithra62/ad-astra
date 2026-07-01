@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Models\Settings;
 
-use App\Models\SettingDomain;
+use AdAstra\Models\SettingDomain;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

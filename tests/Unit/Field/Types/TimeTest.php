@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\Time;
-use App\Rules\Field\TimeFormatRule;
-use App\Support\Iso\TimeValue;
+use AdAstra\Field\Types\Time;
+use AdAstra\Rules\Field\TimeFormatRule;
+use AdAstra\Support\Iso\TimeValue;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

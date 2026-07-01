@@ -2,8 +2,8 @@
 
 namespace Database\Factories\Media;
 
-use App\Models\Media;
-use App\Models\Media\Transformation;
+use AdAstra\Models\Media;
+use AdAstra\Models\Media\Transformation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

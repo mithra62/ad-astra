@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Field\Types\EmailAddress;
-use App\Field\Types\Text;
-use App\Models\Field as FieldModel;
-use App\Models\Field\Group as FieldGroup;
-use App\Models\Field\Type as FieldType;
-use App\Models\Media\Library;
-use App\Models\Role;
-use App\Models\User;
+use AdAstra\Field\Types\EmailAddress;
+use AdAstra\Field\Types\Text;
+use AdAstra\Models\Field as FieldModel;
+use AdAstra\Models\Field\Group as FieldGroup;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Models\Media\Library;
+use AdAstra\Models\Role;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -115,7 +115,7 @@ class FieldTypeSettingsTest extends TestCase
     public function test_file_upload_panel_includes_library_options(): void
     {
         $user    = $this->makeSuperAdmin();
-        $type    = $this->typeFor(\App\Field\Types\FileUpload::class);
+        $type    = $this->typeFor(\AdAstra\Field\Types\FileUpload::class);
         $library = Library::factory()->create(['name' => 'My Test Library']);
 
         $this->actingAs($user)

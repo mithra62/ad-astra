@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Entry;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\User;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

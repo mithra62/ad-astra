@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\MultiSelect;
+use AdAstra\Field\Types\MultiSelect;
 use Tests\TestCase;
 
 class MultiSelectTest extends TestCase

@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Services;
 
-use App\Models\EntryAuthor;
-use App\Models\User;
-use App\Services\EntryAuthorService;
+use AdAstra\Models\EntryAuthor;
+use AdAstra\Models\User;
+use AdAstra\Services\EntryAuthorService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

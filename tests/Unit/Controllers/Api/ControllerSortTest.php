@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Controllers\Api;
 
-use App\Http\Controllers\Api\Controller;
+use AdAstra\Http\Controllers\Api\Controller;
 use Illuminate\Http\Request;
 use Tests\TestCase;
 

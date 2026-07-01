@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Actions\User;
 
-use App\Enums\UserStatus;
-use App\Models\User;
+use AdAstra\Enums\UserStatus;
+use AdAstra\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

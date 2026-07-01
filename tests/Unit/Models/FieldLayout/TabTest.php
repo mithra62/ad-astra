@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Models\FieldLayout;
 
-use App\Models\Field;
-use App\Models\Field\Type;
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
-use App\Models\FieldLayout\TabElement;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout\TabElement;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;

@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Repositories;
 
-use App\Models\Category;
-use App\Models\Category\Group;
-use App\Repositories\CategoryRepository;
+use AdAstra\Models\Category;
+use AdAstra\Models\Category\Group;
+use AdAstra\Repositories\CategoryRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
 use Tests\TestCase;

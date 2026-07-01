@@ -2,16 +2,16 @@
 
 namespace Tests\Feature\Admin\Concerns;
 
-use App\Field\Types\RadioGroup;
-use App\Field\Types\Select;
-use App\Field\Types\Slider;
-use App\Field\Types\StructuredRows;
-use App\Field\Types\Text;
-use App\Field\Types\Users;
-use App\Models\Field\Group as FieldGroup;
-use App\Models\Field\Type as FieldType;
-use App\Models\Role;
-use App\Models\User;
+use AdAstra\Field\Types\RadioGroup;
+use AdAstra\Field\Types\Select;
+use AdAstra\Field\Types\Slider;
+use AdAstra\Field\Types\StructuredRows;
+use AdAstra\Field\Types\Text;
+use AdAstra\Field\Types\Users;
+use AdAstra\Models\Field\Group as FieldGroup;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Models\Role;
+use AdAstra\Models\User;
 
 trait MakesFieldTestFixtures
 {

@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Rules\Field;
 
-use App\Rules\Field\MoneyRangeRule;
+use AdAstra\Rules\Field\MoneyRangeRule;
 use PHPUnit\Framework\TestCase;
 
 class MoneyRangeRuleTest extends TestCase

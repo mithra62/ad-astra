@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Rules;
 
-use App\Models\Category;
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\EntryGroup;
-use App\Models\Media\Library;
-use App\Rules\CategoryAttachedToGroupable;
+use AdAstra\Models\Category;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\Media\Library;
+use AdAstra\Rules\CategoryAttachedToGroupable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

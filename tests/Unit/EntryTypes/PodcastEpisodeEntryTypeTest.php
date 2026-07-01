@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\EntryTypes;
 
-use App\EntryTypes\PodcastEpisodeEntryType;
-use App\Models\Entry;
-use App\Models\EntryBehavior;
-use App\Models\EntryType;
+use AdAstra\EntryTypes\PodcastEpisodeEntryType;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryBehavior;
+use AdAstra\Models\EntryType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
 use Tests\TestCase;

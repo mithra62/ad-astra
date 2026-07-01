@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\EntryGroup;
-use App\Models\StatusGroup;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\StatusGroup;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

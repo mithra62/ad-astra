@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Actions\Category;
 
-use App\Actions\Category\CreateNewCategory;
-use App\Actions\Category\EditCategory;
-use App\Models\Category;
-use App\Models\Category\Group;
-use App\Models\FieldLayout;
+use AdAstra\Actions\Category\CreateNewCategory;
+use AdAstra\Actions\Category\EditCategory;
+use AdAstra\Models\Category;
+use AdAstra\Models\Category\Group;
+use AdAstra\Models\FieldLayout;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

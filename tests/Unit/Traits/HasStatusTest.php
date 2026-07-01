@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Traits;
 
-use App\Models\Entry;
-use App\Models\Status;
-use App\Models\StatusGroup;
-use App\Observers\StatusSyncRegistry;
-use App\Traits\HasStatus;
+use AdAstra\Models\Entry;
+use AdAstra\Models\Status;
+use AdAstra\Models\StatusGroup;
+use AdAstra\Observers\StatusSyncRegistry;
+use AdAstra\Traits\HasStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

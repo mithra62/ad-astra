@@ -2,17 +2,17 @@
 
 namespace Tests\Unit\Services;
 
-use App\Field\Types\Text;
-use App\Models\Entry;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\Field;
-use App\Models\Field\Type;
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
-use App\Models\FieldLayout\TabElement;
-use App\Models\FieldValue;
-use App\Services\EntryService;
+use AdAstra\Field\Types\Text;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout\TabElement;
+use AdAstra\Models\FieldValue;
+use AdAstra\Services\EntryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

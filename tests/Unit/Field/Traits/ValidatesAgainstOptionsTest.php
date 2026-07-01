@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Field\Traits;
 
-use App\Traits\Field\ValidatesAgainstOptions;
+use AdAstra\Traits\Field\ValidatesAgainstOptions;
 use Tests\TestCase;
 
 class ValidatesAgainstOptionsTest extends TestCase

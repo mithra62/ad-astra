@@ -1,7 +1,7 @@
 <?php
 
-use App\Enums\UserStatus;
-use App\Models\FieldLayout;
+use AdAstra\Enums\UserStatus;
+use AdAstra\Models\FieldLayout;
 use Illuminate\Validation\Rule;
 
 /**

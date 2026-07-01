@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Field\Types;
 
-use App\Field\Types\RadioGroup;
+use AdAstra\Field\Types\RadioGroup;
 use Tests\TestCase;
 
 class RadioGroupTest extends TestCase

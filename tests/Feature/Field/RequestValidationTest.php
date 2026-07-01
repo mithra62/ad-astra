@@ -2,20 +2,20 @@
 
 namespace Tests\Feature\Field;
 
-use App\Field\Types\Money;
-use App\Field\Types\Time;
-use App\Models\Entry;
-use App\Models\EntryGroup;
-use App\Models\EntryType;
-use App\Models\Field;
-use App\Models\Field\Type as FieldType;
-use App\Models\FieldLayout;
-use App\Models\FieldLayout\Tab;
-use App\Models\FieldLayout\TabElement;
-use App\Models\Role;
-use App\Models\Status;
-use App\Models\StatusGroup;
-use App\Models\User;
+use AdAstra\Field\Types\Money;
+use AdAstra\Field\Types\Time;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout\TabElement;
+use AdAstra\Models\Role;
+use AdAstra\Models\Status;
+use AdAstra\Models\StatusGroup;
+use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

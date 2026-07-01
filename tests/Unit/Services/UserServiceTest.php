@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Services;
 
-use App\Models\Entry;
-use App\Models\EntryAuthor;
-use App\Models\Role;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryAuthor;
+use AdAstra\Models\Role;
 use Illuminate\Validation\ValidationException;
-use App\Models\User;
-use App\Models\User\OauthToken;
-use App\Services\UserService;
+use AdAstra\Models\User;
+use AdAstra\Models\User\OauthToken;
+use AdAstra\Services\UserService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;

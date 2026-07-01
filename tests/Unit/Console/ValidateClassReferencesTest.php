@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Console;
 
-use App\Models\EntryBehavior;
+use AdAstra\Models\EntryBehavior;
 use Database\Seeders\EntryBehaviorSeeder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;

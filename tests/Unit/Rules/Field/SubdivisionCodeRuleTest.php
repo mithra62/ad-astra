@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Rules\Field;
 
-use App\Rules\Field\SubdivisionCodeRule;
+use AdAstra\Rules\Field\SubdivisionCodeRule;
 use PHPUnit\Framework\TestCase;
 
 class SubdivisionCodeRuleTest extends TestCase

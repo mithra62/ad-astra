@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Services;
 
-use App\Models\Entry;
-use App\Models\EntryMetric;
-use App\Services\EntryService;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryMetric;
+use AdAstra\Services\EntryService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

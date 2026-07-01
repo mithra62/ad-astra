@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Actions\Entry\Group;
 
-use App\Actions\Entry\Group\CreateNewEntryGroup;
-use App\Actions\Entry\Group\EditEntryGroup;
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\EntryGroup;
-use App\Models\FieldLayout;
-use App\Models\StatusGroup;
-use App\Services\EntryGroupService;
+use AdAstra\Actions\Entry\Group\CreateNewEntryGroup;
+use AdAstra\Actions\Entry\Group\EditEntryGroup;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\StatusGroup;
+use AdAstra\Services\EntryGroupService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Actions\Media\Library;
 
-use App\Actions\Media\Library\CreateNewMediaLibrary;
-use App\Actions\Media\Library\DeleteMediaLibrary;
-use App\Actions\Media\Library\EditMediaLibrary;
-use App\Models\Category\Group as CategoryGroup;
-use App\Models\Media\Library;
+use AdAstra\Actions\Media\Library\CreateNewMediaLibrary;
+use AdAstra\Actions\Media\Library\DeleteMediaLibrary;
+use AdAstra\Actions\Media\Library\EditMediaLibrary;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
