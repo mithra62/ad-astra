@@ -64,9 +64,9 @@ The result is a platform that adapts to your application instead of forcing your
 
 AdAstra makes no fixed assumptions about what data a piece of content holds. Rather than hardcoding columns per content type, schemas are composed at runtime through a small set of shared traits, and any model can opt in.
 
-**Fields, everywhere.** The `Fieldable` trait (`app/Traits/Field/Fieldable.php`) gives a model arbitrary, typed field values through one shared mechanism: `fieldValues()`, `field($handle)`, and `fieldArray()`. **Entries, Media, Categories, and Users all use it**, so the same field system that powers a blog post also powers a user profile or a media asset's metadata. Entries, Media, and Categories go a step further and attach to a `FieldLayout` (via `EntryType`/`EntryGroup`, `Media\Library`, and `Category\Group` respectively) to organize those fields into tabs in the admin UI; Users store field values without a configurable layout.
+**Fields, everywhere.** The `Fieldable` trait (`packages/core/src/Traits/Field/Fieldable.php`) gives a model arbitrary, typed field values through one shared mechanism: `fieldValues()`, `field($handle)`, and `fieldArray()`. **Entries, Media, Categories, and Users all use it**, so the same field system that powers a blog post also powers a user profile or a media asset's metadata. Entries, Media, and Categories go a step further and attach to a `FieldLayout` (via `EntryType`/`EntryGroup`, `Media\Library`, and `Category\Group` respectively) to organize those fields into tabs in the admin UI; Users store field values without a configurable layout.
 
-**Categories, everywhere relevant.** The `HasCategories` trait (`app/Traits/Category/HasCategories.php`) gives a model a `categories()` relation through a polymorphic `categorizable` pivot. **Entries and Media both use it**, so arbitrary taxonomy can be applied to either without a content-type-specific tagging system. This is distinct from `HasCategoryGroups`, which `EntryGroup` and `Media\Library` use to scope *which category groups* are available to choose from; `HasCategories` is the tagging relation itself.
+**Categories, everywhere relevant.** The `HasCategories` trait (`packages/core/src/Traits/Category/HasCategories.php`) gives a model a `categories()` relation through a polymorphic `categorizable` pivot. **Entries and Media both use it**, so arbitrary taxonomy can be applied to either without a content-type-specific tagging system. This is distinct from `HasCategoryGroups`, which `EntryGroup` and `Media\Library` use to scope *which category groups* are available to choose from; `HasCategories` is the tagging relation itself.
 
 The result: adding a new content type doesn't mean inventing a new way to store custom fields or apply categories; it means composing the traits that already exist.
 
@@ -127,11 +127,11 @@ The technology stack supports the architecture. It is not the architecture.
 - Public site routing through `SiteController`, with route drivers for entry-tree and template-based pages.
 - Admin UI under `/admin` for users, roles, account settings, tokens, entries, entry groups, entry types, categories, statuses, fields, field layouts, media libraries, and domain/user settings.
 - API routes under `/api/v1`, protected by Sanctum, for users, entries, and the current account.
-- OAuth/social login via Socialite (`app/Http/Controllers/Login.php`), with `app:refresh-tokens` available to refresh expiring OAuth tokens (not currently scheduled; run manually or add a schedule entry).
+- OAuth/social login via Socialite (`packages/core/src/Http/Controllers/Login.php`), with `app:refresh-tokens` available to refresh expiring OAuth tokens (not currently scheduled; run manually or add a schedule entry).
 - Content modeling through entry groups, entry types, fields, field groups, field layouts, statuses, categories, entry relationships, and entry tree routing.
 - Bot-blocking middleware (`BotBlockRequest`) and webhook-client infrastructure for external integrations.
-- Config-driven settings domains in `config/settings.php`.
-- Twig templates in `resources/views` and public templates in `resources/templates`.
+- Config-driven settings domains in `packages/core/config/settings.php`.
+- Twig templates in `packages/core/resources/views` and public templates in `packages/core/resources/templates`.
 
 ## Setup
 
@@ -269,4 +269,4 @@ php artisan app:refresh-tokens
 
 `app:refresh-tokens` refreshes expiring OAuth tokens through `TokenRefreshService`. It is implemented but not registered in the scheduler, so run it manually or add a schedule entry if automatic refresh is needed.
 
-In production, run the Laravel scheduler every minute (e.g. via cron) so the daily jobs execute: `App\Jobs\PruneApiLogs` at 02:00 and `PurgeDeletedMedia` at 03:00 (`routes/console.php`). Both are dispatched as queued jobs, so an active queue worker must also be running for them to actually execute.
+In production, run the Laravel scheduler every minute (e.g. via cron) so the daily jobs execute: `AdAstra\Jobs\PruneApiLogs` at 02:00 and `PurgeDeletedMedia` at 03:00 (`packages/core/routes/console.php`). Both are dispatched as queued jobs, so an active queue worker must also be running for them to actually execute.

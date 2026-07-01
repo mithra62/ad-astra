@@ -1,0 +1,168 @@
+{# ============================================================================
+   UI kit — shared structural components (leaf macros).
+
+   Import:  {% import 'admin._inc._ui' as ui %}
+   Pairs with the embed partials _card.twig, _page-header.twig and _table.twig,
+   and with the form macros in _form-fields.twig. Everything uses the semantic
+   color tokens from resources/css/app.css, so components are dark-mode aware
+   automatically — do not hand-write bg-white / text-slate-* here.
+
+   IMPORTANT (Twig scoping): a top-level `{% import 'admin._inc._ui' as ui %}`
+   is visible in `{% block %}`s of an `{% extends %}` template, but NOT inside
+   `{% embed %}` block overrides. When you call ui.* inside an embed block
+   (e.g. the `rows` block of _table or the `actions` block of _page-header),
+   re-import at the top of that block: `{% import 'admin._inc._ui' as ui %}`.
+   ============================================================================ #}
+
+{# --- icon --------------------------------------------------------------------
+   Single source of truth for the inline SVGs used across the admin. Reference
+   by name; pass Tailwind sizing/colour via `classes`. Add new icons to the map. #}
+{% macro icon(name, classes='h-4 w-4') %}
+    {% set paths = {
+        'plus':          '<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>',
+        'home':          '<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>',
+        'chevron-right': '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>',
+        'chevron-left':  '<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>',
+        'chevron-down':  '<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>',
+        'eye':           '<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>',
+        'pencil':        '<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>',
+        'trash':         '<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>',
+        'search':        '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.1-5.4a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"/>',
+        'menu':          '<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/>',
+        'x':             '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>',
+        'users':         '<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>',
+        'key':           '<path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>',
+        'documents':     '<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>'
+    } %}
+    <svg class="{{ classes }}" fill="none" stroke="currentColor" stroke-width="2"
+         viewBox="0 0 24 24">{{ (paths[name] ?? '')|raw }}</svg>
+{% endmacro %}
+
+{# --- button ------------------------------------------------------------------
+   Renders <a> when `href` is set, otherwise <button>. variant: primary |
+   secondary | danger. size: sm | md | lg. icon: optional icon name. #}
+{% macro button(label, href=null, variant='primary', icon=null, size='md', type=null, attrs='') %}
+    {% set variants = {
+        'primary':   'bg-emerald-600 text-white shadow-sm hover:bg-emerald-700',
+        'secondary': 'border border-edge bg-surface text-content shadow-sm hover:bg-subtle',
+        'danger':    'border border-red-200 bg-red-50 text-red-700 shadow-sm hover:bg-red-100'
+    } %}
+    {% set sizes = {'sm': 'px-3 py-1.5 text-sm', 'md': 'px-3 py-2 text-sm', 'lg': 'px-4 py-2 text-sm'} %}
+    {% set cls = 'inline-flex items-center justify-center gap-1.5 rounded-md font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 ' ~ (variants[variant] ?? variants.primary) ~ ' ' ~ (sizes[size] ?? sizes.md) %}
+    {% if href %}
+        <a href="{{ href }}"
+           class="{{ cls }}" {{ attrs|raw }}>{% if icon %}{{ _self.icon(icon) }}{% endif %}{{ label }}</a>
+    {% else %}
+        <button type="{{ type|default('button') }}"
+                class="{{ cls }}" {{ attrs|raw }}>{% if icon %}{{ _self.icon(icon) }}{% endif %}{{ label }}</button>
+    {% endif %}
+{% endmacro %}
+
+{# --- badge -------------------------------------------------------------------
+   variant: neutral | accent | success | danger | warning #}
+{% macro badge(label, variant='neutral') %}
+    {% set variants = {
+        'neutral': 'bg-canvas text-content',
+        'accent':  'bg-accent-soft text-accent',
+        'success': 'bg-emerald-100 text-emerald-800',
+        'danger':  'bg-red-50 text-red-700',
+        'warning': 'bg-amber-100 text-amber-800'
+    } %}
+    <span
+        class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ variants[variant] ?? variants.neutral }}">{{ label }}</span>
+{% endmacro %}
+
+{# --- breadcrumbs -------------------------------------------------------------
+   items: [{label, href?, icon?}]. Entries with href render as links; the final
+   entry (no href) renders as the current page. Chevrons inserted automatically. #}
+{% macro breadcrumbs(items) %}
+    <nav class="mt-0.5 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
+        {% for item in items %}
+            {% if item.href is defined and item.href %}
+                <a class="inline-flex items-center gap-1 hover:text-content"
+                   href="{{ item.href }}">{% if item.icon is defined %}{{ _self.icon(item.icon, 'inline-block h-3 w-3 align-middle') }}{% endif %}{{ item.label }}</a>
+            {% else %}
+                <span class="text-content">{{ item.label }}</span>
+            {% endif %}
+            {% if not loop.last %}{{ _self.icon('chevron-right', 'h-3 w-3 text-faint') }}{% endif %}
+        {% endfor %}
+    </nav>
+{% endmacro %}
+
+{# --- stat_card ---------------------------------------------------------------
+   The 4-up metric tile used on index/dashboard screens. #}
+{% macro stat_card(label, value) %}
+    <div class="overflow-hidden rounded-lg border border-edge bg-surface p-5 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-muted">{{ label }}</p>
+        <p class="mt-2 text-3xl font-semibold text-content">{{ value }}</p>
+    </div>
+{% endmacro %}
+
+{# --- empty_state -------------------------------------------------------------
+   primary / secondary: {label, href} or null. #}
+{% macro empty_state(title, description, icon=null, primary=null, secondary=null) %}
+    <div class="flex min-h-80 items-center justify-center px-6 py-14">
+        <div class="max-w-sm text-center">
+            {% if icon %}
+                <div
+                    class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-faint">{{ _self.icon(icon, 'h-6 w-6') }}</div>
+            {% endif %}
+            <h2 class="mt-4 text-base font-semibold text-content">{{ title }}</h2>
+            <p class="mt-1 text-sm text-muted">{{ description }}</p>
+            {% if primary or secondary %}
+                <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                    {% if primary %}{{ _self.button(primary.label, primary.href, 'primary') }}{% endif %}
+                    {% if secondary %}{{ _self.button(secondary.label, secondary.href, 'secondary') }}{% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endmacro %}
+
+{# --- section_nav -------------------------------------------------------------
+   Data-driven secondary sidebar (replaces the per-section *_sidebar.twig files).
+   items: a flat list where each entry is one of:
+     {label, href, icon?, active?}   a nav link
+     {heading: '...'}                a small section heading
+     {divider: true}                 a horizontal rule
+   Reuses the #secnav-toggle / #secondary-nav-panel / .secnav-chevron hooks that
+   prototype.js/prototype.css already wire up for the mobile toggle. #}
+{% macro section_nav(title, items) %}
+    <input id="secnav-toggle" type="checkbox">
+    <label for="secnav-toggle"
+           class="flex cursor-pointer items-center justify-between border-b border-edge bg-surface px-4 py-2.5 text-sm font-medium text-muted hover:bg-subtle lg:hidden">
+        <span class="flex items-center gap-2">{{ _self.icon('menu', 'h-4 w-4 text-faint') }} Section Navigation</span>
+        <span class="secnav-chevron text-faint">{{ _self.icon('chevron-down') }}</span>
+    </label>
+
+    <div id="secondary-nav-panel" class="hidden border-b border-edge bg-surface px-4 py-3 lg:hidden">
+        <nav class="grid grid-cols-2 gap-1 sm:grid-cols-3">
+            {% for item in items %}
+                {% if item.href is defined %}
+                    <a class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium {% if item.active %}bg-accent-soft text-accent{% else %}text-muted hover:bg-subtle{% endif %}"
+                       href="{{ item.href }}">{{ item.label }}</a>
+                {% endif %}
+            {% endfor %}
+        </nav>
+    </div>
+
+    <aside class="hidden h-fit lg:block">
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-4 py-3">
+                <h5 class="text-sm font-semibold text-content">{{ title }}</h5>
+            </div>
+            <nav class="p-2">
+                {% for item in items %}
+                    {% if item.divider is defined %}
+                        <div class="my-2 border-t border-edge"></div>
+                    {% elseif item.heading is defined %}
+                        <p class="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-faint">{{ item.heading }}</p>
+                    {% else %}
+                        <a href="{{ item.href }}"
+                           class="mt-0.5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium {% if item.active %}bg-accent-soft text-accent{% else %}text-muted hover:bg-subtle{% endif %}">{% if item.icon is defined %}{{ _self.icon(item.icon, 'h-4 w-4 shrink-0') }}{% endif %}{{ item.label }}</a>
+                    {% endif %}
+                {% endfor %}
+            </nav>
+        </div>
+    </aside>
+{% endmacro %}

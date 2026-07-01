@@ -1,0 +1,51 @@
+{% macro tabButton(tab) %}
+    <button type="button" role="tab" aria-selected="false"
+            class="tab-btn" data-tab-target="{{ tab.handle }}"
+            id="btn-{{ tab.handle }}" aria-controls="tab-{{ tab.handle }}">
+        <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        {{ tab.name }}
+        <span class="unsaved-dot"></span>
+    </button>
+{% endmacro %}
+
+{% macro tabFields(tab, field_values) %}
+    {% for element in tab.elements %}
+        {% set field = element.field %}
+        {% if not element.hidden %}
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-content"
+                       for="field_{{ field.handle }}">{{ element.label ?: field.label }}</label>
+                {% set instructions = element.instructions ?: field.instructions %}
+                {% if instructions %}
+                    <small class="text-secondary d-block mb-1">{{ instructions }}</small>
+                {% endif %}
+                <div class="input-group has-validation">
+                    {{ field.render({
+                        value: field_values[field.handle],
+                        id: 'field_' ~ field.handle,
+                    })|raw }}
+                </div>
+                {% if errors.has('fields.' ~ field.handle) %}
+                    <p class="mt-1 text-xs text-red-600">{{ errors.first('fields.' ~ field.handle) }}</p>
+                {% endif %}
+            </div>
+        {% else %}
+            <input type="hidden" name="fields[{{ field.handle }}]"
+                   value="{{ field_values[field.handle] }}">
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+
+{% macro tabContent(tab, field_values) %}
+    <!-- ░░ TAB: Content ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+    <div id="tab-{{ tab.handle }}" class="tab-panel active" role="tabpanel" aria-labelledby="btn-{{ tab.handle }}"
+         data-tab-panel="{{ tab.handle }}">
+        <div class="border-b border-edge px-5 py-5">
+            <div class="space-y-4">
+                {{ _self.tabFields(tab, field_values) }}
+            </div>
+        </div>
+    </div>
+{% endmacro %}

@@ -1,0 +1,28 @@
+<?php
+
+namespace AdAstra\Field\Types;
+
+use AdAstra\Field\AbstractField;
+
+class Telephone extends AbstractField
+{
+    protected string $handle = 'telephone';
+
+    protected string $name = 'Telephone';
+
+    protected array $rules = [
+        'string',
+    ];
+
+    protected array $settings_form = [];
+
+    public function storageColumn(): string
+    {
+        return 'value_text';
+    }
+
+    public function render(array $params): string
+    {
+        return view('_fields.telephone', $params)->render();
+    }
+}

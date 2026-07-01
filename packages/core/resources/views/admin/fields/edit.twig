@@ -1,0 +1,184 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._form-fields' as forms %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Edit Field' %}
+{% set page_heading = 'Field Groups' %}
+{% set active_nav = 'settings' %}
+{% set active_secondary_nav = 'field_groups' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Field Groups', href: route('fields.groups')},
+        {label: field.groups.first.name, href: route('fields.groups.show', field.groups.first)},
+        {label: field.name, href: route('fields.show', field)},
+        {label: 'Edit Field'}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.fields._sidebar', {active: field.groups.first.id}) }}
+{% endblock %}
+
+{% block content %}
+    <div id="unsaved-bar"
+         class="unsaved-bar items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-2">
+        <span class="flex items-center gap-2 text-sm text-amber-800">
+            <svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            You have unsaved changes.
+        </span>
+        <button type="submit" form="general-create-form"
+                class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Save
+            Now
+        </button>
+    </div>
+
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Edit Field</h1>
+                <p class="mt-1 text-sm text-muted">Create a reusable status, field, label, or option for content
+                    workflows.</p>
+            </div>
+            <a href="{{ route('fields.show', field) }}"
+               class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Field
+            </a>
+        </div>
+
+        <form id="general-create-form" method="POST" action="{{ route('fields.update', field) }}"
+              class="flex w-full min-w-0 flex-col gap-5">
+            {{ csrf_field() }}
+            {{ method_field('PUT') }}
+            <input type="hidden" id="field_id" value="{{ field.id }}">
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Item Details</h5>
+                </div>
+                <div class="space-y-5 px-5 py-5">
+                    {{ forms.input(name='name', label='Name', required=true, value=field.name) }}
+                    {{ forms.input('handle', 'Handle', required=true, value=field.handle) }}
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-content" for="handle">Type <span
+                                class="text-red-500">*</span></label>
+
+                        <select
+                            class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('field_type_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                            id="field_type_id" name="field_type_id">
+                            {% for type, name in field_types %}
+                                <option value="{{ type }}"
+                                        {% if old('field_type_id', field.field_type_id) == type %}selected{% elseif name == 'Text' %}{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.has('field_type_id') %}<p id="handle-error"
+                                                               class="mt-1 text-xs text-red-600">{{ errors.first('field_type_id') }}</p>{% endif %}
+                    </div>
+                    {{ forms.input(name='label', label='Label', value=field.label) }}
+                    {{ forms.textarea(name='instructions', label='Instructions', value=field.instructions, rows=3) }}
+                </div>
+            </div>
+
+            <div id="field-settings-card" class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Field Type Settings</h5>
+                </div>
+                <div class="px-5 py-5">
+                    <div id="field-type-settings">
+                        {{ include('admin::fields/_settings_panel', {
+                            settings_form: initial_settings_form,
+                            current_values: current_values
+                        }) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <a href="{{ route('fields.show', field) }}"
+                   class="rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-semibold text-content shadow-sm hover:bg-subtle">Cancel</a>
+                <button type="submit"
+                        class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                    Edit Field
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.attachHandleGenerator) {
+                window.attachHandleGenerator('name', 'handle');
+            }
+        });
+    </script>
+
+    {% import 'admin::_inc/_structured-rows' as matrix %}
+    {{ matrix.scripts() }}
+
+    <script>
+        (function () {
+            var settingsTouched = false;
+
+            document.getElementById('field-type-settings').addEventListener('input', function () {
+                settingsTouched = true;
+            });
+            document.getElementById('field-type-settings').addEventListener('change', function () {
+                settingsTouched = true;
+            });
+
+            document.getElementById('field_type_id').addEventListener('change', function () {
+                if (settingsTouched) {
+                    var warn = document.getElementById('settings-type-warning');
+                    if (!warn) {
+                        warn = document.createElement('div');
+                        warn.id = 'settings-type-warning';
+                        warn.setAttribute('role', 'alert');
+                        warn.className = 'mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800';
+                        warn.textContent = 'Changing the field type will discard your current settings.';
+                        var card = document.getElementById('field-settings-card');
+                        card.parentNode.insertBefore(warn, card);
+                    }
+                }
+
+                var fieldId = document.getElementById('field_id') ? document.getElementById('field_id').value : '';
+                var typeId = this.value;
+                fetch('{{ route('fields.type_settings') }}?type_id=' + typeId + '&field_id=' + fieldId)
+                    .then(function (r) {
+                        return r.text();
+                    })
+                    .then(function (html) {
+                        var warn = document.getElementById('settings-type-warning');
+                        if (warn) {
+                            warn.remove();
+                        }
+                        document.getElementById('field-type-settings').innerHTML = html;
+                        settingsTouched = false;
+                        if (window.initColorFields) window.initColorFields();
+                        if (window.initRangeSliders) window.initRangeSliders();
+                        if (window.initMatrixFields) window.initMatrixFields();
+                    });
+            });
+        })();
+    </script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,340 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Home' %}
+{% set page_heading = 'Dashboard' %}
+{% set active_nav = 'dashboard' %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([{label: 'Dashboard', href: route('dashboard'), icon: 'home'}, {label: 'Home'}]) }}
+{% endblock %}
+
+{% block content %}
+    {% embed 'admin._inc._page-header' with {title: 'System Overview', subtitle: 'Monitor content volume, user activity, and API usage.'} %}
+        {% block actions %}
+            {% import 'admin._inc._ui' as ui %}
+            {{ ui.button('Refresh', null, 'secondary', attrs='onclick="location.reload()"') }}
+            {{ ui.button('Manage Content', route('entries.groups'), icon='plus') }}
+        {% endblock %}
+    {% endembed %}
+
+    {% if recent_api_errors > 0 %}
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <div class="flex items-start gap-3">
+                <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+                <div>
+                    <p class="text-sm font-semibold text-amber-800">{{ recent_api_errors }} API
+                        error{{ recent_api_errors != 1 ? 's' : '' }} in the last 24 hours.</p>
+                    <p class="mt-1 text-sm text-amber-700">Review the API request log below for details.</p>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="rounded-lg border border-emerald-200 bg-accent-soft p-4">
+            <div class="flex items-start gap-3">
+                <svg class="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+                <div>
+                    <p class="text-sm font-semibold text-emerald-800">No API errors in the last 24 hours.</p>
+                    <p class="mt-1 text-sm text-accent">{{ total_api_requests|number_format }} total API requests
+                        logged.</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="px-5 py-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-medium uppercase tracking-wide text-muted">Total Entries</p>
+                    <span class="rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted">All</span>
+                </div>
+                <p class="mt-2 text-3xl font-semibold text-content">{{ total_entries|number_format }}</p>
+                <p class="mt-1 text-xs text-faint">Across all entry groups</p>
+            </div>
+        </div>
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="px-5 py-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-medium uppercase tracking-wide text-muted">Published</p>
+                    <span class="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">Live</span>
+                </div>
+                <p class="mt-2 text-3xl font-semibold text-content">{{ published_entries|number_format }}</p>
+                <p class="mt-1 text-xs text-faint">{{ draft_entries|number_format }} unpublished</p>
+            </div>
+        </div>
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="px-5 py-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-medium uppercase tracking-wide text-muted">Users</p>
+                    <span class="rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700">{{ active_users }} active</span>
+                </div>
+                <p class="mt-2 text-3xl font-semibold text-content">{{ total_users|number_format }}</p>
+                <p class="mt-1 text-xs text-faint">Registered accounts</p>
+            </div>
+        </div>
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="px-5 py-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-medium uppercase tracking-wide text-muted">Media Files</p>
+                    <span
+                        class="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">Library</span>
+                </div>
+                <p class="mt-2 text-3xl font-semibold text-content">{{ total_media|number_format }}</p>
+                <p class="mt-1 text-xs text-faint">Stored across all libraries</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
+
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
+                <div>
+                    <h5 class="text-sm font-semibold text-content">API Request Volume</h5>
+                    <p class="mt-0.5 text-xs text-muted">Daily requests over the last 14 days.</p>
+                </div>
+            </div>
+            <div class="px-5 py-5">
+                <div class="h-72 w-full">
+                    <canvas id="requestChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-5">
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Entry Groups</h5>
+                </div>
+                {% if entry_groups is not empty %}
+                    <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                        {% for group in entry_groups %}
+                            <div class="flex items-center justify-between py-2.5">
+                                <dt class="text-muted">
+                                    <a href="{{ route('entries.groups.show', group.id) }}"
+                                       class="hover:text-accent">{{ group.name }}</a>
+                                </dt>
+                                <dd class="font-semibold text-content">{{ group.entries_count|number_format }}</dd>
+                            </div>
+                        {% endfor %}
+                    </dl>
+                {% else %}
+                    <div class="px-5 py-6 text-center text-sm text-faint">
+                        No entry groups defined yet.
+                        <a href="{{ route('entries.groups.create') }}"
+                           class="block mt-1 text-emerald-600 hover:underline">Create one</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Content Summary</h5>
+                </div>
+                <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                    <div class="flex items-center justify-between py-2.5">
+                        <dt class="text-muted">Published entries</dt>
+                        <dd class="font-semibold text-content">{{ published_entries|number_format }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <dt class="text-muted">Unpublished</dt>
+                        <dd class="font-semibold text-content">{{ draft_entries|number_format }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <dt class="text-muted">Media files</dt>
+                        <dd class="font-semibold text-content">{{ total_media|number_format }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <dt class="text-muted">Active users</dt>
+                        <dd class="font-semibold text-content">{{ active_users|number_format }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
+                <h5 class="text-sm font-semibold text-content">Recent Entries</h5>
+            </div>
+            {% if recent_entries is not empty %}
+                <div class="divide-y divide-slate-100">
+                    {% for entry in recent_entries %}
+                        <div class="flex items-center gap-3 px-5 py-3.5">
+                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md
+                                {{ entry.status_is_public ? 'bg-accent-soft text-emerald-600' : 'bg-canvas text-faint' }}">
+                                {% if entry.status_is_public %}
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                {% else %}
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <a href="{{ route('entries.edit', entry.id) }}"
+                                   class="truncate block text-sm font-medium text-content hover:text-accent">{{ entry.title }}</a>
+                                <p class="text-xs text-faint">
+                                    {% if entry.entryGroup %}{{ entry.entryGroup.name }} &middot; {% endif %}
+                                    {% if entry.creator %}{{ entry.creator.name }} &middot; {% endif %}
+                                    {{ entry.created_at.diffForHumans() }}
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="px-5 py-8 text-center text-sm text-faint">No entries yet.</div>
+            {% endif %}
+        </div>
+
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
+                <h5 class="text-sm font-semibold text-content">Top API Routes <span
+                        class="ml-1 text-xs font-normal text-faint">(last 7 days)</span></h5>
+            </div>
+            {% if top_api_routes is not empty %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-subtle text-xs uppercase tracking-wide text-muted">
+                        <tr>
+                            <th class="px-4 py-3 font-semibold">Route</th>
+                            <th class="px-4 py-3 font-semibold text-right">Requests</th>
+                            <th class="px-4 py-3 font-semibold text-right">Errors</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-surface">
+                        {% for row in top_api_routes %}
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-content truncate max-w-[14rem]">{{ row.request_route }}</td>
+                                <td class="px-4 py-3 text-right text-content font-semibold">{{ row.hits|number_format }}</td>
+                                <td class="px-4 py-3 text-right">
+                                    {% if row.errors > 0 %}
+                                        <span
+                                            class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">{{ row.errors }}</span>
+                                    {% else %}
+                                        <span class="text-faint">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="px-5 py-8 text-center text-sm text-faint">No API activity in the last 7 days.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if api_logs is not empty %}
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
+                <h5 class="text-sm font-semibold text-content">Recent API Requests</h5>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                    <thead class="bg-subtle text-xs uppercase tracking-wide text-muted">
+                    <tr>
+                        <th class="px-4 py-3 font-semibold">User</th>
+                        <th class="px-4 py-3 font-semibold">Route</th>
+                        <th class="px-4 py-3 font-semibold">Status</th>
+                        <th class="px-4 py-3 font-semibold">Method</th>
+                        <th class="px-4 py-3 font-semibold">Date</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-surface">
+                    {% for log in api_logs %}
+                        <tr>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-2">
+                                    <img alt="" class="h-6 w-6 rounded-full object-cover"
+                                         src="{{ log.user.avatar() }}">
+                                    <span class="font-medium text-content">{{ log.user.name }}</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-muted max-w-[16rem] truncate">{{ log.request_route }}</td>
+                            <td class="px-4 py-3">
+                                {% if log.response_status_code == 200 %}
+                                    <span
+                                        class="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">{{ log.response_status_code }}</span>
+                                {% elseif log.response_status_code == 404 %}
+                                    <span
+                                        class="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">{{ log.response_status_code }}</span>
+                                {% else %}
+                                    <span
+                                        class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">{{ log.response_status_code }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-muted uppercase text-xs font-medium">{{ log.method }}</td>
+                            <td class="px-4 py-3 text-muted">{{ log.created_at.format('M j, Y h:i A') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        fetch('{{ route('dashboard-chart') }}')
+            .then(function (r) {
+                return r.json();
+            })
+            .then(function (payload) {
+                var ctx = document.getElementById('requestChart');
+                if (!ctx) return;
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: payload.labels,
+                        datasets: [{
+                            data: payload.data,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16,185,129,0.08)',
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {legend: {display: false}},
+                        scales: {
+                            x: {
+                                grid: {display: false},
+                                ticks: {color: '#94a3b8', font: {size: 11}}
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: {color: '#e2e8f0'},
+                                ticks: {color: '#94a3b8', font: {size: 11}, precision: 0}
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+{% endblock %}
