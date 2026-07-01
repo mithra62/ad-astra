@@ -35,7 +35,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void rebuildTreeUri(EntryTree $node)
  * @method static EntryMetric recordMetric(Entry $entry, string $metric, int $value = 1, ?Carbon $date = null)
  *
- * @see \AdAstra\Services\EntryService
+ * @see EntryService
  */
 class Entries extends Facade
 {

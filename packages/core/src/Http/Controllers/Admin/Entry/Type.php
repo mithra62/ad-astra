@@ -8,7 +8,6 @@ use AdAstra\Http\Requests\Entry\Type\DeleteEntryTypeRequest;
 use AdAstra\Http\Requests\Entry\Type\EditEntryTypeRequest;
 use AdAstra\Http\Requests\Entry\Type\StoreEntryTypeRequest;
 use AdAstra\Models\EntryBehavior;
-use AdAstra\Models\EntryGroup;
 use AdAstra\Models\EntryType as EntryTypeModel;
 use AdAstra\Models\FieldLayout;
 

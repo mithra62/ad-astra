@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static EntryType|null find(int $id)
  * @method static EntryType get(int $id)
  *
- * @see \AdAstra\Services\EntryTypeService
+ * @see EntryTypeService
  */
 class EntryTypes extends Facade
 {

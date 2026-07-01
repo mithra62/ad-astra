@@ -4,7 +4,6 @@ namespace Tests\Feature\Admin;
 
 use AdAstra\Enums\UserStatus;
 use AdAstra\Models\User;
-use AdAstra\Models\UserStatusLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;

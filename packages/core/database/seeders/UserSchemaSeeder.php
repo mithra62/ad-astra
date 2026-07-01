@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use AdAstra\Field\Types\Text;
-use AdAstra\Field\Types\Url;
 use AdAstra\Field\Types\Date;
+use AdAstra\Field\Types\Text;
 use AdAstra\Field\Types\Textarea;
+use AdAstra\Field\Types\Url;
 use AdAstra\Models\Field;
 use AdAstra\Models\Field\Group as FieldGroup;
 use AdAstra\Models\Field\Type as FieldType;

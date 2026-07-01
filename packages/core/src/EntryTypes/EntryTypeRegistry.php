@@ -3,7 +3,6 @@
 namespace AdAstra\EntryTypes;
 
 use AdAstra\Models\EntryType as EntryTypeRecord;
-use RuntimeException;
 
 class EntryTypeRegistry
 {

@@ -6,7 +6,6 @@ use AdAstra\Models\User;
 use AdAstra\Models\User\OauthToken;
 use AdAstra\Services\UserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class UserServiceOauthRevocationTest extends TestCase

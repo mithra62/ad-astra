@@ -3,8 +3,8 @@
 namespace AdAstra\Http\Controllers;
 
 use AdAstra\Settings;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 abstract class Controller
 {

@@ -3,7 +3,6 @@
 namespace Tests\Unit\Models\Media;
 
 use AdAstra\Models\Media;
-use AdAstra\Models\Media\Library;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;

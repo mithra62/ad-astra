@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Admin;
 
-use AdAstra\Field\Types\Text;
 use AdAstra\Field\Types\EmailAddress;
+use AdAstra\Field\Types\Text;
 use AdAstra\Models\Field as FieldModel;
 use AdAstra\Models\Field\Group as FieldGroup;
 use AdAstra\Models\Field\Type as FieldType;

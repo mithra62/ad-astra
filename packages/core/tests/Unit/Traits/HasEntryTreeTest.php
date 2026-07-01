@@ -4,7 +4,6 @@ namespace Tests\Unit\Traits;
 
 use AdAstra\Models\Entry;
 use AdAstra\Models\EntryGroup;
-use AdAstra\Models\EntryTree;
 use AdAstra\Models\EntryType;
 use AdAstra\Services\EntryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;

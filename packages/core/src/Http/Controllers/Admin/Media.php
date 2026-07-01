@@ -3,13 +3,13 @@
 namespace AdAstra\Http\Controllers\Admin;
 
 use AdAstra\Actions\Media\DeleteMedia as DeleteMediaAction;
+use AdAstra\Actions\Media\EditMedia as EditMediaAction;
 use AdAstra\Http\Requests\Media\DeleteMediaRequest;
 use AdAstra\Http\Requests\Media\EditMediaRequest;
 use AdAstra\Models\Media as MediaModel;
 use AdAstra\Models\Media\Library as LibraryModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
-use AdAstra\Actions\Media\EditMedia as EditMediaAction;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 

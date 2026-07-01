@@ -4,7 +4,6 @@ namespace AdAstra\Services;
 
 use AdAstra\Models\EntryGroup;
 use AdAstra\Models\EntryType;
-use AdAstra\Models\FieldLayout;
 
 class EntryGroupService extends AbstractService
 {

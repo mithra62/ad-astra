@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static Entry|null find(int $id)
  * @method static EntryQueryBuilder query()
  *
- * @see \AdAstra\Services\ContentService
+ * @see ContentService
  */
 class Content extends Facade
 {

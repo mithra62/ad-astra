@@ -4,10 +4,10 @@ namespace AdAstra\Http\Requests\User;
 
 use AdAstra\Enums\UserStatus;
 use AdAstra\Http\Requests\FormRequest;
+use AdAstra\Models\Role;
 use AdAstra\Support\UserFieldLayout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use AdAstra\Models\Role;
 
 class StoreUserRequest extends FormRequest
 {

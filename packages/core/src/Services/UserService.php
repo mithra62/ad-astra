@@ -14,6 +14,7 @@ use AdAstra\Settings;
 use AdAstra\Traits\Field\PersistsFieldValues;
 use Carbon\Carbon;
 use DateTime;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -27,7 +28,6 @@ use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
 use Laravel\Sanctum\NewAccessToken;
 use Laravel\Sanctum\PersonalAccessToken;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class UserService
 {

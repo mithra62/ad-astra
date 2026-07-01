@@ -4,8 +4,8 @@ namespace AdAstra\Services\SiteRouting;
 
 use AdAstra\Services\SiteRouting\RouteDrivers\EntryTreeRouteDriver;
 use AdAstra\Services\SiteRouting\RouteDrivers\TemplateRouteDriver;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use InvalidArgumentException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 

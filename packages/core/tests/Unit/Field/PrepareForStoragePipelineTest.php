@@ -17,9 +17,9 @@ use AdAstra\Models\StatusGroup;
 use AdAstra\Repositories\AbstractFieldableRepository;
 use AdAstra\Traits\Field\PersistsFieldValues;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * Proves the prepareForStorage / prepareForQuery hooks fire at every

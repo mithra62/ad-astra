@@ -8,8 +8,8 @@ use AdAstra\Models\StatusGroup;
 use AdAstra\Observers\StatusSyncRegistry;
 use AdAstra\Traits\HasStatus;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use LogicException;
 use Tests\TestCase;
 

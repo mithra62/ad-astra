@@ -3,7 +3,6 @@
 namespace Tests\Unit\Actions\Media;
 
 use AdAstra\Actions\Media\EditMedia;
-use AdAstra\Field\Types\FileUpload;
 use AdAstra\Field\Types\Text;
 use AdAstra\Models\Category;
 use AdAstra\Models\Field;

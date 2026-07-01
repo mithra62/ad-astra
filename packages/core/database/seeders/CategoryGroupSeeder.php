@@ -15,7 +15,6 @@ use AdAstra\Models\FieldLayout\TabElement;
 use AdAstra\Models\FieldValue;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class CategoryGroupSeeder extends Seeder
 {

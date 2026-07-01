@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use AdAstra\Facades\Entries;
-use AdAstra\Models\EntryBehavior;
 use AdAstra\Models\Entry;
+use AdAstra\Models\EntryBehavior;
 use AdAstra\Models\EntryGroup;
 use AdAstra\Models\EntryTree;
 use AdAstra\Models\EntryType;

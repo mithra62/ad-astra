@@ -23,8 +23,8 @@ use AdAstra\Http\Controllers\Admin\Status;
 use AdAstra\Http\Controllers\Admin\Status\Group as StatusGroup;
 use AdAstra\Http\Controllers\Admin\User;
 use AdAstra\Http\Controllers\Admin\User\Layout as UserLayout;
-use AdAstra\Http\Controllers\Admin\User\Token as UserTokens;
 use AdAstra\Http\Controllers\Admin\User\Status as UserStatus;
+use AdAstra\Http\Controllers\Admin\User\Token as UserTokens;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {
