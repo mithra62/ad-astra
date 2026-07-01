@@ -16,6 +16,7 @@
     </testsuites>
     <source>
         <include>
+            <directory>packages/core/src</directory>
             <directory>app</directory>
         </include>
     </source>

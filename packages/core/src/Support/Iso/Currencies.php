@@ -78,7 +78,12 @@ final class Currencies
     {
         static $data = null;
         if ($data === null) {
-            $data = require base_path('vendor/moneyphp/money/resources/currency.php');
+            // Resolve moneyphp/money's bundled ISO data from the installed package
+            // location. Using reflection (rather than base_path() or a path relative to
+            // this file) keeps it working without a booted application and regardless of
+            // whether the package runs from packages/ or vendor/.
+            $moneySrc = dirname((new \ReflectionClass(\Money\Money::class))->getFileName());
+            $data = require $moneySrc . '/../resources/currency.php';
         }
         return $data;
     }
