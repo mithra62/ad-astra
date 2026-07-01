@@ -11,6 +11,7 @@
     "require": {
         "php": "^8.2",
         "ext-curl": "*",
+        "adastra/core": "*",
         "darkaonline/l5-swagger": "^9.0",
         "doctrine/annotations": "^2.0",
         "laravel/fortify": "^1.31",
@@ -38,10 +39,7 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "app/",
-            "AdAstra\\": "packages/core/src/",
-            "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "App\\": "app/"
         }
     },
     "autoload-dev": {
@@ -90,6 +88,15 @@
             "dont-discover": []
         }
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/core",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",

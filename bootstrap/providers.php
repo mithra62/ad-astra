@@ -1,13 +1,8 @@
 <?php
 
-use AdAstra\Providers\AppServiceProvider;
-use AdAstra\Providers\BotBlockServiceProvider;
-use AdAstra\Providers\ContentServiceProvider;
-use AdAstra\Providers\FortifyServiceProvider;
-
+// AdAstra's service providers are auto-discovered from the adastra/core package
+// (packages/core/composer.json -> extra.laravel.providers). Register the host
+// application's own providers here.
 return [
-    AppServiceProvider::class,
-    BotBlockServiceProvider::class,
-    ContentServiceProvider::class,
-    FortifyServiceProvider::class,
+    //
 ];

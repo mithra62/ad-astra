@@ -4,8 +4,63 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d6ce3b112fe8ce01bcd8f76e585e26de",
+    "content-hash": "08b0ceedb43484da80dc2597cb7ed1e6",
     "packages": [
+        {
+            "name": "adastra/core",
+            "version": "0.0.1",
+            "dist": {
+                "type": "path",
+                "url": "packages/core",
+                "reference": "f3f7689545112d548c061caa047cc213cd4e9b64"
+            },
+            "require": {
+                "darkaonline/l5-swagger": "^9.0",
+                "doctrine/annotations": "^2.0",
+                "ext-curl": "*",
+                "laravel/fortify": "^1.31",
+                "laravel/framework": "^12.0",
+                "laravel/sanctum": "^4.0",
+                "laravel/socialite": "^5.24",
+                "laravolt/avatar": "^6.3",
+                "mews/purifier": "^3.4",
+                "moneyphp/money": "^4.9",
+                "php": "^8.2",
+                "rcrowe/twigbridge": "^0.14.6",
+                "spatie/laravel-permission": "^6.21",
+                "spatie/laravel-webhook-client": "^3.4",
+                "twig/twig": "^3.22"
+            },
+            "require-dev": {
+                "fakerphp/faker": "^1.23"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AdAstra\\Providers\\AppServiceProvider",
+                        "AdAstra\\Providers\\BotBlockServiceProvider",
+                        "AdAstra\\Providers\\ContentServiceProvider",
+                        "AdAstra\\Providers\\FortifyServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AdAstra\\": "src/",
+                    "Database\\Factories\\": "database/factories/",
+                    "Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "AdAstra core framework package.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
         {
             "name": "bacon/bacon-qr-code",
             "version": "v3.1.1",

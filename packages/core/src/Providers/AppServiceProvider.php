@@ -45,8 +45,11 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Pagination\Paginator;
+use AdAstra\Console\Commands\RefreshTokens;
+use AdAstra\Console\Commands\ValidateClassReferences;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -58,6 +61,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // AdAstra's own config ships in the package (merged so config('settings') /
+        // config('site') resolve), and is publishable so a developer can override it at
+        // the app's config/ root. Laravel + third-party config stays at the app root.
+        $this->mergeConfigFrom(__DIR__ . '/../../config/settings.php', 'settings');
+        $this->mergeConfigFrom(__DIR__ . '/../../config/site.php', 'site');
+        $this->publishes([
+            __DIR__ . '/../../config/settings.php' => config_path('settings.php'),
+            __DIR__ . '/../../config/site.php' => config_path('site.php'),
+        ], 'adastra-config');
+
         // Framework models live under AdAstra\Models\, but their factories remain in
         // the Database\Factories\ namespace. Laravel's default guessers assume the
         // application namespace (App\), so neither direction bridges to AdAstra\ on its
@@ -179,17 +192,42 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(UserStatusChanged::class, WriteUserStatusLog::class);
         Event::listen(UserLockChanged::class, WriteUserStatusLog::class);
 
-        //        Route::group([
-        //            'namespace' => 'mithra62\Shop\Http\Controllers',
-        //            'domain' => config('fortify.domain', null),
-        //            'prefix' => config('fortify.prefix'),
-        //        ], function () {
-        //            $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
-        //        });
+        // Package HTTP routes. Registered in a booted() callback so they load AFTER
+        // every other provider (notably Fortify) has registered its routes — the site
+        // catch-all in web.php (`/{uri?}`) must remain the last web route or it would
+        // shadow /login and friends.
+        // The catch-all in web.php (`/{uri?}` with `.*`) matches EVERY path, including
+        // /admin/* and /api/*, so it must be registered LAST. Load admin + api first.
+        $routes = __DIR__ . '/../../routes';
+        $this->app->booted(function () use ($routes) {
+            Route::middleware('web')->group($routes . '/admin.php');
+            Route::middleware('api')->prefix('api')->group($routes . '/api.php');
+            Route::middleware('web')->group($routes . '/web.php');
+        });
 
-        //setup template routing
-        View::addNamespace('templates', resource_path('templates'));
-        View::addNamespace('admin', resource_path('views/admin'));
+        // Framework Artisan commands (schedule + the `inspire` demo command live in the
+        // package's routes/console.php, loaded via bootstrap/app.php `commands:`).
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                RefreshTokens::class,
+                ValidateClassReferences::class,
+            ]);
+        }
+
+        // Framework migrations ship inside the package (the version-delivery mechanism);
+        // `php artisan migrate` picks them up here alongside any app migrations.
+        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+
+        // View resolution. Framework views ship in the package; the app's own
+        // resource_path() locations are listed FIRST so a developer can override any
+        // template by dropping a same-named file at the root (upgrade-safe override).
+        $res = __DIR__ . '/../../resources';
+        View::addNamespace('templates', [resource_path('templates'), $res . '/templates']);
+        View::addNamespace('admin', [resource_path('views/admin'), $res . '/views/admin']);
+        // Non-namespaced framework views (_fields.*, _inc.*, auth.*, errors.*). The app's
+        // resource_path('views') is already the primary path (config/view.php), so this
+        // package location is the fallback.
+        View::addLocation($res . '/views');
 
         // Expose the resolved appearance preference (light|dark|system) to every
         // top-level view so the admin/auth layouts can apply the `.dark` class
