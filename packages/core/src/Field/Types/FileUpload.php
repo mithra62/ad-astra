@@ -10,13 +10,10 @@ use Illuminate\Support\Collection;
 
 class FileUpload extends AbstractField implements SyncsToMediables
 {
-    protected string $handle = 'file_upload';
-
-    protected string $name = 'File Upload';
-
     /** @var array<string, int|null> */
     private static array $libraryHandleCache = [];
-
+    protected string $handle = 'file_upload';
+    protected string $name = 'File Upload';
     protected array $settings_form = [
         'library' => [
             'type' => 'select_multiple',
@@ -137,6 +134,15 @@ class FileUpload extends AbstractField implements SyncsToMediables
         return true;
     }
 
+    public function normaliseIds(mixed $value): array
+    {
+        if ($value instanceof Collection) {
+            return $value->pluck('id')->map('intval')->all();
+        }
+
+        return $this->cast($value);
+    }
+
     /** Cast raw stored value to a plain array of integer IDs. */
     public function cast(mixed $value): array
     {
@@ -150,6 +156,15 @@ class FileUpload extends AbstractField implements SyncsToMediables
         }
 
         return [];
+    }
+
+    private function resolveLibraryHandle(string $handle): ?int
+    {
+        if (!array_key_exists($handle, static::$libraryHandleCache)) {
+            static::$libraryHandleCache[$handle] = Library::where('handle', $handle)->value('id');
+        }
+
+        return static::$libraryHandleCache[$handle];
     }
 
     /**
@@ -236,23 +251,5 @@ class FileUpload extends AbstractField implements SyncsToMediables
         }
 
         return implode(',', $mimes);
-    }
-
-    private function resolveLibraryHandle(string $handle): ?int
-    {
-        if (!array_key_exists($handle, static::$libraryHandleCache)) {
-            static::$libraryHandleCache[$handle] = Library::where('handle', $handle)->value('id');
-        }
-
-        return static::$libraryHandleCache[$handle];
-    }
-
-    public function normaliseIds(mixed $value): array
-    {
-        if ($value instanceof Collection) {
-            return $value->pluck('id')->map('intval')->all();
-        }
-
-        return $this->cast($value);
     }
 }

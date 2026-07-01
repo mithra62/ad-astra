@@ -12,16 +12,6 @@ class VideoEntryTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeType(): VideoEntryType
-    {
-        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'video')->value('id')]);
-        return new VideoEntryType($record);
-    }
-
-    // -------------------------------------------------------------------------
-    // validate()
-    // -------------------------------------------------------------------------
-
     public function test_validate_returns_error_when_publishing_with_no_platform_id_or_video_url(): void
     {
         $type = $this->makeType();
@@ -32,6 +22,16 @@ class VideoEntryTypeTest extends TestCase
         ]);
 
         $this->assertArrayHasKey('platform_id', $errors);
+    }
+
+    // -------------------------------------------------------------------------
+    // validate()
+    // -------------------------------------------------------------------------
+
+    private function makeType(): VideoEntryType
+    {
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'video')->value('id')]);
+        return new VideoEntryType($record);
     }
 
     public function test_validate_passes_when_platform_id_is_provided(): void

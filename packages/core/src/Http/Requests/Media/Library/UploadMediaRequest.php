@@ -43,13 +43,6 @@ class UploadMediaRequest extends FormRequest
         ];
     }
 
-    public function attributes(): array
-    {
-        return [
-            'file' => 'uploaded file',
-        ];
-    }
-
     /**
      * Resolve the library from the route — supports both 'library' and
      * 'library_id' as route parameter names.
@@ -64,5 +57,12 @@ class UploadMediaRequest extends FormRequest
         }
 
         return $param ? LibraryModel::find($param) : null;
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'file' => 'uploaded file',
+        ];
     }
 }

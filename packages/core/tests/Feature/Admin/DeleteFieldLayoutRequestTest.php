@@ -16,18 +16,6 @@ class DeleteFieldLayoutRequestTest extends TestCase
 
     private User $admin;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->withoutMiddleware(VerifyCsrfToken::class);
-
-        Permission::firstOrCreate(['name' => 'delete field layout']);
-        Permission::firstOrCreate(['name' => 'access admin']);
-
-        $this->admin = User::factory()->active()->create();
-        $this->admin->givePermissionTo(['access admin', 'delete field layout']);
-    }
-
     public function test_destroy_fails_validation_when_layout_is_assigned_to_user_schema(): void
     {
         $layout = FieldLayout::factory()->create();
@@ -69,5 +57,17 @@ class DeleteFieldLayoutRequestTest extends TestCase
 
         $response->assertSessionHasNoErrors();
         $this->assertDatabaseMissing('field_layouts', ['id' => $other->id]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+
+        Permission::firstOrCreate(['name' => 'delete field layout']);
+        Permission::firstOrCreate(['name' => 'access admin']);
+
+        $this->admin = User::factory()->active()->create();
+        $this->admin->givePermissionTo(['access admin', 'delete field layout']);
     }
 }

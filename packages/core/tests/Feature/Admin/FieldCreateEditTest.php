@@ -20,6 +20,18 @@ class FieldCreateEditTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
+    public function test_create_page_renders_settings_card(): void
+    {
+        $user = $this->makeSuperAdmin();
+        $group = $this->makeGroup();
+        $this->textType();
+
+        $this->actingAs($user)
+            ->get(route('fields.create', $group->id))
+            ->assertOk()
+            ->assertSee('Field Type Settings', false);
+    }
+
     private function makeSuperAdmin(): User
     {
         $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
@@ -41,29 +53,9 @@ class FieldCreateEditTest extends TestCase
         );
     }
 
-    private function emailType(): FieldType
-    {
-        return FieldType::firstOrCreate(
-            ['object' => EmailAddress::class],
-            ['name' => 'Email Address', 'handle' => 'email_address', 'settings' => []]
-        );
-    }
-
     // -------------------------------------------------------------------------
     // Create page
     // -------------------------------------------------------------------------
-
-    public function test_create_page_renders_settings_card(): void
-    {
-        $user = $this->makeSuperAdmin();
-        $group = $this->makeGroup();
-        $this->textType();
-
-        $this->actingAs($user)
-            ->get(route('fields.create', $group->id))
-            ->assertOk()
-            ->assertSee('Field Type Settings', false);
-    }
 
     public function test_create_page_renders_initial_settings_for_text_type(): void
     {
@@ -93,10 +85,6 @@ class FieldCreateEditTest extends TestCase
             ->assertSee('Repopulated value', false);
     }
 
-    // -------------------------------------------------------------------------
-    // Edit page
-    // -------------------------------------------------------------------------
-
     public function test_edit_page_renders_settings_card(): void
     {
         $user = $this->makeSuperAdmin();
@@ -113,6 +101,10 @@ class FieldCreateEditTest extends TestCase
             ->assertOk()
             ->assertSee('Field Type Settings', false);
     }
+
+    // -------------------------------------------------------------------------
+    // Edit page
+    // -------------------------------------------------------------------------
 
     public function test_edit_page_pre_populates_saved_settings(): void
     {
@@ -146,5 +138,13 @@ class FieldCreateEditTest extends TestCase
             ->get(route('fields.edit', $field->id))
             ->assertOk()
             ->assertSee('no configurable settings', false);
+    }
+
+    private function emailType(): FieldType
+    {
+        return FieldType::firstOrCreate(
+            ['object' => EmailAddress::class],
+            ['name' => 'Email Address', 'handle' => 'email_address', 'settings' => []]
+        );
     }
 }

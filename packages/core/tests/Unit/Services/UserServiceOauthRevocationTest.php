@@ -14,16 +14,6 @@ class UserServiceOauthRevocationTest extends TestCase
 
     private UserService $service;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->service = app(UserService::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // upsertOauthToken — bulk revocation of prior tokens
-    // -------------------------------------------------------------------------
-
     public function test_upsert_revokes_all_active_tokens_for_same_provider(): void
     {
         $user = User::factory()->create();
@@ -38,6 +28,10 @@ class UserServiceOauthRevocationTest extends TestCase
         $this->assertNotNull($t2->fresh()->revoked_at);
         $this->assertNotNull($t3->fresh()->revoked_at);
     }
+
+    // -------------------------------------------------------------------------
+    // upsertOauthToken — bulk revocation of prior tokens
+    // -------------------------------------------------------------------------
 
     public function test_upsert_all_prior_tokens_share_same_revoked_at_timestamp(): void
     {
@@ -86,10 +80,6 @@ class UserServiceOauthRevocationTest extends TestCase
         );
     }
 
-    // -------------------------------------------------------------------------
-    // revokeAllOauthTokens — bulk revocation
-    // -------------------------------------------------------------------------
-
     public function test_revoke_all_revokes_tokens_across_all_providers(): void
     {
         $user = User::factory()->create();
@@ -104,6 +94,10 @@ class UserServiceOauthRevocationTest extends TestCase
         $this->assertNotNull($t2->fresh()->revoked_at);
         $this->assertNotNull($t3->fresh()->revoked_at);
     }
+
+    // -------------------------------------------------------------------------
+    // revokeAllOauthTokens — bulk revocation
+    // -------------------------------------------------------------------------
 
     public function test_revoke_all_tokens_share_same_revoked_at_timestamp(): void
     {
@@ -133,5 +127,11 @@ class UserServiceOauthRevocationTest extends TestCase
         $this->assertNotNull($google1->fresh()->revoked_at);
         $this->assertNotNull($google2->fresh()->revoked_at);
         $this->assertNull($github->fresh()->revoked_at);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->service = app(UserService::class);
     }
 }

@@ -7,6 +7,11 @@ use PHPUnit\Framework\TestCase;
 
 class TimeFormatRuleTest extends TestCase
 {
+    public function test_accepts_hh_mm(): void
+    {
+        $this->assertNull($this->runRule(new TimeFormatRule(), '09:30'));
+    }
+
     private function runRule(TimeFormatRule $rule, mixed $value): ?string
     {
         $error = null;
@@ -14,11 +19,6 @@ class TimeFormatRuleTest extends TestCase
             $error = $msg;
         });
         return $error;
-    }
-
-    public function test_accepts_hh_mm(): void
-    {
-        $this->assertNull($this->runRule(new TimeFormatRule(), '09:30'));
     }
 
     public function test_accepts_h_mm(): void

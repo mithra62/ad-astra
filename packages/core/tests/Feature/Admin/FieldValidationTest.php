@@ -19,41 +19,6 @@ class FieldValidationTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
-    private function makeSuperAdmin(): User
-    {
-        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $user = User::factory()->create();
-        $user->assignRole($role);
-        return $user;
-    }
-
-    private function makeGroup(): FieldGroup
-    {
-        return FieldGroup::factory()->create();
-    }
-
-    private function textType(): FieldType
-    {
-        return FieldType::firstOrCreate(
-            ['object' => Text::class],
-            ['name' => 'Text', 'handle' => 'text', 'settings' => []]
-        );
-    }
-
-    private function basePayload(FieldType $type, FieldGroup $group, array $overrides = []): array
-    {
-        return array_merge([
-            'group_id' => $group->id,
-            'field_type_id' => $type->id,
-            'name' => 'Test Field',
-            'handle' => 'test_field',
-        ], $overrides);
-    }
-
-    // -------------------------------------------------------------------------
-    // Store — settings validation
-    // -------------------------------------------------------------------------
-
     public function test_store_fails_when_max_length_is_not_an_integer(): void
     {
         $user = $this->makeSuperAdmin();
@@ -67,6 +32,41 @@ class FieldValidationTest extends TestCase
             ]))
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['settings.max_length']);
+    }
+
+    private function makeSuperAdmin(): User
+    {
+        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
+        $user = User::factory()->create();
+        $user->assignRole($role);
+        return $user;
+    }
+
+    private function textType(): FieldType
+    {
+        return FieldType::firstOrCreate(
+            ['object' => Text::class],
+            ['name' => 'Text', 'handle' => 'text', 'settings' => []]
+        );
+    }
+
+    private function makeGroup(): FieldGroup
+    {
+        return FieldGroup::factory()->create();
+    }
+
+    // -------------------------------------------------------------------------
+    // Store — settings validation
+    // -------------------------------------------------------------------------
+
+    private function basePayload(FieldType $type, FieldGroup $group, array $overrides = []): array
+    {
+        return array_merge([
+            'group_id' => $group->id,
+            'field_type_id' => $type->id,
+            'name' => 'Test Field',
+            'handle' => 'test_field',
+        ], $overrides);
     }
 
     public function test_store_fails_when_max_length_is_below_minimum(): void

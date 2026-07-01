@@ -289,6 +289,20 @@ class UserService
     // Status management
     // -------------------------------------------------------------------------
 
+    public function delete(User $user): bool
+    {
+        $hasCreatedEntries = Entry::where('created_by_user_id', $user->id)->exists();
+        $hasAuthoredEntries = EntryAuthor::where('user_id', $user->id)->exists();
+
+        if ($hasCreatedEntries || $hasAuthoredEntries) {
+            throw ValidationException::withMessages([
+                'user' => 'This user has associated content and cannot be deleted. Reassign or remove their entries first.',
+            ]);
+        }
+
+        return (bool)$user->delete();
+    }
+
     /**
      * Set an administrative status on a user account.
      *
@@ -366,6 +380,10 @@ class UserService
         return $user->refresh();
     }
 
+    // -------------------------------------------------------------------------
+    // Delete
+    // -------------------------------------------------------------------------
+
     /**
      * Remove an account lock, allowing the user to log in again (subject to status).
      *
@@ -380,24 +398,6 @@ class UserService
         event(new UserLockChanged($user, $previousLockedUntil, null, ''));
 
         return $user->refresh();
-    }
-
-    // -------------------------------------------------------------------------
-    // Delete
-    // -------------------------------------------------------------------------
-
-    public function delete(User $user): bool
-    {
-        $hasCreatedEntries = Entry::where('created_by_user_id', $user->id)->exists();
-        $hasAuthoredEntries = EntryAuthor::where('user_id', $user->id)->exists();
-
-        if ($hasCreatedEntries || $hasAuthoredEntries) {
-            throw ValidationException::withMessages([
-                'user' => 'This user has associated content and cannot be deleted. Reassign or remove their entries first.',
-            ]);
-        }
-
-        return (bool)$user->delete();
     }
 
     /**

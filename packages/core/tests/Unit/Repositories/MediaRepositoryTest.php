@@ -15,14 +15,6 @@ class MediaRepositoryTest extends TestCase
 
     private MediaRepository $repo;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->repo = new MediaRepository;
-    }
-
-    // ── applyData — core attributes ────────────────────────────────────────
-
     public function test_apply_data_updates_name(): void
     {
         $media = Media::factory()->create(['name' => 'Old Name']);
@@ -32,6 +24,8 @@ class MediaRepositoryTest extends TestCase
         $this->assertEquals('New Name', $updated->name);
         $this->assertDatabaseHas('media', ['id' => $media->id, 'name' => 'New Name']);
     }
+
+    // ── applyData — core attributes ────────────────────────────────────────
 
     public function test_apply_data_does_not_change_name_when_not_provided(): void
     {
@@ -70,8 +64,6 @@ class MediaRepositoryTest extends TestCase
         $this->assertSame(7, $updated->sort_order);
     }
 
-    // ── applyData — categories ─────────────────────────────────────────────
-
     public function test_apply_data_syncs_categories(): void
     {
         $media = Media::factory()->create();
@@ -85,6 +77,8 @@ class MediaRepositoryTest extends TestCase
             'category_id' => $category->id,
         ]);
     }
+
+    // ── applyData — categories ─────────────────────────────────────────────
 
     public function test_apply_data_does_not_touch_categories_when_key_absent(): void
     {
@@ -108,8 +102,6 @@ class MediaRepositoryTest extends TestCase
         $this->assertCount(0, $media->fresh()->categories);
     }
 
-    // ── delete ─────────────────────────────────────────────────────────────
-
     public function test_delete_soft_deletes_media_record(): void
     {
         $media = Media::factory()->create();
@@ -119,6 +111,8 @@ class MediaRepositoryTest extends TestCase
         $this->assertTrue($result);
         $this->assertSoftDeleted('media', ['id' => $media->id]);
     }
+
+    // ── delete ─────────────────────────────────────────────────────────────
 
     public function test_deleted_media_is_excluded_from_default_queries(): void
     {
@@ -130,8 +124,6 @@ class MediaRepositoryTest extends TestCase
         $this->assertNotNull(Media::withTrashed()->find($media->id));
     }
 
-    // ── resolveLayoutFields ────────────────────────────────────────────────
-
     public function test_resolve_layout_fields_returns_empty_collection_when_library_has_no_layout(): void
     {
         $library = Library::factory()->create(['field_layout_id' => null]);
@@ -142,6 +134,8 @@ class MediaRepositoryTest extends TestCase
         $this->assertCount(0, $fields);
     }
 
+    // ── resolveLayoutFields ────────────────────────────────────────────────
+
     public function test_resolve_layout_fields_returns_empty_collection_when_media_has_no_library(): void
     {
         $media = Media::factory()->create(['library_id' => null]);
@@ -151,8 +145,6 @@ class MediaRepositoryTest extends TestCase
         $this->assertCount(0, $fields);
     }
 
-    // ── return value contract ──────────────────────────────────────────────
-
     public function test_apply_data_returns_refreshed_media_instance(): void
     {
         $media = Media::factory()->create(['name' => 'Before']);
@@ -161,5 +153,13 @@ class MediaRepositoryTest extends TestCase
 
         $this->assertInstanceOf(Media::class, $result);
         $this->assertEquals('After', $result->name);
+    }
+
+    // ── return value contract ──────────────────────────────────────────────
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->repo = new MediaRepository;
     }
 }

@@ -15,11 +15,18 @@ class LibraryUploadTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    public function test_upload_with_json_accept_returns_json_on_success(): void
     {
-        parent::setUp();
-        $this->withoutMiddleware(VerifyCsrfToken::class);
-        Storage::fake('local');
+        $user = $this->makeSuperAdmin();
+        $library = $this->makeLibrary();
+
+        $this->actingAs($user)
+            ->withHeader('Accept', 'application/json')
+            ->post(route('media.libraries.upload', $library->id), [
+                'file' => UploadedFile::fake()->image('photo.jpg'),
+            ])
+            ->assertOk()
+            ->assertJsonStructure(['id', 'name', 'url']);
     }
 
     // -------------------------------------------------------------------------
@@ -42,20 +49,6 @@ class LibraryUploadTest extends TestCase
     // -------------------------------------------------------------------------
     // JSON content negotiation
     // -------------------------------------------------------------------------
-
-    public function test_upload_with_json_accept_returns_json_on_success(): void
-    {
-        $user = $this->makeSuperAdmin();
-        $library = $this->makeLibrary();
-
-        $this->actingAs($user)
-            ->withHeader('Accept', 'application/json')
-            ->post(route('media.libraries.upload', $library->id), [
-                'file' => UploadedFile::fake()->image('photo.jpg'),
-            ])
-            ->assertOk()
-            ->assertJsonStructure(['id', 'name', 'url']);
-    }
 
     public function test_upload_with_json_accept_returns_422_json_when_no_file(): void
     {
@@ -92,5 +85,12 @@ class LibraryUploadTest extends TestCase
                 'file' => UploadedFile::fake()->image('photo.jpg'),
             ])
             ->assertRedirect();
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+        Storage::fake('local');
     }
 }

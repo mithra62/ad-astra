@@ -14,16 +14,6 @@ class PodcastEpisodeEntryTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeType(): PodcastEpisodeEntryType
-    {
-        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'podcast-episode')->value('id')]);
-        return new PodcastEpisodeEntryType($record);
-    }
-
-    // -------------------------------------------------------------------------
-    // beforeCreate — episode_number
-    // -------------------------------------------------------------------------
-
     public function test_before_create_assigns_episode_number_when_not_provided(): void
     {
         $type = $this->makeType();
@@ -32,6 +22,16 @@ class PodcastEpisodeEntryTypeTest extends TestCase
 
         $this->assertArrayHasKey('episode_number', $result['fields']);
         $this->assertIsInt($result['fields']['episode_number']);
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeCreate — episode_number
+    // -------------------------------------------------------------------------
+
+    private function makeType(): PodcastEpisodeEntryType
+    {
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'podcast-episode')->value('id')]);
+        return new PodcastEpisodeEntryType($record);
     }
 
     public function test_before_create_does_not_overwrite_explicit_episode_number(): void

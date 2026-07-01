@@ -22,11 +22,6 @@ class Type extends Controller
         return $this->view('entries.types.index', ['types' => $types]);
     }
 
-    public function create()
-    {
-        return $this->view('entries.types.create', $this->formData());
-    }
-
     public function store(StoreEntryTypeRequest $request)
     {
         $type = EntryTypes::create($request->validated());
@@ -34,6 +29,19 @@ class Type extends Controller
         return redirect()
             ->route('entries.types.edit', $type->id)
             ->with('success', trans('entry.type.created'));
+    }
+
+    public function create()
+    {
+        return $this->view('entries.types.create', $this->formData());
+    }
+
+    private function formData(): array
+    {
+        return [
+            'behaviors' => EntryBehavior::orderBy('name')->get(),
+            'field_layouts' => FieldLayout::orderBy('name')->get(),
+        ];
     }
 
     public function edit(string $id)
@@ -91,13 +99,5 @@ class Type extends Controller
         }
 
         return $this->view('entries.types.delete', ['type' => $type]);
-    }
-
-    private function formData(): array
-    {
-        return [
-            'behaviors' => EntryBehavior::orderBy('name')->get(),
-            'field_layouts' => FieldLayout::orderBy('name')->get(),
-        ];
     }
 }

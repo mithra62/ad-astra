@@ -5,17 +5,6 @@ namespace AdAstra\Traits\Field;
 trait ValidatesAgainstOptions
 {
     /**
-     * Returns true when $value is one of the declared option keys.
-     *
-     * @param array<int, array{key: string, label: string}> $options
-     */
-    public function isValidOption(mixed $value, array $options): bool
-    {
-        $keys = array_column($options, 'key');
-        return in_array((string)$value, array_map('strval', $keys), true);
-    }
-
-    /**
      * Validates $value against the configured options.
      *
      * When strict_options is false (default), orphaned values pass silently.
@@ -46,6 +35,17 @@ trait ValidatesAgainstOptions
         }
 
         return true;
+    }
+
+    /**
+     * Returns true when $value is one of the declared option keys.
+     *
+     * @param array<int, array{key: string, label: string}> $options
+     */
+    public function isValidOption(mixed $value, array $options): bool
+    {
+        $keys = array_column($options, 'key');
+        return in_array((string)$value, array_map('strval', $keys), true);
     }
 
     /**

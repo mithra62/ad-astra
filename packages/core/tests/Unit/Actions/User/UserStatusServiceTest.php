@@ -17,16 +17,6 @@ class UserStatusServiceTest extends TestCase
 
     private UserService $service;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->service = app(UserService::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // setStatus()
-    // -------------------------------------------------------------------------
-
     public function test_set_status_updates_user_status(): void
     {
         $user = User::factory()->active()->create();
@@ -38,6 +28,10 @@ class UserStatusServiceTest extends TestCase
             'status' => UserStatus::INACTIVE,
         ]);
     }
+
+    // -------------------------------------------------------------------------
+    // setStatus()
+    // -------------------------------------------------------------------------
 
     public function test_set_status_fires_user_status_changed_event(): void
     {
@@ -82,10 +76,6 @@ class UserStatusServiceTest extends TestCase
         $this->assertNull($user->fresh()->suspended_until);
     }
 
-    // -------------------------------------------------------------------------
-    // suspend()
-    // -------------------------------------------------------------------------
-
     public function test_suspend_sets_status_and_suspended_until(): void
     {
         Event::fake([UserStatusChanged::class]);
@@ -99,6 +89,10 @@ class UserStatusServiceTest extends TestCase
         $this->assertSame(UserStatus::SUSPENDED, $fresh->status);
         $this->assertNotNull($fresh->suspended_until);
     }
+
+    // -------------------------------------------------------------------------
+    // suspend()
+    // -------------------------------------------------------------------------
 
     public function test_suspend_fires_user_status_changed_event(): void
     {
@@ -115,10 +109,6 @@ class UserStatusServiceTest extends TestCase
         });
     }
 
-    // -------------------------------------------------------------------------
-    // lockUser() / unlockUser()
-    // -------------------------------------------------------------------------
-
     public function test_lock_user_sets_locked_until(): void
     {
         Event::fake([UserLockChanged::class]);
@@ -130,6 +120,10 @@ class UserStatusServiceTest extends TestCase
 
         $this->assertNotNull($user->fresh()->locked_until);
     }
+
+    // -------------------------------------------------------------------------
+    // lockUser() / unlockUser()
+    // -------------------------------------------------------------------------
 
     public function test_lock_user_fires_user_lock_changed_event(): void
     {
@@ -169,5 +163,11 @@ class UserStatusServiceTest extends TestCase
             return $event->user->id === $user->id
                 && $event->newLockedUntil === null;
         });
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->service = app(UserService::class);
     }
 }

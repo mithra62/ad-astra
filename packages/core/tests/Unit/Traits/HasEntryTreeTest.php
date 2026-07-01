@@ -24,6 +24,20 @@ class HasEntryTreeTest extends TestCase
         $this->assertNull($entry->treeUrl());
     }
 
+    private function makeTreeEntry(array $entryOverrides = [], array $typeOverrides = []): Entry
+    {
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->for($group)->create(array_merge([
+            'has_entry_tree' => true,
+            'default_template' => 'entries.page',
+        ], $typeOverrides));
+
+        return Entry::factory()
+            ->for($group)
+            ->for($type)
+            ->create($entryOverrides);
+    }
+
     public function test_tree_url_returns_full_url_for_root_node(): void
     {
         $service = app(EntryService::class);
@@ -35,6 +49,10 @@ class HasEntryTreeTest extends TestCase
         $this->assertNotNull($url);
         $this->assertStringEndsWith('/about', $url);
     }
+
+    // -------------------------------------------------------------------------
+    // treeParent()
+    // -------------------------------------------------------------------------
 
     public function test_tree_url_returns_full_url_for_nested_node(): void
     {
@@ -50,10 +68,6 @@ class HasEntryTreeTest extends TestCase
         $this->assertNotNull($url);
         $this->assertStringEndsWith('/about/team', $url);
     }
-
-    // -------------------------------------------------------------------------
-    // treeParent()
-    // -------------------------------------------------------------------------
 
     public function test_tree_parent_returns_null_when_entry_has_no_tree_node(): void
     {
@@ -71,6 +85,10 @@ class HasEntryTreeTest extends TestCase
         $this->assertNull($entry->fresh()->treeParent());
     }
 
+    // -------------------------------------------------------------------------
+    // treeChildren()
+    // -------------------------------------------------------------------------
+
     public function test_tree_parent_returns_parent_entry(): void
     {
         $service = app(EntryService::class);
@@ -85,10 +103,6 @@ class HasEntryTreeTest extends TestCase
         $this->assertInstanceOf(Entry::class, $result);
         $this->assertSame($parent->id, $result->id);
     }
-
-    // -------------------------------------------------------------------------
-    // treeChildren()
-    // -------------------------------------------------------------------------
 
     public function test_tree_children_returns_empty_collection_when_no_tree_node(): void
     {
@@ -105,6 +119,10 @@ class HasEntryTreeTest extends TestCase
 
         $this->assertCount(0, $entry->fresh()->treeChildren());
     }
+
+    // -------------------------------------------------------------------------
+    // treeAncestors()
+    // -------------------------------------------------------------------------
 
     public function test_tree_children_returns_direct_children_only(): void
     {
@@ -129,10 +147,6 @@ class HasEntryTreeTest extends TestCase
         );
     }
 
-    // -------------------------------------------------------------------------
-    // treeAncestors()
-    // -------------------------------------------------------------------------
-
     public function test_tree_ancestors_returns_empty_collection_when_no_tree_node(): void
     {
         $entry = $this->makeTreeEntry();
@@ -148,6 +162,10 @@ class HasEntryTreeTest extends TestCase
 
         $this->assertCount(0, $entry->fresh()->treeAncestors());
     }
+
+    // -------------------------------------------------------------------------
+    // treeDescendants()
+    // -------------------------------------------------------------------------
 
     public function test_tree_ancestors_returns_chain_root_first(): void
     {
@@ -166,10 +184,6 @@ class HasEntryTreeTest extends TestCase
         $this->assertSame($root->id, $ancestors->get(0)->id);
         $this->assertSame($mid->id, $ancestors->get(1)->id);
     }
-
-    // -------------------------------------------------------------------------
-    // treeDescendants()
-    // -------------------------------------------------------------------------
 
     public function test_tree_descendants_returns_empty_collection_when_no_tree_node(): void
     {
@@ -206,6 +220,10 @@ class HasEntryTreeTest extends TestCase
         $this->assertContains($grandchild->id, $ids);
     }
 
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
     public function test_tree_descendants_respects_max_depth(): void
     {
         $service = app(EntryService::class);
@@ -222,23 +240,5 @@ class HasEntryTreeTest extends TestCase
 
         $this->assertCount(1, $descendants);
         $this->assertSame($child->id, $descendants->first()->id);
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function makeTreeEntry(array $entryOverrides = [], array $typeOverrides = []): Entry
-    {
-        $group = EntryGroup::factory()->create();
-        $type = EntryType::factory()->for($group)->create(array_merge([
-            'has_entry_tree' => true,
-            'default_template' => 'entries.page',
-        ], $typeOverrides));
-
-        return Entry::factory()
-            ->for($group)
-            ->for($type)
-            ->create($entryOverrides);
     }
 }

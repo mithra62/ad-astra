@@ -17,25 +17,16 @@ class HasTransformationsTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        // Isolate trait tests from whichever driver is configured in production.
-        // NullTransformationDriver marks dispatched transformations as 'failed',
-        // so tests that need a complete status must set it directly on the record.
-        $this->app->bind(TransformationDriverInterface::class, NullTransformationDriver::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // getTransformation / transformation
-    // -------------------------------------------------------------------------
-
     public function test_get_transformation_returns_null_when_not_found(): void
     {
         $media = Media::factory()->create();
 
         $this->assertNull($media->getTransformation('thumb'));
     }
+
+    // -------------------------------------------------------------------------
+    // getTransformation / transformation
+    // -------------------------------------------------------------------------
 
     public function test_get_transformation_returns_record_regardless_of_status(): void
     {
@@ -79,16 +70,16 @@ class HasTransformationsTest extends TestCase
         $this->assertNotNull($media->transformation('thumb'));
     }
 
-    // -------------------------------------------------------------------------
-    // hasTransformation
-    // -------------------------------------------------------------------------
-
     public function test_has_transformation_returns_false_when_missing(): void
     {
         $media = Media::factory()->create();
 
         $this->assertFalse($media->hasTransformation('thumb'));
     }
+
+    // -------------------------------------------------------------------------
+    // hasTransformation
+    // -------------------------------------------------------------------------
 
     public function test_has_transformation_returns_false_when_pending(): void
     {
@@ -118,10 +109,6 @@ class HasTransformationsTest extends TestCase
         $this->assertTrue($media->hasTransformation('thumb'));
     }
 
-    // -------------------------------------------------------------------------
-    // transform
-    // -------------------------------------------------------------------------
-
     public function test_transform_creates_transformation_record(): void
     {
         $media = Media::factory()->create();
@@ -133,6 +120,10 @@ class HasTransformationsTest extends TestCase
             'key' => 'thumb',
         ]);
     }
+
+    // -------------------------------------------------------------------------
+    // transform
+    // -------------------------------------------------------------------------
 
     public function test_transform_returns_existing_complete_transformation_without_redispatch(): void
     {
@@ -203,10 +194,6 @@ class HasTransformationsTest extends TestCase
         $this->assertCount(1, Transformation::where('media_id', $media->id)->get());
     }
 
-    // -------------------------------------------------------------------------
-    // clearTransformation
-    // -------------------------------------------------------------------------
-
     public function test_clear_transformation_deletes_record(): void
     {
         Storage::fake('local');
@@ -225,6 +212,10 @@ class HasTransformationsTest extends TestCase
         $this->assertDatabaseMissing('media_transformations', ['media_id' => $media->id, 'key' => 'thumb']);
     }
 
+    // -------------------------------------------------------------------------
+    // clearTransformation
+    // -------------------------------------------------------------------------
+
     public function test_clear_transformation_is_noop_when_not_found(): void
     {
         $media = Media::factory()->create();
@@ -234,10 +225,6 @@ class HasTransformationsTest extends TestCase
 
         $this->assertTrue(true);
     }
-
-    // -------------------------------------------------------------------------
-    // clearTransformations
-    // -------------------------------------------------------------------------
 
     public function test_clear_transformations_removes_all_records(): void
     {
@@ -261,8 +248,7 @@ class HasTransformationsTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // derivedPath — tested indirectly through transform(), which is its only
-    // caller. derivedPath() is protected and not part of the public API.
+    // clearTransformations
     // -------------------------------------------------------------------------
 
     public function test_transform_stores_derived_path_in_t_subdirectory(): void
@@ -279,6 +265,11 @@ class HasTransformationsTest extends TestCase
         $this->assertStringContainsString('_thumb', $transformation->path);
     }
 
+    // -------------------------------------------------------------------------
+    // derivedPath — tested indirectly through transform(), which is its only
+    // caller. derivedPath() is protected and not part of the public API.
+    // -------------------------------------------------------------------------
+
     public function test_transform_respects_format_param_in_derived_path(): void
     {
         $media = Media::factory()->create([
@@ -290,5 +281,14 @@ class HasTransformationsTest extends TestCase
         $transformation = $media->transform('thumb', ['format' => 'webp']);
 
         $this->assertStringEndsWith('.webp', $transformation->path);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Isolate trait tests from whichever driver is configured in production.
+        // NullTransformationDriver marks dispatched transformations as 'failed',
+        // so tests that need a complete status must set it directly on the record.
+        $this->app->bind(TransformationDriverInterface::class, NullTransformationDriver::class);
     }
 }

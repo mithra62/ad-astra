@@ -38,10 +38,44 @@ class EntryTypeHooksTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    /**
+     * BlogPostEntryType::beforeCreate() injects `fields.reading_time` into the
+     * data array. The repository must persist that value against the entry.
+     * 400 words at 200 wpm = exactly 2 minutes.
+     */
+    public function test_create_blog_post_persists_reading_time_derived_from_body(): void
     {
-        parent::setUp();
-        $this->withoutMiddleware(VerifyCsrfToken::class);
+        $user = $this->makeSuperAdmin();
+        [$group, $type] = $this->makeGroupAndType(BlogPostEntryType::class);
+        // Attach BOTH 'body' and 'reading_time' so schemaFieldRules() adds an
+        // explicit validation rule for fields.body.  Without that rule, Laravel's
+        // validated() strips fields.body from the data before it reaches
+        // computeReadingTime(), and the hook never fires.
+        $this->attachFieldToType($type, ['body', 'reading_time']);
+
+        $body = implode(' ', array_fill(0, 400, 'word')); // 400 words → ceil(400/200) = 2
+
+        $response = $this->actingAs($user)
+            ->post(route('entries.store', ['group_id' => $group->id]), [
+                'type_handle' => $type->handle,
+                'title' => 'Test Blog Post',
+                'handle' => 'test-blog-post',
+                'status' => 'draft',
+                'fields' => ['body' => $body],
+            ]);
+
+        $response->assertRedirect(route('entries.groups.show', $group->id));
+
+        $entry = Entry::query()->where('title', 'Test Blog Post')->firstOrFail();
+        $readingTimeField = Field::where('handle', 'reading_time')->firstOrFail();
+
+        // Assert the field value row was written to the database by the hook.
+        $fv = FieldValue::where('field_id', $readingTimeField->id)
+            ->where('fieldable_id', $entry->id)
+            ->first();
+
+        $this->assertNotNull($fv, 'No field_values row found for reading_time — hook did not persist the value.');
+        $this->assertSame(2, (int)$fv->value_text);
     }
 
     // =========================================================================
@@ -156,46 +190,6 @@ class EntryTypeHooksTest extends TestCase
     // =========================================================================
 
     /**
-     * BlogPostEntryType::beforeCreate() injects `fields.reading_time` into the
-     * data array. The repository must persist that value against the entry.
-     * 400 words at 200 wpm = exactly 2 minutes.
-     */
-    public function test_create_blog_post_persists_reading_time_derived_from_body(): void
-    {
-        $user = $this->makeSuperAdmin();
-        [$group, $type] = $this->makeGroupAndType(BlogPostEntryType::class);
-        // Attach BOTH 'body' and 'reading_time' so schemaFieldRules() adds an
-        // explicit validation rule for fields.body.  Without that rule, Laravel's
-        // validated() strips fields.body from the data before it reaches
-        // computeReadingTime(), and the hook never fires.
-        $this->attachFieldToType($type, ['body', 'reading_time']);
-
-        $body = implode(' ', array_fill(0, 400, 'word')); // 400 words → ceil(400/200) = 2
-
-        $response = $this->actingAs($user)
-            ->post(route('entries.store', ['group_id' => $group->id]), [
-                'type_handle' => $type->handle,
-                'title' => 'Test Blog Post',
-                'handle' => 'test-blog-post',
-                'status' => 'draft',
-                'fields' => ['body' => $body],
-            ]);
-
-        $response->assertRedirect(route('entries.groups.show', $group->id));
-
-        $entry = Entry::query()->where('title', 'Test Blog Post')->firstOrFail();
-        $readingTimeField = Field::where('handle', 'reading_time')->firstOrFail();
-
-        // Assert the field value row was written to the database by the hook.
-        $fv = FieldValue::where('field_id', $readingTimeField->id)
-            ->where('fieldable_id', $entry->id)
-            ->first();
-
-        $this->assertNotNull($fv, 'No field_values row found for reading_time — hook did not persist the value.');
-        $this->assertSame(2, (int)$fv->value_text);
-    }
-
-    /**
      * When a blog post is created with status='published' and no explicit
      * published_at, beforeCreate() should stamp published_at automatically.
      */
@@ -216,10 +210,6 @@ class EntryTypeHooksTest extends TestCase
 
         $this->assertNotNull($entry->published_at);
     }
-
-    // =========================================================================
-    // 2. Product create — validate() blocks publish without a SKU
-    // =========================================================================
 
     /**
      * ProductEntryType::validate() must return an error when a product is
@@ -246,6 +236,10 @@ class EntryTypeHooksTest extends TestCase
         $this->assertDatabaseMissing('entries', ['title' => 'Headphones Without SKU']);
     }
 
+    // =========================================================================
+    // 2. Product create — validate() blocks publish without a SKU
+    // =========================================================================
+
     /**
      * A product published with a valid SKU must be accepted and stored.
      */
@@ -267,10 +261,6 @@ class EntryTypeHooksTest extends TestCase
         $response->assertRedirect(route('entries.groups.show', $group->id));
         $this->assertDatabaseHas('entries', ['title' => 'Headphones With SKU']);
     }
-
-    // =========================================================================
-    // 3. Job listing update — beforeUpdate() auto-expires on past closing_date
-    // =========================================================================
 
     /**
      * JobListingEntryType::beforeUpdate() overrides the entry status to
@@ -305,6 +295,10 @@ class EntryTypeHooksTest extends TestCase
         $this->assertSame('expired', $entry->fresh()->status_handle);
     }
 
+    // =========================================================================
+    // 3. Job listing update — beforeUpdate() auto-expires on past closing_date
+    // =========================================================================
+
     /**
      * A job listing whose closing_date is in the future must not be auto-expired.
      */
@@ -334,10 +328,6 @@ class EntryTypeHooksTest extends TestCase
         $response->assertRedirect(route('entries.edit', $entry));
         $this->assertSame('published', $entry->fresh()->status_handle);
     }
-
-    // =========================================================================
-    // 4. Event update — validate() blocks end_date before start_date
-    // =========================================================================
 
     /**
      * EventEntryType::validate() must return an error when the payload
@@ -373,6 +363,10 @@ class EntryTypeHooksTest extends TestCase
         $response->assertSessionHasErrors('end_date');
     }
 
+    // =========================================================================
+    // 4. Event update — validate() blocks end_date before start_date
+    // =========================================================================
+
     /**
      * An event update with end_date on the same day as start_date is valid.
      */
@@ -401,5 +395,11 @@ class EntryTypeHooksTest extends TestCase
 
         $response->assertRedirect(route('entries.edit', $entry));
         $response->assertSessionDoesntHaveErrors('end_date');
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
     }
 }

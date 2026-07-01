@@ -16,16 +16,6 @@ class UserServiceOauthTransactionTest extends TestCase
 
     private UserService $service;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->service = app(UserService::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // upsertOauthToken — transaction atomicity
-    // -------------------------------------------------------------------------
-
     public function test_upsert_returns_newly_created_token(): void
     {
         $user = User::factory()->create();
@@ -37,6 +27,10 @@ class UserServiceOauthTransactionTest extends TestCase
         $this->assertSame('google', $token->provider);
         $this->assertNull($token->revoked_at);
     }
+
+    // -------------------------------------------------------------------------
+    // upsertOauthToken — transaction atomicity
+    // -------------------------------------------------------------------------
 
     public function test_upsert_new_token_is_persisted(): void
     {
@@ -74,6 +68,12 @@ class UserServiceOauthTransactionTest extends TestCase
             $existing->fresh()->revoked_at,
             'Revocation UPDATE must be rolled back when the subsequent INSERT fails',
         );
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->service = app(UserService::class);
     }
 
 }

@@ -12,12 +12,6 @@ class PageEntryTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeType(): PageEntryType
-    {
-        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'page')->value('id')]);
-        return new PageEntryType($record);
-    }
-
     public function test_before_create_returns_data_unchanged(): void
     {
         $type = $this->makeType();
@@ -26,5 +20,11 @@ class PageEntryTypeTest extends TestCase
         $result = $type->beforeCreate($data);
 
         $this->assertSame($data, $result);
+    }
+
+    private function makeType(): PageEntryType
+    {
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'page')->value('id')]);
+        return new PageEntryType($record);
     }
 }

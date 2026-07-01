@@ -19,6 +19,17 @@ class StatusObserverTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
+    public function test_updating_is_public_syncs_entries(): void
+    {
+        [$draft] = $this->makeTwoStatuses();
+        $entry = $this->makeEntry($draft);
+
+        $draft->is_public = true;
+        $draft->save();
+
+        $this->assertTrue($entry->fresh()->status_is_public);
+    }
+
     /**
      * @return array{0: Status, 1: Status, 2: StatusGroup}
      */
@@ -50,6 +61,21 @@ class StatusObserverTest extends TestCase
         ]);
     }
 
+    // -------------------------------------------------------------------------
+    // is_public sync
+    // -------------------------------------------------------------------------
+
+    public function test_updating_is_public_syncs_media(): void
+    {
+        [$draft] = $this->makeTwoStatuses();
+        $media = $this->makeMedia($draft);
+
+        $draft->is_public = true;
+        $draft->save();
+
+        $this->assertTrue($media->fresh()->status_is_public);
+    }
+
     private function makeMedia(Status $status, array $overrides = []): Media
     {
         $library = Library::create([
@@ -67,32 +93,6 @@ class StatusObserverTest extends TestCase
             'path' => 'uploads/photo.jpg',
             'file_name' => 'photo.jpg',
         ], $overrides));
-    }
-
-    // -------------------------------------------------------------------------
-    // is_public sync
-    // -------------------------------------------------------------------------
-
-    public function test_updating_is_public_syncs_entries(): void
-    {
-        [$draft] = $this->makeTwoStatuses();
-        $entry = $this->makeEntry($draft);
-
-        $draft->is_public = true;
-        $draft->save();
-
-        $this->assertTrue($entry->fresh()->status_is_public);
-    }
-
-    public function test_updating_is_public_syncs_media(): void
-    {
-        [$draft] = $this->makeTwoStatuses();
-        $media = $this->makeMedia($draft);
-
-        $draft->is_public = true;
-        $draft->save();
-
-        $this->assertTrue($media->fresh()->status_is_public);
     }
 
     // -------------------------------------------------------------------------

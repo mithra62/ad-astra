@@ -26,21 +26,6 @@ class HasMediaItemsTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
-    private function makeLibrary(array $overrides = []): Library
-    {
-        return Library::create(array_merge([
-            'name' => 'Test Library',
-            'handle' => 'test-lib',
-            'adapter' => 'local',
-            'allowed_types' => null,
-            'max_size' => 10,
-        ], $overrides));
-    }
-
-    // -------------------------------------------------------------------------
-    // validateUpload
-    // -------------------------------------------------------------------------
-
     public function test_validate_upload_returns_empty_array_for_valid_file(): void
     {
         Storage::fake('local');
@@ -50,6 +35,21 @@ class HasMediaItemsTest extends TestCase
         $errors = $library->validateUpload($file);
 
         $this->assertEmpty($errors);
+    }
+
+    // -------------------------------------------------------------------------
+    // validateUpload
+    // -------------------------------------------------------------------------
+
+    private function makeLibrary(array $overrides = []): Library
+    {
+        return Library::create(array_merge([
+            'name' => 'Test Library',
+            'handle' => 'test-lib',
+            'adapter' => 'local',
+            'allowed_types' => null,
+            'max_size' => 10,
+        ], $overrides));
     }
 
     public function test_validate_upload_returns_error_when_file_exceeds_max_size(): void
@@ -194,26 +194,6 @@ class HasMediaItemsTest extends TestCase
         $library->addMediaFromUpload($file);
     }
 
-    public function test_add_media_from_upload_leaves_no_db_record_when_store_returns_false(): void
-    {
-        $this->mockFailingDisk();
-
-        $library = $this->makeLibrary();
-        $file = UploadedFile::fake()->image('fail.jpg');
-
-        try {
-            $library->addMediaFromUpload($file);
-        } catch (RuntimeException $e) {
-            // expected
-        }
-
-        $this->assertDatabaseEmpty('media');
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
     /**
      * Binds a fake FilesystemManager into the container whose disk() returns a
      * mock that reports putFileAs() failure (returns false). This exercises the
@@ -229,6 +209,26 @@ class HasMediaItemsTest extends TestCase
 
         $this->app->instance('filesystem', $mockManager);
         $this->app->instance(Factory::class, $mockManager);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    public function test_add_media_from_upload_leaves_no_db_record_when_store_returns_false(): void
+    {
+        $this->mockFailingDisk();
+
+        $library = $this->makeLibrary();
+        $file = UploadedFile::fake()->image('fail.jpg');
+
+        try {
+            $library->addMediaFromUpload($file);
+        } catch (RuntimeException $e) {
+            // expected
+        }
+
+        $this->assertDatabaseEmpty('media');
     }
 
 }

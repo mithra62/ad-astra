@@ -38,6 +38,16 @@ class StoreUserRequest extends FormRequest
         );
     }
 
+    protected function assignableRoleNames(): array
+    {
+        $actor = Auth::user();
+
+        return Role::query()
+            ->when(!$actor?->hasRole('super admin'), fn($q) => $q->where('name', '!=', 'super admin'))
+            ->pluck('name')
+            ->all();
+    }
+
     public function messages(): array
     {
         $schema = UserFieldLayout::resolve();
@@ -62,15 +72,5 @@ class StoreUserRequest extends FormRequest
             ],
             $this->schemaFieldAttributes($schema)
         );
-    }
-
-    protected function assignableRoleNames(): array
-    {
-        $actor = Auth::user();
-
-        return Role::query()
-            ->when(!$actor?->hasRole('super admin'), fn($q) => $q->where('name', '!=', 'super admin'))
-            ->pluck('name')
-            ->all();
     }
 }

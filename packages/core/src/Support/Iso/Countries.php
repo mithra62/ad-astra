@@ -10,36 +10,6 @@ namespace AdAstra\Support\Iso;
  */
 final class Countries
 {
-    /**
-     * @return list<array{code: string, name: string}>
-     */
-    public static function all(): array
-    {
-        return self::DATA;
-    }
-
-    public static function exists(string $code): bool
-    {
-        $code = strtoupper($code);
-        foreach (self::DATA as $entry) {
-            if ($entry['code'] === $code) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static function name(string $code): string
-    {
-        $code = strtoupper($code);
-        foreach (self::DATA as $entry) {
-            if ($entry['code'] === $code) {
-                return $entry['name'];
-            }
-        }
-        return $code;
-    }
-
     private const DATA = [
         ['code' => 'AD', 'name' => 'Andorra'],
         ['code' => 'AE', 'name' => 'United Arab Emirates'],
@@ -291,4 +261,34 @@ final class Countries
         ['code' => 'ZM', 'name' => 'Zambia'],
         ['code' => 'ZW', 'name' => 'Zimbabwe'],
     ];
+
+    /**
+     * @return list<array{code: string, name: string}>
+     */
+    public static function all(): array
+    {
+        return self::DATA;
+    }
+
+    public static function exists(string $code): bool
+    {
+        $code = strtoupper($code);
+        foreach (self::DATA as $entry) {
+            if ($entry['code'] === $code) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static function name(string $code): string
+    {
+        $code = strtoupper($code);
+        foreach (self::DATA as $entry) {
+            if ($entry['code'] === $code) {
+                return $entry['name'];
+            }
+        }
+        return $code;
+    }
 }

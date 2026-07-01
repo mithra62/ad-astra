@@ -8,14 +8,14 @@ use PHPUnit\Framework\TestCase;
 
 class StateProvinceTest extends TestCase
 {
-    private function make(array $settings = []): StateProvince
-    {
-        return new StateProvince($settings);
-    }
-
     public function test_storage_column_is_value_text(): void
     {
         $this->assertSame('value_text', $this->make()->storageColumn());
+    }
+
+    private function make(array $settings = []): StateProvince
+    {
+        return new StateProvince($settings);
     }
 
     public function test_get_rules_includes_subdivision_rule(): void

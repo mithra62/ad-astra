@@ -7,6 +7,12 @@ use Tests\TestCase;
 
 class ValidatesAgainstOptionsTest extends TestCase
 {
+    public function test_is_valid_option_returns_true_for_existing_key(): void
+    {
+        $type = $this->makeType();
+        $this->assertTrue($type->isValidOption('foo', $this->sampleOptions()));
+    }
+
     private function makeType(array $settings = []): object
     {
         return new class($settings) {
@@ -23,6 +29,10 @@ class ValidatesAgainstOptionsTest extends TestCase
         };
     }
 
+    // -------------------------------------------------------------------------
+    // isValidOption()
+    // -------------------------------------------------------------------------
+
     private function sampleOptions(): array
     {
         return [
@@ -30,16 +40,6 @@ class ValidatesAgainstOptionsTest extends TestCase
             ['key' => 'bar', 'label' => 'Bar'],
             ['key' => 'baz', 'label' => 'Baz'],
         ];
-    }
-
-    // -------------------------------------------------------------------------
-    // isValidOption()
-    // -------------------------------------------------------------------------
-
-    public function test_is_valid_option_returns_true_for_existing_key(): void
-    {
-        $type = $this->makeType();
-        $this->assertTrue($type->isValidOption('foo', $this->sampleOptions()));
     }
 
     public function test_is_valid_option_returns_false_for_missing_key(): void

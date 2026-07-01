@@ -18,15 +18,6 @@ class SectionsChromeRenderTest extends TestCase
 
     private User $admin;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $this->admin = User::factory()->create();
-        $this->admin->assignRole($role);
-    }
-
     /** @return array<string, array{0: string}> */
     public static function routes(): array
     {
@@ -59,5 +50,14 @@ class SectionsChromeRenderTest extends TestCase
         $this->actingAs($this->admin)
             ->get(route($routeName))
             ->assertOk();
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole($role);
     }
 }

@@ -15,22 +15,16 @@ class EntryAuthorServiceTest extends TestCase
 
     private EntryAuthorService $service;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->service = app(EntryAuthorService::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // getEligible()
-    // -------------------------------------------------------------------------
-
     public function test_get_eligible_returns_a_collection(): void
     {
         $result = $this->service->getEligible();
 
         $this->assertInstanceOf(Collection::class, $result);
     }
+
+    // -------------------------------------------------------------------------
+    // getEligible()
+    // -------------------------------------------------------------------------
 
     public function test_get_eligible_returns_only_active_records(): void
     {
@@ -95,10 +89,6 @@ class EntryAuthorServiceTest extends TestCase
         $this->assertEquals('Zara', $result->last()->display_name);
     }
 
-    // -------------------------------------------------------------------------
-    // findByUser()
-    // -------------------------------------------------------------------------
-
     public function test_find_by_user_returns_entry_author_when_record_exists(): void
     {
         $user = User::factory()->create();
@@ -109,6 +99,10 @@ class EntryAuthorServiceTest extends TestCase
         $this->assertInstanceOf(EntryAuthor::class, $result);
         $this->assertEquals($ea->id, $result->id);
     }
+
+    // -------------------------------------------------------------------------
+    // findByUser()
+    // -------------------------------------------------------------------------
 
     public function test_find_by_user_returns_null_when_no_record_exists(): void
     {
@@ -128,10 +122,6 @@ class EntryAuthorServiceTest extends TestCase
         $this->assertEquals($ea->id, $result->id);
     }
 
-    // -------------------------------------------------------------------------
-    // promote()
-    // -------------------------------------------------------------------------
-
     public function test_promote_returns_entry_author_instance(): void
     {
         $user = User::factory()->create();
@@ -140,6 +130,10 @@ class EntryAuthorServiceTest extends TestCase
 
         $this->assertInstanceOf(EntryAuthor::class, $result);
     }
+
+    // -------------------------------------------------------------------------
+    // promote()
+    // -------------------------------------------------------------------------
 
     public function test_promote_creates_new_record_when_none_exists(): void
     {
@@ -237,10 +231,6 @@ class EntryAuthorServiceTest extends TestCase
         $this->assertNotNull($result->id);
     }
 
-    // -------------------------------------------------------------------------
-    // demote()
-    // -------------------------------------------------------------------------
-
     public function test_demote_sets_status_to_disabled(): void
     {
         $user = User::factory()->create();
@@ -250,6 +240,10 @@ class EntryAuthorServiceTest extends TestCase
 
         $this->assertDatabaseHas('entry_authors', ['user_id' => $user->id, 'status' => 'disabled']);
     }
+
+    // -------------------------------------------------------------------------
+    // demote()
+    // -------------------------------------------------------------------------
 
     public function test_demote_does_not_delete_the_record(): void
     {
@@ -315,10 +309,6 @@ class EntryAuthorServiceTest extends TestCase
         $this->assertTrue($fired, 'demote() must fire the Eloquent updated event so observers can react');
     }
 
-    // -------------------------------------------------------------------------
-    // sync()
-    // -------------------------------------------------------------------------
-
     public function test_sync_promotes_user_when_eligible_is_true(): void
     {
         $user = User::factory()->create();
@@ -327,6 +317,10 @@ class EntryAuthorServiceTest extends TestCase
 
         $this->assertDatabaseHas('entry_authors', ['user_id' => $user->id, 'status' => 'active']);
     }
+
+    // -------------------------------------------------------------------------
+    // sync()
+    // -------------------------------------------------------------------------
 
     public function test_sync_returns_entry_author_when_eligible_is_true(): void
     {
@@ -389,5 +383,11 @@ class EntryAuthorServiceTest extends TestCase
 
         $this->assertDatabaseCount('entry_authors', 1);
         $this->assertDatabaseHas('entry_authors', ['user_id' => $user->id, 'status' => 'active']);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->service = app(EntryAuthorService::class);
     }
 }

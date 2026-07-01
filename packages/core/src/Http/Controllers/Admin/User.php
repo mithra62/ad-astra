@@ -140,16 +140,6 @@ class User extends Controller
         return redirect()->route('users.show', $user)->with('success', trans('user.password_changed'));
     }
 
-    public function changePassword(string $id)
-    {
-        $user = Users::find((int)$id);
-        if (!$user instanceof UserModel) {
-            return redirect()->route('users.index')->with('failure', 'user.not_found');
-        }
-
-        return $this->view('users.password', ['user' => $user]);
-    }
-
     /**
      * Update the specified resource in storage.
      */
@@ -164,5 +154,15 @@ class User extends Controller
         }
 
         return redirect()->route('users.edit', $id)->with('failure', trans('user.not_found'));
+    }
+
+    public function changePassword(string $id)
+    {
+        $user = Users::find((int)$id);
+        if (!$user instanceof UserModel) {
+            return redirect()->route('users.index')->with('failure', 'user.not_found');
+        }
+
+        return $this->view('users.password', ['user' => $user]);
     }
 }

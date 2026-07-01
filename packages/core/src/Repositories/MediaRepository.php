@@ -38,36 +38,6 @@ class MediaRepository extends AbstractFieldableRepository
         return $media->refresh();
     }
 
-    /**
-     * Soft-delete the media record.
-     *
-     * Physical file removal is handled separately by the PurgeDeletedMedia job
-     * so that the delete is immediately reversible and storage cleanup can be
-     * batched / retried independently.
-     */
-    public function delete(Media $media): bool
-    {
-        return (bool)$media->delete();
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * For media items the field layout lives on the owning library.
-     */
-    public function resolveLayoutFields(Model $model): Collection
-    {
-        $model->loadMissing([
-            'library.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
-            'library.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
-            'library.fieldLayout.tabs.elements.field.fieldType',
-        ]);
-
-        return $model->library?->fieldLayout?->fields() ?? collect();
-    }
-
-    // ── Private helpers ────────────────────────────────────────────────────
-
     private function applyCoreAttributes(Media $media, array $data): void
     {
         if (isset($data['name'])) {
@@ -112,5 +82,35 @@ class MediaRepository extends AbstractFieldableRepository
         $media->status_id = $status->id;
         $media->status_handle = $status->handle;
         $media->status_is_public = $status->is_public;
+    }
+
+    // ── Private helpers ────────────────────────────────────────────────────
+
+    /**
+     * Soft-delete the media record.
+     *
+     * Physical file removal is handled separately by the PurgeDeletedMedia job
+     * so that the delete is immediately reversible and storage cleanup can be
+     * batched / retried independently.
+     */
+    public function delete(Media $media): bool
+    {
+        return (bool)$media->delete();
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * For media items the field layout lives on the owning library.
+     */
+    public function resolveLayoutFields(Model $model): Collection
+    {
+        $model->loadMissing([
+            'library.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
+            'library.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
+            'library.fieldLayout.tabs.elements.field.fieldType',
+        ]);
+
+        return $model->library?->fieldLayout?->fields() ?? collect();
     }
 }

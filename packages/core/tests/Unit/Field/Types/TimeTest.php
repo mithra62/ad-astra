@@ -10,14 +10,14 @@ use PHPUnit\Framework\TestCase;
 
 class TimeTest extends TestCase
 {
-    private function make(array $settings = []): Time
-    {
-        return new Time($settings);
-    }
-
     public function test_storage_column_is_value_text(): void
     {
         $this->assertSame('value_text', $this->make()->storageColumn());
+    }
+
+    private function make(array $settings = []): Time
+    {
+        return new Time($settings);
     }
 
     public function test_get_rules_includes_time_format_rule(): void

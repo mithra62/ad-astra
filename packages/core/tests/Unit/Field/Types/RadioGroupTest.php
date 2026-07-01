@@ -7,23 +7,14 @@ use Tests\TestCase;
 
 class RadioGroupTest extends TestCase
 {
-    private function sampleOptions(): array
+    public function test_storage_column_is_value_text(): void
     {
-        return [
-            ['key' => 'yes', 'label' => 'Yes'],
-            ['key' => 'no', 'label' => 'No'],
-            ['key' => 'maybe', 'label' => 'Maybe'],
-        ];
+        $this->assertSame('value_text', $this->make()->storageColumn());
     }
 
     private function make(array $settings = []): RadioGroup
     {
         return new RadioGroup($settings, null);
-    }
-
-    public function test_storage_column_is_value_text(): void
-    {
-        $this->assertSame('value_text', $this->make()->storageColumn());
     }
 
     public function test_settings_form_has_expected_keys(): void
@@ -38,6 +29,15 @@ class RadioGroupTest extends TestCase
     public function test_validate_returns_true_for_null(): void
     {
         $this->assertTrue($this->make(['options' => $this->sampleOptions()])->validate(null));
+    }
+
+    private function sampleOptions(): array
+    {
+        return [
+            ['key' => 'yes', 'label' => 'Yes'],
+            ['key' => 'no', 'label' => 'No'],
+            ['key' => 'maybe', 'label' => 'Maybe'],
+        ];
     }
 
     public function test_validate_returns_true_for_valid_option(): void

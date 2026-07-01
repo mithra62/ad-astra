@@ -27,40 +27,6 @@ class FieldValueObserverTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
-    private function makeFileUploadField(): Field
-    {
-        $fieldType = FieldType::firstOrCreate(
-            ['object' => FileUpload::class],
-            ['name' => 'File Upload', 'object' => FileUpload::class]
-        );
-
-        return Field::factory()->create(['field_type_id' => $fieldType->id]);
-    }
-
-    private function makeMediaField(): Field
-    {
-        $fieldType = FieldType::firstOrCreate(
-            ['object' => MediaField::class],
-            ['name' => 'Media', 'object' => MediaField::class]
-        );
-
-        return Field::factory()->create(['field_type_id' => $fieldType->id]);
-    }
-
-    private function makeLibrary(): Library
-    {
-        return Library::create(['name' => 'Test Library', 'handle' => 'test-lib', 'adapter' => 'local']);
-    }
-
-    private function makeEntry(): Entry
-    {
-        return Entry::factory()->create();
-    }
-
-    // -------------------------------------------------------------------------
-    // saved() — syncs mediables
-    // -------------------------------------------------------------------------
-
     public function test_saving_file_upload_field_value_creates_mediable_rows(): void
     {
         $field = $this->makeFileUploadField();
@@ -83,6 +49,30 @@ class FieldValueObserverTest extends TestCase
             'field_id' => $field->id,
         ]);
     }
+
+    private function makeFileUploadField(): Field
+    {
+        $fieldType = FieldType::firstOrCreate(
+            ['object' => FileUpload::class],
+            ['name' => 'File Upload', 'object' => FileUpload::class]
+        );
+
+        return Field::factory()->create(['field_type_id' => $fieldType->id]);
+    }
+
+    private function makeLibrary(): Library
+    {
+        return Library::create(['name' => 'Test Library', 'handle' => 'test-lib', 'adapter' => 'local']);
+    }
+
+    private function makeEntry(): Entry
+    {
+        return Entry::factory()->create();
+    }
+
+    // -------------------------------------------------------------------------
+    // saved() — syncs mediables
+    // -------------------------------------------------------------------------
 
     public function test_saving_with_updated_ids_removes_stale_rows(): void
     {
@@ -135,10 +125,6 @@ class FieldValueObserverTest extends TestCase
         ]);
     }
 
-    // -------------------------------------------------------------------------
-    // saved() — non-FileUpload fields are ignored
-    // -------------------------------------------------------------------------
-
     public function test_saving_non_file_upload_field_does_not_touch_mediables(): void
     {
         $textType = FieldType::firstOrCreate(['object' => Text::class], ['name' => 'Text', 'object' => Text::class]);
@@ -156,7 +142,7 @@ class FieldValueObserverTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // deleted() — clears mediable rows for this field
+    // saved() — non-FileUpload fields are ignored
     // -------------------------------------------------------------------------
 
     public function test_deleting_file_upload_field_value_removes_mediable_rows(): void
@@ -184,7 +170,7 @@ class FieldValueObserverTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Media field type — same observer behavior via SyncsToMediables interface
+    // deleted() — clears mediable rows for this field
     // -------------------------------------------------------------------------
 
     public function test_saving_media_field_value_creates_mediable_rows(): void
@@ -207,6 +193,20 @@ class FieldValueObserverTest extends TestCase
             'mediable_id' => $entry->id,
             'field_id' => $field->id,
         ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Media field type — same observer behavior via SyncsToMediables interface
+    // -------------------------------------------------------------------------
+
+    private function makeMediaField(): Field
+    {
+        $fieldType = FieldType::firstOrCreate(
+            ['object' => MediaField::class],
+            ['name' => 'Media', 'object' => MediaField::class]
+        );
+
+        return Field::factory()->create(['field_type_id' => $fieldType->id]);
     }
 
     public function test_deleting_media_field_value_removes_mediable_rows(): void

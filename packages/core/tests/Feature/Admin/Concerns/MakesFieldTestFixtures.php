@@ -29,17 +29,17 @@ trait MakesFieldTestFixtures
         return FieldGroup::factory()->create();
     }
 
+    private function selectType(): FieldType
+    {
+        return $this->fieldType(Select::class, 'select', 'Select');
+    }
+
     private function fieldType(string $class, string $handle, string $name): FieldType
     {
         return FieldType::firstOrCreate(
             ['object' => $class],
             ['name' => $name, 'handle' => $handle, 'settings' => []]
         );
-    }
-
-    private function selectType(): FieldType
-    {
-        return $this->fieldType(Select::class, 'select', 'Select');
     }
 
     private function textType(): FieldType

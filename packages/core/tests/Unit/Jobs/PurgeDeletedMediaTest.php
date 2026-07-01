@@ -18,6 +18,21 @@ class PurgeDeletedMediaTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
+    public function test_media_within_grace_period_is_not_purged(): void
+    {
+        Storage::fake('local');
+
+        $media = $this->softDeletedMedia(daysAgo: 10); // inside 30-day grace
+
+        (new PurgeDeletedMedia(graceDays: 30))->handle();
+
+        $this->assertNotNull(Media::withTrashed()->find($media->id));
+    }
+
+    // -------------------------------------------------------------------------
+    // Grace period
+    // -------------------------------------------------------------------------
+
     private function softDeletedMedia(int $daysAgo, string $path = 'uploads/photo.jpg'): Media
     {
         $media = Media::factory()->create([
@@ -32,21 +47,6 @@ class PurgeDeletedMediaTest extends TestCase
             ->update(['deleted_at' => now()->subDays($daysAgo)]);
 
         return $media;
-    }
-
-    // -------------------------------------------------------------------------
-    // Grace period
-    // -------------------------------------------------------------------------
-
-    public function test_media_within_grace_period_is_not_purged(): void
-    {
-        Storage::fake('local');
-
-        $media = $this->softDeletedMedia(daysAgo: 10); // inside 30-day grace
-
-        (new PurgeDeletedMedia(graceDays: 30))->handle();
-
-        $this->assertNotNull(Media::withTrashed()->find($media->id));
     }
 
     public function test_media_past_grace_period_is_force_deleted(): void

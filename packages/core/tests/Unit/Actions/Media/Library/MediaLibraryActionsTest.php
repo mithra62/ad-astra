@@ -18,6 +18,17 @@ class MediaLibraryActionsTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
+    public function test_create_returns_library_instance(): void
+    {
+        $result = app(CreateNewMediaLibrary::class)->create($this->makeLibraryData());
+
+        $this->assertInstanceOf(Library::class, $result);
+    }
+
+    // -------------------------------------------------------------------------
+    // CreateNewMediaLibrary
+    // -------------------------------------------------------------------------
+
     private function makeLibraryData(array $overrides = []): array
     {
         return array_merge([
@@ -25,17 +36,6 @@ class MediaLibraryActionsTest extends TestCase
             'handle' => 'test-library',
             'adapter' => 'local',
         ], $overrides);
-    }
-
-    // -------------------------------------------------------------------------
-    // CreateNewMediaLibrary
-    // -------------------------------------------------------------------------
-
-    public function test_create_returns_library_instance(): void
-    {
-        $result = app(CreateNewMediaLibrary::class)->create($this->makeLibraryData());
-
-        $this->assertInstanceOf(Library::class, $result);
     }
 
     public function test_create_persists_library_to_database(): void

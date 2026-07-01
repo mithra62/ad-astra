@@ -34,6 +34,17 @@ class MediaFactory extends Factory
         ];
     }
 
+    private function mimeForExt(string $ext): string
+    {
+        return match ($ext) {
+            'jpg' => 'image/jpeg',
+            'png' => 'image/png',
+            'pdf' => 'application/pdf',
+            'mp4' => 'video/mp4',
+            default => 'application/octet-stream',
+        };
+    }
+
     public function image(): static
     {
         return $this->state(function () {
@@ -82,16 +93,5 @@ class MediaFactory extends Factory
                 'status_is_public' => $status->is_public,
             ];
         });
-    }
-
-    private function mimeForExt(string $ext): string
-    {
-        return match ($ext) {
-            'jpg' => 'image/jpeg',
-            'png' => 'image/png',
-            'pdf' => 'application/pdf',
-            'mp4' => 'video/mp4',
-            default => 'application/octet-stream',
-        };
     }
 }

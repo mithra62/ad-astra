@@ -7,12 +7,9 @@ use Tests\TestCase;
 
 class StructuredRowsTest extends TestCase
 {
-    private function columns(): array
+    public function test_storage_column_is_value_json(): void
     {
-        return [
-            ['handle' => 'heading', 'label' => 'Heading', 'type' => 'text'],
-            ['handle' => 'body', 'label' => 'Body', 'type' => 'textarea'],
-        ];
+        $this->assertSame('value_json', $this->make()->storageColumn());
     }
 
     private function make(array $settings = []): StructuredRows
@@ -23,11 +20,6 @@ class StructuredRowsTest extends TestCase
     // -------------------------------------------------------------------------
     // storageColumn / basics
     // -------------------------------------------------------------------------
-
-    public function test_storage_column_is_value_json(): void
-    {
-        $this->assertSame('value_json', $this->make()->storageColumn());
-    }
 
     public function test_settings_form_has_expected_keys(): void
     {
@@ -43,10 +35,6 @@ class StructuredRowsTest extends TestCase
         $this->assertSame('structured_rows_columns', $this->make()->settingsForm()['columns']['type']);
     }
 
-    // -------------------------------------------------------------------------
-    // cast()
-    // -------------------------------------------------------------------------
-
     public function test_cast_decodes_json_string(): void
     {
         $result = $this->make()->cast('[{"heading":"Hello","body":"World"}]');
@@ -54,6 +42,10 @@ class StructuredRowsTest extends TestCase
         $this->assertCount(1, $result);
         $this->assertSame('Hello', $result[0]['heading']);
     }
+
+    // -------------------------------------------------------------------------
+    // cast()
+    // -------------------------------------------------------------------------
 
     public function test_cast_returns_array_as_is(): void
     {
@@ -67,13 +59,21 @@ class StructuredRowsTest extends TestCase
         $this->assertSame([], $this->make()->cast(null));
     }
 
+    public function test_validate_returns_true_for_null(): void
+    {
+        $this->assertTrue($this->make(['columns' => $this->columns()])->validate(null));
+    }
+
     // -------------------------------------------------------------------------
     // validate()
     // -------------------------------------------------------------------------
 
-    public function test_validate_returns_true_for_null(): void
+    private function columns(): array
     {
-        $this->assertTrue($this->make(['columns' => $this->columns()])->validate(null));
+        return [
+            ['handle' => 'heading', 'label' => 'Heading', 'type' => 'text'],
+            ['handle' => 'body', 'label' => 'Body', 'type' => 'textarea'],
+        ];
     }
 
     public function test_validate_returns_true_for_empty_array(): void

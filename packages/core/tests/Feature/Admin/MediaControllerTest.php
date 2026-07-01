@@ -18,50 +18,13 @@ class MediaControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->withoutMiddleware(VerifyCsrfToken::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function makeSuperAdmin(): User
-    {
-        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $user = User::factory()->create();
-        $user->assignRole($role);
-        return $user;
-    }
-
-    private function makeLibrary(string $handle = 'photos'): Library
-    {
-        return Library::create(['name' => 'Photos', 'handle' => $handle, 'adapter' => 'local']);
-    }
-
-    private function makeMedia(Library $library): Media
-    {
-        return Media::factory()->create([
-            'library_id' => $library->id,
-            'disk' => 'local',
-            'path' => 'uploads/photo.jpg',
-            'file_name' => 'photo.jpg',
-        ]);
-    }
-
-    // -------------------------------------------------------------------------
-    // Auth guard
-    // -------------------------------------------------------------------------
-
     public function test_index_redirects_guests(): void
     {
         $this->get(route('media.index'))->assertRedirect();
     }
 
     // -------------------------------------------------------------------------
-    // index
+    // Helpers
     // -------------------------------------------------------------------------
 
     public function test_index_returns_ok_for_authenticated_user(): void
@@ -71,9 +34,13 @@ class MediaControllerTest extends TestCase
             ->assertOk();
     }
 
-    // -------------------------------------------------------------------------
-    // create
-    // -------------------------------------------------------------------------
+    private function makeSuperAdmin(): User
+    {
+        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
+        $user = User::factory()->create();
+        $user->assignRole($role);
+        return $user;
+    }
 
     public function test_create_returns_ok_for_valid_library(): void
     {
@@ -84,6 +51,19 @@ class MediaControllerTest extends TestCase
             ->assertOk();
     }
 
+    // -------------------------------------------------------------------------
+    // Auth guard
+    // -------------------------------------------------------------------------
+
+    private function makeLibrary(string $handle = 'photos'): Library
+    {
+        return Library::create(['name' => 'Photos', 'handle' => $handle, 'adapter' => 'local']);
+    }
+
+    // -------------------------------------------------------------------------
+    // index
+    // -------------------------------------------------------------------------
+
     public function test_create_redirects_when_library_not_found(): void
     {
         $this->actingAs($this->makeSuperAdmin())
@@ -92,7 +72,7 @@ class MediaControllerTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // store
+    // create
     // -------------------------------------------------------------------------
 
     public function test_store_redirects_to_media_libraries(): void
@@ -103,10 +83,6 @@ class MediaControllerTest extends TestCase
             ->post(route('media.store', $library->id))
             ->assertRedirect(route('media.libraries'));
     }
-
-    // -------------------------------------------------------------------------
-    // upload — category-group scoping
-    // -------------------------------------------------------------------------
 
     public function test_upload_rejects_category_from_unattached_category_group(): void
     {
@@ -122,6 +98,10 @@ class MediaControllerTest extends TestCase
             ])
             ->assertSessionHasErrors('categories.0');
     }
+
+    // -------------------------------------------------------------------------
+    // store
+    // -------------------------------------------------------------------------
 
     public function test_upload_accepts_category_from_attached_category_group(): void
     {
@@ -140,7 +120,7 @@ class MediaControllerTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // show
+    // upload — category-group scoping
     // -------------------------------------------------------------------------
 
     public function test_show_returns_ok_for_existing_media(): void
@@ -152,8 +132,18 @@ class MediaControllerTest extends TestCase
             ->assertOk();
     }
 
+    private function makeMedia(Library $library): Media
+    {
+        return Media::factory()->create([
+            'library_id' => $library->id,
+            'disk' => 'local',
+            'path' => 'uploads/photo.jpg',
+            'file_name' => 'photo.jpg',
+        ]);
+    }
+
     // -------------------------------------------------------------------------
-    // edit
+    // show
     // -------------------------------------------------------------------------
 
     public function test_edit_returns_ok_for_existing_media(): void
@@ -166,7 +156,7 @@ class MediaControllerTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // update
+    // edit
     // -------------------------------------------------------------------------
 
     public function test_update_persists_name_and_redirects_to_show(): void
@@ -181,7 +171,7 @@ class MediaControllerTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // confirm
+    // update
     // -------------------------------------------------------------------------
 
     public function test_confirm_returns_ok_for_existing_media(): void
@@ -193,16 +183,16 @@ class MediaControllerTest extends TestCase
             ->assertOk();
     }
 
+    // -------------------------------------------------------------------------
+    // confirm
+    // -------------------------------------------------------------------------
+
     public function test_confirm_redirects_when_media_not_found(): void
     {
         $this->actingAs($this->makeSuperAdmin())
             ->get(route('media.confirm', 99999))
             ->assertRedirect(route('media.index'));
     }
-
-    // -------------------------------------------------------------------------
-    // destroy
-    // -------------------------------------------------------------------------
 
     public function test_destroy_soft_deletes_media_and_redirects(): void
     {
@@ -216,7 +206,7 @@ class MediaControllerTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // download
+    // destroy
     // -------------------------------------------------------------------------
 
     public function test_download_returns_file_when_it_exists_on_disk(): void
@@ -232,6 +222,10 @@ class MediaControllerTest extends TestCase
             ->assertHeader('Content-Disposition');
     }
 
+    // -------------------------------------------------------------------------
+    // download
+    // -------------------------------------------------------------------------
+
     public function test_download_returns_404_when_file_missing_from_disk(): void
     {
         Storage::fake('local');
@@ -241,5 +235,11 @@ class MediaControllerTest extends TestCase
         $this->actingAs($this->makeSuperAdmin())
             ->get(route('media.download', $media->id))
             ->assertNotFound();
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
     }
 }

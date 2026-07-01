@@ -7,13 +7,9 @@ use Tests\TestCase;
 
 class SelectTest extends TestCase
 {
-    private function sampleOptions(): array
+    public function test_storage_column_is_value_text(): void
     {
-        return [
-            ['key' => 'red', 'label' => 'Red'],
-            ['key' => 'green', 'label' => 'Green'],
-            ['key' => 'blue', 'label' => 'Blue'],
-        ];
+        $this->assertSame('value_text', $this->make()->storageColumn());
     }
 
     private function make(array $settings = []): Select
@@ -25,11 +21,6 @@ class SelectTest extends TestCase
     // storageColumn / basics
     // -------------------------------------------------------------------------
 
-    public function test_storage_column_is_value_text(): void
-    {
-        $this->assertSame('value_text', $this->make()->storageColumn());
-    }
-
     public function test_settings_form_has_expected_keys(): void
     {
         $form = $this->make()->settingsForm();
@@ -39,13 +30,22 @@ class SelectTest extends TestCase
         $this->assertArrayHasKey('strict_options', $form);
     }
 
+    public function test_validate_returns_true_for_null_value(): void
+    {
+        $this->assertTrue($this->make(['options' => $this->sampleOptions()])->validate(null));
+    }
+
     // -------------------------------------------------------------------------
     // validate()
     // -------------------------------------------------------------------------
 
-    public function test_validate_returns_true_for_null_value(): void
+    private function sampleOptions(): array
     {
-        $this->assertTrue($this->make(['options' => $this->sampleOptions()])->validate(null));
+        return [
+            ['key' => 'red', 'label' => 'Red'],
+            ['key' => 'green', 'label' => 'Green'],
+            ['key' => 'blue', 'label' => 'Blue'],
+        ];
     }
 
     public function test_validate_returns_true_for_empty_string(): void

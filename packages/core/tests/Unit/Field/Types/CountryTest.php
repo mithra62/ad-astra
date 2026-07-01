@@ -8,14 +8,14 @@ use PHPUnit\Framework\TestCase;
 
 class CountryTest extends TestCase
 {
-    private function make(array $settings = []): Country
-    {
-        return new Country($settings);
-    }
-
     public function test_storage_column_is_value_text(): void
     {
         $this->assertSame('value_text', $this->make()->storageColumn());
+    }
+
+    private function make(array $settings = []): Country
+    {
+        return new Country($settings);
     }
 
     public function test_get_rules_includes_country_code_rule(): void

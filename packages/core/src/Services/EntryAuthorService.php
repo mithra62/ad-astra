@@ -25,11 +25,20 @@ class EntryAuthorService
     }
 
     /**
-     * Look up the eligibility record for a given user. Returns null if none exists.
+     * Idempotent upsert driven by the user edit form.
+     *
+     * When $eligible is true, promotes (or re-activates) the user.
+     * When $eligible is false, demotes the user if a record exists.
      */
-    public function findByUser(User $user): ?EntryAuthor
+    public function sync(User $user, bool $eligible, ?string $displayName = null): ?EntryAuthor
     {
-        return EntryAuthor::where('user_id', $user->id)->first();
+        if ($eligible) {
+            return $this->promote($user, $displayName);
+        }
+
+        $this->demote($user);
+
+        return $this->findByUser($user);
     }
 
     // -------------------------------------------------------------------------
@@ -66,19 +75,10 @@ class EntryAuthorService
     }
 
     /**
-     * Idempotent upsert driven by the user edit form.
-     *
-     * When $eligible is true, promotes (or re-activates) the user.
-     * When $eligible is false, demotes the user if a record exists.
+     * Look up the eligibility record for a given user. Returns null if none exists.
      */
-    public function sync(User $user, bool $eligible, ?string $displayName = null): ?EntryAuthor
+    public function findByUser(User $user): ?EntryAuthor
     {
-        if ($eligible) {
-            return $this->promote($user, $displayName);
-        }
-
-        $this->demote($user);
-
-        return $this->findByUser($user);
+        return EntryAuthor::where('user_id', $user->id)->first();
     }
 }

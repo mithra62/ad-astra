@@ -47,6 +47,36 @@ class User extends Authenticatable
         'locked_until' => 'datetime',
     ];
 
+    public function isActive(): bool
+    {
+        return $this->status === UserStatus::ACTIVE;
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->status === UserStatus::SUSPENDED
+            && $this->suspended_until !== null
+            && $this->suspended_until->isFuture();
+    }
+
+    public function accessDeniedReason(): ?string
+    {
+        if ($this->canAccessSystem()) {
+            return null;
+        }
+
+        return match (true) {
+            $this->isLocked() => 'account_locked',
+            $this->status === UserStatus::INACTIVE => 'account_inactive',
+            $this->status === UserStatus::PENDING => 'account_pending',
+            $this->status === UserStatus::BANNED => 'account_banned',
+            $this->status === UserStatus::SUSPENDED
+            && $this->suspended_until !== null => 'account_suspended_until',
+            $this->status === UserStatus::SUSPENDED => 'account_suspended',
+            default => 'account_inactive',
+        };
+    }
+
     /**
      * Whether this user is permitted to access the system right now.
      *
@@ -87,36 +117,6 @@ class User extends Authenticatable
     public function isLocked(): bool
     {
         return $this->locked_until !== null && $this->locked_until->isFuture();
-    }
-
-    public function isActive(): bool
-    {
-        return $this->status === UserStatus::ACTIVE;
-    }
-
-    public function isSuspended(): bool
-    {
-        return $this->status === UserStatus::SUSPENDED
-            && $this->suspended_until !== null
-            && $this->suspended_until->isFuture();
-    }
-
-    public function accessDeniedReason(): ?string
-    {
-        if ($this->canAccessSystem()) {
-            return null;
-        }
-
-        return match (true) {
-            $this->isLocked() => 'account_locked',
-            $this->status === UserStatus::INACTIVE => 'account_inactive',
-            $this->status === UserStatus::PENDING => 'account_pending',
-            $this->status === UserStatus::BANNED => 'account_banned',
-            $this->status === UserStatus::SUSPENDED
-            && $this->suspended_until !== null => 'account_suspended_until',
-            $this->status === UserStatus::SUSPENDED => 'account_suspended',
-            default => 'account_inactive',
-        };
     }
 
     public function statusLabel(): string

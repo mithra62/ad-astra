@@ -32,16 +32,6 @@ class EditMediaRequest extends FormRequest
         );
     }
 
-    public function messages(): array
-    {
-        return $this->schemaFieldMessages($this->resolvedSchema());
-    }
-
-    public function attributes(): array
-    {
-        return $this->schemaFieldAttributes($this->resolvedSchema());
-    }
-
     private function resolvedSchema(): ?MediaLibrary
     {
         if (!$this->schemaResolved) {
@@ -54,5 +44,15 @@ class EditMediaRequest extends FormRequest
         }
 
         return $this->resolvedSchema;
+    }
+
+    public function messages(): array
+    {
+        return $this->schemaFieldMessages($this->resolvedSchema());
+    }
+
+    public function attributes(): array
+    {
+        return $this->schemaFieldAttributes($this->resolvedSchema());
     }
 }

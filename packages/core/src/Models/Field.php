@@ -49,14 +49,14 @@ class Field extends Model
             ->withTimestamps();
     }
 
-    public function typeInstance(): AbstractField
-    {
-        return $this->fieldType->instance($this->settings ?? [], $this);
-    }
-
     public function render(array $params = []): string
     {
         $params['field'] = $this;
         return $this->typeInstance()->render($params);
+    }
+
+    public function typeInstance(): AbstractField
+    {
+        return $this->fieldType->instance($this->settings ?? [], $this);
     }
 }

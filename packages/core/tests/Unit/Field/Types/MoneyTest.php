@@ -11,14 +11,14 @@ use PHPUnit\Framework\TestCase;
 
 class MoneyTest extends TestCase
 {
-    private function make(array $settings = []): Money
-    {
-        return new Money($settings);
-    }
-
     public function test_storage_column_is_value_integer(): void
     {
         $this->assertSame('value_integer', $this->make()->storageColumn());
+    }
+
+    private function make(array $settings = []): Money
+    {
+        return new Money($settings);
     }
 
     public function test_get_rules_includes_format_and_range_rules(): void

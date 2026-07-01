@@ -18,12 +18,9 @@ class FileUploadTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    public function test_storage_column_is_value_json(): void
     {
-        parent::setUp();
-        $ref = new ReflectionProperty(FileUpload::class, 'libraryHandleCache');
-        $ref->setAccessible(true);
-        $ref->setValue(null, []);
+        $this->assertEquals('value_json', $this->make()->storageColumn());
     }
 
     // -------------------------------------------------------------------------
@@ -35,40 +32,10 @@ class FileUploadTest extends TestCase
         return new FileUpload($settings);
     }
 
-    private function callProtected(FileUpload $instance, string $method): mixed
-    {
-        $ref = new ReflectionMethod(FileUpload::class, $method);
-        $ref->setAccessible(true);
-
-        return $ref->invoke($instance);
-    }
-
-    private function makeLibrary(string $handle = 'uploads'): Library
-    {
-        return Library::create([
-            'name' => ucfirst($handle) . ' Library',
-            'handle' => $handle,
-            'adapter' => 'local',
-        ]);
-    }
-
-    // -------------------------------------------------------------------------
-    // storageColumn / isRelational
-    // -------------------------------------------------------------------------
-
-    public function test_storage_column_is_value_json(): void
-    {
-        $this->assertEquals('value_json', $this->make()->storageColumn());
-    }
-
     public function test_is_relational_returns_false(): void
     {
         $this->assertFalse($this->make()->isRelational());
     }
-
-    // -------------------------------------------------------------------------
-    // normaliseIds
-    // -------------------------------------------------------------------------
 
     public function test_normalise_ids_from_json_string(): void
     {
@@ -76,6 +43,10 @@ class FileUploadTest extends TestCase
 
         $this->assertEquals([1, 2, 3], $result);
     }
+
+    // -------------------------------------------------------------------------
+    // storageColumn / isRelational
+    // -------------------------------------------------------------------------
 
     public function test_normalise_ids_from_array(): void
     {
@@ -93,6 +64,10 @@ class FileUploadTest extends TestCase
         $this->assertEquals($media->pluck('id')->map('intval')->all(), $result);
     }
 
+    // -------------------------------------------------------------------------
+    // normaliseIds
+    // -------------------------------------------------------------------------
+
     public function test_normalise_ids_empty_string_returns_empty_array(): void
     {
         $this->assertEquals([], $this->make()->normaliseIds(''));
@@ -102,10 +77,6 @@ class FileUploadTest extends TestCase
     {
         $this->assertEquals([], $this->make()->normaliseIds(null));
     }
-
-    // -------------------------------------------------------------------------
-    // cast
-    // -------------------------------------------------------------------------
 
     public function test_cast_decodes_json_string_to_int_array(): void
     {
@@ -126,14 +97,14 @@ class FileUploadTest extends TestCase
         $this->assertSame([], $this->make()->cast('not json'));
     }
 
+    // -------------------------------------------------------------------------
+    // cast
+    // -------------------------------------------------------------------------
+
     public function test_cast_returns_empty_for_null(): void
     {
         $this->assertSame([], $this->make()->cast(null));
     }
-
-    // -------------------------------------------------------------------------
-    // value()
-    // -------------------------------------------------------------------------
 
     public function test_value_returns_collection_of_media_models(): void
     {
@@ -167,7 +138,7 @@ class FileUploadTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // value() — status passthrough (intentional: value() is context-agnostic)
+    // value()
     // -------------------------------------------------------------------------
 
     public function test_value_returns_all_media_regardless_of_status(): void
@@ -205,7 +176,7 @@ class FileUploadTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // validate — min / max count
+    // value() — status passthrough (intentional: value() is context-agnostic)
     // -------------------------------------------------------------------------
 
     public function test_validate_returns_true_for_empty_value_with_no_constraints(): void
@@ -236,6 +207,10 @@ class FileUploadTest extends TestCase
         $this->assertTrue($result);
     }
 
+    // -------------------------------------------------------------------------
+    // validate — min / max count
+    // -------------------------------------------------------------------------
+
     public function test_validate_returns_error_when_above_max(): void
     {
         $type = $this->make(['max' => 1]);
@@ -256,10 +231,6 @@ class FileUploadTest extends TestCase
         $this->assertTrue($result);
     }
 
-    // -------------------------------------------------------------------------
-    // validate — ID existence
-    // -------------------------------------------------------------------------
-
     public function test_validate_returns_error_when_id_does_not_exist(): void
     {
         $result = $this->make()->validate('[99999]');
@@ -276,10 +247,6 @@ class FileUploadTest extends TestCase
         $this->assertTrue($result);
     }
 
-    // -------------------------------------------------------------------------
-    // validate — library membership
-    // -------------------------------------------------------------------------
-
     public function test_validate_returns_error_when_media_not_in_expected_library(): void
     {
         $libA = $this->makeLibrary('lib-a');
@@ -293,6 +260,19 @@ class FileUploadTest extends TestCase
         $this->assertStringContainsString('expected library', $result);
     }
 
+    // -------------------------------------------------------------------------
+    // validate — ID existence
+    // -------------------------------------------------------------------------
+
+    private function makeLibrary(string $handle = 'uploads'): Library
+    {
+        return Library::create([
+            'name' => ucfirst($handle) . ' Library',
+            'handle' => $handle,
+            'adapter' => 'local',
+        ]);
+    }
+
     public function test_validate_passes_when_media_belongs_to_expected_library(): void
     {
         $library = $this->makeLibrary();
@@ -304,6 +284,10 @@ class FileUploadTest extends TestCase
         $this->assertTrue($result);
     }
 
+    // -------------------------------------------------------------------------
+    // validate — library membership
+    // -------------------------------------------------------------------------
+
     public function test_validate_resolves_library_by_handle(): void
     {
         $library = $this->makeLibrary('photos');
@@ -314,10 +298,6 @@ class FileUploadTest extends TestCase
 
         $this->assertTrue($result);
     }
-
-    // -------------------------------------------------------------------------
-    // validate — allowed_types MIME check
-    // -------------------------------------------------------------------------
 
     public function test_validate_returns_error_when_mime_type_not_in_allowed_types(): void
     {
@@ -341,7 +321,7 @@ class FileUploadTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // H8 — value() eager-loads field values
+    // validate — allowed_types MIME check
     // -------------------------------------------------------------------------
 
     public function test_value_eager_loads_field_values_on_returned_media(): void
@@ -382,7 +362,7 @@ class FileUploadTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // resolveLibraryId
+    // H8 — value() eager-loads field values
     // -------------------------------------------------------------------------
 
     public function test_resolve_library_id_returns_id_from_library_setting(): void
@@ -394,6 +374,18 @@ class FileUploadTest extends TestCase
 
         $this->assertSame($library->id, $id);
     }
+
+    private function callProtected(FileUpload $instance, string $method): mixed
+    {
+        $ref = new ReflectionMethod(FileUpload::class, $method);
+        $ref->setAccessible(true);
+
+        return $ref->invoke($instance);
+    }
+
+    // -------------------------------------------------------------------------
+    // resolveLibraryId
+    // -------------------------------------------------------------------------
 
     public function test_resolve_library_id_falls_back_to_legacy_library_id_setting(): void
     {
@@ -414,10 +406,6 @@ class FileUploadTest extends TestCase
         $this->assertNull($id);
     }
 
-    // -------------------------------------------------------------------------
-    // buildAcceptString
-    // -------------------------------------------------------------------------
-
     public function test_build_accept_string_returns_comma_separated_mimes_from_key_value_rows(): void
     {
         $type = $this->make([
@@ -431,6 +419,10 @@ class FileUploadTest extends TestCase
 
         $this->assertSame('image/jpeg,image/png', $accept);
     }
+
+    // -------------------------------------------------------------------------
+    // buildAcceptString
+    // -------------------------------------------------------------------------
 
     public function test_build_accept_string_returns_empty_string_when_no_allowed_types(): void
     {
@@ -450,10 +442,6 @@ class FileUploadTest extends TestCase
         $this->assertSame('image/gif,video/mp4', $accept);
     }
 
-    // -------------------------------------------------------------------------
-    // render()
-    // -------------------------------------------------------------------------
-
     public function test_render_includes_library_upload_url(): void
     {
         $library = $this->makeLibrary('renders');
@@ -463,6 +451,10 @@ class FileUploadTest extends TestCase
 
         $this->assertStringContainsString((string)$library->id, $html);
     }
+
+    // -------------------------------------------------------------------------
+    // render()
+    // -------------------------------------------------------------------------
 
     public function test_render_includes_accept_attribute_when_allowed_types_set(): void
     {
@@ -587,10 +579,6 @@ class FileUploadTest extends TestCase
         $this->assertStringNotContainsString('data-chip="' . $stale->id . '"', $html);
     }
 
-    // -------------------------------------------------------------------------
-    // validate() library_handle cache — single lookup per unique handle
-    // -------------------------------------------------------------------------
-
     public function test_validate_library_handle_queries_db_only_once_per_handle(): void
     {
         $library = $this->makeLibrary('cache-test');
@@ -614,5 +602,17 @@ class FileUploadTest extends TestCase
             $libraryLookups->count(),
             'Second validate() call must not re-query media_libraries for the same handle.'
         );
+    }
+
+    // -------------------------------------------------------------------------
+    // validate() library_handle cache — single lookup per unique handle
+    // -------------------------------------------------------------------------
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $ref = new ReflectionProperty(FileUpload::class, 'libraryHandleCache');
+        $ref->setAccessible(true);
+        $ref->setValue(null, []);
     }
 }

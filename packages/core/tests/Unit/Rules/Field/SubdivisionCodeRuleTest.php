@@ -7,6 +7,12 @@ use PHPUnit\Framework\TestCase;
 
 class SubdivisionCodeRuleTest extends TestCase
 {
+    public function test_data_backed_country_accepts_known_subdivision(): void
+    {
+        $this->assertNull($this->runRule(new SubdivisionCodeRule('US'), 'US-CA'));
+        $this->assertNull($this->runRule(new SubdivisionCodeRule('CA'), 'CA-ON'));
+    }
+
     private function runRule(SubdivisionCodeRule $rule, mixed $value): ?string
     {
         $error = null;
@@ -14,12 +20,6 @@ class SubdivisionCodeRuleTest extends TestCase
             $error = $msg;
         });
         return $error;
-    }
-
-    public function test_data_backed_country_accepts_known_subdivision(): void
-    {
-        $this->assertNull($this->runRule(new SubdivisionCodeRule('US'), 'US-CA'));
-        $this->assertNull($this->runRule(new SubdivisionCodeRule('CA'), 'CA-ON'));
     }
 
     public function test_data_backed_country_rejects_unknown_subdivision(): void

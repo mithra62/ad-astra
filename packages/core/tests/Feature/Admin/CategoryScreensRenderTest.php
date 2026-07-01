@@ -20,15 +20,6 @@ class CategoryScreensRenderTest extends TestCase
 
     private User $admin;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $this->admin = User::factory()->create();
-        $this->admin->assignRole($role);
-    }
-
     public function test_groups_index_renders(): void
     {
         Group::factory()->count(2)->create();
@@ -105,5 +96,14 @@ class CategoryScreensRenderTest extends TestCase
         $this->actingAs($this->admin)
             ->get(route('categories.confirm', $category))
             ->assertOk();
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole($role);
     }
 }

@@ -12,16 +12,6 @@ class EventEntryTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeType(): EventEntryType
-    {
-        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'event')->value('id')]);
-        return new EventEntryType($record);
-    }
-
-    // -------------------------------------------------------------------------
-    // validate() — date range guard
-    // -------------------------------------------------------------------------
-
     public function test_validate_returns_error_when_end_date_is_before_start_date(): void
     {
         $type = $this->makeType();
@@ -35,6 +25,16 @@ class EventEntryTypeTest extends TestCase
 
         $this->assertArrayHasKey('end_date', $errors);
         $this->assertStringContainsString('earlier than start_date', $errors['end_date']);
+    }
+
+    // -------------------------------------------------------------------------
+    // validate() — date range guard
+    // -------------------------------------------------------------------------
+
+    private function makeType(): EventEntryType
+    {
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'event')->value('id')]);
+        return new EventEntryType($record);
     }
 
     public function test_validate_passes_when_end_date_equals_start_date(): void

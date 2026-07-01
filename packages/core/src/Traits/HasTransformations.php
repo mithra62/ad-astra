@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Storage;
 
 trait HasTransformations
 {
-    public function getTransformation(string $key): ?Transformation
+    public function hasTransformation(string $key): bool
     {
-        return $this->transformations()->where('key', $key)->first();
+        return $this->transformation($key) !== null;
     }
 
     /** Returns the transformation only if it completed successfully. */
@@ -20,9 +20,9 @@ trait HasTransformations
         return ($t && $t->isComplete()) ? $t : null;
     }
 
-    public function hasTransformation(string $key): bool
+    public function getTransformation(string $key): ?Transformation
     {
-        return $this->transformation($key) !== null;
+        return $this->transformations()->where('key', $key)->first();
     }
 
     public function transform(string $key, array $params = []): Transformation
@@ -61,6 +61,14 @@ trait HasTransformations
         return $transformation;
     }
 
+    protected function derivedPath(string $key, array $params = []): string
+    {
+        $dir = dirname($this->path);
+        $stem = pathinfo($this->file_name, PATHINFO_FILENAME);
+        $ext = $params['format'] ?? pathinfo($this->file_name, PATHINFO_EXTENSION);
+        return $dir . '/_t/' . $stem . '_' . $key . '.' . $ext;
+    }
+
     public function clearTransformation(string $key): void
     {
         $t = $this->getTransformation($key);
@@ -81,13 +89,5 @@ trait HasTransformations
             }
             $t->delete();
         }
-    }
-
-    protected function derivedPath(string $key, array $params = []): string
-    {
-        $dir = dirname($this->path);
-        $stem = pathinfo($this->file_name, PATHINFO_FILENAME);
-        $ext = $params['format'] ?? pathinfo($this->file_name, PATHINFO_EXTENSION);
-        return $dir . '/_t/' . $stem . '_' . $key . '.' . $ext;
     }
 }

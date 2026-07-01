@@ -39,6 +39,50 @@ class EntryCategoryValidationTest extends TestCase
         $this->assertTrue($entry->categories()->whereKey($category->id)->exists());
     }
 
+    protected function makeSuperAdmin(): User
+    {
+        $role = Role::query()->firstOrCreate([
+            'name' => 'super admin',
+            'guard_name' => 'web',
+        ]);
+
+        $user = User::factory()->create();
+        $user->assignRole($role);
+
+        return $user;
+    }
+
+    /**
+     * @return array{0: EntryGroup, 1: EntryType}
+     */
+    protected function makeEntryGroupAndType(): array
+    {
+        $statusGroup = StatusGroup::factory()->create();
+        Status::factory()->default()->create([
+            'status_group_id' => $statusGroup->id,
+            'handle' => 'draft',
+            'name' => 'Draft',
+        ]);
+
+        $group = EntryGroup::factory()->create([
+            'status_group_id' => $statusGroup->id,
+        ]);
+
+        $type = EntryType::factory()->create([
+            'entry_group_id' => $group->id,
+        ]);
+
+        return [$group, $type];
+    }
+
+    protected function makeAttachedCategory(EntryGroup $group): Category
+    {
+        $categoryGroup = CategoryGroup::factory()->create();
+        $group->categoryGroups()->syncWithoutDetaching([$categoryGroup->id]);
+
+        return Category::factory()->for($categoryGroup, 'group')->create();
+    }
+
     public function test_store_rejects_category_from_unattached_category_group(): void
     {
         $user = $this->makeSuperAdmin();
@@ -57,6 +101,13 @@ class EntryCategoryValidationTest extends TestCase
         $response->assertRedirect(route('entries.create', ['group_id' => $group->id]));
         $response->assertSessionHasErrors('categories.0');
         $this->assertDatabaseMissing('entries', ['title' => 'Invalid Entry']);
+    }
+
+    protected function makeUnattachedCategory(): Category
+    {
+        $categoryGroup = CategoryGroup::factory()->create();
+
+        return Category::factory()->for($categoryGroup, 'group')->create();
     }
 
     public function test_update_accepts_category_from_attached_category_group(): void
@@ -108,57 +159,6 @@ class EntryCategoryValidationTest extends TestCase
         $response->assertRedirect(route('entries.edit', $entry));
         $response->assertSessionHasErrors('categories.0');
         $this->assertFalse($entry->fresh()->categories()->whereKey($category->id)->exists());
-    }
-
-    protected function makeSuperAdmin(): User
-    {
-        $role = Role::query()->firstOrCreate([
-            'name' => 'super admin',
-            'guard_name' => 'web',
-        ]);
-
-        $user = User::factory()->create();
-        $user->assignRole($role);
-
-        return $user;
-    }
-
-    /**
-     * @return array{0: EntryGroup, 1: EntryType}
-     */
-    protected function makeEntryGroupAndType(): array
-    {
-        $statusGroup = StatusGroup::factory()->create();
-        Status::factory()->default()->create([
-            'status_group_id' => $statusGroup->id,
-            'handle' => 'draft',
-            'name' => 'Draft',
-        ]);
-
-        $group = EntryGroup::factory()->create([
-            'status_group_id' => $statusGroup->id,
-        ]);
-
-        $type = EntryType::factory()->create([
-            'entry_group_id' => $group->id,
-        ]);
-
-        return [$group, $type];
-    }
-
-    protected function makeAttachedCategory(EntryGroup $group): Category
-    {
-        $categoryGroup = CategoryGroup::factory()->create();
-        $group->categoryGroups()->syncWithoutDetaching([$categoryGroup->id]);
-
-        return Category::factory()->for($categoryGroup, 'group')->create();
-    }
-
-    protected function makeUnattachedCategory(): Category
-    {
-        $categoryGroup = CategoryGroup::factory()->create();
-
-        return Category::factory()->for($categoryGroup, 'group')->create();
     }
 
     protected function setUp(): void

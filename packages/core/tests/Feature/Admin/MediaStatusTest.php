@@ -18,23 +18,18 @@ class MediaStatusTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    public function test_media_belongs_to_status(): void
     {
-        parent::setUp();
-        $this->withoutMiddleware(VerifyCsrfToken::class);
+        [$library, , $draft] = $this->makeLibraryWithStatuses();
+        $media = $this->makeMedia($library, ['status_id' => $draft->id]);
+
+        $this->assertInstanceOf(Status::class, $media->status);
+        $this->assertSame($draft->id, $media->status->id);
     }
 
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
-
-    private function makeSuperAdmin(): User
-    {
-        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $user = User::factory()->create();
-        $user->assignRole($role);
-        return $user;
-    }
 
     /**
      * @return array{0: Library, 1: StatusGroup, 2: Status, 3: Status}
@@ -76,25 +71,16 @@ class MediaStatusTest extends TestCase
         ], $overrides));
     }
 
-    // -------------------------------------------------------------------------
-    // Model & relationships
-    // -------------------------------------------------------------------------
-
-    public function test_media_belongs_to_status(): void
-    {
-        [$library, , $draft] = $this->makeLibraryWithStatuses();
-        $media = $this->makeMedia($library, ['status_id' => $draft->id]);
-
-        $this->assertInstanceOf(Status::class, $media->status);
-        $this->assertSame($draft->id, $media->status->id);
-    }
-
     public function test_library_status_group_relationship(): void
     {
         [$library, $statusGroup] = $this->makeLibraryWithStatuses();
 
         $this->assertSame($statusGroup->id, $library->statusGroup->id);
     }
+
+    // -------------------------------------------------------------------------
+    // Model & relationships
+    // -------------------------------------------------------------------------
 
     public function test_library_statuses_returns_all_in_group(): void
     {
@@ -130,10 +116,6 @@ class MediaStatusTest extends TestCase
 
         $this->assertSame($library->id, $statusGroup->mediaLibraries->first()->id);
     }
-
-    // -------------------------------------------------------------------------
-    // Scopes
-    // -------------------------------------------------------------------------
 
     public function test_published_scope_returns_only_public_media(): void
     {
@@ -177,6 +159,10 @@ class MediaStatusTest extends TestCase
         $this->assertSame(1, Media::withStatus('published')->count());
     }
 
+    // -------------------------------------------------------------------------
+    // Scopes
+    // -------------------------------------------------------------------------
+
     public function test_published_scope_excludes_soft_deleted_media(): void
     {
         [$library, , , $published] = $this->makeLibraryWithStatuses();
@@ -196,10 +182,6 @@ class MediaStatusTest extends TestCase
 
         $this->assertSame([$alive->id], $results);
     }
-
-    // -------------------------------------------------------------------------
-    // Upload auto-assignment
-    // -------------------------------------------------------------------------
 
     public function test_upload_assigns_default_status_when_library_has_status_group(): void
     {
@@ -227,6 +209,10 @@ class MediaStatusTest extends TestCase
         $this->assertNull($media->status_id);
         $this->assertNull($media->status_handle);
     }
+
+    // -------------------------------------------------------------------------
+    // Upload auto-assignment
+    // -------------------------------------------------------------------------
 
     public function test_upload_leaves_status_null_when_governed_library_has_no_default(): void
     {
@@ -268,10 +254,6 @@ class MediaStatusTest extends TestCase
         $this->assertTrue($media->status_is_public);
     }
 
-    // -------------------------------------------------------------------------
-    // HTTP validation (the most important set)
-    // -------------------------------------------------------------------------
-
     public function test_update_accepts_status_from_librarys_status_group(): void
     {
         $user = $this->makeSuperAdmin();
@@ -288,6 +270,18 @@ class MediaStatusTest extends TestCase
         $this->assertSame('published', $fresh->status_handle);
         $this->assertTrue($fresh->status_is_public);
     }
+
+    private function makeSuperAdmin(): User
+    {
+        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
+        $user = User::factory()->create();
+        $user->assignRole($role);
+        return $user;
+    }
+
+    // -------------------------------------------------------------------------
+    // HTTP validation (the most important set)
+    // -------------------------------------------------------------------------
 
     public function test_update_rejects_status_from_another_status_group(): void
     {
@@ -392,5 +386,11 @@ class MediaStatusTest extends TestCase
         $fresh = $media->fresh();
         $this->assertSame('draft', $fresh->status_handle);
         $this->assertSame($draft->id, $fresh->status_id);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
     }
 }

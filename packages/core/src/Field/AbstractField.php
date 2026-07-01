@@ -98,19 +98,6 @@ abstract class AbstractField
     }
 
     /**
-     * Convert a validated wire-format value into the form written to the storage
-     * column. Assumes the FormRequest pipeline (or another caller) has already
-     * validated input via this field type's getRules().
-     *
-     * Implementations MAY throw InvalidArgumentException for structurally-impossible
-     * input — but this should be unreachable via the normal HTTP write path.
-     */
-    public function prepareForStorage(mixed $value): mixed
-    {
-        return $value;
-    }
-
-    /**
      * Convert a wire-format value for use in a WHERE clause against the storage
      * column. Default delegates to prepareForStorage() with a fallback so bad
      * code-level query input produces zero results rather than a 500.
@@ -122,6 +109,19 @@ abstract class AbstractField
         } catch (InvalidArgumentException) {
             return $value;
         }
+    }
+
+    /**
+     * Convert a validated wire-format value into the form written to the storage
+     * column. Assumes the FormRequest pipeline (or another caller) has already
+     * validated input via this field type's getRules().
+     *
+     * Implementations MAY throw InvalidArgumentException for structurally-impossible
+     * input — but this should be unreachable via the normal HTTP write path.
+     */
+    public function prepareForStorage(mixed $value): mixed
+    {
+        return $value;
     }
 
     public function getSetting(string $key, mixed $default = null): mixed

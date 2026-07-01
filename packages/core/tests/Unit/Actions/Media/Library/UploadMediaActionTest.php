@@ -37,6 +37,30 @@ class UploadMediaActionTest extends TestCase
         $this->assertSame($media, $result);
     }
 
+    private function bindMediaService(): Mockery\MockInterface
+    {
+        $mock = Mockery::mock(MediaStorageService::class);
+        $this->app->instance('media-service', $mock);
+
+        return $mock;
+    }
+
+    // -------------------------------------------------------------------------
+    // Name attribute forwarding
+    // -------------------------------------------------------------------------
+
+    private function mockRequest(array $data): FormRequest
+    {
+        $file = $data['file'] ?? null;
+
+        $request = Mockery::mock(FormRequest::class);
+        $request->shouldReceive('file')->with('file')->andReturn($file);
+        $request->shouldReceive('input')->with('name')->andReturn($data['name'] ?? null);
+        $request->shouldReceive('input')->with('categories')->andReturn($data['categories'] ?? null);
+
+        return $request;
+    }
+
     public function test_upload_returns_media_instance(): void
     {
         $library = Library::factory()->create();
@@ -52,7 +76,7 @@ class UploadMediaActionTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Name attribute forwarding
+    // Category syncing
     // -------------------------------------------------------------------------
 
     public function test_upload_passes_name_attribute_to_service_when_provided(): void
@@ -86,7 +110,7 @@ class UploadMediaActionTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Category syncing
+    // Helpers
     // -------------------------------------------------------------------------
 
     public function test_upload_skips_category_sync_when_categories_absent(): void
@@ -115,29 +139,5 @@ class UploadMediaActionTest extends TestCase
         $result = app(UploadMedia::class)->upload($this->mockRequest(['file' => $file, 'categories' => []]), $library);
 
         $this->assertInstanceOf(Media::class, $result);
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function bindMediaService(): Mockery\MockInterface
-    {
-        $mock = Mockery::mock(MediaStorageService::class);
-        $this->app->instance('media-service', $mock);
-
-        return $mock;
-    }
-
-    private function mockRequest(array $data): FormRequest
-    {
-        $file = $data['file'] ?? null;
-
-        $request = Mockery::mock(FormRequest::class);
-        $request->shouldReceive('file')->with('file')->andReturn($file);
-        $request->shouldReceive('input')->with('name')->andReturn($data['name'] ?? null);
-        $request->shouldReceive('input')->with('categories')->andReturn($data['categories'] ?? null);
-
-        return $request;
     }
 }

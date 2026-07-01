@@ -54,6 +54,18 @@ class Field extends Controller
         return $this->view('fields.create', $data);
     }
 
+    private function buildSettingsForm(AbstractField $instance): array
+    {
+        $form = $instance->settingsForm();
+        foreach ($instance->settingsFormOptions() as $handle => $optionList) {
+            if (isset($form[$handle])) {
+                $form[$handle]['options'] = $optionList;
+            }
+        }
+
+        return $form;
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -197,18 +209,6 @@ class Field extends Controller
             'settings_form' => $form,
             'current_values' => $currentValues,
         ]);
-    }
-
-    private function buildSettingsForm(AbstractField $instance): array
-    {
-        $form = $instance->settingsForm();
-        foreach ($instance->settingsFormOptions() as $handle => $optionList) {
-            if (isset($form[$handle])) {
-                $form[$handle]['options'] = $optionList;
-            }
-        }
-
-        return $form;
     }
 
     public function confirm(string $id)

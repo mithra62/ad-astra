@@ -44,6 +44,41 @@ class EntryGroupService extends AbstractService
     }
 
     /**
+     * Sync the set of Entry Types assigned to a group.
+     *
+     * Types currently owned by this group that are not in $ids are detached
+     * (entry_group_id set to null). Types in $ids that are unattached
+     * (entry_group_id = null) are attached. Types owned by a different group
+     * are silently skipped to prevent hijacking.
+     *
+     * @param int[] $ids
+     */
+    private function syncEntryTypes(EntryGroup $group, array $ids): void
+    {
+        $groupId = $group->getKey();
+
+        // Detach types that were owned by this group but are no longer selected
+        EntryType::where('entry_group_id', $groupId)
+            ->whereNotIn('id', $ids)
+            ->update(['entry_group_id' => null]);
+
+        if (empty($ids)) {
+            return;
+        }
+
+        // Attach eligible types: only those that are currently unattached
+        EntryType::whereIn('id', $ids)
+            ->whereNull('entry_group_id')
+            ->update(['entry_group_id' => $groupId]);
+
+        // Re-attach types already owned by this group (no-op, but handles
+        // the case where an already-attached type is re-submitted in the form)
+        EntryType::whereIn('id', $ids)
+            ->where('entry_group_id', $groupId)
+            ->update(['entry_group_id' => $groupId]);
+    }
+
+    /**
      * Update an EntryGroup's attributes and pivot relationships.
      *
      * All keys in $data are applied; omit a key to leave that value unchanged.
@@ -82,50 +117,15 @@ class EntryGroupService extends AbstractService
         return EntryGroup::find($id);
     }
 
+    // -------------------------------------------------------------------------
+    // Entry Type assignment
+    // -------------------------------------------------------------------------
+
     /**
      * Find an EntryGroup by ID. Throws ModelNotFoundException when not found.
      */
     public function get(int $id): EntryGroup
     {
         return EntryGroup::findOrFail($id);
-    }
-
-    // -------------------------------------------------------------------------
-    // Entry Type assignment
-    // -------------------------------------------------------------------------
-
-    /**
-     * Sync the set of Entry Types assigned to a group.
-     *
-     * Types currently owned by this group that are not in $ids are detached
-     * (entry_group_id set to null). Types in $ids that are unattached
-     * (entry_group_id = null) are attached. Types owned by a different group
-     * are silently skipped to prevent hijacking.
-     *
-     * @param int[] $ids
-     */
-    private function syncEntryTypes(EntryGroup $group, array $ids): void
-    {
-        $groupId = $group->getKey();
-
-        // Detach types that were owned by this group but are no longer selected
-        EntryType::where('entry_group_id', $groupId)
-            ->whereNotIn('id', $ids)
-            ->update(['entry_group_id' => null]);
-
-        if (empty($ids)) {
-            return;
-        }
-
-        // Attach eligible types: only those that are currently unattached
-        EntryType::whereIn('id', $ids)
-            ->whereNull('entry_group_id')
-            ->update(['entry_group_id' => $groupId]);
-
-        // Re-attach types already owned by this group (no-op, but handles
-        // the case where an already-attached type is re-submitted in the form)
-        EntryType::whereIn('id', $ids)
-            ->where('entry_group_id', $groupId)
-            ->update(['entry_group_id' => $groupId]);
     }
 }

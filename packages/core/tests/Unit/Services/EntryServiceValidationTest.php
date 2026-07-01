@@ -26,18 +26,6 @@ class EntryServiceValidationTest extends TestCase
 
     private EntryService $service;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed(EntryBehaviorSeeder::class);
-        $this->service = app(EntryService::class);
-        $this->actingAs(User::factory()->create());
-    }
-
-    // -------------------------------------------------------------------------
-    // create() — validation fires before repository
-    // -------------------------------------------------------------------------
-
     public function test_create_throws_validation_exception_when_type_validate_returns_errors(): void
     {
         ['group' => $group, 'type' => $type] = $this->makeJobListingSetup();
@@ -52,6 +40,33 @@ class EntryServiceValidationTest extends TestCase
             'status' => 'published',
             'fields' => [],
         ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // create() — validation fires before repository
+    // -------------------------------------------------------------------------
+
+    /**
+     * Build the minimum DB scaffolding required to resolve a JobListingEntryType
+     * through the EntryTypeRegistry (requires a real entry_types row).
+     *
+     * @return array{group: EntryGroup, type: EntryType}
+     */
+    private function makeJobListingSetup(): array
+    {
+        $statusGroup = StatusGroup::factory()->create();
+        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft', 'is_default' => true, 'is_public' => false]);
+        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'published', 'is_default' => false, 'is_public' => true]);
+
+        $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
+
+        $type = EntryType::factory()->create([
+            'entry_group_id' => $group->id,
+            'handle' => 'job_listing_' . uniqid(),
+            'entry_behavior_id' => EntryBehavior::where('handle', 'job-listing')->value('id'),
+        ]);
+
+        return compact('group', 'type');
     }
 
     public function test_create_validation_exception_contains_correct_field_key(): void
@@ -128,6 +143,28 @@ class EntryServiceValidationTest extends TestCase
         ]);
     }
 
+    /**
+     * Build the minimum DB scaffolding for a ProductEntryType.
+     *
+     * @return array{group: EntryGroup, type: EntryType}
+     */
+    private function makeProductSetup(): array
+    {
+        $statusGroup = StatusGroup::factory()->create();
+        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft', 'is_default' => true, 'is_public' => false]);
+        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'published', 'is_default' => false, 'is_public' => true]);
+
+        $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
+
+        $type = EntryType::factory()->create([
+            'entry_group_id' => $group->id,
+            'handle' => 'product_' . uniqid(),
+            'entry_behavior_id' => EntryBehavior::where('handle', 'product')->value('id'),
+        ]);
+
+        return compact('group', 'type');
+    }
+
     public function test_update_validation_exception_contains_correct_field_key(): void
     {
         ['group' => $group, 'type' => $type] = $this->makeProductSetup();
@@ -169,6 +206,10 @@ class EntryServiceValidationTest extends TestCase
         $this->assertSame('Updated', $updated->title);
     }
 
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
     public function test_update_does_not_persist_changes_when_validation_fails(): void
     {
         ['group' => $group, 'type' => $type] = $this->makeProductSetup();
@@ -195,52 +236,11 @@ class EntryServiceValidationTest extends TestCase
         ]);
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    /**
-     * Build the minimum DB scaffolding required to resolve a JobListingEntryType
-     * through the EntryTypeRegistry (requires a real entry_types row).
-     *
-     * @return array{group: EntryGroup, type: EntryType}
-     */
-    private function makeJobListingSetup(): array
+    protected function setUp(): void
     {
-        $statusGroup = StatusGroup::factory()->create();
-        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft', 'is_default' => true, 'is_public' => false]);
-        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'published', 'is_default' => false, 'is_public' => true]);
-
-        $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
-
-        $type = EntryType::factory()->create([
-            'entry_group_id' => $group->id,
-            'handle' => 'job_listing_' . uniqid(),
-            'entry_behavior_id' => EntryBehavior::where('handle', 'job-listing')->value('id'),
-        ]);
-
-        return compact('group', 'type');
-    }
-
-    /**
-     * Build the minimum DB scaffolding for a ProductEntryType.
-     *
-     * @return array{group: EntryGroup, type: EntryType}
-     */
-    private function makeProductSetup(): array
-    {
-        $statusGroup = StatusGroup::factory()->create();
-        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'draft', 'is_default' => true, 'is_public' => false]);
-        Status::factory()->create(['status_group_id' => $statusGroup->id, 'handle' => 'published', 'is_default' => false, 'is_public' => true]);
-
-        $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
-
-        $type = EntryType::factory()->create([
-            'entry_group_id' => $group->id,
-            'handle' => 'product_' . uniqid(),
-            'entry_behavior_id' => EntryBehavior::where('handle', 'product')->value('id'),
-        ]);
-
-        return compact('group', 'type');
+        parent::setUp();
+        $this->seed(EntryBehaviorSeeder::class);
+        $this->service = app(EntryService::class);
+        $this->actingAs(User::factory()->create());
     }
 }

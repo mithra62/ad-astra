@@ -22,12 +22,13 @@ class DomainSettingsTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    private function makeSuperAdmin(): User
+    public function test_show_redirects_guests_to_login(): void
     {
-        $role = Role::firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $user = User::factory()->create();
-        $user->assignRole($role);
-        return $user;
+        $this->makeDomain();
+
+        $response = $this->get(route('settings.show', 'td_test'));
+
+        $response->assertRedirect(route('login'));
     }
 
     // -------------------------------------------------------------------------
@@ -67,19 +68,6 @@ class DomainSettingsTest extends TestCase
         ]);
     }
 
-    public function test_show_redirects_guests_to_login(): void
-    {
-        $this->makeDomain();
-
-        $response = $this->get(route('settings.show', 'td_test'));
-
-        $response->assertRedirect(route('login'));
-    }
-
-    // -------------------------------------------------------------------------
-    // show
-    // -------------------------------------------------------------------------
-
     public function test_show_renders_domain_form(): void
     {
         $user = $this->makeSuperAdmin();
@@ -90,6 +78,18 @@ class DomainSettingsTest extends TestCase
         $response->assertOk();
         $response->assertSee('Test Domain');
         $response->assertSee('Site Name');
+    }
+
+    // -------------------------------------------------------------------------
+    // show
+    // -------------------------------------------------------------------------
+
+    private function makeSuperAdmin(): User
+    {
+        $role = Role::firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
+        $user = User::factory()->create();
+        $user->assignRole($role);
+        return $user;
     }
 
     public function test_show_returns_404_for_missing_domain(): void

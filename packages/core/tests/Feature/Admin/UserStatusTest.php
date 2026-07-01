@@ -14,21 +14,6 @@ class UserStatusTest extends TestCase
 
     private User $admin;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Permission::firstOrCreate(['name' => 'manage user status']);
-        Permission::firstOrCreate(['name' => 'access admin']);
-
-        $this->admin = User::factory()->active()->create();
-        $this->admin->givePermissionTo(['access admin', 'manage user status']);
-    }
-
-    // -------------------------------------------------------------------------
-    // PATCH /admin/users/{id}/status
-    // -------------------------------------------------------------------------
-
     public function test_admin_can_set_user_status_to_inactive(): void
     {
         $target = User::factory()->active()->create();
@@ -45,6 +30,10 @@ class UserStatusTest extends TestCase
             'status' => UserStatus::INACTIVE,
         ]);
     }
+
+    // -------------------------------------------------------------------------
+    // PATCH /admin/users/{id}/status
+    // -------------------------------------------------------------------------
 
     public function test_admin_can_suspend_user_with_date(): void
     {
@@ -119,10 +108,6 @@ class UserStatusTest extends TestCase
             ->assertForbidden();
     }
 
-    // -------------------------------------------------------------------------
-    // DELETE /admin/users/{id}/lock
-    // -------------------------------------------------------------------------
-
     public function test_admin_can_unlock_a_locked_user(): void
     {
         $target = User::factory()->active()->locked()->create();
@@ -133,6 +118,10 @@ class UserStatusTest extends TestCase
 
         $this->assertNull($target->fresh()->locked_until);
     }
+
+    // -------------------------------------------------------------------------
+    // DELETE /admin/users/{id}/lock
+    // -------------------------------------------------------------------------
 
     public function test_unlock_writes_audit_log(): void
     {
@@ -155,5 +144,16 @@ class UserStatusTest extends TestCase
         $this->actingAs($unprivileged)
             ->delete(route('users.lock.destroy', $target->id))
             ->assertForbidden();
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Permission::firstOrCreate(['name' => 'manage user status']);
+        Permission::firstOrCreate(['name' => 'access admin']);
+
+        $this->admin = User::factory()->active()->create();
+        $this->admin->givePermissionTo(['access admin', 'manage user status']);
     }
 }

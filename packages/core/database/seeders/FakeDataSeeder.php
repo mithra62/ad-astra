@@ -90,21 +90,6 @@ class FakeDataSeeder extends Seeder
     // Users
     // =========================================================================
 
-    /**
-     * Pick a weighted random user status from USER_STATUS_WEIGHTS.
-     */
-    private function pickUserStatus(): string
-    {
-        $pool = [];
-        foreach (self::USER_STATUS_WEIGHTS as $status => $weight) {
-            for ($w = 0; $w < $weight; $w++) {
-                $pool[] = $status;
-            }
-        }
-
-        return fake()->randomElement($pool);
-    }
-
     /** @return User[] */
     private function seedUsers(): array
     {
@@ -154,6 +139,21 @@ class FakeDataSeeder extends Seeder
         $this->command->info(sprintf('Users: %d created, %d failed.', count($created), $failed));
 
         return $created;
+    }
+
+    /**
+     * Pick a weighted random user status from USER_STATUS_WEIGHTS.
+     */
+    private function pickUserStatus(): string
+    {
+        $pool = [];
+        foreach (self::USER_STATUS_WEIGHTS as $status => $weight) {
+            for ($w = 0; $w < $weight; $w++) {
+                $pool[] = $status;
+            }
+        }
+
+        return fake()->randomElement($pool);
     }
 
     private function fakeUserFields(): array
@@ -245,6 +245,44 @@ class FakeDataSeeder extends Seeder
     }
 
     /**
+     * Pre-resolve the field definitions for a group's layout into a flat array
+     * of [handle, type] pairs so the recursive tree builder can generate fake
+     * values without re-querying the DB on every node.
+     *
+     * @return array<int, array{handle: string, type: string}>
+     */
+    private function resolveGroupFieldDefs(CategoryGroup $group): array
+    {
+        $layout = $group->fieldLayout;
+
+        if (!$layout) {
+            return [];
+        }
+
+        $defs = [];
+
+        foreach ($layout->tabs as $tab) {
+            foreach ($tab->elements as $element) {
+                $field = $element->field;
+
+                if (!$field || !$field->fieldType) {
+                    continue;
+                }
+
+                // Relational fields write to a separate table and require real
+                // related IDs — skip them in the fake data generator.
+                if ($field->fieldType->instance()->isRelational()) {
+                    continue;
+                }
+
+                $defs[] = ['handle' => $field->handle, 'type' => $field->fieldType->object];
+            }
+        }
+
+        return $defs;
+    }
+
+    /**
      * Recursively create a single category node and its subtree.
      *
      * Child probability and maximum fanout both taper with depth so the tree
@@ -301,44 +339,6 @@ class FakeDataSeeder extends Seeder
                 $depth + 1, $budget, $created, $failed,
             );
         }
-    }
-
-    /**
-     * Pre-resolve the field definitions for a group's layout into a flat array
-     * of [handle, type] pairs so the recursive tree builder can generate fake
-     * values without re-querying the DB on every node.
-     *
-     * @return array<int, array{handle: string, type: string}>
-     */
-    private function resolveGroupFieldDefs(CategoryGroup $group): array
-    {
-        $layout = $group->fieldLayout;
-
-        if (!$layout) {
-            return [];
-        }
-
-        $defs = [];
-
-        foreach ($layout->tabs as $tab) {
-            foreach ($tab->elements as $element) {
-                $field = $element->field;
-
-                if (!$field || !$field->fieldType) {
-                    continue;
-                }
-
-                // Relational fields write to a separate table and require real
-                // related IDs — skip them in the fake data generator.
-                if ($field->fieldType->instance()->isRelational()) {
-                    continue;
-                }
-
-                $defs[] = ['handle' => $field->handle, 'type' => $field->fieldType->object];
-            }
-        }
-
-        return $defs;
     }
 
     /**

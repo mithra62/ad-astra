@@ -19,6 +19,15 @@ class EditMediaRequestTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
+    public function test_rules_does_not_crash_when_media_record_not_found(): void
+    {
+        $request = $this->makeRequest(999999);
+
+        $rules = $request->rules();
+
+        $this->assertArrayHasKey('name', $rules);
+    }
+
     private function makeRequest(mixed $mediaItemParam): EditMediaRequest
     {
         // Route::setParameter() requires the route to be bound to a real request
@@ -40,27 +49,9 @@ class EditMediaRequestTest extends TestCase
         return $request;
     }
 
-    private function makeLibrary(string $handle = 'test-lib'): MediaLibrary
-    {
-        return MediaLibrary::create([
-            'name' => 'Test Library',
-            'handle' => $handle,
-            'adapter' => 'local',
-        ]);
-    }
-
     // -------------------------------------------------------------------------
     // C4 — does not crash when media or library_id is missing
     // -------------------------------------------------------------------------
-
-    public function test_rules_does_not_crash_when_media_record_not_found(): void
-    {
-        $request = $this->makeRequest(999999);
-
-        $rules = $request->rules();
-
-        $this->assertArrayHasKey('name', $rules);
-    }
 
     public function test_rules_does_not_crash_when_library_id_is_null(): void
     {
@@ -88,10 +79,6 @@ class EditMediaRequestTest extends TestCase
         $this->assertIsArray($request->attributes());
     }
 
-    // -------------------------------------------------------------------------
-    // H2 — schema resolved only once regardless of how many methods are called
-    // -------------------------------------------------------------------------
-
     public function test_messages_and_attributes_incur_no_queries_after_rules_is_called(): void
     {
         $library = $this->makeLibrary();
@@ -111,6 +98,19 @@ class EditMediaRequestTest extends TestCase
             $count,
             'messages() and attributes() should read from the cached schema with zero DB queries.'
         );
+    }
+
+    // -------------------------------------------------------------------------
+    // H2 — schema resolved only once regardless of how many methods are called
+    // -------------------------------------------------------------------------
+
+    private function makeLibrary(string $handle = 'test-lib'): MediaLibrary
+    {
+        return MediaLibrary::create([
+            'name' => 'Test Library',
+            'handle' => $handle,
+            'adapter' => 'local',
+        ]);
     }
 
     public function test_repeated_calls_to_rules_incur_no_extra_queries(): void

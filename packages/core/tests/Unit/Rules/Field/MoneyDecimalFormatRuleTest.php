@@ -7,6 +7,11 @@ use PHPUnit\Framework\TestCase;
 
 class MoneyDecimalFormatRuleTest extends TestCase
 {
+    public function test_accepts_integer_string_usd(): void
+    {
+        $this->assertNull($this->runRule(new MoneyDecimalFormatRule('USD'), '42'));
+    }
+
     private function runRule(MoneyDecimalFormatRule $rule, mixed $value): ?string
     {
         $error = null;
@@ -14,11 +19,6 @@ class MoneyDecimalFormatRuleTest extends TestCase
             $error = $msg;
         });
         return $error;
-    }
-
-    public function test_accepts_integer_string_usd(): void
-    {
-        $this->assertNull($this->runRule(new MoneyDecimalFormatRule('USD'), '42'));
     }
 
     public function test_accepts_two_decimal_places_usd(): void

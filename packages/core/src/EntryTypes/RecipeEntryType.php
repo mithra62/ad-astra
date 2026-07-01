@@ -14,6 +14,20 @@ class RecipeEntryType extends AbstractEntryType
         return $this->computeTotalTime($data);
     }
 
+    private function computeTotalTime(array $data): array
+    {
+        $prepTime = $data['fields']['prep_time'] ?? null;
+        $cookTime = $data['fields']['cook_time'] ?? null;
+
+        if ($prepTime !== null || $cookTime !== null) {
+            $data['fields']['total_time'] = (int)$prepTime + (int)$cookTime;
+        }
+
+        return $data;
+    }
+
+    // -------------------------------------------------------------------------
+
     /**
      * Re-compute total_time whenever prep_time or cook_time is in the payload.
      */
@@ -26,20 +40,6 @@ class RecipeEntryType extends AbstractEntryType
             $cookTime = $data['fields']['cook_time']
                 ?? (int)$this->existingFieldValue($entry, 'cook_time');
 
-            $data['fields']['total_time'] = (int)$prepTime + (int)$cookTime;
-        }
-
-        return $data;
-    }
-
-    // -------------------------------------------------------------------------
-
-    private function computeTotalTime(array $data): array
-    {
-        $prepTime = $data['fields']['prep_time'] ?? null;
-        $cookTime = $data['fields']['cook_time'] ?? null;
-
-        if ($prepTime !== null || $cookTime !== null) {
             $data['fields']['total_time'] = (int)$prepTime + (int)$cookTime;
         }
 

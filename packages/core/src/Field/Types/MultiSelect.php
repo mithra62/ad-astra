@@ -68,20 +68,6 @@ class MultiSelect extends AbstractField
         return 'value_json';
     }
 
-    public function cast(mixed $value): array
-    {
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            return is_array($decoded) ? array_map('strval', $decoded) : [];
-        }
-
-        if (is_array($value)) {
-            return array_map('strval', $value);
-        }
-
-        return [];
-    }
-
     public function validate(mixed $value): bool|string
     {
         if ($value === null || $value === []) {
@@ -101,6 +87,20 @@ class MultiSelect extends AbstractField
         }
 
         return $this->validateAgainstOptions($ids);
+    }
+
+    public function cast(mixed $value): array
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? array_map('strval', $decoded) : [];
+        }
+
+        if (is_array($value)) {
+            return array_map('strval', $value);
+        }
+
+        return [];
     }
 
     public function render(array $params): string

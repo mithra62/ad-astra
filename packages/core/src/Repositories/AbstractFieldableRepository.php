@@ -24,14 +24,6 @@ use Illuminate\Support\Collection;
 abstract class AbstractFieldableRepository implements RepositoryInterface
 {
     /**
-     * Return the Field models reachable through this model's field layout.
-     *
-     * Implementations should eager-load the full layout chain and return an
-     * empty Collection when no layout is configured.
-     */
-    abstract public function resolveLayoutFields(Model $model): Collection;
-
-    /**
      * Persist field values for the given handles.
      *
      * Skips handles not present in the model's resolved layout and silently
@@ -65,6 +57,14 @@ abstract class AbstractFieldableRepository implements RepositoryInterface
             );
         }
     }
+
+    /**
+     * Return the Field models reachable through this model's field layout.
+     *
+     * Implementations should eager-load the full layout chain and return an
+     * empty Collection when no layout is configured.
+     */
+    abstract public function resolveLayoutFields(Model $model): Collection;
 
     /**
      * Race-safe field value upsert.

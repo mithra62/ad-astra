@@ -13,16 +13,6 @@ class RecipeEntryTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeType(): RecipeEntryType
-    {
-        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'recipe')->value('id')]);
-        return new RecipeEntryType($record);
-    }
-
-    // -------------------------------------------------------------------------
-    // beforeCreate — total_time computation
-    // -------------------------------------------------------------------------
-
     public function test_before_create_computes_total_time_from_prep_and_cook(): void
     {
         $type = $this->makeType();
@@ -32,6 +22,16 @@ class RecipeEntryTypeTest extends TestCase
         ]);
 
         $this->assertSame(45, $result['fields']['total_time']);
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeCreate — total_time computation
+    // -------------------------------------------------------------------------
+
+    private function makeType(): RecipeEntryType
+    {
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'recipe')->value('id')]);
+        return new RecipeEntryType($record);
     }
 
     public function test_before_create_computes_total_time_when_only_prep_time_provided(): void

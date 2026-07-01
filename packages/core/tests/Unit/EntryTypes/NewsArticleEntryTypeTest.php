@@ -12,16 +12,6 @@ class NewsArticleEntryTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeType(): NewsArticleEntryType
-    {
-        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'news-article')->value('id')]);
-        return new NewsArticleEntryType($record);
-    }
-
-    // -------------------------------------------------------------------------
-    // validate()
-    // -------------------------------------------------------------------------
-
     public function test_validate_returns_error_when_source_url_set_without_source(): void
     {
         $type = $this->makeType();
@@ -34,6 +24,16 @@ class NewsArticleEntryTypeTest extends TestCase
         ]);
 
         $this->assertArrayHasKey('source', $errors);
+    }
+
+    // -------------------------------------------------------------------------
+    // validate()
+    // -------------------------------------------------------------------------
+
+    private function makeType(): NewsArticleEntryType
+    {
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'news-article')->value('id')]);
+        return new NewsArticleEntryType($record);
     }
 
     public function test_validate_passes_when_both_source_and_url_provided(): void

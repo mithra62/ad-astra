@@ -23,6 +23,19 @@ class FormRequest extends LaravelFormRequest
         return $attributes;
     }
 
+    private function layoutFrom(?Model $schema): ?FieldLayout
+    {
+        if (!$schema) {
+            return null;
+        }
+
+        if ($schema instanceof FieldLayout) {
+            return $schema;
+        }
+
+        return $schema->fieldLayout ?? null;
+    }
+
     protected function schemaFieldRules(?Model $schema): array
     {
         $layout = $this->layoutFrom($schema);
@@ -47,18 +60,5 @@ class FormRequest extends LaravelFormRequest
     protected function schemaFieldMessages(?Model $schema): array
     {
         return [];
-    }
-
-    private function layoutFrom(?Model $schema): ?FieldLayout
-    {
-        if (!$schema) {
-            return null;
-        }
-
-        if ($schema instanceof FieldLayout) {
-            return $schema;
-        }
-
-        return $schema->fieldLayout ?? null;
     }
 }

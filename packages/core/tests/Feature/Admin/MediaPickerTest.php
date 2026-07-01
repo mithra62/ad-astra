@@ -13,23 +13,6 @@ class MediaPickerTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeSuperAdmin(): User
-    {
-        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $user = User::factory()->create();
-        $user->assignRole($role);
-        return $user;
-    }
-
-    private function makeLibrary(string $handle): Library
-    {
-        return Library::create(['name' => ucfirst($handle), 'handle' => $handle, 'adapter' => 'local']);
-    }
-
-    // -------------------------------------------------------------------------
-    // Auth
-    // -------------------------------------------------------------------------
-
     public function test_unauthenticated_request_redirects_or_rejects(): void
     {
         $library = $this->makeLibrary('photos');
@@ -41,8 +24,13 @@ class MediaPickerTest extends TestCase
         $this->assertContains($response->status(), [302, 401, 403]);
     }
 
+    private function makeLibrary(string $handle): Library
+    {
+        return Library::create(['name' => ucfirst($handle), 'handle' => $handle, 'adapter' => 'local']);
+    }
+
     // -------------------------------------------------------------------------
-    // Validation
+    // Auth
     // -------------------------------------------------------------------------
 
     public function test_request_without_library_id_fails_validation(): void
@@ -53,6 +41,18 @@ class MediaPickerTest extends TestCase
             ->getJson(route('media.picker.index'))
             ->assertStatus(422)
             ->assertJsonValidationErrors(['library_id']);
+    }
+
+    // -------------------------------------------------------------------------
+    // Validation
+    // -------------------------------------------------------------------------
+
+    private function makeSuperAdmin(): User
+    {
+        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
+        $user = User::factory()->create();
+        $user->assignRole($role);
+        return $user;
     }
 
     // -------------------------------------------------------------------------

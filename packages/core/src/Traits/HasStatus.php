@@ -35,21 +35,6 @@ use LogicException;
  */
 trait HasStatus
 {
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(Status::class);
-    }
-
-    public function scopeWithStatus(Builder $query, string $handle): Builder
-    {
-        return $query->where('status_handle', $handle);
-    }
-
-    public function scopePublic(Builder $query): Builder
-    {
-        return $query->where('status_is_public', true);
-    }
-
     /**
      * Registers the consuming model with StatusSyncRegistry so StatusObserver
      * can cascade is_public / handle changes here on every Status update.
@@ -89,5 +74,20 @@ trait HasStatus
         }
 
         StatusSyncRegistry::register(static::class);
+    }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(Status::class);
+    }
+
+    public function scopeWithStatus(Builder $query, string $handle): Builder
+    {
+        return $query->where('status_handle', $handle);
+    }
+
+    public function scopePublic(Builder $query): Builder
+    {
+        return $query->where('status_is_public', true);
     }
 }

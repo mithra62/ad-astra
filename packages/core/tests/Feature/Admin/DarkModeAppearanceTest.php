@@ -17,12 +17,6 @@ class DarkModeAppearanceTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        Cache::flush();
-    }
-
     public function test_login_page_renders_resolved_system_appearance(): void
     {
         app(Settings::class)->set('general', 'appearance', 'dark', null);
@@ -39,5 +33,11 @@ class DarkModeAppearanceTest extends TestCase
 
         $response->assertOk();
         $response->assertSee("var pref = 'light'", false);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Cache::flush();
     }
 }

@@ -64,16 +64,6 @@ final class TimeValue
         return $this->toDateTimeImmutable()->format($phpFormat);
     }
 
-    public function toMinutes(): int
-    {
-        return $this->hours * 60 + $this->minutes;
-    }
-
-    public function toSeconds(): int
-    {
-        return $this->toMinutes() * 60 + $this->seconds;
-    }
-
     private function toDateTimeImmutable(): DateTimeImmutable
     {
         return new DateTimeImmutable(sprintf(
@@ -82,5 +72,15 @@ final class TimeValue
             $this->minutes,
             $this->seconds,
         ));
+    }
+
+    public function toSeconds(): int
+    {
+        return $this->toMinutes() * 60 + $this->seconds;
+    }
+
+    public function toMinutes(): int
+    {
+        return $this->hours * 60 + $this->minutes;
     }
 }

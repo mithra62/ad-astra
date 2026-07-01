@@ -19,9 +19,17 @@ class MediaStorageServiceTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
-    private function service(): MediaStorageService
+    public function test_upload_creates_media_record(): void
     {
-        return app('media-service');
+        Storage::fake('local');
+
+        $library = $this->makeLibrary();
+        $file = UploadedFile::fake()->image('photo.jpg');
+
+        $media = $this->service()->upload($library, $file);
+
+        $this->assertInstanceOf(Media::class, $media);
+        $this->assertDatabaseHas('media', ['id' => $media->id]);
     }
 
     private function makeLibrary(array $overrides = []): Library
@@ -38,17 +46,9 @@ class MediaStorageServiceTest extends TestCase
     // upload()
     // -------------------------------------------------------------------------
 
-    public function test_upload_creates_media_record(): void
+    private function service(): MediaStorageService
     {
-        Storage::fake('local');
-
-        $library = $this->makeLibrary();
-        $file = UploadedFile::fake()->image('photo.jpg');
-
-        $media = $this->service()->upload($library, $file);
-
-        $this->assertInstanceOf(Media::class, $media);
-        $this->assertDatabaseHas('media', ['id' => $media->id]);
+        return app('media-service');
     }
 
     public function test_upload_stores_file_on_disk(): void

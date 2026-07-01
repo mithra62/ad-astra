@@ -7,6 +7,11 @@ use PHPUnit\Framework\TestCase;
 
 class MoneyRangeRuleTest extends TestCase
 {
+    public function test_passes_value_in_range(): void
+    {
+        $this->assertNull($this->runRule(new MoneyRangeRule('0', '100', 'USD'), '50.00'));
+    }
+
     private function runRule(MoneyRangeRule $rule, mixed $value): ?string
     {
         $error = null;
@@ -14,11 +19,6 @@ class MoneyRangeRuleTest extends TestCase
             $error = $msg;
         });
         return $error;
-    }
-
-    public function test_passes_value_in_range(): void
-    {
-        $this->assertNull($this->runRule(new MoneyRangeRule('0', '100', 'USD'), '50.00'));
     }
 
     public function test_rejects_below_min(): void

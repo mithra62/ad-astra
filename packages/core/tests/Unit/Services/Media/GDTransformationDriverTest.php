@@ -18,11 +18,14 @@ class GDTransformationDriverTest extends TestCase
 
     private GDTransformationDriver $driver;
 
-    protected function setUp(): void
+    public function test_apply_sync_writes_file_to_storage(): void
     {
-        parent::setUp();
-        $this->driver = new GDTransformationDriver();
-        Storage::fake('local');
+        $media = $this->makeMediaWithImage(800, 600);
+        $t = $this->makePendingTransformation($media, ['width' => 200, 'height' => 200]);
+
+        $this->driver->applySync($t);
+
+        Storage::disk('local')->assertExists($t->path);
     }
 
     // -------------------------------------------------------------------------
@@ -68,16 +71,6 @@ class GDTransformationDriverTest extends TestCase
     // applySync — cover mode (default)
     // -------------------------------------------------------------------------
 
-    public function test_apply_sync_writes_file_to_storage(): void
-    {
-        $media = $this->makeMediaWithImage(800, 600);
-        $t = $this->makePendingTransformation($media, ['width' => 200, 'height' => 200]);
-
-        $this->driver->applySync($t);
-
-        Storage::disk('local')->assertExists($t->path);
-    }
-
     public function test_apply_sync_marks_transformation_complete(): void
     {
         $media = $this->makeMediaWithImage(800, 600);
@@ -101,10 +94,6 @@ class GDTransformationDriverTest extends TestCase
         $this->assertSame(200, $t->height);
     }
 
-    // -------------------------------------------------------------------------
-    // applySync — contain mode
-    // -------------------------------------------------------------------------
-
     public function test_apply_sync_contain_fits_within_bounds(): void
     {
         $media = $this->makeMediaWithImage(800, 400); // 2:1 ratio
@@ -119,7 +108,7 @@ class GDTransformationDriverTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // applySync — exact mode
+    // applySync — contain mode
     // -------------------------------------------------------------------------
 
     public function test_apply_sync_exact_stretches_to_target_dimensions(): void
@@ -135,7 +124,7 @@ class GDTransformationDriverTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // applySync — format conversion
+    // applySync — exact mode
     // -------------------------------------------------------------------------
 
     public function test_apply_sync_converts_to_png(): void
@@ -158,7 +147,7 @@ class GDTransformationDriverTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // applySync — no params (passthrough)
+    // applySync — format conversion
     // -------------------------------------------------------------------------
 
     public function test_apply_sync_with_no_params_copies_source_at_original_dimensions(): void
@@ -175,7 +164,7 @@ class GDTransformationDriverTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // applySync — error handling
+    // applySync — no params (passthrough)
     // -------------------------------------------------------------------------
 
     public function test_apply_sync_throws_when_source_file_missing(): void
@@ -196,7 +185,7 @@ class GDTransformationDriverTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // dispatch — queues ProcessTransformation job
+    // applySync — error handling
     // -------------------------------------------------------------------------
 
     public function test_dispatch_queues_process_transformation_job(): void
@@ -212,5 +201,16 @@ class GDTransformationDriverTest extends TestCase
             ProcessTransformation::class,
             fn($job) => $job->transformationId === $t->id
         );
+    }
+
+    // -------------------------------------------------------------------------
+    // dispatch — queues ProcessTransformation job
+    // -------------------------------------------------------------------------
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->driver = new GDTransformationDriver();
+        Storage::fake('local');
     }
 }

@@ -18,22 +18,16 @@ class AppearanceSettingTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        Cache::flush();
-    }
-
-    private function settings(): Settings
-    {
-        return app(Settings::class);
-    }
-
     public function test_defaults_to_light_when_nothing_stored(): void
     {
         $user = User::factory()->create();
 
         $this->assertSame('light', $this->settings()->get('general', 'appearance', 'fallback', $user));
+    }
+
+    private function settings(): Settings
+    {
+        return app(Settings::class);
     }
 
     public function test_system_value_used_when_user_has_no_override(): void
@@ -68,5 +62,11 @@ class AppearanceSettingTest extends TestCase
             'value_text' => 'dark',
             'value_integer' => null,
         ]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Cache::flush();
     }
 }

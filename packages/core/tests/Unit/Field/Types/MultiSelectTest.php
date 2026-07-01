@@ -7,13 +7,9 @@ use Tests\TestCase;
 
 class MultiSelectTest extends TestCase
 {
-    private function sampleOptions(): array
+    public function test_storage_column_is_value_json(): void
     {
-        return [
-            ['key' => 'a', 'label' => 'A'],
-            ['key' => 'b', 'label' => 'B'],
-            ['key' => 'c', 'label' => 'C'],
-        ];
+        $this->assertSame('value_json', $this->make()->storageColumn());
     }
 
     private function make(array $settings = []): MultiSelect
@@ -25,11 +21,6 @@ class MultiSelectTest extends TestCase
     // storageColumn / basics
     // -------------------------------------------------------------------------
 
-    public function test_storage_column_is_value_json(): void
-    {
-        $this->assertSame('value_json', $this->make()->storageColumn());
-    }
-
     public function test_settings_form_has_expected_keys(): void
     {
         $form = $this->make()->settingsForm();
@@ -40,15 +31,15 @@ class MultiSelectTest extends TestCase
         $this->assertArrayHasKey('strict_options', $form);
     }
 
-    // -------------------------------------------------------------------------
-    // cast()
-    // -------------------------------------------------------------------------
-
     public function test_cast_decodes_json_string_to_array_of_strings(): void
     {
         $result = $this->make()->cast('["a","b","c"]');
         $this->assertSame(['a', 'b', 'c'], $result);
     }
+
+    // -------------------------------------------------------------------------
+    // cast()
+    // -------------------------------------------------------------------------
 
     public function test_cast_returns_array_of_strings_from_array_input(): void
     {
@@ -66,13 +57,22 @@ class MultiSelectTest extends TestCase
         $this->assertSame([], $this->make()->cast('not-json'));
     }
 
+    public function test_validate_returns_true_for_null(): void
+    {
+        $this->assertTrue($this->make(['options' => $this->sampleOptions()])->validate(null));
+    }
+
     // -------------------------------------------------------------------------
     // validate()
     // -------------------------------------------------------------------------
 
-    public function test_validate_returns_true_for_null(): void
+    private function sampleOptions(): array
     {
-        $this->assertTrue($this->make(['options' => $this->sampleOptions()])->validate(null));
+        return [
+            ['key' => 'a', 'label' => 'A'],
+            ['key' => 'b', 'label' => 'B'],
+            ['key' => 'c', 'label' => 'C'],
+        ];
     }
 
     public function test_validate_returns_true_for_empty_array(): void

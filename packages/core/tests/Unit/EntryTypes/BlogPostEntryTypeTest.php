@@ -13,16 +13,6 @@ class BlogPostEntryTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeType(): BlogPostEntryType
-    {
-        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'blog-post')->value('id')]);
-        return new BlogPostEntryType($record);
-    }
-
-    // -------------------------------------------------------------------------
-    // beforeCreate — reading_time
-    // -------------------------------------------------------------------------
-
     public function test_before_create_computes_reading_time_from_body(): void
     {
         $type = $this->makeType();
@@ -31,6 +21,16 @@ class BlogPostEntryTypeTest extends TestCase
         $result = $type->beforeCreate(['fields' => ['body' => $body]]);
 
         $this->assertSame(2, $result['fields']['reading_time']);
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeCreate — reading_time
+    // -------------------------------------------------------------------------
+
+    private function makeType(): BlogPostEntryType
+    {
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'blog-post')->value('id')]);
+        return new BlogPostEntryType($record);
     }
 
     public function test_before_create_rounds_reading_time_up(): void

@@ -43,15 +43,6 @@ class Media extends Controller
         return $this->view('media.show', compact('media'));
     }
 
-    public function edit(string $id): View
-    {
-        $media = MediaModel::with([
-            'library.statusGroup.statuses',
-            'status',
-        ])->findOrFail($id);
-        return $this->view('media.edit', compact('media'));
-    }
-
     public function update(EditMediaRequest $request, string $id): RedirectResponse
     {
         $media = MediaModel::with([
@@ -64,6 +55,15 @@ class Media extends Controller
         $media = $editor->edit($media, $request->validated());
         return redirect()->route('media.show', $media->id)
             ->with('success', trans('media.updated'));
+    }
+
+    public function edit(string $id): View
+    {
+        $media = MediaModel::with([
+            'library.statusGroup.statuses',
+            'status',
+        ])->findOrFail($id);
+        return $this->view('media.edit', compact('media'));
     }
 
     public function confirm(string $id): View|RedirectResponse

@@ -15,12 +15,35 @@ class ProductEntryType extends AbstractEntryType
     }
 
     /**
+     * Coerce pricing field types. Runs only after validate() has confirmed the
+     * values are logically consistent, so no guards are needed here.
+     */
+    private function normalisePricing(array $data): array
+    {
+        return $data;
+    }
+
+    /**
      * Normalise pricing fields and auto-set out-of-stock status when stock hits zero.
      */
     public function beforeUpdate(Entry $entry, array $data): array
     {
         $data = $this->normalisePricing($data);
         $data = $this->applyStockStatus($entry, $data);
+
+        return $data;
+    }
+
+    // -------------------------------------------------------------------------
+
+    private function applyStockStatus(Entry $entry, array $data): array
+    {
+        $stock = $data['fields']['stock_quantity']
+            ?? $this->existingFieldValue($entry, 'stock_quantity');
+
+        if ($stock !== null && (int)$stock === 0) {
+            $data['status'] = 'out-of-stock';
+        }
 
         return $data;
     }
@@ -64,28 +87,5 @@ class ProductEntryType extends AbstractEntryType
         }
 
         return $errors;
-    }
-
-    // -------------------------------------------------------------------------
-
-    /**
-     * Coerce pricing field types. Runs only after validate() has confirmed the
-     * values are logically consistent, so no guards are needed here.
-     */
-    private function normalisePricing(array $data): array
-    {
-        return $data;
-    }
-
-    private function applyStockStatus(Entry $entry, array $data): array
-    {
-        $stock = $data['fields']['stock_quantity']
-            ?? $this->existingFieldValue($entry, 'stock_quantity');
-
-        if ($stock !== null && (int)$stock === 0) {
-            $data['status'] = 'out-of-stock';
-        }
-
-        return $data;
     }
 }

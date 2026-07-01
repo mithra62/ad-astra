@@ -18,17 +18,6 @@ class UserScreensRenderTest extends TestCase
 
     private User $admin;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Permission::firstOrCreate(['name' => 'access admin']);
-        Permission::firstOrCreate(['name' => 'manage user status']);
-
-        $this->admin = User::factory()->active()->create();
-        $this->admin->givePermissionTo(['access admin', 'manage user status']);
-    }
-
     public function test_index_renders(): void
     {
         $target = User::factory()->active()->create();
@@ -93,5 +82,16 @@ class UserScreensRenderTest extends TestCase
             ->get(route('users.token.index', $target))
             ->assertOk()
             ->assertSee('No Tokens found'); // ui.empty_state rendered
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Permission::firstOrCreate(['name' => 'access admin']);
+        Permission::firstOrCreate(['name' => 'manage user status']);
+
+        $this->admin = User::factory()->active()->create();
+        $this->admin->givePermissionTo(['access admin', 'manage user status']);
     }
 }

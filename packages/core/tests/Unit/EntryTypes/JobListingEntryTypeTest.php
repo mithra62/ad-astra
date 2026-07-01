@@ -13,16 +13,6 @@ class JobListingEntryTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeType(): JobListingEntryType
-    {
-        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'job-listing')->value('id')]);
-        return new JobListingEntryType($record);
-    }
-
-    // -------------------------------------------------------------------------
-    // beforeUpdate — expired/closed guard
-    // -------------------------------------------------------------------------
-
     public function test_before_update_returns_early_when_status_is_expired(): void
     {
         $type = $this->makeType();
@@ -36,6 +26,16 @@ class JobListingEntryTypeTest extends TestCase
         ]);
 
         $this->assertSame('expired', $result['status']);
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeUpdate — expired/closed guard
+    // -------------------------------------------------------------------------
+
+    private function makeType(): JobListingEntryType
+    {
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'job-listing')->value('id')]);
+        return new JobListingEntryType($record);
     }
 
     public function test_before_update_returns_early_when_status_is_closed(): void

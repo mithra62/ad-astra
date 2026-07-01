@@ -12,18 +12,18 @@ class UsersTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function make(array $settings = []): Users
+    public function test_storage_column_is_value_json(): void
     {
-        return new Users($settings, null);
+        $this->assertSame('value_json', $this->make()->storageColumn());
     }
 
     // -------------------------------------------------------------------------
     // storageColumn / basics
     // -------------------------------------------------------------------------
 
-    public function test_storage_column_is_value_json(): void
+    private function make(array $settings = []): Users
     {
-        $this->assertSame('value_json', $this->make()->storageColumn());
+        return new Users($settings, null);
     }
 
     public function test_settings_form_has_expected_keys(): void

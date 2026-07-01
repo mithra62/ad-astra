@@ -17,19 +17,6 @@ class HasStatusTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Keep the registry isolated between tests so fixture model classes
-        // don't bleed into other suites' StatusObserver runs.
-        StatusSyncRegistry::clear();
-    }
-
-    // -------------------------------------------------------------------------
-    // Registry self-registration
-    // -------------------------------------------------------------------------
-
     public function test_boot_registers_consumer_class(): void
     {
         // setUp cleared the registry. Entry was already booted by
@@ -42,7 +29,7 @@ class HasStatusTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Relations + scopes
+    // Registry self-registration
     // -------------------------------------------------------------------------
 
     public function test_status_relation_returns_belongs_to_status(): void
@@ -51,6 +38,10 @@ class HasStatusTest extends TestCase
         $this->assertInstanceOf(BelongsTo::class, $entry->status());
         $this->assertInstanceOf(Status::class, $entry->status()->getRelated());
     }
+
+    // -------------------------------------------------------------------------
+    // Relations + scopes
+    // -------------------------------------------------------------------------
 
     public function test_public_scope_filters_by_status_is_public(): void
     {
@@ -91,10 +82,6 @@ class HasStatusTest extends TestCase
         $this->assertSame(1, Entry::withStatus('published')->count());
     }
 
-    // -------------------------------------------------------------------------
-    // Dev-mode contract check (APP_ENV=testing during phpunit)
-    // -------------------------------------------------------------------------
-
     public function test_dev_env_contract_check_throws_when_fillable_missing_columns(): void
     {
         $this->expectException(LogicException::class);
@@ -111,6 +98,10 @@ class HasStatusTest extends TestCase
         };
     }
 
+    // -------------------------------------------------------------------------
+    // Dev-mode contract check (APP_ENV=testing during phpunit)
+    // -------------------------------------------------------------------------
+
     public function test_dev_env_contract_check_throws_when_status_is_public_not_cast_to_bool(): void
     {
         $this->expectException(LogicException::class);
@@ -125,5 +116,14 @@ class HasStatusTest extends TestCase
 
             protected $casts = ['status_is_public' => 'integer']; // wrong cast
         };
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Keep the registry isolated between tests so fixture model classes
+        // don't bleed into other suites' StatusObserver runs.
+        StatusSyncRegistry::clear();
     }
 }

@@ -49,6 +49,20 @@ class PrepareForStoragePipelineTest extends TestCase
         ]);
     }
 
+    private function makeMoneyField(string $handle, array $settings = []): Field
+    {
+        $type = FieldType::firstOrCreate(
+            ['object' => Money::class],
+            ['name' => 'Money'],
+        );
+
+        return Field::factory()->create([
+            'field_type_id' => $type->id,
+            'handle' => $handle,
+            'settings' => $settings,
+        ]);
+    }
+
     public function test_persists_field_values_set_fields_normalizes_money(): void
     {
         $field = $this->makeMoneyField('price', ['currency' => 'JPY']);
@@ -129,6 +143,26 @@ class PrepareForStoragePipelineTest extends TestCase
         $this->assertSame([$entryA->id], $matches);
     }
 
+    private function makeEntry(): Entry
+    {
+        $statusGroup = StatusGroup::factory()->create();
+        Status::factory()->default()->create([
+            'status_group_id' => $statusGroup->id,
+            'handle' => 'draft',
+        ]);
+        $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
+        $type = EntryType::factory()->create(['entry_group_id' => $group->id]);
+
+        return Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id' => $type->id,
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
     public function test_entry_query_builder_does_not_throw_on_invalid_query_input(): void
     {
         $this->makeMoneyField('price', ['currency' => 'USD']);
@@ -163,24 +197,6 @@ class PrepareForStoragePipelineTest extends TestCase
         ]);
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function makeMoneyField(string $handle, array $settings = []): Field
-    {
-        $type = FieldType::firstOrCreate(
-            ['object' => Money::class],
-            ['name' => 'Money'],
-        );
-
-        return Field::factory()->create([
-            'field_type_id' => $type->id,
-            'handle' => $handle,
-            'settings' => $settings,
-        ]);
-    }
-
     private function makeTextField(string $handle): Field
     {
         $type = FieldType::firstOrCreate(
@@ -191,22 +207,6 @@ class PrepareForStoragePipelineTest extends TestCase
         return Field::factory()->create([
             'field_type_id' => $type->id,
             'handle' => $handle,
-        ]);
-    }
-
-    private function makeEntry(): Entry
-    {
-        $statusGroup = StatusGroup::factory()->create();
-        Status::factory()->default()->create([
-            'status_group_id' => $statusGroup->id,
-            'handle' => 'draft',
-        ]);
-        $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
-        $type = EntryType::factory()->create(['entry_group_id' => $group->id]);
-
-        return Entry::factory()->create([
-            'entry_group_id' => $group->id,
-            'entry_type_id' => $type->id,
         ]);
     }
 }

@@ -66,19 +66,6 @@ class Media extends AbstractField implements SyncsToMediables
         return false;
     }
 
-    /** Cast raw stored value to a plain array of integer IDs. */
-    public function cast(mixed $value): array
-    {
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            return is_array($decoded) ? array_map('intval', $decoded) : [];
-        }
-        if (is_array($value)) {
-            return array_map('intval', $value);
-        }
-        return [];
-    }
-
     /**
      * Validate the submitted value:
      *   1. Minimum / maximum item count
@@ -124,24 +111,26 @@ class Media extends AbstractField implements SyncsToMediables
         return true;
     }
 
-    /**
-     * Resolve stored IDs to Media models, preserving saved sort order.
-     *
-     * FieldValue::resolvedValue() calls this so $entry->field('gallery')
-     * returns Collection<Media> rather than raw IDs.
-     */
-    public function value(mixed $raw): Collection
+    /** Cast raw stored value to a plain array of integer IDs. */
+    public function cast(mixed $value): array
     {
-        $ids = $this->cast($raw);
-        if (empty($ids)) {
-            return collect();
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? array_map('intval', $decoded) : [];
         }
+        if (is_array($value)) {
+            return array_map('intval', $value);
+        }
+        return [];
+    }
 
-        return MediaModel::whereIn('id', $ids)
-            ->with('fieldValues.field.fieldType')
-            ->get()
-            ->sortBy(fn($m) => array_search($m->id, $ids))
-            ->values();
+    /** @return int[] */
+    private function normaliseLibraryIds(mixed $value): array
+    {
+        if (!is_array($value)) {
+            return [];
+        }
+        return array_values(array_filter(array_map('intval', $value)));
     }
 
     public function render(array $params): string
@@ -177,12 +166,23 @@ class Media extends AbstractField implements SyncsToMediables
         return view('_fields.media', $params)->render();
     }
 
-    /** @return int[] */
-    private function normaliseLibraryIds(mixed $value): array
+    /**
+     * Resolve stored IDs to Media models, preserving saved sort order.
+     *
+     * FieldValue::resolvedValue() calls this so $entry->field('gallery')
+     * returns Collection<Media> rather than raw IDs.
+     */
+    public function value(mixed $raw): Collection
     {
-        if (!is_array($value)) {
-            return [];
+        $ids = $this->cast($raw);
+        if (empty($ids)) {
+            return collect();
         }
-        return array_values(array_filter(array_map('intval', $value)));
+
+        return MediaModel::whereIn('id', $ids)
+            ->with('fieldValues.field.fieldType')
+            ->get()
+            ->sortBy(fn($m) => array_search($m->id, $ids))
+            ->values();
     }
 }

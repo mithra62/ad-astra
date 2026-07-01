@@ -43,24 +43,6 @@ class Domain extends Controller
     }
 
     /**
-     * Invoke any options_callback closures so select fields receive a live options list.
-     *
-     * @param array<int, array<string, mixed>> $fields
-     * @return array<int, array<string, mixed>>
-     */
-    private function hydrateOptions(array $fields): array
-    {
-        return array_map(function (array $field): array {
-            if (isset($field['options_callback']) && is_callable($field['options_callback'])) {
-                $field['options'] = ($field['options_callback'])();
-                unset($field['options_callback']);
-            }
-
-            return $field;
-        }, $fields);
-    }
-
-    /**
      * Group field definitions by their 'group' key.
      *
      * @return array<string, array<int, array<string, mixed>>>
@@ -77,6 +59,24 @@ class Domain extends Controller
         }
 
         return $grouped;
+    }
+
+    /**
+     * Invoke any options_callback closures so select fields receive a live options list.
+     *
+     * @param array<int, array<string, mixed>> $fields
+     * @return array<int, array<string, mixed>>
+     */
+    private function hydrateOptions(array $fields): array
+    {
+        return array_map(function (array $field): array {
+            if (isset($field['options_callback']) && is_callable($field['options_callback'])) {
+                $field['options'] = ($field['options_callback'])();
+                unset($field['options_callback']);
+            }
+
+            return $field;
+        }, $fields);
     }
 
     // -------------------------------------------------------------------------

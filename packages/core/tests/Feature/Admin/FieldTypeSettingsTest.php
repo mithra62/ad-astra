@@ -22,23 +22,6 @@ class FieldTypeSettingsTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
-    private function makeSuperAdmin(): User
-    {
-        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $user = User::factory()->create();
-        $user->assignRole($role);
-        return $user;
-    }
-
-    private function typeFor(string $class): FieldType
-    {
-        return FieldType::factory()->create(['object' => $class, 'settings' => []]);
-    }
-
-    // -------------------------------------------------------------------------
-    // Basic HTTP
-    // -------------------------------------------------------------------------
-
     public function test_returns_404_when_type_id_not_found(): void
     {
         $user = $this->makeSuperAdmin();
@@ -47,6 +30,18 @@ class FieldTypeSettingsTest extends TestCase
             ->get(route('fields.type_settings', ['type_id' => 99999]))
             ->assertNotFound();
     }
+
+    private function makeSuperAdmin(): User
+    {
+        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
+        $user = User::factory()->create();
+        $user->assignRole($role);
+        return $user;
+    }
+
+    // -------------------------------------------------------------------------
+    // Basic HTTP
+    // -------------------------------------------------------------------------
 
     public function test_returns_422_when_type_id_missing(): void
     {
@@ -66,6 +61,11 @@ class FieldTypeSettingsTest extends TestCase
         $this->actingAs($user)
             ->get(route('fields.type_settings', ['type_id' => $type->id]))
             ->assertOk();
+    }
+
+    private function typeFor(string $class): FieldType
+    {
+        return FieldType::factory()->create(['object' => $class, 'settings' => []]);
     }
 
     // -------------------------------------------------------------------------

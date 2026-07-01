@@ -14,16 +14,6 @@ class BlogPostEntryType extends AbstractEntryType
         return $this->computeReadingTime($data);
     }
 
-    /**
-     * Re-compute reading_time whenever body is present in the update payload.
-     */
-    public function beforeUpdate(Entry $entry, array $data): array
-    {
-        return $this->computeReadingTime($data);
-    }
-
-    // -------------------------------------------------------------------------
-
     private function computeReadingTime(array $data): array
     {
         $body = $data['fields']['body'] ?? null;
@@ -33,5 +23,15 @@ class BlogPostEntryType extends AbstractEntryType
         }
 
         return $data;
+    }
+
+    // -------------------------------------------------------------------------
+
+    /**
+     * Re-compute reading_time whenever body is present in the update payload.
+     */
+    public function beforeUpdate(Entry $entry, array $data): array
+    {
+        return $this->computeReadingTime($data);
     }
 }

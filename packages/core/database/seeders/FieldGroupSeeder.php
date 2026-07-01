@@ -89,6 +89,20 @@ class FieldGroupSeeder extends Seeder
         $this->attachFields($group, $fields);
     }
 
+    /**
+     * Create fields (if they don't exist) and attach them to a FieldGroup.
+     *
+     * @param array<array<string, mixed>> $fields
+     */
+    private function attachFields(FieldGroup $group, array $fields): void
+    {
+        foreach ($fields as $fieldData) {
+            $handle = $fieldData['handle'];
+            $field = Field::firstOrCreate(['handle' => $handle], $fieldData);
+            $group->fields()->syncWithoutDetaching([$field->id]);
+        }
+    }
+
     private function seedSeoFields(): void
     {
         $group = FieldGroup::firstOrCreate(
@@ -118,6 +132,10 @@ class FieldGroupSeeder extends Seeder
         $this->attachFields($group, $fields);
     }
 
+    // =========================================================================
+    // Domain-specific groups
+    // =========================================================================
+
     private function seedRelationshipFields(): void
     {
         $group = FieldGroup::firstOrCreate(
@@ -138,10 +156,6 @@ class FieldGroupSeeder extends Seeder
 
         $this->attachFields($group, $fields);
     }
-
-    // =========================================================================
-    // Domain-specific groups
-    // =========================================================================
 
     private function seedBlogFields(): void
     {
@@ -315,6 +329,10 @@ class FieldGroupSeeder extends Seeder
         $this->attachFields($group, $fields);
     }
 
+    // =========================================================================
+    // Helpers
+    // =========================================================================
+
     private function seedVideoFields(): void
     {
         $group = FieldGroup::firstOrCreate(
@@ -332,23 +350,5 @@ class FieldGroupSeeder extends Seeder
         ];
 
         $this->attachFields($group, $fields);
-    }
-
-    // =========================================================================
-    // Helpers
-    // =========================================================================
-
-    /**
-     * Create fields (if they don't exist) and attach them to a FieldGroup.
-     *
-     * @param array<array<string, mixed>> $fields
-     */
-    private function attachFields(FieldGroup $group, array $fields): void
-    {
-        foreach ($fields as $fieldData) {
-            $handle = $fieldData['handle'];
-            $field = Field::firstOrCreate(['handle' => $handle], $fieldData);
-            $group->fields()->syncWithoutDetaching([$field->id]);
-        }
     }
 }

@@ -26,6 +26,24 @@ class EntryTreeObserverTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
+    public function test_direct_child_depth_is_reset_to_zero_after_parent_deleted(): void
+    {
+        $parent = $this->makeRoot('blog');
+        $child = $this->makeChild($parent, 'posts');
+
+        $this->assertEquals(1, $child->depth);
+
+        $parent->delete();
+
+        $this->assertEquals(0, $child->fresh()->depth);
+    }
+
+    /** Shorthand: create a root tree node via the service. */
+    private function makeRoot(string $handle = 'root'): EntryTree
+    {
+        return app(EntryService::class)->createTreeNode($this->makeTreeEntry(), $handle);
+    }
+
     /**
      * Create an Entry that belongs to an EntryType with has_entry_tree = true.
      * Mirrors the helper pattern used across other tree-related tests.
@@ -41,32 +59,14 @@ class EntryTreeObserverTest extends TestCase
         return Entry::factory()->for($group)->for($type)->create();
     }
 
-    /** Shorthand: create a root tree node via the service. */
-    private function makeRoot(string $handle = 'root'): EntryTree
-    {
-        return app(EntryService::class)->createTreeNode($this->makeTreeEntry(), $handle);
-    }
+    // -------------------------------------------------------------------------
+    // Depth rebuild on parent deletion
+    // -------------------------------------------------------------------------
 
     /** Shorthand: create a child node under an existing parent. */
     private function makeChild(EntryTree $parent, string $handle): EntryTree
     {
         return app(EntryService::class)->createTreeNode($this->makeTreeEntry(), $handle, $parent);
-    }
-
-    // -------------------------------------------------------------------------
-    // Depth rebuild on parent deletion
-    // -------------------------------------------------------------------------
-
-    public function test_direct_child_depth_is_reset_to_zero_after_parent_deleted(): void
-    {
-        $parent = $this->makeRoot('blog');
-        $child = $this->makeChild($parent, 'posts');
-
-        $this->assertEquals(1, $child->depth);
-
-        $parent->delete();
-
-        $this->assertEquals(0, $child->fresh()->depth);
     }
 
     public function test_grandchild_depth_is_decremented_after_grandparent_deleted(): void

@@ -148,11 +148,6 @@ class Entry extends Model
         return $this->hasOne(EntryTree::class);
     }
 
-    public function metrics(): HasMany
-    {
-        return $this->hasMany(EntryMetric::class);
-    }
-
     /**
      * Return the total value for a named metric, optionally filtered from a given date forward.
      * Aggregates in the database — safe to call on entries with long metric histories.
@@ -163,5 +158,10 @@ class Entry extends Model
             ->where('metric', $metric)
             ->when($from, fn($q) => $q->where('recorded_date', '>=', $from->toDateString()))
             ->sum('value');
+    }
+
+    public function metrics(): HasMany
+    {
+        return $this->hasMany(EntryMetric::class);
     }
 }

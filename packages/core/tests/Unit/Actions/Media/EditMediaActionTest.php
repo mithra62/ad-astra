@@ -21,16 +21,6 @@ class EditMediaActionTest extends TestCase
 
     private EditMedia $action;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->action = new EditMedia();
-    }
-
-    // -------------------------------------------------------------------------
-    // Core attributes
-    // -------------------------------------------------------------------------
-
     public function test_edit_updates_name(): void
     {
         $media = Media::factory()->create(['name' => 'Old Name']);
@@ -40,6 +30,10 @@ class EditMediaActionTest extends TestCase
         $this->assertEquals('New Name', $result->name);
         $this->assertDatabaseHas('media', ['id' => $media->id, 'name' => 'New Name']);
     }
+
+    // -------------------------------------------------------------------------
+    // Core attributes
+    // -------------------------------------------------------------------------
 
     public function test_edit_updates_sort_order(): void
     {
@@ -60,10 +54,6 @@ class EditMediaActionTest extends TestCase
         $this->assertEquals('After', $result->name);
     }
 
-    // -------------------------------------------------------------------------
-    // Categories
-    // -------------------------------------------------------------------------
-
     public function test_edit_syncs_categories(): void
     {
         $media = Media::factory()->create();
@@ -78,6 +68,10 @@ class EditMediaActionTest extends TestCase
         ]);
     }
 
+    // -------------------------------------------------------------------------
+    // Categories
+    // -------------------------------------------------------------------------
+
     public function test_edit_detaches_categories_when_passed_empty_array(): void
     {
         $media = Media::factory()->create();
@@ -88,10 +82,6 @@ class EditMediaActionTest extends TestCase
 
         $this->assertCount(0, $media->fresh()->categories);
     }
-
-    // -------------------------------------------------------------------------
-    // Dynamic field values (full stack through library field layout)
-    // -------------------------------------------------------------------------
 
     public function test_edit_persists_field_values_for_library_layout(): void
     {
@@ -124,6 +114,10 @@ class EditMediaActionTest extends TestCase
         ]);
     }
 
+    // -------------------------------------------------------------------------
+    // Dynamic field values (full stack through library field layout)
+    // -------------------------------------------------------------------------
+
     public function test_edit_leaves_field_values_untouched_when_fields_key_absent(): void
     {
         $media = Media::factory()->create();
@@ -133,5 +127,11 @@ class EditMediaActionTest extends TestCase
 
         $this->assertEquals('Renamed', $result->name);
         $this->assertDatabaseEmpty('field_values');
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->action = new EditMedia();
     }
 }

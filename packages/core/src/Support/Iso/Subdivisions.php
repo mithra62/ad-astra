@@ -13,43 +13,6 @@ namespace AdAstra\Support\Iso;
  */
 final class Subdivisions
 {
-    /**
-     * @return list<array{code: string, name: string}>
-     */
-    public static function forCountry(string $countryCode): array
-    {
-        return self::DATA[strtoupper($countryCode)] ?? [];
-    }
-
-    public static function exists(string $countryCode, string $subdivisionCode): bool
-    {
-        $list = self::forCountry($countryCode);
-        $needle = strtoupper($subdivisionCode);
-        foreach ($list as $entry) {
-            if (strtoupper($entry['code']) === $needle) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static function hasData(string $countryCode): bool
-    {
-        return !empty(self::DATA[strtoupper($countryCode)] ?? null);
-    }
-
-    public static function name(string $countryCode, string $subdivisionCode): string
-    {
-        $list = self::forCountry($countryCode);
-        $needle = strtoupper($subdivisionCode);
-        foreach ($list as $entry) {
-            if (strtoupper($entry['code']) === $needle) {
-                return $entry['name'];
-            }
-        }
-        return $subdivisionCode;
-    }
-
     private const DATA = [
         'US' => [
             ['code' => 'US-AL', 'name' => 'Alabama'],
@@ -482,4 +445,41 @@ final class Subdivisions
             ['code' => 'CN-MO', 'name' => 'Macao'],
         ],
     ];
+
+    public static function exists(string $countryCode, string $subdivisionCode): bool
+    {
+        $list = self::forCountry($countryCode);
+        $needle = strtoupper($subdivisionCode);
+        foreach ($list as $entry) {
+            if (strtoupper($entry['code']) === $needle) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return list<array{code: string, name: string}>
+     */
+    public static function forCountry(string $countryCode): array
+    {
+        return self::DATA[strtoupper($countryCode)] ?? [];
+    }
+
+    public static function hasData(string $countryCode): bool
+    {
+        return !empty(self::DATA[strtoupper($countryCode)] ?? null);
+    }
+
+    public static function name(string $countryCode, string $subdivisionCode): string
+    {
+        $list = self::forCountry($countryCode);
+        $needle = strtoupper($subdivisionCode);
+        foreach ($list as $entry) {
+            if (strtoupper($entry['code']) === $needle) {
+                return $entry['name'];
+            }
+        }
+        return $subdivisionCode;
+    }
 }

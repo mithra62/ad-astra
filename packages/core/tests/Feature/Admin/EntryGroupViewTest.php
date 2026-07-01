@@ -52,6 +52,19 @@ class EntryGroupViewTest extends TestCase
             ->assertDontSee('<span></span>', false);
     }
 
+    protected function makeSuperAdmin(): User
+    {
+        $role = Role::query()->firstOrCreate([
+            'name' => 'super admin',
+            'guard_name' => 'web',
+        ]);
+
+        $user = User::factory()->create();
+        $user->assignRole($role);
+
+        return $user;
+    }
+
     public function test_show_displays_entry_author_user_name_when_display_name_is_empty(): void
     {
         $user = $this->makeSuperAdmin();
@@ -86,18 +99,5 @@ class EntryGroupViewTest extends TestCase
             ->get(route('entries.groups.show', $group))
             ->assertOk()
             ->assertSee('Fallback Author');
-    }
-
-    protected function makeSuperAdmin(): User
-    {
-        $role = Role::query()->firstOrCreate([
-            'name' => 'super admin',
-            'guard_name' => 'web',
-        ]);
-
-        $user = User::factory()->create();
-        $user->assignRole($role);
-
-        return $user;
     }
 }

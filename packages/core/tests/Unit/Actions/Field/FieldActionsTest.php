@@ -214,19 +214,6 @@ class FieldActionsTest extends TestCase
         );
     }
 
-    /** Create a Select FieldType, reusing the existing row if already present. */
-    private function selectType(): FieldType
-    {
-        return FieldType::firstOrCreate(
-            ['object' => Select::class],
-            ['name' => 'Select', 'settings' => []]
-        );
-    }
-
-    // -------------------------------------------------------------------------
-    // filterSettings — via CreateNewField::create
-    // -------------------------------------------------------------------------
-
     public function test_create_strips_undeclared_settings_keys(): void
     {
         $type = $this->textType();
@@ -247,6 +234,10 @@ class FieldActionsTest extends TestCase
         $this->assertArrayNotHasKey('unknown_key', $field->fresh()->settings);
         $this->assertArrayNotHasKey('placeholder_hex', $field->fresh()->settings);
     }
+
+    // -------------------------------------------------------------------------
+    // filterSettings — via CreateNewField::create
+    // -------------------------------------------------------------------------
 
     public function test_create_fills_defaults_for_missing_settings_keys(): void
     {
@@ -291,6 +282,15 @@ class FieldActionsTest extends TestCase
         $this->assertCount(2, $stored['options']);
         $this->assertSame('red', $stored['options'][0]['key']);
         $this->assertSame('blue', $stored['options'][1]['key']);
+    }
+
+    /** Create a Select FieldType, reusing the existing row if already present. */
+    private function selectType(): FieldType
+    {
+        return FieldType::firstOrCreate(
+            ['object' => Select::class],
+            ['name' => 'Select', 'settings' => []]
+        );
     }
 
     // -------------------------------------------------------------------------

@@ -71,20 +71,6 @@ class Users extends AbstractField
         return 'value_json';
     }
 
-    public function cast(mixed $value): array
-    {
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            return is_array($decoded) ? array_map('intval', $decoded) : [];
-        }
-
-        if (is_array($value)) {
-            return array_map('intval', $value);
-        }
-
-        return [];
-    }
-
     public function validate(mixed $value): bool|string
     {
         if ($value === null || $value === []) {
@@ -116,6 +102,20 @@ class Users extends AbstractField
         }
 
         return true;
+    }
+
+    public function cast(mixed $value): array
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? array_map('intval', $decoded) : [];
+        }
+
+        if (is_array($value)) {
+            return array_map('intval', $value);
+        }
+
+        return [];
     }
 
     /**

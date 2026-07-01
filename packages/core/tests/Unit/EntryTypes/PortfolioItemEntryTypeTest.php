@@ -12,12 +12,6 @@ class PortfolioItemEntryTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeType(): PortfolioItemEntryType
-    {
-        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'portfolio-item')->value('id')]);
-        return new PortfolioItemEntryType($record);
-    }
-
     public function test_before_create_returns_data_unchanged(): void
     {
         $type = $this->makeType();
@@ -26,5 +20,11 @@ class PortfolioItemEntryTypeTest extends TestCase
         $result = $type->beforeCreate($data);
 
         $this->assertSame($data, $result);
+    }
+
+    private function makeType(): PortfolioItemEntryType
+    {
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'portfolio-item')->value('id')]);
+        return new PortfolioItemEntryType($record);
     }
 }

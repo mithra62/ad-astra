@@ -17,19 +17,6 @@ class ProcessMediaLibraryRemovalTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
-    private function makeLibrary(): Library
-    {
-        return Library::create([
-            'name' => 'Test Library',
-            'handle' => 'test-lib',
-            'adapter' => 'local',
-        ]);
-    }
-
-    // -------------------------------------------------------------------------
-    // handle()
-    // -------------------------------------------------------------------------
-
     public function test_handle_soft_deletes_all_media_for_library(): void
     {
         Storage::fake('local');
@@ -42,6 +29,19 @@ class ProcessMediaLibraryRemovalTest extends TestCase
 
         $this->assertSoftDeleted('media', ['id' => $media1->id]);
         $this->assertSoftDeleted('media', ['id' => $media2->id]);
+    }
+
+    // -------------------------------------------------------------------------
+    // handle()
+    // -------------------------------------------------------------------------
+
+    private function makeLibrary(): Library
+    {
+        return Library::create([
+            'name' => 'Test Library',
+            'handle' => 'test-lib',
+            'adapter' => 'local',
+        ]);
     }
 
     public function test_handle_does_not_touch_media_from_other_libraries(): void

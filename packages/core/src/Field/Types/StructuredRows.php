@@ -48,16 +48,6 @@ class StructuredRows extends AbstractField
         return 'value_json';
     }
 
-    public function cast(mixed $value): array
-    {
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            return is_array($decoded) ? $decoded : [];
-        }
-
-        return is_array($value) ? $value : [];
-    }
-
     public function validate(mixed $value): bool|string
     {
         if ($value === null || $value === []) {
@@ -92,6 +82,16 @@ class StructuredRows extends AbstractField
         }
 
         return true;
+    }
+
+    public function cast(mixed $value): array
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return is_array($value) ? $value : [];
     }
 
     public function render(array $params): string

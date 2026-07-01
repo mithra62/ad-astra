@@ -163,13 +163,6 @@ class CategoryService extends AbstractService
         return collect();
     }
 
-    private function loadGroup(Category $category): ?CategoryGroup
-    {
-        $category->loadMissing('group.fieldLayout');
-
-        return $category->group;
-    }
-
     /**
      * Resolve all Field models available to a category via its group's layout,
      * returned in tab/sort_order sequence.
@@ -187,10 +180,6 @@ class CategoryService extends AbstractService
         return collect($layout->fields());
     }
 
-    // -------------------------------------------------------------------------
-    // Querying
-    // -------------------------------------------------------------------------
-
     /**
      * Resolve the FieldLayout for the category's group.
      * Returns null if the group has no layout assigned.
@@ -198,6 +187,17 @@ class CategoryService extends AbstractService
     public function resolveLayout(Category $category): ?FieldLayout
     {
         return $this->loadGroup($category)?->fieldLayout;
+    }
+
+    // -------------------------------------------------------------------------
+    // Querying
+    // -------------------------------------------------------------------------
+
+    private function loadGroup(Category $category): ?CategoryGroup
+    {
+        $category->loadMissing('group.fieldLayout');
+
+        return $category->group;
     }
 
     /**

@@ -10,21 +10,11 @@ class ControllerSortTest extends TestCase
 {
     private Controller $controller;
 
-    protected function setUp(): void
+    public function test_sort_returns_id_when_no_param_provided(): void
     {
-        parent::setUp();
+        $result = $this->controller->sort($this->requestWith([]));
 
-        $this->controller = new class extends Controller {
-            public function sort(Request $request, array $allowed = ['id', 'created_at', 'updated_at']): string
-            {
-                return parent::sort($request, $allowed);
-            }
-
-            public function sortDir(Request $request): string
-            {
-                return parent::sortDir($request);
-            }
-        };
+        $this->assertSame('id', $result);
     }
 
     private function requestWith(array $params): Request
@@ -35,13 +25,6 @@ class ControllerSortTest extends TestCase
     // -------------------------------------------------------------------------
     // sort()
     // -------------------------------------------------------------------------
-
-    public function test_sort_returns_id_when_no_param_provided(): void
-    {
-        $result = $this->controller->sort($this->requestWith([]));
-
-        $this->assertSame('id', $result);
-    }
 
     public function test_sort_returns_requested_column_when_in_allowlist(): void
     {
@@ -101,16 +84,16 @@ class ControllerSortTest extends TestCase
         $this->assertSame('id', $result);
     }
 
-    // -------------------------------------------------------------------------
-    // sortDir()
-    // -------------------------------------------------------------------------
-
     public function test_sort_dir_defaults_to_asc(): void
     {
         $result = $this->controller->sortDir($this->requestWith([]));
 
         $this->assertSame('asc', $result);
     }
+
+    // -------------------------------------------------------------------------
+    // sortDir()
+    // -------------------------------------------------------------------------
 
     public function test_sort_dir_returns_desc_when_requested(): void
     {
@@ -145,5 +128,22 @@ class ControllerSortTest extends TestCase
         $result = $this->controller->sortDir($this->requestWith(['direction' => 'asc; DROP TABLE users']));
 
         $this->assertSame('asc', $result);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->controller = new class extends Controller {
+            public function sort(Request $request, array $allowed = ['id', 'created_at', 'updated_at']): string
+            {
+                return parent::sort($request, $allowed);
+            }
+
+            public function sortDir(Request $request): string
+            {
+                return parent::sortDir($request);
+            }
+        };
     }
 }

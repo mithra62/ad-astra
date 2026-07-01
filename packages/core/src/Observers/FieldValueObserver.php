@@ -16,20 +16,6 @@ class FieldValueObserver
         $this->syncMediables($fieldValue);
     }
 
-    public function deleted(FieldValue $fieldValue): void
-    {
-        if (!$this->syncsMediables($fieldValue)) {
-            return;
-        }
-
-        // field_id here is the actual Field ID (always > 0); never the sentinel 0.
-        DB::table('mediables')
-            ->where('mediable_type', $fieldValue->fieldable_type)
-            ->where('mediable_id', $fieldValue->fieldable_id)
-            ->where('field_id', $fieldValue->field_id)
-            ->delete();
-    }
-
     /**
      * Read only the string `object` column of the already-eager-loaded
      * FieldType record. is_subclass_of() with a string FQN autoloads the
@@ -87,5 +73,19 @@ class FieldValueObserver
             ['media_id', 'mediable_type', 'mediable_id', 'field_id'],
             ['sort_order', 'updated_at']
         );
+    }
+
+    public function deleted(FieldValue $fieldValue): void
+    {
+        if (!$this->syncsMediables($fieldValue)) {
+            return;
+        }
+
+        // field_id here is the actual Field ID (always > 0); never the sentinel 0.
+        DB::table('mediables')
+            ->where('mediable_type', $fieldValue->fieldable_type)
+            ->where('mediable_id', $fieldValue->fieldable_id)
+            ->where('field_id', $fieldValue->field_id)
+            ->delete();
     }
 }

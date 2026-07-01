@@ -15,16 +15,6 @@ class EntryServiceMetricTest extends TestCase
 
     private EntryService $service;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->service = app(EntryService::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // recordMetric() — insert
-    // -------------------------------------------------------------------------
-
     public function test_record_metric_creates_row_on_first_call(): void
     {
         $entry = Entry::factory()->create();
@@ -38,6 +28,10 @@ class EntryServiceMetricTest extends TestCase
             'value' => 1,
         ]);
     }
+
+    // -------------------------------------------------------------------------
+    // recordMetric() — insert
+    // -------------------------------------------------------------------------
 
     public function test_record_metric_uses_custom_value(): void
     {
@@ -61,10 +55,6 @@ class EntryServiceMetricTest extends TestCase
         $this->assertSame(today()->toDateString(), $metric->recorded_date->toDateString());
     }
 
-    // -------------------------------------------------------------------------
-    // recordMetric() — increment on subsequent calls (same day)
-    // -------------------------------------------------------------------------
-
     public function test_record_metric_increments_on_second_call_same_day(): void
     {
         $entry = Entry::factory()->create();
@@ -75,6 +65,10 @@ class EntryServiceMetricTest extends TestCase
         $this->assertSame(15, $metric->value);
         $this->assertDatabaseCount('entry_metrics', 1);
     }
+
+    // -------------------------------------------------------------------------
+    // recordMetric() — increment on subsequent calls (same day)
+    // -------------------------------------------------------------------------
 
     public function test_record_metric_increments_by_correct_amount(): void
     {
@@ -88,10 +82,6 @@ class EntryServiceMetricTest extends TestCase
         $this->assertDatabaseCount('entry_metrics', 1);
     }
 
-    // -------------------------------------------------------------------------
-    // recordMetric() — backdated writes
-    // -------------------------------------------------------------------------
-
     public function test_record_metric_accepts_custom_date(): void
     {
         $entry = Entry::factory()->create();
@@ -101,6 +91,10 @@ class EntryServiceMetricTest extends TestCase
 
         $this->assertSame('2025-01-15', $metric->recorded_date->toDateString());
     }
+
+    // -------------------------------------------------------------------------
+    // recordMetric() — backdated writes
+    // -------------------------------------------------------------------------
 
     public function test_record_metric_creates_separate_rows_for_different_dates(): void
     {
@@ -127,10 +121,6 @@ class EntryServiceMetricTest extends TestCase
         $this->assertDatabaseCount('entry_metrics', 1);
     }
 
-    // -------------------------------------------------------------------------
-    // recordMetric() — isolation between entries and metrics
-    // -------------------------------------------------------------------------
-
     public function test_record_metric_does_not_affect_other_entries(): void
     {
         $entryA = Entry::factory()->create();
@@ -142,6 +132,10 @@ class EntryServiceMetricTest extends TestCase
         $this->assertSame(100, $entryA->metricTotal('views'));
         $this->assertSame(1, $entryB->metricTotal('views'));
     }
+
+    // -------------------------------------------------------------------------
+    // recordMetric() — isolation between entries and metrics
+    // -------------------------------------------------------------------------
 
     public function test_record_metric_does_not_affect_other_metric_names(): void
     {
@@ -155,10 +149,6 @@ class EntryServiceMetricTest extends TestCase
         $this->assertDatabaseCount('entry_metrics', 2);
     }
 
-    // -------------------------------------------------------------------------
-    // recordMetric() — return value
-    // -------------------------------------------------------------------------
-
     public function test_record_metric_returns_entry_metric_instance(): void
     {
         $entry = Entry::factory()->create();
@@ -170,6 +160,10 @@ class EntryServiceMetricTest extends TestCase
         $this->assertSame('views', $result->metric);
     }
 
+    // -------------------------------------------------------------------------
+    // recordMetric() — return value
+    // -------------------------------------------------------------------------
+
     public function test_record_metric_returns_fresh_model_after_increment(): void
     {
         $entry = Entry::factory()->create();
@@ -179,5 +173,11 @@ class EntryServiceMetricTest extends TestCase
 
         // The returned model reflects the post-increment value, not the stale one.
         $this->assertSame(20, $result->value);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->service = app(EntryService::class);
     }
 }

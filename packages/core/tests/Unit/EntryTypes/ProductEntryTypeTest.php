@@ -13,16 +13,6 @@ class ProductEntryTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeType(): ProductEntryType
-    {
-        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'product')->value('id')]);
-        return new ProductEntryType($record);
-    }
-
-    // -------------------------------------------------------------------------
-    // beforeCreate — normalisation (no longer throws)
-    // -------------------------------------------------------------------------
-
     public function test_before_create_passes_when_price_is_zero(): void
     {
         $type = $this->makeType();
@@ -30,6 +20,16 @@ class ProductEntryTypeTest extends TestCase
         $result = $type->beforeCreate(['fields' => ['price' => 0]]);
 
         $this->assertSame(0, $result['fields']['price']);
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeCreate — normalisation (no longer throws)
+    // -------------------------------------------------------------------------
+
+    private function makeType(): ProductEntryType
+    {
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'product')->value('id')]);
+        return new ProductEntryType($record);
     }
 
     public function test_before_create_passes_when_price_is_positive(): void

@@ -12,12 +12,6 @@ class GeneralEntryTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeType(): GeneralEntryType
-    {
-        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'general')->value('id')]);
-        return new GeneralEntryType($record);
-    }
-
     public function test_before_create_returns_data_unchanged(): void
     {
         $type = $this->makeType();
@@ -26,5 +20,11 @@ class GeneralEntryTypeTest extends TestCase
         $result = $type->beforeCreate($data);
 
         $this->assertSame($data, $result);
+    }
+
+    private function makeType(): GeneralEntryType
+    {
+        $record = EntryType::factory()->create(['entry_behavior_id' => EntryBehavior::where('handle', 'general')->value('id')]);
+        return new GeneralEntryType($record);
     }
 }

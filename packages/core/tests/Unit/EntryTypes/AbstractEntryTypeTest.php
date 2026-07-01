@@ -33,6 +33,19 @@ class AbstractEntryTypeTest extends TestCase
         $this->assertSame([], $result);
     }
 
+    private function makeAnonymousEntryType(?EntryType $record = null): AbstractEntryType
+    {
+        $record ??= EntryType::factory()->create();
+
+        return new class($record) extends AbstractEntryType {
+            // Expose protected method for testing.
+            public function callExistingFieldValue(?Entry $entry, string $handle): mixed
+            {
+                return $this->existingFieldValue($entry, $handle);
+            }
+        };
+    }
+
     public function test_validate_accepts_null_entry_for_create_context(): void
     {
         $type = $this->makeAnonymousEntryType();
@@ -41,6 +54,10 @@ class AbstractEntryTypeTest extends TestCase
 
         $this->assertSame([], $result);
     }
+
+    // -------------------------------------------------------------------------
+    // existingFieldValue() — safe field reading
+    // -------------------------------------------------------------------------
 
     public function test_validate_accepts_entry_for_update_context(): void
     {
@@ -52,10 +69,6 @@ class AbstractEntryTypeTest extends TestCase
         $this->assertSame([], $result);
     }
 
-    // -------------------------------------------------------------------------
-    // existingFieldValue() — safe field reading
-    // -------------------------------------------------------------------------
-
     public function test_existing_field_value_returns_null_when_entry_is_null(): void
     {
         $type = $this->makeAnonymousEntryType();
@@ -63,6 +76,12 @@ class AbstractEntryTypeTest extends TestCase
         $result = $this->callExistingFieldValue($type, null, 'anything');
 
         $this->assertNull($result);
+    }
+
+    private function callExistingFieldValue(AbstractEntryType $type, ?Entry $entry, string $handle): mixed
+    {
+        // @phpstan-ignore-next-line
+        return $type->callExistingFieldValue($entry, $handle);
     }
 
     public function test_existing_field_value_returns_null_when_field_has_no_value(): void
@@ -74,6 +93,26 @@ class AbstractEntryTypeTest extends TestCase
 
         $this->assertNull($result);
     }
+
+    private function makeEntryWithTextField(string $handle = 'body'): array
+    {
+        $fieldType = FieldType::factory()->create(['object' => Text::class]);
+        $field = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => $handle]);
+
+        $layout = FieldLayout::factory()->create();
+        $tab = Tab::factory()->create(['field_layout_id' => $layout->id]);
+        TabElement::factory()->create(['field_layout_tab_id' => $tab->id, 'field_id' => $field->id]);
+
+        $group = EntryGroup::factory()->create(['field_layout_id' => $layout->id]);
+        $type = EntryType::factory()->create(['entry_group_id' => $group->id]);
+        $entry = Entry::factory()->create(['entry_group_id' => $group->id, 'entry_type_id' => $type->id]);
+
+        return [$entry, $field];
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
 
     public function test_existing_field_value_returns_stored_value(): void
     {
@@ -133,44 +172,5 @@ class AbstractEntryTypeTest extends TestCase
         $second = $this->callExistingFieldValue($type, $entry, 'slug_field');
 
         $this->assertSame($first, $second);
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function makeAnonymousEntryType(?EntryType $record = null): AbstractEntryType
-    {
-        $record ??= EntryType::factory()->create();
-
-        return new class($record) extends AbstractEntryType {
-            // Expose protected method for testing.
-            public function callExistingFieldValue(?Entry $entry, string $handle): mixed
-            {
-                return $this->existingFieldValue($entry, $handle);
-            }
-        };
-    }
-
-    private function callExistingFieldValue(AbstractEntryType $type, ?Entry $entry, string $handle): mixed
-    {
-        // @phpstan-ignore-next-line
-        return $type->callExistingFieldValue($entry, $handle);
-    }
-
-    private function makeEntryWithTextField(string $handle = 'body'): array
-    {
-        $fieldType = FieldType::factory()->create(['object' => Text::class]);
-        $field = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => $handle]);
-
-        $layout = FieldLayout::factory()->create();
-        $tab = Tab::factory()->create(['field_layout_id' => $layout->id]);
-        TabElement::factory()->create(['field_layout_tab_id' => $tab->id, 'field_id' => $field->id]);
-
-        $group = EntryGroup::factory()->create(['field_layout_id' => $layout->id]);
-        $type = EntryType::factory()->create(['entry_group_id' => $group->id]);
-        $entry = Entry::factory()->create(['entry_group_id' => $group->id, 'entry_type_id' => $type->id]);
-
-        return [$entry, $field];
     }
 }

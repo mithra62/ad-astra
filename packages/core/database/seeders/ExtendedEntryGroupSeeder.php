@@ -69,6 +69,79 @@ class ExtendedEntryGroupSeeder extends Seeder
         );
     }
 
+    /**
+     * Local idempotent override for BuildsLayouts::createLayout().
+     *
+     * @param array<string, string[]> $tabs
+     */
+    private function createLayout(string $name, array $tabs): FieldLayout
+    {
+        $layout = FieldLayout::query()
+            ->where('handle', Str::slug($name))
+            ->orderBy('id')
+            ->first();
+
+        if (!$layout instanceof FieldLayout) {
+            $layout = FieldLayout::create([
+                'name' => $name,
+                'handle' => Str::slug($name),
+            ]);
+        } elseif ($layout->name !== $name) {
+            $layout->update(['name' => $name]);
+        }
+
+        $tabOrder = 1;
+        foreach ($tabs as $tabName => $fieldHandles) {
+            $this->addTabIfMissing($layout->id, $tabName, $fieldHandles, $tabOrder++);
+        }
+
+        return $layout;
+    }
+
+    /**
+     * Local idempotent override for BuildsLayouts::addTabIfMissing().
+     *
+     * @param string[] $fieldHandles
+     */
+    private function addTabIfMissing(int $layoutId, string $tabName, array $fieldHandles, int $sortOrder): void
+    {
+        $tab = Tab::query()->updateOrCreate(
+            [
+                'field_layout_id' => $layoutId,
+                'handle' => Str::slug($tabName),
+            ],
+            [
+                'name' => $tabName,
+                'sort_order' => $sortOrder,
+            ]
+        );
+
+        $fields = Field::query()
+            ->whereIn('handle', $fieldHandles)
+            ->get()
+            ->keyBy('handle');
+
+        $order = 1;
+        foreach ($fieldHandles as $handle) {
+            $field = $fields->get($handle);
+
+            if (!$field instanceof Field) {
+                continue;
+            }
+
+            TabElement::query()->updateOrCreate(
+                [
+                    'field_layout_tab_id' => $tab->id,
+                    'field_id' => $field->id,
+                ],
+                [
+                    'required' => false,
+                    'sort_order' => $order++,
+                ]
+            );
+        }
+    }
+
     private function seedNewsGroup(StatusGroup $publication): void
     {
         $layout = $this->createLayout('News Layout', [
@@ -329,78 +402,5 @@ class ExtendedEntryGroupSeeder extends Seeder
             ['entry_group_id' => $group->id, 'handle' => 'general'],
             ['name' => 'General', 'entry_behavior_id' => EntryBehavior::where('handle', 'general')->value('id'), 'sort_order' => 1]
         );
-    }
-
-    /**
-     * Local idempotent override for BuildsLayouts::createLayout().
-     *
-     * @param array<string, string[]> $tabs
-     */
-    private function createLayout(string $name, array $tabs): FieldLayout
-    {
-        $layout = FieldLayout::query()
-            ->where('handle', Str::slug($name))
-            ->orderBy('id')
-            ->first();
-
-        if (!$layout instanceof FieldLayout) {
-            $layout = FieldLayout::create([
-                'name' => $name,
-                'handle' => Str::slug($name),
-            ]);
-        } elseif ($layout->name !== $name) {
-            $layout->update(['name' => $name]);
-        }
-
-        $tabOrder = 1;
-        foreach ($tabs as $tabName => $fieldHandles) {
-            $this->addTabIfMissing($layout->id, $tabName, $fieldHandles, $tabOrder++);
-        }
-
-        return $layout;
-    }
-
-    /**
-     * Local idempotent override for BuildsLayouts::addTabIfMissing().
-     *
-     * @param string[] $fieldHandles
-     */
-    private function addTabIfMissing(int $layoutId, string $tabName, array $fieldHandles, int $sortOrder): void
-    {
-        $tab = Tab::query()->updateOrCreate(
-            [
-                'field_layout_id' => $layoutId,
-                'handle' => Str::slug($tabName),
-            ],
-            [
-                'name' => $tabName,
-                'sort_order' => $sortOrder,
-            ]
-        );
-
-        $fields = Field::query()
-            ->whereIn('handle', $fieldHandles)
-            ->get()
-            ->keyBy('handle');
-
-        $order = 1;
-        foreach ($fieldHandles as $handle) {
-            $field = $fields->get($handle);
-
-            if (!$field instanceof Field) {
-                continue;
-            }
-
-            TabElement::query()->updateOrCreate(
-                [
-                    'field_layout_tab_id' => $tab->id,
-                    'field_id' => $field->id,
-                ],
-                [
-                    'required' => false,
-                    'sort_order' => $order++,
-                ]
-            );
-        }
     }
 }

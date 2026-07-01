@@ -85,10 +85,20 @@ class ImagickTransformationDriver implements TransformationDriverInterface
     // Resize modes
     // -------------------------------------------------------------------------
 
-    private function applyCover(Imagick $imagick, int $targetW, int $targetH): void
+    private function localPath(string $disk, string $path): string
     {
-        // cropThumbnailImage scales to fill the box and crops the excess from centre.
-        $imagick->cropThumbnailImage($targetW, $targetH);
+        $fullPath = Storage::disk($disk)->path($path);
+
+        if (!file_exists($fullPath)) {
+            throw new RuntimeException("Source file not found on disk '{$disk}': {$path}");
+        }
+
+        return $fullPath;
+    }
+
+    private function extensionFromPath(string $path): string
+    {
+        return strtolower(pathinfo($path, PATHINFO_EXTENSION)) ?: 'jpg';
     }
 
     private function applyContain(Imagick $imagick, int $targetW, int $targetH): void
@@ -98,14 +108,20 @@ class ImagickTransformationDriver implements TransformationDriverInterface
         $imagick->thumbnailImage($targetW, $targetH, true);
     }
 
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
     private function applyExact(Imagick $imagick, int $targetW, int $targetH): void
     {
         $imagick->resizeImage($targetW, $targetH, Imagick::FILTER_LANCZOS, 1);
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
+    private function applyCover(Imagick $imagick, int $targetW, int $targetH): void
+    {
+        // cropThumbnailImage scales to fill the box and crops the excess from centre.
+        $imagick->cropThumbnailImage($targetW, $targetH);
+    }
 
     private function imagickFormat(string $format): string
     {
@@ -116,21 +132,5 @@ class ImagickTransformationDriver implements TransformationDriverInterface
             'gif' => 'gif',
             default => 'jpeg',
         };
-    }
-
-    private function extensionFromPath(string $path): string
-    {
-        return strtolower(pathinfo($path, PATHINFO_EXTENSION)) ?: 'jpg';
-    }
-
-    private function localPath(string $disk, string $path): string
-    {
-        $fullPath = Storage::disk($disk)->path($path);
-
-        if (!file_exists($fullPath)) {
-            throw new RuntimeException("Source file not found on disk '{$disk}': {$path}");
-        }
-
-        return $fullPath;
     }
 }

@@ -17,14 +17,9 @@ class MediaTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    public function test_implements_syncs_to_mediables(): void
     {
-        parent::setUp();
-        // The Media field's render() calls route('media.picker.index'); make
-        // sure that name resolves under the testing route table.
-        if (!Route::has('media.picker.index')) {
-            Route::get('/__test/picker', fn() => null)->name('media.picker.index');
-        }
+        $this->assertInstanceOf(SyncsToMediables::class, $this->make());
     }
 
     private function make(array $settings = []): Media
@@ -32,37 +27,19 @@ class MediaTest extends TestCase
         return new Media($settings);
     }
 
-    private function makeLibrary(string $handle = 'lib'): Library
+    public function test_storage_column_is_value_json(): void
     {
-        return Library::create([
-            'name' => ucfirst($handle) . ' Library',
-            'handle' => $handle,
-            'adapter' => 'local',
-        ]);
+        $this->assertSame('value_json', $this->make()->storageColumn());
     }
 
     // -------------------------------------------------------------------------
     // Contract / shape
     // -------------------------------------------------------------------------
 
-    public function test_implements_syncs_to_mediables(): void
-    {
-        $this->assertInstanceOf(SyncsToMediables::class, $this->make());
-    }
-
-    public function test_storage_column_is_value_json(): void
-    {
-        $this->assertSame('value_json', $this->make()->storageColumn());
-    }
-
     public function test_is_relational_returns_false(): void
     {
         $this->assertFalse($this->make()->isRelational());
     }
-
-    // -------------------------------------------------------------------------
-    // cast
-    // -------------------------------------------------------------------------
 
     public function test_cast_decodes_json_string_to_int_array(): void
     {
@@ -74,6 +51,10 @@ class MediaTest extends TestCase
         $this->assertSame([5, 10], $this->make()->cast(['5', '10']));
     }
 
+    // -------------------------------------------------------------------------
+    // cast
+    // -------------------------------------------------------------------------
+
     public function test_cast_returns_empty_for_invalid_json(): void
     {
         $this->assertSame([], $this->make()->cast('not json'));
@@ -83,10 +64,6 @@ class MediaTest extends TestCase
     {
         $this->assertSame([], $this->make()->cast(null));
     }
-
-    // -------------------------------------------------------------------------
-    // value()
-    // -------------------------------------------------------------------------
 
     public function test_value_returns_collection_of_media_models(): void
     {
@@ -108,14 +85,14 @@ class MediaTest extends TestCase
         $this->assertSame($first->id, $result->last()->id);
     }
 
+    // -------------------------------------------------------------------------
+    // value()
+    // -------------------------------------------------------------------------
+
     public function test_value_returns_empty_collection_for_empty_input(): void
     {
         $this->assertCount(0, $this->make()->value('[]'));
     }
-
-    // -------------------------------------------------------------------------
-    // validate — min / max
-    // -------------------------------------------------------------------------
 
     public function test_validate_returns_error_when_below_min(): void
     {
@@ -138,14 +115,14 @@ class MediaTest extends TestCase
         $this->assertIsString($result);
     }
 
+    // -------------------------------------------------------------------------
+    // validate — min / max
+    // -------------------------------------------------------------------------
+
     public function test_validate_passes_with_no_constraints_and_empty_value(): void
     {
         $this->assertTrue($this->make()->validate('[]'));
     }
-
-    // -------------------------------------------------------------------------
-    // validate — ID existence
-    // -------------------------------------------------------------------------
 
     public function test_validate_returns_error_when_id_does_not_exist(): void
     {
@@ -154,10 +131,6 @@ class MediaTest extends TestCase
         $this->assertIsString($result);
         $this->assertStringContainsString('no longer exist', $result);
     }
-
-    // -------------------------------------------------------------------------
-    // validate — library scope (allowed_libraries)
-    // -------------------------------------------------------------------------
 
     public function test_validate_rejects_media_outside_allowed_libraries(): void
     {
@@ -171,6 +144,23 @@ class MediaTest extends TestCase
         $this->assertIsString($result);
         $this->assertStringContainsString('allowed library', $result);
     }
+
+    // -------------------------------------------------------------------------
+    // validate — ID existence
+    // -------------------------------------------------------------------------
+
+    private function makeLibrary(string $handle = 'lib'): Library
+    {
+        return Library::create([
+            'name' => ucfirst($handle) . ' Library',
+            'handle' => $handle,
+            'adapter' => 'local',
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // validate — library scope (allowed_libraries)
+    // -------------------------------------------------------------------------
 
     public function test_validate_passes_when_media_is_in_an_allowed_library(): void
     {
@@ -196,16 +186,16 @@ class MediaTest extends TestCase
         $this->assertTrue($type->validate(json_encode([$mA->id, $mB->id])));
     }
 
-    // -------------------------------------------------------------------------
-    // settings shape
-    // -------------------------------------------------------------------------
-
     public function test_libraries_setting_rule_requires_at_least_one(): void
     {
         $rules = $this->make()->settingsRules();
 
         $this->assertSame('required|array|min:1', $rules['settings.libraries']);
     }
+
+    // -------------------------------------------------------------------------
+    // settings shape
+    // -------------------------------------------------------------------------
 
     public function test_settings_form_options_returns_library_list(): void
     {
@@ -222,10 +212,6 @@ class MediaTest extends TestCase
         }
     }
 
-    // -------------------------------------------------------------------------
-    // render()
-    // -------------------------------------------------------------------------
-
     public function test_render_includes_browse_button_when_libraries_configured(): void
     {
         $lib = $this->makeLibrary('photos');
@@ -237,6 +223,10 @@ class MediaTest extends TestCase
         $this->assertStringContainsString((string)$lib->id, $html);
     }
 
+    // -------------------------------------------------------------------------
+    // render()
+    // -------------------------------------------------------------------------
+
     public function test_render_shows_warning_when_no_libraries_configured(): void
     {
         $type = $this->make(['libraries' => []]);
@@ -244,6 +234,18 @@ class MediaTest extends TestCase
         $html = $type->render(['input_name' => 'fields[gallery]']);
 
         $this->assertStringContainsString('No libraries configured', $html);
+    }
+
+    public function test_render_emits_hidden_input_named_from_field_handle_when_input_name_omitted(): void
+    {
+        $lib = $this->makeLibrary('photos');
+        $media = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'p.jpg']);
+        $field = $this->makeFieldWithHandle('gallery');
+
+        $type = new Media(['libraries' => [$lib->id]], $field);
+        $html = $type->render(['value' => collect([$media])]);
+
+        $this->assertStringContainsString('name="fields[gallery][]"', $html);
     }
 
     // -------------------------------------------------------------------------
@@ -266,18 +268,6 @@ class MediaTest extends TestCase
             'field_type_id' => $fieldType->id,
             'handle' => $handle,
         ]);
-    }
-
-    public function test_render_emits_hidden_input_named_from_field_handle_when_input_name_omitted(): void
-    {
-        $lib = $this->makeLibrary('photos');
-        $media = MediaModel::factory()->create(['library_id' => $lib->id, 'original_name' => 'p.jpg']);
-        $field = $this->makeFieldWithHandle('gallery');
-
-        $type = new Media(['libraries' => [$lib->id]], $field);
-        $html = $type->render(['value' => collect([$media])]);
-
-        $this->assertStringContainsString('name="fields[gallery][]"', $html);
     }
 
     public function test_render_respects_explicit_input_name_param(): void
@@ -339,5 +329,15 @@ class MediaTest extends TestCase
         $this->assertStringContainsString('data-chip="' . $userA->id . '"', $html);
         $this->assertStringContainsString('data-chip="' . $userB->id . '"', $html);
         $this->assertStringNotContainsString('data-chip="' . $stale->id . '"', $html);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // The Media field's render() calls route('media.picker.index'); make
+        // sure that name resolves under the testing route table.
+        if (!Route::has('media.picker.index')) {
+            Route::get('/__test/picker', fn() => null)->name('media.picker.index');
+        }
     }
 }

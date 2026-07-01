@@ -27,54 +27,10 @@ class HasMediaTest extends TestCase
     // Setup
     // -------------------------------------------------------------------------
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        // Reset static handle cache so each test starts with a clean slate.
-        $this->resetFieldHandleCache();
-    }
-
-    private function resetFieldHandleCache(): void
-    {
-        $ref = new ReflectionProperty(HasMedia::class, 'fieldHandleCache');
-        $ref->setAccessible(true);
-        $ref->setValue(null, []);
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function makeLibrary(string $handle = 'general'): Library
-    {
-        return Library::create([
-            'name' => ucfirst($handle) . ' Library',
-            'handle' => $handle,
-            'adapter' => 'local',
-        ]);
-    }
-
-    private function makeMedia(Library $library, string $path = 'uploads/test.jpg'): Media
-    {
-        return Media::factory()->image()->create([
-            'library_id' => $library->id,
-            'disk' => 'local',
-            'path' => $path,
-        ]);
-    }
-
-    // -------------------------------------------------------------------------
-    // media() relation
-    // -------------------------------------------------------------------------
-
     public function test_media_relation_is_morph_to_many(): void
     {
         $this->assertInstanceOf(MorphToMany::class, User::factory()->create()->media());
     }
-
-    // -------------------------------------------------------------------------
-    // attachMedia / directMedia
-    // -------------------------------------------------------------------------
 
     public function test_attach_media_creates_pivot_row(): void
     {
@@ -87,6 +43,32 @@ class HasMediaTest extends TestCase
         $this->assertTrue($user->directMedia()->where('media.id', $media->id)->exists());
     }
 
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private function makeMedia(Library $library, string $path = 'uploads/test.jpg'): Media
+    {
+        return Media::factory()->image()->create([
+            'library_id' => $library->id,
+            'disk' => 'local',
+            'path' => $path,
+        ]);
+    }
+
+    private function makeLibrary(string $handle = 'general'): Library
+    {
+        return Library::create([
+            'name' => ucfirst($handle) . ' Library',
+            'handle' => $handle,
+            'adapter' => 'local',
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // media() relation
+    // -------------------------------------------------------------------------
+
     public function test_attach_media_is_idempotent(): void
     {
         Storage::fake('local');
@@ -98,6 +80,10 @@ class HasMediaTest extends TestCase
 
         $this->assertCount(1, $user->directMedia);
     }
+
+    // -------------------------------------------------------------------------
+    // attachMedia / directMedia
+    // -------------------------------------------------------------------------
 
     public function test_attach_media_uses_sentinel_field_id_zero(): void
     {
@@ -114,10 +100,6 @@ class HasMediaTest extends TestCase
             'field_id' => 0,
         ]);
     }
-
-    // -------------------------------------------------------------------------
-    // detachMedia
-    // -------------------------------------------------------------------------
 
     public function test_detach_media_removes_pivot_row(): void
     {
@@ -155,7 +137,7 @@ class HasMediaTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // syncMedia
+    // detachMedia
     // -------------------------------------------------------------------------
 
     public function test_sync_media_replaces_direct_attachments(): void
@@ -173,16 +155,16 @@ class HasMediaTest extends TestCase
         $this->assertTrue($user->directMedia()->where('media.id', $mediaB->id)->exists(), 'B should be attached');
     }
 
-    // -------------------------------------------------------------------------
-    // firstMedia
-    // -------------------------------------------------------------------------
-
     public function test_first_media_returns_null_when_nothing_attached(): void
     {
         $user = User::factory()->create();
 
         $this->assertNull($user->firstMedia());
     }
+
+    // -------------------------------------------------------------------------
+    // syncMedia
+    // -------------------------------------------------------------------------
 
     public function test_first_media_returns_first_direct_attachment(): void
     {
@@ -195,6 +177,10 @@ class HasMediaTest extends TestCase
         $this->assertNotNull($user->firstMedia());
         $this->assertEquals($media->id, $user->firstMedia()->id);
     }
+
+    // -------------------------------------------------------------------------
+    // firstMedia
+    // -------------------------------------------------------------------------
 
     public function test_first_media_scoped_to_library_handle(): void
     {
@@ -225,10 +211,6 @@ class HasMediaTest extends TestCase
 
         $this->assertNull($user->firstMedia('avatars'));
     }
-
-    // -------------------------------------------------------------------------
-    // mediaForField
-    // -------------------------------------------------------------------------
 
     public function test_media_for_field_scopes_by_field_id(): void
     {
@@ -266,7 +248,7 @@ class HasMediaTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // H3 — handle→ID lookup is cached (only one query per unique handle)
+    // mediaForField
     // -------------------------------------------------------------------------
 
     public function test_media_for_field_with_string_handle_queries_db_once(): void
@@ -328,11 +310,29 @@ class HasMediaTest extends TestCase
             'Each unique handle should produce exactly one fields lookup.');
     }
 
+    // -------------------------------------------------------------------------
+    // H3 — handle→ID lookup is cached (only one query per unique handle)
+    // -------------------------------------------------------------------------
+
     public function test_media_for_field_returns_null_field_id_for_unknown_handle(): void
     {
         $user = User::factory()->create();
         $result = $user->mediaForField('no-such-field')->get();
 
         $this->assertCount(0, $result);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Reset static handle cache so each test starts with a clean slate.
+        $this->resetFieldHandleCache();
+    }
+
+    private function resetFieldHandleCache(): void
+    {
+        $ref = new ReflectionProperty(HasMedia::class, 'fieldHandleCache');
+        $ref->setAccessible(true);
+        $ref->setValue(null, []);
     }
 }

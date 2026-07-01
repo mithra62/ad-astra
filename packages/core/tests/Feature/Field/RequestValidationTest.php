@@ -50,76 +50,6 @@ class RequestValidationTest extends TestCase
         $this->assertStringContainsString('decimal places', $errors[0]);
     }
 
-    public function test_money_accepts_valid_input_and_persists_minor_units(): void
-    {
-        $user = $this->makeSuperAdmin();
-        [$group, $type] = $this->makeEntryGroupAndTypeWithMoneyField();
-
-        $response = $this->actingAs($user)->post(route('entries.store', ['group_id' => $group->id]), [
-            'type_handle' => $type->handle,
-            'title' => 'Good Money',
-            'handle' => 'good-money',
-            'status' => 'draft',
-            'fields' => ['price' => '42.50'],
-        ]);
-
-        $response->assertSessionDoesntHaveErrors();
-        $entry = Entry::where('handle', 'good-money')->firstOrFail();
-
-        $this->assertDatabaseHas('field_values', [
-            'fieldable_id' => $entry->id,
-            'value_integer' => 4250,
-        ]);
-    }
-
-    public function test_time_rejects_invalid_format_with_friendly_error(): void
-    {
-        $user = $this->makeSuperAdmin();
-        [$group, $type] = $this->makeEntryGroupAndTypeWithTimeField();
-
-        $response = $this->actingAs($user)
-            ->from(route('entries.create', ['group_id' => $group->id]))
-            ->post(route('entries.store', ['group_id' => $group->id]), [
-                'type_handle' => $type->handle,
-                'title' => 'Bad Time',
-                'handle' => 'bad-time',
-                'status' => 'draft',
-                'fields' => ['open_time' => '25:00'],
-            ]);
-
-        $response->assertSessionHasErrors(['fields.open_time']);
-        $errors = session('errors')->get('fields.open_time');
-        $this->assertNotEmpty($errors);
-        $this->assertStringContainsString('valid time', $errors[0]);
-    }
-
-    public function test_time_accepts_valid_input_and_canonicalizes(): void
-    {
-        $user = $this->makeSuperAdmin();
-        [$group, $type] = $this->makeEntryGroupAndTypeWithTimeField();
-
-        $response = $this->actingAs($user)->post(route('entries.store', ['group_id' => $group->id]), [
-            'type_handle' => $type->handle,
-            'title' => 'Good Time',
-            'handle' => 'good-time',
-            'status' => 'draft',
-            'fields' => ['open_time' => '9:30'],
-        ]);
-
-        $response->assertSessionDoesntHaveErrors();
-        $entry = Entry::where('handle', 'good-time')->firstOrFail();
-
-        // Stored as canonical 24-hour HH:MM (include_seconds defaults to false).
-        $this->assertDatabaseHas('field_values', [
-            'fieldable_id' => $entry->id,
-            'value_text' => '09:30',
-        ]);
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
     private function makeSuperAdmin(): User
     {
         $role = Role::query()->firstOrCreate([
@@ -143,19 +73,6 @@ class RequestValidationTest extends TestCase
             typeClass: Money::class,
             typeName: 'Money',
             settings: ['currency' => 'USD'],
-        );
-    }
-
-    /**
-     * @return array{0: EntryGroup, 1: EntryType}
-     */
-    private function makeEntryGroupAndTypeWithTimeField(): array
-    {
-        return $this->makeEntryGroupAndTypeWithField(
-            handle: 'open_time',
-            typeClass: Time::class,
-            typeName: 'Time',
-            settings: [],
         );
     }
 
@@ -204,5 +121,88 @@ class RequestValidationTest extends TestCase
         ]);
 
         return [$group, $type];
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    public function test_money_accepts_valid_input_and_persists_minor_units(): void
+    {
+        $user = $this->makeSuperAdmin();
+        [$group, $type] = $this->makeEntryGroupAndTypeWithMoneyField();
+
+        $response = $this->actingAs($user)->post(route('entries.store', ['group_id' => $group->id]), [
+            'type_handle' => $type->handle,
+            'title' => 'Good Money',
+            'handle' => 'good-money',
+            'status' => 'draft',
+            'fields' => ['price' => '42.50'],
+        ]);
+
+        $response->assertSessionDoesntHaveErrors();
+        $entry = Entry::where('handle', 'good-money')->firstOrFail();
+
+        $this->assertDatabaseHas('field_values', [
+            'fieldable_id' => $entry->id,
+            'value_integer' => 4250,
+        ]);
+    }
+
+    public function test_time_rejects_invalid_format_with_friendly_error(): void
+    {
+        $user = $this->makeSuperAdmin();
+        [$group, $type] = $this->makeEntryGroupAndTypeWithTimeField();
+
+        $response = $this->actingAs($user)
+            ->from(route('entries.create', ['group_id' => $group->id]))
+            ->post(route('entries.store', ['group_id' => $group->id]), [
+                'type_handle' => $type->handle,
+                'title' => 'Bad Time',
+                'handle' => 'bad-time',
+                'status' => 'draft',
+                'fields' => ['open_time' => '25:00'],
+            ]);
+
+        $response->assertSessionHasErrors(['fields.open_time']);
+        $errors = session('errors')->get('fields.open_time');
+        $this->assertNotEmpty($errors);
+        $this->assertStringContainsString('valid time', $errors[0]);
+    }
+
+    /**
+     * @return array{0: EntryGroup, 1: EntryType}
+     */
+    private function makeEntryGroupAndTypeWithTimeField(): array
+    {
+        return $this->makeEntryGroupAndTypeWithField(
+            handle: 'open_time',
+            typeClass: Time::class,
+            typeName: 'Time',
+            settings: [],
+        );
+    }
+
+    public function test_time_accepts_valid_input_and_canonicalizes(): void
+    {
+        $user = $this->makeSuperAdmin();
+        [$group, $type] = $this->makeEntryGroupAndTypeWithTimeField();
+
+        $response = $this->actingAs($user)->post(route('entries.store', ['group_id' => $group->id]), [
+            'type_handle' => $type->handle,
+            'title' => 'Good Time',
+            'handle' => 'good-time',
+            'status' => 'draft',
+            'fields' => ['open_time' => '9:30'],
+        ]);
+
+        $response->assertSessionDoesntHaveErrors();
+        $entry = Entry::where('handle', 'good-time')->firstOrFail();
+
+        // Stored as canonical 24-hour HH:MM (include_seconds defaults to false).
+        $this->assertDatabaseHas('field_values', [
+            'fieldable_id' => $entry->id,
+            'value_text' => '09:30',
+        ]);
     }
 }

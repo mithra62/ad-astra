@@ -15,22 +15,6 @@ class ControllerCanTest extends TestCase
 
     private Controller $controller;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->controller = new class extends Controller {
-            public function check(string $permission): bool
-            {
-                return $this->can($permission);
-            }
-        };
-    }
-
-    // -------------------------------------------------------------------------
-    // can()
-    // -------------------------------------------------------------------------
-
     public function test_returns_true_when_authenticated_user_has_permission(): void
     {
         $permission = Permission::firstOrCreate(['name' => 'edit posts', 'guard_name' => 'web']);
@@ -41,6 +25,10 @@ class ControllerCanTest extends TestCase
 
         $this->assertTrue($this->controller->check('edit posts'));
     }
+
+    // -------------------------------------------------------------------------
+    // can()
+    // -------------------------------------------------------------------------
 
     public function test_returns_false_when_authenticated_user_lacks_permission(): void
     {
@@ -66,5 +54,17 @@ class ControllerCanTest extends TestCase
         $this->actingAs($user);
 
         $this->assertTrue($this->controller->check('always-true'));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->controller = new class extends Controller {
+            public function check(string $permission): bool
+            {
+                return $this->can($permission);
+            }
+        };
     }
 }

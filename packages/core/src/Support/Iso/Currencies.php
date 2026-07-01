@@ -18,78 +18,6 @@ use ReflectionClass;
  */
 final class Currencies
 {
-    private static ?ISOCurrencies $iso = null;
-
-    /**
-     * @return list<array{code: string, name: string, symbol: string, decimals: int}>
-     */
-    public static function all(): array
-    {
-        $out = [];
-        foreach (self::iso() as $currency) {
-            $code = $currency->getCode();
-            $out[] = [
-                'code' => $code,
-                'name' => self::name($code),
-                'symbol' => self::symbol($code),
-                'decimals' => self::decimals($code),
-            ];
-        }
-        return $out;
-    }
-
-    public static function exists(string $code): bool
-    {
-        return self::iso()->contains(new Currency(strtoupper($code)));
-    }
-
-    public static function decimals(string $code): int
-    {
-        try {
-            return self::iso()->subunitFor(new Currency(strtoupper($code)));
-        } catch (UnknownCurrencyException) {
-            return 2;
-        }
-    }
-
-    public static function symbol(string $code): string
-    {
-        return self::SYMBOLS[strtoupper($code)] ?? strtoupper($code);
-    }
-
-    public static function name(string $code): string
-    {
-        $code = strtoupper($code);
-        $data = self::isoData();
-        return $data[$code]['currency'] ?? $code;
-    }
-
-    private static function iso(): ISOCurrencies
-    {
-        return self::$iso ??= new ISOCurrencies();
-    }
-
-    /**
-     * Pull the raw ISO data from moneyphp's bundled resource so we can read
-     * the name field directly. (The public API only exposes existence and
-     * subunit — name lives in the underlying array.)
-     *
-     * @return array<string, array{alphabeticCode: string, currency: string, minorUnit: int, numericCode: int}>
-     */
-    private static function isoData(): array
-    {
-        static $data = null;
-        if ($data === null) {
-            // Resolve moneyphp/money's bundled ISO data from the installed package
-            // location. Using reflection (rather than base_path() or a path relative to
-            // this file) keeps it working without a booted application and regardless of
-            // whether the package runs from packages/ or vendor/.
-            $moneySrc = dirname((new ReflectionClass(Money::class))->getFileName());
-            $data = require $moneySrc . '/../resources/currency.php';
-        }
-        return $data;
-    }
-
     /**
      * Local symbol map. moneyphp doesn't carry symbols because they're a
      * display convention (and locale-dependent in many cases). For the
@@ -128,4 +56,75 @@ final class Currencies
         'VND' => '₫', 'VUV' => 'VT', 'WST' => 'WS$', 'XAF' => 'FCFA', 'XCD' => 'EC$',
         'XOF' => 'CFA', 'XPF' => '₣', 'YER' => '﷼', 'ZAR' => 'R', 'ZMW' => 'ZK',
     ];
+    private static ?ISOCurrencies $iso = null;
+
+    /**
+     * @return list<array{code: string, name: string, symbol: string, decimals: int}>
+     */
+    public static function all(): array
+    {
+        $out = [];
+        foreach (self::iso() as $currency) {
+            $code = $currency->getCode();
+            $out[] = [
+                'code' => $code,
+                'name' => self::name($code),
+                'symbol' => self::symbol($code),
+                'decimals' => self::decimals($code),
+            ];
+        }
+        return $out;
+    }
+
+    private static function iso(): ISOCurrencies
+    {
+        return self::$iso ??= new ISOCurrencies();
+    }
+
+    public static function name(string $code): string
+    {
+        $code = strtoupper($code);
+        $data = self::isoData();
+        return $data[$code]['currency'] ?? $code;
+    }
+
+    /**
+     * Pull the raw ISO data from moneyphp's bundled resource so we can read
+     * the name field directly. (The public API only exposes existence and
+     * subunit — name lives in the underlying array.)
+     *
+     * @return array<string, array{alphabeticCode: string, currency: string, minorUnit: int, numericCode: int}>
+     */
+    private static function isoData(): array
+    {
+        static $data = null;
+        if ($data === null) {
+            // Resolve moneyphp/money's bundled ISO data from the installed package
+            // location. Using reflection (rather than base_path() or a path relative to
+            // this file) keeps it working without a booted application and regardless of
+            // whether the package runs from packages/ or vendor/.
+            $moneySrc = dirname((new ReflectionClass(Money::class))->getFileName());
+            $data = require $moneySrc . '/../resources/currency.php';
+        }
+        return $data;
+    }
+
+    public static function symbol(string $code): string
+    {
+        return self::SYMBOLS[strtoupper($code)] ?? strtoupper($code);
+    }
+
+    public static function decimals(string $code): int
+    {
+        try {
+            return self::iso()->subunitFor(new Currency(strtoupper($code)));
+        } catch (UnknownCurrencyException) {
+            return 2;
+        }
+    }
+
+    public static function exists(string $code): bool
+    {
+        return self::iso()->contains(new Currency(strtoupper($code)));
+    }
 }

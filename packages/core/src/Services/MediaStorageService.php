@@ -15,12 +15,6 @@ class MediaStorageService
         return $library->addMediaFromUpload($file, $attributes);
     }
 
-    /** Soft-delete — physical file preserved until the purge job runs. */
-    public function delete(Media $media): void
-    {
-        $media->delete();
-    }
-
     /** Hard-delete record and physical file immediately. */
     public function purge(Media $media): void
     {
@@ -31,15 +25,21 @@ class MediaStorageService
         $media->forceDelete();
     }
 
-    public function url(Media $media, ?int $signedMinutes = null): string
+    /** Soft-delete — physical file preserved until the purge job runs. */
+    public function delete(Media $media): void
     {
-        return $signedMinutes !== null
-            ? $media->temporaryUrl($signedMinutes)
-            : $media->url();
+        $media->delete();
     }
 
     public function disk(Media $media): Filesystem
     {
         return Storage::disk($media->disk);
+    }
+
+    public function url(Media $media, ?int $signedMinutes = null): string
+    {
+        return $signedMinutes !== null
+            ? $media->temporaryUrl($signedMinutes)
+            : $media->url();
     }
 }

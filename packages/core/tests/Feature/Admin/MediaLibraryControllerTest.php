@@ -16,40 +16,13 @@ class MediaLibraryControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->withoutMiddleware(VerifyCsrfToken::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function makeSuperAdmin(): User
-    {
-        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
-        $user = User::factory()->create();
-        $user->assignRole($role);
-        return $user;
-    }
-
-    private function makeLibrary(string $handle = 'photos'): Library
-    {
-        return Library::create(['name' => 'Photos', 'handle' => $handle, 'adapter' => 'local']);
-    }
-
-    // -------------------------------------------------------------------------
-    // Auth guard
-    // -------------------------------------------------------------------------
-
     public function test_index_redirects_guests(): void
     {
         $this->get(route('media.libraries'))->assertRedirect();
     }
 
     // -------------------------------------------------------------------------
-    // index
+    // Helpers
     // -------------------------------------------------------------------------
 
     public function test_index_returns_ok(): void
@@ -59,8 +32,16 @@ class MediaLibraryControllerTest extends TestCase
             ->assertOk();
     }
 
+    private function makeSuperAdmin(): User
+    {
+        $role = Role::query()->firstOrCreate(['name' => 'super admin', 'guard_name' => 'web']);
+        $user = User::factory()->create();
+        $user->assignRole($role);
+        return $user;
+    }
+
     // -------------------------------------------------------------------------
-    // create
+    // Auth guard
     // -------------------------------------------------------------------------
 
     public function test_create_returns_ok(): void
@@ -71,7 +52,7 @@ class MediaLibraryControllerTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // store
+    // index
     // -------------------------------------------------------------------------
 
     public function test_store_creates_library_and_redirects_to_show(): void
@@ -87,6 +68,10 @@ class MediaLibraryControllerTest extends TestCase
         $this->assertDatabaseHas('media_libraries', ['handle' => 'documents']);
     }
 
+    // -------------------------------------------------------------------------
+    // create
+    // -------------------------------------------------------------------------
+
     public function test_store_fails_validation_when_handle_missing(): void
     {
         $this->actingAs($this->makeSuperAdmin())
@@ -95,7 +80,7 @@ class MediaLibraryControllerTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // show
+    // store
     // -------------------------------------------------------------------------
 
     public function test_show_returns_ok_for_existing_library(): void
@@ -106,6 +91,15 @@ class MediaLibraryControllerTest extends TestCase
             ->get(route('media.libraries.show', $library->id))
             ->assertOk();
     }
+
+    private function makeLibrary(string $handle = 'photos'): Library
+    {
+        return Library::create(['name' => 'Photos', 'handle' => $handle, 'adapter' => 'local']);
+    }
+
+    // -------------------------------------------------------------------------
+    // show
+    // -------------------------------------------------------------------------
 
     public function test_show_returns_404_for_missing_library(): void
     {
@@ -132,10 +126,6 @@ class MediaLibraryControllerTest extends TestCase
         );
     }
 
-    // -------------------------------------------------------------------------
-    // edit
-    // -------------------------------------------------------------------------
-
     public function test_edit_returns_ok_for_existing_library(): void
     {
         $library = $this->makeLibrary();
@@ -145,16 +135,16 @@ class MediaLibraryControllerTest extends TestCase
             ->assertOk();
     }
 
+    // -------------------------------------------------------------------------
+    // edit
+    // -------------------------------------------------------------------------
+
     public function test_edit_returns_404_for_missing_library(): void
     {
         $this->actingAs($this->makeSuperAdmin())
             ->get(route('media.libraries.edit', 99999))
             ->assertNotFound();
     }
-
-    // -------------------------------------------------------------------------
-    // update
-    // -------------------------------------------------------------------------
 
     public function test_update_persists_name_and_redirects(): void
     {
@@ -172,7 +162,7 @@ class MediaLibraryControllerTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // confirm
+    // update
     // -------------------------------------------------------------------------
 
     public function test_confirm_returns_ok_for_existing_library(): void
@@ -184,16 +174,16 @@ class MediaLibraryControllerTest extends TestCase
             ->assertOk();
     }
 
+    // -------------------------------------------------------------------------
+    // confirm
+    // -------------------------------------------------------------------------
+
     public function test_confirm_redirects_when_library_not_found(): void
     {
         $this->actingAs($this->makeSuperAdmin())
             ->get(route('media.libraries.confirm', 99999))
             ->assertRedirect(route('media.libraries'));
     }
-
-    // -------------------------------------------------------------------------
-    // destroy
-    // -------------------------------------------------------------------------
 
     public function test_destroy_deletes_library_and_redirects(): void
     {
@@ -207,7 +197,7 @@ class MediaLibraryControllerTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // upload
+    // destroy
     // -------------------------------------------------------------------------
 
     public function test_upload_stores_file_and_redirects_to_media_show(): void
@@ -223,6 +213,10 @@ class MediaLibraryControllerTest extends TestCase
         $this->assertDatabaseCount('media', 1);
     }
 
+    // -------------------------------------------------------------------------
+    // upload
+    // -------------------------------------------------------------------------
+
     public function test_upload_returns_404_for_missing_library(): void
     {
         Storage::fake('local');
@@ -232,5 +226,11 @@ class MediaLibraryControllerTest extends TestCase
                 'file' => UploadedFile::fake()->image('photo.jpg'),
             ])
             ->assertNotFound();
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
     }
 }

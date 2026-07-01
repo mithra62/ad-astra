@@ -14,7 +14,13 @@ trait HasMedia
     // a unique index, so nullable field_id would not protect against duplicate
     // direct attachments at the DB level. See mediables migration for details.
     private const DIRECT_ATTACHMENT = 0;
-
+    /**
+     * Process-wide handle→ID cache shared across all instances and requests.
+     * Static so the lookup survives across multiple model instances in one process.
+     *
+     * @var array<string, int|null>
+     */
+    private static array $fieldHandleCache = [];
     /**
      * Per-instance cache for firstMedia() results.
      *
@@ -25,33 +31,6 @@ trait HasMedia
      * @var array<string, Media|null>
      */
     private array $firstMediaCache = [];
-
-    /** All media attached to this model via any method. */
-    public function media(): MorphToMany
-    {
-        return $this->morphToMany(Media::class, 'mediable', 'mediables')
-            ->withTimestamps()
-            ->withPivot('sort_order', 'field_id')
-            ->orderByPivot('sort_order');
-    }
-
-    /** Media attached directly (field_id = 0 sentinel). */
-    public function directMedia(): MorphToMany
-    {
-        return $this->morphToMany(Media::class, 'mediable', 'mediables')
-            ->wherePivot('field_id', self::DIRECT_ATTACHMENT)
-            ->withTimestamps()
-            ->withPivot('sort_order', 'field_id')
-            ->orderByPivot('sort_order');
-    }
-
-    /**
-     * Process-wide handle→ID cache shared across all instances and requests.
-     * Static so the lookup survives across multiple model instances in one process.
-     *
-     * @var array<string, int|null>
-     */
-    private static array $fieldHandleCache = [];
 
     /**
      * Media attached via a specific FileUpload field.
@@ -90,11 +69,30 @@ trait HasMedia
         $this->firstMediaCache = [];
     }
 
+    /** Media attached directly (field_id = 0 sentinel). */
+    public function directMedia(): MorphToMany
+    {
+        return $this->morphToMany(Media::class, 'mediable', 'mediables')
+            ->wherePivot('field_id', self::DIRECT_ATTACHMENT)
+            ->withTimestamps()
+            ->withPivot('sort_order', 'field_id')
+            ->orderByPivot('sort_order');
+    }
+
     /** Remove a media item from all pivot rows for this model. */
     public function detachMedia(Media $media): void
     {
         $this->media()->detach($media->id);
         $this->firstMediaCache = [];
+    }
+
+    /** All media attached to this model via any method. */
+    public function media(): MorphToMany
+    {
+        return $this->morphToMany(Media::class, 'mediable', 'mediables')
+            ->withTimestamps()
+            ->withPivot('sort_order', 'field_id')
+            ->orderByPivot('sort_order');
     }
 
     /**

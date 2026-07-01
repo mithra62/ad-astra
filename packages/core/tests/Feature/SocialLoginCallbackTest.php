@@ -14,6 +14,20 @@ class SocialLoginCallbackTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_successful_login_redirects_to_intended_url(): void
+    {
+        User::factory()->active()->create(['email' => 'user@example.com']);
+        $this->mockSocialite('user@example.com', 'Test User');
+
+        $this->withSession(['url.intended' => '/admin/dashboard'])
+            ->get(route('social.login.callback', ['provider' => 'google']))
+            ->assertRedirect('/admin/dashboard');
+    }
+
+    // -------------------------------------------------------------------------
+    // Redirect behavior
+    // -------------------------------------------------------------------------
+
     private function mockSocialite(string $email, string $name): void
     {
         $socialUser = Mockery::mock();
@@ -30,20 +44,6 @@ class SocialLoginCallbackTest extends TestCase
         $driver->shouldReceive('user')->andReturn($socialUser);
 
         Socialite::shouldReceive('driver')->andReturn($driver);
-    }
-
-    // -------------------------------------------------------------------------
-    // Redirect behavior
-    // -------------------------------------------------------------------------
-
-    public function test_successful_login_redirects_to_intended_url(): void
-    {
-        User::factory()->active()->create(['email' => 'user@example.com']);
-        $this->mockSocialite('user@example.com', 'Test User');
-
-        $this->withSession(['url.intended' => '/admin/dashboard'])
-            ->get(route('social.login.callback', ['provider' => 'google']))
-            ->assertRedirect('/admin/dashboard');
     }
 
     public function test_successful_login_redirects_to_root_when_no_intended_url(): void

@@ -7,6 +7,14 @@ use PHPUnit\Framework\TestCase;
 
 class CountryCodeRuleTest extends TestCase
 {
+    public function test_accepts_known_codes(): void
+    {
+        $rule = new CountryCodeRule();
+        $this->assertNull($this->runRule($rule, 'US'));
+        $this->assertNull($this->runRule($rule, 'GB'));
+        $this->assertNull($this->runRule($rule, 'JP'));
+    }
+
     private function runRule(CountryCodeRule $rule, mixed $value): ?string
     {
         $error = null;
@@ -14,14 +22,6 @@ class CountryCodeRuleTest extends TestCase
             $error = $msg;
         });
         return $error;
-    }
-
-    public function test_accepts_known_codes(): void
-    {
-        $rule = new CountryCodeRule();
-        $this->assertNull($this->runRule($rule, 'US'));
-        $this->assertNull($this->runRule($rule, 'GB'));
-        $this->assertNull($this->runRule($rule, 'JP'));
     }
 
     public function test_accepts_null_and_empty(): void

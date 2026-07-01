@@ -45,42 +45,6 @@ class EntryQueryBuilderTest extends TestCase
         return new EntryQueryBuilder();
     }
 
-    /**
-     * Create an Entry wired to a layout containing a single Text field with
-     * the given handle. Returns [$entry, $field] for use in assertions.
-     */
-    private function makeEntryWithTextField(string $handle): array
-    {
-        $fieldType = Type::firstOrCreate(
-            ['object' => Text::class],
-            ['name' => 'Text', 'settings' => []]
-        );
-        $field = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => $handle]);
-
-        $layout = FieldLayout::factory()->create();
-        $tab = Tab::factory()->create(['field_layout_id' => $layout->id]);
-        TabElement::factory()->create(['field_layout_tab_id' => $tab->id, 'field_id' => $field->id]);
-
-        $group = EntryGroup::factory()->create(['field_layout_id' => $layout->id]);
-        $type = EntryType::factory()->create(['entry_group_id' => $group->id, 'field_layout_id' => null]);
-        $entry = Entry::factory()->create(['entry_group_id' => $group->id, 'entry_type_id' => $type->id]);
-
-        return [$entry, $field];
-    }
-
-    /**
-     * Store a text value for the given field on the given entry.
-     */
-    private function storeTextValue(Entry $entry, Field $field, string $value): void
-    {
-        FieldValue::create([
-            'field_id' => $field->id,
-            'fieldable_id' => $entry->id,
-            'fieldable_type' => $entry->getMorphClass(),
-            'value_text' => $value,
-        ]);
-    }
-
     public function test_of_type_returns_self(): void
     {
         $type = EntryType::factory()->create();
@@ -138,10 +102,6 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertSame($builder, $builder->latest());
     }
 
-    // -------------------------------------------------------------------------
-    // inGroup()
-    // -------------------------------------------------------------------------
-
     public function test_in_group_filters_by_entry_group_model(): void
     {
         $group1 = EntryGroup::factory()->create();
@@ -168,6 +128,10 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertFalse($results->contains('id', $entry2->id));
     }
 
+    // -------------------------------------------------------------------------
+    // inGroup()
+    // -------------------------------------------------------------------------
+
     public function test_in_group_filters_by_group_id_integer(): void
     {
         $group1 = EntryGroup::factory()->create();
@@ -180,10 +144,6 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertTrue($results->contains('id', $entry1->id));
         $this->assertFalse($results->contains('id', $entry2->id));
     }
-
-    // -------------------------------------------------------------------------
-    // ofType()
-    // -------------------------------------------------------------------------
 
     public function test_of_type_filters_by_entry_type_model(): void
     {
@@ -213,6 +173,10 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertFalse($results->contains('id', $entry2->id));
     }
 
+    // -------------------------------------------------------------------------
+    // ofType()
+    // -------------------------------------------------------------------------
+
     public function test_of_type_filters_by_type_id_integer(): void
     {
         $group = EntryGroup::factory()->create();
@@ -226,10 +190,6 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertTrue($results->contains('id', $entry1->id));
         $this->assertFalse($results->contains('id', $entry2->id));
     }
-
-    // -------------------------------------------------------------------------
-    // published()
-    // -------------------------------------------------------------------------
 
     public function test_published_returns_entries_with_past_published_at_and_public_status(): void
     {
@@ -255,6 +215,10 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertFalse($results->contains('id', $future->id));
     }
 
+    // -------------------------------------------------------------------------
+    // published()
+    // -------------------------------------------------------------------------
+
     public function test_published_excludes_entries_with_null_published_at(): void
     {
         $draft = Entry::factory()->create([
@@ -279,10 +243,6 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertFalse($results->contains('id', $private->id));
     }
 
-    // -------------------------------------------------------------------------
-    // withStatus()
-    // -------------------------------------------------------------------------
-
     public function test_with_status_returns_matching_entries(): void
     {
         $active = Entry::factory()->create(['status_handle' => 'active']);
@@ -304,7 +264,7 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // withAuthor()
+    // withStatus()
     // -------------------------------------------------------------------------
 
     public function test_with_author_returns_entries_with_given_author(): void
@@ -335,6 +295,10 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertFalse($results->contains('id', $entry->id));
     }
 
+    // -------------------------------------------------------------------------
+    // withAuthor()
+    // -------------------------------------------------------------------------
+
     public function test_with_author_returns_empty_collection_when_no_entries_have_that_author(): void
     {
         Entry::factory()->create();
@@ -343,10 +307,6 @@ class EntryQueryBuilderTest extends TestCase
 
         $this->assertEmpty($results);
     }
-
-    // -------------------------------------------------------------------------
-    // withCategory()
-    // -------------------------------------------------------------------------
 
     public function test_with_category_returns_entries_with_given_category(): void
     {
@@ -374,6 +334,10 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertFalse($results->contains('id', $entry->id));
     }
 
+    // -------------------------------------------------------------------------
+    // withCategory()
+    // -------------------------------------------------------------------------
+
     public function test_with_category_returns_empty_collection_when_no_entries_have_that_category(): void
     {
         Entry::factory()->create();
@@ -382,10 +346,6 @@ class EntryQueryBuilderTest extends TestCase
 
         $this->assertEmpty($results);
     }
-
-    // -------------------------------------------------------------------------
-    // where()
-    // -------------------------------------------------------------------------
 
     public function test_where_filters_by_column_and_value(): void
     {
@@ -409,6 +369,10 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertCount(1, $results);
     }
 
+    // -------------------------------------------------------------------------
+    // where()
+    // -------------------------------------------------------------------------
+
     public function test_where_with_not_equal_operator_excludes_matching_row(): void
     {
         $entry = Entry::factory()->create(['status_handle' => 'draft']);
@@ -417,10 +381,6 @@ class EntryQueryBuilderTest extends TestCase
 
         $this->assertFalse($results->contains('id', $entry->id));
     }
-
-    // -------------------------------------------------------------------------
-    // orderBy() and latest()
-    // -------------------------------------------------------------------------
 
     public function test_order_by_ascending_returns_entries_in_correct_order(): void
     {
@@ -443,6 +403,10 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals($first->id, $results->first()->id);
         $this->assertEquals($second->id, $results->last()->id);
     }
+
+    // -------------------------------------------------------------------------
+    // orderBy() and latest()
+    // -------------------------------------------------------------------------
 
     public function test_order_by_descending_returns_entries_in_correct_order(): void
     {
@@ -470,10 +434,6 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals($older->id, $results->last()->id);
     }
 
-    // -------------------------------------------------------------------------
-    // get()
-    // -------------------------------------------------------------------------
-
     public function test_get_returns_a_collection(): void
     {
         Entry::factory()->count(3)->create();
@@ -491,6 +451,10 @@ class EntryQueryBuilderTest extends TestCase
 
         $this->assertCount(3, $results);
     }
+
+    // -------------------------------------------------------------------------
+    // get()
+    // -------------------------------------------------------------------------
 
     public function test_get_returns_empty_collection_when_no_entries_exist(): void
     {
@@ -539,10 +503,6 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertTrue($results->first()->relationLoaded('categories'));
     }
 
-    // -------------------------------------------------------------------------
-    // paginate()
-    // -------------------------------------------------------------------------
-
     public function test_paginate_returns_length_aware_paginator(): void
     {
         Entry::factory()->count(5)->create();
@@ -562,6 +522,10 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertCount(3, $paginator->items());
     }
 
+    // -------------------------------------------------------------------------
+    // paginate()
+    // -------------------------------------------------------------------------
+
     public function test_paginate_uses_default_per_page_of_fifteen(): void
     {
         Entry::factory()->count(20)->create();
@@ -580,10 +544,6 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(7, $paginator->total());
     }
 
-    // -------------------------------------------------------------------------
-    // first()
-    // -------------------------------------------------------------------------
-
     public function test_first_returns_entry_model_when_match_found(): void
     {
         $entry = Entry::factory()->create();
@@ -601,6 +561,10 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertNull($result);
     }
 
+    // -------------------------------------------------------------------------
+    // first()
+    // -------------------------------------------------------------------------
+
     public function test_first_eager_loads_relations(): void
     {
         Entry::factory()->create();
@@ -612,10 +576,6 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertTrue($result->relationLoaded('authors'));
         $this->assertTrue($result->relationLoaded('categories'));
     }
-
-    // -------------------------------------------------------------------------
-    // firstOrFail()
-    // -------------------------------------------------------------------------
 
     public function test_first_or_fail_returns_entry_model_when_match_found(): void
     {
@@ -634,6 +594,10 @@ class EntryQueryBuilderTest extends TestCase
         $this->builder()->where('id', 99999)->firstOrFail();
     }
 
+    // -------------------------------------------------------------------------
+    // firstOrFail()
+    // -------------------------------------------------------------------------
+
     public function test_first_or_fail_eager_loads_relations(): void
     {
         Entry::factory()->create();
@@ -644,10 +608,6 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertTrue($result->relationLoaded('authors'));
         $this->assertTrue($result->relationLoaded('categories'));
     }
-
-    // -------------------------------------------------------------------------
-    // count()
-    // -------------------------------------------------------------------------
 
     public function test_count_returns_zero_when_no_entries_exist(): void
     {
@@ -661,6 +621,10 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(4, $this->builder()->count());
     }
 
+    // -------------------------------------------------------------------------
+    // count()
+    // -------------------------------------------------------------------------
+
     public function test_count_respects_applied_filters(): void
     {
         Entry::factory()->count(3)->create(['status_handle' => 'active']);
@@ -668,10 +632,6 @@ class EntryQueryBuilderTest extends TestCase
 
         $this->assertEquals(3, $this->builder()->withStatus('active')->count());
     }
-
-    // -------------------------------------------------------------------------
-    // Method chaining
-    // -------------------------------------------------------------------------
 
     public function test_multiple_filters_can_be_chained_together(): void
     {
@@ -733,7 +693,7 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // whereField()
+    // Method chaining
     // -------------------------------------------------------------------------
 
     public function test_where_field_returns_self(): void
@@ -743,6 +703,46 @@ class EntryQueryBuilderTest extends TestCase
 
         $builder = $this->builder();
         $this->assertSame($builder, $builder->whereField('slug', 'hello'));
+    }
+
+    /**
+     * Create an Entry wired to a layout containing a single Text field with
+     * the given handle. Returns [$entry, $field] for use in assertions.
+     */
+    private function makeEntryWithTextField(string $handle): array
+    {
+        $fieldType = Type::firstOrCreate(
+            ['object' => Text::class],
+            ['name' => 'Text', 'settings' => []]
+        );
+        $field = Field::factory()->create(['field_type_id' => $fieldType->id, 'handle' => $handle]);
+
+        $layout = FieldLayout::factory()->create();
+        $tab = Tab::factory()->create(['field_layout_id' => $layout->id]);
+        TabElement::factory()->create(['field_layout_tab_id' => $tab->id, 'field_id' => $field->id]);
+
+        $group = EntryGroup::factory()->create(['field_layout_id' => $layout->id]);
+        $type = EntryType::factory()->create(['entry_group_id' => $group->id, 'field_layout_id' => null]);
+        $entry = Entry::factory()->create(['entry_group_id' => $group->id, 'entry_type_id' => $type->id]);
+
+        return [$entry, $field];
+    }
+
+    // -------------------------------------------------------------------------
+    // whereField()
+    // -------------------------------------------------------------------------
+
+    /**
+     * Store a text value for the given field on the given entry.
+     */
+    private function storeTextValue(Entry $entry, Field $field, string $value): void
+    {
+        FieldValue::create([
+            'field_id' => $field->id,
+            'fieldable_id' => $entry->id,
+            'fieldable_type' => $entry->getMorphClass(),
+            'value_text' => $value,
+        ]);
     }
 
     public function test_where_field_implicit_equals_returns_matching_entry(): void

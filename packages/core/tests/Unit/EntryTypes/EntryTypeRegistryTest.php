@@ -20,17 +20,6 @@ class EntryTypeRegistryTest extends TestCase
 
     private EntryTypeRegistry $registry;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed(EntryBehaviorSeeder::class);
-        $this->registry = app(EntryTypeRegistry::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // instantiate() — null behavior fallback
-    // -------------------------------------------------------------------------
-
     public function test_resolves_general_entry_type_when_behavior_is_null(): void
     {
         $record = EntryType::factory()->create(['entry_behavior_id' => null]);
@@ -41,7 +30,7 @@ class EntryTypeRegistryTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // instantiate() — invalid class (not AbstractEntryType subclass) still throws
+    // instantiate() — null behavior fallback
     // -------------------------------------------------------------------------
 
     public function test_throws_runtime_exception_when_class_does_not_extend_abstract_entry_type(): void
@@ -64,7 +53,7 @@ class EntryTypeRegistryTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // resolveByRecord() — caching
+    // instantiate() — invalid class (not AbstractEntryType subclass) still throws
     // -------------------------------------------------------------------------
 
     public function test_resolves_same_instance_for_same_record(): void
@@ -80,7 +69,7 @@ class EntryTypeRegistryTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // resolveByHandle() — normal path
+    // resolveByRecord() — caching
     // -------------------------------------------------------------------------
 
     public function test_resolves_by_handle(): void
@@ -95,7 +84,7 @@ class EntryTypeRegistryTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Cache convergence — resolveByHandle and resolveByRecord return same instance
+    // resolveByHandle() — normal path
     // -------------------------------------------------------------------------
 
     public function test_resolve_by_handle_and_resolve_by_record_return_same_instance(): void
@@ -110,6 +99,10 @@ class EntryTypeRegistryTest extends TestCase
         $this->assertSame($byHandle, $byRecord);
     }
 
+    // -------------------------------------------------------------------------
+    // Cache convergence — resolveByHandle and resolveByRecord return same instance
+    // -------------------------------------------------------------------------
+
     public function test_resolve_by_record_then_by_handle_return_same_instance(): void
     {
         $record = EntryType::factory()->create([
@@ -120,5 +113,12 @@ class EntryTypeRegistryTest extends TestCase
         $byHandle = $this->registry->resolveByHandle($record->handle);
 
         $this->assertSame($byRecord, $byHandle);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(EntryBehaviorSeeder::class);
+        $this->registry = app(EntryTypeRegistry::class);
     }
 }

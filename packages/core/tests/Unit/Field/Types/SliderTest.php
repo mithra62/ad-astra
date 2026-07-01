@@ -7,18 +7,18 @@ use Tests\TestCase;
 
 class SliderTest extends TestCase
 {
-    private function make(array $settings = []): Slider
+    public function test_storage_column_is_integer_when_decimals_is_zero(): void
     {
-        return new Slider($settings, null);
+        $this->assertSame('value_integer', $this->make(['decimals' => 0])->storageColumn());
     }
 
     // -------------------------------------------------------------------------
     // storageColumn — delegates to HasDecimalStorage trait
     // -------------------------------------------------------------------------
 
-    public function test_storage_column_is_integer_when_decimals_is_zero(): void
+    private function make(array $settings = []): Slider
     {
-        $this->assertSame('value_integer', $this->make(['decimals' => 0])->storageColumn());
+        return new Slider($settings, null);
     }
 
     public function test_storage_column_is_float_when_decimals_greater_than_zero(): void

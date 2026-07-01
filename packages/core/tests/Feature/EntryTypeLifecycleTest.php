@@ -82,6 +82,29 @@ class EntryTypeLifecycleTest extends TestCase
         $this->assertSame(1, SpyEntryType::$beforeUpdateCalls);
     }
 
+    /**
+     * Create a bare entry in the DB using the spy type, bypassing the service
+     * (so setUp hooks don't inflate the create counters for update tests).
+     */
+    private function makeEntry(): Entry
+    {
+        // Direct factory create — skips EntryService and its lifecycle hooks.
+        $entry = Entry::factory()->create([
+            'entry_group_id' => $this->type->entry_group_id,
+            'entry_type_id' => $this->type->id,
+            'title' => 'Original',
+        ]);
+
+        // Reset counters so update tests start from zero.
+        SpyEntryType::reset();
+
+        return $entry;
+    }
+
+    // -------------------------------------------------------------------------
+    // afterUpdate
+    // -------------------------------------------------------------------------
+
     public function test_before_update_mutation_is_persisted(): void
     {
         $entry = $this->makeEntry();
@@ -92,10 +115,6 @@ class EntryTypeLifecycleTest extends TestCase
         $this->assertDatabaseHas('entries', ['id' => $entry->id, 'title' => 'Updated [bu]']);
     }
 
-    // -------------------------------------------------------------------------
-    // afterUpdate
-    // -------------------------------------------------------------------------
-
     public function test_after_update_is_invoked(): void
     {
         $entry = $this->makeEntry();
@@ -104,6 +123,10 @@ class EntryTypeLifecycleTest extends TestCase
 
         $this->assertSame(1, SpyEntryType::$afterUpdateCalls);
     }
+
+    // -------------------------------------------------------------------------
+    // Hook ordering — create
+    // -------------------------------------------------------------------------
 
     public function test_after_update_receives_entry_with_new_title(): void
     {
@@ -114,10 +137,6 @@ class EntryTypeLifecycleTest extends TestCase
         // The returned entry should reflect the beforeUpdate mutation.
         $this->assertSame('Updated [bu]', $updated->title);
     }
-
-    // -------------------------------------------------------------------------
-    // Hook ordering — create
-    // -------------------------------------------------------------------------
 
     public function test_before_create_runs_before_after_create(): void
     {
@@ -130,6 +149,10 @@ class EntryTypeLifecycleTest extends TestCase
         $this->assertSame(0, SpyEntryType::$afterUpdateCalls);
     }
 
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
     public function test_before_update_runs_before_after_update(): void
     {
         $entry = $this->makeEntry();
@@ -141,10 +164,6 @@ class EntryTypeLifecycleTest extends TestCase
         $this->assertSame(1, SpyEntryType::$beforeUpdateCalls);
         $this->assertSame(1, SpyEntryType::$afterUpdateCalls);
     }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
 
     protected function setUp(): void
     {
@@ -179,24 +198,5 @@ class EntryTypeLifecycleTest extends TestCase
             'handle' => 'spy-type-' . uniqid(),
             'entry_behavior_id' => $behavior->id,
         ]);
-    }
-
-    /**
-     * Create a bare entry in the DB using the spy type, bypassing the service
-     * (so setUp hooks don't inflate the create counters for update tests).
-     */
-    private function makeEntry(): Entry
-    {
-        // Direct factory create — skips EntryService and its lifecycle hooks.
-        $entry = Entry::factory()->create([
-            'entry_group_id' => $this->type->entry_group_id,
-            'entry_type_id' => $this->type->id,
-            'title' => 'Original',
-        ]);
-
-        // Reset counters so update tests start from zero.
-        SpyEntryType::reset();
-
-        return $entry;
     }
 }

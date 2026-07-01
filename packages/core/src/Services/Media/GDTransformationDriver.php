@@ -77,6 +77,72 @@ class GDTransformationDriver implements TransformationDriverInterface
     // Resize modes
     // -------------------------------------------------------------------------
 
+    private function localPath(string $disk, string $path): string
+    {
+        $fullPath = Storage::disk($disk)->path($path);
+
+        if (!file_exists($fullPath)) {
+            throw new RuntimeException("Source file not found on disk '{$disk}': {$path}");
+        }
+
+        return $fullPath;
+    }
+
+    private function loadImage(string $path, ?string $mimeType): GdImage
+    {
+        $img = match (true) {
+            str_contains((string)$mimeType, 'png') => imagecreatefrompng($path),
+            str_contains((string)$mimeType, 'gif') => imagecreatefromgif($path),
+            str_contains((string)$mimeType, 'webp') => imagecreatefromwebp($path),
+            default => imagecreatefromjpeg($path),
+        };
+
+        if ($img === false) {
+            throw new RuntimeException("GD could not load image: {$path}");
+        }
+
+        return $img;
+    }
+
+    private function extensionFromPath(string $path): string
+    {
+        return strtolower(pathinfo($path, PATHINFO_EXTENSION)) ?: 'jpg';
+    }
+
+    // -------------------------------------------------------------------------
+    // GD helpers
+    // -------------------------------------------------------------------------
+
+    private function applyContain(GdImage $src, int $srcW, int $srcH, int $targetW, int $targetH): GdImage
+    {
+        $ratio = min($targetW / $srcW, $targetH / $srcH);
+        $newW = (int)round($srcW * $ratio);
+        $newH = (int)round($srcH * $ratio);
+
+        $dst = $this->newCanvas($newW, $newH);
+        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $srcW, $srcH);
+        return $dst;
+    }
+
+    private function newCanvas(int $w, int $h): GdImage
+    {
+        $img = imagecreatetruecolor($w, $h);
+        // Preserve transparency for PNG/GIF output.
+        imagealphablending($img, false);
+        imagesavealpha($img, true);
+        $transparent = imagecolorallocatealpha($img, 0, 0, 0, 127);
+        imagefilledrectangle($img, 0, 0, $w, $h, $transparent);
+        imagealphablending($img, true);
+        return $img;
+    }
+
+    private function applyExact(GdImage $src, int $srcW, int $srcH, int $targetW, int $targetH): GdImage
+    {
+        $dst = $this->newCanvas($targetW, $targetH);
+        imagecopyresampled($dst, $src, 0, 0, 0, 0, $targetW, $targetH, $srcW, $srcH);
+        return $dst;
+    }
+
     private function applyCover(GdImage $src, int $srcW, int $srcH, int $targetW, int $targetH): GdImage
     {
         $srcRatio = $srcW / $srcH;
@@ -105,56 +171,6 @@ class GDTransformationDriver implements TransformationDriverInterface
         return $dst;
     }
 
-    private function applyContain(GdImage $src, int $srcW, int $srcH, int $targetW, int $targetH): GdImage
-    {
-        $ratio = min($targetW / $srcW, $targetH / $srcH);
-        $newW = (int)round($srcW * $ratio);
-        $newH = (int)round($srcH * $ratio);
-
-        $dst = $this->newCanvas($newW, $newH);
-        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $srcW, $srcH);
-        return $dst;
-    }
-
-    private function applyExact(GdImage $src, int $srcW, int $srcH, int $targetW, int $targetH): GdImage
-    {
-        $dst = $this->newCanvas($targetW, $targetH);
-        imagecopyresampled($dst, $src, 0, 0, 0, 0, $targetW, $targetH, $srcW, $srcH);
-        return $dst;
-    }
-
-    // -------------------------------------------------------------------------
-    // GD helpers
-    // -------------------------------------------------------------------------
-
-    private function newCanvas(int $w, int $h): GdImage
-    {
-        $img = imagecreatetruecolor($w, $h);
-        // Preserve transparency for PNG/GIF output.
-        imagealphablending($img, false);
-        imagesavealpha($img, true);
-        $transparent = imagecolorallocatealpha($img, 0, 0, 0, 127);
-        imagefilledrectangle($img, 0, 0, $w, $h, $transparent);
-        imagealphablending($img, true);
-        return $img;
-    }
-
-    private function loadImage(string $path, ?string $mimeType): GdImage
-    {
-        $img = match (true) {
-            str_contains((string)$mimeType, 'png') => imagecreatefrompng($path),
-            str_contains((string)$mimeType, 'gif') => imagecreatefromgif($path),
-            str_contains((string)$mimeType, 'webp') => imagecreatefromwebp($path),
-            default => imagecreatefromjpeg($path),
-        };
-
-        if ($img === false) {
-            throw new RuntimeException("GD could not load image: {$path}");
-        }
-
-        return $img;
-    }
-
     private function saveImage(GdImage $img, string $path, string $format, int $quality): void
     {
         $ok = match (strtolower($format)) {
@@ -167,21 +183,5 @@ class GDTransformationDriver implements TransformationDriverInterface
         if ($ok === false) {
             throw new RuntimeException("GD could not save image to: {$path}");
         }
-    }
-
-    private function extensionFromPath(string $path): string
-    {
-        return strtolower(pathinfo($path, PATHINFO_EXTENSION)) ?: 'jpg';
-    }
-
-    private function localPath(string $disk, string $path): string
-    {
-        $fullPath = Storage::disk($disk)->path($path);
-
-        if (!file_exists($fullPath)) {
-            throw new RuntimeException("Source file not found on disk '{$disk}': {$path}");
-        }
-
-        return $fullPath;
     }
 }

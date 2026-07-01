@@ -27,6 +27,17 @@ class EntryTypeRegistry
         return $this->handleCache[$handle];
     }
 
+    private function instantiate(EntryTypeRecord $record): AbstractEntryType
+    {
+        $behavior = $record->entryBehavior;
+
+        if ($behavior === null) {
+            return new GeneralEntryType($record);
+        }
+
+        return $behavior->instance($record);
+    }
+
     public function resolveByRecord(EntryTypeRecord $record): AbstractEntryType
     {
         $handle = $record->handle;
@@ -38,16 +49,5 @@ class EntryTypeRegistry
         }
 
         return $this->handleCache[$handle];
-    }
-
-    private function instantiate(EntryTypeRecord $record): AbstractEntryType
-    {
-        $behavior = $record->entryBehavior;
-
-        if ($behavior === null) {
-            return new GeneralEntryType($record);
-        }
-
-        return $behavior->instance($record);
     }
 }

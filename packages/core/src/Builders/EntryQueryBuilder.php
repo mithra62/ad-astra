@@ -124,6 +124,25 @@ class EntryQueryBuilder
         return $this;
     }
 
+    public function first(): ?Entry
+    {
+        return $this->query->with($this->eagerLoad())->first();
+    }
+
+    private function eagerLoad(): array
+    {
+        return [
+            'entryGroup',
+            'entryType',
+            'creator',
+            'authors',
+            'categories',
+            'fieldValues.field.fieldType',
+            'entryRelationships.field',
+            'entryRelationships.relatedEntry',
+        ];
+    }
+
     public function latest(): static
     {
         return $this->orderBy('created_at', 'desc');
@@ -141,28 +160,9 @@ class EntryQueryBuilder
         return $this->query->with($this->eagerLoad())->get();
     }
 
-    private function eagerLoad(): array
-    {
-        return [
-            'entryGroup',
-            'entryType',
-            'creator',
-            'authors',
-            'categories',
-            'fieldValues.field.fieldType',
-            'entryRelationships.field',
-            'entryRelationships.relatedEntry',
-        ];
-    }
-
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return $this->query->with($this->eagerLoad())->paginate($perPage);
-    }
-
-    public function first(): ?Entry
-    {
-        return $this->query->with($this->eagerLoad())->first();
     }
 
     public function firstOrFail(): Entry
