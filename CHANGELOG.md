@@ -7,6 +7,7 @@ Release --
 - FIXED: Badly formatted templates that were causing issues (#39)
 - FIXED: Entry fillable exposes `created_by_user_id` (#22)
 - FIXED: BotBlock Needs Session Storage of Field Name (#23)
+- FIXED: Personal access token flashed in URL session flash string (#15)
 - UPDATED: Moved `app` logic to stand-alone composer package (#12)
 
 ### Version 0.0.1 (Alpha 1)
