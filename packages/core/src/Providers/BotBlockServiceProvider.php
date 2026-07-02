@@ -14,14 +14,17 @@ class BotBlockServiceProvider extends ServiceProvider
     {
         $this->app->singleton('bb-field', function ($app) {
             $value = md5(str()->random());
+            $field_name = '_' . str()->random();
+
+            session()->put('bb_field_name', $field_name);
             $params = [
                 'field_value' => $value,
-                'field_name' => '_' . str()->random(),
+                'field_name' => $field_name,
                 'ip_address' => app('request')->ip(),
             ];
 
             BbValue::create($params);
-            return $value;
+            return $params;
         });
     }
 

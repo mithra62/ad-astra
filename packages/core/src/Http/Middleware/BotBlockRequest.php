@@ -13,7 +13,7 @@ class BotBlockRequest
     {
         $user = Auth::user();
         if (strtolower($request->method()) === 'post' && !$user) {
-            $bb = BbValue::where(['field_value' => $request->post('__bb')])->first();
+            $bb = BbValue::where(['field_value' => $request->post(session('bb_field_name'))])->first();
             if (!$bb instanceof BbValue) {
                 abort(403);
             }
