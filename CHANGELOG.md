@@ -4,6 +4,7 @@
 Release --
 
 - ADDED: Additional Unit and Feature tests (#36)
+- FIXED: BotBlockRequest ignores PUT, PATCH, DELETE (#21)
 - FIXED: Badly formatted templates that were causing issues (#39)
 - FIXED: Entry fillable exposes `created_by_user_id` (#22)
 - FIXED: BotBlock Needs Session Storage of Field Name (#23)

@@ -12,7 +12,8 @@ class BotBlockRequest
     public function handle(Request $request, Closure $next): mixed
     {
         $user = Auth::user();
-        if (strtolower($request->method()) === 'post' && !$user) {
+        $modifying = in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'], true);
+        if ($modifying  && !$user) {
             $bb = BbValue::where(['field_value' => $request->post(session('bb_field_name'))])->first();
             if (!$bb instanceof BbValue) {
                 abort(403);
