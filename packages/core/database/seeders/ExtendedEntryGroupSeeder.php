@@ -18,7 +18,8 @@ use Illuminate\Support\Str;
 
 class ExtendedEntryGroupSeeder extends Seeder
 {
-    use BuildsLayouts, WithoutModelEvents;
+    use BuildsLayouts;
+    use WithoutModelEvents;
 
     public function run(): void
     {
@@ -44,6 +45,8 @@ class ExtendedEntryGroupSeeder extends Seeder
             'Details' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
         ]);
+
+        $this->attachFieldGroups($layout, ['content-fields', 'seo-fields', 'event-fields']);
 
         $group = EntryGroup::updateOrCreate(
             ['handle' => 'events'],
@@ -149,6 +152,8 @@ class ExtendedEntryGroupSeeder extends Seeder
             'SEO' => ['meta_title', 'meta_description'],
         ]);
 
+        $this->attachFieldGroups($layout, ['content-fields', 'seo-fields', 'news-fields']);
+
         $group = EntryGroup::updateOrCreate(
             ['handle' => 'news'],
             [
@@ -176,6 +181,8 @@ class ExtendedEntryGroupSeeder extends Seeder
             'Content' => ['body'],
             'SEO' => ['meta_title', 'meta_description'],
         ]);
+
+        $this->attachFieldGroups($layout, ['content-fields', 'seo-fields', 'page-fields']);
 
         $group = EntryGroup::updateOrCreate(
             ['handle' => 'pages'],
@@ -214,6 +221,8 @@ class ExtendedEntryGroupSeeder extends Seeder
             'SEO' => ['meta_title', 'meta_description'],
         ]);
 
+        $this->attachFieldGroups($layout, ['content-fields', 'seo-fields', 'job-fields']);
+
         $group = EntryGroup::updateOrCreate(
             ['handle' => 'jobs'],
             [
@@ -245,6 +254,8 @@ class ExtendedEntryGroupSeeder extends Seeder
             'SEO' => ['meta_title', 'meta_description'],
         ]);
 
+        $this->attachFieldGroups($layout, ['content-fields', 'seo-fields', 'podcast-fields']);
+
         $group = EntryGroup::updateOrCreate(
             ['handle' => 'podcast'],
             [
@@ -274,6 +285,8 @@ class ExtendedEntryGroupSeeder extends Seeder
             'Case Study' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
         ]);
+
+        $this->attachFieldGroups($layout, ['content-fields', 'seo-fields', 'portfolio-fields']);
 
         $group = EntryGroup::updateOrCreate(
             ['handle' => 'portfolio'],
@@ -309,6 +322,8 @@ class ExtendedEntryGroupSeeder extends Seeder
             'Video' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
         ]);
+
+        $this->attachFieldGroups($layout, ['content-fields', 'seo-fields', 'video-fields']);
 
         $group = EntryGroup::updateOrCreate(
             ['handle' => 'videos'],
@@ -348,6 +363,8 @@ class ExtendedEntryGroupSeeder extends Seeder
             'SEO' => ['meta_title', 'meta_description'],
         ]);
 
+        $this->attachFieldGroups($layout, ['content-fields', 'seo-fields', 'recipe-fields']);
+
         $group = EntryGroup::updateOrCreate(
             ['handle' => 'recipes'],
             [
@@ -386,6 +403,8 @@ class ExtendedEntryGroupSeeder extends Seeder
             'Content' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
         ]);
+
+        $this->attachFieldGroups($layout, ['content-fields', 'seo-fields']);
 
         $group = EntryGroup::updateOrCreate(
             ['handle' => 'general'],

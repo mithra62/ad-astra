@@ -36,6 +36,8 @@ class UserSchemaSeeder extends Seeder
             'Bio' => ['bio', 'social_twitter', 'social_linkedin'],
         ]);
 
+        $this->attachFieldGroups($layout, ['user-profile', 'user-bio']);
+
         app(Settings::class)->set('users', 'user_field_layout_id', $layout->id);
     }
 
@@ -166,5 +168,18 @@ class UserSchemaSeeder extends Seeder
         }
 
         return $layout;
+    }
+
+    /**
+     * Attach FieldGroups to a layout by handle, without detaching any groups
+     * already attached. Unknown handles are silently skipped.
+     *
+     * @param string[] $handles
+     */
+    private function attachFieldGroups(FieldLayout $layout, array $handles): void
+    {
+        $groupIds = FieldGroup::whereIn('handle', $handles)->pluck('id');
+
+        $layout->fieldGroups()->syncWithoutDetaching($groupIds);
     }
 }

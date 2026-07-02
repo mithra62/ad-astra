@@ -105,6 +105,7 @@ class CategoryGroupSeeder extends Seeder
             }
 
             $group->update(['field_layout_id' => $layout->id]);
+            $this->attachFieldGroups($layout, ['topic-fields']);
         }
 
         // --- Categories + field values ---------------------------------------
@@ -170,11 +171,24 @@ class CategoryGroupSeeder extends Seeder
                 [
                     'field_id' => $field->id,
                     'fieldable_id' => $category->id,
-                    'fieldable_type' => (new Category)->getMorphClass(),
+                    'fieldable_type' => (new Category())->getMorphClass(),
                 ],
                 [$column => $value]
             );
         }
+    }
+
+    /**
+     * Attach FieldGroups to a layout by handle, without detaching any groups
+     * already attached. Unknown handles are silently skipped.
+     *
+     * @param string[] $handles
+     */
+    private function attachFieldGroups(FieldLayout $layout, array $handles): void
+    {
+        $groupIds = FieldGroup::whereIn('handle', $handles)->pluck('id');
+
+        $layout->fieldGroups()->syncWithoutDetaching($groupIds);
     }
 
     // -------------------------------------------------------------------------
@@ -241,6 +255,7 @@ class CategoryGroupSeeder extends Seeder
             }
 
             $group->update(['field_layout_id' => $layout->id]);
+            $this->attachFieldGroups($layout, ['product-category-fields']);
         }
 
         // --- Root categories + field values ----------------------------------

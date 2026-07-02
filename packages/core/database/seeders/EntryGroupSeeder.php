@@ -13,7 +13,8 @@ use Illuminate\Database\Seeder;
 
 class EntryGroupSeeder extends Seeder
 {
-    use BuildsLayouts, WithoutModelEvents;
+    use BuildsLayouts;
+    use WithoutModelEvents;
 
     public function run(): void
     {
@@ -29,13 +30,14 @@ class EntryGroupSeeder extends Seeder
     private function seedBlogGroup(
         StatusGroup   $publication,
         CategoryGroup $topics,
-    ): void
-    {
+    ): void {
         $layout = $this->createLayout('Blog Layout', [
             'Content' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
             'Related' => ['related_entries'],
         ]);
+
+        $this->attachFieldGroups($layout, ['content-fields', 'seo-fields', 'relationship-fields']);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'blog'],
@@ -52,6 +54,7 @@ class EntryGroupSeeder extends Seeder
 
         // Add "Publishing" tab to the layout if not already present.
         $this->addTabIfMissing($group->field_layout_id, 'Publishing', ['reading_time'], 99);
+        $this->attachFieldGroups($layout, ['blog-fields']);
 
         EntryType::firstOrCreate(
             ['entry_group_id' => $group->id, 'handle' => 'blog_post'],
@@ -66,12 +69,13 @@ class EntryGroupSeeder extends Seeder
     private function seedProductsGroup(
         StatusGroup   $productStatus,
         CategoryGroup $productCategories,
-    ): void
-    {
+    ): void {
         $layout = $this->createLayout('Products Layout', [
             'Description' => ['body', 'excerpt'],
             'SEO' => ['meta_title', 'meta_description'],
         ]);
+
+        $this->attachFieldGroups($layout, ['content-fields', 'seo-fields', 'product-fields']);
 
         $group = EntryGroup::firstOrCreate(
             ['handle' => 'products'],
