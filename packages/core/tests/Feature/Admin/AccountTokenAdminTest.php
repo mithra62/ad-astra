@@ -76,12 +76,15 @@ class AccountTokenAdminTest extends TestCase
     // store
     // -------------------------------------------------------------------------
 
-    public function test_store_creates_token_and_redirects(): void
+    public function test_store_creates_token_and_renders_created_view(): void
     {
-        $this->actingAs($this->admin)
-            ->post(route('account.tokens.store'), ['name' => 'CI Token'])
-            ->assertRedirect(route('account.tokens.index'))
-            ->assertSessionHas('success');
+        $response = $this->actingAs($this->admin)
+            ->post(route('account.tokens.store'), ['name' => 'CI Token']);
+
+        $response->assertOk();
+        $response->assertViewIs('admin::account.tokens.created');
+        $response->assertSessionMissing('success');
+        $response->assertSee($response->viewData('new_token')->plainTextToken, false);
 
         $this->assertDatabaseHas('personal_access_tokens', [
             'tokenable_id' => $this->admin->id,

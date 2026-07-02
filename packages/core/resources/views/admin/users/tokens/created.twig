@@ -1,0 +1,86 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Access Token Created' %}
+{% set page_heading = 'Access Tokens' %}
+{% set active_nav = 'members' %}
+{% set active_user_section = 'users' %}
+{% set has_secondary_sidebar = true %}
+{% set active_secondary_nav = 'tokens' %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Users', href: route('users.index')},
+        {label: user.name, href: route('users.show', user)},
+        {label: 'Access Tokens', href: route('users.token.index', user)},
+        {label: 'Token Created'}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.users._sidebar') }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        {% embed 'admin._inc._page-header' with {title: 'Access Token Created', subtitle: 'Copy this token now — it will not be shown again.'} %}
+            {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Back to Access Tokens', route('users.token.index', user), 'secondary', icon='chevron-left') }}{% endblock %}
+        {% endembed %}
+
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <div class="flex items-start gap-3">
+                <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+                <div>
+                    <p class="text-sm font-semibold text-amber-800">This is the only time this token will be shown.</p>
+                    <p class="mt-1 text-sm text-amber-700">Copy it now and store it somewhere safe. Refreshing or leaving this page means it cannot be retrieved again — you would need to create a new token instead.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
+                <h5 class="text-sm font-semibold text-content">{{ new_token.accessToken.name }}</h5>
+            </div>
+            <div class="space-y-4 px-5 py-5">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-content" for="new-token-value">Access Token</label>
+                    <div class="flex items-center gap-2 rounded-md border border-edge bg-canvas px-3 py-2">
+                        <input id="new-token-value" type="text" readonly value="{{ new_token.plainTextToken }}"
+                               class="min-w-0 flex-1 border-0 bg-transparent p-0 font-mono text-sm text-content focus:outline-none focus:ring-0"
+                               onclick="this.select()">
+                        <button type="button" data-copy-target="new-token-value"
+                                class="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-edge bg-surface px-3 py-1.5 text-xs font-semibold text-content shadow-sm hover:bg-subtle">
+                            <span data-copy-label>Copy</span>
+                        </button>
+                    </div>
+                </div>
+                <dl class="grid grid-cols-1 gap-3 border-t border-edge pt-4 text-sm sm:grid-cols-2">
+                    <div class="flex items-center justify-between sm:flex-col sm:items-start sm:gap-0.5">
+                        <dt class="text-muted">Expires</dt>
+                        <dd class="text-content">
+                            {% if new_token.accessToken.expires_at %}
+                                {{ new_token.accessToken.expires_at.format('F j, Y') }}
+                            {% else %}
+                                <span class="text-faint">Never</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+            <a href="{{ route('users.token.create', user) }}"
+               class="rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-semibold text-content shadow-sm hover:bg-subtle">Create Another Token</a>
+            <a href="{{ route('users.token.index', user) }}"
+               class="rounded-md bg-emerald-600 px-4 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                Done — Back to Access Tokens
+            </a>
+        </div>
+    </div>
+{% endblock %}

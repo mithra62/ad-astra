@@ -117,6 +117,24 @@ window.attachHandleGenerator = function (sourceId, targetId) {
     }
 })();
 
+// Copy-to-clipboard button (users/tokens/created.twig, account/tokens/created.twig)
+(function () {
+    document.querySelectorAll('[data-copy-target]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var input = document.getElementById(button.getAttribute('data-copy-target'));
+            var label = button.querySelector('[data-copy-label]');
+            if (!input || !navigator.clipboard) return;
+
+            navigator.clipboard.writeText(input.value).then(function () {
+                if (!label) return;
+                var original = label.textContent;
+                label.textContent = 'Copied!';
+                setTimeout(function () { label.textContent = original; }, 2000);
+            });
+        });
+    });
+})();
+
 // Source: create-article.twig
 (function () {
     try {
