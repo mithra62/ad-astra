@@ -3,6 +3,7 @@
 namespace Database\Seeders\Concerns;
 
 use AdAstra\Models\Field;
+use AdAstra\Models\Field\Group as FieldGroup;
 use AdAstra\Models\FieldLayout;
 use AdAstra\Models\FieldLayout\Tab;
 use AdAstra\Models\FieldLayout\TabElement;
@@ -93,5 +94,19 @@ trait BuildsLayouts
                 'sort_order' => $order++,
             ]);
         }
+    }
+
+    /**
+     * Attach FieldGroups to a layout by handle, without detaching any groups
+     * already attached (e.g. by a manual admin edit, or an earlier call for
+     * the same layout). Unknown handles are silently skipped.
+     *
+     * @param string[] $handles
+     */
+    private function attachFieldGroups(FieldLayout $layout, array $handles): void
+    {
+        $groupIds = FieldGroup::whereIn('handle', $handles)->pluck('id');
+
+        $layout->fieldGroups()->syncWithoutDetaching($groupIds);
     }
 }
