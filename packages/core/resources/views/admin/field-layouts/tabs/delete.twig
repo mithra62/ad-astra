@@ -1,85 +1,117 @@
-{{ include('admin._inc._header', {title: 'Delete Tab'}) }}
-<main>
-    <div class="container-fluid">
-        <!-- Breadcrumb start -->
-        <div class="row m-1">
-            <div class="col-12">
-                <h5>Field Layouts</h5>
-                <div class="col-6">
-                    <ul class="app-line-breadcrumbs mb-3">
-                        <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('dashboard') }}">
-                                <span><i class="ph-duotone ph-table f-s-16"></i> Dashboard</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="f-s-14 f-w-500" href="{{ route('field-layouts') }}">Field Layouts</a>
-                        </li>
-                        <li>
-                            <a class="f-s-14 f-w-500"
-                               href="{{ route('field-layouts.edit', layout) }}">{{ layout.name }}</a>
-                        </li>
-                        <li class="active">
-                            <a class="f-s-14 f-w-500"
-                               href="{{ route('field-layouts.tabs.confirm', {layout_id: layout.id, tab_id: tab.id}) }}">Delete
-                                Tab</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <!-- Breadcrumb end -->
-        {{ include('admin._inc._message') }}
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
 
-        <div class="row">
-            {{ include('admin.field-layouts._sidebar', {active: layout.id}) }}
-            <div class="col-lg-8 col-xxl-9">
-                <form method="POST"
-                      action="{{ route('field-layouts.tabs.destroy', {layout_id: layout.id, tab_id: tab.id}) }}"
-                      class="row g-3 needs-validation" novalidate>
-                    {{ csrf_field() }}
-                    {{ method_field('DELETE') }}
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5>Delete Tab</h5>
-                            </div>
-                            <div class="card-body">
-                                <h6>Are you sure you want to remove the <strong>{{ tab.name }}</strong> tab from
-                                    <strong>{{ layout.name }}</strong>?</h6>
-                                <p class="text-secondary">
-                                    This will permanently remove the tab and all of its field assignments.
-                                    The fields themselves will not be deleted. This action cannot be undone.
-                                </p>
-                                {% if tab.elements_count > 0 %}
-                                    <div class="alert alert-warning">
-                                        <strong>Warning:</strong> This tab contains {{ tab.elements_count }}
-                                        field {{ tab.elements_count == 1 ? 'assignment' : 'assignments' }} that will be
-                                        removed.
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="card-footer">
-                                <div
-                                    class="switch-border-primary switch-primary switch-unchecked-primary my-3 card-body main-switch main-switch-color">
-                                    <input class="toggle switch-border-primary" name="confirm_removal"
-                                           id="confirm_removal" type="checkbox">
-                                    <label for="confirm_removal">Confirm Removal</label>
-                                    {% if errors.has('confirm_removal') %}
-                                        <p class="text-danger">{{ errors.first('confirm_removal') }}</p>
-                                    {% endif %}
-                                </div>
-                                <div class="col-12 float-end">
-                                    <a href="{{ route('field-layouts.edit', layout) }}"
-                                       class="btn btn-secondary">Cancel</a>
-                                    <button class="btn btn-danger ms-2" type="submit">Delete Tab</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+{% set page_title = 'Delete Tab' %}
+{% set page_heading = 'Field Layouts' %}
+{% set active_nav = 'settings' %}
+{% set active_secondary_nav = 'field_layouts' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Field Layouts', href: route('field-layouts')},
+        {label: layout.name, href: route('field-layouts.edit', layout)},
+        {label: tab.name, href: route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id})},
+        {label: 'Delete'}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.field-layouts._sidebar', {active: layout.id}) }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Delete Tab</h1>
+            <p class="mt-1 text-sm text-muted">Remove a tab and its field assignments from this layout.</p>
+        </div>
+        <a href="{{ route('field-layouts.edit', layout) }}"
+           class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">Cancel</a>
+    </div>
+
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div class="flex items-start gap-3">
+            <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            <div>
+                <p class="text-sm font-semibold text-red-800">This action cannot be undone.</p>
+                <p class="mt-1 text-sm text-red-700">Deleting the <strong>{{ tab.name }}</strong> tab from
+                    <strong>{{ layout.name }}</strong> permanently removes the tab and all of its field assignments. The
+                    fields themselves are not deleted.</p>
             </div>
         </div>
     </div>
-</main>
-{{ include('admin._inc._footer') }}
+
+    <form method="POST" action="{{ route('field-layouts.tabs.destroy', {layout_id: layout.id, tab_id: tab.id}) }}"
+          class="row g-3 needs-validation" novalidate>
+        {{ csrf_field() }}
+        {{ method_field('DELETE') }}
+        <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3"><h5 class="text-sm font-semibold text-content">Tab Being
+                            Deleted</h5></div>
+                    <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-muted">Name</dt>
+                            <dd class="font-semibold text-content">{{ tab.name }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-muted">Handle</dt>
+                            <dd class="text-content"><code>{{ tab.handle }}</code></dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-muted">Layout</dt>
+                            <dd class="text-content">{{ layout.name }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-muted">Field assignments</dt>
+                            <dd class="font-semibold text-content">{{ tab.elements_count }}</dd>
+                        </div>
+                    </dl>
+                    {% if tab.elements_count > 0 %}
+                        <div class="mx-5 mb-5 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                            <strong>Warning:</strong> this tab
+                            contains {{ tab.elements_count }} field {{ tab.elements_count == 1 ? 'assignment' : 'assignments' }}
+                            that will be removed.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-red-200 bg-surface shadow-sm">
+                    <div class="border-b border-red-100 bg-red-50 px-5 py-3"><h5
+                            class="text-sm font-semibold text-red-800">Confirm Deletion</h5></div>
+                    <div class="p-5">
+                        <div class="mb-4 rounded-md bg-subtle px-4 py-3 text-sm text-content">Select the toggle to
+                            confirm deletion of the <strong>{{ tab.name }}</strong> tab.
+                        </div>
+                        <label
+                            class="flex cursor-pointer items-center justify-between gap-4 rounded-md border {% if errors.has('confirm_removal') %} bg-red-300 border-red-300{% else %}bg-subtle border-edge{% endif %} px-4 py-3">
+                            <span class="text-sm font-medium text-content">I understand this tab will be permanently deleted</span>
+                            <input class="peer sr-only" type="checkbox" name="confirm_removal" required>
+                            <span
+                                class="h-6 w-11 shrink-0 rounded-full bg-slate-300 after:mt-1 after:ml-1 after:block after:h-4 after:w-4 after:rounded-full after:bg-surface after:shadow after:transition after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-red-500"></span>
+                        </label>
+                        {% if errors.has('confirm_removal') %}
+                            <p class="mt-2 text-sm text-red-600">{{ errors.first('confirm_removal') }}</p>
+                        {% endif %}
+                        <button type="submit"
+                                class="mt-5 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                            Permanently Delete Tab
+                        </button>
+                        <a href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}"
+                           class="mt-2 block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">Back
+                            to Edit</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

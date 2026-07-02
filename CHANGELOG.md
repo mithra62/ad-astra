@@ -4,6 +4,7 @@
 Release --
 
 - ADDED: Additional Unit and Feature tests (#36)
+- FIXES: Badly formatted templates that were causing issues (#39)
 - CHANGED: Moved `app` logic to stand-alone composer package (#12)
 
 ### Version 0.0.1 (Alpha 1)

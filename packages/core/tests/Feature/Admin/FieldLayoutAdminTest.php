@@ -70,10 +70,15 @@ class FieldLayoutAdminTest extends TestCase
         $this->actingAs($this->admin)->get(route('field-layouts.edit', 999999))->assertNotFound();
     }
 
-    // NOTE: the happy-path confirm render is not asserted here — the
-    // field-layouts/delete.twig template is broken (it includes the
-    // non-existent 'admin._inc._header' partial and 500s). Tracked separately;
-    // the missing-record guard branch below runs before the view renders.
+    public function test_confirm_renders(): void
+    {
+        $layout = FieldLayout::factory()->create();
+
+        $this->actingAs($this->admin)
+            ->get(route('field-layouts.confirm', $layout->id))
+            ->assertOk()
+            ->assertSee('Delete Field Layout');
+    }
 
     public function test_confirm_missing_layout_redirects_with_failure(): void
     {

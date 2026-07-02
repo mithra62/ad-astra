@@ -126,10 +126,19 @@ class FieldLayoutTabElementAdminTest extends TestCase
     // confirm (render)
     // -------------------------------------------------------------------------
 
-    // NOTE: the happy-path confirm render is not asserted — the
-    // field-layouts/tabs/elements/delete.twig template is broken (includes the
-    // non-existent 'admin._inc._header' partial and 500s). Tracked separately.
-    // The scoping guard below runs before the view renders.
+    public function test_confirm_renders(): void
+    {
+        $layout = $this->layout();
+        $tab = $this->tabIn($layout);
+        $element = $this->elementIn($tab);
+
+        $this->actingAs($this->admin)
+            ->get(route('field-layouts.tabs.elements.confirm', [
+                'layout_id' => $layout->id, 'tab_id' => $tab->id, 'element_id' => $element->id,
+            ]))
+            ->assertOk()
+            ->assertSee('Remove Field');
+    }
 
     public function test_confirm_returns_404_when_element_belongs_to_another_tab(): void
     {
