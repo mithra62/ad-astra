@@ -25,8 +25,12 @@ class User extends Controller
     public function index()
     {
         $users = Users::paginate(20);
-
-        return $this->view('users.index', ['users' => $users]);
+        $variables = [
+            'users' => $users,
+            'total_users' => Users::getTotal(),
+            'total_active_users' => Users::getTotal(['status' => 'active']),
+        ];
+        return $this->view('users.index', $variables);
     }
 
     /**

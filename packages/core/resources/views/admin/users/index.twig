@@ -22,8 +22,8 @@
     {% endembed %}
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {{ ui.stat_card('Total Users', 128) }}
-        {{ ui.stat_card('Active', 112) }}
+        {{ ui.stat_card('Total Users', total_users) }}
+        {{ ui.stat_card('Active', total_active_users) }}
         {{ ui.stat_card('Pending Invites', 9) }}
         {{ ui.stat_card('Admins', 6) }}
     </div>

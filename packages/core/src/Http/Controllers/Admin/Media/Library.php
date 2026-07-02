@@ -15,6 +15,7 @@ use AdAstra\Http\Requests\Media\Library\UploadMediaRequest;
 use AdAstra\Models\Category\Group as CategoryGroup;
 use AdAstra\Models\Media\Library as LibraryModel;
 use AdAstra\Models\StatusGroup;
+use AdAstra\Models\Media;
 
 class Library extends Controller
 {
@@ -23,8 +24,14 @@ class Library extends Controller
      */
     public function index()
     {
-        $libraries = LibraryModel::with('statusGroup')->paginate(20);
-        return $this->view('media.libraries.index', ['libraries' => $libraries]);
+        $libraries = LibraryModel::withCount('media')->with('statusGroup')->paginate(20);
+        $variables = [
+            'libraries' => $libraries,
+            'total_libraries' => LibraryModel::count(),
+            'total_media' => Media::count(),
+            'total_size' => Media::sum('size')
+        ];
+        return $this->view('media.libraries.index', $variables);
     }
 
     /**

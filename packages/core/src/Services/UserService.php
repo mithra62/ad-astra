@@ -599,4 +599,13 @@ class UserService
 
         return $query->orderByDesc('created_at')->get();
     }
+
+    public function getTotal(array $where = []): int
+    {
+        if($where) {
+            return User::where($where)->count();
+        }
+
+        return User::count();
+    }
 }
