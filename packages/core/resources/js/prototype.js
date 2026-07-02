@@ -123,7 +123,20 @@ window.attachHandleGenerator = function (sourceId, targetId) {
         button.addEventListener('click', function () {
             var input = document.getElementById(button.getAttribute('data-copy-target'));
             var label = button.querySelector('[data-copy-label]');
-            if (!input || !navigator.clipboard) return;
+            if (!input) return;
+
+            // navigator.clipboard requires a secure context (HTTPS or localhost) —
+            // unavailable on plain-HTTP dev hosts. Select the text and say so
+            // instead of silently doing nothing.
+            if (!navigator.clipboard) {
+                input.select();
+                if (label) {
+                    var fallbackOriginal = label.textContent;
+                    label.textContent = 'Press Ctrl+C to copy';
+                    setTimeout(function () { label.textContent = fallbackOriginal; }, 3000);
+                }
+                return;
+            }
 
             navigator.clipboard.writeText(input.value).then(function () {
                 if (!label) return;
