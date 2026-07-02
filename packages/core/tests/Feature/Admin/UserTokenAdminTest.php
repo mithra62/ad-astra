@@ -82,19 +82,30 @@ class UserTokenAdminTest extends TestCase
     // store
     // -------------------------------------------------------------------------
 
-    public function test_store_creates_token_and_redirects(): void
+    public function test_store_creates_token_and_renders_created_view(): void
     {
         $user = User::factory()->create();
 
-        $this->actingAs($this->admin)
-            ->post(route('users.token.store', $user->id), ['name' => 'CI Token'])
-            ->assertRedirect(route('users.edit', $user->id))
-            ->assertSessionHas('success');
+        $response = $this->actingAs($this->admin)
+            ->post(route('users.token.store', $user->id), ['name' => 'CI Token']);
+
+        $response->assertOk();
+        $response->assertViewIs('admin::users.tokens.created');
+        $response->assertSessionMissing('success');
+        $response->assertSee($response->viewData('new_token')->plainTextToken, false);
 
         $this->assertDatabaseHas('personal_access_tokens', [
             'tokenable_id' => $user->id,
             'name' => 'CI Token',
         ]);
+    }
+
+    public function test_store_missing_user_redirects_with_failure(): void
+    {
+        $this->actingAs($this->admin)
+            ->post(route('users.token.store', 999999), ['name' => 'CI Token'])
+            ->assertRedirect(route('users.index'))
+            ->assertSessionHas('failure');
     }
 
     public function test_store_requires_name(): void

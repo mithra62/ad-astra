@@ -117,6 +117,37 @@ window.attachHandleGenerator = function (sourceId, targetId) {
     }
 })();
 
+// Copy-to-clipboard button (users/tokens/created.twig, account/tokens/created.twig)
+(function () {
+    document.querySelectorAll('[data-copy-target]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var input = document.getElementById(button.getAttribute('data-copy-target'));
+            var label = button.querySelector('[data-copy-label]');
+            if (!input) return;
+
+            // navigator.clipboard requires a secure context (HTTPS or localhost) —
+            // unavailable on plain-HTTP dev hosts. Select the text and say so
+            // instead of silently doing nothing.
+            if (!navigator.clipboard) {
+                input.select();
+                if (label) {
+                    var fallbackOriginal = label.textContent;
+                    label.textContent = 'Press Ctrl+C to copy';
+                    setTimeout(function () { label.textContent = fallbackOriginal; }, 3000);
+                }
+                return;
+            }
+
+            navigator.clipboard.writeText(input.value).then(function () {
+                if (!label) return;
+                var original = label.textContent;
+                label.textContent = 'Copied!';
+                setTimeout(function () { label.textContent = original; }, 2000);
+            });
+        });
+    });
+})();
+
 // Source: create-article.twig
 (function () {
     try {

@@ -32,13 +32,14 @@ class Token extends AdminController
     public function store(StoreUserTokenRequest $request, string $id)
     {
         $user = Users::find((int)$id);
-        $token = '';
-        if ($user instanceof UserModel) {
-            $creator = app(CreateNewUserToken::class);
-            $token = $creator->create($user, $request->validated())->plainTextToken;
+        if (!$user instanceof UserModel) {
+            return redirect()->route('users.index')->with('failure', 'user.not_found');
         }
 
-        return redirect()->route('users.edit', $user)->with('success', __('user.token_created') . ' - ' . $token);
+        $creator = app(CreateNewUserToken::class);
+        $newToken = $creator->create($user, $request->validated());
+
+        return $this->view('users.tokens.created', ['user' => $user, 'new_token' => $newToken]);
     }
 
     /**

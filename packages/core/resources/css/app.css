@@ -1,0 +1,84 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@import './prototype.css';
+
+/* Class-based dark mode: `dark:` applies under a `.dark` ancestor (set on <html>).
+   Kept as an escape hatch for one-off tweaks; day-to-day theming uses the
+   semantic tokens below, which flip automatically under `.dark`. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Semantic color tokens. Each resolves to a light value by default and a dark
+ * value under `.dark` (toggled on <html> by the inline theme script in the
+ * layouts). Templates use bg-surface / text-content / border-edge / text-accent
+ * etc. and pick up dark mode automatically — no per-element `dark:` variants.
+ */
+@theme inline {
+    --color-canvas: var(--app-canvas);
+    --color-surface: var(--app-surface);
+    --color-subtle: var(--app-subtle);
+    --color-content: var(--app-content);
+    --color-muted: var(--app-muted);
+    --color-faint: var(--app-faint);
+    --color-edge: var(--app-edge);
+    --color-accent: var(--app-accent);
+    --color-accent-soft: var(--app-accent-soft);
+}
+
+:root {
+    --app-canvas: #f1f5f9;       /* slate-100  */
+    --app-surface: #ffffff;      /* white      */
+    --app-subtle: #f8fafc;       /* slate-50   */
+    --app-content: #0f172a;      /* slate-900  */
+    --app-muted: #475569;        /* slate-600  */
+    --app-faint: #94a3b8;        /* slate-400  */
+    --app-edge: #e2e8f0;         /* slate-200  */
+    --app-accent: #047857;       /* emerald-700 */
+    --app-accent-soft: #ecfdf5;  /* emerald-50  */
+}
+
+.dark {
+    --app-canvas: #0f172a;       /* slate-900  */
+    --app-surface: #1e293b;      /* slate-800  */
+    --app-subtle: #334155;       /* slate-700  */
+    --app-content: #f1f5f9;      /* slate-100  */
+    --app-muted: #cbd5e1;        /* slate-300  */
+    --app-faint: #64748b;        /* slate-500  */
+    --app-edge: #334155;         /* slate-700  */
+    --app-accent: #6ee7b7;       /* emerald-300 */
+    --app-accent-soft: color-mix(in srgb, #10b981 12%, transparent);
+}
+
+/*
+ * Theme text-like form controls through the tokens. @tailwindcss/forms paints
+ * these white by default, which breaks in dark mode; this drives their surface,
+ * border, and text off the same variables. Explicit background/text utilities
+ * still win (utilities layer beats base), so per-field overrides keep working.
+ * Checkbox/radio/range/color/file are excluded so the forms plugin keeps owning
+ * their checked/track styling.
+ */
+@layer base {
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
+    select:not([hidden]),
+    textarea:not([hidden]) {
+        background-color: var(--app-surface);
+        border-color: var(--app-edge);
+        color: var(--app-content);
+    }
+
+    ::placeholder {
+        color: var(--app-faint);
+        opacity: 1;
+    }
+}
+
+@source '../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../../storage/framework/views/*.php';
+@source '../**/*.twig';
+@source '../**/*.js';
+@source '../../../resources/**/*.blade.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
+}

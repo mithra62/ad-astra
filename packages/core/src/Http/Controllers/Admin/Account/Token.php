@@ -24,13 +24,14 @@ class Token extends AdminController
     public function store(StoreAccountTokenRequest $request)
     {
         $user = Auth::user();
-        $token = '';
-        if ($user instanceof UserModel) {
-            $creator = app(CreateNewUserToken::class);
-            $token = $creator->create($user, $request->validated())->plainTextToken;
+        if (!$user instanceof UserModel) {
+            abort(404);
         }
 
-        return redirect()->route('account.tokens.index')->with('success', __('account.token_created') . ' - ' . $token);
+        $creator = app(CreateNewUserToken::class);
+        $newToken = $creator->create($user, $request->validated());
+
+        return $this->view('account.tokens.created', ['new_token' => $newToken]);
     }
 
     /**

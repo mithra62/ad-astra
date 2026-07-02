@@ -30,7 +30,7 @@ class EntryTest extends TestCase
         $entry = new Entry;
 
         $this->assertEquals(
-            ['entry_group_id', 'entry_type_id', 'status_id', 'status_handle', 'status_is_public', 'created_by_user_id', 'title', 'handle', 'published_at'],
+            ['entry_group_id', 'entry_type_id', 'status_id', 'status_handle', 'status_is_public', 'title', 'handle', 'published_at'],
             $entry->getFillable()
         );
     }
