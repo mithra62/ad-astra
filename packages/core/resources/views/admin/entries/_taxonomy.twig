@@ -1,3 +1,4 @@
+{% import 'admin._inc._form-fields' as forms %}
 <div id="tab-taxonomy" class="tab-panel" role="tabpanel" aria-labelledby="btn-taxonomy" data-tab-panel="taxonomy"
      hidden>
 
@@ -6,26 +7,28 @@
         <!-- Authors -->
         <div class="px-5 py-5">
             <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-faint">Authors</h5>
-            <label class="mb-1.5 block text-sm font-medium text-content" for="authors">Assign Authors</label>
             {% if authors is not empty %}
-                <select
-                    class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                    id="authors" name="authors[]" multiple size="5" data-tab-dirty="taxonomy">
-                    {% for author in authors %}
-                        <option value="{{ author.user_id }}"
-                            {% if entry is defined %}
-                                {% for assigned in entry.authors %}
-                                    {% if assigned.user_id == author.user_id %}selected{% endif %}
-                                {% endfor %}
-                            {% elseif old('authors') %}
-                                {% for key, val in old('authors') %}
-                                    {% if val == author.user_id %}selected{% endif %}
-                                {% endfor %}
-                            {% endif %}
-                        >{{ author.display_name }}</option>
+                {% set author_options = [] %}
+                {% for author in authors %}
+                    {% set author_options = author_options|merge([{value: author.user_id, label: author.display_name}]) %}
+                {% endfor %}
+                {% set selected_author_ids = [] %}
+                {% if entry is defined %}
+                    {% for assigned in entry.authors %}
+                        {% set selected_author_ids = selected_author_ids|merge([assigned.user_id]) %}
                     {% endfor %}
-                </select>
-                <p class="mt-1 text-xs text-faint">Hold Ctrl / Cmd to select multiple authors.</p>
+                {% endif %}
+                {{ forms.select(
+                    name='authors[]',
+                    label='Assign Authors',
+                    options=author_options,
+                    value=selected_author_ids,
+                    id='authors',
+                    multiple=true,
+                    enhanced=true,
+                    placeholder='Search authors…',
+                    attrs='data-tab-dirty="taxonomy"'
+                ) }}
             {% else %}
                 <p class="text-sm text-faint italic">No eligible authors yet. Mark users as authors from the <a
                         href="{{ route('users.index') }}" class="text-emerald-600 hover:underline">Users</a> section.

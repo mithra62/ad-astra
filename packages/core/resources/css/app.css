@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @import './prototype.css';
+@import './choices-theme.css';
 
 /* Class-based dark mode: `dark:` applies under a `.dark` ancestor (set on <html>).
    Kept as an escape hatch for one-off tweaks; day-to-day theming uses the

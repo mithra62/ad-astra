@@ -158,7 +158,7 @@
     </div>
 {% endmacro %}
 
-{% macro select(name, label, options, value, description, id, error_key, multiple, required=false) %}
+{% macro select(name, label, options, value, description, id, error_key, multiple, required=false, enhanced=false, placeholder=null, attrs='') %}
     {% set field_id = id|default(name|replace({'[': '_', ']': '', '.': '_'})) %}
     {% set field_error_key = error_key|default(name|replace({'[]': '', '[': '.', ']': ''})) %}
     {% if multiple %}
@@ -173,7 +173,9 @@
         <select
             class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if has_error %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
             id="{{ field_id }}" name="{{ name }}"
-            {% if multiple %}multiple{% endif %} {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}>
+            {% if multiple %}multiple{% endif %} {% if has_error %}aria-invalid="true" aria-describedby="{{ field_id }}_error"{% endif %}
+            {% if enhanced %}data-choices {% if placeholder %}data-choices-placeholder="{{ placeholder }}"{% endif %}{% endif %}
+            {{ attrs|raw }}>
             {% if not multiple %}
                 <option value="">— Select —</option>
             {% endif %}

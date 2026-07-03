@@ -1,4 +1,5 @@
 import './prototype.js';
+import Choices from 'choices.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const activeClasses = [
@@ -152,5 +153,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         syncToggle();
+    });
+
+    document.querySelectorAll('[data-choices]').forEach((select) => {
+        new Choices(select, {
+            removeItemButton: true,
+            searchEnabled: true,
+            shouldSort: false,
+            placeholderValue: select.dataset.choicesPlaceholder || 'Search…',
+            noResultsText: 'No matches found',
+            noChoicesText: 'No options to choose from',
+        });
     });
 });

@@ -153,6 +153,28 @@ class EntryAdminTest extends TestCase
         $this->actingAs($this->admin)->get(route('entries.edit', $entry->id))->assertOk();
     }
 
+    public function test_edit_renders_assign_authors_field_with_eligible_authors(): void
+    {
+        $group = $this->group();
+        $entry = $this->entryIn($group);
+        // The taxonomy tab (which contains Assign Authors) only renders when
+        // the group has at least one category group (see edit.twig:140) —
+        // unrelated to authors, but required to reach the tab at all.
+        $group->categoryGroups()->attach(\AdAstra\Models\Category\Group::factory()->create());
+        $author = \AdAstra\Models\EntryAuthor::factory()->create([
+            'status' => 'active',
+            'display_name' => 'Temp Verification Author',
+        ]);
+        $entry->authors()->attach($author->id);
+
+        $response = $this->actingAs($this->admin)->get(route('entries.edit', $entry->id));
+
+        $response->assertOk();
+        $response->assertSee('data-choices', false);
+        $response->assertSee('Temp Verification Author', false);
+        $response->assertSee('authors[]', false);
+    }
+
     public function test_edit_returns_404_for_missing_entry(): void
     {
         $this->actingAs($this->admin)->get(route('entries.edit', 999999))->assertNotFound();
