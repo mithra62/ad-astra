@@ -48,6 +48,7 @@
                 <div class="space-y-5 px-5 py-5">
                     {{ forms.input(name='name', label='Name', required=true, placeholder="") }}
                     {{ forms.input('handle', 'Handle', required=true, description="Lowercase letters, numbers, and hyphens only.") }}
+                    {{ forms.textarea('description', 'Description', placeholder="Describe this Field Group") }}
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-content" for="field_layout_id">Field
