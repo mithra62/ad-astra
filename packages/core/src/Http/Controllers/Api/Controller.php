@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 /**
  * @OA\Info(
  *      version="1.0.0",
- *      title="Magic Program",
- *      description="API documentation for Magic Program",
+ *      title="Ad Astra REST API",
+ *      description="API documentation for Ad Astra REST API",
  * )
  * @OA\SecurityScheme(
  *      securityScheme="sanctum",
