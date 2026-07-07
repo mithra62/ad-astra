@@ -38,6 +38,7 @@ use AdAstra\Services\CategoryService;
 use AdAstra\Services\EntryAuthorService;
 use AdAstra\Services\FieldService;
 use AdAstra\Services\FilesService;
+use AdAstra\Services\GateBypassRecorder;
 use AdAstra\Services\Media\GDTransformationDriver;
 use AdAstra\Services\Media\ImagickTransformationDriver;
 use AdAstra\Services\Media\NullTransformationDriver;
@@ -51,6 +52,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -81,7 +83,7 @@ class AppServiceProvider extends ServiceProvider
         //
         // model -> factory, e.g. AdAstra\Models\Entry -> Database\Factories\EntryFactory
         Factory::guessFactoryNamesUsing(
-            fn(string $modelName) => 'Database\\Factories\\'
+            fn (string $modelName) => 'Database\\Factories\\'
                 . Str::after($modelName, 'AdAstra\\Models\\') . 'Factory'
         );
         // factory -> model (for factories that omit $model), e.g.
@@ -99,7 +101,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Bind by class name so constructor injection works in controllers,
         // then alias to 'settings' for backwards-compatible app('settings') calls.
-        $this->app->singleton(Settings::class, fn() => new Settings());
+        $this->app->singleton(Settings::class, fn () => new Settings());
         $this->app->alias(Settings::class, 'settings');
 
         $this->app->singleton('api', function ($app) {
@@ -114,9 +116,10 @@ class AppServiceProvider extends ServiceProvider
             return new FieldService($app);
         });
 
-        $this->app->singleton(UserService::class, fn() => new UserService());
-        $this->app->singleton(CategoryService::class, fn($app) => new CategoryService($app));
-        $this->app->singleton(EntryAuthorService::class, fn() => new EntryAuthorService());
+        $this->app->singleton(UserService::class, fn () => new UserService());
+        $this->app->singleton(GateBypassRecorder::class, fn () => new GateBypassRecorder());
+        $this->app->singleton(CategoryService::class, fn ($app) => new CategoryService($app));
+        $this->app->singleton(EntryAuthorService::class, fn () => new EntryAuthorService());
 
         // Media layer
         $this->app->bind(TransformationDriverInterface::class, function () {
@@ -128,7 +131,7 @@ class AppServiceProvider extends ServiceProvider
             }
             return new NullTransformationDriver();
         });
-        $this->app->singleton('media-service', fn() => new MediaStorageService());
+        $this->app->singleton('media-service', fn () => new MediaStorageService());
 
         // Schema macro for the status-denormalization column triple. FK to
         // `statuses` is intentionally NOT included — this codebase uses a
@@ -243,8 +246,30 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Paginator::useTailwind();
-        Gate::before(function ($user, $ability) {
-            return $user->hasRole('super admin') ? true : null;
+
+        // Super admin gate bypass, with an audit trail. Spatie caches the
+        // roles relation on the model instance after first load, so repeated
+        // hasRole() calls within a request do not re-query.
+        Gate::before(function ($user, $ability, array $arguments = []) {
+            if (!$user->hasRole('super admin')) {
+                return null; // zero added work for non-super-admins
+            }
+
+            app(GateBypassRecorder::class)->record($user, $ability, $arguments);
+
+            return true;
         });
+
+        // Flush the gate-bypass audit buffer after the response is sent
+        // (terminating covers HTTP + artisan) and after every queue job —
+        // long-running workers never call terminate() per job, and flushing
+        // per job attributes rows to the job that produced them.
+        $this->app->terminating(fn () => app(GateBypassRecorder::class)->flush());
+        Queue::after(fn ($event) => app(GateBypassRecorder::class)->flush([
+            'job' => $event->job->resolveName(),
+        ]));
+        Queue::failing(fn ($event) => app(GateBypassRecorder::class)->flush([
+            'job' => $event->job->resolveName(),
+        ]));
     }
 }
