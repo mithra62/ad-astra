@@ -4,6 +4,7 @@
 Release --
 
 - ADDED: Additional Unit and Feature tests (#36)
+- ADDED: Super Admin bypass log (#30)
 - FIXED: Seeders and Field Layouts so Field Groups were aligned (#42)
 - FIXED: BotBlockRequest ignores PUT, PATCH, DELETE (#21)
 - FIXED: Badly formatted templates that were causing issues (#39)

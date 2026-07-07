@@ -149,7 +149,7 @@ return [
                 'group' => 'Appearance',
                 'hidden' => false,
                 'user_overridable' => true,
-                'options_callback' => static fn() => [
+                'options_callback' => static fn () => [
                     ['value' => 'light', 'label' => 'Light'],
                     ['value' => 'dark', 'label' => 'Dark'],
                     ['value' => 'system', 'label' => 'System'],
@@ -259,8 +259,8 @@ return [
                 'group' => 'Accounts',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn() => array_map(
-                    fn($s) => ['value' => $s, 'label' => UserStatus::label($s)],
+                'options_callback' => static fn () => array_map(
+                    fn ($s) => ['value' => $s, 'label' => UserStatus::label($s)],
                     UserStatus::ALL
                 ),
             ],
@@ -274,8 +274,8 @@ return [
                 'group' => 'Accounts',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn() => array_map(
-                    fn($s) => ['value' => $s, 'label' => UserStatus::label($s)],
+                'options_callback' => static fn () => array_map(
+                    fn ($s) => ['value' => $s, 'label' => UserStatus::label($s)],
                     UserStatus::ALL
                 ),
             ],
@@ -289,10 +289,56 @@ return [
                 'group' => 'Schema',
                 'hidden' => false,
                 'user_overridable' => false,
-                'options_callback' => static fn() => FieldLayout::orderBy('name')
+                'options_callback' => static fn () => FieldLayout::orderBy('name')
                     ->get()
-                    ->map(fn($l) => ['value' => $l->id, 'label' => $l->name])
+                    ->map(fn ($l) => ['value' => $l->id, 'label' => $l->name])
                     ->toArray(),
+            ],
+        ],
+    ],
+
+    // -------------------------------------------------------------------------
+    // Security
+    // -------------------------------------------------------------------------
+
+    'security' => [
+        'name' => 'Security',
+        'description' => 'Security auditing and access-control configuration.',
+        'icon' => 'ti-shield-lock',
+        'sort_order' => 11,
+        'fields' => [
+            [
+                'handle' => 'gate_bypass_log_enabled',
+                'label' => 'Log Super Admin Gate Bypasses',
+                'type' => 'boolean',
+                'default' => true,
+                'rules' => [],
+                'instructions' => 'Record an audit entry whenever the super admin role bypasses an authorization check.',
+                'group' => 'Audit',
+                'hidden' => false,
+                'user_overridable' => false,
+            ],
+            [
+                'handle' => 'gate_bypass_log_include_reads',
+                'label' => 'Include Read Requests',
+                'type' => 'boolean',
+                'default' => false,
+                'rules' => [],
+                'instructions' => 'Also log bypasses on GET/HEAD/OPTIONS requests. Off by default — read-request bypasses are mostly passive UI checks (navigation visibility, button rendering).',
+                'group' => 'Audit',
+                'hidden' => false,
+                'user_overridable' => false,
+            ],
+            [
+                'handle' => 'gate_bypass_log_retention_days',
+                'label' => 'Gate Bypass Log Retention (Days)',
+                'type' => 'integer',
+                'default' => 365,
+                'rules' => ['required', 'integer', 'min:0', 'max:3650'],
+                'instructions' => 'Days to keep gate bypass audit entries. Set to 0 to keep them forever.',
+                'group' => 'Audit',
+                'hidden' => false,
+                'user_overridable' => false,
             ],
         ],
     ],
