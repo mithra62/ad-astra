@@ -1,31 +1,25 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "adastra/adastra",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "AdAstra — a content platform built around your content model.",
     "keywords": [
-        "laravel",
-        "framework"
+        "cms",
+        "content-platform",
+        "content-management",
+        "laravel"
     ],
     "license": "proprietary",
+    "authors": [
+        {
+            "name": "Eric Lamb",
+            "email": "eric@mithra62.com"
+        }
+    ],
     "require": {
         "php": "^8.2",
-        "ext-curl": "*",
         "adastra/core": "*",
-        "darkaonline/l5-swagger": "^9.0",
-        "doctrine/annotations": "^2.0",
-        "laravel/fortify": "^1.31",
-        "laravel/framework": "^12.0",
-        "laravel/sanctum": "^4.0",
-        "laravel/socialite": "^5.24",
-        "laravel/tinker": "^2.10.1",
-        "laravolt/avatar": "^6.3",
-        "mews/purifier": "^3.4",
-        "moneyphp/money": "^4.9",
-        "rcrowe/twigbridge": "^0.14.6",
-        "spatie/laravel-permission": "^6.21",
-        "spatie/laravel-webhook-client": "^3.4",
-        "twig/twig": "^3.22"
+        "laravel/tinker": "^2.10.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",
@@ -102,7 +96,6 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
-            "pestphp/pest-plugin": true,
             "php-http/discovery": true
         }
     },
