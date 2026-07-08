@@ -5,20 +5,32 @@ namespace AdAstra\Providers;
 use AdAstra\Console\Commands\DoctorCommand;
 use AdAstra\Console\Commands\RefreshTokens;
 use AdAstra\Console\Commands\ValidateClassReferences;
+use AdAstra\Doctor\Checks\Assets\ViteManifestCheck;
+use AdAstra\Doctor\Checks\Cache\CacheRoundtripCheck;
 use AdAstra\Doctor\Checks\Database\ConnectionCheck;
 use AdAstra\Doctor\Checks\Database\PendingMigrationsCheck;
 use AdAstra\Doctor\Checks\Database\RequiredTablesCheck;
+use AdAstra\Doctor\Checks\Database\StrayMigrationsCheck;
 use AdAstra\Doctor\Checks\EntrySystem\BehaviorClassReferencesCheck;
+use AdAstra\Doctor\Checks\EntrySystem\DuplicateTypeHandlesCheck;
+use AdAstra\Doctor\Checks\EntrySystem\SilentBehaviorFallbackCheck;
 use AdAstra\Doctor\Checks\Environment\AppDebugCheck;
 use AdAstra\Doctor\Checks\Environment\AppKeyCheck;
+use AdAstra\Doctor\Checks\Environment\AppUrlCheck;
 use AdAstra\Doctor\Checks\Environment\LaravelVersionCheck;
 use AdAstra\Doctor\Checks\Environment\PhpVersionCheck;
 use AdAstra\Doctor\Checks\FieldSystem\FieldTypeClassReferencesCheck;
+use AdAstra\Doctor\Checks\Media\AvatarsLibraryCheck;
+use AdAstra\Doctor\Checks\Media\FileinfoExtensionCheck;
 use AdAstra\Doctor\Checks\Media\TransformationDriverCheck;
+use AdAstra\Doctor\Checks\Media\UploadLimitsCheck;
 use AdAstra\Doctor\Checks\Permissions\RequiredPermissionsCheck;
 use AdAstra\Doctor\Checks\Permissions\RequiredRolesCheck;
+use AdAstra\Doctor\Checks\Permissions\SuperAdminAssignedCheck;
+use AdAstra\Doctor\Checks\Security\DevAccountCheck;
 use AdAstra\Doctor\Checks\Storage\PublicSymlinkCheck;
 use AdAstra\Doctor\Checks\Storage\StorageWritableCheck;
+use AdAstra\Doctor\Checks\Templates\EntryTemplatesCheck;
 use AdAstra\Doctor\DoctorRunner;
 use AdAstra\EntryTypes\BlogPostEntryType;
 use AdAstra\EntryTypes\EventEntryType;
@@ -102,16 +114,28 @@ class AppServiceProvider extends ServiceProvider
             LaravelVersionCheck::class,
             AppKeyCheck::class,
             AppDebugCheck::class,
+            AppUrlCheck::class,
             ConnectionCheck::class,
             RequiredTablesCheck::class,
             PendingMigrationsCheck::class,
+            StrayMigrationsCheck::class,
             StorageWritableCheck::class,
             PublicSymlinkCheck::class,
+            CacheRoundtripCheck::class,
             TransformationDriverCheck::class,
+            FileinfoExtensionCheck::class,
+            UploadLimitsCheck::class,
+            AvatarsLibraryCheck::class,
             RequiredRolesCheck::class,
             RequiredPermissionsCheck::class,
+            SuperAdminAssignedCheck::class,
+            DevAccountCheck::class,
             BehaviorClassReferencesCheck::class,
+            DuplicateTypeHandlesCheck::class,
+            SilentBehaviorFallbackCheck::class,
             FieldTypeClassReferencesCheck::class,
+            EntryTemplatesCheck::class,
+            ViteManifestCheck::class,
         ], 'adastra.doctor.checks');
         $this->app->bind(DoctorRunner::class, fn ($app) => new DoctorRunner($app->tagged('adastra.doctor.checks')));
 

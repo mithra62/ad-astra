@@ -3,6 +3,7 @@
 ### Version 0.0.2 (Alpha 2)
 Release --
 
+- ADDED: `doctor` Command for system health
 - ADDED: Additional Unit and Feature tests (#36)
 - ADDED: Super Admin bypass log (#30)
 - FIXED: Seeders and Field Layouts so Field Groups were aligned (#42)

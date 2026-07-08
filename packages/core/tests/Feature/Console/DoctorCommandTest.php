@@ -4,8 +4,10 @@ namespace Tests\Feature\Console;
 
 use AdAstra\Services\Media\NullTransformationDriver;
 use AdAstra\Services\Media\TransformationDriverInterface;
+use AdAstra\Models\User;
 use Database\Seeders\EntryBehaviorSeeder;
 use Database\Seeders\FieldTypeSeeder;
+use Database\Seeders\MediaLibrarySeeder;
 use Database\Seeders\RolesPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
@@ -21,6 +23,8 @@ class DoctorCommandTest extends TestCase
         $this->seed(RolesPermissionsSeeder::class);
         $this->seed(EntryBehaviorSeeder::class);
         $this->seed(FieldTypeSeeder::class);
+        $this->seed(MediaLibrarySeeder::class);
+        User::factory()->create()->assignRole('super admin');
     }
 
     public function test_healthy_install_exits_zero(): void

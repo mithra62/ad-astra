@@ -5,8 +5,10 @@ namespace Tests\Unit\Doctor\Checks;
 use AdAstra\Doctor\Checks\Database\ConnectionCheck;
 use AdAstra\Doctor\Checks\Database\PendingMigrationsCheck;
 use AdAstra\Doctor\Checks\Database\RequiredTablesCheck;
+use AdAstra\Doctor\Checks\Database\StrayMigrationsCheck;
 use AdAstra\Doctor\DoctorStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class DatabaseChecksTest extends TestCase
@@ -63,5 +65,27 @@ class DatabaseChecksTest extends TestCase
 
         $this->assertCount(1, $results);
         $this->assertSame(DoctorStatus::Pass, $results[0]->status);
+    }
+
+    public function test_stray_migrations_pass_on_clean_database(): void
+    {
+        $results = iterator_to_array((new StrayMigrationsCheck())->run(), false);
+
+        $this->assertCount(1, $results);
+        $this->assertSame(DoctorStatus::Pass, $results[0]->status);
+    }
+
+    public function test_stray_migrations_warn_on_ran_row_without_file(): void
+    {
+        DB::table('migrations')->insert([
+            'migration' => '2020_01_01_000000_doctor_test_ghost_migration',
+            'batch' => 999,
+        ]);
+
+        $results = iterator_to_array((new StrayMigrationsCheck())->run(), false);
+
+        $this->assertCount(1, $results);
+        $this->assertSame(DoctorStatus::Warn, $results[0]->status);
+        $this->assertStringContainsString('ghost_migration', $results[0]->message);
     }
 }

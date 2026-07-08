@@ -4,6 +4,7 @@ namespace Tests\Unit\Doctor\Checks;
 
 use AdAstra\Doctor\Checks\Environment\AppDebugCheck;
 use AdAstra\Doctor\Checks\Environment\AppKeyCheck;
+use AdAstra\Doctor\Checks\Environment\AppUrlCheck;
 use AdAstra\Doctor\Checks\Environment\LaravelVersionCheck;
 use AdAstra\Doctor\Checks\Environment\PhpVersionCheck;
 use AdAstra\Doctor\DoctorStatus;
@@ -64,5 +65,44 @@ class EnvironmentChecksTest extends TestCase
         $results = iterator_to_array((new AppDebugCheck())->run(), false);
 
         $this->assertSame(DoctorStatus::Warn, $results[0]->status);
+    }
+
+    public function test_app_url_passes_outside_production(): void
+    {
+        config(['app.url' => 'http://localhost']);
+
+        $results = iterator_to_array((new AppUrlCheck())->run(), false);
+
+        $this->assertSame(DoctorStatus::Pass, $results[0]->status);
+    }
+
+    public function test_app_url_warns_on_localhost_in_production(): void
+    {
+        $this->app['env'] = 'production';
+        config(['app.url' => 'http://localhost']);
+
+        $results = iterator_to_array((new AppUrlCheck())->run(), false);
+
+        $this->assertSame(DoctorStatus::Warn, $results[0]->status);
+    }
+
+    public function test_app_url_warns_on_plain_http_in_production(): void
+    {
+        $this->app['env'] = 'production';
+        config(['app.url' => 'http://example.com']);
+
+        $results = iterator_to_array((new AppUrlCheck())->run(), false);
+
+        $this->assertSame(DoctorStatus::Warn, $results[0]->status);
+    }
+
+    public function test_app_url_passes_on_https_in_production(): void
+    {
+        $this->app['env'] = 'production';
+        config(['app.url' => 'https://example.com']);
+
+        $results = iterator_to_array((new AppUrlCheck())->run(), false);
+
+        $this->assertSame(DoctorStatus::Pass, $results[0]->status);
     }
 }
