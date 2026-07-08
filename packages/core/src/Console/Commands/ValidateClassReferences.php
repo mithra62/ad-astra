@@ -2,56 +2,34 @@
 
 namespace AdAstra\Console\Commands;
 
-use AdAstra\EntryTypes\AbstractEntryType;
-use AdAstra\Field\AbstractField;
-use AdAstra\Models\EntryBehavior;
-use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Doctor\Checks\EntrySystem\BehaviorClassReferencesCheck;
+use AdAstra\Doctor\Checks\FieldSystem\FieldTypeClassReferencesCheck;
+use AdAstra\Doctor\DoctorStatus;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
+/**
+ * Thin wrapper kept for muscle memory and existing docs — the actual
+ * validation lives in the two doctor checks, which `adastra:doctor`
+ * runs as part of the full health report.
+ */
 class ValidateClassReferences extends Command
 {
-    protected $signature = 'app:validate-class-references';
+    protected $signature = 'adastra:validate-class-references';
     protected $description = 'Verify that all class-name strings stored in the database still resolve to valid classes.';
+
+    // Pre-rename signature, kept as a hidden alias through alpha.
+    protected $aliases = ['app:validate-class-references'];
 
     public function handle(): int
     {
         $errors = 0;
 
         $this->info('Checking entry_behaviors.class (morphMap keys) …');
-        EntryBehavior::all()->each(function (EntryBehavior $behavior) use (&$errors) {
-            $class = Relation::getMorphedModel($behavior->class);
-
-            if ($class === null) {
-                $this->error("  EntryBehavior [{$behavior->handle}] → morph key [{$behavior->class}] is not registered in the morphMap.");
-                $errors++;
-                return;
-            }
-
-            if (!class_exists($class)) {
-                $this->error("  EntryBehavior [{$behavior->handle}] → class [{$class}] does not exist.");
-                $errors++;
-            } elseif (!is_subclass_of($class, AbstractEntryType::class)) {
-                $this->error("  EntryBehavior [{$behavior->handle}] → class [{$class}] does not extend AbstractEntryType.");
-                $errors++;
-            } else {
-                $this->line("  <fg=green>✓</> {$behavior->handle} → {$behavior->class} ({$class})");
-            }
-        });
+        $errors += $this->runCheck(new BehaviorClassReferencesCheck());
 
         $this->newLine();
         $this->info('Checking field_types.object …');
-        FieldType::all()->each(function (FieldType $type) use (&$errors) {
-            if (!class_exists($type->object)) {
-                $this->error("  FieldType [{$type->name}] → class [{$type->object}] does not exist.");
-                $errors++;
-            } elseif (!is_subclass_of($type->object, AbstractField::class)) {
-                $this->error("  FieldType [{$type->name}] → class [{$type->object}] does not extend AbstractField.");
-                $errors++;
-            } else {
-                $this->line("  <fg=green>✓</> {$type->name} → {$type->object}");
-            }
-        });
+        $errors += $this->runCheck(new FieldTypeClassReferencesCheck());
 
         $this->newLine();
 
@@ -62,5 +40,21 @@ class ValidateClassReferences extends Command
 
         $this->info('All class references are valid.');
         return self::SUCCESS;
+    }
+
+    private function runCheck($check): int
+    {
+        $errors = 0;
+
+        foreach ($check->run() as $result) {
+            if ($result->status === DoctorStatus::Fail) {
+                $errors++;
+                $this->error('  ' . $result->message);
+            } else {
+                $this->line('  <fg=green>✓</> ' . $result->message);
+            }
+        }
+
+        return $errors;
     }
 }

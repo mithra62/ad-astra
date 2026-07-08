@@ -146,7 +146,7 @@ class User extends Controller
     )]
     public function show(int $user): UserResource
     {
-        if (!$this->can('read users')) {
+        if (!$this->can('read user')) {
             abort(404);
         }
 

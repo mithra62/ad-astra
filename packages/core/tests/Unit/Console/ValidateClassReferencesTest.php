@@ -21,6 +21,14 @@ class ValidateClassReferencesTest extends TestCase
     {
         $this->seed(EntryBehaviorSeeder::class);
 
+        $this->artisan('adastra:validate-class-references')
+            ->assertSuccessful();
+    }
+
+    public function test_pre_rename_alias_still_resolves(): void
+    {
+        $this->seed(EntryBehaviorSeeder::class);
+
         $this->artisan('app:validate-class-references')
             ->assertSuccessful();
     }
@@ -37,7 +45,7 @@ class ValidateClassReferencesTest extends TestCase
             'class' => 'behavior.nonexistent-' . uniqid(),
         ]);
 
-        $this->artisan('app:validate-class-references')
+        $this->artisan('adastra:validate-class-references')
             ->assertFailed();
     }
 
@@ -56,7 +64,7 @@ class ValidateClassReferencesTest extends TestCase
             'class' => $morphKey,
         ]);
 
-        $this->artisan('app:validate-class-references')
+        $this->artisan('adastra:validate-class-references')
             ->assertFailed();
     }
 }

@@ -259,13 +259,16 @@ php artisan l5-swagger:generate
 php artisan optimize:clear
 php artisan config:clear
 php artisan route:list --except-vendor
-php artisan app:validate-class-references
+php artisan adastra:doctor
+php artisan adastra:validate-class-references
 php artisan schedule:run
 php artisan queue:work
 php artisan app:refresh-tokens
 ```
 
-`app:validate-class-references` checks `entry_behaviors.class` (morph alias) and `field_types.object` (FQCN) references before deployment, failing if any are broken.
+`adastra:doctor` produces a read-only health report for the installation (exit 0 healthy / 2 failures; `--strict` promotes warnings, `--format=json` for machine-readable output). See `docs/DOCTOR_EXTENDING.md` to add checks.
+
+`adastra:validate-class-references` checks `entry_behaviors.class` (morph alias) and `field_types.object` (FQCN) references before deployment, failing if any are broken. (Also runs as part of `adastra:doctor`; the old `app:validate-class-references` name still works as an alias.)
 
 `app:refresh-tokens` refreshes expiring OAuth tokens through `TokenRefreshService`. It is implemented but not registered in the scheduler, so run it manually or add a schedule entry if automatic refresh is needed.
 

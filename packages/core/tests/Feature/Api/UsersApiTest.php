@@ -9,14 +9,6 @@ use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
-/**
- * Feature coverage for the User API controller (apiResource).
- *
- * Gate quirks encoded faithfully: index requires "read user" (singular) while
- * show requires "read users" (plural); store/update authorize() require
- * "create user" / "edit user"; destroy aborts 403 without "delete user" and
- * also blocks self-deletion (403) even for a super admin.
- */
 class UsersApiTest extends TestCase
 {
     use RefreshDatabase;
@@ -32,7 +24,7 @@ class UsersApiTest extends TestCase
 
     private function plainUser(): User
     {
-        foreach (['read user', 'read users', 'create user', 'edit user', 'delete user'] as $name) {
+        foreach (['read user', 'read user', 'create user', 'edit user', 'delete user'] as $name) {
             Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
         }
 

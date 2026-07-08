@@ -2,8 +2,24 @@
 
 namespace AdAstra\Providers;
 
+use AdAstra\Console\Commands\DoctorCommand;
 use AdAstra\Console\Commands\RefreshTokens;
 use AdAstra\Console\Commands\ValidateClassReferences;
+use AdAstra\Doctor\Checks\Database\ConnectionCheck;
+use AdAstra\Doctor\Checks\Database\PendingMigrationsCheck;
+use AdAstra\Doctor\Checks\Database\RequiredTablesCheck;
+use AdAstra\Doctor\Checks\EntrySystem\BehaviorClassReferencesCheck;
+use AdAstra\Doctor\Checks\Environment\AppDebugCheck;
+use AdAstra\Doctor\Checks\Environment\AppKeyCheck;
+use AdAstra\Doctor\Checks\Environment\LaravelVersionCheck;
+use AdAstra\Doctor\Checks\Environment\PhpVersionCheck;
+use AdAstra\Doctor\Checks\FieldSystem\FieldTypeClassReferencesCheck;
+use AdAstra\Doctor\Checks\Media\TransformationDriverCheck;
+use AdAstra\Doctor\Checks\Permissions\RequiredPermissionsCheck;
+use AdAstra\Doctor\Checks\Permissions\RequiredRolesCheck;
+use AdAstra\Doctor\Checks\Storage\PublicSymlinkCheck;
+use AdAstra\Doctor\Checks\Storage\StorageWritableCheck;
+use AdAstra\Doctor\DoctorRunner;
 use AdAstra\EntryTypes\BlogPostEntryType;
 use AdAstra\EntryTypes\EventEntryType;
 use AdAstra\EntryTypes\GeneralEntryType;
@@ -70,10 +86,34 @@ class AppServiceProvider extends ServiceProvider
         // the app's config/ root. Laravel + third-party config stays at the app root.
         $this->mergeConfigFrom(__DIR__ . '/../../config/settings.php', 'settings');
         $this->mergeConfigFrom(__DIR__ . '/../../config/site.php', 'site');
+        $this->mergeConfigFrom(__DIR__ . '/../../config/doctor.php', 'doctor');
         $this->publishes([
             __DIR__ . '/../../config/settings.php' => config_path('settings.php'),
             __DIR__ . '/../../config/site.php' => config_path('site.php'),
+            __DIR__ . '/../../config/doctor.php' => config_path('doctor.php'),
         ], 'adastra-config');
+
+        // Doctor checks. The tag is the extension point: any package can add
+        // its own checks by tagging them 'adastra.doctor.checks' in its
+        // service provider — see docs/DOCTOR_EXTENDING.md. Tag order sets
+        // report order among independent checks.
+        $this->app->tag([
+            PhpVersionCheck::class,
+            LaravelVersionCheck::class,
+            AppKeyCheck::class,
+            AppDebugCheck::class,
+            ConnectionCheck::class,
+            RequiredTablesCheck::class,
+            PendingMigrationsCheck::class,
+            StorageWritableCheck::class,
+            PublicSymlinkCheck::class,
+            TransformationDriverCheck::class,
+            RequiredRolesCheck::class,
+            RequiredPermissionsCheck::class,
+            BehaviorClassReferencesCheck::class,
+            FieldTypeClassReferencesCheck::class,
+        ], 'adastra.doctor.checks');
+        $this->app->bind(DoctorRunner::class, fn ($app) => new DoctorRunner($app->tagged('adastra.doctor.checks')));
 
         // Framework models live under AdAstra\Models\, but their factories remain in
         // the Database\Factories\ namespace. Laravel's default guessers assume the
@@ -214,6 +254,7 @@ class AppServiceProvider extends ServiceProvider
         // package's routes/console.php, loaded via bootstrap/app.php `commands:`).
         if ($this->app->runningInConsole()) {
             $this->commands([
+                DoctorCommand::class,
                 RefreshTokens::class,
                 ValidateClassReferences::class,
             ]);

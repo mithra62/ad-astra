@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class RefreshTokens extends Command
 {
-    protected $signature = 'app:refresh-tokens
+    protected $signature = 'adastra:refresh-tokens
                             {--provider= : Limit refresh to a specific provider}
                             {--window=300 : Refresh tokens expiring within this many seconds}';
 
