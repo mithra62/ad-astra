@@ -143,7 +143,7 @@ return [
                 'handle' => 'appearance',
                 'label' => 'Appearance',
                 'type' => 'text',
-                'default' => 'light',
+                'default' => 'system',
                 'rules' => ['string', Rule::in(['light', 'dark', 'system'])],
                 'instructions' => 'Interface theme. "System" follows your operating system setting.',
                 'group' => 'Appearance',
