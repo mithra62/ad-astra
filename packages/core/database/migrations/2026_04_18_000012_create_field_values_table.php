@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
@@ -32,7 +33,30 @@ return new class extends Migration {
             $table->unique(['field_id', 'fieldable_id', 'fieldable_type'], 'fv_field_fieldable_unique');
 
             $table->index(['fieldable_id', 'fieldable_type'], 'fv_fieldable_idx');
+
+            // Value-predicate support for whereField(): the unique index above
+            // leads (field_id, fieldable_id, ...) so it serves point lookups but
+            // not range/equality scans on the typed value columns. These make
+            // e.g. whereField('price', '>', 100) index-driven.
+            $table->index(['field_id', 'value_integer'], 'fv_field_int_idx');
+            $table->index(['field_id', 'value_float'], 'fv_field_float_idx');
+            $table->index(['field_id', 'value_date'], 'fv_field_date_idx');
+            $table->index(['field_id', 'value_boolean'], 'fv_field_bool_idx');
         });
+
+        // value_text is TEXT, which MySQL/MariaDB can only index with an explicit
+        // key prefix length — syntax the schema builder can't express portably.
+        // SQLite (test suite) and PostgreSQL index the full column instead.
+        if (in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true)) {
+            DB::statement(
+                'CREATE INDEX fv_field_text_idx ON '
+                . DB::getTablePrefix() . 'field_values (field_id, value_text(191))'
+            );
+        } else {
+            Schema::table('field_values', function (Blueprint $table) {
+                $table->index(['field_id', 'value_text'], 'fv_field_text_idx');
+            });
+        }
     }
 
     public function down(): void

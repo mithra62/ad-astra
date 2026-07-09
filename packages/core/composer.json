@@ -1,9 +1,22 @@
 {
     "name": "adastra/core",
-    "description": "AdAstra core framework package.",
+    "description": "AdAstra core — content modeling, fields, media, users, admin, and APIs for the AdAstra content platform.",
     "type": "library",
     "license": "proprietary",
-    "version": "0.0.1",
+    "keywords": [
+        "cms",
+        "content-platform",
+        "laravel"
+    ],
+    "authors": [
+        {
+            "name": "Eric Lamb",
+            "email": "eric@mithra62.com"
+        }
+    ],
+    "support": {
+        "email": "eric@mithra62.com"
+    },
     "require": {
         "php": "^8.2",
         "ext-curl": "*",
