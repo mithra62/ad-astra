@@ -3,7 +3,7 @@
 ### Version 0.0.2 (Alpha 2)
 Release --
 
-- ADDED: `doctor` Command for system health
+- ADDED: `doctor` Command for system health (#66)
 - ADDED: Additional Unit and Feature tests (#36)
 - ADDED: Super Admin bypass log (#30)
 - FIXED: Seeders and Field Layouts so Field Groups were aligned (#42)
@@ -13,6 +13,7 @@ Release --
 - FIXED: BotBlock Needs Session Storage of Field Name (#23)
 - FIXED: Personal access token flashed in URL session flash string (#15)
 - UPDATED: Moved `app` logic to stand-alone composer package (#12)
+- UPDATED: Indexes to `field_values` table for query performance (#65)
 
 ### Version 0.0.1 (Alpha 1)
 Release June 29, 2026
