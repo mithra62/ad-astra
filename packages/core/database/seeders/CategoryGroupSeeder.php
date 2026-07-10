@@ -49,7 +49,7 @@ class CategoryGroupSeeder extends Seeder
     {
         $group = CategoryGroup::firstOrCreate(
             ['handle' => 'topics'],
-            ['name' => 'Topics', 'sort_order' => 1]
+            ['name' => 'Topics', 'sort_order' => 1, 'description' => 'Seeded Topics Example']
         );
 
         // --- Fields ----------------------------------------------------------
@@ -199,7 +199,7 @@ class CategoryGroupSeeder extends Seeder
     {
         $group = CategoryGroup::firstOrCreate(
             ['handle' => 'product-categories'],
-            ['name' => 'Product Categories', 'sort_order' => 2]
+            ['name' => 'Product Categories', 'sort_order' => 2, 'description' => 'Seeded Product Categories Example']
         );
 
         // --- Fields ----------------------------------------------------------
@@ -324,7 +324,7 @@ class CategoryGroupSeeder extends Seeder
     {
         $group = CategoryGroup::firstOrCreate(
             ['handle' => 'cuisines'],
-            ['name' => 'Cuisines', 'sort_order' => 3]
+            ['name' => 'Cuisines', 'sort_order' => 3, 'description' => 'Seeded Cuisines Example']
         );
 
         $cuisines = [
@@ -360,7 +360,7 @@ class CategoryGroupSeeder extends Seeder
     {
         $group = CategoryGroup::firstOrCreate(
             ['handle' => 'diet-types'],
-            ['name' => 'Diet Types', 'sort_order' => 4]
+            ['name' => 'Diet Types', 'sort_order' => 4, 'description' => 'Seeded Diet Types Example']
         );
 
         $dietTypes = [
@@ -383,7 +383,7 @@ class CategoryGroupSeeder extends Seeder
     {
         $group = CategoryGroup::firstOrCreate(
             ['handle' => 'event-types'],
-            ['name' => 'Event Types', 'sort_order' => 5]
+            ['name' => 'Event Types', 'sort_order' => 5, 'description' => 'Seeded Event Types Example']
         );
 
         $eventTypes = [
@@ -402,7 +402,7 @@ class CategoryGroupSeeder extends Seeder
     {
         $group = CategoryGroup::firstOrCreate(
             ['handle' => 'employment-types'],
-            ['name' => 'Employment Types', 'sort_order' => 6]
+            ['name' => 'Employment Types', 'sort_order' => 6, 'description' => 'Seeded Employment Types Example']
         );
 
         $employmentTypes = [
@@ -420,7 +420,7 @@ class CategoryGroupSeeder extends Seeder
     {
         $group = CategoryGroup::firstOrCreate(
             ['handle' => 'experience-levels'],
-            ['name' => 'Experience Levels', 'sort_order' => 7]
+            ['name' => 'Experience Levels', 'sort_order' => 7, 'description' => 'Seeded Experience Levels Example']
         );
 
         $levels = [
