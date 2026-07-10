@@ -3,7 +3,7 @@
 namespace AdAstra\Http\Requests\FieldLayout\Tab;
 
 use AdAstra\Http\Requests\FormRequest;
-use AdAstra\Rules\FieldLayout\UniqueHandleByGroup;
+use AdAstra\Rules\FieldLayout\Tab\UniqueHandleByLayout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -26,7 +26,7 @@ class StoreTabRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                new UniqueHandleByGroup(['group_id' => $this->route('group_id') ?? $this->input('status_group_id')]),
+                new UniqueHandleByLayout(['field_layout_id' => $this->route('layout_id')]),
             ],
             'sort_order' => [
                 'nullable',

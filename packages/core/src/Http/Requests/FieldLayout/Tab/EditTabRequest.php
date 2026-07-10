@@ -3,6 +3,7 @@
 namespace AdAstra\Http\Requests\FieldLayout\Tab;
 
 use AdAstra\Http\Requests\FormRequest;
+use AdAstra\Rules\FieldLayout\Tab\UniqueHandleByLayout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -25,7 +26,7 @@ class EditTabRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('field_layout_tabs', 'field_layout_id')->ignore($this->route()->parameter('layout_id')),
+                new UniqueHandleByLayout(['tab_id' => $this->route()->parameter('tab_id')]),
             ],
             'sort_order' => [
                 'nullable',
