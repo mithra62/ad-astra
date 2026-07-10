@@ -62,7 +62,10 @@ return [
 
     // Check ids to exclude from every run (for slow or opt-in checks).
     // Naming a disabled check exactly in --only opts it back in for that
-    // run; matching it via its category does not.
+    // run; matching it via its category does not. A disabled check never
+    // runs as a dependency either: checks depending on it directly are
+    // SKIPped (doctor never runs a check against unverified prerequisites),
+    // while category-wide dependencies simply ignore disabled members.
     'disabled' => [
         // The template layer is in flux; re-enable once template
         // names/locations settle.

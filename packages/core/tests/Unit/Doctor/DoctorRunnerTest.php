@@ -215,4 +215,62 @@ class DoctorRunnerTest extends TestCase
 
         $this->assertSame(['a.on'], array_keys($this->statuses($runner, only: ['a'])));
     }
+
+    public function test_direct_dependency_on_a_disabled_check_skips_the_dependent(): void
+    {
+        config(['doctor.disabled' => ['a.root']]);
+
+        $runner = new DoctorRunner([
+            $this->makeCheck('a.root', run: function () {
+                throw new RuntimeException('must never run while disabled');
+                yield;
+            }),
+            $this->makeCheck('b.child', deps: ['a.root']),
+        ]);
+
+        $report = $runner->run();
+        $statuses = $this->statuses($runner);
+
+        // a.root is absent (never ran), b.child skips with the reason.
+        $this->assertSame(['b.child'], array_keys($statuses));
+        $this->assertSame([DoctorStatus::Skip], $statuses['b.child']);
+        $this->assertStringContainsString(
+            'is disabled and did not run',
+            $report->entries()[0]['results'][0]->message
+        );
+    }
+
+    public function test_category_dependency_ignores_disabled_members(): void
+    {
+        config(['doctor.disabled' => ['db.slow']]);
+
+        $runner = new DoctorRunner([
+            $this->makeCheck('db.slow', run: function () {
+                throw new RuntimeException('must never run while disabled');
+                yield;
+            }),
+            $this->makeCheck('db.fast'),
+            $this->makeCheck('app.check', deps: ['db']),
+        ]);
+
+        $statuses = $this->statuses($runner);
+
+        $this->assertArrayNotHasKey('db.slow', $statuses);
+        $this->assertSame([DoctorStatus::Pass], $statuses['app.check']);
+    }
+
+    public function test_opting_a_disabled_dependency_back_in_unblocks_its_dependent(): void
+    {
+        config(['doctor.disabled' => ['a.root']]);
+
+        $runner = new DoctorRunner([
+            $this->makeCheck('a.root'),
+            $this->makeCheck('b.child', deps: ['a.root']),
+        ]);
+
+        $statuses = $this->statuses($runner, only: ['a.root', 'b.child']);
+
+        $this->assertSame([DoctorStatus::Pass], $statuses['a.root']);
+        $this->assertSame([DoctorStatus::Pass], $statuses['b.child']);
+    }
 }
