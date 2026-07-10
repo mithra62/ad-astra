@@ -179,4 +179,40 @@ class DoctorRunnerTest extends TestCase
 
         $this->assertSame(['a.on'], array_keys($this->statuses($runner)));
     }
+
+    public function test_unknown_selectors_reports_ids_matching_nothing(): void
+    {
+        $runner = new DoctorRunner([
+            $this->makeCheck('a.one'),
+            $this->makeCheck('b.two'),
+        ]);
+
+        $this->assertSame([], $runner->unknownSelectors([]));
+        $this->assertSame([], $runner->unknownSelectors(['a.one', 'a', 'b']));
+        $this->assertSame(['a.typo', 'c'], $runner->unknownSelectors(['a.typo', 'b.two', 'c']));
+    }
+
+    public function test_only_with_exact_id_opts_a_disabled_check_back_in(): void
+    {
+        config(['doctor.disabled' => ['a.off']]);
+
+        $runner = new DoctorRunner([
+            $this->makeCheck('a.off'),
+            $this->makeCheck('a.on'),
+        ]);
+
+        $this->assertSame(['a.off'], array_keys($this->statuses($runner, only: ['a.off'])));
+    }
+
+    public function test_only_with_category_does_not_resurrect_disabled_checks(): void
+    {
+        config(['doctor.disabled' => ['a.off']]);
+
+        $runner = new DoctorRunner([
+            $this->makeCheck('a.off'),
+            $this->makeCheck('a.on'),
+        ]);
+
+        $this->assertSame(['a.on'], array_keys($this->statuses($runner, only: ['a'])));
+    }
 }

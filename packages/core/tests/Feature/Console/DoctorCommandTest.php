@@ -91,4 +91,44 @@ class DoctorCommandTest extends TestCase
         // Permission checks plus their pulled-in database dependencies — nothing else.
         $this->assertSame(['database', 'permissions'], $categories);
     }
+
+    public function test_unknown_only_selector_errors_instead_of_reporting_healthy(): void
+    {
+        $this->seedHealthyInstall();
+
+        $this->artisan('adastra:doctor --only=databsae')
+            ->expectsOutputToContain('Unknown check or category id(s): databsae')
+            ->assertExitCode(2);
+    }
+
+    public function test_unknown_except_selector_errors_instead_of_reporting_healthy(): void
+    {
+        $this->seedHealthyInstall();
+
+        $this->artisan('adastra:doctor --except=storage.writeable')
+            ->expectsOutputToContain('Unknown check or category id(s): storage.writeable')
+            ->assertExitCode(2);
+    }
+
+    public function test_only_naming_a_disabled_check_runs_it(): void
+    {
+        $this->seedHealthyInstall();
+        config(['doctor.disabled' => ['environment.php-version']]);
+
+        Artisan::call('adastra:doctor', ['--format' => 'json', '--only' => 'environment.php-version']);
+        $envelope = json_decode(Artisan::output(), true);
+
+        $this->assertContains('environment.php-version', array_column($envelope['results'], 'id'));
+    }
+
+    public function test_selection_that_nets_zero_checks_errors(): void
+    {
+        $this->seedHealthyInstall();
+
+        // templates.entry-templates is the category's only check and is
+        // disabled by default config — a valid selector, zero runnable checks.
+        $this->artisan('adastra:doctor --only=templates')
+            ->expectsOutputToContain('No runnable checks matched')
+            ->assertExitCode(2);
+    }
 }
