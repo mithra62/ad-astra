@@ -57,6 +57,16 @@
                                 <td class="px-5 py-3.5">
                                     <p class="font-medium text-content">{{ status.name }}</p>
                                     <p class="mt-0.5 text-xs text-faint">{{ status.handle }}</p>
+                                    <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
+                                        <a href="{{ route('statuses.edit', status) }}"
+                                           class="text-accent hover:underline">View</a><span
+                                            class="text-faint">|</span>
+                                        <a href="{{ route('statuses.edit', status) }}"
+                                           class="text-accent hover:underline">Edit</a><span
+                                            class="text-faint">|</span>
+                                        <a href="{{ route('statuses.confirm', status) }}"
+                                           class="text-red-500 hover:underline">Delete</a>
+                                    </div>
                                 </td>
                                 <td class="hidden px-5 py-3.5 text-muted sm:table-cell">
                                     {% if status.color %}

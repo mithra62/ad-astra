@@ -169,6 +169,16 @@
                                 <td class="px-5 py-3.5">
                                     <p class="font-medium text-content">{{ entry.title }}</p>
                                     <p class="mt-0.5 text-xs text-faint">{{ entry.handle }}</p>
+                                    <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
+                                        <a href="{{ route('entries.edit', entry) }}"
+                                           class="text-accent hover:underline">View</a><span
+                                            class="text-faint">|</span>
+                                        <a href="{{ route('entries.edit', entry) }}"
+                                           class="text-accent hover:underline">Edit</a><span
+                                            class="text-faint">|</span>
+                                        <a href="{{ route('entries.confirm', entry) }}"
+                                           class="text-red-500 hover:underline">Delete</a>
+                                    </div>
                                 </td>
                                 <td class="hidden px-5 py-3.5 text-muted sm:table-cell">
                                     {{ entry.entryType.name ?? '—' }}

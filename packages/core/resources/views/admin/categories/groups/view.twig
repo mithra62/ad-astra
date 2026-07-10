@@ -47,6 +47,16 @@
                                     <td class="px-4 py-3.5">
                                         <p class="font-medium text-content">{{ category.name }}</p>
                                         <p class="mt-0.5 text-xs text-faint">{{ category.handle }}</p>
+                                        <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
+                                            <a href="{{ route('categories.show', category) }}"
+                                               class="text-accent hover:underline">View</a><span
+                                                class="text-faint">|</span>
+                                            <a href="{{ route('categories.edit', category) }}"
+                                               class="text-accent hover:underline">Edit</a><span
+                                                class="text-faint">|</span>
+                                            <a href="{{ route('categories.confirm', category) }}"
+                                               class="text-red-500 hover:underline">Delete</a>
+                                        </div>
                                     </td>
                                     <td class="hidden px-4 py-3.5 text-muted sm:table-cell">{{ category.children.count() }}</td>
                                     <td class="px-4 py-3.5">{{ category.created_at.format('F j, Y') }}</td>

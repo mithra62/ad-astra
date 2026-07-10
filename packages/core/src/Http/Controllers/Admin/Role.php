@@ -19,7 +19,12 @@ class Role extends Controller
     public function index()
     {
         $roles = RoleModel::paginate(20);
-        return $this->view('roles.index', ['roles' => $roles]);
+        $variables = [
+            'roles' => $roles,
+            'total_roles' => RoleModel::count(),
+            'total_permissions' => Permission::count(),
+        ];
+        return $this->view('roles.index', $variables);
     }
 
     /**
