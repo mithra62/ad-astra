@@ -34,6 +34,28 @@ class ValidateClassReferencesTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // Unmigrated database — should fail gracefully, not crash with an
+    // uncaught QueryException (the DoctorRunner cascade reports the real
+    // cause and skips the class checks)
+    // -------------------------------------------------------------------------
+
+    public function test_unmigrated_database_degrades_gracefully_instead_of_crashing(): void
+    {
+        config([
+            'database.connections.doctor_empty' => [
+                'driver' => 'sqlite',
+                'database' => ':memory:',
+                'prefix' => '',
+            ],
+            'database.default' => 'doctor_empty',
+        ]);
+
+        $this->artisan('adastra:validate-class-references')
+            ->expectsOutputToContain('Skipped: dependency')
+            ->assertFailed();
+    }
+
+    // -------------------------------------------------------------------------
     // Unmapped morph key — should fail
     // -------------------------------------------------------------------------
 

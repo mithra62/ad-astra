@@ -2,15 +2,18 @@
 
 namespace AdAstra\Console\Commands;
 
-use AdAstra\Doctor\Checks\EntrySystem\BehaviorClassReferencesCheck;
-use AdAstra\Doctor\Checks\FieldSystem\FieldTypeClassReferencesCheck;
+use AdAstra\Doctor\DoctorRunner;
 use AdAstra\Doctor\DoctorStatus;
 use Illuminate\Console\Command;
 
 /**
  * Thin wrapper kept for muscle memory and existing docs — the actual
- * validation lives in the two doctor checks, which `adastra:doctor`
- * runs as part of the full health report.
+ * validation lives in the two doctor checks, which `adastra:doctor` runs
+ * as part of the full health report. Routing through DoctorRunner (rather
+ * than executing the checks directly) buys the runner's guarantees: a
+ * crashing check becomes a contained failure, and an unmigrated or
+ * unreachable database cascades to SKIP with the real cause reported
+ * first instead of an uncaught QueryException.
  */
 class ValidateClassReferences extends Command
 {
@@ -20,41 +23,38 @@ class ValidateClassReferences extends Command
     // Pre-rename signature, kept as a hidden alias through alpha.
     protected $aliases = ['app:validate-class-references'];
 
-    public function handle(): int
+    public function handle(DoctorRunner $runner): int
     {
-        $errors = 0;
+        // Exact check ids — per --only semantics these run even if a host
+        // has disabled them in config/doctor.php.
+        $report = $runner->run(only: [
+            'entry-system.behavior-classes',
+            'field-system.type-classes',
+        ]);
 
-        $this->info('Checking entry_behaviors.class (morphMap keys) …');
-        $errors += $this->runCheck(new BehaviorClassReferencesCheck());
+        foreach ($report->entries() as $entry) {
+            $this->info($entry['name'] . ' …');
 
-        $this->newLine();
-        $this->info('Checking field_types.object …');
-        $errors += $this->runCheck(new FieldTypeClassReferencesCheck());
+            foreach ($entry['results'] as $result) {
+                match ($result->status) {
+                    DoctorStatus::Fail => $this->error('  ✗ ' . $result->message),
+                    DoctorStatus::Warn => $this->line('  <fg=yellow>!</> ' . $result->message),
+                    DoctorStatus::Skip => $this->line('  <fg=gray>–</> ' . $result->message),
+                    DoctorStatus::Pass => $this->line('  <fg=green>✓</> ' . $result->message),
+                };
+            }
 
-        $this->newLine();
+            $this->newLine();
+        }
 
-        if ($errors > 0) {
-            $this->error("Found {$errors} broken class reference(s). Fix them before deploying.");
+        if ($report->failures() > 0) {
+            $this->error("Found {$report->failures()} problem(s). Fix them before deploying.");
+
             return self::FAILURE;
         }
 
         $this->info('All class references are valid.');
+
         return self::SUCCESS;
-    }
-
-    private function runCheck($check): int
-    {
-        $errors = 0;
-
-        foreach ($check->run() as $result) {
-            if ($result->status === DoctorStatus::Fail) {
-                $errors++;
-                $this->error('  ' . $result->message);
-            } else {
-                $this->line('  <fg=green>✓</> ' . $result->message);
-            }
-        }
-
-        return $errors;
     }
 }
