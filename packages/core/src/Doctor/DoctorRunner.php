@@ -77,6 +77,24 @@ final class DoctorRunner
     }
 
     /**
+     * Selector ids that match no registered check id or category — callers
+     * should refuse to run with these rather than silently report an empty
+     * (healthy-looking) result.
+     *
+     * @param list<string> $ids
+     * @return list<string>
+     */
+    public function unknownSelectors(array $ids): array
+    {
+        $categories = array_map(fn (DoctorCheck $check) => $check->category(), $this->checks);
+
+        return array_values(array_filter(
+            $ids,
+            fn (string $id) => !isset($this->checks[$id]) && !in_array($id, $categories, true),
+        ));
+    }
+
+    /**
      * Apply --only/--except semantics. Both match check ids and category
      * ids; dependencies of surviving checks always run.
      *
@@ -86,10 +104,13 @@ final class DoctorRunner
      */
     private function select(array $only, array $except): array
     {
+        // Naming a disabled check exactly in --only opts it back in for this
+        // run (disabled is for slow/opt-in checks); a category match does not.
         $disabled = (array) config('doctor.disabled', []);
         $pool = array_filter(
             $this->checks,
             fn (DoctorCheck $check) => !in_array($check->id(), $disabled, true)
+                || in_array($check->id(), $only, true)
         );
 
         $matches = fn (DoctorCheck $check, array $ids) => in_array($check->id(), $ids, true)

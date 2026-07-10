@@ -61,6 +61,8 @@ return [
     ],
 
     // Check ids to exclude from every run (for slow or opt-in checks).
+    // Naming a disabled check exactly in --only opts it back in for that
+    // run; matching it via its category does not.
     'disabled' => [
         // The template layer is in flux; re-enable once template
         // names/locations settle.

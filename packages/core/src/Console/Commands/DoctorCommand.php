@@ -19,10 +19,29 @@ class DoctorCommand extends Command
 
     public function handle(DoctorRunner $runner): int
     {
-        $report = $runner->run(
-            only: $this->idList('only'),
-            except: $this->idList('except'),
-        );
+        $only = $this->idList('only');
+        $except = $this->idList('except');
+
+        // A typo'd selector must not produce an empty, healthy-looking
+        // report — in a pipeline that reads as "install verified".
+        $unknown = $runner->unknownSelectors(array_merge($only, $except));
+
+        if ($unknown !== []) {
+            $this->error('Unknown check or category id(s): ' . implode(', ', $unknown));
+            $this->line('Run adastra:doctor with no options to see every check.');
+
+            return self::INVALID;
+        }
+
+        $report = $runner->run(only: $only, except: $except);
+
+        // Valid selectors can still net zero checks (e.g. a category whose
+        // members are all disabled). Same rule: never report empty as healthy.
+        if ($report->entries() === []) {
+            $this->error('No runnable checks matched — the matching check(s) may be disabled in config/doctor.php.');
+
+            return self::INVALID;
+        }
 
         $strict = (bool) $this->option('strict');
 
