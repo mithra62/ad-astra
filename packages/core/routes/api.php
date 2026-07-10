@@ -33,6 +33,18 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         ->middleware(LogRequestResponse::class)
         ->name('api.v1.account.show');
 
+    Route::put('/account', [Account::class, 'update'])
+        ->middleware(LogRequestResponse::class)
+        ->name('api.v1.account.update');
+
+    Route::put('/account/password', [Account::class, 'updatePassword'])
+        ->middleware(LogRequestResponse::class)
+        ->name('api.v1.account.password');
+
+    Route::put('/account/email', [Account::class, 'updateEmail'])
+        ->middleware(LogRequestResponse::class)
+        ->name('api.v1.account.email');
+
     // Category Groups + nested Categories
     // Parameter names are intentionally aligned with the existing admin FormRequests:
     //   {group}    -> matches EditCategoryGroupRequest::route()->parameter('group')
