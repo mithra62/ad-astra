@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Category extends Model
 {
-    use Fieldable, HasFactory;
+    use Fieldable;
+    use HasFactory;
 
     protected $table = 'categories';
 
@@ -38,6 +40,16 @@ class Category extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class, 'group_id');
+    }
+
+    /**
+     * Intended field schema for a category: the field layout on its group.
+     */
+    public function fieldSchema(): Collection
+    {
+        $this->loadMissing('group.fieldLayout.tabs.elements.field.fieldType');
+
+        return $this->group?->fieldLayout?->fields() ?? collect();
     }
 
     public function parent(): BelongsTo

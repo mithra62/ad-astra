@@ -5,6 +5,7 @@ namespace AdAstra\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use AdAstra\Enums\UserStatus;
 use AdAstra\Models\User\OauthToken;
+use AdAstra\Support\UserFieldLayout;
 use AdAstra\Traits\Field\Fieldable;
 use AdAstra\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravolt\Avatar\Facade as LaravoltAvatar;
@@ -145,10 +147,19 @@ class User extends Authenticatable
         });
     }
 
+    /**
+     * Intended field schema for a user: the layout configured under
+     * Settings users.user_field_layout_id.
+     */
+    public function fieldSchema(): Collection
+    {
+        return UserFieldLayout::resolve()?->fields() ?? collect();
+    }
+
     public function setAvatar(Media $media): void
     {
         $existing = $this->directMedia()
-            ->whereHas('library', fn($q) => $q->where('handle', 'avatars'))
+            ->whereHas('library', fn ($q) => $q->where('handle', 'avatars'))
             ->get();
 
         foreach ($existing as $old) {

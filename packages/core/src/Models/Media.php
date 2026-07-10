@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -49,6 +50,16 @@ class Media extends Model
     public function library(): BelongsTo
     {
         return $this->belongsTo(Media\Library::class, 'library_id');
+    }
+
+    /**
+     * Intended field schema for a media item: the field layout on its library.
+     */
+    public function fieldSchema(): Collection
+    {
+        $this->loadMissing('library.fieldLayout.tabs.elements.field.fieldType');
+
+        return $this->library?->fieldLayout?->fields() ?? collect();
     }
 
     /**

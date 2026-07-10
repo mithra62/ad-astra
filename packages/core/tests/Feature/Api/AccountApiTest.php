@@ -2,7 +2,14 @@
 
 namespace Tests\Feature\Api;
 
+use AdAstra\Field\Types\Text;
+use AdAstra\Models\Field;
+use AdAstra\Models\Field\Type as FieldType;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\FieldLayout\Tab;
+use AdAstra\Models\FieldLayout\TabElement;
 use AdAstra\Models\User;
+use AdAstra\Settings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
@@ -35,6 +42,32 @@ class AccountApiTest extends TestCase
         return $user;
     }
 
+    /**
+     * Configure a user field layout with two text fields and point the users
+     * setting at it, mirroring how the User model resolves its schema.
+     */
+    private function configureUserLayout(): void
+    {
+        $type = FieldType::firstOrCreate(
+            ['object' => Text::class],
+            ['name' => 'Text', 'settings' => []]
+        );
+
+        $layout = FieldLayout::factory()->create();
+        $tab = Tab::factory()->create(['field_layout_id' => $layout->id]);
+
+        foreach (['first_name' => 0, 'last_name' => 1] as $handle => $sort) {
+            $field = Field::factory()->create(['handle' => $handle, 'field_type_id' => $type->id]);
+            TabElement::factory()->create([
+                'field_layout_tab_id' => $tab->id,
+                'field_id' => $field->id,
+                'sort_order' => $sort,
+            ]);
+        }
+
+        app(Settings::class)->set('users', 'user_field_layout_id', $layout->id);
+    }
+
     // -------------------------------------------------------------------------
     // show
     // -------------------------------------------------------------------------
@@ -54,6 +87,18 @@ class AccountApiTest extends TestCase
             ->assertJsonPath('data.name', 'Ada Lovelace')
             ->assertJsonPath('data.email', $user->email)
             ->assertJsonStructure(['data' => ['id', 'name', 'email', 'roles']]);
+    }
+
+    public function test_show_fields_node_reflects_the_full_user_schema(): void
+    {
+        $this->configureUserLayout();
+        $this->actingUser();
+
+        $this->getJson('/api/v1/account')
+            ->assertOk()
+            ->assertJsonPath('data.fields.first_name', null)
+            ->assertJsonPath('data.fields.last_name', null)
+            ->assertJsonStructure(['data' => ['fields' => ['first_name', 'last_name']]]);
     }
 
     // -------------------------------------------------------------------------

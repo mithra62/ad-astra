@@ -24,9 +24,9 @@ class UserFieldLayout
         }
 
         return FieldLayout::with([
-            'tabs' => fn($q) => $q->orderBy('sort_order'),
-            'tabs.elements' => fn($q) => $q->orderBy('sort_order'),
-            'tabs.elements.field',
+            'tabs' => fn ($q) => $q->orderBy('sort_order'),
+            'tabs.elements' => fn ($q) => $q->orderBy('sort_order'),
+            'tabs.elements.field.fieldType',
         ])->find($id);
     }
 
