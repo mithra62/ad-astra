@@ -18,11 +18,11 @@ class AppearanceSettingTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_defaults_to_light_when_nothing_stored(): void
+    public function test_defaults_to_system_when_nothing_stored(): void
     {
         $user = User::factory()->create();
 
-        $this->assertSame('light', $this->settings()->get('general', 'appearance', 'fallback', $user));
+        $this->assertSame('system', $this->settings()->get('general', 'appearance', 'fallback', $user));
     }
 
     private function settings(): Settings

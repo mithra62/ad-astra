@@ -27,12 +27,12 @@ class DarkModeAppearanceTest extends TestCase
         $response->assertSee("var pref = 'dark'", false);
     }
 
-    public function test_login_page_defaults_to_light(): void
+    public function test_login_page_defaults_to_system(): void
     {
         $response = $this->get('/login');
 
         $response->assertOk();
-        $response->assertSee("var pref = 'light'", false);
+        $response->assertSee("var pref = 'system'", false);
     }
 
     protected function setUp(): void
