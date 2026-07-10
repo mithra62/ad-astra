@@ -20,6 +20,8 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @method static LengthAwarePaginator paginate(int $perPage = 20, array $with = ['roles'])
  * @method static Collection getForDropdown(int $limit = 50)
  * @method static int getTotalCount()
+ * @method static int getTotal(array $where = [])
+ * @method static int getTotalByRole(string $role)
  * @method static Collection getLatestUsers(int $limit = 9)
  * @method static User firstOrCreateFromSocial(string $email, string $name, string $provider, string $ip)
  *

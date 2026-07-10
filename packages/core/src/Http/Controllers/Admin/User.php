@@ -29,6 +29,7 @@ class User extends Controller
             'users' => $users,
             'total_users' => Users::getTotal(),
             'total_active_users' => Users::getTotal(['status' => 'active']),
+            'total_super_admin' => Users::getTotalByRole('super_admin')
         ];
         return $this->view('users.index', $variables);
     }

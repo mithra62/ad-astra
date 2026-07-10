@@ -1353,6 +1353,46 @@ class UserServiceTest extends TestCase
         $this->assertDatabaseCount('entry_authors', 1);
     }
 
+    public function test_get_total_returns_all_users_when_no_where_clause(): void
+    {
+        User::factory()->count(3)->create();
+        $this->assertEquals(3, $this->service->getTotal());
+    }
+
+    public function test_get_total_respects_where_clause(): void
+    {
+        User::factory()->count(2)->create(['status' => 'active']);
+        User::factory()->create(['status' => 'inactive']);
+
+        $this->assertEquals(2, $this->service->getTotal(['status' => 'active']));
+    }
+
+    // -------------------------------------------------------------------------
+    // getTotal()
+    // -------------------------------------------------------------------------
+
+    public function test_get_total_by_role_returns_correct_count(): void
+    {
+        $role = Role::factory()->create(['name' => 'editor']);
+        $adminRole = Role::factory()->create(['name' => 'admin']);
+
+        $editors = User::factory()->count(3)->create();
+        foreach ($editors as $editor) {
+            $editor->assignRole($role);
+        }
+
+        $admin = User::factory()->create();
+        $admin->assignRole($adminRole);
+
+        $this->assertEquals(3, $this->service->getTotalByRole('editor'));
+        $this->assertEquals(1, $this->service->getTotalByRole('admin'));
+        $this->assertEquals(0, $this->service->getTotalByRole('non-existent'));
+    }
+
+    // -------------------------------------------------------------------------
+    // getTotalByRole()
+    // -------------------------------------------------------------------------
+
     protected function setUp(): void
     {
         parent::setUp();

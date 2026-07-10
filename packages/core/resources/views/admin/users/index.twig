@@ -21,11 +21,10 @@
         {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Add User', route('users.create'), icon='plus') }}{% endblock %}
     {% endembed %}
 
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {{ ui.stat_card('Total Users', total_users) }}
         {{ ui.stat_card('Active', total_active_users) }}
-        {{ ui.stat_card('Pending Invites', 9) }}
-        {{ ui.stat_card('Admins', 6) }}
+        {{ ui.stat_card('Admins', total_super_admin) }}
     </div>
 
     {% embed 'admin._inc._card' with {title: 'All Users'} %}
@@ -71,6 +70,7 @@
                                     <div class="min-w-0">
                                         <a href="{{ route('users.show', user) }}"
                                            class="font-medium text-content hover:text-accent">{{ user.name }}</a>
+                                        <p class="mt-0.5 truncate text-xs text-faint">{{ user.email }}</p>
                                         <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
                                             <a href="{{ route('users.show', user) }}"
                                                class="text-accent hover:underline">View</a><span
@@ -81,7 +81,6 @@
                                             <a href="{{ route('users.confirm', user) }}"
                                                class="text-red-500 hover:underline">Delete</a>
                                         </div>
-                                        <p class="mt-0.5 truncate text-xs text-faint">{{ user.email }}</p>
                                     </div>
                                 </div>
                             </td>

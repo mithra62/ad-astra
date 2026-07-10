@@ -600,6 +600,11 @@ class UserService
         return $query->orderByDesc('created_at')->get();
     }
 
+    public function getTotalByRole(string $role): int
+    {
+        return User::whereHas('roles', fn($q) => $q->where('name', $role))->count();
+    }
+
     public function getTotal(array $where = []): int
     {
         if($where) {
