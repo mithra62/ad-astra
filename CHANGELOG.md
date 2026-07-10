@@ -14,6 +14,7 @@ Release --
 - FIXED: Personal access token flashed in URL session flash string (#15)
 - UPDATED: Moved `app` logic to stand-alone composer package (#12)
 - UPDATED: Indexes to `field_values` table for query performance (#65)
+- UPDATED: Tab handle validation to use uniqueness by layout (#37)
 
 ### Version 0.0.1 (Alpha 1)
 Release June 29, 2026
