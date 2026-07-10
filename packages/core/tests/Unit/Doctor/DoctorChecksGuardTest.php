@@ -58,6 +58,36 @@ class DoctorChecksGuardTest extends TestCase
         }
     }
 
+    public function test_required_tables_accounts_for_every_package_migration(): void
+    {
+        // Tables a stock install creates that doctor deliberately does NOT
+        // require. Adding a table here is a conscious decision, not a default:
+        // the inclusion test for required_tables is "does an AdAstra feature
+        // break without it" (see config/doctor.php).
+        $intentionallyExcluded = [
+            'cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs', // framework plumbing
+            'fieldables',         // no runtime references yet (dead table)
+            'user_oauth_tokens',  // OAuth-only installs
+        ];
+
+        // Assumes Schema::create('literal') — true for every current
+        // migration; a dynamically named table would slip past this scan.
+        $created = [];
+        foreach (glob(__DIR__ . '/../../../database/migrations/*.php') as $file) {
+            preg_match_all("/Schema::create\('([^']+)'/", file_get_contents($file), $matches);
+            $created = array_merge($created, $matches[1]);
+        }
+        $this->assertNotEmpty($created, 'Migration scan found no tables — path or pattern is broken.');
+
+        $unaccounted = array_diff($created, config('doctor.required_tables'), $intentionallyExcluded);
+
+        $this->assertSame(
+            [],
+            array_values($unaccounted),
+            'New package table(s) not covered by doctor: add them to doctor.required_tables or, deliberately, to $intentionallyExcluded.'
+        );
+    }
+
     public function test_dependency_graph_has_no_cycles(): void
     {
         $checks = [];
