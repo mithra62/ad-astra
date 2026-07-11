@@ -12,10 +12,12 @@ Release --
 - FIXED: Badly formatted templates causing issues (#39)
 - FIXED: Entry fillable exposes `created_by_user_id` (#22)
 - FIXED: BotBlock Needs Session Storage of Field Name (#23)
+- FIXED: Account API routes (#17)
 - FIXED: Personal access token flashed in URL session flash string (#15)
 - UPDATED: Moved `app` logic to stand-alone composer package (#12)
 - UPDATED: Indexes to `field_values` table for query performance (#65)
 - UPDATED: Tab handle validation to use uniqueness by layout (#37)
+- UPDATED: Api\v1\User::update() to enforce the permission check (#18)
 
 ### Version 0.0.1 (Alpha 1)
 Release June 29, 2026

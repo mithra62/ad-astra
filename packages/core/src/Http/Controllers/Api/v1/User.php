@@ -114,6 +114,10 @@ class User extends Controller
     )]
     public function store(StoreUserRequest $request): JsonResponse
     {
+        if (!$this->can('create user')) {
+            abort(403);
+        }
+
         $user = Users::create($request->validated());
 
         return (new UserResource($user->load(['roles', 'fieldValues'])))
@@ -201,6 +205,10 @@ class User extends Controller
     )]
     public function update(EditUserRequest $request, int $user): UserResource
     {
+        if (!$this->can('edit user')) {
+            abort(403);
+        }
+
         $model = UserModel::find($user);
 
         if (!$model instanceof UserModel) {
