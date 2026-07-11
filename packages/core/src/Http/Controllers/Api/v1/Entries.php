@@ -55,7 +55,7 @@ class Entries extends Controller
                 )
             ),
             new OA\Response(response: 401, description: 'Unauthenticated'),
-            new OA\Response(response: 404, description: 'Entry group not found'),
+            new OA\Response(response: 404, description: 'Entry group not found, or no entries present'),
         ]
     )]
     public function index(Request $request, int $group_id): EntryCollection
@@ -78,7 +78,13 @@ class Entries extends Controller
             $this->sortDir($request),
         );
 
-        return new EntryCollection($query->paginate($this->limit($request)));
+        $entries = $query->paginate($this->limit($request));
+
+        if ($entries->isEmpty()) {
+            abort(404);
+        }
+
+        return new EntryCollection($entries);
     }
 
     // -------------------------------------------------------------------------

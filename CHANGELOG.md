@@ -13,6 +13,7 @@ Release --
 - FIXED: Entry fillable exposes `created_by_user_id` (#22)
 - FIXED: BotBlock Needs Session Storage of Field Name (#23)
 - FIXED: Account API routes (#17)
+- FIXED: Entries API never verifying entry group exists (#54)
 - FIXED: Personal access token flashed in URL session flash string (#15)
 - UPDATED: Moved `app` logic to stand-alone composer package (#12)
 - UPDATED: Indexes to `field_values` table for query performance (#65)

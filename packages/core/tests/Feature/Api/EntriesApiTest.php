@@ -156,6 +156,7 @@ class EntriesApiTest extends TestCase
     public function test_index_caps_limit_at_100(): void
     {
         $group = $this->group();
+        $this->entryIn($group);
 
         Sanctum::actingAs($this->superAdmin(), ['*']);
 
