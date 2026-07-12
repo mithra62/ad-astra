@@ -4,10 +4,12 @@ namespace Tests\Feature\Api;
 
 use AdAstra\Models\Entry;
 use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryTree;
 use AdAstra\Models\EntryType;
 use AdAstra\Models\Role;
 use AdAstra\Models\Status;
 use AdAstra\Models\User;
+use AdAstra\Services\EntryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Permission;
@@ -86,6 +88,40 @@ class EntriesApiTest extends TestCase
             'entry_group_id' => $group->id,
             'entry_type_id' => $type->id,
         ], $attributes));
+    }
+
+    private function treeTypeFor(EntryGroup $group, ?string $handle = null): EntryType
+    {
+        return EntryType::factory()->create([
+            'entry_group_id' => $group->id,
+            'handle' => $handle ?? 'page-' . fake()->unique()->numberBetween(1, 999999),
+            'has_entry_tree' => true,
+        ]);
+    }
+
+    /**
+     * An entry of a tree-enabled type with its Entry Tree node already created.
+     */
+    private function treeEntryIn(
+        EntryGroup $group,
+        string     $handle,
+        ?EntryTree $parent = null,
+        bool       $isHome = false,
+    ): Entry {
+        $entry = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id' => $this->treeTypeFor($group)->id,
+            'handle' => $handle,
+        ]);
+
+        app(EntryService::class)->createTreeNode($entry, $handle, $parent, null, $isHome);
+
+        return $entry;
+    }
+
+    private function nodeFor(Entry $entry): EntryTree
+    {
+        return EntryTree::where('entry_id', $entry->id)->firstOrFail();
     }
 
     // -------------------------------------------------------------------------
@@ -340,6 +376,171 @@ class EntriesApiTest extends TestCase
             'title' => 'Nope',
             'handle' => 'edit-me',
         ])->assertForbidden();
+    }
+
+    // -------------------------------------------------------------------------
+    // Entry Tree fields (parent placement, redirects, is_home, uri echo)
+    // -------------------------------------------------------------------------
+
+    public function test_store_with_parent_entry_id_creates_nested_tree_node(): void
+    {
+        $group = $this->group();
+        $this->treeTypeFor($group, 'page');
+        $parent = $this->treeEntryIn($group, 'about');
+
+        Sanctum::actingAs($this->superAdmin(), ['*']);
+
+        $this->postJson("/api/v1/entry-groups/{$group->id}/entries", [
+            'type_handle' => 'page',
+            'title' => 'Team',
+            'handle' => 'team',
+            'parent_entry_id' => $parent->id,
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('entry_trees', [
+            'handle' => 'team',
+            'parent_id' => $this->nodeFor($parent)->id,
+            'uri' => 'about/team',
+            'depth' => 1,
+        ]);
+    }
+
+    public function test_store_rejects_parent_entry_without_tree_node_with_422(): void
+    {
+        $group = $this->group();
+        $this->treeTypeFor($group, 'page');
+        // Exists as an entry, but has no Entry Tree node.
+        $nodeless = $this->entryIn($group);
+
+        Sanctum::actingAs($this->superAdmin(), ['*']);
+
+        $this->postJson("/api/v1/entry-groups/{$group->id}/entries", [
+            'type_handle' => 'page',
+            'title' => 'Orphan',
+            'handle' => 'orphan',
+            'parent_entry_id' => $nodeless->id,
+        ])->assertStatus(422)->assertJsonValidationErrors('parent_entry_id');
+    }
+
+    public function test_update_changing_parent_entry_id_moves_node_appended_at_end(): void
+    {
+        $group = $this->group();
+        $sectionA = $this->treeEntryIn($group, 'section-a');
+        $sectionB = $this->treeEntryIn($group, 'section-b');
+        $this->treeEntryIn($group, 'b-one', $this->nodeFor($sectionB));
+        $this->treeEntryIn($group, 'b-two', $this->nodeFor($sectionB));
+        $moved = $this->treeEntryIn($group, 'moved', $this->nodeFor($sectionA));
+
+        Sanctum::actingAs($this->superAdmin(), ['*']);
+
+        $this->putJson("/api/v1/entry-groups/{$group->id}/entries/{$moved->id}", [
+            'title' => $moved->title,
+            'handle' => 'moved',
+            'parent_entry_id' => $sectionB->id,
+        ])->assertOk();
+
+        $this->assertDatabaseHas('entry_trees', [
+            'entry_id' => $moved->id,
+            'parent_id' => $this->nodeFor($sectionB)->id,
+            'uri' => 'section-b/moved',
+            'sort_order' => 3,
+        ]);
+    }
+
+    public function test_update_echoing_own_uri_does_not_422(): void
+    {
+        $group = $this->group();
+        $entry = $this->treeEntryIn($group, 'about');
+
+        Sanctum::actingAs($this->superAdmin(), ['*']);
+
+        // A client round-tripping the entry (GET → PUT the same payload,
+        // including its own uri) must not trip the unique rule.
+        $this->putJson("/api/v1/entry-groups/{$group->id}/entries/{$entry->id}", [
+            'title' => $entry->title,
+            'handle' => 'about',
+            'uri' => 'about',
+        ])->assertOk();
+    }
+
+    public function test_update_promote_non_root_is_home_returns_422_not_500(): void
+    {
+        $group = $this->group();
+        $section = $this->treeEntryIn($group, 'section');
+        $child = $this->treeEntryIn($group, 'child', $this->nodeFor($section));
+
+        Sanctum::actingAs($this->superAdmin(), ['*']);
+
+        $this->putJson("/api/v1/entry-groups/{$group->id}/entries/{$child->id}", [
+            'title' => $child->title,
+            'handle' => 'child',
+            'is_home' => true,
+        ])->assertStatus(422)->assertJsonValidationErrors('is_home');
+    }
+
+    public function test_store_with_is_home_transfers_home_flag_from_existing_home(): void
+    {
+        $group = $this->group();
+        $this->treeTypeFor($group, 'page');
+        $oldHome = $this->treeEntryIn($group, 'old-home', null, true);
+
+        Sanctum::actingAs($this->superAdmin(), ['*']);
+
+        $this->postJson("/api/v1/entry-groups/{$group->id}/entries", [
+            'type_handle' => 'page',
+            'title' => 'New Home',
+            'handle' => 'new-home',
+            'is_home' => true,
+        ])->assertCreated();
+
+        // Old home is demoted, its handle restored from its entry.
+        $this->assertDatabaseHas('entry_trees', [
+            'entry_id' => $oldHome->id,
+            'is_home' => 0,
+            'handle' => 'old-home',
+            'uri' => 'old-home',
+        ]);
+        $this->assertDatabaseHas('entry_trees', [
+            'handle' => 'home',
+            'is_home' => 1,
+            'uri' => '/',
+        ]);
+    }
+
+    public function test_store_and_update_persist_redirect_fields(): void
+    {
+        $group = $this->group();
+        $this->treeTypeFor($group, 'page');
+
+        Sanctum::actingAs($this->superAdmin(), ['*']);
+
+        $response = $this->postJson("/api/v1/entry-groups/{$group->id}/entries", [
+            'type_handle' => 'page',
+            'title' => 'Landing',
+            'handle' => 'landing',
+            'redirect_url' => 'https://example.com/original',
+            'redirect_status' => 301,
+        ])->assertCreated();
+
+        $entryId = $response->json('data.id');
+        $this->assertDatabaseHas('entry_trees', [
+            'entry_id' => $entryId,
+            'redirect_url' => 'https://example.com/original',
+            'redirect_status' => 301,
+        ]);
+
+        $this->putJson("/api/v1/entry-groups/{$group->id}/entries/{$entryId}", [
+            'title' => 'Landing',
+            'handle' => 'landing',
+            'redirect_url' => 'https://example.com/changed',
+            'redirect_status' => 308,
+        ])->assertOk();
+
+        $this->assertDatabaseHas('entry_trees', [
+            'entry_id' => $entryId,
+            'redirect_url' => 'https://example.com/changed',
+            'redirect_status' => 308,
+        ]);
     }
 
     // -------------------------------------------------------------------------

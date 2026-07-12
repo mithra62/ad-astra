@@ -9,6 +9,7 @@ use AdAstra\Services\EntryService;
 
 /**
  * @deprecated Delegate to EntryService::createTreeNode() directly.
+ *             Does not forward the redirectUrl / redirectStatus parameters.
  */
 class CreateEntryTreeNode extends AbstractAction
 {

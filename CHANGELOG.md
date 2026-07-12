@@ -6,6 +6,7 @@ Release --
 - ADDED: `doctor` Command for system health (#66)
 - ADDED: Additional Unit and Feature tests (#36)
 - ADDED: Super Admin bypass log (#30)
+- FIXED: Entry Tree request fields (`parent_entry_id`, `redirect_url`, `redirect_status`, `is_home`) were validated but silently ignored on create/update (#44)
 - FIXED: Seeders and Field Layouts so Field Groups were aligned (#42)
 - FIXED: BotBlockRequest ignores PUT, PATCH, DELETE (#21)
 - FIXED: Error message on user CRUD when role isn't select (#69)

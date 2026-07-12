@@ -114,6 +114,11 @@ class Entries extends Controller
                     new OA\Property(property: 'authors', type: 'array', nullable: true, items: new OA\Items(type: 'integer'), description: 'User IDs to assign as authors'),
                     new OA\Property(property: 'categories', type: 'array', nullable: true, items: new OA\Items(type: 'integer'), description: 'Category IDs to assign'),
                     new OA\Property(property: 'fields', type: 'object', nullable: true, description: 'Dynamic field values keyed by field handle', additionalProperties: new OA\AdditionalProperties(type: 'string')),
+                    new OA\Property(property: 'parent_entry_id', type: 'integer', nullable: true, description: 'ID of the parent entry for Entry Tree placement (tree-enabled types only); the parent entry must already have a tree node'),
+                    new OA\Property(property: 'template', type: 'string', nullable: true, description: 'Template path override for the Entry Tree node'),
+                    new OA\Property(property: 'is_home', type: 'boolean', nullable: true, description: 'Mark this entry as the site home page. Last write wins: any existing home entry is demoted'),
+                    new OA\Property(property: 'redirect_url', type: 'string', nullable: true, description: "If set, visiting this entry's URL redirects here"),
+                    new OA\Property(property: 'redirect_status', type: 'integer', enum: [301, 302, 307, 308], nullable: true, description: 'HTTP status used for the redirect; defaults to 302'),
                 ]
             )
         ),
@@ -203,6 +208,11 @@ class Entries extends Controller
                     new OA\Property(property: 'authors', type: 'array', nullable: true, items: new OA\Items(type: 'integer')),
                     new OA\Property(property: 'categories', type: 'array', nullable: true, items: new OA\Items(type: 'integer')),
                     new OA\Property(property: 'fields', type: 'object', nullable: true, additionalProperties: new OA\AdditionalProperties(type: 'string')),
+                    new OA\Property(property: 'parent_entry_id', type: 'integer', nullable: true, description: 'ID of the parent entry for Entry Tree placement (tree-enabled types only); the parent entry must already have a tree node'),
+                    new OA\Property(property: 'template', type: 'string', nullable: true, description: 'Template path override for the Entry Tree node'),
+                    new OA\Property(property: 'is_home', type: 'boolean', nullable: true, description: 'Mark this entry as the site home page. Last write wins: any existing home entry is demoted'),
+                    new OA\Property(property: 'redirect_url', type: 'string', nullable: true, description: "If set, visiting this entry's URL redirects here"),
+                    new OA\Property(property: 'redirect_status', type: 'integer', enum: [301, 302, 307, 308], nullable: true, description: 'HTTP status used for the redirect; defaults to 302'),
                 ]
             )
         ),

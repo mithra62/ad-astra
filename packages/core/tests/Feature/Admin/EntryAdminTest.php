@@ -4,9 +4,11 @@ namespace Tests\Feature\Admin;
 
 use AdAstra\Models\Entry;
 use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryTree;
 use AdAstra\Models\EntryType;
 use AdAstra\Models\Status;
 use AdAstra\Models\User;
+use AdAstra\Services\EntryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -210,6 +212,55 @@ class EntryAdminTest extends TestCase
         $this->actingAs($this->admin)
             ->put(route('entries.update', 999999), ['title' => 'Nope', 'handle' => 'nope'])
             ->assertNotFound();
+    }
+
+    public function test_update_with_parent_and_redirect_persists_tree_changes(): void
+    {
+        $group = $this->group();
+        $service = app(EntryService::class);
+
+        $treeType = fn () => EntryType::factory()->create([
+            'entry_group_id' => $group->id,
+            'handle' => 'page-' . fake()->unique()->numberBetween(1, 999999),
+            'has_entry_tree' => true,
+        ]);
+
+        $parent = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id' => $treeType()->id,
+            'handle' => 'about',
+        ]);
+        $service->createTreeNode($parent, 'about');
+
+        $entry = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id' => $treeType()->id,
+            'handle' => 'contact',
+            'title' => 'Contact',
+        ]);
+        $service->createTreeNode($entry, 'contact');
+
+        // Mirrors what admin.entries._hierarchy actually submits.
+        $this->actingAs($this->admin)
+            ->put(route('entries.update', $entry->id), [
+                'title' => 'Contact',
+                'handle' => 'contact',
+                'parent_entry_id' => $parent->id,
+                'redirect_url' => 'https://example.com/contact-us',
+                'redirect_status' => 301,
+                'template' => 'pages/contact',
+            ])
+            ->assertRedirect(route('entries.edit', $entry->id))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('entry_trees', [
+            'entry_id' => $entry->id,
+            'parent_id' => EntryTree::where('entry_id', $parent->id)->value('id'),
+            'uri' => 'about/contact',
+            'redirect_url' => 'https://example.com/contact-us',
+            'redirect_status' => 301,
+            'template' => 'pages/contact',
+        ]);
     }
 
     // -------------------------------------------------------------------------

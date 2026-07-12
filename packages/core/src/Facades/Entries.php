@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void setFieldValue(Entry $entry, string $fieldHandle, mixed $value)
  * @method static FieldLayout|null resolveLayout(Entry $entry)
  * @method static Collection resolveFields(Entry $entry)
- * @method static EntryTree createTreeNode(Entry $entry, string $handle, ?EntryTree $parent = null, ?string $template = null, bool $isHome = false)
+ * @method static EntryTree createTreeNode(Entry $entry, string $handle, ?EntryTree $parent = null, ?string $template = null, bool $isHome = false, ?string $redirectUrl = null, ?int $redirectStatus = null)
  * @method static EntryTree moveTreeNode(EntryTree $node, ?EntryTree $newParent, int $sortOrder = 0)
  * @method static void rebuildTreeUri(EntryTree $node)
  * @method static EntryMetric recordMetric(Entry $entry, string $metric, int $value = 1, ?Carbon $date = null)
