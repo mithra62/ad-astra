@@ -263,7 +263,7 @@ php artisan adastra:doctor
 php artisan adastra:validate-class-references
 php artisan schedule:run
 php artisan queue:work
-php artisan app:refresh-tokens
+php artisan adastra:refresh-tokens
 ```
 
 `adastra:doctor` produces a read-only health report for the installation (exit 0 healthy / 2 failures; `--strict` promotes warnings, `--format=json` for machine-readable output). See `docs/DOCTOR_EXTENDING.md` to add checks.
