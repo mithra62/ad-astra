@@ -20,7 +20,7 @@ class EditEntryRequest extends FormRequest
     public function rules(): array
     {
         $entry = Entry::query()
-            ->with('entryGroup.statusGroup')
+            ->with('entryGroup.statusGroup', 'entryTree')
             ->findOrFail($this->route()->parameter('entry'));
         $groupSchema = EntryGroup::resolvedFields($entry->entry_group_id);
         $typeSchema = EntryType::resolvedFields($entry->entry_type_id);
@@ -37,7 +37,7 @@ class EditEntryRequest extends FormRequest
                     'string',
                     'max:255',
                     Rule::unique('entries', 'handle')
-                        ->where(fn($query) => $query->where('entry_group_id', $entry->entry_group_id))
+                        ->where(fn ($query) => $query->where('entry_group_id', $entry->entry_group_id))
                         ->ignore($entry->id),
                 ],
                 'status' => [
@@ -45,7 +45,7 @@ class EditEntryRequest extends FormRequest
                     'string',
                     'max:100',
                     Rule::exists('statuses', 'handle')->where(
-                        fn($query) => $query->where('status_group_id', $entry->entryGroup->status_group_id)
+                        fn ($query) => $query->where('status_group_id', $entry->entryGroup->status_group_id)
                     ),
                 ],
                 'published_at' => [
@@ -75,19 +75,18 @@ class EditEntryRequest extends FormRequest
                 'parent_entry_id' => [
                     'nullable',
                     'integer',
-                    'exists:entries,id'
+                    // The parent entry must already have an Entry Tree node —
+                    // otherwise placement would silently fall back to root.
+                    Rule::exists('entry_trees', 'entry_id'),
+                    Rule::notIn([$entry->id]),
                 ],
                 'uri' => [
                     'nullable',
                     'string',
                     'max:255',
-                    'unique:entry_trees,uri'
+                    Rule::unique('entry_trees', 'uri')->ignore($entry->entryTree?->id),
                 ],
                 'depth' => [
-                    'nullable',
-                    'integer', 'min:0'
-                ],
-                'sort_order' => [
                     'nullable',
                     'integer', 'min:0'
                 ],
