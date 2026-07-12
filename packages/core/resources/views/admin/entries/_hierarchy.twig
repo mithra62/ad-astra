@@ -83,6 +83,32 @@
                         <p class="mt-1 text-xs text-red-600">{{ errors.first('redirect_url', entry.entryType.redirect_url) }}</p>
                     {% endif %}
                 </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-content" for="redirect_status">Redirect HTTP
+                        Status</label>
+                    <select
+                        class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:max-w-[20rem]"
+                        id="redirect_status" name="redirect_status" data-tab-dirty="structure">
+                        {% set current_redirect_status = old('redirect_status', entry.entryTree.redirect_status ?? 302) %}
+                        <option value="301" {% if current_redirect_status == 301 %} selected {% endif %}>301 — Moved
+                            Permanently
+                        </option>
+                        <option value="302" {% if current_redirect_status == 302 %} selected {% endif %}>302 — Found
+                            (temporary)
+                        </option>
+                        <option value="307" {% if current_redirect_status == 307 %} selected {% endif %}>307 —
+                            Temporary Redirect
+                        </option>
+                        <option value="308" {% if current_redirect_status == 308 %} selected {% endif %}>308 —
+                            Permanent Redirect
+                        </option>
+                    </select>
+                    <p class="mt-1 text-xs text-faint">HTTP status code used when the redirect fires. Defaults to
+                        302.</p>
+                    {% if errors.has('redirect_status') %}
+                        <p class="mt-1 text-xs text-red-600">{{ errors.first('redirect_status') }}</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
