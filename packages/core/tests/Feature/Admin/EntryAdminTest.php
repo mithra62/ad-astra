@@ -263,6 +263,41 @@ class EntryAdminTest extends TestCase
         ]);
     }
 
+    public function test_edit_prefills_the_parent_picker_with_the_current_tree_parent(): void
+    {
+        $group = $this->group();
+        $service = app(EntryService::class);
+
+        $treeType = fn () => EntryType::factory()->create([
+            'entry_group_id' => $group->id,
+            'handle' => 'page-' . fake()->unique()->numberBetween(1, 999999),
+            'has_entry_tree' => true,
+        ]);
+
+        $parent = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id' => $treeType()->id,
+            'title' => 'About Section',
+            'handle' => 'about',
+        ]);
+        $service->createTreeNode($parent, 'about');
+
+        $entry = Entry::factory()->create([
+            'entry_group_id' => $group->id,
+            'entry_type_id' => $treeType()->id,
+            'handle' => 'contact',
+        ]);
+        $service->createTreeNode($entry, 'contact', $parent->entryTree);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('entries.edit', $entry->id))
+            ->assertOk();
+
+        $response->assertSee('data-parent-picker', false);
+        $response->assertSee('value="' . $parent->id . '" selected', false);
+        $response->assertSee('About Section', false);
+    }
+
     // -------------------------------------------------------------------------
     // destroy
     // -------------------------------------------------------------------------

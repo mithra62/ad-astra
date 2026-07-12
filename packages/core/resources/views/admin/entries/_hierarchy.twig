@@ -15,20 +15,21 @@
                         Entry</label>
                     <select
                         class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                        id="parent_entry_id" name="parent_entry_id" data-tab-dirty="structure">
+                        id="parent_entry_id" name="parent_entry_id"
+                        data-parent-picker
+                        data-picker-url="{{ route('entries.parent_picker.index') }}"
+                        data-entry-group-id="{{ group.id ?? entry.entry_group_id }}"
+                        data-exclude="{{ entry.id ?? '' }}"
+                        data-per-page="25"
+                        data-initial-count="20"
+                        data-choices-placeholder="Search entries…"
+                        data-tab-dirty="structure">
                         <option value="">— None (top-level) —</option>
-                        <option value="22060" {% if old('parent_entry_id') == 22060 %} selected {% endif %}>Vel Fugiat
-                            Nemo Animi.
-                        </option>
-                        <option value="22004" {% if old('parent_entry_id') == 22004 %} selected {% endif %}>Possimus Ut
-                            Architecto Ut Atque Fugit Est.
-                        </option>
-                        <option value="21970" {% if old('parent_entry_id') == 21970 %} selected {% endif %}>Aut Soluta
-                            Dolor Nostrum Explicabo Et Aut.
-                        </option>
-                        <option value="21922" {% if old('parent_entry_id') == 21922 %} selected {% endif %}>Ullam Id
-                            Corporis Rem Dolores Dolorem.
-                        </option>
+                        {% if parent_entry %}
+                            <option value="{{ parent_entry.id }}" selected>
+                                {{- parent_entry.title }}{% if parent_entry.uri %} — /{{ parent_entry.uri }}{% endif -%}
+                            </option>
+                        {% endif %}
                     </select>
                     <p class="mt-1 text-xs text-faint">Leave blank to place at the top level.</p>
                     {% if errors.has('parent_entry_id') %}

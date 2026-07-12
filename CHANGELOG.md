@@ -3,6 +3,7 @@
 ### Version 0.0.2 (Alpha 2)
 Release --
 
+- ADDED: Ajax parent-entry search picker on the entry Hierarchy tab, replacing the placeholder select (#45)
 - ADDED: `doctor` Command for system health (#66)
 - ADDED: Additional Unit and Feature tests (#36)
 - ADDED: Super Admin bypass log (#30)

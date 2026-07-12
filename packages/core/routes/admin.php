@@ -144,6 +144,9 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::resource('statuses', Status::class)->except(['index', 'create', 'store', 'show']);
 
     //entries
+    // Must be registered before the other entries/* routes so the literal
+    // `parent-picker` segment isn't captured as an {id}/{entry} parameter.
+    Route::get('entries/parent-picker', [Entry::class, 'entry_picker'])->name('entries.parent_picker.index');
     Route::get('entries/groups', [EntryGroup::class, 'index'])->name('entries.groups');
     Route::get('entries/groups/create', [EntryGroup::class, 'create'])->name('entries.groups.create');
     Route::post('entries/groups', [EntryGroup::class, 'store'])->name('entries.groups.store');

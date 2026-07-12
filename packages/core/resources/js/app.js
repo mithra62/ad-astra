@@ -165,4 +165,79 @@ document.addEventListener('DOMContentLoaded', () => {
             noChoicesText: 'No options to choose from',
         });
     });
+
+    // Ajax-driven single-select parent entry picker for the entry Hierarchy
+    // tab. Remote search against entries.parent_picker.index; the current
+    // parent is prefilled server-side as a selected <option>. Deliberately
+    // keyed off data-parent-picker (not data-choices) so the generic
+    // enhancer above never double-initialises it.
+    document.querySelectorAll('select[data-parent-picker]').forEach((select) => {
+        const pickerUrl = select.dataset.pickerUrl;
+        const entryGroupId = select.dataset.entryGroupId;
+        const exclude = select.dataset.exclude || '';
+        const perPage = select.dataset.perPage || '';
+        const initialCount = select.dataset.initialCount || '';
+        const noneLabel = '— None (top-level) —';
+
+        const choices = new Choices(select, {
+            removeItemButton: false,
+            searchEnabled: true,
+            // Results come from the server already filtered; letting Choices
+            // re-filter them locally would drop valid matches.
+            searchChoices: false,
+            searchFloor: 2,
+            shouldSort: false,
+            placeholderValue: select.dataset.choicesPlaceholder || 'Search entries…',
+            noResultsText: 'No matching entries',
+            noChoicesText: 'Type to search entries',
+        });
+
+        let debounceTimer = null;
+        let requestSeq = 0;
+
+        const loadChoices = (q, limit) => {
+            const seq = ++requestSeq;
+            const url = new URL(pickerUrl, window.location.origin);
+            url.searchParams.set('q', q);
+            url.searchParams.set('entry_group_id', entryGroupId);
+            if (exclude) {
+                url.searchParams.set('exclude', exclude);
+            }
+            if (limit) {
+                url.searchParams.set('per_page', limit);
+            }
+
+            fetch(url, { headers: { Accept: 'application/json' } })
+                .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+                .then((json) => {
+                    if (seq !== requestSeq) {
+                        return; // a newer search superseded this response
+                    }
+
+                    const items = (json.data || []).map((entry) => ({
+                        value: String(entry.id),
+                        label: entry.uri ? `${entry.title} — /${entry.uri}` : entry.title,
+                    }));
+                    // setChoices(..., replace) wipes the list, so the
+                    // top-level option has to be re-added each time.
+                    items.unshift({ value: '', label: noneLabel });
+
+                    choices.setChoices(items, 'value', 'label', true);
+                })
+                .catch(() => {});
+        };
+
+        select.addEventListener('search', (event) => {
+            const q = event.detail.value;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => loadChoices(q, perPage), 300);
+        });
+
+        // Prepopulate the dropdown so it opens with options before the
+        // user types; the count comes from the markup like the other
+        // request values.
+        if (initialCount) {
+            loadChoices('', initialCount);
+        }
+    });
 });
