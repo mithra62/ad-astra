@@ -22,8 +22,7 @@ class EntryService extends AbstractService
         $app,
         private readonly EntryTypeRegistry $registry,
         private readonly EntryRepository $repository,
-    )
-    {
+    ) {
         parent::__construct($app);
     }
 
@@ -34,6 +33,10 @@ class EntryService extends AbstractService
     /**
      * Update an entry's core attributes, authors, categories, and/or fields.
      * Only keys present in $data are touched.
+     *
+     * Entry Tree keys (parent_entry_id, template, is_home, redirect_url,
+     * redirect_status) are honored when the type has has_entry_tree — see
+     * syncTreeNode() for the semantics.
      *
      * Validation:
      *   The entry type's `validate()` method is called before any writes. If it
@@ -78,13 +81,22 @@ class EntryService extends AbstractService
     /**
      * Synchronise the Entry Tree node for an existing entry after an update.
      *
-     * Three mutations are handled independently:
-     *   - Handle changed  → update node handle + rebuild URI for the whole subtree.
-     *   - Parent changed  → moveTreeNode (which rebalances siblings and rebuilds URIs).
-     *   - Template changed → direct column update.
+     * Mutations handled:
+     *   - Handle changed   → update node handle + rebuild URI for the whole subtree.
+     *   - Parent changed   → moveTreeNode, appending to the end of the new siblings
+     *                        (which rebalances siblings and rebuilds URIs).
+     *                        The parent is identified by `parent_entry_id` — the
+     *                        parent *entry's* ID, not a tree node ID.
+     *   - Home flag        → last write wins: promoting this node demotes whichever
+     *                        node currently holds the flag. Promotion requires the
+     *                        node to end up at the root (either already there, or
+     *                        moved there in the same request).
+     *   - Template / redirect pair → direct column updates when the key is present.
      *
      * If no tree node exists yet, one is created (first save after has_entry_tree
      * is enabled on the type, or a missed create).
+     *
+     * @throws ValidationException on home-placement or handle-collision violations.
      */
     private function syncTreeNode(Entry $entry, array $data): void
     {
@@ -94,25 +106,70 @@ class EntryService extends AbstractService
             if (!filled($entry->handle)) {
                 return;
             }
-            $parentNode = $this->resolveTreeParentNode($data['parent_id'] ?? null);
+            // The `boolean` validation rule accepts "0"/"1" strings — normalize
+            // before use, since (bool)"0" would be true.
+            $isHome = filter_var($data['is_home'] ?? false, FILTER_VALIDATE_BOOL);
+            if ($isHome) {
+                $this->demoteExistingHomeNode();
+            }
+            $parentNode = $this->resolveTreeParentNode($data['parent_entry_id'] ?? null);
             $this->createTreeNode(
                 entry: $entry,
                 handle: $entry->handle,
                 parent: $parentNode,
                 template: $data['template'] ?? null,
-                isHome: (bool)($data['is_home'] ?? false),
+                isHome: $isHome,
+                redirectUrl: $data['redirect_url'] ?? null,
+                redirectStatus: $data['redirect_status'] ?? null,
             );
             return;
+        }
+
+        // Resolve the intended final state up front so validation can consider
+        // a parent move and a home promotion submitted in the same request.
+        $parentKeyPresent = array_key_exists('parent_entry_id', $data);
+        $newParentNode = $parentKeyPresent ? $this->resolveTreeParentNode($data['parent_entry_id'] ?? null) : null;
+        $finalParentId = $parentKeyPresent ? $newParentNode?->id : $node->parent_id;
+
+        // The `boolean` validation rule accepts "0"/"1" strings — normalize
+        // before use, since (bool)"0" would be true.
+        $finalIsHome = array_key_exists('is_home', $data)
+            ? filter_var($data['is_home'], FILTER_VALIDATE_BOOL)
+            : $node->is_home;
+
+        if ($finalIsHome && $finalParentId !== null) {
+            throw ValidationException::withMessages([
+                'is_home' => 'The home entry must be a top-level entry.',
+            ]);
+        }
+
+        $promoting = $finalIsHome && !$node->is_home;
+        $demoting = !$finalIsHome && $node->is_home;
+
+        // Last write wins: taking the home flag demotes whichever node holds it.
+        if ($promoting) {
+            $this->demoteExistingHomeNode($node->id);
         }
 
         $handleChanged = false;
         $dirty = false;
 
-        // Sync tree handle with the entry's (potentially renamed) handle.
-        $normalizedHandle = EntryTree::normalizeHandle($entry->handle);
-        if ($normalizedHandle !== '' && $node->handle !== $normalizedHandle) {
-            $node->handle = $normalizedHandle;
+        // Sync tree handle: home nodes always use the literal 'home' handle;
+        // otherwise follow the entry's (potentially renamed) handle.
+        $targetHandle = $finalIsHome ? 'home' : EntryTree::normalizeHandle($entry->handle);
+        if ($targetHandle !== '' && $node->handle !== $targetHandle) {
+            if ($this->treeHandleTaken($targetHandle, $finalParentId, $node->id)) {
+                throw ValidationException::withMessages([
+                    'handle' => "An Entry Tree node with handle [{$targetHandle}] already exists at this level.",
+                ]);
+            }
+            $node->handle = $targetHandle;
             $handleChanged = true;
+            $dirty = true;
+        }
+
+        if ($promoting || $demoting) {
+            $node->is_home = $finalIsHome;
             $dirty = true;
         }
 
@@ -122,25 +179,84 @@ class EntryService extends AbstractService
             $dirty = true;
         }
 
+        // Sync the redirect pair when the caller explicitly included the keys.
+        // A null redirect_url clears it; a null redirect_status resets to 302.
+        if (array_key_exists('redirect_url', $data) && $node->redirect_url !== $data['redirect_url']) {
+            $node->redirect_url = $data['redirect_url'];
+            $dirty = true;
+        }
+        if (array_key_exists('redirect_status', $data)) {
+            $redirectStatus = (int)($data['redirect_status'] ?? 302);
+            if ((int)$node->redirect_status !== $redirectStatus) {
+                $node->redirect_status = $redirectStatus;
+                $dirty = true;
+            }
+        }
+
         if ($dirty) {
             $node->save();
         }
 
         // Sync parent — moveTreeNode rebalances siblings and rebuilds all URIs,
-        // so return early to avoid a redundant rebuildTreeUri call below.
-        if (array_key_exists('parent_id', $data)) {
-            $newParentNode = $this->resolveTreeParentNode($data['parent_id'] ?? null);
-            if ($node->parent_id !== $newParentNode?->id) {
-                $this->moveTreeNode($node->fresh(), $newParentNode);
-                return;
-            }
+        // so return early to avoid a redundant rebuildTreeUri call below. Moved
+        // nodes are appended to the end of their new siblings.
+        if ($parentKeyPresent && $node->parent_id !== $newParentNode?->id) {
+            $this->moveTreeNode($node->fresh(), $newParentNode, $this->treeNextSortOrder($newParentNode));
+            return;
         }
 
-        // If only the handle changed (no parent move), rebuild URIs for this
-        // node and every descendant so their stored `uri` values stay accurate.
-        if ($handleChanged) {
+        // If the handle or home flag changed (no parent move), rebuild URIs for
+        // this node and every descendant so their stored `uri` values stay
+        // accurate — home nodes contribute no URI segment, regular nodes do.
+        if ($handleChanged || $promoting || $demoting) {
             $this->rebuildTreeUri($node->fresh());
         }
+    }
+
+    /**
+     * Demote whichever node currently holds the home flag (last write wins).
+     *
+     * The demoted node's handle is restored from its entry's handle (falling
+     * back to a node-id suffix when that slug is already taken at its level)
+     * and its subtree URIs are rebuilt, since home nodes contribute no URI
+     * segment but regular nodes do.
+     */
+    private function demoteExistingHomeNode(?int $exceptNodeId = null): void
+    {
+        $current = EntryTree::query()
+            ->where('is_home', true)
+            ->when($exceptNodeId, fn ($query) => $query->whereKeyNot($exceptNodeId))
+            ->first();
+
+        if (!$current) {
+            return;
+        }
+
+        $current->loadMissing('entry');
+
+        $restored = EntryTree::normalizeHandle((string)$current->entry?->handle);
+        if ($restored === '' || $this->treeHandleTaken($restored, $current->parent_id, $current->id)) {
+            $restored = ($restored === '' ? 'home' : $restored) . '-' . $current->id;
+        }
+
+        $current->is_home = false;
+        $current->handle = $restored;
+        $current->save();
+
+        $this->rebuildTreeUri($current->fresh());
+    }
+
+    /**
+     * Boolean variant of the tree handle-uniqueness assertions, for HTTP-facing
+     * paths that surface a ValidationException (422) instead of a 500.
+     */
+    private function treeHandleTaken(string $handle, ?int $parentId, ?int $exceptNodeId = null): bool
+    {
+        return EntryTree::query()
+            ->where('handle', $handle)
+            ->where('parent_id', $parentId)
+            ->when($exceptNodeId, fn ($query) => $query->whereKeyNot($exceptNodeId))
+            ->exists();
     }
 
     /**
@@ -172,6 +288,8 @@ class EntryService extends AbstractService
      * Handles are automatically slugified. The home node ($isHome = true) must
      * be a root-level node and can only exist once per tree.
      *
+     * A null $redirectStatus falls back to the column default of 302.
+     *
      * @throws InvalidArgumentException if the entry type does not support trees,
      *                                  if placement rules are violated, or if a
      *                                  duplicate handle exists at the same level.
@@ -182,9 +300,10 @@ class EntryService extends AbstractService
         ?EntryTree $parent = null,
         ?string    $template = null,
         bool       $isHome = false,
-    ): EntryTree
-    {
-        return DB::transaction(function () use ($entry, $handle, $parent, $template, $isHome) {
+        ?string    $redirectUrl = null,
+        ?int       $redirectStatus = null,
+    ): EntryTree {
+        return DB::transaction(function () use ($entry, $handle, $parent, $template, $isHome, $redirectUrl, $redirectStatus) {
             $entry->loadMissing('entryType');
 
             if (!$entry->entryType?->has_entry_tree) {
@@ -210,6 +329,8 @@ class EntryService extends AbstractService
                 'depth' => $parent ? $parent->depth + 1 : 0,
                 'sort_order' => $this->treeNextSortOrder($parent),
                 'template' => $template,
+                'redirect_url' => $redirectUrl,
+                'redirect_status' => $redirectStatus ?? 302,
                 'is_home' => $isHome,
             ]);
 
@@ -269,6 +390,14 @@ class EntryService extends AbstractService
      *   categories (array)  — category IDs to sync
      *   fields     (array)  — ['handle' => value] field values (relational or scalar)
      *
+     * Entry Tree keys (only honored when the type has has_entry_tree):
+     *   parent_entry_id (int|null)  — ID of the parent *entry* (not tree node);
+     *                                 the parent must already have a tree node
+     *   template        (string|null)
+     *   is_home         (bool)      — last write wins: any existing home node is demoted
+     *   redirect_url    (string|null)
+     *   redirect_status (int|null)  — defaults to 302 when null
+     *
      * Validation:
      *   The entry type's `validate()` method is called before the repository is
      *   touched. If it returns a non-empty error array a ValidationException is
@@ -294,13 +423,22 @@ class EntryService extends AbstractService
         $entry = $this->repository->create($entryType, $data);
 
         if ($entryType->getRecord()->has_entry_tree && filled($entry->handle)) {
-            $parentNode = $this->resolveTreeParentNode($data['parent_id'] ?? null);
+            // Normalized because the `boolean` validation rule accepts "0"/"1" strings.
+            $isHome = filter_var($data['is_home'] ?? false, FILTER_VALIDATE_BOOL);
+
+            // Last write wins: taking the home flag demotes whichever node holds it.
+            if ($isHome) {
+                $this->demoteExistingHomeNode();
+            }
+            $parentNode = $this->resolveTreeParentNode($data['parent_entry_id'] ?? null);
             $this->createTreeNode(
                 entry: $entry,
                 handle: $entry->handle,
                 parent: $parentNode,
                 template: $data['template'] ?? null,
-                isHome: (bool)($data['is_home'] ?? false),
+                isHome: $isHome,
+                redirectUrl: $data['redirect_url'] ?? null,
+                redirectStatus: $data['redirect_status'] ?? null,
             );
         }
 
@@ -419,7 +557,7 @@ class EntryService extends AbstractService
     {
         $siblingCount = EntryTree::query()
             ->where('parent_id', $parent?->id)
-            ->when($node->exists, fn($query) => $query->whereKeyNot($node->id))
+            ->when($node->exists, fn ($query) => $query->whereKeyNot($node->id))
             ->count();
 
         return max(1, min($sortOrder, $siblingCount + 1));
@@ -429,7 +567,7 @@ class EntryService extends AbstractService
     {
         $siblings = EntryTree::query()
             ->where('parent_id', $parentId)
-            ->when($exceptNodeId, fn($query) => $query->whereKeyNot($exceptNodeId))
+            ->when($exceptNodeId, fn ($query) => $query->whereKeyNot($exceptNodeId))
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
@@ -545,7 +683,7 @@ class EntryService extends AbstractService
      */
     public function deleteTreeNode(EntryTree $node): bool
     {
-        return DB::transaction(fn() => (bool)$node->delete());
+        return DB::transaction(fn () => (bool)$node->delete());
     }
 
     // -- Tree helpers (private) ------------------------------------------------
@@ -605,8 +743,7 @@ class EntryService extends AbstractService
         string $fieldHandle,
         int    $maxDepth = 3,
         array  $seen = [],
-    ): Collection
-    {
+    ): Collection {
         if ($maxDepth <= 0 || in_array($entry->id, $seen, true)) {
             return collect();
         }
@@ -615,7 +752,7 @@ class EntryService extends AbstractService
         $entry->loadMissing('entryRelationships.relatedEntry', 'entryRelationships.field');
 
         $related = $entry->entryRelationships
-            ->filter(fn($r) => $r->field?->handle === $fieldHandle && $r->relatedEntry !== null)
+            ->filter(fn ($r) => $r->field?->handle === $fieldHandle && $r->relatedEntry !== null)
             ->sortBy('sort_order')
             ->pluck('relatedEntry');
 
