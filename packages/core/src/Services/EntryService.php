@@ -65,13 +65,17 @@ class EntryService extends AbstractService
         // no changes needed there. afterUpdate (called inside applyData, outside
         // its inner transaction) will run within this outer transaction.
         return DB::transaction(function () use ($entry, $data) {
+            // Captured before applyData rewrites it — syncTreeNode needs the
+            // pre-save handle to tell a tracking tree handle from a custom one.
+            $previousHandle = (string) $entry->getOriginal('handle');
+
             $entry = $this->repository->applyData($entry, $data);
 
             // applyData calls refresh() which clears loaded relations — reload before tree sync.
             $entry->loadMissing('entryType');
             if ($entry->entryType->has_entry_tree) {
                 $entry->loadMissing('entryTree');
-                $this->syncTreeNode($entry, $data);
+                $this->syncTreeNode($entry, $data, $previousHandle);
             }
 
             return $entry;
@@ -82,7 +86,10 @@ class EntryService extends AbstractService
      * Synchronise the Entry Tree node for an existing entry after an update.
      *
      * Mutations handled:
-     *   - Handle changed   → update node handle + rebuild URI for the whole subtree.
+     *   - Handle changed   → update node handle + rebuild URI for the whole subtree,
+     *                        but only when the node was tracking the entry's handle.
+     *                        Custom tree handles (createTreeNode() accepts any handle)
+     *                        are preserved so a save never silently changes a URL.
      *   - Parent changed   → moveTreeNode, appending to the end of the new siblings
      *                        (which rebalances siblings and rebuilds URIs).
      *                        The parent is identified by `parent_entry_id` — the
@@ -98,7 +105,7 @@ class EntryService extends AbstractService
      *
      * @throws ValidationException on home-placement or handle-collision violations.
      */
-    private function syncTreeNode(Entry $entry, array $data): void
+    private function syncTreeNode(Entry $entry, array $data, ?string $previousEntryHandle = null): void
     {
         $node = $entry->entryTree;
 
@@ -154,10 +161,18 @@ class EntryService extends AbstractService
         $handleChanged = false;
         $dirty = false;
 
-        // Sync tree handle: home nodes always use the literal 'home' handle;
-        // otherwise follow the entry's (potentially renamed) handle.
+        // Sync tree handle: home nodes always use the literal 'home' handle,
+        // and demotions restore the entry-based handle (the pre-promotion
+        // handle is gone). Otherwise follow the entry's (potentially renamed)
+        // handle only when the node was tracking it before this save — a
+        // custom tree handle (createTreeNode() accepts any handle; the
+        // sandbox seeder relies on that) is preserved so a save never
+        // silently changes the node's public URL.
         $targetHandle = $finalIsHome ? 'home' : EntryTree::normalizeHandle($entry->handle);
-        if ($targetHandle !== '' && $node->handle !== $targetHandle) {
+        $shouldSyncHandle = $finalIsHome
+            || $demoting
+            || $node->handle === EntryTree::normalizeHandle((string) ($previousEntryHandle ?? $entry->handle));
+        if ($shouldSyncHandle && $targetHandle !== '' && $node->handle !== $targetHandle) {
             if ($this->treeHandleTaken($targetHandle, $finalParentId, $node->id)) {
                 throw ValidationException::withMessages([
                     'handle' => "An Entry Tree node with handle [{$targetHandle}] already exists at this level.",

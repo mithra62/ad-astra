@@ -14,6 +14,7 @@ use AdAstra\Doctor\Checks\Database\StrayMigrationsCheck;
 use AdAstra\Doctor\Checks\EntrySystem\BehaviorClassReferencesCheck;
 use AdAstra\Doctor\Checks\EntrySystem\DuplicateTypeHandlesCheck;
 use AdAstra\Doctor\Checks\EntrySystem\SilentBehaviorFallbackCheck;
+use AdAstra\Doctor\Checks\EntryTree\EntryTreeIntegrityCheck;
 use AdAstra\Doctor\Checks\Environment\AppDebugCheck;
 use AdAstra\Doctor\Checks\Environment\AppKeyCheck;
 use AdAstra\Doctor\Checks\Environment\AppUrlCheck;
@@ -133,6 +134,7 @@ class AppServiceProvider extends ServiceProvider
             BehaviorClassReferencesCheck::class,
             DuplicateTypeHandlesCheck::class,
             SilentBehaviorFallbackCheck::class,
+            EntryTreeIntegrityCheck::class,
             FieldTypeClassReferencesCheck::class,
             EntryTemplatesCheck::class,
             ViteManifestCheck::class,

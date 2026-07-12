@@ -4,6 +4,7 @@ namespace AdAstra\Services\SiteRouting\RouteDrivers;
 
 use AdAstra\Models\EntryTree;
 use AdAstra\Services\SiteRouting\RouteResult;
+use AdAstra\Services\EntryService;
 
 class EntryTreeRouteDriver implements RouteDriverInterface
 {
@@ -18,7 +19,7 @@ class EntryTreeRouteDriver implements RouteDriverInterface
             ])
             ->where('uri', $uri)
             ->whereHas('entry', function ($query) {
-                $query->published();
+                $query->published(); //we only want published entries for tree pages
             })
             ->first();
 
@@ -26,7 +27,7 @@ class EntryTreeRouteDriver implements RouteDriverInterface
             return null;
         }
 
-        if (filled($node->redirect_url) && $this->isSafeRedirect($node->redirect_url)) {
+        if (filled($node->redirect_url) && self::isSafeRedirect($node->redirect_url)) {
             return new RouteResult(
                 type: 'entry_tree_redirect',
                 template: '',
@@ -38,8 +39,12 @@ class EntryTreeRouteDriver implements RouteDriverInterface
             );
         }
 
-        $entry = $node->entry;
+        $entry_service = app(EntryService::class);
+        $entry = $entry_service->find($node->entry->id);
 
+        if($entry instanceof Entry) {
+
+        }
         $template = $node->template
             ?? $entry->entryType?->default_template
             ?? 'entries.show';
@@ -56,7 +61,11 @@ class EntryTreeRouteDriver implements RouteDriverInterface
         );
     }
 
-    private function isSafeRedirect(?string $url): bool
+    /**
+     * Public so diagnostics (entry-tree.integrity doctor check) can apply the
+     * exact same redirect gate the router does, without duplicating it.
+     */
+    public static function isSafeRedirect(?string $url): bool
     {
         if (!$url) {
             return false;

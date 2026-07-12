@@ -92,7 +92,7 @@ trait HasEntryTree
         $node = $this->entryTree;
 
         while ($node->parent_id !== null) {
-            $node->load('parent.entry');
+            $node->loadMissing('parent.entry');
             $node = $node->parent;
 
             if (!$node) {

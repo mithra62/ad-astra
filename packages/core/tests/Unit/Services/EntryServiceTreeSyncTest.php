@@ -236,6 +236,78 @@ class EntryServiceTreeSyncTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // update() — handle sync (follow-if-following)
+    // -------------------------------------------------------------------------
+
+    public function test_update_renaming_entry_handle_moves_tracking_node_and_rebuilds_uris(): void
+    {
+        $group = $this->makeTreeGroup();
+        $section = $this->makeTreeEntry($group, 'welcome');
+        $this->makeTreeEntry($group, 'team', $this->nodeFor($section));
+
+        $this->service->update($section, ['handle' => 'start']);
+
+        $node = $this->nodeFor($section);
+        $this->assertSame('start', $node->handle);
+        $this->assertSame('start', $node->uri);
+
+        $child = EntryTree::where('parent_id', $node->id)->firstOrFail();
+        $this->assertSame('start/team', $child->uri);
+    }
+
+    public function test_update_preserves_custom_tree_handle(): void
+    {
+        // createTreeNode() accepts a handle that differs from the entry's
+        // (the sandbox seeder relies on this). A later save must not
+        // silently rewrite it — that would change the node's public URL.
+        $group = $this->makeTreeGroup();
+        $entry = Entry::factory()
+            ->for($group)
+            ->for($this->makeTreeType($group))
+            ->create(['handle' => 'sandbox-site']);
+        $this->service->createTreeNode($entry, 'site');
+
+        $this->service->update($entry, ['title' => 'Renamed Title']);
+
+        $node = $this->nodeFor($entry);
+        $this->assertSame('site', $node->handle);
+        $this->assertSame('site', $node->uri);
+    }
+
+    public function test_update_renaming_entry_handle_preserves_custom_tree_handle(): void
+    {
+        $group = $this->makeTreeGroup();
+        $entry = Entry::factory()
+            ->for($group)
+            ->for($this->makeTreeType($group))
+            ->create(['handle' => 'sandbox-site']);
+        $this->service->createTreeNode($entry, 'site');
+
+        $this->service->update($entry, ['handle' => 'sandbox-site-renamed']);
+
+        $node = $this->nodeFor($entry);
+        $this->assertSame('site', $node->handle);
+        $this->assertSame('site', $node->uri);
+    }
+
+    public function test_update_promoting_custom_handle_node_still_forces_home_handle(): void
+    {
+        $group = $this->makeTreeGroup();
+        $entry = Entry::factory()
+            ->for($group)
+            ->for($this->makeTreeType($group))
+            ->create(['handle' => 'sandbox-site']);
+        $this->service->createTreeNode($entry, 'site');
+
+        $this->service->update($entry, ['is_home' => true]);
+
+        $node = $this->nodeFor($entry);
+        $this->assertTrue((bool)$node->is_home);
+        $this->assertSame('home', $node->handle);
+        $this->assertSame('/', $node->uri);
+    }
+
+    // -------------------------------------------------------------------------
     // update() — is_home promotion / demotion
     // -------------------------------------------------------------------------
 
