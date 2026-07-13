@@ -8,7 +8,7 @@
             <h5 class="mb-4 text-xs font-semibold uppercase tracking-wider text-faint">Hierarchy</h5>
             <div class="space-y-4">
                 <div>
-                    {{ forms.checkbox_card('is_home', 1, 'Is Home?', 'Should this Entry be considered the Home Page content?') }}
+                    {{ forms.checkbox_card('is_home', 1, 'Is Home?', 'Should this Entry be considered the Home Page content?', entry.entryTree.is_home) }}
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-content" for="parent_entry_id">Parent
@@ -35,16 +35,6 @@
                     {% if errors.has('parent_entry_id') %}
                         <p class="mt-1 text-xs text-red-600">{{ errors.first('parent_entry_id', entry.entryType.parent_id) }}</p>
                     {% endif %}
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-sm font-medium text-content" for="sort_order">Sort Order</label>
-                    <input
-                        class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:max-w-[8rem]"
-                        id="sort_order" name="sort_order" type="number" min="0" placeholder="0"
-                        readonly
-                        value="{{ old('sort_order', entry.entryTree.sort_order) }}"
-                        data-tab-dirty="structure">
-                    <p class="mt-1 text-xs text-faint">Lower numbers appear first in ordered lists.</p>
                 </div>
             </div>
         </div>

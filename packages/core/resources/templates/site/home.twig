@@ -1,0 +1,17 @@
+Entry Tree Homepage
+<p>
+    Title: {{ entry.title }} <br />
+    Handle: {{ entry.handle }}<br />
+    ID: {{ entry.id }}
+
+    {{ entry.field('excerpt') }}
+</p>
+
+{% if(auth_user()) %}
+<p>
+    Logged In Email: {{ auth_user().email }}<br />
+    Logged Username: {{ auth_user().name }}<br />
+    Logged In ID: {{ auth_user().id }}<br />
+    Roles: {% for role in auth_user().roles %}{{ role.name }}{% endfor %}
+</p>
+{% endif %}
