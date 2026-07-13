@@ -50,14 +50,17 @@ class EntryQueryBuilder
 
     public function withAuthor(int $userId): static
     {
-        $this->query->whereHas('authors', fn($q) => $q->where('entry_authors.user_id', $userId));
+        $this->query->whereHas('authors', fn ($q) => $q->where('entry_authors.user_id', $userId));
 
         return $this;
     }
 
     public function where(string $column, mixed $operator, mixed $value = null): static
     {
-        $value === null
+        // Detect the two-argument shorthand by arity, not by $value === null,
+        // so an explicit null value (->where('col', '=', null)) passes through
+        // to Eloquent's IS NULL handling instead of being misread as shorthand.
+        func_num_args() === 2
             ? $this->query->where($column, $operator)
             : $this->query->where($column, $operator, $value);
 
@@ -66,7 +69,7 @@ class EntryQueryBuilder
 
     public function withCategory(int $categoryId): static
     {
-        $this->query->whereHas('categories', fn($q) => $q->where('categories.id', $categoryId));
+        $this->query->whereHas('categories', fn ($q) => $q->where('categories.id', $categoryId));
 
         return $this;
     }
@@ -83,14 +86,28 @@ class EntryQueryBuilder
      * is relational (data lives in entry_relationships, not field_values), an
      * InvalidArgumentException is thrown rather than silently returning no results.
      *
-     * @throws InvalidArgumentException for unknown or relational field handles.
+     * Null is rejected as a value: entries with an unset field have no
+     * field_values row at all, so a null comparison inside the whereHas could
+     * never match them and would silently return misleading results.
+     *
+     * @throws InvalidArgumentException for unknown or relational field handles,
+     *                                  or a null value.
      */
     public function whereField(string $handle, mixed $operator, mixed $value = null): static
     {
-        // Support two-argument shorthand: ->whereField('slug', 'my-post')
-        if ($value === null) {
+        // Support two-argument shorthand: ->whereField('slug', 'my-post').
+        // Arity check rather than $value === null, so an explicit null in the
+        // three-argument form is caught by the guard below instead of being
+        // misread as shorthand (which would compare against the string '=').
+        if (func_num_args() === 2) {
             $value = $operator;
             $operator = '=';
+        }
+
+        if ($value === null) {
+            throw new InvalidArgumentException(
+                "whereField: null is not a filterable value for [{$handle}]. Entries without a stored value have no field_values row, so a null comparison cannot match them. Use whereDoesntHave on fieldValues to find entries missing a value."
+            );
         }
 
         // Resolve the field's storage column with a single lookup so the WHERE

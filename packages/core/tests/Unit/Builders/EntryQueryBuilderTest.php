@@ -382,6 +382,28 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertFalse($results->contains('id', $entry->id));
     }
 
+    public function test_where_with_explicit_null_value_matches_null_column(): void
+    {
+        $match = Entry::factory()->create(['published_at' => null]);
+        $other = Entry::factory()->create(['published_at' => now()]);
+
+        $results = $this->builder()->where('published_at', '=', null)->get();
+
+        $this->assertTrue($results->contains('id', $match->id));
+        $this->assertFalse($results->contains('id', $other->id));
+    }
+
+    public function test_where_with_not_equal_operator_and_null_value_matches_non_null_column(): void
+    {
+        $match = Entry::factory()->create(['published_at' => now()]);
+        $other = Entry::factory()->create(['published_at' => null]);
+
+        $results = $this->builder()->where('published_at', '!=', null)->get();
+
+        $this->assertTrue($results->contains('id', $match->id));
+        $this->assertFalse($results->contains('id', $other->id));
+    }
+
     public function test_order_by_ascending_returns_entries_in_correct_order(): void
     {
         $second = Entry::factory()->create(['title' => 'Beta']);
@@ -865,5 +887,26 @@ class EntryQueryBuilderTest extends TestCase
         $this->expectExceptionMessageMatches('/\[related-items\] is a relational field/');
 
         $this->builder()->whereField('related-items', 1);
+    }
+
+    public function test_where_field_throws_for_null_value_in_two_argument_form(): void
+    {
+        $this->makeEntryWithTextField('teaser');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/null is not a filterable value for \[teaser\]/');
+
+        $this->builder()->whereField('teaser', null);
+    }
+
+    public function test_where_field_throws_for_null_value_with_explicit_operator(): void
+    {
+        // Before the arity fix, this silently searched for the string '='.
+        $this->makeEntryWithTextField('teaser');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/null is not a filterable value for \[teaser\]/');
+
+        $this->builder()->whereField('teaser', '=', null);
     }
 }
