@@ -8,7 +8,7 @@ use AdAstra\Models\EntryTree;
 use AdAstra\Models\EntryType;
 use AdAstra\Models\Status;
 use AdAstra\Models\User;
-use AdAstra\Services\EntryService;
+use AdAstra\Services\EntryTreeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -217,7 +217,7 @@ class EntryAdminTest extends TestCase
     public function test_update_with_parent_and_redirect_persists_tree_changes(): void
     {
         $group = $this->group();
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
 
         $treeType = fn () => EntryType::factory()->create([
             'entry_group_id' => $group->id,
@@ -266,7 +266,7 @@ class EntryAdminTest extends TestCase
     public function test_edit_prefills_the_parent_picker_with_the_current_tree_parent(): void
     {
         $group = $this->group();
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
 
         $treeType = fn () => EntryType::factory()->create([
             'entry_group_id' => $group->id,

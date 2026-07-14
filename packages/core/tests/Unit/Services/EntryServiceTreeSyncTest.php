@@ -9,13 +9,14 @@ use AdAstra\Models\EntryType;
 use AdAstra\Models\Status;
 use AdAstra\Models\User;
 use AdAstra\Services\EntryService;
+use AdAstra\Services\EntryTreeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 /**
  * Covers the Entry Tree data path through EntryService::create() and
- * update()/syncTreeNode():
+ * update()/EntryTreeService::syncForEntry():
  *
  *   - parent placement via the `parent_entry_id` data key (regression for the
  *     request/service key mismatch that silently rooted every node)
@@ -29,11 +30,14 @@ class EntryServiceTreeSyncTest extends TestCase
 
     private EntryService $service;
 
+    private EntryTreeService $trees;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->service = app(EntryService::class);
+        $this->trees = app(EntryTreeService::class);
 
         // The create() path stamps created_by_user_id from the authenticated user.
         $this->actingAs(User::factory()->create());
@@ -79,7 +83,7 @@ class EntryServiceTreeSyncTest extends TestCase
             ->for($this->makeTreeType($group))
             ->create(['handle' => $handle]);
 
-        $this->service->createTreeNode($entry, $handle, $parent, null, $isHome);
+        $this->trees->createTreeNode($entry, $handle, $parent, null, $isHome);
 
         return $entry;
     }
@@ -265,7 +269,7 @@ class EntryServiceTreeSyncTest extends TestCase
             ->for($group)
             ->for($this->makeTreeType($group))
             ->create(['handle' => 'sandbox-site']);
-        $this->service->createTreeNode($entry, 'site');
+        $this->trees->createTreeNode($entry, 'site');
 
         $this->service->update($entry, ['title' => 'Renamed Title']);
 
@@ -281,7 +285,7 @@ class EntryServiceTreeSyncTest extends TestCase
             ->for($group)
             ->for($this->makeTreeType($group))
             ->create(['handle' => 'sandbox-site']);
-        $this->service->createTreeNode($entry, 'site');
+        $this->trees->createTreeNode($entry, 'site');
 
         $this->service->update($entry, ['handle' => 'sandbox-site-renamed']);
 
@@ -297,7 +301,7 @@ class EntryServiceTreeSyncTest extends TestCase
             ->for($group)
             ->for($this->makeTreeType($group))
             ->create(['handle' => 'sandbox-site']);
-        $this->service->createTreeNode($entry, 'site');
+        $this->trees->createTreeNode($entry, 'site');
 
         $this->service->update($entry, ['is_home' => true]);
 

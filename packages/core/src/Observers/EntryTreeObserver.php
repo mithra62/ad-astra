@@ -3,7 +3,7 @@
 namespace AdAstra\Observers;
 
 use AdAstra\Models\EntryTree;
-use AdAstra\Services\EntryService;
+use AdAstra\Services\EntryTreeService;
 
 class EntryTreeObserver
 {
@@ -18,7 +18,7 @@ class EntryTreeObserver
      */
     private static array $pendingReroot = [];
 
-    public function __construct(private readonly EntryService $entryService)
+    public function __construct(private readonly EntryTreeService $treeService)
     {
     }
 
@@ -58,7 +58,7 @@ class EntryTreeObserver
             // current DB state (parent = null, children = live subtree).
             $child->unsetRelations();
 
-            $this->entryService->rebuildTreeUri($child);
+            $this->treeService->rebuildTreeUri($child);
         }
     }
 }
