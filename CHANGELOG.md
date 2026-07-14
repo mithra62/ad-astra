@@ -22,6 +22,7 @@ Release --
 - UPDATED: Indexes to `field_values` table for query performance (#65)
 - UPDATED: Tab handle validation to use uniqueness by layout (#37)
 - UPDATED: Api\v1\User::update() to enforce the permission check (#18)
+- UPDATED: Split EntryService tree logic into EntryTreeService (#58)
 
 ### Version 0.0.1 (Alpha 1)
 Release June 29, 2026
