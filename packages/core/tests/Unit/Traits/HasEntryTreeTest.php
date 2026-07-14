@@ -5,7 +5,7 @@ namespace Tests\Unit\Traits;
 use AdAstra\Models\Entry;
 use AdAstra\Models\EntryGroup;
 use AdAstra\Models\EntryType;
-use AdAstra\Services\EntryService;
+use AdAstra\Services\EntryTreeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -40,7 +40,7 @@ class HasEntryTreeTest extends TestCase
 
     public function test_tree_url_returns_full_url_for_root_node(): void
     {
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
         $entry = $this->makeTreeEntry(['handle' => 'about']);
         $service->createTreeNode($entry, 'about');
 
@@ -56,7 +56,7 @@ class HasEntryTreeTest extends TestCase
 
     public function test_tree_url_returns_full_url_for_nested_node(): void
     {
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
         $parent = $this->makeTreeEntry(['handle' => 'about']);
         $child = $this->makeTreeEntry(['handle' => 'team']);
 
@@ -78,7 +78,7 @@ class HasEntryTreeTest extends TestCase
 
     public function test_tree_parent_returns_null_for_root_node(): void
     {
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
         $entry = $this->makeTreeEntry(['handle' => 'root']);
         $service->createTreeNode($entry, 'root');
 
@@ -91,7 +91,7 @@ class HasEntryTreeTest extends TestCase
 
     public function test_tree_parent_returns_parent_entry(): void
     {
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
         $parent = $this->makeTreeEntry(['handle' => 'parent']);
         $child = $this->makeTreeEntry(['handle' => 'child']);
 
@@ -113,7 +113,7 @@ class HasEntryTreeTest extends TestCase
 
     public function test_tree_children_returns_empty_collection_for_leaf_node(): void
     {
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
         $entry = $this->makeTreeEntry(['handle' => 'leaf']);
         $service->createTreeNode($entry, 'leaf');
 
@@ -126,7 +126,7 @@ class HasEntryTreeTest extends TestCase
 
     public function test_tree_children_returns_direct_children_only(): void
     {
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
         $parent = $this->makeTreeEntry(['handle' => 'parent']);
         $child1 = $this->makeTreeEntry(['handle' => 'child-one']);
         $child2 = $this->makeTreeEntry(['handle' => 'child-two']);
@@ -156,7 +156,7 @@ class HasEntryTreeTest extends TestCase
 
     public function test_tree_ancestors_returns_empty_collection_for_root_node(): void
     {
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
         $entry = $this->makeTreeEntry(['handle' => 'root']);
         $service->createTreeNode($entry, 'root');
 
@@ -169,7 +169,7 @@ class HasEntryTreeTest extends TestCase
 
     public function test_tree_ancestors_returns_chain_root_first(): void
     {
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
         $root = $this->makeTreeEntry(['handle' => 'root']);
         $mid = $this->makeTreeEntry(['handle' => 'mid']);
         $leaf = $this->makeTreeEntry(['handle' => 'leaf']);
@@ -194,7 +194,7 @@ class HasEntryTreeTest extends TestCase
 
     public function test_tree_descendants_returns_empty_collection_for_leaf_node(): void
     {
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
         $entry = $this->makeTreeEntry(['handle' => 'leaf']);
         $service->createTreeNode($entry, 'leaf');
 
@@ -203,7 +203,7 @@ class HasEntryTreeTest extends TestCase
 
     public function test_tree_descendants_returns_all_levels(): void
     {
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
         $root = $this->makeTreeEntry(['handle' => 'root']);
         $child = $this->makeTreeEntry(['handle' => 'child']);
         $grandchild = $this->makeTreeEntry(['handle' => 'grandchild']);
@@ -226,7 +226,7 @@ class HasEntryTreeTest extends TestCase
 
     public function test_tree_descendants_respects_max_depth(): void
     {
-        $service = app(EntryService::class);
+        $service = app(EntryTreeService::class);
         $root = $this->makeTreeEntry(['handle' => 'root']);
         $child = $this->makeTreeEntry(['handle' => 'child']);
         $grandchild = $this->makeTreeEntry(['handle' => 'grandchild']);

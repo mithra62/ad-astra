@@ -9,7 +9,7 @@ use AdAstra\Models\EntryType;
 use AdAstra\Models\Role;
 use AdAstra\Models\Status;
 use AdAstra\Models\User;
-use AdAstra\Services\EntryService;
+use AdAstra\Services\EntryTreeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Permission;
@@ -114,7 +114,7 @@ class EntriesApiTest extends TestCase
             'handle' => $handle,
         ]);
 
-        app(EntryService::class)->createTreeNode($entry, $handle, $parent, null, $isHome);
+        app(EntryTreeService::class)->createTreeNode($entry, $handle, $parent, null, $isHome);
 
         return $entry;
     }

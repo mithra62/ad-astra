@@ -6,7 +6,7 @@ use AdAstra\Models\Entry;
 use AdAstra\Models\EntryGroup;
 use AdAstra\Models\EntryTree;
 use AdAstra\Models\EntryType;
-use AdAstra\Services\EntryService;
+use AdAstra\Services\EntryTreeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -41,7 +41,7 @@ class EntryTreeObserverTest extends TestCase
     /** Shorthand: create a root tree node via the service. */
     private function makeRoot(string $handle = 'root'): EntryTree
     {
-        return app(EntryService::class)->createTreeNode($this->makeTreeEntry(), $handle);
+        return app(EntryTreeService::class)->createTreeNode($this->makeTreeEntry(), $handle);
     }
 
     /**
@@ -66,7 +66,7 @@ class EntryTreeObserverTest extends TestCase
     /** Shorthand: create a child node under an existing parent. */
     private function makeChild(EntryTree $parent, string $handle): EntryTree
     {
-        return app(EntryService::class)->createTreeNode($this->makeTreeEntry(), $handle, $parent);
+        return app(EntryTreeService::class)->createTreeNode($this->makeTreeEntry(), $handle, $parent);
     }
 
     public function test_grandchild_depth_is_decremented_after_grandparent_deleted(): void
@@ -145,7 +145,7 @@ class EntryTreeObserverTest extends TestCase
     {
         $node = $this->makeRoot('about');
 
-        app(EntryService::class)->deleteTreeNode($node);
+        app(EntryTreeService::class)->deleteTreeNode($node);
 
         $this->assertDatabaseMissing('entry_trees', ['id' => $node->id]);
     }
@@ -158,7 +158,7 @@ class EntryTreeObserverTest extends TestCase
         $this->assertEquals(1, $child->depth);
         $this->assertEquals('help/faq', $child->uri);
 
-        app(EntryService::class)->deleteTreeNode($parent);
+        app(EntryTreeService::class)->deleteTreeNode($parent);
 
         $this->assertEquals(0, $child->fresh()->depth);
         $this->assertEquals('faq', $child->fresh()->uri);
@@ -167,7 +167,7 @@ class EntryTreeObserverTest extends TestCase
     public function test_delete_tree_node_returns_true_on_success(): void
     {
         $node = $this->makeRoot('terms');
-        $result = app(EntryService::class)->deleteTreeNode($node);
+        $result = app(EntryTreeService::class)->deleteTreeNode($node);
 
         $this->assertTrue($result);
     }
@@ -206,7 +206,7 @@ class EntryTreeObserverTest extends TestCase
 
     public function test_deleting_parent_of_non_home_root_preserves_home_node(): void
     {
-        $home = app(EntryService::class)->createTreeNode($this->makeTreeEntry(), 'home', null, null, true);
+        $home = app(EntryTreeService::class)->createTreeNode($this->makeTreeEntry(), 'home', null, null, true);
         $parent = $this->makeRoot('blog');
         $child = $this->makeChild($parent, 'post');
 

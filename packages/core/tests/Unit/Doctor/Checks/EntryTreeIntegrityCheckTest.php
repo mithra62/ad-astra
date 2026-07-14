@@ -266,7 +266,7 @@ class EntryTreeIntegrityCheckTest extends TestCase
     {
         $this->makeHome();
         // A supported state: createTreeNode() accepts any handle, and
-        // syncTreeNode() preserves custom handles on save.
+        // syncForEntry() preserves custom handles on save.
         $this->makeNode(['handle' => 'custom-handle', 'uri' => 'custom-handle']);
 
         $results = $this->runCheck();
