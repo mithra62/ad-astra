@@ -10,7 +10,7 @@ use AdAstra\Services\SiteRouting\RouteDrivers\EntryTreeRouteDriver;
 use Illuminate\Support\Collection;
 
 /**
- * Validates stored entry tree data against the invariants the EntryService
+ * Validates stored entry tree data against the invariants the EntryTreeService
  * write path maintains: parent chains, stored uri/depth, root-level handle
  * uniqueness, the home-node singleton, entry linkage, and redirect targets.
  * Diagnostic only — reports drift, never repairs it.
@@ -18,9 +18,9 @@ use Illuminate\Support\Collection;
  * Deliberately not covered here: template existence (covered by
  * templates.entry-templates), duplicate URIs and duplicate entry_ids
  * (enforced by real unique indexes), sort_order gaps (cosmetic; the
- * sibling rebalancing in EntryService tolerates them), and tree handles
+ * sibling rebalancing in EntryTreeService tolerates them), and tree handles
  * that differ from their entry's handle (a supported state —
- * createTreeNode() accepts any handle, and syncTreeNode() preserves
+ * createTreeNode() accepts any handle, and syncForEntry() preserves
  * custom handles on save).
  */
 class EntryTreeIntegrityCheck extends AbstractDoctorCheck
@@ -86,7 +86,7 @@ class EntryTreeIntegrityCheck extends AbstractDoctorCheck
     /**
      * Walk every node's parent chain with a visited set. The parent_id FK
      * does not prevent cycles (A→B→A), and a cycle makes
-     * EntryService::rebuildTreeUri() recurse forever. Dangling parent
+     * EntryTreeService::rebuildTreeUri() recurse forever. Dangling parent
      * references are impossible while FK enforcement is on but can arrive
      * via imports run with constraints disabled.
      *

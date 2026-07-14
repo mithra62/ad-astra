@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use AdAstra\Facades\Entries;
 use AdAstra\Models\Entry;
 use AdAstra\Models\EntryBehavior;
 use AdAstra\Models\EntryGroup;
@@ -12,6 +11,7 @@ use AdAstra\Models\Status;
 use AdAstra\Models\StatusGroup;
 use AdAstra\Models\User;
 use AdAstra\Services\EntryAuthorService;
+use AdAstra\Services\EntryTreeService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -246,6 +246,6 @@ class SandboxedEntryTreeSeeder extends Seeder
             );
         }
 
-        Entries::rebuildTreeUri($nodes['site']);
+        app(EntryTreeService::class)->rebuildTreeUri($nodes['site']);
     }
 }
