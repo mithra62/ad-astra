@@ -264,7 +264,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
   <p class="site-title">AdAstra</p>
   <p class="site-sub">Project Overview &amp; Developer Reference</p>
   <input id="search" type="search" placeholder="Filter sections…" aria-label="Filter table of contents">
-  <ul class="nav-list"><li><a href="#architecture-at-a-glance">Architecture at a Glance</a><ul class="nav-sublist"><li><a href="#request-lifecycle">Request Lifecycle</a></li><li><a href="#cross-cutting-infrastructure">Cross-cutting infrastructure</a></li></ul></li><li><a href="#setup">Setup</a></li><li><a href="#operational-commands-and-deployment-notes">Operational Commands and Deployment Notes</a><ul class="nav-sublist"><li><a href="#running-without-php-artisan-serve-apachenginx--php-fpm">Running without `php artisan serve` (Apache/Nginx + PHP-FPM)</a></li></ul></li><li><a href="#testing-strategy">Testing Strategy</a></li><li><a href="#system-health-and-data-integrity">System Health and Data Integrity</a><ul class="nav-sublist"><li><a href="#the-doctor-command">The Doctor Command</a></li><li><a href="#flags-and-exit-codes">Flags and Exit Codes</a></li><li><a href="#alpha-check-set">Alpha Check Set</a></li><li><a href="#adding-a-new-doctor-check">Adding a New Doctor Check</a></li><li><a href="#class-reference-validation">Class Reference Validation</a></li><li><a href="#morph-map-stability">Morph Map Stability</a></li></ul></li><li><a href="#users-roles-and-permissions">Users, Roles, and Permissions</a><ul class="nav-sublist"><li><a href="#built-in-roles">Built-in Roles</a></li><li><a href="#built-in-permissions">Built-in Permissions</a></li><li><a href="#super-admin-gate-bypass">Super Admin Gate Bypass</a></li><li><a href="#creating-users-programmatically">Creating Users Programmatically</a></li><li><a href="#checking-permissions">Checking Permissions</a></li><li><a href="#creating-a-new-permission-and-role">Creating a New Permission and Role</a></li></ul></li><li><a href="#adding-new-permissions">Adding New Permissions</a></li><li><a href="#user-account-status">User Account Status</a><ul class="nav-sublist"><li><a href="#status-values">Status Values</a></li><li><a href="#parallel-lock-column">Parallel Lock Column</a></li><li><a href="#model-helpers">Model Helpers</a></li><li><a href="#authentication-gate">Authentication Gate</a></li><li><a href="#access-enforcement-middleware">Access-Enforcement Middleware</a></li><li><a href="#status-change-events-and-audit-log">Status Change Events and Audit Log</a></li><li><a href="#admin-ui">Admin UI</a></li></ul></li><li><a href="#user-extended-profile-userschema">User Extended Profile (UserSchema)</a><ul class="nav-sublist"><li><a href="#setting-up-the-user-schema">Setting Up the User Schema</a></li><li><a href="#writing-field-values-to-a-user">Writing Field Values to a User</a></li><li><a href="#reading-field-values-from-a-user">Reading Field Values from a User</a></li><li><a href="#typical-controller-pattern">Typical Controller Pattern</a></li><li><a href="#comparison-users-vs-entries">Comparison: Users vs Entries</a></li></ul></li><li><a href="#author-eligibility">Author Eligibility</a><ul class="nav-sublist"><li><a href="#schema">Schema</a></li><li><a href="#entryauthorservice-and-entryauthors-facade">EntryAuthorService and EntryAuthors Facade</a></li><li><a href="#promoting-and-demoting-authors">Promoting and Demoting Authors</a></li><li><a href="#author-eligibility-via-userservice">Author Eligibility via UserService</a></li><li><a href="#querying-eligible-authors">Querying Eligible Authors</a></li></ul></li><li><a href="#userservice-and-the-users-facade">UserService and the Users Facade</a><ul class="nav-sublist"><li><a href="#crud">CRUD</a></li><li><a href="#roles">Roles</a></li><li><a href="#custom-fields">Custom Fields</a></li><li><a href="#passwords">Passwords</a></li><li><a href="#status-management">Status Management</a></li><li><a href="#two-factor-authentication">Two-Factor Authentication</a></li><li><a href="#oauth-token-management">OAuth Token Management</a></li><li><a href="#action-classes-inventory">Action Classes Inventory</a></li></ul></li><li><a href="#oauth-and-social-login">OAuth and Social Login</a></li><li><a href="#system-and-user-settings">System and User Settings</a><ul class="nav-sublist"><li><a href="#settings-domains">Settings Domains</a></li><li><a href="#value-storage-and-resolution">Value Storage and Resolution</a></li><li><a href="#reading-settings">Reading Settings</a></li><li><a href="#writing-system-settings">Writing System Settings</a></li><li><a href="#writing-user-preferences">Writing User Preferences</a></li><li><a href="#adding-a-setting">Adding a Setting</a></li></ul></li><li><a href="#field-types">Field Types</a><ul class="nav-sublist"><li><a href="#built-in-types">Built-in Types</a></li></ul></li><li><a href="#field-groups-and-fields">Field Groups and Fields</a><ul class="nav-sublist"><li><a href="#creating-a-field-group-with-fields">Creating a Field Group with Fields</a></li></ul></li><li><a href="#field-layouts">Field Layouts</a><ul class="nav-sublist"><li><a href="#building-a-layout-programmatically">Building a Layout Programmatically</a></li><li><a href="#getting-all-fields-from-a-layout">Getting All Fields from a Layout</a></li><li><a href="#field-uniqueness-constraint">Field Uniqueness Constraint</a></li></ul></li><li><a href="#status-groups-and-statuses">Status Groups and Statuses</a><ul class="nav-sublist"><li><a href="#creating-a-status-group">Creating a Status Group</a></li><li><a href="#how-an-entry-stores-its-status">How an Entry Stores its Status</a></li><li><a href="#statusobserver-keeping-status_is_public-consistent">StatusObserver: keeping status_is_public consistent</a></li></ul></li><li><a href="#category-groups-and-categories">Category Groups and Categories</a><ul class="nav-sublist"><li><a href="#creating-a-category-group-and-categories">Creating a Category Group and Categories</a></li><li><a href="#fetching-categories">Fetching Categories</a></li></ul></li><li><a href="#custom-field-groups-on-category-groups">Custom Field Groups on Category Groups</a></li><li><a href="#entry-groups-and-entry-types">Entry Groups and Entry Types</a><ul class="nav-sublist"><li><a href="#seeded-entry-groups-and-types">Seeded Entry Groups and Types</a></li><li><a href="#available-entry-type-classes">Available Entry Type Classes</a></li><li><a href="#registry-resolution-and-admin-constraints">Registry Resolution and Admin Constraints</a></li><li><a href="#field-layering-group-and-type-fields">Field Layering: Group and Type Fields</a></li><li><a href="#lifecycle-hook-signatures">Lifecycle Hook Signatures</a></li><li><a href="#creating-an-entry-group">Creating an Entry Group</a></li><li><a href="#creating-an-entry-type-class">Creating an Entry Type Class</a></li><li><a href="#registering-the-entry-type-in-the-database">Registering the Entry Type in the Database</a></li></ul></li><li><a href="#adding-a-new-entry-type-end-to-end">Adding a New Entry Type End-to-End</a><ul class="nav-sublist"><li><a href="#1-create-fields-and-a-fieldgroup">1. Create fields and a FieldGroup</a></li><li><a href="#2-create-fieldlayouts">2. Create FieldLayouts</a></li><li><a href="#3-create-the-entrygroup">3. Create the EntryGroup</a></li><li><a href="#4-write-the-entrytype-php-classes">4. Write the EntryType PHP classes</a></li><li><a href="#5-register-the-entrytype-rows">5. Register the EntryType rows</a></li><li><a href="#6-validate-and-create-entries">6. Validate and create entries</a></li></ul></li><li><a href="#creating-and-updating-entries">Creating and Updating Entries</a><ul class="nav-sublist"><li><a href="#creating-an-entry">Creating an Entry</a></li><li><a href="#updating-an-entry">Updating an Entry</a></li><li><a href="#using-the-relationship-field">Using the Relationship Field</a></li></ul></li><li><a href="#querying-entries">Querying Entries</a><ul class="nav-sublist"><li><a href="#full-entryquerybuilder-surface">Full `EntryQueryBuilder` surface</a></li><li><a href="#reading-field-values">Reading Field Values</a></li><li><a href="#accessing-entry-authors">Accessing Entry Authors</a></li></ul></li><li><a href="#accessing-entry-categories-via-the-content-facade">Accessing Entry Categories via the Content Facade</a><ul class="nav-sublist"><li><a href="#reading-categories-on-a-result-set">Reading categories on a result set</a></li><li><a href="#loading-a-categorys-group-on-already-fetched-entries">Loading a category's group on already-fetched entries</a></li><li><a href="#filtering-entries-by-category">Filtering entries by category</a></li><li><a href="#accessing-category-field-values">Accessing category field values</a></li></ul></li><li><a href="#entry-metrics">Entry Metrics</a></li><li><a href="#deleting-entries">Deleting Entries</a></li><li><a href="#media-library">Media Library</a><ul class="nav-sublist"><li><a href="#libraries">Libraries</a></li><li><a href="#uploads">Uploads</a></li><li><a href="#attachments-and-field-usage">Attachments and Field Usage</a></li><li><a href="#media-picker-endpoint">Media Picker Endpoint</a></li><li><a href="#categories-fields-transformations-and-cleanup">Categories, Fields, Transformations, and Cleanup</a></li></ul></li><li><a href="#site-routing-public-facing-urls">Site Routing (Public-Facing URLs)</a><ul class="nav-sublist"><li><a href="#frontend-catch-all-route">Frontend Catch-All Route</a></li><li><a href="#routeresult">RouteResult</a></li><li><a href="#entry-tree-layer">Entry Tree Layer</a></li><li><a href="#entrytree-driver">EntryTree Driver</a></li><li><a href="#template-driver">Template Driver</a></li><li><a href="#configuring-driver-priority">Configuring Driver Priority</a></li></ul></li><li><a href="#template-and-view-stack">Template and View Stack</a><ul class="nav-sublist"><li><a href="#twigbridge-configuration">TwigBridge Configuration</a></li><li><a href="#view-namespaces-and-includes">View Namespaces and Includes</a></li><li><a href="#site-templates">Site Templates</a></li><li><a href="#vite-asset-pipeline">Vite Asset Pipeline</a></li></ul></li><li><a href="#api-layer">API Layer</a><ul class="nav-sublist"><li><a href="#api-routes">API Routes</a></li><li><a href="#api-resources-and-current-limitations">API Resources and Current Limitations</a></li><li><a href="#api-requestresponse-logging">API Request/Response Logging</a></li></ul></li><li><a href="#controller-layer">Controller Layer</a><ul class="nav-sublist"><li><a href="#base-classes-and-helpers">Base Classes and Helpers</a></li><li><a href="#admin-controllers-catalog">Admin Controllers: Catalog</a></li><li><a href="#api-controllers-catalog">API Controllers: Catalog</a></li></ul></li><li><a href="#admin-route-map">Admin Route Map</a></li><li><a href="#model-creation-and-modification">Model Creation and Modification</a><ul class="nav-sublist"><li><a href="#services-layer">Services Layer</a></li><li><a href="#repositories-layer">Repositories Layer</a></li><li><a href="#actions-layer">Actions Layer</a></li><li><a href="#formrequests-layer">FormRequests Layer</a></li><li><a href="#observers-events-and-listeners">Observers, Events, and Listeners</a></li><li><a href="#schema-macros">Schema Macros</a></li><li><a href="#transactional-behaviour">Transactional Behaviour</a></li></ul></li><li><a href="#validation-strategy">Validation Strategy</a></li><li><a href="#bot-blocking-webhooks-and-external-integrations">Bot Blocking, Webhooks, and External Integrations</a></li><li><a href="#end-to-end-chain-traces">End-to-End Chain Traces</a><ul class="nav-sublist"><li><a href="#entry-create-chain">Entry Create Chain</a></li><li><a href="#entry-update-chain">Entry Update Chain</a></li><li><a href="#category-create-chain">Category Create Chain</a></li><li><a href="#media-upload-chain">Media Upload Chain</a></li><li><a href="#user-create-chain">User Create Chain</a></li></ul></li><li><a href="#key-data-flow-summary">Key Data Flow Summary</a><ul class="nav-sublist"><li><a href="#write-path-entry-creation">Write path (entry creation)</a></li><li><a href="#read-path-entry-query">Read path (entry query)</a></li><li><a href="#field-value-storage">Field value storage</a></li><li><a href="#morph-map-aliases-at-a-glance">Morph map aliases at a glance</a></li></ul></li><li><a href="#media-status-governance">Media Status Governance</a><ul class="nav-sublist"><li><a href="#schema-1">Schema</a></li><li><a href="#model-surface">Model surface</a></li><li><a href="#upload-auto-assignment">Upload auto-assignment</a></li><li><a href="#validation">Validation</a></li><li><a href="#admin-ui-1">Admin UI</a></li><li><a href="#known-limits">Known limits</a></li></ul></li><li><a href="#hasstatus-and-the-status-sync-registry">HasStatus and the Status Sync Registry</a><ul class="nav-sublist"><li><a href="#contract">Contract</a></li><li><a href="#what-the-observer-does">What the observer does</a></li><li><a href="#current-consumers">Current consumers</a></li></ul></li><li><a href="#technical-tutorials">Technical Tutorials</a><ul class="nav-sublist"><li><a href="#adding-custom-fields-to-any-model">Adding Custom Fields to Any Model</a></li><li><a href="#how-the-field-layer-works">How the Field Layer Works</a></li><li><a href="#step-1-add-a-morph-map-alias">Step 1: Add a Morph Map Alias</a></li><li><a href="#step-2-add-the-fieldable-trait-to-the-model">Step 2: Add the Fieldable Trait to the Model</a></li><li><a href="#step-3-create-fields-and-a-field-layout">Step 3: Create Fields and a Field Layout</a></li><li><a href="#step-4-write-field-values">Step 4: Write Field Values</a></li><li><a href="#step-5-read-field-values">Step 5: Read Field Values</a></li><li><a href="#step-6-attach-field-groups-to-the-owning-configuration-model">Step 6: Attach Field Groups to the Owning Configuration Model</a></li><li><a href="#morph-map-note">Morph Map Note</a></li></ul></li><li><a href="#roadmap">Roadmap</a></li></ul>
+  <ul class="nav-list"><li><a href="#architecture-at-a-glance">Architecture at a Glance</a><ul class="nav-sublist"><li><a href="#request-lifecycle">Request Lifecycle</a></li><li><a href="#cross-cutting-infrastructure">Cross-cutting infrastructure</a></li></ul></li><li><a href="#setup">Setup</a></li><li><a href="#operational-commands-and-deployment-notes">Operational Commands and Deployment Notes</a><ul class="nav-sublist"><li><a href="#running-without-php-artisan-serve-apachenginx--php-fpm">Running without `php artisan serve` (Apache/Nginx + PHP-FPM)</a></li></ul></li><li><a href="#testing-strategy">Testing Strategy</a></li><li><a href="#system-health-and-data-integrity">System Health and Data Integrity</a><ul class="nav-sublist"><li><a href="#the-doctor-command">The Doctor Command</a></li><li><a href="#flags-and-exit-codes">Flags and Exit Codes</a></li><li><a href="#alpha-check-set">Alpha Check Set</a></li><li><a href="#adding-a-new-doctor-check">Adding a New Doctor Check</a></li><li><a href="#class-reference-validation">Class Reference Validation</a></li><li><a href="#morph-map-stability">Morph Map Stability</a></li></ul></li><li><a href="#users-roles-and-permissions">Users, Roles, and Permissions</a><ul class="nav-sublist"><li><a href="#built-in-roles">Built-in Roles</a></li><li><a href="#built-in-permissions">Built-in Permissions</a></li><li><a href="#super-admin-gate-bypass">Super Admin Gate Bypass</a></li><li><a href="#creating-users-programmatically">Creating Users Programmatically</a></li><li><a href="#checking-permissions">Checking Permissions</a></li><li><a href="#creating-a-new-permission-and-role">Creating a New Permission and Role</a></li></ul></li><li><a href="#adding-new-permissions">Adding New Permissions</a></li><li><a href="#user-account-status">User Account Status</a><ul class="nav-sublist"><li><a href="#status-values">Status Values</a></li><li><a href="#parallel-lock-column">Parallel Lock Column</a></li><li><a href="#model-helpers">Model Helpers</a></li><li><a href="#authentication-gate">Authentication Gate</a></li><li><a href="#access-enforcement-middleware">Access-Enforcement Middleware</a></li><li><a href="#status-change-events-and-audit-log">Status Change Events and Audit Log</a></li><li><a href="#admin-ui">Admin UI</a></li></ul></li><li><a href="#user-extended-profile-userschema">User Extended Profile (UserSchema)</a><ul class="nav-sublist"><li><a href="#setting-up-the-user-schema">Setting Up the User Schema</a></li><li><a href="#writing-field-values-to-a-user">Writing Field Values to a User</a></li><li><a href="#reading-field-values-from-a-user">Reading Field Values from a User</a></li><li><a href="#typical-controller-pattern">Typical Controller Pattern</a></li><li><a href="#comparison-users-vs-entries">Comparison: Users vs Entries</a></li></ul></li><li><a href="#author-eligibility">Author Eligibility</a><ul class="nav-sublist"><li><a href="#schema">Schema</a></li><li><a href="#entryauthorservice-and-entryauthors-facade">EntryAuthorService and EntryAuthors Facade</a></li><li><a href="#promoting-and-demoting-authors">Promoting and Demoting Authors</a></li><li><a href="#author-eligibility-via-userservice">Author Eligibility via UserService</a></li><li><a href="#querying-eligible-authors">Querying Eligible Authors</a></li></ul></li><li><a href="#userservice-and-the-users-facade">UserService and the Users Facade</a><ul class="nav-sublist"><li><a href="#crud">CRUD</a></li><li><a href="#roles">Roles</a></li><li><a href="#custom-fields">Custom Fields</a></li><li><a href="#passwords">Passwords</a></li><li><a href="#status-management">Status Management</a></li><li><a href="#two-factor-authentication">Two-Factor Authentication</a></li><li><a href="#oauth-token-management">OAuth Token Management</a></li><li><a href="#action-classes-inventory">Action Classes Inventory</a></li></ul></li><li><a href="#oauth-and-social-login">OAuth and Social Login</a></li><li><a href="#system-and-user-settings">System and User Settings</a><ul class="nav-sublist"><li><a href="#settings-domains">Settings Domains</a></li><li><a href="#value-storage-and-resolution">Value Storage and Resolution</a></li><li><a href="#reading-settings">Reading Settings</a></li><li><a href="#writing-system-settings">Writing System Settings</a></li><li><a href="#writing-user-preferences">Writing User Preferences</a></li><li><a href="#adding-a-setting">Adding a Setting</a></li></ul></li><li><a href="#field-types">Field Types</a><ul class="nav-sublist"><li><a href="#built-in-types">Built-in Types</a></li></ul></li><li><a href="#blueprint-dynamic-settings-fieldsets">Blueprint (Dynamic Settings Fieldsets)</a><ul class="nav-sublist"><li><a href="#the-blueprint-value-object">The `Blueprint` value object</a></li><li><a href="#field-definition-shape">Field-definition shape</a></li><li><a href="#how-field-types-consume-it">How field types consume it</a></li><li><a href="#rendering-a-blueprint">Rendering a blueprint</a></li><li><a href="#adopting-blueprint-in-a-new-layer">Adopting Blueprint in a new layer</a></li></ul></li><li><a href="#field-groups-and-fields">Field Groups and Fields</a><ul class="nav-sublist"><li><a href="#creating-a-field-group-with-fields">Creating a Field Group with Fields</a></li></ul></li><li><a href="#field-layouts">Field Layouts</a><ul class="nav-sublist"><li><a href="#building-a-layout-programmatically">Building a Layout Programmatically</a></li><li><a href="#getting-all-fields-from-a-layout">Getting All Fields from a Layout</a></li><li><a href="#field-uniqueness-constraint">Field Uniqueness Constraint</a></li></ul></li><li><a href="#status-groups-and-statuses">Status Groups and Statuses</a><ul class="nav-sublist"><li><a href="#creating-a-status-group">Creating a Status Group</a></li><li><a href="#how-an-entry-stores-its-status">How an Entry Stores its Status</a></li><li><a href="#statusobserver-keeping-status_is_public-consistent">StatusObserver: keeping status_is_public consistent</a></li></ul></li><li><a href="#category-groups-and-categories">Category Groups and Categories</a><ul class="nav-sublist"><li><a href="#creating-a-category-group-and-categories">Creating a Category Group and Categories</a></li><li><a href="#fetching-categories">Fetching Categories</a></li></ul></li><li><a href="#custom-field-groups-on-category-groups">Custom Field Groups on Category Groups</a></li><li><a href="#entry-groups-and-entry-types">Entry Groups and Entry Types</a><ul class="nav-sublist"><li><a href="#seeded-entry-groups-and-types">Seeded Entry Groups and Types</a></li><li><a href="#available-entry-type-classes">Available Entry Type Classes</a></li><li><a href="#registry-resolution-and-admin-constraints">Registry Resolution and Admin Constraints</a></li><li><a href="#field-layering-group-and-type-fields">Field Layering: Group and Type Fields</a></li><li><a href="#lifecycle-hook-signatures">Lifecycle Hook Signatures</a></li><li><a href="#creating-an-entry-group">Creating an Entry Group</a></li><li><a href="#creating-an-entry-type-class">Creating an Entry Type Class</a></li><li><a href="#registering-the-entry-type-in-the-database">Registering the Entry Type in the Database</a></li></ul></li><li><a href="#adding-a-new-entry-type-end-to-end">Adding a New Entry Type End-to-End</a><ul class="nav-sublist"><li><a href="#1-create-fields-and-a-fieldgroup">1. Create fields and a FieldGroup</a></li><li><a href="#2-create-fieldlayouts">2. Create FieldLayouts</a></li><li><a href="#3-create-the-entrygroup">3. Create the EntryGroup</a></li><li><a href="#4-write-the-entrytype-php-classes">4. Write the EntryType PHP classes</a></li><li><a href="#5-register-the-entrytype-rows">5. Register the EntryType rows</a></li><li><a href="#6-validate-and-create-entries">6. Validate and create entries</a></li></ul></li><li><a href="#creating-and-updating-entries">Creating and Updating Entries</a><ul class="nav-sublist"><li><a href="#creating-an-entry">Creating an Entry</a></li><li><a href="#updating-an-entry">Updating an Entry</a></li><li><a href="#using-the-relationship-field">Using the Relationship Field</a></li></ul></li><li><a href="#querying-entries">Querying Entries</a><ul class="nav-sublist"><li><a href="#full-entryquerybuilder-surface">Full `EntryQueryBuilder` surface</a></li><li><a href="#reading-field-values">Reading Field Values</a></li><li><a href="#accessing-entry-authors">Accessing Entry Authors</a></li></ul></li><li><a href="#accessing-entry-categories-via-the-content-facade">Accessing Entry Categories via the Content Facade</a><ul class="nav-sublist"><li><a href="#reading-categories-on-a-result-set">Reading categories on a result set</a></li><li><a href="#loading-a-categorys-group-on-already-fetched-entries">Loading a category's group on already-fetched entries</a></li><li><a href="#filtering-entries-by-category">Filtering entries by category</a></li><li><a href="#accessing-category-field-values">Accessing category field values</a></li></ul></li><li><a href="#entry-metrics">Entry Metrics</a></li><li><a href="#deleting-entries">Deleting Entries</a></li><li><a href="#media-library">Media Library</a><ul class="nav-sublist"><li><a href="#libraries">Libraries</a></li><li><a href="#uploads">Uploads</a></li><li><a href="#attachments-and-field-usage">Attachments and Field Usage</a></li><li><a href="#media-picker-endpoint">Media Picker Endpoint</a></li><li><a href="#categories-fields-transformations-and-cleanup">Categories, Fields, Transformations, and Cleanup</a></li></ul></li><li><a href="#site-routing-public-facing-urls">Site Routing (Public-Facing URLs)</a><ul class="nav-sublist"><li><a href="#frontend-catch-all-route">Frontend Catch-All Route</a></li><li><a href="#routeresult">RouteResult</a></li><li><a href="#entry-tree-layer">Entry Tree Layer</a></li><li><a href="#entrytree-driver">EntryTree Driver</a></li><li><a href="#template-driver">Template Driver</a></li><li><a href="#configuring-driver-priority">Configuring Driver Priority</a></li></ul></li><li><a href="#template-and-view-stack">Template and View Stack</a><ul class="nav-sublist"><li><a href="#twigbridge-configuration">TwigBridge Configuration</a></li><li><a href="#view-namespaces-and-includes">View Namespaces and Includes</a></li><li><a href="#site-templates">Site Templates</a></li><li><a href="#vite-asset-pipeline">Vite Asset Pipeline</a></li></ul></li><li><a href="#api-layer">API Layer</a><ul class="nav-sublist"><li><a href="#api-routes">API Routes</a></li><li><a href="#api-resources-and-current-limitations">API Resources and Current Limitations</a></li><li><a href="#api-requestresponse-logging">API Request/Response Logging</a></li></ul></li><li><a href="#controller-layer">Controller Layer</a><ul class="nav-sublist"><li><a href="#base-classes-and-helpers">Base Classes and Helpers</a></li><li><a href="#admin-controllers-catalog">Admin Controllers: Catalog</a></li><li><a href="#api-controllers-catalog">API Controllers: Catalog</a></li></ul></li><li><a href="#admin-route-map">Admin Route Map</a></li><li><a href="#model-creation-and-modification">Model Creation and Modification</a><ul class="nav-sublist"><li><a href="#services-layer">Services Layer</a></li><li><a href="#repositories-layer">Repositories Layer</a></li><li><a href="#actions-layer">Actions Layer</a></li><li><a href="#formrequests-layer">FormRequests Layer</a></li><li><a href="#observers-events-and-listeners">Observers, Events, and Listeners</a></li><li><a href="#schema-macros">Schema Macros</a></li><li><a href="#transactional-behaviour">Transactional Behaviour</a></li></ul></li><li><a href="#validation-strategy">Validation Strategy</a></li><li><a href="#bot-blocking-webhooks-and-external-integrations">Bot Blocking, Webhooks, and External Integrations</a></li><li><a href="#end-to-end-chain-traces">End-to-End Chain Traces</a><ul class="nav-sublist"><li><a href="#entry-create-chain">Entry Create Chain</a></li><li><a href="#entry-update-chain">Entry Update Chain</a></li><li><a href="#category-create-chain">Category Create Chain</a></li><li><a href="#media-upload-chain">Media Upload Chain</a></li><li><a href="#user-create-chain">User Create Chain</a></li></ul></li><li><a href="#key-data-flow-summary">Key Data Flow Summary</a><ul class="nav-sublist"><li><a href="#write-path-entry-creation">Write path (entry creation)</a></li><li><a href="#read-path-entry-query">Read path (entry query)</a></li><li><a href="#field-value-storage">Field value storage</a></li><li><a href="#morph-map-aliases-at-a-glance">Morph map aliases at a glance</a></li></ul></li><li><a href="#media-status-governance">Media Status Governance</a><ul class="nav-sublist"><li><a href="#schema-1">Schema</a></li><li><a href="#model-surface">Model surface</a></li><li><a href="#upload-auto-assignment">Upload auto-assignment</a></li><li><a href="#validation">Validation</a></li><li><a href="#admin-ui-1">Admin UI</a></li><li><a href="#known-limits">Known limits</a></li></ul></li><li><a href="#hasstatus-and-the-status-sync-registry">HasStatus and the Status Sync Registry</a><ul class="nav-sublist"><li><a href="#contract">Contract</a></li><li><a href="#what-the-observer-does">What the observer does</a></li><li><a href="#current-consumers">Current consumers</a></li></ul></li><li><a href="#technical-tutorials">Technical Tutorials</a><ul class="nav-sublist"><li><a href="#adding-custom-fields-to-any-model">Adding Custom Fields to Any Model</a></li><li><a href="#how-the-field-layer-works">How the Field Layer Works</a></li><li><a href="#step-1-add-a-morph-map-alias">Step 1: Add a Morph Map Alias</a></li><li><a href="#step-2-add-the-fieldable-trait-to-the-model">Step 2: Add the Fieldable Trait to the Model</a></li><li><a href="#step-3-create-fields-and-a-field-layout">Step 3: Create Fields and a Field Layout</a></li><li><a href="#step-4-write-field-values">Step 4: Write Field Values</a></li><li><a href="#step-5-read-field-values">Step 5: Read Field Values</a></li><li><a href="#step-6-attach-field-groups-to-the-owning-configuration-model">Step 6: Attach Field Groups to the Owning Configuration Model</a></li><li><a href="#morph-map-note">Morph Map Note</a></li></ul></li><li><a href="#roadmap">Roadmap</a></li></ul>
 </nav>
 
 <main id="content">
@@ -3278,6 +3278,228 @@ FieldType::firstOrCreate(
     [&#39;name&#39; =&gt; &#39;Toggle&#39;]
 );
 </code></pre>
+<hr>
+<h2 id="blueprint-dynamic-settings-fieldsets"><a class="anchor" href="#blueprint-dynamic-settings-fieldsets" aria-hidden="true">#</a>Blueprint (Dynamic Settings Fieldsets)</h2>
+<p>Every field type declares a <code>$settings_form</code> — a small schema of typed,
+validated, renderable configuration inputs (a <code>Select</code>&#39;s options, a <code>Text</code>&#39;s
+<code>max_length</code>, and so on). The machinery that turns that declaration into
+defaults, validation rules, sanitised input, and a rendered admin form is the
+<strong>Blueprint</strong> subsystem (<code>packages/core/src/Blueprint/</code>). It is the single point
+of entry for dynamic settings, so new layers that need the same &quot;configure this
+object&quot; capability adopt it instead of re-implementing the plumbing.</p>
+<p>A <em>blueprint</em> is an ordered set of typed field definitions plus the operations
+over it. Field values persist as a single JSON blob (the owner&#39;s <code>settings</code>
+column, cast to <code>array</code>); there is no per-setting table.</p>
+<blockquote>
+<p><strong>Scope.</strong> Blueprint is the machinery behind <em>field-type settings</em> and any
+layer that opts in. It is distinct from the <a href="#system-and-user-settings">System and User Settings</a>
+domain system (<code>config/settings.php</code> + typed <code>setting_values</code> rows), which is
+a separate subsystem and is not built on Blueprint.</p>
+</blockquote>
+<h3 id="the-blueprint-value-object"><a class="anchor" href="#the-blueprint-value-object" aria-hidden="true">#</a>The <code>Blueprint</code> value object</h3>
+<p><code>AdAstra\Blueprint\Blueprint</code> is immutable; <code>withOptions()</code> returns a hydrated
+copy rather than mutating in place.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Returns</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Blueprint::fromArray($definition)</code></td>
+<td><code>Blueprint</code></td>
+<td>Build from a <code>$settings_form</code>-shaped array (handle =&gt; definition)</td>
+</tr>
+<tr>
+<td><code>fields()</code></td>
+<td><code>array&lt;string, BlueprintField&gt;</code></td>
+<td>The definitions, order preserved</td>
+</tr>
+<tr>
+<td><code>defaults()</code></td>
+<td><code>array</code></td>
+<td><code>handle =&gt; default</code> (null when undeclared)</td>
+</tr>
+<tr>
+<td><code>rules(string $prefix = &#39;&#39;)</code></td>
+<td><code>array</code></td>
+<td><code>&quot;{prefix}.{handle}&quot; =&gt; rules</code> for a FormRequest; raw rule passthrough with a whole-value <code>&#39;nullable&#39;</code> fallback</td>
+</tr>
+<tr>
+<td><code>filter(array $raw)</code></td>
+<td><code>array</code></td>
+<td>Sanitise submitted input: keep only declared handles, fill missing with defaults, normalise <code>key_value</code> rows (drop blank-key rows)</td>
+</tr>
+<tr>
+<td><code>withOptions(array $byHandle)</code></td>
+<td><code>Blueprint</code></td>
+<td>Inject dynamic option lists onto named handles for rendering; unknown handles ignored, un-mapped handles untouched</td>
+</tr>
+<tr>
+<td><code>form()</code></td>
+<td><code>array</code></td>
+<td>The raw <code>handle =&gt; definition</code> array, for the render layer</td>
+</tr>
+</tbody></table>
+<p><code>BlueprintField</code> wraps one definition and preserves arbitrary widget-specific
+keys (<code>min</code>, <code>max</code>, <code>step</code>, <code>rows</code>, <code>alpha</code>, …) untouched. Note that a field may
+declare a setting whose <em>handle</em> is literally <code>default</code> (e.g. <code>Select</code>,
+<code>Country</code>) — that is distinct from the <code>default</code> <em>meta-attribute</em> and the two
+are never conflated.</p>
+<h3 id="field-definition-shape"><a class="anchor" href="#field-definition-shape" aria-hidden="true">#</a>Field-definition shape</h3>
+<p>Each entry in the definition array is keyed by handle:</p>
+<pre><code class="language-php">&#39;max_length&#39; =&gt; [
+    &#39;type&#39;         =&gt; &#39;number&#39;,          // render widget (see vocab below)
+    &#39;label&#39;        =&gt; &#39;Max Length&#39;,
+    &#39;instructions&#39; =&gt; &#39;Leave blank for no limit.&#39;,
+    &#39;default&#39;      =&gt; null,               // meta-attribute
+    &#39;rules&#39;        =&gt; &#39;nullable|integer|min:1&#39;,
+    // …plus any widget-specific keys (min/max/step/suffix/rows/options/…)
+],
+</code></pre>
+<p>Widget <code>type</code> vocabulary understood by the render partial:</p>
+<p><code>text</code>, <code>number</code>, <code>textarea</code>, <code>toggle</code>, <code>select</code>, <code>select_multiple</code>, <code>slider</code>,
+<code>color</code>, <code>key_value</code> (two-column key/label repeater), <code>structured_rows_columns</code>
+(column-schema editor).</p>
+<p>For <code>select</code>/<code>select_multiple</code>, <code>options</code> may be a static list <strong>or</strong> a
+placeholder string (e.g. <code>&#39;options&#39; =&gt; &#39;roles&#39;</code>) that a dynamic source replaces
+at hydration — see <a href="#rendering-a-blueprint">Rendering a blueprint</a>.</p>
+<h3 id="how-field-types-consume-it"><a class="anchor" href="#how-field-types-consume-it" aria-hidden="true">#</a>How field types consume it</h3>
+<p><code>AbstractField</code> implements <code>AdAstra\Blueprint\Contracts\ProvidesBlueprint</code> and
+exposes a memoised <code>blueprint()</code> built from <code>$settings_form</code>. Everything else on
+the field-settings path delegates to it:</p>
+<table>
+<thead>
+<tr>
+<th>Caller</th>
+<th>Delegates to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>AbstractField::settingsDefaults()</code></td>
+<td><code>blueprint()-&gt;defaults()</code></td>
+</tr>
+<tr>
+<td><code>AbstractField::settingsRules()</code></td>
+<td><code>blueprint()-&gt;rules(&#39;settings&#39;)</code></td>
+</tr>
+<tr>
+<td><code>FiltersFieldSettings::filterSettings()</code> (used by <code>CreateNewField</code>/<code>EditField</code>)</td>
+<td><code>blueprint()-&gt;filter($raw)</code></td>
+</tr>
+<tr>
+<td><code>Admin\Field::buildSettingsForm()</code></td>
+<td><code>blueprint()-&gt;withOptions($instance-&gt;settingsFormOptions())-&gt;form()</code></td>
+</tr>
+</tbody></table>
+<p>A field type that needs dynamic option lists overrides <code>settingsFormOptions()</code>
+(returning <code>handle =&gt; optionList</code>); the controller feeds it to <code>withOptions()</code>
+at render time. <code>Users</code>, <code>Country</code>, <code>Relationship</code>, <code>Media</code>, <code>FileUpload</code>,
+<code>ColorPicker</code>, <code>Html</code>, <code>Money</code>, and <code>StateProvince</code> all do this today.</p>
+<h3 id="rendering-a-blueprint"><a class="anchor" href="#rendering-a-blueprint" aria-hidden="true">#</a>Rendering a blueprint</h3>
+<p>A single Twig partial renders any blueprint, keyed off each field&#39;s widget
+<code>type</code>:</p>
+<pre><code class="language-twig">{% for handle, def in settings_form %}
+    {{ include(&#39;admin::blueprint/_blueprint_widget&#39;, {
+        handle: handle,
+        def: def,
+        value: current_values[handle] is defined ? current_values[handle] : def.default,
+        name_prefix: &#39;settings&#39;
+    }) }}
+{% endfor %}
+</code></pre>
+<ul>
+<li><code>name_prefix</code> (default <code>settings</code>) controls the input name — <code>settings[handle]</code>
+for the Field layer; a new layer can namespace differently.</li>
+<li><strong>Hydrate before rendering.</strong> Always pass the blueprint through
+<code>withOptions(...)</code> first. A placeholder option string (e.g. <code>&#39;roles&#39;</code>) reaches
+the widget as a literal string otherwise; the widget coerces any non-iterable
+<code>options</code> to <code>[]</code> defensively, but the real list only appears after hydration.</li>
+<li>The Field admin form re-renders the panel over AJAX when the type dropdown
+changes (<code>Admin\Field::typeSettings()</code>), driven by the same blueprint.</li>
+</ul>
+<h3 id="adopting-blueprint-in-a-new-layer"><a class="anchor" href="#adopting-blueprint-in-a-new-layer" aria-hidden="true">#</a>Adopting Blueprint in a new layer</h3>
+<p>Because storage is a plain JSON cast, a new configurable-object layer adopts
+Blueprint in four steps — no bespoke settings code:</p>
+<ol>
+<li><strong>Declare</strong> — the owning model (or a class it delegates to) implements
+<code>ProvidesBlueprint::blueprint()</code>, returning <code>Blueprint::fromArray([...])</code>.
+Dynamic option sources hook in exactly like <code>Users::settingsFormOptions()</code>.</li>
+<li><strong>Store</strong> — add a JSON <code>settings</code> column with
+<code>protected $casts = [&#39;settings&#39; =&gt; &#39;array&#39;]</code> (mirrors <code>Field</code>). No settings
+table, no store contract.</li>
+<li><strong>Validate &amp; persist</strong> — the FormRequest merges
+<code>$model-&gt;blueprint()-&gt;rules($prefix)</code>; the create/edit action calls
+<code>$model-&gt;blueprint()-&gt;filter($input[&#39;settings&#39;] ?? [])</code> before <code>save()</code>.</li>
+<li><strong>Render</strong> — the admin view includes <code>admin::blueprint/_blueprint_widget</code>
+over <code>blueprint()-&gt;withOptions(...)-&gt;form()</code>.</li>
+</ol>
+<h4 id="worked-example-per-type-settings-on-the-behavior-layer"><a class="anchor" href="#worked-example-per-type-settings-on-the-behavior-layer" aria-hidden="true">#</a>Worked example: per-type settings on the Behavior layer</h4>
+<p><em>Illustrative.</em> Entry behaviours are a natural fit: a behaviour class is shared
+across many entry types, so the schema lives on the class and the values live
+per <code>EntryType</code> record — the same split as <code>FieldType</code>/<code>Field</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Field layer</th>
+<th>Behavior layer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>FieldType</code> (class defines <code>$settings_form</code>)</td>
+<td><code>AbstractEntryType</code> subclass (defines the schema)</td>
+</tr>
+<tr>
+<td><code>Field</code> record (stores <code>settings</code> JSON)</td>
+<td><code>EntryType</code> record (stores <code>settings</code> JSON)</td>
+</tr>
+</tbody></table>
+<pre><code class="language-php">// 1 + 2. Migration: add a nullable JSON `settings` column to entry_types,
+//        and cast it on the EntryType model ([&#39;settings&#39; =&gt; &#39;array&#39;]).
+
+// 3. Declare the schema on a concrete behaviour and expose a blueprint.
+use AdAstra\Blueprint\Blueprint;
+use AdAstra\Blueprint\Contracts\ProvidesBlueprint;
+use AdAstra\EntryTypes\AbstractEntryType;
+
+class BlogPostEntryType extends AbstractEntryType implements ProvidesBlueprint
+{
+    protected array $settings_form = [
+        &#39;posts_per_page&#39; =&gt; [
+            &#39;type&#39; =&gt; &#39;number&#39;, &#39;label&#39; =&gt; &#39;Posts Per Page&#39;,
+            &#39;default&#39; =&gt; 10, &#39;rules&#39; =&gt; &#39;nullable|integer|min:1&#39;,
+        ],
+        &#39;enable_comments&#39; =&gt; [
+            &#39;type&#39; =&gt; &#39;toggle&#39;, &#39;label&#39; =&gt; &#39;Enable Comments&#39;, &#39;default&#39; =&gt; true,
+        ],
+    ];
+
+    public function blueprint(): Blueprint
+    {
+        return Blueprint::fromArray($this-&gt;settings_form);
+    }
+
+    // Read at runtime inside a lifecycle hook. Singleton-safe: reads from the
+    // per-type record, never writes to $this (see the AbstractEntryType contract).
+    protected function setting(string $key, mixed $default = null): mixed
+    {
+        $values = array_merge($this-&gt;blueprint()-&gt;defaults(), $this-&gt;record-&gt;settings ?? []);
+        return $values[$key] ?? $default;
+    }
+}
+</code></pre>
+<pre><code class="language-php">// 4. Validate + persist (in the EntryType FormRequest / service):
+$rules = array_merge($base, $behavior-&gt;blueprint()-&gt;rules(&#39;settings&#39;));
+// …then before save:
+$data[&#39;settings&#39;] = $behavior-&gt;blueprint()-&gt;filter($data[&#39;settings&#39;] ?? []);
+</code></pre>
+<p>The admin edit view includes <code>admin::blueprint/_blueprint_widget</code> exactly as the
+Field form does, optionally re-rendering the panel when the behaviour dropdown
+changes (mirroring <code>Admin\Field::typeSettings()</code>). Everything else — defaults,
+validation, filtering, dynamic options, the rendered form — comes from the
+shared subsystem.</p>
 <hr>
 <h2 id="field-groups-and-fields"><a class="anchor" href="#field-groups-and-fields" aria-hidden="true">#</a>Field Groups and Fields</h2>
 <p><strong>FieldGroups</strong> are reusable bundles of fields attached to whatever uses the
