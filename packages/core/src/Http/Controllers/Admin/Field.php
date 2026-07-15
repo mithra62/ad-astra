@@ -56,14 +56,9 @@ class Field extends Controller
 
     private function buildSettingsForm(AbstractField $instance): array
     {
-        $form = $instance->settingsForm();
-        foreach ($instance->settingsFormOptions() as $handle => $optionList) {
-            if (isset($form[$handle])) {
-                $form[$handle]['options'] = $optionList;
-            }
-        }
-
-        return $form;
+        return $instance->blueprint()
+            ->withOptions($instance->settingsFormOptions())
+            ->form();
     }
 
     /**
@@ -92,7 +87,7 @@ class Field extends Controller
         $groups = FieldGroup::all();
         $active_group = $field->groups->first();
         $layouts = FieldLayoutModel::with(['entryGroups', 'entryTypes.entryGroup'])
-            ->whereHas('tabs.elements', fn($q) => $q->where('field_id', $field->id))
+            ->whereHas('tabs.elements', fn ($q) => $q->where('field_id', $field->id))
             ->orderBy('name')
             ->get();
 

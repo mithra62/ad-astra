@@ -6,34 +6,13 @@ use AdAstra\Field\AbstractField;
 
 trait FiltersFieldSettings
 {
+    /**
+     * Sanitise submitted settings against the field type's blueprint: keep only
+     * declared handles, fill missing ones with defaults, normalise key_value
+     * rows. Delegates to the shared Blueprint subsystem.
+     */
     private function filterSettings(array $raw, AbstractField $instance): array
     {
-        $form = $instance->settingsForm();
-        $defaults = $instance->settingsDefaults();
-        $filtered = [];
-
-        foreach ($form as $key => $def) {
-            if (array_key_exists($key, $raw)) {
-                $value = $raw[$key];
-                if (($def['type'] ?? '') === 'key_value') {
-                    $value = $this->normaliseKeyValue((array)$value);
-                }
-                $filtered[$key] = $value;
-            } else {
-                $filtered[$key] = $defaults[$key] ?? null;
-            }
-        }
-
-        return $filtered;
-    }
-
-    private function normaliseKeyValue(array $raw): array
-    {
-        return array_values(
-            array_filter(
-                $raw,
-                fn($row) => trim($row['key'] ?? '') !== ''
-            )
-        );
+        return $instance->blueprint()->filter($raw);
     }
 }
