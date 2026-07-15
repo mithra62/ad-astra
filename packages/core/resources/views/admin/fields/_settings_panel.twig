@@ -3,10 +3,11 @@
 {% else %}
     <div class="space-y-4">
         {% for handle, def in settings_form %}
-            {{ include('admin::fields/_settings_widget', {
+            {{ include('admin::blueprint/_blueprint_widget', {
                 handle: handle,
                 def: def,
-                value: current_values[handle] is defined ? current_values[handle] : def.default
+                value: current_values[handle] is defined ? current_values[handle] : def.default,
+                name_prefix: 'settings'
             }) }}
         {% endfor %}
     </div>

@@ -1,8 +1,9 @@
 {# Column-schema editor for the Structured Rows field type. #}
 {# matrix.scripts() is NOT called here — it is emitted once by the create/edit view layout. #}
 {% import 'admin::_inc/_structured-rows' as matrix %}
+{% set name_prefix = name_prefix|default('settings') %}
 {{ matrix.field(
-    'settings[' ~ handle ~ ']',
+    name_prefix ~ '[' ~ handle ~ ']',
     def.label,
     [
         {handle: 'handle',      label: 'Handle',      type: 'text'},

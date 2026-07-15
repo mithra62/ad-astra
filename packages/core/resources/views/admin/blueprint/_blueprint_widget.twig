@@ -1,0 +1,54 @@
+{# Single dynamic-settings widget, keyed off the field's widget `type`.        #}
+{# Shared by the Field settings layer and any new layer that adopts Blueprint. #}
+{# Params: handle, def (raw definition), value, name_prefix (default 'settings'). #}
+{% import 'admin::_inc/_form-fields' as f %}
+
+{% set name_prefix = name_prefix|default('settings') %}
+{% set input_name = name_prefix ~ '[' ~ handle ~ ']' %}
+
+{# Placeholder-string option sources (e.g. 'countries') are replaced at
+   hydration; coerce anything non-iterable to an empty list defensively. #}
+{% set options = def.options is iterable ? def.options : [] %}
+
+{% if def.type == 'text' %}
+    {{ f.input(input_name, def.label, value, 'text', def.instructions|default('')) }}
+
+{% elseif def.type == 'number' %}
+    {{ f.input(input_name, def.label, value, 'number', def.instructions|default('')) }}
+
+{% elseif def.type == 'textarea' %}
+    {{ f.textarea(input_name, def.label, value, null, def.instructions|default('')) }}
+
+{% elseif def.type == 'toggle' %}
+    {{ f.toggle(input_name, def.label, value, def.instructions|default('')) }}
+
+{% elseif def.type == 'select' %}
+    {{ f.select(input_name, def.label, options, value, def.instructions|default('')) }}
+
+{% elseif def.type == 'select_multiple' %}
+    {{ f.select(name_prefix ~ '[' ~ handle ~ '][]', def.label, options, value, def.instructions|default(''), null, null, true) }}
+
+{% elseif def.type == 'slider' %}
+    {{ f.slider(input_name, def.label, value, def.min|default(0), def.max|default(100), def.step|default(1), def.instructions|default(''), null, def.suffix|default('')) }}
+
+{% elseif def.type == 'color' %}
+    {{ f.color(input_name, def.label, value, def.instructions|default('')) }}
+
+{% elseif def.type == 'key_value' %}
+    {# Two-column repeater: key + label pairs. matrix.scripts() is NOT called here. #}
+    {% import 'admin::_inc/_structured-rows' as matrix %}
+    {{ matrix.field(
+        input_name,
+        def.label,
+        [{handle: 'key', label: 'Key', type: 'text'}, {handle: 'label', label: 'Label', type: 'text'}],
+        value,
+        def.instructions|default(''),
+        null, null,
+        'Add option',
+        0
+    ) }}
+
+{% elseif def.type == 'structured_rows_columns' %}
+    {{ include('admin::blueprint/_blueprint_structured_rows_columns', {handle: handle, def: def, value: value, name_prefix: name_prefix}) }}
+
+{% endif %}
