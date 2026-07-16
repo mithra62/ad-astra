@@ -1,7 +1,7 @@
 # Change Log
 
 ### Version 0.0.2 (Alpha 2)
-Release --
+Release July 17, 2026
 
 - ADDED: Ajax parent-entry search picker on the entry Hierarchy tab, replacing the placeholder select (#45)
 - ADDED: `doctor` Command for system health (#66)
