@@ -1,0 +1,586 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Tab Fields' %}
+{% set page_heading = 'Field Layouts' %}
+{% set active_nav = 'settings' %}
+{% set active_secondary_nav = 'field_layouts' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Field Layouts', href: route('field-layouts')},
+        {label: layout.name, href: route('field-layouts.edit', layout)},
+        {label: tab.name ~ ' Fields'}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.field-layouts._sidebar', {active: layout.id, active_tab: tab.id}) }}
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script>
+        (function () {
+            const availableList = document.getElementById('available-fields');
+            const assignedList = document.getElementById('assigned-fields');
+            const saveBtn = document.getElementById('save-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const searchInput = document.getElementById('field-search');
+            const availableCount = document.getElementById('available-count');
+            const assignedCount = document.getElementById('assigned-count');
+            const bulkForm = document.getElementById('bulk-save-form');
+            const bulkInputs = document.getElementById('bulk-save-inputs');
+
+            let isDirty = false;
+            const removedElementIds = new Set();
+
+            function markDirty() {
+                if (!isDirty) {
+                    isDirty = true;
+                    resetBtn.classList.remove('hidden');
+                }
+            }
+
+            function renumberBadges() {
+                assignedList.querySelectorAll(':scope > li .position-badge').forEach((badge, i) => {
+                    badge.textContent = i + 1;
+                });
+            }
+
+            function updateCounts() {
+                availableCount.textContent = availableList.querySelectorAll(':scope > li[data-field-id]').length;
+                const n = assignedList.querySelectorAll(':scope > li').length;
+                assignedCount.textContent = n + ' assigned';
+            }
+
+            function attachRowListeners(li) {
+                const toggleBtn = li.querySelector('.toggle-field-settings');
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', function (evt) {
+                        evt.stopPropagation();
+                        const panel = li.querySelector('.field-settings');
+                        const chevron = this.querySelector('.settings-chevron');
+                        const isHidden = panel.classList.toggle('hidden');
+                        chevron.style.transform = isHidden ? '' : 'rotate(180deg)';
+                        this.setAttribute('aria-expanded', String(!isHidden));
+                    });
+                }
+
+                li.querySelector('.remove-field').addEventListener('click', function () {
+                    const elementId = li.dataset.elementId;
+                    if (elementId) {
+                        removedElementIds.add(elementId);
+                    }
+
+                    const newAvailableLi = document.createElement('li');
+                    newAvailableLi.className = 'field-row flex items-center gap-3 rounded-md px-3 py-3 hover:bg-subtle';
+                    newAvailableLi.dataset.fieldId = li.dataset.fieldId;
+                    newAvailableLi.dataset.name = li.dataset.name;
+                    newAvailableLi.dataset.handle = li.dataset.handle || '';
+                    newAvailableLi.dataset.type = li.dataset.type || '';
+                    newAvailableLi.innerHTML = li.querySelector('.drag-handle').outerHTML
+                        + '<div class="min-w-0 flex-1">'
+                        + '<p class="truncate text-sm font-medium text-content">' + (li.querySelector('.field-display-name').textContent.trim()) + '</p>'
+                        + '<p class="truncate font-mono text-xs text-faint">' + (li.querySelector('.field-meta') ? li.querySelector('.field-meta').textContent.trim() : '') + '</p>'
+                        + '</div>';
+
+                    availableList.appendChild(newAvailableLi);
+                    li.remove();
+                    renumberBadges();
+                    updateCounts();
+                    markDirty();
+                });
+
+                const toggleMap = [
+                    {toggle: '.required-toggle', badge: '.required-badge'},
+                    {toggle: '.hidden-toggle', badge: '.hidden-badge'},
+                    {toggle: '.readonly-toggle', badge: '.readonly-badge'},
+                    {toggle: '.disabled-toggle', badge: '.disabled-badge'},
+                ];
+
+                function syncBadges() {
+                    toggleMap.forEach(({toggle, badge}) => {
+                        const cb = li.querySelector(toggle);
+                        const b = li.querySelector(badge);
+                        if (cb && b) b.classList.toggle('hidden', !cb.checked);
+                    });
+                }
+
+                toggleMap.forEach(({toggle}) => {
+                    const cb = li.querySelector(toggle);
+                    if (cb) cb.addEventListener('change', () => {
+                        syncBadges();
+                        markDirty();
+                    });
+                });
+
+                li.querySelectorAll('input[type="text"], textarea').forEach(el => el.addEventListener('input', markDirty));
+
+                // Sync badges to match initial state
+                syncBadges();
+            }
+
+            assignedList.querySelectorAll(':scope > li').forEach(attachRowListeners);
+
+            Sortable.create(availableList, {
+                group: {name: 'fields', pull: true, put: true},
+                handle: '.drag-handle',
+                animation: 150,
+                onAdd: function (evt) {
+                    const item = evt.item;
+                    const elementId = item.dataset.elementId;
+                    if (elementId) {
+                        removedElementIds.add(elementId);
+                    }
+
+                    const displayName = item.querySelector('.field-display-name')?.textContent.trim()
+                        || item.dataset.displayName || item.dataset.handle || '';
+                    const metaText = item.querySelector('.field-meta')?.textContent.trim()
+                        || (item.dataset.handle && item.dataset.type ? item.dataset.handle + ' / ' + item.dataset.type : '');
+
+                    // Transform in place so Sortable's reference stays valid
+                    item.className = 'field-row flex items-center gap-3 rounded-md px-3 py-3 hover:bg-subtle';
+                    const fieldId = item.dataset.fieldId;
+                    const dataName = item.dataset.name;
+                    // Clear all data attrs then re-set only what's needed for available rows
+                    Object.keys(item.dataset).forEach(k => delete item.dataset[k]);
+                    item.dataset.fieldId = fieldId;
+                    item.dataset.name = dataName;
+                    item.innerHTML = '<span class="drag-handle shrink-0 cursor-grab text-faint"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg></span>'
+                        + '<div class="min-w-0 flex-1">'
+                        + '<p class="truncate text-sm font-medium text-content">' + displayName + '</p>'
+                        + '<p class="truncate font-mono text-xs text-faint">' + metaText + '</p>'
+                        + '</div>';
+
+                    renumberBadges();
+                    updateCounts();
+                    markDirty();
+                },
+                onSort: function () {
+                    renumberBadges();
+                    markDirty();
+                },
+            });
+
+            Sortable.create(assignedList, {
+                group: {name: 'fields', pull: true, put: true},
+                handle: '.drag-handle',
+                animation: 150,
+                onAdd: function (evt) {
+                    const item = evt.item;
+                    const fieldId = item.dataset.fieldId;
+                    const displayName = item.dataset.displayName || item.dataset.handle || '';
+                    const handle = item.dataset.handle || '';
+                    const type = item.dataset.type || '';
+                    const dataName = item.dataset.name || '';
+
+                    // Build the assigned-row HTML using the template's innerHTML as the source of truth,
+                    // then overwrite item in place so Sortable's internal reference stays valid.
+                    const tmpl = document.getElementById('assigned-row-template');
+                    const clone = tmpl.content.cloneNode(true).querySelector('li');
+                    clone.querySelector('.field-display-name').textContent = displayName;
+                    clone.querySelector('.field-meta').textContent = handle + (type ? ' / ' + type : '');
+
+                    item.className = clone.className;
+                    item.dataset.fieldId = fieldId;
+                    item.dataset.name = dataName;
+                    item.dataset.handle = handle;
+                    item.dataset.type = type;
+                    delete item.dataset.elementId;
+                    item.innerHTML = clone.innerHTML;
+
+                    attachRowListeners(item);
+                    renumberBadges();
+                    updateCounts();
+                    markDirty();
+                },
+                onSort: function () {
+                    renumberBadges();
+                    markDirty();
+                },
+            });
+
+            searchInput.addEventListener('input', function () {
+                const q = this.value.toLowerCase();
+                availableList.querySelectorAll(':scope > li[data-name]').forEach(li => {
+                    li.style.display = li.dataset.name.includes(q) ? '' : 'none';
+                });
+                updateCounts();
+            });
+
+            saveBtn.addEventListener('click', function () {
+                bulkInputs.innerHTML = '';
+
+                let ei = 0;
+                let ni = 0;
+
+                assignedList.querySelectorAll(':scope > li').forEach(li => {
+                    const elementId = li.dataset.elementId;
+                    const fieldId = li.dataset.fieldId;
+
+                    const required = li.querySelector('.required-toggle')?.checked ? '1' : '0';
+                    const hidden = li.querySelector('.hidden-toggle')?.checked ? '1' : '0';
+                    const readonly = li.querySelector('.readonly-toggle')?.checked ? '1' : '0';
+                    const disabled = li.querySelector('.disabled-toggle')?.checked ? '1' : '0';
+                    const label = li.querySelector('.label-input')?.value || '';
+                    const schemaProp = li.querySelector('.schema-property-input')?.value || '';
+                    const instructions = li.querySelector('.instructions-input')?.value || '';
+
+                    if (elementId) {
+                        addHidden('elements[' + ei + '][element_id]', elementId);
+                        addHidden('elements[' + ei + '][sort_order]', ei);
+                        addHidden('elements[' + ei + '][required]', required);
+                        addHidden('elements[' + ei + '][hidden]', hidden);
+                        addHidden('elements[' + ei + '][readonly]', readonly);
+                        addHidden('elements[' + ei + '][disabled]', disabled);
+                        addHidden('elements[' + ei + '][label]', label);
+                        addHidden('elements[' + ei + '][schema_property]', schemaProp);
+                        addHidden('elements[' + ei + '][instructions]', instructions);
+                        ei++;
+                    } else if (fieldId) {
+                        addHidden('new_fields[' + ni + '][field_id]', fieldId);
+                        addHidden('new_fields[' + ni + '][sort_order]', ei + ni);
+                        addHidden('new_fields[' + ni + '][required]', required);
+                        addHidden('new_fields[' + ni + '][hidden]', hidden);
+                        addHidden('new_fields[' + ni + '][readonly]', readonly);
+                        addHidden('new_fields[' + ni + '][disabled]', disabled);
+                        addHidden('new_fields[' + ni + '][label]', label);
+                        addHidden('new_fields[' + ni + '][schema_property]', schemaProp);
+                        addHidden('new_fields[' + ni + '][instructions]', instructions);
+                        ni++;
+                    }
+                });
+
+                let ri = 0;
+                removedElementIds.forEach(id => {
+                    addHidden('removed_elements[' + ri + ']', id);
+                    ri++;
+                });
+
+                bulkForm.submit();
+            });
+
+            function addHidden(name, value) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                bulkInputs.appendChild(input);
+            }
+
+            resetBtn.addEventListener('click', function () {
+                window.location.reload();
+            });
+        })();
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ tab.name }} Tab Fields</h1>
+                <p class="mt-1 text-sm text-muted">Drag fields between columns and reorder the assigned fields for this
+                    tab.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" id="reset-btn"
+                        class="hidden rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle">
+                    Reset
+                </button>
+                <button type="button" id="save-btn"
+                        class="rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                    Save Field Order
+                </button>
+            </div>
+        </div>
+
+        <div id="toast" class="hidden rounded-lg border px-4 py-3 text-sm shadow-sm"></div>
+
+        <div class="grid grid-cols-1 gap-5 xl:grid-cols-[22rem_1fr]">
+            {# Available Fields panel #}
+            <div class="self-start overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h5 class="text-sm font-semibold text-content">Available Fields</h5>
+                            <p class="mt-0.5 text-xs text-muted">Drag fields into the tab.</p>
+                        </div>
+                        <span id="available-count"
+                              class="rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted">{{ available_fields|length }}</span>
+                    </div>
+                </div>
+                <div class="border-b border-edge px-5 py-3">
+                    <input id="field-search" type="search" placeholder="Filter fields…"
+                           class="w-full rounded-md border border-edge px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                </div>
+                <div class="max-h-[32rem] overflow-y-auto">
+                    <ul id="available-fields" class="min-h-[16rem] divide-y divide-slate-100 p-2">
+                        {% for field in available_fields %}
+                            <li class="field-row flex items-center gap-3 rounded-md px-3 py-3 hover:bg-subtle"
+                                data-field-id="{{ field.id }}"
+                                data-name="{{ field.name|lower }} {{ field.handle|lower }}"
+                                data-display-name="{{ field.name }}"
+                                data-handle="{{ field.handle }}"
+                                data-type="{{ field.fieldType.name ?? '' }}">
+                    <span class="drag-handle shrink-0 cursor-grab text-faint">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path
+                                stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+                    </span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium text-content">{{ field.name }}</p>
+                                    <p class="truncate font-mono text-xs text-faint">{{ field.handle }}
+                                        / {{ field.fieldType.name ?? '—' }}</p>
+                                </div>
+                            </li>
+                        {% else %}
+                            <li class="flex items-center justify-center px-5 py-10 text-sm text-faint">All fields are
+                                assigned.
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            {# Assigned Fields panel #}
+            <div class="flex flex-col overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h5 class="text-sm font-semibold text-content">Assigned to {{ tab.name }}</h5>
+                            <p class="mt-0.5 text-xs text-muted">Order here controls how fields render on the tab.</p>
+                        </div>
+                        <span id="assigned-count"
+                              class="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">{{ tab.elements|length }} assigned</span>
+                    </div>
+                </div>
+                <ul id="assigned-fields" class="flex-1 min-h-[24rem] divide-y divide-slate-100 p-2">
+                    {% for element in tab.elements %}
+                        <li class="field-row rounded-md hover:bg-subtle"
+                            data-element-id="{{ element.id }}"
+                            data-field-id="{{ element.field.id }}"
+                            data-name="{{ element.field.name|lower }} {{ element.field.handle|lower }}">
+                            <div class="flex items-center gap-3 px-3 py-3">
+                        <span class="drag-handle shrink-0 cursor-grab text-faint">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
+                                                           d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+                        </span>
+                                <span
+                                    class="position-badge inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-canvas text-xs font-semibold text-muted">{{ loop.index }}</span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="field-display-name truncate text-sm font-medium text-content">{{ element.field.label ?: element.field.name }}</p>
+                                    <p class="truncate font-mono text-xs text-faint">{{ element.field.handle }}
+                                        / {{ element.field.fieldType.name ?? '—' }}</p>
+                                </div>
+                                <div class="hidden flex-wrap gap-1.5 sm:flex">
+                                    <span
+                                        class="required-badge rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 {% if not element.required %}hidden{% endif %}">Required</span>
+                                    <span
+                                        class="hidden-badge rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 {% if not element.hidden %}hidden{% endif %}">Hidden</span>
+                                    <span
+                                        class="readonly-badge rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700 {% if not element.readonly %}hidden{% endif %}">Read-only</span>
+                                    <span
+                                        class="disabled-badge rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted {% if not element.disabled %}hidden{% endif %}">Disabled</span>
+                                </div>
+                                <button type="button"
+                                        class="toggle-field-settings rounded p-1 text-faint hover:bg-subtle hover:text-muted"
+                                        title="Field settings" aria-expanded="false">
+                                    <svg class="settings-chevron h-4 w-4 transition-transform" fill="none"
+                                         stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+                                <button type="button"
+                                        class="remove-field rounded p-1 text-faint hover:bg-red-50 hover:text-red-600"
+                                        title="Remove from tab">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="field-settings hidden border-t border-edge bg-subtle px-3 py-4 sm:px-5">
+                                <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                                    <div class="space-y-3">
+                                        <label
+                                            class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                                            <input type="checkbox"
+                                                   class="required-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500"
+                                                   {% if element.required %}checked{% endif %}>
+                                            <span><span class="font-medium text-content">Required</span><span
+                                                    class="mt-0.5 block text-xs text-muted">Users must provide a value before saving.</span></span>
+                                        </label>
+                                        <label
+                                            class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                                            <input type="checkbox"
+                                                   class="hidden-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500"
+                                                   {% if element.hidden %}checked{% endif %}>
+                                            <span><span class="font-medium text-content">Hidden</span><span
+                                                    class="mt-0.5 block text-xs text-muted">Store the field on the layout without showing it by default.</span></span>
+                                        </label>
+                                        <label
+                                            class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                                            <input type="checkbox"
+                                                   class="readonly-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500"
+                                                   {% if element.readonly %}checked{% endif %}>
+                                            <span><span class="font-medium text-content">Read-only</span><span
+                                                    class="mt-0.5 block text-xs text-muted">Display the field value but prevent editing.</span></span>
+                                        </label>
+                                        <label
+                                            class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                                            <input type="checkbox"
+                                                   class="disabled-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500"
+                                                   {% if element.disabled %}checked{% endif %}>
+                                            <span><span class="font-medium text-content">Disabled</span><span
+                                                    class="mt-0.5 block text-xs text-muted">Render the field as disabled in the form.</span></span>
+                                        </label>
+                                    </div>
+                                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        <div class="sm:col-span-2">
+                                            <label class="mb-1.5 block text-xs font-medium text-content">Label
+                                                Override</label>
+                                            <input type="text"
+                                                   class="label-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                                   placeholder="Leave blank to use field default"
+                                                   value="{{ element.label ?: '' }}">
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <label class="mb-1.5 block text-xs font-medium text-content">Schema
+                                                Property</label>
+                                            <input type="text"
+                                                   class="schema-property-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                                   placeholder="Optional schema key mapping"
+                                                   value="{{ element.schema_property ?: '' }}">
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <label class="mb-1.5 block text-xs font-medium text-content">Instructions
+                                                Override</label>
+                                            <textarea
+                                                class="instructions-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                                rows="2" placeholder="Optional helper text for editors…"
+                                                maxlength="255">{{ element.instructions ?: '' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="border-t border-edge bg-subtle px-5 py-3 text-xs text-muted">Tip: drag fields back to
+                    Available Fields to remove them from this tab.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Hidden form used by JS to submit the bulk save payload #}
+    <form id="bulk-save-form" method="POST"
+          action="{{ route('field-layouts.tabs.elements.bulk-update', {layout_id: layout.id, tab_id: tab.id}) }}">
+        {{ csrf_field() }}
+        {{ method_field('PUT') }}
+        <div id="bulk-save-inputs"></div>
+    </form>
+
+    {# Template for a newly dragged-in assigned row — JS clones this and fills data- slots #}
+    <template id="assigned-row-template">
+        <li class="field-row rounded-md hover:bg-subtle" data-element-id="" data-field-id="" data-name="">
+            <div class="flex items-center gap-3 px-3 py-3">
+            <span class="drag-handle shrink-0 cursor-grab text-faint">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path
+                        stroke-linecap="round" stroke-linejoin="round"
+                        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+            </span>
+                <span
+                    class="position-badge inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-canvas text-xs font-semibold text-muted"></span>
+                <div class="min-w-0 flex-1">
+                    <p class="field-display-name truncate text-sm font-medium text-content"></p>
+                    <p class="field-meta truncate font-mono text-xs text-faint"></p>
+                </div>
+                <div class="hidden flex-wrap gap-1.5 sm:flex">
+                    <span
+                        class="required-badge hidden rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">Required</span>
+                    <span
+                        class="hidden-badge hidden rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Hidden</span>
+                    <span
+                        class="readonly-badge hidden rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700">Read-only</span>
+                    <span
+                        class="disabled-badge hidden rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-muted">Disabled</span>
+                </div>
+                <button type="button"
+                        class="toggle-field-settings rounded p-1 text-faint hover:bg-subtle hover:text-muted"
+                        title="Field settings" aria-expanded="false">
+                    <svg class="settings-chevron h-4 w-4 transition-transform" fill="none" stroke="currentColor"
+                         stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <button type="button" class="remove-field rounded p-1 text-faint hover:bg-red-50 hover:text-red-600"
+                        title="Remove from tab">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="field-settings hidden border-t border-edge bg-subtle px-3 py-4 sm:px-5">
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                    <div class="space-y-3">
+                        <label
+                            class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                            <input type="checkbox"
+                                   class="required-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                            <span><span class="font-medium text-content">Required</span><span
+                                    class="mt-0.5 block text-xs text-muted">Users must provide a value before saving.</span></span>
+                        </label>
+                        <label
+                            class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                            <input type="checkbox"
+                                   class="hidden-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                            <span><span class="font-medium text-content">Hidden</span><span
+                                    class="mt-0.5 block text-xs text-muted">Store the field on the layout without showing it by default.</span></span>
+                        </label>
+                        <label
+                            class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                            <input type="checkbox"
+                                   class="readonly-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                            <span><span class="font-medium text-content">Read-only</span><span
+                                    class="mt-0.5 block text-xs text-muted">Display the field value but prevent editing.</span></span>
+                        </label>
+                        <label
+                            class="flex cursor-pointer items-start gap-3 rounded-md border border-edge bg-surface px-4 py-3 text-sm text-content shadow-sm">
+                            <input type="checkbox"
+                                   class="disabled-toggle mt-0.5 rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                            <span><span class="font-medium text-content">Disabled</span><span
+                                    class="mt-0.5 block text-xs text-muted">Render the field as disabled in the form.</span></span>
+                        </label>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="sm:col-span-2">
+                            <label class="mb-1.5 block text-xs font-medium text-content">Label Override</label>
+                            <input type="text"
+                                   class="label-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                   placeholder="Leave blank to use field default">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="mb-1.5 block text-xs font-medium text-content">Schema Property</label>
+                            <input type="text"
+                                   class="schema-property-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                   placeholder="Optional schema key mapping">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="mb-1.5 block text-xs font-medium text-content">Instructions Override</label>
+                            <textarea
+                                class="instructions-input w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                rows="2" placeholder="Optional helper text for editors…" maxlength="255"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </template>
+
+{% endblock %}

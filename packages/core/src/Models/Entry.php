@@ -1,0 +1,181 @@
+<?php
+
+namespace AdAstra\Models;
+
+use AdAstra\Traits\Category\HasCategories;
+use AdAstra\Traits\Field\Fieldable;
+use AdAstra\Traits\HasEntryTree;
+use AdAstra\Traits\HasMedia;
+use AdAstra\Traits\HasStatus;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
+
+class Entry extends Model
+{
+    use Fieldable;
+    use HasCategories;
+    use HasEntryTree;
+    use HasFactory;
+    use HasMedia;
+    use HasStatus;
+
+    protected $fillable = [
+        'entry_group_id',
+        'entry_type_id',
+        'status_id',
+        'status_handle',
+        'status_is_public',
+        'title',
+        'handle',
+        'published_at',
+    ];
+
+    protected $casts = [
+        'published_at' => 'datetime',
+        'status_is_public' => 'boolean',
+    ];
+
+    public function entryGroup(): BelongsTo
+    {
+        return $this->belongsTo(EntryGroup::class);
+    }
+
+    public function entryType(): BelongsTo
+    {
+        return $this->belongsTo(EntryType::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function authors(): BelongsToMany
+    {
+        return $this->belongsToMany(EntryAuthor::class, 'entry_author_entry')
+            ->withPivot('sort_order')
+            ->orderByPivot('sort_order')
+            ->withTimestamps();
+    }
+
+    public function entryRelationships(): HasMany
+    {
+        return $this->hasMany(EntryRelationship::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Resolve a field value by handle.
+     *
+     * For scalar field types this reads from fieldValues (morphMany).
+     * For relational field types this reads from entryRelationships and returns
+     * a Collection of related Entry models, ordered by sort_order.
+     *
+     * REQUIRES the following relations to be eager-loaded to avoid N+1 queries:
+     *   - fieldValues.field.fieldType
+     *   - entryRelationships.field
+     *   - entryRelationships.relatedEntry
+     *
+     * Use EntryService::get() / EntryService::find() which apply the full eager-load, or load them explicitly.
+     */
+    public function field(string $handle): mixed
+    {
+        // Scalar field values (text, number, date, etc.)
+        $fv = $this->fieldValues->first(fn ($v) => $v->field?->handle === $handle);
+        if ($fv) {
+            return $fv->resolvedValue();
+        }
+
+        // Relational field values stored in entry_relationships
+        $related = $this->entryRelationships
+            ->filter(fn ($r) => $r->field?->handle === $handle)
+            ->sortBy('sort_order')
+            ->pluck('relatedEntry')
+            ->filter(); // remove any null entries from broken FKs
+
+        return $related->isNotEmpty() ? $related->values() : null;
+    }
+
+    public function getFieldLayout(): ?FieldLayout
+    {
+        $typeLayout = $this->entryType?->fieldLayout;
+        $groupLayout = $this->entryGroup?->fieldLayout;
+
+        return $typeLayout ?? $groupLayout;
+    }
+
+    /**
+     * Intended field schema for an entry: its type's layout, falling back to
+     * the group's layout (mirrors getFieldLayout()).
+     */
+    public function fieldSchema(): Collection
+    {
+        $this->loadMissing([
+            'entryType.fieldLayout.tabs.elements.field.fieldType',
+            'entryGroup.fieldLayout.tabs.elements.field.fieldType',
+        ]);
+
+        return $this->getFieldLayout()?->fields() ?? collect();
+    }
+
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('status_is_public', true)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
+    }
+
+    public function scopeInGroup(Builder $query, string|int|EntryGroup $group): Builder
+    {
+        if ($group instanceof EntryGroup) {
+            return $query->where('entry_group_id', $group->getKey());
+        }
+
+        if (is_string($group)) {
+            return $query->whereHas('entryGroup', fn ($q) => $q->where('handle', $group));
+        }
+
+        return $query->where('entry_group_id', $group);
+    }
+
+    public function scopeOfType(Builder $query, string|int|EntryType $type): Builder
+    {
+        if ($type instanceof EntryType) {
+            return $query->where('entry_type_id', $type->getKey());
+        }
+
+        if (is_string($type)) {
+            return $query->whereHas('entryType', fn ($q) => $q->where('handle', $type));
+        }
+
+        return $query->where('entry_type_id', $type);
+    }
+
+    public function entryTree(): HasOne
+    {
+        return $this->hasOne(EntryTree::class);
+    }
+
+    /**
+     * Return the total value for a named metric, optionally filtered from a given date forward.
+     * Aggregates in the database — safe to call on entries with long metric histories.
+     */
+    public function metricTotal(string $metric, ?Carbon $from = null): int
+    {
+        return (int)$this->metrics()
+            ->where('metric', $metric)
+            ->when($from, fn ($q) => $q->where('recorded_date', '>=', $from->toDateString()))
+            ->sum('value');
+    }
+
+    public function metrics(): HasMany
+    {
+        return $this->hasMany(EntryMetric::class);
+    }
+}

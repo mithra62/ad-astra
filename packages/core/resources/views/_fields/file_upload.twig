@@ -1,0 +1,146 @@
+{% import 'admin::_inc/_form-fields' as f %}
+
+{% set field_id = input_name|default('file_upload')|replace({'[': '_', ']': '', '.': '_'}) %}
+{% set multiple  = (max is null or max > 1) %}
+{% set upload_url = library_id is not null ? route('media.libraries.upload', library_id) : null %}
+{% set prepopulated = value is not empty ? value : [] %}
+
+<div data-file-upload
+     data-upload-url="{{ upload_url }}"
+     data-input-name="{{ input_name|default('') }}"
+     data-max="{{ max is not null ? max : '' }}"
+     data-multiple="{{ multiple ? 'true' : 'false' }}">
+
+    {# Pre-populated chips from saved value or old() #}
+    <div class="mb-3 flex flex-wrap gap-2" id="{{ field_id }}_chips">
+        {% for media in prepopulated %}
+            <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-canvas px-3 py-1 text-xs font-medium text-content"
+                data-chip="{{ media.id }}">
+                {{ media.original_name }}
+                <button type="button"
+                        class="ml-1 rounded-full text-faint hover:text-red-500 focus:outline-none focus:ring-1 focus:ring-red-400"
+                        aria-label="Remove {{ media.original_name }}">×</button>
+                <input type="hidden" name="{{ input_name|default('') }}[]" value="{{ media.id }}">
+            </span>
+        {% endfor %}
+    </div>
+
+    {# Drop zone — hidden by JS when max is reached #}
+    <div id="{{ field_id }}_dropzone">
+        {{ f.file('_fu_' ~ field_id, label|default('Upload files'), description|default(''), accept|default(''), multiple, field_id ~ '_file') }}
+    </div>
+
+    {# Inline error area #}
+    <div id="{{ field_id }}_error_area" role="alert" class="mt-1 hidden text-xs text-red-600"></div>
+
+    {% if not upload_url %}
+        <p class="mt-1 text-xs text-amber-600">No library configured — set a library in the field settings to enable
+            uploads.</p>
+    {% endif %}
+</div>
+
+<script>
+    (function () {
+        var container = document.querySelector('[data-file-upload][data-input-name="{{ input_name|default('')|e('js') }}"]');
+        if (!container) return;
+
+        var uploadUrl = container.dataset.uploadUrl;
+        var inputName = container.dataset.inputName;
+        var max = container.dataset.max !== '' ? parseInt(container.dataset.max, 10) : null;
+        var chipsEl = document.getElementById('{{ field_id }}_chips');
+        var dropzone = document.getElementById('{{ field_id }}_dropzone');
+        var errorArea = document.getElementById('{{ field_id }}_error_area');
+        var fileInput = document.getElementById('{{ field_id }}_file');
+        var csrfToken = '{{ csrf_token() }}';
+
+        if (!uploadUrl || !fileInput) return;
+
+        function chipCount() {
+            return chipsEl.querySelectorAll('[data-chip]').length;
+        }
+
+        function enforceMax() {
+            if (max !== null && chipCount() >= max) {
+                dropzone.style.display = 'none';
+            } else {
+                dropzone.style.display = '';
+            }
+        }
+
+        function addChip(id, name) {
+            if (max === 1) {
+                chipsEl.innerHTML = '';
+            }
+            var span = document.createElement('span');
+            span.className = 'inline-flex items-center gap-1.5 rounded-full bg-canvas px-3 py-1 text-xs font-medium text-content';
+            span.dataset.chip = id;
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ml-1 rounded-full text-faint hover:text-red-500 focus:outline-none focus:ring-1 focus:ring-red-400';
+            btn.setAttribute('aria-label', 'Remove ' + name);
+            btn.textContent = '×';
+            btn.addEventListener('click', function () {
+                span.remove();
+                enforceMax();
+            });
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = inputName + '[]';
+            hidden.value = id;
+            span.appendChild(document.createTextNode(name + ' '));
+            span.appendChild(btn);
+            span.appendChild(hidden);
+            chipsEl.appendChild(span);
+            enforceMax();
+        }
+
+        function showError(msg) {
+            errorArea.textContent = msg;
+            errorArea.classList.remove('hidden');
+            setTimeout(function () {
+                errorArea.classList.add('hidden');
+            }, 6000);
+        }
+
+        fileInput.addEventListener('change', function () {
+            var files = Array.from(this.files);
+            this.value = '';
+
+            files.forEach(function (file) {
+                var data = new FormData();
+                data.append('file', file);
+                data.append('_token', csrfToken);
+
+                fetch(uploadUrl, {
+                    method: 'POST',
+                    headers: {'Accept': 'application/json'},
+                    body: data,
+                })
+                    .then(function (r) {
+                        return r.json();
+                    })
+                    .then(function (json) {
+                        if (json.id) {
+                            addChip(json.id, json.name || 'File #' + json.id);
+                        } else {
+                            showError(json.error || 'Upload failed.');
+                        }
+                    })
+                    .catch(function () {
+                        showError('Upload failed. Please try again.');
+                    });
+            });
+        });
+
+        // Wire remove buttons on server-rendered chips
+        chipsEl.querySelectorAll('button').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                btn.closest('[data-chip]').remove();
+                enforceMax();
+            });
+        });
+
+        enforceMax();
+    })();
+</script>

@@ -1,0 +1,30 @@
+Tree Template {{ type }}
+
+<br/>
+<br />
+{{ entry.title }} ({{ entry.id }})
+
+<p>
+{{ entry.field('excerpt') }}
+</p>
+
+{# Parent link #}
+{% set parent = entry.treeParent() %}
+{% if parent %}
+    <a href="{{ parent.treeUrl() }}">&larr; {{ parent.title }}</a>
+{% endif %}
+
+{# Direct children of this entry #}
+<ul>
+    {% for child in entry.treeChildren() %}
+        <li><a href="{{ child.treeUrl() }}">{{ child.title }}</a></li>
+    {% endfor %}
+</ul>
+
+{# Breadcrumbs #}
+<nav>
+    {% for ancestor in entry.treeAncestors() %}
+        <a href="{{ ancestor.treeUrl() }}">{{ ancestor.title }} {{ ancestor.id }}</a> /
+    {% endfor %}
+    {{ entry.title }}
+</nav>

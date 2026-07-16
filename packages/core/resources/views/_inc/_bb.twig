@@ -1,0 +1,5 @@
+{% set bb = app('bb-field') %}
+<div class="" style="position: absolute !important; height: 0 !important;  overflow: hidden !important;">
+    <input type="text" id="__bb" name="{{ bb.field_name }}" value="foo"/>
+</div>
+<script type="text/javascript">document.getElementById("__bb").value = '{{ bb.field_value }}'</script>

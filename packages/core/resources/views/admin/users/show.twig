@@ -1,0 +1,490 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'View User' %}
+{% set page_heading = 'View User' %}
+{% set active_nav = 'members' %}
+{% set active_user_section = 'users' %}
+{% set has_secondary_sidebar = true %}
+{% set active_secondary_nav = 'view' %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Users', href: route('users.index')},
+        {label: user.name}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.users._sidebar', {'user': user}) }}
+{% endblock %}
+
+{# ── Status badge macro ──────────────────────────────────────────────────── #}
+{% macro status_badge(status, label, extra_class) %}
+    {% set colours = {
+        'active':    'bg-emerald-100 text-emerald-800',
+        'inactive':  'bg-canvas text-content',
+        'pending':   'bg-amber-100 text-amber-800',
+        'suspended': 'bg-orange-100 text-orange-800',
+        'banned':    'bg-red-100 text-red-800'
+    } %}
+    {% set dot_colours = {
+        'active':    'bg-emerald-500',
+        'inactive':  'bg-slate-400',
+        'pending':   'bg-amber-500',
+        'suspended': 'bg-orange-500',
+        'banned':    'bg-red-500'
+    } %}
+    <span
+        class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold {{ colours[status] ?? 'bg-canvas text-content' }} {{ extra_class }}">
+        <span class="h-1.5 w-1.5 rounded-full {{ dot_colours[status] ?? 'bg-slate-400' }}"></span>
+        {{ label }}
+    </span>
+{% endmacro %}
+
+{% block content %}
+    {# ── Flash messages ──────────────────────────────────────────────────── #}
+    {% if session('success') %}
+        <div
+            class="rounded-lg border border-emerald-200 bg-accent-soft px-4 py-3 text-sm text-emerald-800">{{ session('success') }}</div>
+    {% endif %}
+    {% if session('failure') %}
+        <div
+            class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ session('failure') }}</div>
+    {% endif %}
+
+    {# ── Page header ─────────────────────────────────────────────────────── #}
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex items-center gap-4">
+            <div
+                class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-lg font-semibold text-white">
+                {{ user.name|slice(0,2)|upper }}
+            </div>
+            <div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">{{ user.name }}</h1>
+                    {{ _self.status_badge(user.status, user.statusLabel(), '') }}
+                    {% if user.isLocked() %}
+                        <span
+                            class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-semibold text-yellow-800">
+                            <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path
+                                    stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 15v2m0 0v2m0-2h2m-2 0H10m2-5a3 3 0 100-6 3 3 0 000 6z"/><rect width="18"
+                                                                                                         height="11"
+                                                                                                         x="3" y="11"
+                                                                                                         rx="2"/></svg>
+                            Locked
+                        </span>
+                    {% endif %}
+                </div>
+                <p class="mt-1 text-sm text-muted">{{ user.email }}</p>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                    {% for role in user.roles %}{{ ui.badge(role.name) }}{% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 self-start">
+            {{ ui.button('Edit User', route('users.edit', user)) }}
+            {{ ui.button('Delete', route('users.confirm', user), 'danger') }}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
+
+        {# ── Left column ─────────────────────────────────────────────────── #}
+        <div class="flex flex-col gap-5">
+
+            {# Basic Details #}
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Basic Details</h5>
+                </div>
+                <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                    <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                        <dt class="text-muted">Name</dt>
+                        <dd class="font-medium text-content">{{ user.name }}</dd>
+                    </div>
+                    <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                        <dt class="text-muted">Email</dt>
+                        <dd class="text-content">{{ user.email }}</dd>
+                    </div>
+                    <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                        <dt class="text-muted">Status</dt>
+                        <dd>{{ _self.status_badge(user.status, user.statusLabel(), '') }}</dd>
+                    </div>
+                    {% if user.status == 'suspended' and user.suspended_until %}
+                        <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                            <dt class="text-muted">Suspended until</dt>
+                            <dd class="text-content">{{ user.suspended_until|date('M j, Y g:i A') }}</dd>
+                        </div>
+                    {% endif %}
+                    {% if user.status == 'banned' and user.banned_at %}
+                        <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                            <dt class="text-muted">Banned at</dt>
+                            <dd class="text-content">{{ user.banned_at|date('M j, Y g:i A') }}</dd>
+                        </div>
+                    {% endif %}
+                    {% if user.isLocked() %}
+                        <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                            <dt class="text-muted">Locked until</dt>
+                            <dd class="text-content">{{ user.locked_until|date('M j, Y g:i A') }}</dd>
+                        </div>
+                    {% endif %}
+                </dl>
+            </div>
+
+            {# Custom field tabs #}
+            {% if layout %}
+                {% for tab in layout.tabs %}
+                    <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                        <div class="border-b border-edge px-5 py-3">
+                            <h5 class="text-sm font-semibold text-content">{{ tab.name }}</h5>
+                        </div>
+                        <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                            {% for element in tab.elements %}
+                                {% set field = element.field %}
+                                <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]">
+                                    <dt class="text-muted">{{ field.label }}</dt>
+                                    <dd class="text-content">{{ field_values[field.handle] }}</dd>
+                                </div>
+                            {% endfor %}
+                        </dl>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {# ── Status history log ──────────────────────────────────────── #}
+            {% if status_logs is not empty %}
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm" id="status-history">
+                    <div class="border-b border-edge px-5 py-3">
+                        <h5 class="text-sm font-semibold text-content">Status History</h5>
+                    </div>
+                    <ul class="divide-y divide-slate-100">
+                        {% for log in status_logs %}
+                            <li class="px-5 py-3">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        {% if log.previous_status %}
+                                            {{ _self.status_badge(log.previous_status, log.previous_status|capitalize, 'opacity-60') }}
+                                            <svg class="h-3 w-3 text-faint" fill="none" stroke="currentColor"
+                                                 stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                        {% endif %}
+                                        {% if log.new_status %}
+                                            {{ _self.status_badge(log.new_status, log.new_status|capitalize, '') }}
+                                        {% elseif log.new_locked_until %}
+                                            <span
+                                                class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-semibold text-yellow-800">Locked until {{ log.new_locked_until|date('M j, Y g:i A') }}</span>
+                                        {% elseif log.previous_locked_until and not log.new_locked_until %}
+                                            <span
+                                                class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">Lock removed</span>
+                                        {% endif %}
+                                    </div>
+                                    <time class="shrink-0 text-xs text-faint"
+                                          title="{{ log.created_at|date('Y-m-d H:i:s') }}">
+                                        {{ log.created_at|date('M j, Y g:i A') }}
+                                    </time>
+                                </div>
+                                {% if log.reason %}
+                                    <p class="mt-1 text-xs text-muted italic">&ldquo;{{ log.reason }}&rdquo;</p>
+                                {% endif %}
+                                {% if log.actor %}
+                                    <p class="mt-0.5 text-xs text-faint">by {{ log.actor.name }}</p>
+                                {% endif %}
+                                {% if log.context and log.context.suspended_until is defined %}
+                                    <p class="mt-0.5 text-xs text-faint">Suspended
+                                        until {{ log.context.suspended_until }}</p>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+        </div>{# /left column #}
+
+        {# ── Right column ────────────────────────────────────────────────── #}
+        <div class="flex flex-col gap-5">
+
+            {# Metadata card #}
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Metadata</h5>
+                </div>
+                <dl class="divide-y divide-slate-100 px-5 py-2 text-xs">
+                    <div class="flex items-center justify-between py-2.5">
+                        <dt class="text-muted">ID</dt>
+                        <dd class="font-medium text-content">{{ user.id }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <dt class="text-muted">Created</dt>
+                        <dd class="text-content">{{ user.created_at ? user.created_at|date('M j, Y') : '—' }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <dt class="text-muted">2FA</dt>
+                        {% if user.two_factor_confirmed_at %}
+                            <dd class="text-accent font-medium">Enabled</dd>
+                        {% else %}
+                            <dd class="text-muted">Disabled</dd>
+                        {% endif %}
+                    </div>
+                </dl>
+            </div>
+
+            {# ── Status management card ───────────────────────────────── #}
+            {% if can('manage user status') %}
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm" id="status-management">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Account Status</h5>
+                </div>
+
+                {# Current status summary #}
+                <div class="border-b border-edge px-5 py-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-muted uppercase tracking-wider">Current</span>
+                        {{ _self.status_badge(user.status, user.statusLabel(), '') }}
+                    </div>
+                    {% if user.status == 'suspended' and user.suspended_until %}
+                        <p class="mt-2 text-xs text-orange-700">
+                            <svg class="inline h-3 w-3" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            {% if user.suspended_until.isPast() %}
+                                Suspension expired {{ user.suspended_until|date('M j, Y g:i A') }} — will clear on next status update.
+                            {% else %}
+                                Suspended until {{ user.suspended_until|date('M j, Y g:i A') }}
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                    {% if user.isLocked() %}
+                        <p class="mt-2 text-xs text-yellow-700">
+                            <svg class="inline h-3 w-3" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M12 15v2m0 0v2m0-2h2m-2 0H10m2-5a3 3 0 100-6 3 3 0 000 6z"/>
+                                <rect width="18" height="11" x="3" y="11" rx="2"/>
+                            </svg>
+                            Account locked until {{ user.locked_until|date('M j, Y g:i A') }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                {% if can('manage user status') %}
+                    {# Status change form #}
+                    <form method="POST"
+                          action="{{ route('users.status.update', user.id) }}"
+                          id="status-form"
+                          class="px-5 py-4 space-y-4">
+                        {{ csrf_field() }}
+                        {{ method_field('PATCH') }}
+
+                        {# Status select #}
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="status-select">
+                                Change Status
+                            </label>
+                            <select id="status-select"
+                                    name="status"
+                                    class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                    onchange="handleStatusChange(this.value)">
+                                <option value="active" {{ user.status == 'active'    ? 'selected' : '' }}>Active
+                                </option>
+                                <option value="inactive" {{ user.status == 'inactive'  ? 'selected' : '' }}>Inactive
+                                </option>
+                                <option value="pending" {{ user.status == 'pending'   ? 'selected' : '' }}>Pending
+                                    Approval
+                                </option>
+                                <option value="suspended" {{ user.status == 'suspended' ? 'selected' : '' }}>Suspended
+                                </option>
+                                <option value="banned" {{ user.status == 'banned'    ? 'selected' : '' }}>Banned
+                                </option>
+                            </select>
+                            {% if errors.has('status') %}
+                                <p class="mt-1 text-xs text-red-600">{{ errors.first('status') }}</p>
+                            {% endif %}
+                        </div>
+
+                        {# Suspended-until picker — shown only when suspended is selected #}
+                        <div id="suspended-until-wrap" class="{{ user.status == 'suspended' ? '' : 'hidden' }}">
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="suspended-until">
+                                Suspend Until <span class="text-red-500">*</span>
+                            </label>
+
+                            {# Quick-preset buttons #}
+                            <div class="mb-2 flex flex-wrap gap-1.5">
+                                <button type="button"
+                                        onclick="setSuspendPreset(1, 'hour')"
+                                        class="rounded border border-edge bg-subtle px-2 py-1 text-xs font-medium text-muted hover:bg-subtle">
+                                    +1 h
+                                </button>
+                                <button type="button"
+                                        onclick="setSuspendPreset(24, 'hour')"
+                                        class="rounded border border-edge bg-subtle px-2 py-1 text-xs font-medium text-muted hover:bg-subtle">
+                                    +24 h
+                                </button>
+                                <button type="button"
+                                        onclick="setSuspendPreset(3, 'day')"
+                                        class="rounded border border-edge bg-subtle px-2 py-1 text-xs font-medium text-muted hover:bg-subtle">
+                                    +3 d
+                                </button>
+                                <button type="button"
+                                        onclick="setSuspendPreset(7, 'day')"
+                                        class="rounded border border-edge bg-subtle px-2 py-1 text-xs font-medium text-muted hover:bg-subtle">
+                                    +7 d
+                                </button>
+                                <button type="button"
+                                        onclick="setSuspendPreset(30, 'day')"
+                                        class="rounded border border-edge bg-subtle px-2 py-1 text-xs font-medium text-muted hover:bg-subtle">
+                                    +30 d
+                                </button>
+                            </div>
+
+                            <input type="datetime-local"
+                                   id="suspended-until"
+                                   name="suspended_until"
+                                   value="{{ old('suspended_until', user.status == 'suspended' and user.suspended_until ? user.suspended_until|date('Y-m-d\\TH:i') : '') }}"
+                                   class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <p class="mt-1 text-xs text-faint">Must be a future date and time.</p>
+                            {% if errors.has('suspended_until') %}
+                                <p class="mt-1 text-xs text-red-600">{{ errors.first('suspended_until') }}</p>
+                            {% endif %}
+                        </div>
+
+                        {# Reason textarea — hidden only when active is selected #}
+                        <div id="reason-wrap" class="{{ user.status == 'active' ? 'hidden' : '' }}">
+                            <label class="mb-1.5 block text-sm font-medium text-content" for="status-reason">
+                                Reason
+                                <span id="reason-required-marker"
+                                      class="text-red-500 {{ user.status == 'active' ? 'hidden' : '' }}">*</span>
+                                <span id="reason-optional-marker"
+                                      class="text-faint font-normal {{ user.status == 'active' ? '' : 'hidden' }}">(optional)</span>
+                            </label>
+                            <textarea id="status-reason"
+                                      name="reason"
+                                      rows="3"
+                                      maxlength="500"
+                                      placeholder="Brief explanation — visible in the audit log."
+                                      class="w-full rounded-md border border-edge px-3 py-2 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none">{{ old('reason') }}</textarea>
+                            <p class="mt-1 text-xs text-faint">Max 500 characters. Saved in the audit log.</p>
+                            {% if errors.has('reason') %}
+                                <p class="mt-1 text-xs text-red-600">{{ errors.first('reason') }}</p>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit"
+                                class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                            Update Status
+                        </button>
+                    </form>
+
+                {% endif %}
+
+                {# Unlock action — only shown when account is locked #}
+                {% if user.isLocked() %}
+                    <div class="border-t border-edge px-5 py-4">
+                        <h6 class="mb-2 text-xs font-semibold uppercase tracking-wider text-faint">Account Lock</h6>
+                        <p class="mb-3 text-xs text-muted">
+                            This account is temporarily locked until
+                            <span class="font-medium text-content">{{ user.locked_until|date('M j, Y g:i A') }}</span>.
+                            The lock lifts automatically; use the button below to remove it immediately.
+                        </p>
+                        <form method="POST"
+                              action="{{ route('users.lock.destroy', user.id) }}"
+                              onsubmit="return confirm('Remove the account lock for {{ user.name|e('js') }}?')">
+                            {{ csrf_field() }}
+                            {{ method_field('DELETE') }}
+                            <button type="submit"
+                                    class="w-full rounded-md border border-yellow-300 bg-yellow-50 px-4 py-2 text-sm font-medium text-yellow-800 shadow-sm hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2">
+                                <svg class="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                                </svg>
+                                Remove Account Lock
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+                </div>{# /status management card #}
+            {% endif %}
+
+        </div>{# /right column #}
+    </div>
+
+    {# ── JS for dynamic status form behaviour ────────────────────────────── #}
+    <script>
+        (function () {
+            /**
+             * Show/hide fields depending on the chosen status value.
+             * Called by the status <select> onchange and on page load.
+             */
+            function handleStatusChange(status) {
+                var suspendWrap = document.getElementById('suspended-until-wrap');
+                var reasonWrap = document.getElementById('reason-wrap');
+                var reqMarker = document.getElementById('reason-required-marker');
+                var optMarker = document.getElementById('reason-optional-marker');
+                var suspendInput = document.getElementById('suspended-until');
+
+                // Suspended-until picker only when suspended
+                if (suspendWrap) {
+                    suspendWrap.classList.toggle('hidden', status !== 'suspended');
+                    if (suspendInput) {
+                        suspendInput.required = (status === 'suspended');
+                    }
+                }
+
+                // Reason textarea — required for all non-active statuses
+                if (reasonWrap) {
+                    var isActive = (status === 'active');
+                    reasonWrap.classList.toggle('hidden', false); // always visible once non-active chosen
+                    if (isActive) {
+                        reasonWrap.classList.add('hidden');
+                    }
+                    if (reqMarker) reqMarker.classList.toggle('hidden', isActive);
+                    if (optMarker) optMarker.classList.toggle('hidden', !isActive);
+                    var textarea = document.getElementById('status-reason');
+                    if (textarea) textarea.required = !isActive;
+                }
+            }
+
+            /**
+             * Set the suspended_until datetime-local input to now + offset.
+             * @param {number} amount
+             * @param {'hour'|'day'} unit
+             */
+            function setSuspendPreset(amount, unit) {
+                var input = document.getElementById('suspended-until');
+                if (!input) return;
+                var d = new Date();
+                if (unit === 'hour') {
+                    d.setHours(d.getHours() + amount);
+                } else {
+                    d.setDate(d.getDate() + amount);
+                }
+                // datetime-local needs "YYYY-MM-DDTHH:MM"
+                var pad = function (n) {
+                    return String(n).padStart(2, '0');
+                };
+                input.value = d.getFullYear() + '-'
+                    + pad(d.getMonth() + 1) + '-'
+                    + pad(d.getDate()) + 'T'
+                    + pad(d.getHours()) + ':'
+                    + pad(d.getMinutes());
+            }
+
+            // Expose to inline handlers
+            window.handleStatusChange = handleStatusChange;
+            window.setSuspendPreset = setSuspendPreset;
+
+            // Re-evaluate on page load in case of validation error repopulation
+            var select = document.getElementById('status-select');
+            if (select) {
+                handleStatusChange(select.value);
+            }
+        })();
+    </script>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Users' %}
+{% set page_heading = 'Users' %}
+{% set active_nav = 'members' %}
+{% set active_user_section = 'users' %}
+{% set has_secondary_sidebar = true %}
+{% set active_secondary_nav = 'all' %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([{label: 'Dashboard', href: route('dashboard'), icon: 'home'}, {label: 'Users'}]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.users._sidebar') }}
+{% endblock %}
+
+{% block content %}
+    {% embed 'admin._inc._page-header' with {title: 'Users', subtitle: 'Manage admin accounts, access status, and assigned roles.'} %}
+        {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Add User', route('users.create'), icon='plus') }}{% endblock %}
+    {% endembed %}
+
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {{ ui.stat_card('Total Users', total_users) }}
+        {{ ui.stat_card('Active', total_active_users) }}
+        {{ ui.stat_card('Admins', total_super_admin) }}
+    </div>
+
+    {% embed 'admin._inc._card' with {title: 'All Users'} %}
+        {% block actions %}
+            <select id="role-filter"
+                    class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                <option value="">All roles</option>
+                <option value="administrator">Administrator</option>
+                <option value="editor">Editor</option>
+                <option value="author">Author</option>
+            </select>
+            <input id="user-search"
+                   class="w-full rounded-md border border-edge px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-52"
+                   placeholder="Search users..." type="search">
+        {% endblock %}
+
+        {% block body %}
+            {% embed 'admin._inc._table' %}
+                {% block thead %}
+                    <tr>
+                        <th class="px-4 py-3"><input id="select-all" type="checkbox"
+                                                     class="rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                        </th>
+                        <th class="px-4 py-3 font-semibold">User</th>
+                        <th class="px-4 py-3 font-semibold">Roles</th>
+                        <th class="px-4 py-3 font-semibold">Status</th>
+                        <th class="px-4 py-3 font-semibold">Last Login</th>
+                        <th class="px-4 py-3 font-semibold">Actions</th>
+                    </tr>
+                {% endblock %}
+                {% block rows %}
+                    {% import 'admin._inc._ui' as ui %}
+                    {% for user in users %}
+                        <tr class="hover:bg-subtle/60" data-name="{{ user.name|lower }} {{ user.email|lower }}"
+                            data-role="{{ user.role_key }}">
+                            <td class="px-4 py-3"><input type="checkbox" name="ids[]" value="{{ user.email }}"
+                                                         class="row-cb rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white">{{ user.initials }}</div>
+                                    <div class="min-w-0">
+                                        <a href="{{ route('users.show', user) }}"
+                                           class="font-medium text-content hover:text-accent">{{ user.name }}</a>
+                                        <p class="mt-0.5 truncate text-xs text-faint">{{ user.email }}</p>
+                                        <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
+                                            <a href="{{ route('users.show', user) }}"
+                                               class="text-accent hover:underline">View</a><span
+                                                class="text-faint">|</span>
+                                            <a href="{{ route('users.edit', user) }}"
+                                               class="text-accent hover:underline">Edit</a><span
+                                                class="text-faint">|</span>
+                                            <a href="{{ route('users.confirm', user) }}"
+                                               class="text-red-500 hover:underline">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex flex-wrap gap-1.5">
+                                    {% for role in user.roles %}{{ ui.badge(role.name) }}{% endfor %}
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                {% if user.status == 'active' %}{{ ui.badge(user.status, 'accent') }}{% else %}{{ ui.badge(user.status, 'danger') }}{% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-muted">{{ user.updated_at.format('F j, Y') }}</td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-1.5">
+                                    <a href="{{ route('users.show', user) }}"
+                                       class="rounded p-1 text-faint hover:bg-subtle hover:text-accent"
+                                       title="View">{{ ui.icon('eye') }}</a>
+                                    <a href="{{ route('users.edit', user) }}"
+                                       class="rounded p-1 text-faint hover:bg-subtle hover:text-accent"
+                                       title="Edit">{{ ui.icon('pencil') }}</a>
+                                    <a href="{{ route('users.confirm', user) }}"
+                                       class="rounded p-1 text-faint hover:bg-red-50 hover:text-red-600"
+                                       title="Delete">{{ ui.icon('trash') }}</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endblock %}
+            {% endembed %}
+        {% endblock %}
+
+        {% block footer %}
+            {% import 'admin._inc._ui' as ui %}
+            <div class="flex flex-wrap items-center gap-2">
+                <select id="bulk-action"
+                        class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                    <option value="">Bulk action</option>
+                    <option value="activate">Activate</option>
+                    <option value="suspend">Suspend</option>
+                    <option value="delete">Delete</option>
+                </select>
+                {{ ui.button('Apply', null, 'secondary', size='sm', attrs='onclick="applyBulk()"') }}
+            </div>
+            {{ users.links() }}
+        {% endblock %}
+    {% endembed %}
+{% endblock %}

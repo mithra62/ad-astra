@@ -1,0 +1,112 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Category Groups' %}
+{% set page_heading = 'Category Groups' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'categories' %}
+{% set has_secondary_sidebar = false %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Category Groups'}
+    ]) }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        {% embed 'admin._inc._page-header' with {title: 'Category Groups', subtitle: 'Select a category group to view and manage its entries.'} %}
+            {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Create Category Group', route('categories.groups.create'), icon='plus') }}{% endblock %}
+        {% endembed %}
+
+        {% embed 'admin._inc._card' with {title: 'All Items'} %}
+            {% block actions %}
+                <select id="type-filter"
+                        class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                    <option value="">All types</option>
+                    <option value="status">Status</option>
+                    <option value="field">Field</option>
+                    <option value="option">Option</option>
+                </select>
+                <input id="item-search"
+                       class="w-full rounded-md border border-edge px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-52"
+                       placeholder="Search items..." type="search">
+            {% endblock %}
+
+            {% block body %}
+                {% import 'admin._inc._ui' as ui %}
+                {% if groups.count >= 1 %}
+                    {% embed 'admin._inc._table' with {columns: [
+                        {label: 'Title'},
+                        {label: 'Categories', class: 'hidden sm:table-cell'},
+                        {label: 'Updated', class: 'hidden lg:table-cell'},
+                        {label: 'Created'},
+                        {label: 'Actions', class: 'text-right'}
+                    ]} %}
+                        {% block rows %}
+                            {% import 'admin._inc._ui' as ui %}
+                            {% for group in groups %}
+                                <tr class="hover:bg-subtle">
+                                    <td class="px-4 py-3.5">
+                                        <a class="font-medium text-content hover:text-accent"
+                                           href="{{ route('categories.groups.show', group) }}">{{ group.name }} <span
+                                                class="mt-0.5 font-mono text-xs text-faint">{{ group.handle }}</span></a>
+                                        <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
+                                            <a href="{{ route('categories.groups.show', group) }}"
+                                               class="text-accent hover:underline">View</a>
+                                            <span class="text-faint">|</span>
+                                            <a href="{{ route('categories.groups.edit', group) }}"
+                                               class="text-accent hover:underline">Edit</a>
+                                            <span class="text-faint">|</span>
+                                            <a href="{{ route('categories.groups.confirm', group) }}"
+                                               class="text-red-500 hover:underline">Delete</a>
+                                        </div>
+                                    </td>
+                                    <td class="hidden px-4 py-3.5 text-muted sm:table-cell">{{ group.categories.count() }}</td>
+                                    <td class="px-4 py-3.5">{{ group.updated_at.format('F j, Y') }}</td>
+                                    <td class="hidden px-4 py-3.5 text-faint lg:table-cell">{{ group.created_at.format('F j, Y') }}</td>
+                                    <td class="px-4 py-3.5">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <a class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:bg-subtle hover:text-content"
+                                               href="{{ route('categories.groups.show', group) }}"
+                                               title="View">{{ ui.icon('eye') }}<span class="sr-only">View</span></a>
+                                            <a class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:bg-subtle hover:text-content"
+                                               href="{{ route('categories.groups.edit', group) }}"
+                                               title="Edit">{{ ui.icon('pencil') }}<span class="sr-only">Edit</span></a>
+                                            <a class="inline-flex items-center justify-center rounded-md border border-red-100 p-1.5 text-red-400 hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                                               href="{{ route('categories.groups.confirm', group) }}"
+                                               title="Delete">{{ ui.icon('trash') }}<span class="sr-only">Delete</span></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endblock %}
+                    {% endembed %}
+                {% else %}
+                    {{ ui.empty_state(
+                        'No Category Groups found',
+                        'Create your first category group to get started.',
+                        'documents',
+                        {label: 'Create Category Group', href: route('categories.groups.create')}
+                    ) }}
+                {% endif %}
+            {% endblock %}
+
+            {% block footer %}
+                {% import 'admin._inc._ui' as ui %}
+                <div class="flex flex-wrap items-center gap-2">
+                    <select id="bulk-action"
+                            class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        <option value="">Bulk action</option>
+                        <option value="activate">Activate</option>
+                        <option value="deactivate">Deactivate</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                    {{ ui.button('Apply', null, 'secondary', size='sm', attrs='onclick="applyBulk()"') }}
+                </div>
+                {{ groups.links() }}
+            {% endblock %}
+        {% endembed %}
+    </div>
+{% endblock %}

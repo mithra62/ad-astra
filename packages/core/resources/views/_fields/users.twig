@@ -1,0 +1,28 @@
+{% set input_name = 'fields[' ~ field.handle ~ '][]' %}
+{% set selected_ids = selected_ids ?? [] %}
+{% set available_users = available_users ?? [] %}
+
+{% if display == 'checkboxes' %}
+    <div class="space-y-2">
+        {% for user in available_users %}
+            {% set checkbox_id = id ~ '_' ~ user.id %}
+            <label class="flex cursor-pointer items-center gap-2" for="{{ checkbox_id }}">
+                <input id="{{ checkbox_id }}" type="checkbox" name="{{ input_name }}" value="{{ user.id }}"
+                       class="rounded border-edge text-emerald-600 focus:ring-emerald-500"
+                       {% if user.id in selected_ids %}checked{% endif %}>
+                <span class="text-sm text-content">{{ user.name }}</span>
+            </label>
+        {% else %}
+            <p class="text-sm text-faint italic">No users available.</p>
+        {% endfor %}
+    </div>
+{% else %}
+    <select id="{{ id }}" name="{{ input_name }}" multiple
+            class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+        {% for user in available_users %}
+            <option value="{{ user.id }}" {% if user.id in selected_ids %}selected{% endif %}>{{ user.name }}</option>
+        {% else %}
+            <option disabled value="">No users available</option>
+        {% endfor %}
+    </select>
+{% endif %}

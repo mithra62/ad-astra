@@ -1,0 +1,91 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Access Tokens' %}
+{% set page_heading = 'Access Tokens' %}
+{% set active_nav = 'account' %}
+{% set active_secondary_nav = 'settings' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'API Tokens', href: route('account.tokens.index')},
+        {label: 'Delete'}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.account._sidebar', {active: 'tokens'}) }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Delete Access Token</h1>
+            <p class="mt-1 text-sm text-muted">Review ownership and access before removing this account.</p>
+        </div>
+        <a href=""
+           class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">Cancel</a>
+    </div>
+
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div class="flex items-start gap-3">
+            <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            <div>
+                <p class="text-sm font-semibold text-red-800">This action cannot be undone.</p>
+                <p class="mt-1 text-sm text-red-700">Deleting {{ token.name }} removes the Category from all Entries and
+                    Category Groups.</p>
+            </div>
+        </div>
+    </div>
+    <form method="POST" action="{{ route('account.tokens.destroy', {token_id: token_id}) }}"
+          class="row g-3 needs-validation" novalidate>
+        {{ csrf_field() }}
+        {{ method_field('DELETE') }}
+        <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3"><h5 class="text-sm font-semibold text-content">Access
+                            Token Being Deleted</h5></div>
+                    <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-muted">Name</dt>
+                            <dd class="font-semibold text-content">{{ token.name }}</dd>
+                        </div>
+
+                    </dl>
+                </div>
+            </div>
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-red-200 bg-surface shadow-sm">
+                    <div class="border-b border-red-100 bg-red-50 px-5 py-3"><h5
+                            class="text-sm font-semibold text-red-800">Confirm Deletion</h5></div>
+                    <div class="mb-4 rounded-md bg-subtle px-4 py-3 text-sm text-content">Select the toggle to confirm
+                        deletion of <strong>{{ status.name }}</strong>.
+                    </div>
+                    <label
+                        class="flex cursor-pointer items-center justify-between gap-4 rounded-md border  {% if errors.has('confirm_removal') %} bg-red-300 border-red-300{% else %}bg-subtle border-edge{% endif %} px-4 py-3">
+                        <span class="text-sm font-medium text-content">I understand this Status will be permanently deleted</span>
+
+                        <input class="peer sr-only" type="checkbox" name="confirm_removal" required>
+                        <span
+                            class="h-6 w-11 shrink-0 rounded-full bg-slate-300 after:mt-1 after:ml-1 after:block after:h-4 after:w-4 after:rounded-full after:bg-surface after:shadow after:transition after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-red-500"></span>
+                    </label>
+                    <button id="delete-btn" type="submit"
+                            class="mt-5 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                        Permanently Delete Access Token
+                    </button>
+                    <a href=""
+                       class="mt-2 block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">Back
+                        to Edit</a>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
