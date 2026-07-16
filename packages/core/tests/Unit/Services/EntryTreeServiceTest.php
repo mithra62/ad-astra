@@ -1,0 +1,209 @@
+<?php
+
+namespace Tests\Unit\Services;
+
+use AdAstra\Facades\Entries;
+use AdAstra\Models\Entry;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryTree;
+use AdAstra\Models\EntryType;
+use AdAstra\Services\EntryTreeService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use InvalidArgumentException;
+use Tests\TestCase;
+
+/**
+ * Behavioral coverage for EntryTreeService: node creation (handle slugify,
+ * home-node invariants, duplicate handles), moves (subtree URI/depth rebuild,
+ * sort-order rebalancing, duplicate-handle rejection), and URI rebuilding.
+ *
+ * The EntryService delegators and the Entries facade tree methods are the
+ * backward-compatibility surface — the smoke tests at the bottom keep that
+ * path exercised end-to-end.
+ */
+class EntryTreeServiceTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private EntryTreeService $service;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->service = app(EntryTreeService::class);
+    }
+
+    protected function makeTreeEntry(array $entryOverrides = [], array $typeOverrides = []): Entry
+    {
+        $group = EntryGroup::factory()->create();
+        $type = EntryType::factory()->for($group)->create(array_merge([
+            'has_entry_tree' => true,
+            'default_template' => 'entries.page',
+        ], $typeOverrides));
+
+        return Entry::factory()
+            ->for($group)
+            ->for($type)
+            ->create($entryOverrides);
+    }
+
+    // -------------------------------------------------------------------------
+    // createTreeNode()
+    // -------------------------------------------------------------------------
+
+    public function test_create_tree_node_builds_handle_uri_and_depth(): void
+    {
+        $parentEntry = $this->makeTreeEntry();
+        $childEntry = $this->makeTreeEntry();
+
+        $parent = $this->service->createTreeNode($parentEntry, 'About Us');
+        $child = $this->service->createTreeNode($childEntry, 'Leadership Team', $parent);
+
+        $this->assertSame('about-us', $parent->handle);
+        $this->assertSame('about-us', $parent->uri);
+        $this->assertSame(0, $parent->depth);
+        $this->assertSame('leadership-team', $child->handle);
+        $this->assertSame('about-us/leadership-team', $child->uri);
+        $this->assertSame(1, $child->depth);
+        $this->assertSame($childEntry->entryType->id, $child->entry->entryType->id);
+    }
+
+    public function test_create_tree_node_rejects_invalid_handles(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Entry Tree handles must contain at least one URL-safe character.');
+
+        $this->service->createTreeNode($this->makeTreeEntry(), '!!!');
+    }
+
+    public function test_create_tree_node_enforces_home_node_invariants(): void
+    {
+        $parent = $this->service->createTreeNode($this->makeTreeEntry(), 'Root');
+
+        $home = $this->service->createTreeNode($this->makeTreeEntry(), 'Home', null, null, true);
+
+        $this->assertSame('/', $home->uri);
+
+        try {
+            $this->service->createTreeNode($this->makeTreeEntry(), 'Nested Home', $parent, null, true);
+            $this->fail('Expected nested home creation to fail.');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame('The Entry Tree home node must be a root node.', $e->getMessage());
+        }
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Only one Entry Tree home node may exist.');
+
+        $this->service->createTreeNode($this->makeTreeEntry(), 'Second Home', null, null, true);
+    }
+
+    public function test_create_tree_node_prevents_duplicate_root_handles(): void
+    {
+        $this->service->createTreeNode($this->makeTreeEntry(), 'About');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('An Entry Tree node with handle [about] already exists at this level.');
+
+        $this->service->createTreeNode($this->makeTreeEntry(), 'About');
+    }
+
+    // -------------------------------------------------------------------------
+    // moveTreeNode()
+    // -------------------------------------------------------------------------
+
+    public function test_move_tree_node_rebuilds_subtree_and_rebalances_sort_order(): void
+    {
+        $rootA = $this->service->createTreeNode($this->makeTreeEntry(), 'Section A');
+        $rootB = $this->service->createTreeNode($this->makeTreeEntry(), 'Section B');
+        $firstChild = $this->service->createTreeNode($this->makeTreeEntry(), 'First Child', $rootA);
+        $movedChild = $this->service->createTreeNode($this->makeTreeEntry(), 'Moved Child', $rootA);
+        $grandchild = $this->service->createTreeNode($this->makeTreeEntry(), 'Grand Child', $movedChild);
+
+        $moved = $this->service->moveTreeNode($movedChild, $rootB, 1);
+
+        $this->assertSame($rootB->id, $moved->parent_id);
+        $this->assertSame(1, $moved->sort_order);
+        $this->assertSame('section-b/moved-child', $moved->uri);
+
+        $grandchild->refresh();
+        $this->assertSame(2, $grandchild->depth);
+        $this->assertSame('section-b/moved-child/grand-child', $grandchild->uri);
+
+        $firstChild->refresh();
+        $this->assertSame(1, $firstChild->sort_order);
+    }
+
+    public function test_move_tree_node_prevents_duplicate_handles_in_target_parent(): void
+    {
+        $rootA = $this->service->createTreeNode($this->makeTreeEntry(), 'Section A');
+        $rootB = $this->service->createTreeNode($this->makeTreeEntry(), 'Section B');
+        $candidate = $this->service->createTreeNode($this->makeTreeEntry(), 'Child', $rootA);
+        $this->service->createTreeNode($this->makeTreeEntry(), 'Child', $rootB);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('An Entry Tree node with handle [child] already exists at this level.');
+
+        $this->service->moveTreeNode($candidate, $rootB, 1);
+    }
+
+    // -------------------------------------------------------------------------
+    // rebuildTreeUri()
+    // -------------------------------------------------------------------------
+
+    public function test_rebuild_tree_uri_rejects_non_root_home_nodes(): void
+    {
+        $parent = EntryTree::create([
+            'entry_id' => $this->makeTreeEntry()->id,
+            'parent_id' => null,
+            'handle' => 'parent',
+            'uri' => 'parent',
+            'depth' => 0,
+            'sort_order' => 1,
+            'template' => null,
+            'is_home' => false,
+        ]);
+
+        $invalidHome = EntryTree::create([
+            'entry_id' => $this->makeTreeEntry()->id,
+            'parent_id' => $parent->id,
+            'handle' => 'home',
+            'uri' => '/',
+            'depth' => 1,
+            'sort_order' => 1,
+            'template' => null,
+            'is_home' => true,
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The Entry Tree home node must remain at the root.');
+
+        $this->service->rebuildTreeUri($invalidHome);
+    }
+
+    // -------------------------------------------------------------------------
+    // Backward compatibility: Entries facade → EntryService delegators
+    // -------------------------------------------------------------------------
+
+    public function test_facade_create_tree_node_delegates_to_tree_service(): void
+    {
+        $node = Entries::createTreeNode($this->makeTreeEntry(), 'Via Facade');
+
+        $this->assertSame('via-facade', $node->handle);
+        $this->assertSame('via-facade', $node->uri);
+        $this->assertDatabaseHas('entry_trees', ['id' => $node->id, 'handle' => 'via-facade']);
+    }
+
+    public function test_facade_rebuild_tree_uri_delegates_to_tree_service(): void
+    {
+        $parent = $this->service->createTreeNode($this->makeTreeEntry(), 'Parent');
+        $child = $this->service->createTreeNode($this->makeTreeEntry(), 'Child', $parent);
+
+        // Desync the stored URI, then rebuild through the facade path.
+        $child->forceFill(['uri' => 'stale'])->save();
+
+        Entries::rebuildTreeUri($parent->fresh());
+
+        $this->assertSame('parent/child', $child->fresh()->uri);
+    }
+}

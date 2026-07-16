@@ -1,0 +1,212 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Roles' %}
+{% set page_heading = 'Roles' %}
+{% set active_nav = 'members' %}
+{% set active_user_section = 'roles' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Roles'}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.roles._sidebar') }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex min-w-0 flex-col gap-5">
+        {% embed 'admin._inc._page-header' with {title: 'Roles', subtitle: 'Review existing roles, assigned users, and permission coverage.'} %}
+            {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Add Role', route('roles.create'), icon='plus') }}{% endblock %}
+        {% endembed %}
+
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="grid grid-cols-2 divide-x divide-y divide-slate-200 sm:grid-cols-3 sm:divide-y-0">
+                <div class="p-4 sm:p-5">
+                    <p class="text-xs font-medium uppercase tracking-wide text-muted">Total Roles</p>
+                    <p class="mt-1.5 text-3xl font-semibold text-content">{{ total_roles }}</p>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <p class="text-xs font-medium uppercase tracking-wide text-muted">Assigned Users</p>
+                    <p class="mt-1.5 text-3xl font-semibold text-content">150</p>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <p class="text-xs font-medium uppercase tracking-wide text-muted">Permissions</p>
+                    <p class="mt-1.5 text-3xl font-semibold text-content">{{ total_permissions }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
+                <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h5 class="text-sm font-semibold text-content">Existing Roles</h5>
+                        <p class="mt-0.5 text-xs text-muted">Use this table to audit role usage before changing
+                            permissions.</p>
+                    </div>
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <select
+                            class="w-full rounded-md border border-edge bg-surface px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-auto">
+                            <option>All statuses</option>
+                            <option>Active</option>
+                            <option>System</option>
+                            <option>Default</option>
+                        </select>
+                        <div class="relative">
+                            <svg
+                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-faint"
+                                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <input
+                                class="w-full rounded-md border border-edge bg-surface py-1.5 pl-3 pr-10 text-sm shadow-sm placeholder:text-faint focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-56"
+                                placeholder="Search roles" type="search">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if roles.count >= 1 %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-subtle text-xs font-semibold uppercase tracking-wide text-muted">
+                        <tr>
+                            <th class="px-4 py-3" scope="col">Role</th>
+                            <th class="px-4 py-3 text-center" scope="col">Users</th>
+                            <th class="px-4 py-3 text-center" scope="col">Permissions</th>
+                            <th class="px-4 py-3" scope="col">Updated</th>
+                            <th class="px-4 py-3" scope="col">Created</th>
+                            <th class="px-4 py-3 text-right" scope="col">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-surface">
+                        {% for role in roles %}
+                            <tr class="hover:bg-subtle/60">
+                                <td class="px-4 py-3.5">
+                                    <div class="flex items-start gap-3">
+                                        <span
+                                            class="mt-0.5 h-10 w-10 shrink-0 rounded-md ring-1 ring-inset ring-slate-200"
+                                            style="background-color: {{ role.highlight }}"></span>
+                                        <div class="min-w-0">
+                                            {% if role.name != 'super admin' %}
+                                                <a class="font-medium text-content hover:text-accent"
+                                                   href="{{ route('roles.edit', role) }}">{{ role.name|title }}</a>
+                                            {% else %}
+                                                {{ role.name|title }}
+                                            {% endif %}
+                                            <p class="mt-1 max-w-xl text-xs text-muted">{{ role.description }}</p>
+                                            <p class="mt-0.5 font-mono text-xs text-faint">{{ role.name }}</p>
+                                            <div class="row-actions mt-0.5 flex flex-wrap items-center gap-2 text-xs">
+                                                {% if role.name != 'super admin' %}
+                                                    <a class="text-emerald-600 hover:underline"
+                                                       href="{{ route('roles.edit', role.id) }}">Edit</a>
+                                                    {% if role.canDelete() %}
+                                                        <span class="text-faint">|</span>
+                                                        <a class="text-red-500 hover:underline"
+                                                           href="{{ route('roles.confirm', role) }}">Delete</a>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3.5 text-center font-medium text-content">{{ role.users.count() }}</td>
+                                <td class="px-4 py-3.5 text-center font-medium text-content">
+                                    {% if role.name == 'super admin' %}
+                                        All
+                                        {% else %}
+                                        {{ role.permissions.count() }}
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3.5 text-muted">{{ role.updated_at.format('F j, Y') }}</td>
+                                <td class="px-4 py-3.5 text-muted">{{ role.created_at.format('F j, Y') }}</td>
+                                <td class="px-4 py-3.5">
+                                    <div class="flex items-center justify-end gap-1">
+                                        {% if role.name != 'super admin' %}
+                                            <a href="{{ route('roles.edit', role.id) }}"
+                                               class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:border-edge hover:bg-subtle hover:text-content"
+                                               title="Edit">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </a>
+                                            {% if role.canDelete() %}
+                                            <a href="{{ route('roles.confirm', role.id) }}"
+                                               class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                                               title="Delete">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </a>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% else %}
+                <div class="flex min-h-80 items-center justify-center px-6 py-14">
+                    <div class="max-w-sm text-center">
+                        <div
+                            class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-faint">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                            </svg>
+                        </div>
+                        <h2 class="mt-4 text-base font-semibold text-content">No User Roles found</h2>
+                        <p class="mt-1 text-sm text-muted">Create your first entry or adjust the filters to broaden the
+                            list.</p>
+                        <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                            <a href="{{ route('roles.create') }}"
+                               class="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Create Role
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            <div
+                class="flex flex-col gap-3 border-t border-edge bg-subtle px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex flex-wrap items-center gap-2">
+                    <select
+                        class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        <option>Bulk action</option>
+                        <option>Export selected</option>
+                        <option>Review permissions</option>
+                    </select>
+                    <button type="button"
+                            class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm font-medium text-content shadow-sm hover:bg-subtle">
+                        Apply
+                    </button>
+                </div>
+                <div class="flex items-center justify-between gap-3 sm:justify-end">
+                    <span class="text-xs text-muted">Showing 4 roles</span>
+                    <div class="flex items-center gap-1">
+                        <button class="rounded px-2 py-1 text-xs text-faint" disabled>Prev</button>
+                        <span class="rounded bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white">1</span>
+                        <button class="rounded px-2 py-1 text-xs text-faint" disabled>Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

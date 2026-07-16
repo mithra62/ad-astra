@@ -1,0 +1,125 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Delete Field' %}
+{% set page_heading = 'Status Groups' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'statuses' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Field Groups', href: route('fields.groups')},
+        {label: field.groups.first.name, href: route('fields.groups.show', field.groups.first)},
+        {label: field.name, href: route('fields.show', field)},
+        {label: 'Delete Field'}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.fields._sidebar', {active: field.groups.first.id}) }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Delete Field</h1>
+            <p class="mt-1 text-sm text-muted">Review ownership and access before removing this account.</p>
+        </div>
+        <a href=""
+           class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">Cancel</a>
+    </div>
+
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div class="flex items-start gap-3">
+            <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            <div>
+                <p class="text-sm font-semibold text-red-800">This action cannot be undone.</p>
+                <p class="mt-1 text-sm text-red-700">Deleting {{ field.name }} removes all data associated with the
+                    field.</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ route('fields.destroy', field) }}"
+          class="row g-3 needs-validation" novalidate>
+        {{ csrf_field() }}
+        {{ method_field('DELETE') }}
+        <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3"><h5 class="text-sm font-semibold text-content">Field
+                            Being Deleted</h5></div>
+                    <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-muted">Name</dt>
+                            <dd class="font-semibold text-content">{{ field.name }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-muted">handle</dt>
+                            <dd class="text-content"><code>{{ field.handle }}</code></dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-muted">Type</dt>
+                            <dd class="text-content">{{ status.color }}</dd>
+                        </div>
+                    </dl>
+                </div>
+                {#
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3"><h5 class="text-sm font-semibold text-content">Content Reassignment</h5></div>
+                    <div class="space-y-4 px-5 py-5">
+                        <label class="flex items-start gap-3">
+                            <input type="radio" name="content_action" value="reassign" checked class="mt-0.5 border-edge text-emerald-600 focus:ring-emerald-500">
+                            <span class="text-sm text-content"><span class="font-medium">Reassign authored content</span><span class="mt-0.5 block text-xs text-muted">Move articles and drafts to another user.</span></span>
+                        </label>
+                        <select class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <option>Morgan Lee</option>
+                            <option>Avery Stone</option>
+                            <option>Riley Chen</option>
+                        </select>
+                        <label class="flex items-start gap-3">
+                            <input type="radio" name="content_action" value="delete" class="mt-0.5 border-edge text-red-600 focus:ring-red-500">
+                            <span class="text-sm text-content"><span class="font-medium text-red-700">Delete user-owned drafts</span><span class="mt-0.5 block text-xs text-muted">Published content remains assigned to system.</span></span>
+                        </label>
+                    </div>
+                </div>
+                #}
+
+            </div>
+
+
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-red-200 bg-surface shadow-sm">
+                    <div class="border-b border-red-100 bg-red-50 px-5 py-3"><h5
+                            class="text-sm font-semibold text-red-800">Confirm Deletion</h5></div>
+                    <div class="mb-4 rounded-md bg-subtle px-4 py-3 text-sm text-content">Select the toggle to confirm
+                        deletion of <strong>{{ group.name }}</strong>.
+                    </div>
+                    <label
+                        class="flex cursor-pointer items-center justify-between gap-4 rounded-md border  {% if errors.has('confirm_removal') %} bg-red-300 border-red-300{% else %}bg-subtle border-edge{% endif %} px-4 py-3">
+                        <span class="text-sm font-medium text-content">I understand this Field Group will be permanently deleted</span>
+
+                        <input class="peer sr-only" type="checkbox" name="confirm_removal" required>
+                        <span
+                            class="h-6 w-11 shrink-0 rounded-full bg-slate-300 after:mt-1 after:ml-1 after:block after:h-4 after:w-4 after:rounded-full after:bg-surface after:shadow after:transition after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-red-500"></span>
+                    </label>
+                    <button id="delete-btn" type="submit"
+                            class="mt-5 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                        Permanently Delete Field
+                    </button>
+                    <a href="{{ route('fields.show', field) }}"
+                       class="mt-2 block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">Back
+                        to Field</a>
+
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

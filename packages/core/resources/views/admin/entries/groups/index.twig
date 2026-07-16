@@ -1,0 +1,156 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Entry Groups' %}
+{% set page_heading = 'Entry Groups' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'entries' %}
+{% set has_secondary_sidebar = false %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([{label: 'Dashboard', href: route('dashboard'), icon: 'home'}, {label: page_title}]) }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        {% embed 'admin._inc._page-header' with {title: page_title, subtitle: 'Select an entry group to view and manage its entries.'} %}
+            {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Create Entry Group', route('entries.groups.create'), icon='plus') }}{% endblock %}
+        {% endembed %}
+
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <h5 class="text-sm font-semibold text-content">All Items</h5>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="type-filter"
+                                class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <option value="">All types</option>
+                            <option value="status">Status</option>
+                            <option value="field">Field</option>
+                            <option value="option">Option</option>
+                        </select>
+                        <input id="item-search"
+                               class="w-full rounded-md border border-edge px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-52"
+                               placeholder="Search items..." type="search">
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                    <thead class="bg-subtle text-xs uppercase tracking-wide text-muted">
+                    <tr>
+                        <th class="w-10 px-4 py-3">
+                            <input id="select-all" type="checkbox"
+                                   class="rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                        </th>
+                        <th class="px-4 py-3 font-semibold">Name</th>
+                        <th class="px-4 py-3 font-semibold">Types</th>
+                        <th class="px-4 py-3 font-semibold">Entries</th>
+                        <th class="px-4 py-3 font-semibold">Status Group</th>
+                        <th class="px-4 py-3 font-semibold"></th>
+                    </tr>
+                    </thead>
+                    <tbody id="item-tbody" class="divide-y divide-slate-100 bg-surface">
+                    {% for group in groups %}
+                        <tr class="hover:bg-subtle/60" data-name="{{ group.name|lower }} {{ group.handle|lower }}">
+                            <td class="px-4 py-3">
+                                <input type="checkbox" name="ids[]" value="{{ group.handle }}"
+                                       class="row-cb rounded border-edge text-emerald-600 focus:ring-emerald-500">
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-3">
+                                    <div>
+                                        <a class="font-medium text-content hover:text-accent"
+                                           href="{{ route('entries.groups.show', group) }}">
+                                            {{ group.name }} <span
+                                                class="mt-0.5 font-mono text-xs text-faint">{{ group.handle }}</span>
+                                        </a>
+                                        <p>{{ group.description }}</p>
+                                        <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
+
+                                            <a href="{{ route('entries.groups.show', group) }}"
+                                               class="text-emerald-600 hover:underline">View</a>
+                                            <span class="text-faint">|</span>
+                                            <a href="{{ route('entries.groups.edit', group) }}"
+                                               class="text-emerald-600 hover:underline">Edit</a>
+                                            <span class="text-faint">|</span>
+                                            <a href="{{ route('entries.groups.confirm', group) }}"
+                                               class="text-red-500 hover:underline">Delete</a>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 capitalize text-muted">
+                                {% for type in group.entryTypes %}
+                                    <a href="{{ route('entries.types.edit', type) }}">{{ type.name }}</a>
+                                {% endfor %}
+                            </td>
+                            <td class="px-4 py-3">{{ group.entries_count }}</td>
+                            <td class="px-4 py-3 font-medium text-content">
+                                {% if group.statusGroup.name %}
+                                    <a href="{{ route('statuses.groups.show', group.statusGroup.id) }}">{{ group.statusGroup.name }}</a>
+                                {% else %}
+
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-1.5">
+                                    <a href="{{ route('entries.groups.show', group) }}"
+                                       class="rounded p-1 text-faint hover:bg-subtle hover:text-emerald-600"
+                                       title="View">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </a>
+                                    <a href="{{ route('entries.groups.edit', group) }}"
+                                       class="rounded p-1 text-faint hover:bg-subtle hover:text-emerald-600"
+                                       title="Edit">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </a>
+                                    <a href="{{ route('entries.groups.confirm', group) }}"
+                                       class="rounded p-1 text-faint hover:bg-red-50 hover:text-red-600" title="Delete">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div
+                class="flex flex-col gap-3 border-t border-edge bg-subtle px-4 py-3 text-sm lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex flex-wrap items-center gap-2">
+                    <select id="bulk-action"
+                            class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        <option value="">Bulk action</option>
+                        <option value="activate">Activate</option>
+                        <option value="deactivate">Deactivate</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                    <button type="button" onclick="applyBulk()"
+                            class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm font-medium text-content shadow-sm hover:bg-subtle">
+                        Apply
+                    </button>
+                </div>
+                {{ groups.links() }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

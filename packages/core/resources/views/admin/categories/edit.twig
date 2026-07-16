@@ -1,0 +1,251 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._form-fields' as forms %}
+{% import 'admin._inc._schema-tab-elements' as tabs %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Category Groups' %}
+{% set page_heading = 'Category Groups' %}
+{% set active_nav = 'content' %}
+{% set active_secondary_nav = 'categories' %}
+{% set has_secondary_sidebar = true %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Category Groups', href: route('categories.groups')},
+        {label: category.group.name, href: route('categories.groups.show', category.group)},
+        {label: category.name}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.categories._sidebar', {active: category.group.id}) }}
+{% endblock %}
+
+{% block content %}
+    <div id="unsaved-bar"
+         class="unsaved-bar items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-2">
+        <span class="flex items-center gap-2 text-sm text-amber-800">
+            <svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            You have unsaved changes.
+        </span>
+        <button type="submit" form="general-create-form"
+                class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Save
+            Now
+        </button>
+    </div>
+
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        {% embed 'admin._inc._page-header' with {title: 'Edit Category', subtitle: 'Update this category and its custom fields.'} %}
+            {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Back to ' ~ category.group.name, route('categories.groups.show', category.group), 'secondary', icon='chevron-left') }}{% endblock %}
+        {% endembed %}
+
+        <form id="general-create-form" method="POST" action="{{ route('categories.update', category) }}"
+              class="flex w-full min-w-0 flex-col gap-5">
+            {{ csrf_field() }}
+            {{ method_field('PUT') }}
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Item Details</h5>
+                </div>
+                <div class="space-y-5 px-5 py-5">
+
+                    {{ forms.input(name='name', label='Name', required=true, placeholder="", value=category.name) }}
+                    {{ forms.input('handle', 'Handle', required=true, description="Lowercase letters, numbers, and hyphens only.", value=category.handle) }}
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-content" for="handle">Parent
+                            Category</label>
+                        <select
+                            class="w-full rounded-md border bg-surface px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 {% if errors.has('parent_id') %}border-red-300 focus:border-red-500 focus:ring-red-500/20{% else %}border-edge focus:border-emerald-500 focus:ring-emerald-500/20{% endif %}"
+                            id="parent_id" name="parent_id">
+                            <option value="">— No Parent (top-level) —</option>
+                            {% for cat in parent_categories %}
+                                <option value="{{ cat.id }}"
+                                    {{ old('parent_id', category.parent_id) == cat.id ? 'selected' : '' }}>
+                                    {{ cat.label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.has('parent_id') %}<p id="handle-error"
+                                                           class="mt-1 text-xs text-red-600">{{ errors.first('parent_id') }}</p>{% endif %}
+                    </div>
+
+                </div>
+            </div>
+
+            {% set layout = category.group.fieldLayout %}
+            {% if layout and layout.tabs.count >= 1 %}
+            {% for tab in layout.tabs %}
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">{{ tab.name }}</h5>
+                </div>
+                <div class="space-y-5 px-5 py-5">
+                    {{ tabs.tabFields(tab, field_values) }}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+            </div>
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <a href="{{ route('categories.show', category) }}"
+                   class="rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-semibold text-content shadow-sm hover:bg-subtle">Cancel</a>
+                <button type="submit"
+                        class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                    Edit Category
+                </button>
+            </div>
+        </form>
+
+        <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+            <div class="border-b border-edge px-5 py-3">
+                <h5 class="text-sm font-semibold text-content">Children</h5>
+            </div>
+            <div class="space-y-5 px-5 py-5">
+                {% if category.children.count >= 1 %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-subtle text-xs font-semibold uppercase tracking-wide text-muted">
+                            <tr>
+                                <th class="px-5 py-3" scope="col">Title</th>
+                                <th class="hidden px-5 py-3 sm:table-cell" scope="col">Children</th>
+                                <th class="hidden px-5 py-3 lg:table-cell" scope="col">Updated</th>
+                                <th class="px-5 py-3" scope="col">Created</th>
+                                <th class="px-5 py-3 text-right" scope="col">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-surface">
+                            {% for child in category.children %}
+                                <tr class="hover:bg-subtle">
+                                    <td class="px-5 py-3.5">
+                                        <a class="font-medium text-content hover:text-accent"
+                                           href="{{ route('categories.show', child) }}">{{ child.name }} <span
+                                                class="mt-0.5 font-mono text-xs text-faint">{{ child.handle }}</span></a>
+                                        <div class="row-actions mt-0.5 flex items-center gap-2 text-xs">
+                                            <a href="{{ route('categories.show', child) }}"
+                                               class="text-emerald-600 hover:underline">View</a>
+                                            <span class="text-faint">|</span>
+                                            <a href="{{ route('categories.edit', child) }}"
+                                               class="text-emerald-600 hover:underline">Edit</a>
+                                            <span class="text-faint">|</span>
+                                            <a href="{{ route('categories.confirm', child) }}"
+                                               class="text-red-500 hover:underline">Delete</a>
+                                        </div>
+                                    </td>
+                                    <td class="hidden px-5 py-3.5 text-muted sm:table-cell">
+                                        {{ child.children.count() }}
+                                    </td>
+                                    <td class="px-5 py-3.5">
+                                        {{ child.updated_at.format('F j, Y') }}
+                                    </td>
+                                    <td class="hidden px-5 py-3.5 text-faint lg:table-cell">{{ child.created_at.format('F j, Y') }}</td>
+                                    <td class="px-5 py-3.5">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <a href="{{ route('categories.create', {group_id: category.group.id, parent_id: child.id}) }}"
+                                               class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:border-edge hover:bg-subtle hover:text-content"
+                                               title="View">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                                <span class="sr-only">Create Child</span>
+                                            </a>
+                                            <a href="{{ route('categories.show', child) }}"
+                                               class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:border-edge hover:bg-subtle hover:text-content"
+                                               title="View">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                                <span class="sr-only">View</span>
+                                            </a>
+                                            <a href="{{ route('categories.edit', child) }}"
+                                               class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:border-edge hover:bg-subtle hover:text-content"
+                                               title="Edit">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                                <span class="sr-only">Edit</span>
+                                            </a>
+                                            <a href="{{ route('categories.confirm', child) }}"
+                                               class="inline-flex items-center justify-center rounded-md border border-red-100 p-1.5 text-red-400 hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                                               title="Delete">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                <span class="sr-only">Delete</span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="flex min-h-80 items-center justify-center px-6 py-14">
+                        <div class="max-w-sm text-center">
+                            <div
+                                class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-faint">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                                </svg>
+                            </div>
+                            <h2 class="mt-4 text-base font-semibold text-content">No Child Categories found</h2>
+                            <p class="mt-1 text-sm text-muted">Create your first entry or adjust the filters to broaden
+                                the list.</p>
+                            <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                                <a href="{{ route('categories.create', {group_id: category.group.id, parent_id: category.id}) }}"
+                                   class="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Create Child Category
+                                </a>
+                                <a class="inline-flex items-center justify-center rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle"
+                                   href="index.twig">Clear filters</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ forms.color_scripts() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.attachHandleGenerator) {
+                window.attachHandleGenerator('name', 'handle');
+            }
+        });
+    </script>
+{% endblock %}
+
+
+
+
+
+
+
+
+

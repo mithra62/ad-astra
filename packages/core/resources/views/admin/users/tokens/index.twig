@@ -1,0 +1,73 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Access Tokens' %}
+{% set page_heading = 'Access Tokens' %}
+{% set active_nav = 'members' %}
+{% set active_user_section = 'users' %}
+{% set has_secondary_sidebar = true %}
+{% set active_secondary_nav = 'tokens' %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Users', href: route('users.index')},
+        {label: user.name, href: route('users.show', user)},
+        {label: 'Access Tokens'}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.users._sidebar', {'user': user}) }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex w-full min-w-0 flex-col gap-5">
+        {% embed 'admin._inc._page-header' with {title: 'Access Tokens', subtitle: 'Manage drafts, scheduled posts, and published article content.'} %}
+            {% block actions %}{% import 'admin._inc._ui' as ui %}{{ ui.button('Create Token', route('users.token.create', user), icon='plus') }}{% endblock %}
+        {% endembed %}
+
+        {% embed 'admin._inc._card' with {title: 'Status List', subtitle: 'No Statuses match the current view.'} %}
+            {% block body %}
+                {% import 'admin._inc._ui' as ui %}
+                {% if user.tokens.count >= 1 %}
+                    {% embed 'admin._inc._table' with {columns: [
+                        {label: 'Name'},
+                        {label: 'Expires', class: 'hidden sm:table-cell'},
+                        {label: 'Last Used'},
+                        {label: 'Actions', class: 'text-right'}
+                    ]} %}
+                        {% block rows %}
+                            {% import 'admin._inc._ui' as ui %}
+                            {% for token in user.tokens %}
+                                <tr class="hover:bg-subtle">
+                                    <td class="px-4 py-3.5"><p class="font-medium text-content">{{ token.name }}</p>
+                                    </td>
+                                    <td class="hidden px-4 py-3.5 text-muted sm:table-cell">{% if token.expires_at %}{{ token.expires_at.format('F j, Y') }}{% else %}
+                                            <span class="text-faint">Never</span>{% endif %}</td>
+                                    <td class="px-4 py-3.5">{% if token.last_used_at %}{{ token.last_used_at.format('F j, Y') }}{% else %}
+                                            <span class="text-faint">Never</span>{% endif %}</td>
+                                    <td class="px-4 py-3.5">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <a class="inline-flex items-center justify-center rounded-md border border-edge p-1.5 text-faint hover:bg-subtle hover:text-content"
+                                               href="{{ route('users.token.edit', {id: user.id, token_id: token.id}) }}"
+                                               title="Edit">{{ ui.icon('pencil') }}<span class="sr-only">Edit</span></a>
+                                            <a class="inline-flex items-center justify-center rounded-md border border-red-100 p-1.5 text-red-400 hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                                               href="{{ route('users.token.confirm', {id: user.id, token_id: token.id}) }}"
+                                               title="Delete">{{ ui.icon('trash') }}<span class="sr-only">Delete</span></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endblock %}
+                    {% endembed %}
+                {% else %}
+                    {{ ui.empty_state('No Tokens found', 'Create the first token.', 'key', {label: 'Create Token', href: route('users.token.create', user)}) }}
+                {% endif %}
+                <div class="border-t border-edge px-5 py-3">
+                    <p class="text-xs text-muted">Showing {{ user.tokens.count }} token</p>
+                </div>
+            {% endblock %}
+        {% endembed %}
+    </div>
+{% endblock %}

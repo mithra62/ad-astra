@@ -1,0 +1,165 @@
+<?php
+
+namespace AdAstra\Http\Controllers\Admin\Entry;
+
+use AdAstra\Facades\EntryGroups;
+use AdAstra\Http\Controllers\Admin\Controller;
+use AdAstra\Http\Requests\Entry\Group\DeleteEntryGroupRequest;
+use AdAstra\Http\Requests\Entry\Group\EditEntryGroupRequest;
+use AdAstra\Http\Requests\Entry\Group\StoreEntryGroupRequest;
+use AdAstra\Models\Category\Group as CategoryGroup;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\EntryType;
+use AdAstra\Models\FieldLayout;
+use AdAstra\Models\StatusGroup;
+
+class Group extends Controller
+{
+    public function index()
+    {
+        $groups = EntryGroup::withCount(['entries'])
+            ->with('statusGroup', 'entryTypes')
+            ->ordered()
+            ->paginate($this->total_per_page);
+
+        return $this->view('entries.groups.index', ['groups' => $groups]);
+    }
+
+    public function store(StoreEntryGroupRequest $request)
+    {
+        $group = EntryGroups::create($request->validated());
+
+        return redirect()
+            ->route('entries.groups.show', $group->id)
+            ->with('success', trans('entry.group.created'));
+    }
+
+    public function create()
+    {
+        return $this->view('entries.groups.create', $this->formData(null));
+    }
+
+    private function formData(?EntryGroup $group = null): array
+    {
+        // Eligible types: unattached (null group_id) plus those already owned by this group
+        $availableTypesQuery = EntryType::with('entryBehavior')->orderBy('name');
+        if ($group) {
+            $availableTypesQuery->where(function ($q) use ($group) {
+                $q->whereNull('entry_group_id')->orWhere('entry_group_id', $group->getKey());
+            });
+        } else {
+            $availableTypesQuery->whereNull('entry_group_id');
+        }
+
+        return [
+            'status_groups' => StatusGroup::ordered()->get(),
+            'category_groups' => CategoryGroup::orderBy('name')->get(),
+            'field_layouts' => FieldLayout::orderBy('name')->get(),
+            'available_entry_types' => $availableTypesQuery->get(),
+        ];
+    }
+
+    public function show(string $id)
+    {
+        $group = EntryGroup::withCount('entries')->with([
+            'entryTypes',
+            'statusGroup.statuses',
+        ])->find($id);
+
+        if (!$group instanceof EntryGroup) {
+            abort(404);
+        }
+
+        // One query keyed by status_id — replaces per-status lazy queries in the view.
+        $statusCounts = $group->entries()
+            ->selectRaw('status_id, COUNT(*) as count')
+            ->groupBy('status_id')
+            ->pluck('count', 'status_id')
+            ->toArray();
+
+        $allGroups = EntryGroup::withCount('entries')->ordered()->get();
+        $entries = $group->entries()
+            ->with(['authors.user', 'status', 'entryType'])
+            ->latest()
+            ->paginate(20);
+
+        return $this->view('entries.groups.view', [
+            'group' => $group,
+            'groups' => $allGroups,
+            'entries' => $entries,
+            'statusCounts' => $statusCounts,
+        ]);
+    }
+
+    public function edit(string $id)
+    {
+        $group = EntryGroup::with([
+            'entryTypes.fieldLayout',
+            'statusGroup',
+            'categoryGroups',
+            'fieldLayout',
+        ])->find($id);
+
+        if (!$group instanceof EntryGroup) {
+            abort(404);
+        }
+
+        $allGroups = EntryGroup::withCount('entries')->ordered()->get();
+
+        return $this->view('entries.groups.edit', array_merge(
+            $this->formData($group),
+            [
+                'group' => $group,
+                'groups' => $allGroups,
+            ]
+        ));
+    }
+
+    public function update(EditEntryGroupRequest $request, string $id)
+    {
+        $group = EntryGroups::find((int)$id);
+
+        if (!$group instanceof EntryGroup) {
+            abort(404);
+        }
+
+        EntryGroups::update($group, $request->validated());
+
+        return redirect()
+            ->route('entries.groups.edit', $id)
+            ->with('success', trans('entry.group.updated'));
+    }
+
+    public function destroy(DeleteEntryGroupRequest $request, string $id)
+    {
+        $group = EntryGroups::find((int)$id);
+
+        if (!$group instanceof EntryGroup) {
+            return redirect()
+                ->route('entries.groups')
+                ->with('failure', trans('entry.group.not_found'));
+        }
+
+        EntryGroups::delete($group);
+
+        return redirect()
+            ->route('entries.groups')
+            ->with('success', trans('entry.group.deleted'));
+    }
+
+    public function confirm(string $id)
+    {
+        $group = EntryGroup::withCount('entries')->find($id);
+
+        if (!$group instanceof EntryGroup) {
+            return redirect()->route('entries.groups')->with('failure', trans('entry.group.not_found'));
+        }
+
+        $allGroups = EntryGroup::withCount('entries')->ordered()->get();
+
+        return $this->view('entries.groups.delete', [
+            'group' => $group,
+            'groups' => $allGroups,
+        ]);
+    }
+}

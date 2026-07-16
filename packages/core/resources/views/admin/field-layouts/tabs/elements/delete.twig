@@ -1,0 +1,109 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Remove Field from Tab' %}
+{% set page_heading = 'Field Layouts' %}
+{% set active_nav = 'settings' %}
+{% set active_secondary_nav = 'field_layouts' %}
+{% set has_secondary_sidebar = true %}
+
+{% set field_label = element.field.label ?: element.field.name %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Field Layouts', href: route('field-layouts')},
+        {label: layout.name, href: route('field-layouts.edit', layout)},
+        {label: tab.name, href: route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id})},
+        {label: 'Remove Field'}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.field-layouts._sidebar', {active: layout.id}) }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Remove Field from Tab</h1>
+            <p class="mt-1 text-sm text-muted">Detach a field from this tab. The field itself is kept.</p>
+        </div>
+        <a href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}"
+           class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle sm:self-auto">Cancel</a>
+    </div>
+
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div class="flex items-start gap-3">
+            <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            <div>
+                <p class="text-sm font-semibold text-red-800">Remove this field from the tab?</p>
+                <p class="mt-1 text-sm text-red-700">This removes <strong>{{ field_label }}</strong> from the
+                    <strong>{{ tab.name }}</strong> tab's layout. The field itself is not deleted and can be re-added at
+                    any time.</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST"
+          action="{{ route('field-layouts.tabs.elements.destroy', {layout_id: layout.id, tab_id: tab.id, element_id: element.id}) }}"
+          class="row g-3 needs-validation" novalidate>
+        {{ csrf_field() }}
+        {{ method_field('DELETE') }}
+        <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_20rem]">
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                    <div class="border-b border-edge px-5 py-3"><h5 class="text-sm font-semibold text-content">Field
+                            Being Removed</h5></div>
+                    <dl class="divide-y divide-slate-100 px-5 py-2 text-sm">
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-muted">Field</dt>
+                            <dd class="font-semibold text-content">{{ field_label }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-muted">Handle</dt>
+                            <dd class="text-content"><code>{{ element.field.handle }}</code></dd>
+                        </div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <dt class="text-muted">Tab</dt>
+                            <dd class="text-content">{{ tab.name }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-5">
+                <div class="overflow-hidden rounded-lg border border-red-200 bg-surface shadow-sm">
+                    <div class="border-b border-red-100 bg-red-50 px-5 py-3"><h5
+                            class="text-sm font-semibold text-red-800">Confirm Removal</h5></div>
+                    <div class="p-5">
+                        <div class="mb-4 rounded-md bg-subtle px-4 py-3 text-sm text-content">Select the toggle to
+                            confirm removal of <strong>{{ field_label }}</strong>.
+                        </div>
+                        <label
+                            class="flex cursor-pointer items-center justify-between gap-4 rounded-md border {% if errors.has('confirm_removal') %} bg-red-300 border-red-300{% else %}bg-subtle border-edge{% endif %} px-4 py-3">
+                            <span class="text-sm font-medium text-content">I understand this field will be removed from the tab</span>
+                            <input class="peer sr-only" type="checkbox" name="confirm_removal" required>
+                            <span
+                                class="h-6 w-11 shrink-0 rounded-full bg-slate-300 after:mt-1 after:ml-1 after:block after:h-4 after:w-4 after:rounded-full after:bg-surface after:shadow after:transition after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-red-500"></span>
+                        </label>
+                        {% if errors.has('confirm_removal') %}
+                            <p class="mt-2 text-sm text-red-600">{{ errors.first('confirm_removal') }}</p>
+                        {% endif %}
+                        <button type="submit"
+                                class="mt-5 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                            Remove Field
+                        </button>
+                        <a href="{{ route('field-layouts.tabs.edit', {layout_id: layout.id, tab_id: tab.id}) }}"
+                           class="mt-2 block w-full rounded-md border border-edge bg-surface px-4 py-2 text-center text-sm font-medium text-content shadow-sm hover:bg-subtle">Back
+                            to Edit</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

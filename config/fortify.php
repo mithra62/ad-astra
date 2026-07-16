@@ -103,7 +103,7 @@ return [
 
     'middleware' => [
         'web',
-        \App\Http\Middleware\BotBlockRequest::class,
+        \AdAstra\Http\Middleware\BotBlockRequest::class,
 
     ],
 

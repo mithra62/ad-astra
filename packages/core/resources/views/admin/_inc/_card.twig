@@ -1,0 +1,42 @@
+{# ============================================================================
+   Card / panel container.
+
+   {% embed 'admin._inc._card' with {title: 'All Users', subtitle: '...'} %}
+       {% block actions %}{{ ui.button('Add', route('...'), icon='plus') }}{% endblock %}
+       {% block body %}<dl class="px-5 py-2 ...">...</dl>{% endblock %}
+       {% block footer %}{{ users.links() }}{% endblock %}
+   {% endembed %}
+
+   Vars (all optional): title, subtitle, variant ('default' | 'danger').
+   Blocks (all optional): actions (header right side), body, footer.
+   The header is rendered only when a title, subtitle, or actions block exists;
+   the footer wrapper only when the footer block has content. The body block is
+   placed flush — it owns its own padding (some bodies are tables, some are dl's).
+   ============================================================================ #}
+{% set _variant  = variant|default('default') %}
+{% set _danger   = _variant == 'danger' %}
+{% set _actions %}{% block actions %}{% endblock %}{% endset %}
+{% set _body %}{% block body %}{% endblock %}{% endset %}
+{% set _footer %}{% block footer %}{% endblock %}{% endset %}
+{% set _has_header = (title is defined and title) or (subtitle is defined and subtitle) or _actions|trim %}
+<div class="overflow-hidden rounded-lg border {{ _danger ? 'border-red-200' : 'border-edge' }} bg-surface shadow-sm">
+    {% if _has_header %}
+        <div class="border-b {{ _danger ? 'border-red-100 bg-red-50' : 'border-edge' }} px-5 py-3">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    {% if title is defined and title %}<h5
+                        class="text-sm font-semibold {{ _danger ? 'text-red-800' : 'text-content' }}">{{ title }}</h5>{% endif %}
+                    {% if subtitle is defined and subtitle %}<p
+                        class="mt-0.5 text-xs text-muted">{{ subtitle }}</p>{% endif %}
+                </div>
+                {% if _actions|trim %}
+                    <div class="flex flex-wrap items-center gap-2">{{ _actions|raw }}</div>{% endif %}
+            </div>
+        </div>
+    {% endif %}
+    {{ _body|raw }}
+    {% if _footer|trim %}
+        <div
+            class="flex flex-col gap-3 border-t border-edge bg-subtle px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">{{ _footer|raw }}</div>
+    {% endif %}
+</div>

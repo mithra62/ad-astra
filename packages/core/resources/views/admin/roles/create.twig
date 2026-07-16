@@ -1,0 +1,171 @@
+{% extends 'admin._inc._layout' %}
+{% import 'admin._inc._ui' as ui %}
+
+{% set page_title = 'Role Permissions' %}
+{% set page_heading = 'Role Permissions' %}
+{% set active_nav = 'members' %}
+{% set active_user_section = 'roles' %}
+{% set has_secondary_sidebar = true %}
+{% set active_secondary_nav = 'create_role' %}
+
+{% block breadcrumbs %}
+    {{ ui.breadcrumbs([
+        {label: 'Dashboard', href: route('dashboard'), icon: 'home'},
+        {label: 'Roles', href: route('roles.index')},
+        {label: 'Create Role'}
+    ]) }}
+{% endblock %}
+
+{% block secondary_sidebar %}
+    {{ include('admin.roles._sidebar') }}
+{% endblock %}
+
+{% block content %}
+    <div class="flex min-w-0 flex-col gap-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight text-content sm:text-2xl">Create Role</h1>
+                <p class="mt-1 text-sm text-muted">Assign capabilities to one role at a time using the seeded permission
+                    domains.</p>
+            </div>
+            <a class="inline-flex items-center gap-1.5 self-start rounded-md border border-edge bg-surface px-3 py-2 text-sm font-semibold text-content shadow-sm hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:self-auto"
+               href="{{ route('roles.index') }}">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Roles
+            </a>
+        </div>
+
+        <form method="POST" action="{{ route('roles.store') }}" class="flex min-w-0 flex-col gap-5">
+            {{ csrf_field() }}
+
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <h5 class="text-sm font-semibold text-content">Role Details</h5>
+                    <p class="mt-0.5 text-xs text-muted">Update the selected role before saving permission
+                        assignments.</p>
+                </div>
+
+                <div class="divide-y divide-slate-100">
+                    <div class="grid gap-4 px-5 py-5 lg:grid-cols-[12rem_1fr]">
+                        <div>
+                            <label class="text-sm font-medium text-content" for="role-name">Name <span
+                                    class="text-red-500">*</span></label>
+                            <p class="mt-1 text-xs text-muted">The unique role name used by the permission layer.</p>
+                        </div>
+                        <div class="max-w-xl">
+                            <input id="role-name" name="name" type="text" value="{{ old('name') }}"
+                                   class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            {% if errors is defined and errors.has('name') %}
+                                <p class="mt-1 text-xs text-red-600">{{ errors.first('name') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 px-5 py-5 lg:grid-cols-[12rem_1fr]">
+                        <div>
+                            <label class="text-sm font-medium text-content" for="role-highlight">Highlight Color</label>
+                            <p class="mt-1 text-xs text-muted">Used for badges and quick visual recognition.</p>
+                        </div>
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <input id="role-highlight" name="highlight" type="color" value="{{ old('highlight') }}"
+                                   class="h-10 w-16 cursor-pointer rounded-md border border-edge bg-surface p-1 shadow-sm">
+                            <span
+                                class="rounded-md border border-edge bg-subtle px-3 py-2 font-mono text-sm text-muted">{{ old('highlight', selected_role.highlight) }}</span>
+                            {% if errors is defined and errors.has('highlight') %}
+                                <p class="text-xs text-red-600">{{ errors.first('highlight') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 px-5 py-5 lg:grid-cols-[12rem_1fr]">
+                        <div>
+                            <label class="text-sm font-medium text-content" for="role-description">Description</label>
+                            <p class="mt-1 text-xs text-muted">A short note explaining when this role should be
+                                assigned.</p>
+                        </div>
+                        <div>
+                            <textarea id="role-description" name="description" rows="3"
+                                      class="w-full rounded-md border border-edge bg-surface px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">{{ old('description') }}</textarea>
+                            {% if errors is defined and errors.has('description') %}
+                                <p class="mt-1 text-xs text-red-600">{{ errors.first('description') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-lg border border-edge bg-surface shadow-sm">
+                <div class="border-b border-edge px-5 py-3">
+                    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <h5 class="text-sm font-semibold text-content">Permissions</h5>
+                            <p class="mt-0.5 text-xs text-muted">Grouped from `RolesPermissionsSeeder.php` by resource
+                                area.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divide-y divide-slate-200">
+                    {% for group, perms in permissions %}
+                        <section class="px-5 py-5" data-permission-domain>
+                            <div class="grid gap-4 lg:grid-cols-[16rem_1fr] lg:items-start">
+                                <div class="flex flex-col lg:min-h-24 lg:w-64">
+                                    <h6 class="text-sm font-semibold text-content">{{ group }}</h6>
+                                    <p class="mt-1 text-xs text-muted">{{ group.description }}</p>
+                                    <label
+                                        class="mt-3 inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-muted lg:mt-auto">
+                                        <input type="checkbox"
+                                               class="rounded border-edge text-emerald-600 focus:ring-emerald-500"
+                                               checked data-permission-domain-toggle>
+                                        Select all
+                                    </label>
+                                </div>
+                                <div class="grid min-w-0 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                                    {% for permission in perms %}
+                                        <label
+                                            class="min-h-24 cursor-pointer rounded-md border border-edge bg-surface px-3 py-3 hover:border-emerald-200 hover:bg-accent-soft/30">
+                                        <span class="flex min-w-0 items-start gap-2.5">
+                                            <input type="checkbox" name="permissions[]" value="{{ permission.name }}"
+                                                   class="mt-0.5 shrink-0 rounded border-edge text-emerald-600 focus:ring-emerald-500"
+                                                   data-permission-checkbox
+                                                {% if old('permissions') %}
+                                                    {% for key, field in old('permissions') %}
+                                                        {% if old('permissions.' ~ key) == permission.name %}checked{% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            >
+                                            <span
+                                                class="block min-w-0 truncate text-sm font-medium text-content">{{ permission.name }}</span>
+                                        </span>
+                                            <span class="block pl-7">
+                                            <span
+                                                class="mt-0.5 block text-xs text-muted">{{ permission.description }}</span>
+                                        </span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </section>
+                    {% endfor %}
+                </div>
+
+                <div
+                    class="flex flex-col gap-3 border-t border-edge bg-subtle px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-xs text-muted">Saving this role syncs the role details and selected `permissions[]`
+                        values.</p>
+                    <div class="flex flex-col gap-2 sm:flex-row">
+                        <button type="reset"
+                                class="rounded-md border border-edge bg-surface px-3 py-1.5 text-sm font-semibold text-content shadow-sm hover:bg-subtle">
+                            Reset
+                        </button>
+                        <button type="submit"
+                                class="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                            Save {{ selected_role.label }}</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
