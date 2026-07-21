@@ -1,0 +1,38 @@
+# Codecov configuration for AdAstra.
+#
+# Everything here is informational on purpose: coverage is a signal to look
+# at, not a gate that blocks merges. Flip `informational: false` later if the
+# project ever wants coverage to be enforceable.
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+        informational: true
+    patch:
+      default:
+        target: auto
+        informational: true
+
+comment:
+  layout: "condensed_header, diff, flags, files"
+  require_changes: true
+  behavior: default
+
+ignore:
+  # Schema definition, not logic — executed by every test, meaningful to none.
+  - "packages/core/database/migrations/**"
+  - "packages/core/database/seeders/**"
+  - "packages/core/database/factories/**"
+
+  # Static ISO reference data (Countries, Subdivisions). Several hundred lines
+  # of array literals that would distort the percentage in both directions.
+  - "packages/core/src/Support/Iso/**"
+
+  # Thin Laravel host application; the platform lives in packages/core.
+  - "app/**"
+  - "bootstrap/**"
+  - "config/**"
+  - "public/**"
