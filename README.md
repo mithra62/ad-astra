@@ -1,5 +1,14 @@
 # AdAstra
 
+[![tests](https://github.com/mithra62/ad-astra/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mithra62/ad-astra/actions/workflows/tests.yml)
+[![PHP](https://img.shields.io/badge/PHP-8.2%20%7C%208.3%20%7C%208.4-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)](https://laravel.com/)
+[![code style](https://img.shields.io/badge/code%20style-PSR--12-blue)](https://www.php-fig.org/psr/psr-12/)
+[![release](https://img.shields.io/github/v/release/mithra62/ad-astra?include_prereleases&label=release)](https://github.com/mithra62/ad-astra/releases)
+[![status](https://img.shields.io/badge/status-alpha-orange)](https://github.com/mithra62/ad-astra/releases)
+[![tests](https://img.shields.io/badge/tests-2454%20passing-success)]()
+[![last commit](https://img.shields.io/github/last-commit/mithra62/ad-astra)]()
+
 > **A content platform built around your content model, where content types are real classes, not just schema rows.**
 
 AdAstra is an opinionated content platform built for developers who want complete control over how content is modeled, managed, and delivered.
