@@ -75,6 +75,18 @@ jobs:
       - name: Run test suite
         run: php artisan test
 
+      # One upload per commit, not three. phpunit.xml already writes
+      # coverage/clover.xml on every run, so nothing extra is generated here.
+      - name: Upload coverage to Codecov
+        if: matrix.php == '8.3'
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage/clover.xml
+          # Never fail the build because Codecov had a bad day.
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
   style:
     name: Pint
     runs-on: ubuntu-latest
