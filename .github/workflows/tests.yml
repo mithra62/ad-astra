@@ -33,8 +33,11 @@ jobs:
           extensions: curl, fileinfo, gd, imagick, intl, mbstring, pdo_sqlite, sqlite3, zip
           # phpunit.xml configures coverage reports unconditionally, so a
           # driver has to be present or PHPUnit exits non-zero after the
-          # suite passes. PCOV is much faster than Xdebug for this.
-          coverage: pcov
+          # suite passes. Xdebug (not PCOV) because adastra/core is installed
+          # as a symlinked path repository: Xdebug resolves the symlink to the
+          # real packages/core/src path so coverage matches the <source>
+          # filter, where PCOV records the vendor/ symlink path and reports 0%.
+          coverage: xdebug
 
       - name: Cache Composer packages
         uses: actions/cache@v5
