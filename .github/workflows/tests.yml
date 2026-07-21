@@ -31,7 +31,10 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: curl, fileinfo, gd, imagick, intl, mbstring, pdo_sqlite, sqlite3, zip
-          coverage: none
+          # phpunit.xml configures coverage reports unconditionally, so a
+          # driver has to be present or PHPUnit exits non-zero after the
+          # suite passes. PCOV is much faster than Xdebug for this.
+          coverage: pcov
 
       - name: Cache Composer packages
         uses: actions/cache@v4
