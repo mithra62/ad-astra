@@ -8,6 +8,7 @@
 [![status](https://img.shields.io/badge/status-alpha-orange)](https://github.com/mithra62/ad-astra/releases)
 [![tests](https://img.shields.io/badge/tests-2454%20passing-success)]()
 [![last commit](https://img.shields.io/github/last-commit/mithra62/ad-astra)]()
+[![codecov](https://codecov.io/gh/mithra62/ad-astra/branch/main/graph/badge.svg)](https://codecov.io/gh/mithra62/ad-astra)
 
 > **A content platform built around your content model, where content types are real classes, not just schema rows.**
 
