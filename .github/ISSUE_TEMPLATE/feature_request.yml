@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest something AdAstra should do.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature requests during alpha are genuinely useful, particularly ones
+        about the content model itself. Please check the roadmap in the README
+        first, since multi-tenancy, localization, SEO, queued actions and
+        keyword search are already planned.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you running into?
+      description: >
+        Describe the situation, not the solution. The underlying problem is
+        usually more useful than a proposed API.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to see?
+      description: If you have a specific shape in mind, describe it here.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer does this belong to?
+      description: Best guess is fine.
+      options:
+        - Content model (entry types, fields, layouts, statuses)
+        - Media
+        - API
+        - Routing and templates
+        - Admin interface
+        - Tooling (doctor, console commands)
+        - Not sure
+    validations:
+      required: true

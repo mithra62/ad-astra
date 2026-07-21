@@ -1,0 +1,89 @@
+name: tests
+
+on:
+  push:
+    branches: [main, develop, 'dev-alpha*']
+  pull_request:
+    branches: [main, develop, 'dev-alpha*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, fileinfo, gd, imagick, intl, mbstring, pdo_sqlite, sqlite3, zip
+          coverage: none
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ matrix.php }}-
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      # vite.config.js is gitignored (it holds machine-specific dev server
+      # settings), so CI builds from the tracked sample instead.
+      - name: Build front-end assets
+        run: |
+          cp vite.config.sample.js vite.config.js
+          npm run build
+
+      - name: Prepare environment
+        run: |
+          cp .env.testing .env
+          php artisan key:generate
+          touch database/testing.sqlite
+          php artisan migrate --force
+
+      - name: Run test suite
+        run: php artisan test
+
+  style:
+    name: Pint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Check code style
+        run: vendor/bin/pint --preset psr12 --test

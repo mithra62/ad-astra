@@ -1,0 +1,73 @@
+name: Bug report
+description: Something in AdAstra isn't working the way it should.
+labels: ["bug", "alpha"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing an alpha. Breaking things is the point.
+
+        Before filing: please check that a similar issue isn't already open, and
+        note that known media layer and field type issues are being tracked for
+        Alpha 3.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what did you get instead?
+      placeholder: |
+        Expected: saving an entry with an empty relationship field leaves it empty.
+        Actual: it throws a 500 from FieldValueObserver.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: The smallest sequence that reliably triggers it.
+      placeholder: |
+        1. Create an entry type with a Relationship field
+        2. Save an entry without selecting anything
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `php artisan adastra:doctor`
+      description: >
+        This is read-only and secrets-safe, so it's fine to paste directly.
+        Use `php artisan adastra:doctor --format=json` if you prefer.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: AdAstra version
+      placeholder: "0.0.2 (Alpha 2)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: errors
+    attributes:
+      label: Relevant log output or stack trace
+      description: From `storage/logs/`. Please redact anything sensitive.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Before submitting
+      options:
+        - label: I'm running a supported PHP version (8.2+)
+          required: true
+        - label: I've run `php artisan optimize:clear` and the issue persists
+          required: true
