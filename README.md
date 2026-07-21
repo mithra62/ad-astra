@@ -6,7 +6,6 @@
 [![code style](https://img.shields.io/badge/code%20style-PSR--12-blue)](https://www.php-fig.org/psr/psr-12/)
 [![release](https://img.shields.io/github/v/release/mithra62/ad-astra?include_prereleases&label=release)](https://github.com/mithra62/ad-astra/releases)
 [![status](https://img.shields.io/badge/status-alpha-orange)](https://github.com/mithra62/ad-astra/releases)
-[![tests](https://img.shields.io/badge/tests-2454%20passing-success)]()
 [![last commit](https://img.shields.io/github/last-commit/mithra62/ad-astra)]()
 [![codecov](https://codecov.io/gh/mithra62/ad-astra/branch/main/graph/badge.svg)](https://codecov.io/gh/mithra62/ad-astra)
 
