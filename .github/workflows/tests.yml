@@ -65,6 +65,9 @@ jobs:
           php artisan key:generate
           touch database/testing.sqlite
           php artisan migrate --force
+          # public/storage is gitignored, so a fresh checkout has no symlink
+          # and doctor's storage.public-symlink check fails the run.
+          php artisan storage:link
 
       - name: Run test suite
         run: php artisan test
