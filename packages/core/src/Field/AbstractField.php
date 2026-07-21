@@ -2,10 +2,12 @@
 
 namespace AdAstra\Field;
 
+use AdAstra\Blueprint\Blueprint;
+use AdAstra\Blueprint\Contracts\ProvidesBlueprint;
 use AdAstra\Models\Field;
 use InvalidArgumentException;
 
-abstract class AbstractField
+abstract class AbstractField implements ProvidesBlueprint
 {
     /**
      * @var string
@@ -36,6 +38,12 @@ abstract class AbstractField
      * @var array
      */
     protected array $rules = [];
+
+    /**
+     * Memoised blueprint built from $settings_form. Safe to cache: the schema
+     * is a fixed class property, not per-request state.
+     */
+    private ?Blueprint $blueprintCache = null;
 
     public function __construct(array $settings, Field $field = null)
     {
@@ -129,6 +137,15 @@ abstract class AbstractField
         return $this->settings[$key] ?? $default;
     }
 
+    /**
+     * The blueprint (typed fieldset) describing this type's settings form.
+     * Backs settingsDefaults()/settingsRules() and the render/filter paths.
+     */
+    public function blueprint(): Blueprint
+    {
+        return $this->blueprintCache ??= Blueprint::fromArray($this->settings_form);
+    }
+
     public function settingsForm(): array
     {
         return $this->settings_form;
@@ -136,18 +153,12 @@ abstract class AbstractField
 
     public function settingsDefaults(): array
     {
-        return collect($this->settings_form)
-            ->map(fn ($def) => $def['default'] ?? null)
-            ->all();
+        return $this->blueprint()->defaults();
     }
 
     public function settingsRules(): array
     {
-        return collect($this->settings_form)
-            ->mapWithKeys(fn ($def, $key) => [
-                "settings.{$key}" => $def['rules'] ?? 'nullable',
-            ])
-            ->all();
+        return $this->blueprint()->rules('settings');
     }
 
     public function settingsFormOptions(): array
