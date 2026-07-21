@@ -12,14 +12,14 @@ class BbValueTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $model = new BbValue;
+        $model = new BbValue();
 
         $this->assertEquals(['field_value', 'ip_address', 'field_name'], $model->getFillable());
     }
 
     public function test_uses_bb_values_table(): void
     {
-        $model = new BbValue;
+        $model = new BbValue();
 
         $this->assertEquals('bb_values', $model->getTable());
     }

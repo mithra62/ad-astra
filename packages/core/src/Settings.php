@@ -280,6 +280,6 @@ class Settings
             ->whereNotNull('user_id')
             ->distinct()
             ->pluck('user_id')
-            ->each(fn($id) => Cache::forget("settings.user.{$id}.{$domain}"));
+            ->each(fn ($id) => Cache::forget("settings.user.{$id}.{$domain}"));
     }
 }

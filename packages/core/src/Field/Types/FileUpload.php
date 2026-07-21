@@ -49,7 +49,7 @@ class FileUpload extends AbstractField implements SyncsToMediables
         return [
             'library' => Library::orderBy('name')
                 ->get(['id', 'name'])
-                ->map(fn($lib) => ['value' => $lib->id, 'label' => $lib->name])
+                ->map(fn ($lib) => ['value' => $lib->id, 'label' => $lib->name])
                 ->all(),
         ];
     }
@@ -186,7 +186,7 @@ class FileUpload extends AbstractField implements SyncsToMediables
         return Media::whereIn('id', $ids)
             ->with('fieldValues.field.fieldType')
             ->get()
-            ->sortBy(fn($m) => array_search($m->id, $ids))
+            ->sortBy(fn ($m) => array_search($m->id, $ids))
             ->values();
     }
 

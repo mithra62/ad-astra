@@ -42,7 +42,7 @@ class EntryTreeRouteDriver implements RouteDriverInterface
         $entry_service = app(EntryService::class);
         $entry = $entry_service->find($node->entry->id);
 
-        if($entry instanceof Entry) {
+        if ($entry instanceof Entry) {
 
         }
         $template = $node->template

@@ -27,7 +27,7 @@ class EntryTypeTest extends TestCase
                 'max_depth',
                 'allowed_parent_types',
                 'sort_order'],
-            (new EntryType)->getFillable()
+            (new EntryType())->getFillable()
         );
     }
 

@@ -29,7 +29,7 @@ class EntryFactory extends Factory
 
     public function published(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status_handle' => 'published',
             'status_is_public' => true,
             'published_at' => now()->subHour(),
@@ -38,7 +38,7 @@ class EntryFactory extends Factory
 
     public function scheduledForFuture(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'published_at' => now()->addDay(),
         ]);
     }

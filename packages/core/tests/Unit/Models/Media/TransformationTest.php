@@ -19,12 +19,12 @@ class TransformationTest extends TestCase
 
     public function test_media_relationship_is_belongs_to(): void
     {
-        $this->assertInstanceOf(BelongsTo::class, (new Transformation)->media());
+        $this->assertInstanceOf(BelongsTo::class, (new Transformation())->media());
     }
 
     public function test_media_relationship_is_related_to_media_model(): void
     {
-        $this->assertInstanceOf(Media::class, (new Transformation)->media()->getRelated());
+        $this->assertInstanceOf(Media::class, (new Transformation())->media()->getRelated());
     }
 
     // -------------------------------------------------------------------------

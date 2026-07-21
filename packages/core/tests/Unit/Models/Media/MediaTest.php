@@ -18,32 +18,32 @@ class MediaTest extends TestCase
 
     public function test_library_relationship_is_belongs_to(): void
     {
-        $this->assertInstanceOf(BelongsTo::class, (new Media)->library());
+        $this->assertInstanceOf(BelongsTo::class, (new Media())->library());
     }
 
     public function test_library_is_related_to_library_model(): void
     {
-        $this->assertInstanceOf(Library::class, (new Media)->library()->getRelated());
+        $this->assertInstanceOf(Library::class, (new Media())->library()->getRelated());
     }
 
     public function test_transformations_relationship_is_has_many(): void
     {
-        $this->assertInstanceOf(HasMany::class, (new Media)->transformations());
+        $this->assertInstanceOf(HasMany::class, (new Media())->transformations());
     }
 
     public function test_categories_relationship_is_morph_to_many(): void
     {
-        $this->assertInstanceOf(MorphToMany::class, (new Media)->categories());
+        $this->assertInstanceOf(MorphToMany::class, (new Media())->categories());
     }
 
     public function test_categories_is_related_to_category_model(): void
     {
-        $this->assertInstanceOf(Category::class, (new Media)->categories()->getRelated());
+        $this->assertInstanceOf(Category::class, (new Media())->categories()->getRelated());
     }
 
     public function test_categories_uses_categorizable_morph_name(): void
     {
-        $this->assertEquals('categorizable_type', (new Media)->categories()->getMorphType());
+        $this->assertEquals('categorizable_type', (new Media())->categories()->getMorphType());
     }
 
     // -------------------------------------------------------------------------

@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApiLog extends Model
 {
-    use HasFactory,
-        Prunable;
+    use HasFactory;
+    use Prunable;
 
     /**
      * @var string[]

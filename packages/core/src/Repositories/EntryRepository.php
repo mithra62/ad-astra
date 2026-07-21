@@ -195,11 +195,11 @@ class EntryRepository
     public function resolveLayoutFields(Entry $entry): Collection
     {
         $entry->loadMissing([
-            'entryGroup.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
-            'entryGroup.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
+            'entryGroup.fieldLayout.tabs' => fn ($q) => $q->orderBy('sort_order'),
+            'entryGroup.fieldLayout.tabs.elements' => fn ($q) => $q->orderBy('sort_order'),
             'entryGroup.fieldLayout.tabs.elements.field.fieldType',
-            'entryType.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
-            'entryType.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
+            'entryType.fieldLayout.tabs' => fn ($q) => $q->orderBy('sort_order'),
+            'entryType.fieldLayout.tabs.elements' => fn ($q) => $q->orderBy('sort_order'),
             'entryType.fieldLayout.tabs.elements.field.fieldType',
         ]);
 
@@ -219,7 +219,7 @@ class EntryRepository
         // using loadRelatedRecursive() or an equivalent depth-limited loader.
         $relatedIds = array_values(array_filter(
             $relatedIds,
-            fn($id) => (int)$id !== $entry->getKey()
+            fn ($id) => (int)$id !== $entry->getKey()
         ));
 
         // Delete existing pivots for this field on this entry.
@@ -248,8 +248,7 @@ class EntryRepository
         string $fieldableType,
         string $column,
         mixed  $value,
-    ): void
-    {
+    ): void {
         $key = ['field_id' => $fieldId, 'fieldable_id' => $fieldableId, 'fieldable_type' => $fieldableType];
 
         try {

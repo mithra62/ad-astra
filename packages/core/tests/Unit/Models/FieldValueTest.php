@@ -32,7 +32,7 @@ class FieldValueTest extends TestCase
                 'value_boolean',
                 'value_json',
             ],
-            (new FieldValue)->getFillable()
+            (new FieldValue())->getFillable()
         );
     }
 
@@ -40,7 +40,7 @@ class FieldValueTest extends TestCase
     {
         $prop = (new ReflectionClass(FieldValue::class))->getProperty('with');
         $prop->setAccessible(true);
-        $this->assertContains('field', $prop->getValue(new FieldValue));
+        $this->assertContains('field', $prop->getValue(new FieldValue()));
     }
 
     public function test_casts_value_integer_to_integer(): void

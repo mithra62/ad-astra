@@ -32,7 +32,7 @@ trait FiltersFieldSettings
         return array_values(
             array_filter(
                 $raw,
-                fn($row) => trim($row['key'] ?? '') !== ''
+                fn ($row) => trim($row['key'] ?? '') !== ''
             )
         );
     }

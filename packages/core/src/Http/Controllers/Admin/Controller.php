@@ -2,7 +2,6 @@
 
 namespace AdAstra\Http\Controllers\Admin;
 
-
 use AdAstra\Http\Controllers\Controller as DefaultController;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;

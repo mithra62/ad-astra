@@ -13,7 +13,7 @@ class CategoryRepository extends AbstractFieldableRepository
 {
     public function create(Group $group, array $data): Category
     {
-        $category = new Category;
+        $category = new Category();
         $category->group_id = $group->getKey();
 
         $this->applyCoreAttributes($category, $data);
@@ -76,8 +76,8 @@ class CategoryRepository extends AbstractFieldableRepository
     public function resolveLayoutFields(Model $model): Collection
     {
         $model->loadMissing([
-            'group.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
-            'group.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
+            'group.fieldLayout.tabs' => fn ($q) => $q->orderBy('sort_order'),
+            'group.fieldLayout.tabs.elements' => fn ($q) => $q->orderBy('sort_order'),
             'group.fieldLayout.tabs.elements.field.fieldType',
         ]);
 

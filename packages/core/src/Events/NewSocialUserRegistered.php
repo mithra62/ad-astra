@@ -13,7 +13,6 @@ class NewSocialUserRegistered
         public readonly User   $user,
         public readonly string $provider,
         public readonly string $ip,
-    )
-    {
+    ) {
     }
 }

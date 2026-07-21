@@ -67,7 +67,7 @@ class User extends Controller
         }
 
         $user->loadMissing(['roles', 'tokens', 'fieldValues.field.fieldType']);
-        $user->load(['statusLogs' => fn($q) => $q->with('actor')->limit(10)]);
+        $user->load(['statusLogs' => fn ($q) => $q->with('actor')->limit(10)]);
         $layout = UserFieldLayout::resolve();
 
         return $this->view('users.show', [

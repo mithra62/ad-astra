@@ -80,8 +80,7 @@ abstract class AbstractFieldableRepository implements RepositoryInterface
         string $fieldableType,
         string $column,
         mixed  $value,
-    ): void
-    {
+    ): void {
         $key = [
             'field_id' => $fieldId,
             'fieldable_id' => $fieldableId,

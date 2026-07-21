@@ -22,7 +22,7 @@ class EditPasswordRequest extends FormRequest
     {
         return [
             'password' => 'required|min:8|confirmed',
-            'current_password' => ['required', new MatchCurrentPassword],
+            'current_password' => ['required', new MatchCurrentPassword()],
             'password_confirmation' => 'required',
         ];
     }
@@ -31,7 +31,6 @@ class EditPasswordRequest extends FormRequest
      * @return string[]
      */
     public function messages(): array
-
     {
         return [
             'current_password.required' => 'You must enter your current password.',

@@ -39,7 +39,7 @@ class FieldLayout extends Model
         $this->loadMissing('tabs.elements.field');
 
         return $this->tabs->flatMap(
-            fn($tab) => $tab->elements->map(fn($el) => $el->field)
+            fn ($tab) => $tab->elements->map(fn ($el) => $el->field)
         );
     }
 
@@ -51,7 +51,7 @@ class FieldLayout extends Model
             return Field::orderBy('name')->get();
         }
 
-        return $this->fieldGroups->flatMap(fn($g) => $g->fields)
+        return $this->fieldGroups->flatMap(fn ($g) => $g->fields)
             ->unique('id')
             ->sortBy('name')
             ->values();

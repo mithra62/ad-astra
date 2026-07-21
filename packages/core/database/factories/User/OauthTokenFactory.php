@@ -39,7 +39,7 @@ class OauthTokenFactory extends Factory
      */
     public function expired(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'expires_at' => now()->subDay(),
         ]);
     }
@@ -49,7 +49,7 @@ class OauthTokenFactory extends Factory
      */
     public function revoked(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'revoked_at' => now(),
         ]);
     }

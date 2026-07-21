@@ -29,7 +29,6 @@ class StoreUserTokenRequest extends FormRequest
      * @return string[]
      */
     public function messages(): array
-
     {
         return [
             'confirm_removal.required' => 'You must select at least one role.',

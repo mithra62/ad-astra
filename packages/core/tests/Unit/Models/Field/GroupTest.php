@@ -15,14 +15,14 @@ class GroupTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $model = new Group;
+        $model = new Group();
 
         $this->assertEquals(['name', 'handle', 'description'], $model->getFillable());
     }
 
     public function test_uses_field_groups_table(): void
     {
-        $this->assertEquals('field_groups', (new Group)->getTable());
+        $this->assertEquals('field_groups', (new Group())->getTable());
     }
 
     public function test_fields_relationship_is_morph_to_many(): void

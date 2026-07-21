@@ -65,14 +65,14 @@ class EntryResource extends JsonResource
             'fields' => $this->fieldArray(),
             'authors' => $this->whenLoaded(
                 'authors',
-                fn() => $this->authors->map(fn($a) => [
+                fn () => $this->authors->map(fn ($a) => [
                     'id' => $a->user_id,
                     'display_name' => $a->display_name,
                 ])
             ),
             'categories' => $this->whenLoaded(
                 'categories',
-                fn() => $this->categories->map(fn($c) => ['id' => $c->id, 'title' => $c->name])
+                fn () => $this->categories->map(fn ($c) => ['id' => $c->id, 'title' => $c->name])
             ),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

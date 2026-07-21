@@ -84,8 +84,7 @@ class RequestValidationTest extends TestCase
         string $typeClass,
         string $typeName,
         array  $settings,
-    ): array
-    {
+    ): array {
         $statusGroup = StatusGroup::factory()->create();
         Status::factory()->default()->create([
             'status_group_id' => $statusGroup->id,

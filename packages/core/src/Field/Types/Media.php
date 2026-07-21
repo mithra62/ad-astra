@@ -51,7 +51,7 @@ class Media extends AbstractField implements SyncsToMediables
         return [
             'libraries' => Library::orderBy('name')
                 ->get(['id', 'name'])
-                ->map(fn($lib) => ['value' => $lib->id, 'label' => $lib->name])
+                ->map(fn ($lib) => ['value' => $lib->id, 'label' => $lib->name])
                 ->all(),
         ];
     }
@@ -182,7 +182,7 @@ class Media extends AbstractField implements SyncsToMediables
         return MediaModel::whereIn('id', $ids)
             ->with('fieldValues.field.fieldType')
             ->get()
-            ->sortBy(fn($m) => array_search($m->id, $ids))
+            ->sortBy(fn ($m) => array_search($m->id, $ids))
             ->values();
     }
 }

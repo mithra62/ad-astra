@@ -400,6 +400,6 @@ class SettingsResolverTest extends TestCase
     {
         parent::setUp();
         Cache::flush();
-        $this->settings = new Settings;
+        $this->settings = new Settings();
     }
 }

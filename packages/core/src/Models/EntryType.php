@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EntryType extends Model
 {
-    use HasFactory, HasFieldLayout;
+    use HasFactory;
+    use HasFieldLayout;
 
     protected $fillable = [
         'entry_group_id',

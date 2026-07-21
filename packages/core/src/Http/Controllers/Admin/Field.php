@@ -92,7 +92,7 @@ class Field extends Controller
         $groups = FieldGroup::all();
         $active_group = $field->groups->first();
         $layouts = FieldLayoutModel::with(['entryGroups', 'entryTypes.entryGroup'])
-            ->whereHas('tabs.elements', fn($q) => $q->where('field_id', $field->id))
+            ->whereHas('tabs.elements', fn ($q) => $q->where('field_id', $field->id))
             ->orderBy('name')
             ->get();
 

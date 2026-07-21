@@ -21,13 +21,13 @@ class SettingValueTest extends TestCase
     {
         $this->assertEquals(
             ['domain', 'field_handle', 'user_id', 'value_text', 'value_integer', 'value_float', 'value_boolean', 'value_json'],
-            (new SettingValue)->getFillable()
+            (new SettingValue())->getFillable()
         );
     }
 
     public function test_uses_correct_table(): void
     {
-        $this->assertEquals('setting_values', (new SettingValue)->getTable());
+        $this->assertEquals('setting_values', (new SettingValue())->getTable());
     }
 
     // -------------------------------------------------------------------------
@@ -96,7 +96,7 @@ class SettingValueTest extends TestCase
 
     public function test_user_returns_belongs_to(): void
     {
-        $this->assertInstanceOf(BelongsTo::class, (new SettingValue)->user());
+        $this->assertInstanceOf(BelongsTo::class, (new SettingValue())->user());
     }
 
     public function test_user_id_can_be_null_for_system_values(): void

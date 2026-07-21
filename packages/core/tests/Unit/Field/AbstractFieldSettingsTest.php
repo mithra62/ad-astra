@@ -105,7 +105,7 @@ class AbstractFieldSettingsTest extends TestCase
     public function test_settings_rules_falls_back_to_nullable_when_rules_key_absent(): void
     {
         // Use an anonymous subclass with a settings_form entry that has no 'rules' key
-        $type = new class([], null) extends AbstractField {
+        $type = new class ([], null) extends AbstractField {
             protected array $settings_form = [
                 'my_setting' => ['type' => 'text', 'label' => 'My Setting'],
             ];

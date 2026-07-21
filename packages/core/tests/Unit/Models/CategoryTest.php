@@ -16,14 +16,14 @@ class CategoryTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $model = new Category;
+        $model = new Category();
 
         $this->assertEquals(['group_id', 'parent_id', 'name', 'handle', 'sort_order'], $model->getFillable());
     }
 
     public function test_uses_categories_table(): void
     {
-        $this->assertEquals('categories', (new Category)->getTable());
+        $this->assertEquals('categories', (new Category())->getTable());
     }
 
     public function test_casts_group_id_to_integer(): void

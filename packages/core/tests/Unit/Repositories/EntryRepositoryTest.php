@@ -72,7 +72,7 @@ class EntryRepositoryTest extends TestCase
 
     private function makeAbstractEntryType(EntryType $record): AbstractEntryType
     {
-        return new class($record) extends AbstractEntryType {
+        return new class ($record) extends AbstractEntryType {
         };
     }
 
@@ -631,6 +631,6 @@ class EntryRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repo = new EntryRepository;
+        $this->repo = new EntryRepository();
     }
 }

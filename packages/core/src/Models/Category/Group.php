@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Group extends Model
 {
-    use HasFactory, HasFieldLayout;
+    use HasFactory;
+    use HasFieldLayout;
 
     protected $table = 'category_groups';
 

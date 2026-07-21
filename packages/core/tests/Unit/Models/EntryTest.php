@@ -27,7 +27,7 @@ class EntryTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $entry = new Entry;
+        $entry = new Entry();
 
         $this->assertEquals(
             ['entry_group_id', 'entry_type_id', 'status_id', 'status_handle', 'status_is_public', 'title', 'handle', 'published_at'],
@@ -154,11 +154,11 @@ class EntryTest extends TestCase
 
     public function test_field_returns_scalar_value_by_handle(): void
     {
-        $field = new class {
+        $field = new class () {
             public string $handle = 'body';
         };
 
-        $fieldValue = new class($field) {
+        $fieldValue = new class ($field) {
             public function __construct(public readonly object $field)
             {
             }
@@ -169,7 +169,7 @@ class EntryTest extends TestCase
             }
         };
 
-        $entry = new Entry;
+        $entry = new Entry();
         $entry->setRelation('fieldValues', collect([$fieldValue]));
         $entry->setRelation('entryRelationships', collect([]));
 
@@ -178,7 +178,7 @@ class EntryTest extends TestCase
 
     public function test_field_returns_null_for_unknown_handle(): void
     {
-        $entry = new Entry;
+        $entry = new Entry();
         $entry->setRelation('fieldValues', collect([]));
         $entry->setRelation('entryRelationships', collect([]));
 
@@ -187,11 +187,11 @@ class EntryTest extends TestCase
 
     public function test_field_does_not_return_scalar_value_for_wrong_handle(): void
     {
-        $field = new class {
+        $field = new class () {
             public string $handle = 'title';
         };
 
-        $fieldValue = new class($field) {
+        $fieldValue = new class ($field) {
             public function __construct(public readonly object $field)
             {
             }
@@ -202,7 +202,7 @@ class EntryTest extends TestCase
             }
         };
 
-        $entry = new Entry;
+        $entry = new Entry();
         $entry->setRelation('fieldValues', collect([$fieldValue]));
         $entry->setRelation('entryRelationships', collect([]));
 
@@ -213,21 +213,20 @@ class EntryTest extends TestCase
     {
         $relatedEntry = new Entry(['title' => 'Related Entry']);
 
-        $field = new class {
+        $field = new class () {
             public string $handle = 'related_posts';
         };
 
-        $relationship = new class($field, $relatedEntry, 1) {
+        $relationship = new class ($field, $relatedEntry, 1) {
             public function __construct(
                 public readonly object $field,
                 public readonly Entry  $relatedEntry,
                 public readonly int    $sort_order,
-            )
-            {
+            ) {
             }
         };
 
-        $entry = new Entry;
+        $entry = new Entry();
         $entry->setRelation('fieldValues', collect([]));
         $entry->setRelation('entryRelationships', collect([$relationship]));
 
@@ -239,22 +238,21 @@ class EntryTest extends TestCase
 
     public function test_field_returns_null_when_relational_field_has_no_entries(): void
     {
-        $field = new class {
+        $field = new class () {
             public string $handle = 'related_posts';
         };
 
         /** Simulates a broken FK where relatedEntry is null. */
-        $relationship = new class($field, null, 1) {
+        $relationship = new class ($field, null, 1) {
             public function __construct(
                 public readonly object $field,
                 public readonly ?Entry $relatedEntry,
                 public readonly int    $sort_order,
-            )
-            {
+            ) {
             }
         };
 
-        $entry = new Entry;
+        $entry = new Entry();
         $entry->setRelation('fieldValues', collect([]));
         $entry->setRelation('entryRelationships', collect([$relationship]));
 
@@ -266,21 +264,20 @@ class EntryTest extends TestCase
         $first = new Entry(['title' => 'First']);
         $second = new Entry(['title' => 'Second']);
 
-        $field = new class {
+        $field = new class () {
             public string $handle = 'related_posts';
         };
 
-        $makeRel = fn(Entry $e, int $order) => new class($field, $e, $order) {
+        $makeRel = fn (Entry $e, int $order) => new class ($field, $e, $order) {
             public function __construct(
                 public readonly object $field,
                 public readonly Entry  $relatedEntry,
                 public readonly int    $sort_order,
-            )
-            {
+            ) {
             }
         };
 
-        $entry = new Entry;
+        $entry = new Entry();
         $entry->setRelation('fieldValues', collect([]));
         // Intentionally insert in reverse sort order.
         $entry->setRelation('entryRelationships', collect([$makeRel($second, 2), $makeRel($first, 1)]));
@@ -298,15 +295,15 @@ class EntryTest extends TestCase
 
     public function test_get_field_layout_returns_entry_type_layout_when_available(): void
     {
-        $typeLayout = new FieldLayout;
+        $typeLayout = new FieldLayout();
 
-        $entryType = new EntryType;
+        $entryType = new EntryType();
         $entryType->setRelation('fieldLayout', $typeLayout);
 
-        $entryGroup = new EntryGroup;
-        $entryGroup->setRelation('fieldLayout', new FieldLayout);
+        $entryGroup = new EntryGroup();
+        $entryGroup->setRelation('fieldLayout', new FieldLayout());
 
-        $entry = new Entry;
+        $entry = new Entry();
         $entry->setRelation('entryType', $entryType);
         $entry->setRelation('entryGroup', $entryGroup);
 
@@ -315,14 +312,14 @@ class EntryTest extends TestCase
 
     public function test_get_field_layout_falls_back_to_entry_group_layout(): void
     {
-        $entryType = new EntryType;
+        $entryType = new EntryType();
         $entryType->setRelation('fieldLayout', null);
 
-        $groupLayout = new FieldLayout;
-        $entryGroup = new EntryGroup;
+        $groupLayout = new FieldLayout();
+        $entryGroup = new EntryGroup();
         $entryGroup->setRelation('fieldLayout', $groupLayout);
 
-        $entry = new Entry;
+        $entry = new Entry();
         $entry->setRelation('entryType', $entryType);
         $entry->setRelation('entryGroup', $entryGroup);
 

@@ -53,7 +53,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
     }
@@ -64,28 +64,28 @@ class UserFactory extends Factory
 
     public function active(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => UserStatus::ACTIVE,
         ]);
     }
 
     public function pending(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => UserStatus::PENDING,
         ]);
     }
 
     public function inactive(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => UserStatus::INACTIVE,
         ]);
     }
 
     public function suspended(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => UserStatus::SUSPENDED,
             'suspended_until' => now()->addDays(7),
         ]);
@@ -93,7 +93,7 @@ class UserFactory extends Factory
 
     public function banned(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => UserStatus::BANNED,
             'banned_at' => now(),
         ]);
@@ -105,7 +105,7 @@ class UserFactory extends Factory
      */
     public function locked(int $minutes = 30): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'locked_until' => now()->addMinutes($minutes),
         ]);
     }

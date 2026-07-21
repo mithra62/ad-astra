@@ -1,6 +1,5 @@
 <?php
 
-
 namespace AdAstra\Models\User;
 
 use Carbon\CarbonInterface;

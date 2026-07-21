@@ -5,7 +5,6 @@ namespace AdAstra\Http\Requests\FieldLayout\Tab;
 use AdAstra\Http\Requests\FormRequest;
 use AdAstra\Rules\FieldLayout\Tab\UniqueHandleByLayout;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class StoreTabRequest extends FormRequest
 {

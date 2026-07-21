@@ -40,7 +40,7 @@ class Country extends AbstractField
     public function settingsFormOptions(): array
     {
         $countries = array_map(
-            fn($c) => ['value' => $c['code'], 'label' => $c['name']],
+            fn ($c) => ['value' => $c['code'], 'label' => $c['name']],
             Countries::all(),
         );
 
@@ -100,7 +100,7 @@ class Country extends AbstractField
         if (!empty($allowed)) {
             $all = array_values(array_filter(
                 $all,
-                fn($c) => in_array($c['code'], $allowed, true),
+                fn ($c) => in_array($c['code'], $allowed, true),
             ));
         }
 

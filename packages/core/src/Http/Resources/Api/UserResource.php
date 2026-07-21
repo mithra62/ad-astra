@@ -35,7 +35,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'roles' => $this->whenLoaded('roles', fn() => $this->roles->pluck('name')->values()),
+            'roles' => $this->whenLoaded('roles', fn () => $this->roles->pluck('name')->values()),
             'avatar' => $this->avatar(),
             'fields' => $this->fieldArray(),
             'created_at' => $this->created_at,

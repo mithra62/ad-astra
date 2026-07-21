@@ -14,7 +14,6 @@ class UserLockChanged
         public readonly mixed  $previousLockedUntil,
         public readonly mixed  $newLockedUntil,
         public readonly string $reason = 'admin',
-    )
-    {
+    ) {
     }
 }

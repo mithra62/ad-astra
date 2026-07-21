@@ -9,7 +9,6 @@ class RouteResult
         public string $template,
         public array  $data = [],
         public mixed  $resource = null,
-    )
-    {
+    ) {
     }
 }

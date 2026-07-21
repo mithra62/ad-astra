@@ -61,7 +61,7 @@ class Users extends AbstractField
         return [
             'roles' => Role::orderBy('name')
                 ->get(['id', 'name'])
-                ->map(fn($r) => ['value' => $r->id, 'label' => $r->name])
+                ->map(fn ($r) => ['value' => $r->id, 'label' => $r->name])
                 ->all(),
         ];
     }
@@ -93,7 +93,7 @@ class Users extends AbstractField
         $roles = $this->getSetting('roles', []);
         if (!empty($roles)) {
             $invalidUser = User::whereIn('id', $ids)
-                ->whereDoesntHave('roles', fn($q) => $q->whereIn('id', (array)$roles))
+                ->whereDoesntHave('roles', fn ($q) => $q->whereIn('id', (array)$roles))
                 ->exists();
 
             if ($invalidUser) {
@@ -133,7 +133,7 @@ class Users extends AbstractField
         return User::select(['id', 'name', 'email'])
             ->whereIn('id', $ids)
             ->get()
-            ->sortBy(fn($u) => array_search($u->id, $ids))
+            ->sortBy(fn ($u) => array_search($u->id, $ids))
             ->values();
     }
 
@@ -143,7 +143,7 @@ class Users extends AbstractField
 
         $query = User::select(['id', 'name', 'email'])->orderBy('name');
         if (!empty($roles)) {
-            $query->whereHas('roles', fn($q) => $q->whereIn('id', (array)$roles));
+            $query->whereHas('roles', fn ($q) => $q->whereIn('id', (array)$roles));
         }
 
         $params['available_users'] = $query->get();
@@ -156,7 +156,7 @@ class Users extends AbstractField
     private function extractSelectedIds(mixed $value): array
     {
         if ($value instanceof Collection) {
-            return $value->pluck('id')->map(fn($id) => (int)$id)->all();
+            return $value->pluck('id')->map(fn ($id) => (int)$id)->all();
         }
 
         if (is_array($value)) {

@@ -37,7 +37,7 @@ class AbstractEntryTypeTest extends TestCase
     {
         $record ??= EntryType::factory()->create();
 
-        return new class($record) extends AbstractEntryType {
+        return new class ($record) extends AbstractEntryType {
             // Expose protected method for testing.
             public function callExistingFieldValue(?Entry $entry, string $handle): mixed
             {

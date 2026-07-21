@@ -43,7 +43,7 @@ class StoreUserRequest extends FormRequest
         $actor = Auth::user();
 
         return Role::query()
-            ->when(!$actor?->hasRole('super admin'), fn($q) => $q->where('name', '!=', 'super admin'))
+            ->when(!$actor?->hasRole('super admin'), fn ($q) => $q->where('name', '!=', 'super admin'))
             ->pluck('name')
             ->all();
     }

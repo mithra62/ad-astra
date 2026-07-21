@@ -337,7 +337,7 @@ class MediaTest extends TestCase
         // The Media field's render() calls route('media.picker.index'); make
         // sure that name resolves under the testing route table.
         if (!Route::has('media.picker.index')) {
-            Route::get('/__test/picker', fn() => null)->name('media.picker.index');
+            Route::get('/__test/picker', fn () => null)->name('media.picker.index');
         }
     }
 }

@@ -14,8 +14,7 @@ class BulkUpdateTabElements extends AbstractAction
         private readonly EditTabElement   $editElement,
         private readonly CreateTabElement $createElement,
         private readonly DeleteTabElement $deleteElement,
-    )
-    {
+    ) {
     }
 
     public function update(Tab $tab, array $input): Tab

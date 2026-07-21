@@ -11,7 +11,8 @@ use Throwable;
 
 class ProcessTransformation implements ShouldQueue
 {
-    use Dispatchable, Queueable;
+    use Dispatchable;
+    use Queueable;
 
     public function __construct(public readonly int $transformationId)
     {

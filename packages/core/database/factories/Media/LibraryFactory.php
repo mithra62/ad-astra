@@ -28,14 +28,14 @@ class LibraryFactory extends Factory
 
     public function withImages(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'allowed_types' => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
         ]);
     }
 
     public function withStatusGroup(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'status_group_id' => StatusGroup::factory(),
         ]);
     }

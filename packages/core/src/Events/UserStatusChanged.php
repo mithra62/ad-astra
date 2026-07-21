@@ -15,7 +15,6 @@ class UserStatusChanged
         public readonly string  $newStatus,
         public readonly ?string $reason = null,
         public readonly array   $context = [],
-    )
-    {
+    ) {
     }
 }

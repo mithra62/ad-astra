@@ -39,7 +39,8 @@ class StoreCategoryRequest extends FormRequest
                     Rule::exists('categories', 'id')->where('group_id', $this->route()->parameter('group_id')),
                 ],
             ],
-            $this->schemaFieldRules($schema));
+            $this->schemaFieldRules($schema)
+        );
     }
 
     public function messages(): array

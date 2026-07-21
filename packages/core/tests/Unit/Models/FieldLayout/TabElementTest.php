@@ -24,13 +24,13 @@ class TabElementTest extends TestCase
                 'schema_property',
                 'label',
                 'instructions',],
-            (new TabElement)->getFillable()
+            (new TabElement())->getFillable()
         );
     }
 
     public function test_uses_field_layout_tab_elements_table(): void
     {
-        $this->assertEquals('field_layout_tab_elements', (new TabElement)->getTable());
+        $this->assertEquals('field_layout_tab_elements', (new TabElement())->getTable());
     }
 
     public function test_casts_required_to_boolean(): void

@@ -106,8 +106,8 @@ class MediaRepository extends AbstractFieldableRepository
     public function resolveLayoutFields(Model $model): Collection
     {
         $model->loadMissing([
-            'library.fieldLayout.tabs' => fn($q) => $q->orderBy('sort_order'),
-            'library.fieldLayout.tabs.elements' => fn($q) => $q->orderBy('sort_order'),
+            'library.fieldLayout.tabs' => fn ($q) => $q->orderBy('sort_order'),
+            'library.fieldLayout.tabs.elements' => fn ($q) => $q->orderBy('sort_order'),
             'library.fieldLayout.tabs.elements.field.fieldType',
         ]);
 

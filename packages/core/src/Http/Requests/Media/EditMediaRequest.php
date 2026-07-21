@@ -24,7 +24,7 @@ class EditMediaRequest extends FormRequest
                     'string',
                     'max:100',
                     Rule::exists('statuses', 'handle')->where(
-                        fn($query) => $query->where('status_group_id', $schema?->status_group_id)
+                        fn ($query) => $query->where('status_group_id', $schema?->status_group_id)
                     ),
                 ],
             ],

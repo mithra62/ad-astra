@@ -171,11 +171,12 @@ class FakeDataSeeder extends Seeder
                 ?->format('Y-m-d'),
             'website' => fake()->optional(0.35)->url(),
             'bio' => fake()->optional(0.50)->paragraphs(
-                fake()->numberBetween(1, 3), true
+                fake()->numberBetween(1, 3),
+                true
             ),
             'social_twitter' => fake()->optional(0.30)->userName(),
             'social_linkedin' => fake()->optional(0.25)->url(),
-        ], fn($v) => $v !== null);
+        ], fn ($v) => $v !== null);
     }
 
     /**
@@ -298,8 +299,7 @@ class FakeDataSeeder extends Seeder
         int           &$budget,
         int           &$created,
         int           &$failed,
-    ): void
-    {
+    ): void {
         if ($budget <= 0 || $depth > self::MAX_CATEGORY_DEPTH) {
             return;
         }
@@ -335,8 +335,13 @@ class FakeDataSeeder extends Seeder
 
         for ($i = 0; $i < $childCount && $budget > 0; $i++) {
             $this->createCategoryNode(
-                $group, $fieldDefs, $category->id,
-                $depth + 1, $budget, $created, $failed,
+                $group,
+                $fieldDefs,
+                $category->id,
+                $depth + 1,
+                $budget,
+                $created,
+                $failed,
             );
         }
     }
@@ -471,7 +476,7 @@ class FakeDataSeeder extends Seeder
         // Load every category ID, grouped by their category-group ID.
         $categoryIdsByGroup = Category::all()
             ->groupBy('group_id')
-            ->map(fn($cats) => $cats->pluck('id')->all());
+            ->map(fn ($cats) => $cats->pluck('id')->all());
 
         // Load every entry type with its entry group and that group's category groups.
         $entryTypes = EntryType::with('entryGroup.categoryGroups')->get();

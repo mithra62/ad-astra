@@ -48,7 +48,7 @@ class StateProvince extends AbstractField
     {
         return [
             'country' => array_map(
-                fn($c) => ['value' => $c['code'], 'label' => $c['name']],
+                fn ($c) => ['value' => $c['code'], 'label' => $c['name']],
                 Countries::all(),
             ),
         ];
