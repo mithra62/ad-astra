@@ -49,7 +49,7 @@ php artisan test
 php artisan test --filter=YourTest
 
 # style, required before submitting
-vendor/bin/pint --preset psr12 --dirty
+vendor/bin/pint --dirty
 ```
 
 See [README.md](../README.md#setup) for full setup, including the `DEV_USER_*`

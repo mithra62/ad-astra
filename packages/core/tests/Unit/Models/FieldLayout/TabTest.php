@@ -18,12 +18,12 @@ class TabTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $this->assertEquals(['field_layout_id', 'name', 'handle', 'sort_order'], (new Tab)->getFillable());
+        $this->assertEquals(['field_layout_id', 'name', 'handle', 'sort_order'], (new Tab())->getFillable());
     }
 
     public function test_uses_field_layout_tabs_table(): void
     {
-        $this->assertEquals('field_layout_tabs', (new Tab)->getTable());
+        $this->assertEquals('field_layout_tabs', (new Tab())->getTable());
     }
 
     public function test_casts_sort_order_to_integer(): void

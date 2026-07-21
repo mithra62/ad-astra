@@ -318,7 +318,7 @@ class PersistsFieldValuesTest extends TestCase
     {
         parent::setUp();
 
-        $this->subject = new class {
+        $this->subject = new class () {
             use PersistsFieldValues;
         };
     }

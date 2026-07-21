@@ -43,7 +43,7 @@ class SettingDomain extends Model
         return array_values(
             array_filter(
                 $this->configFields(),
-                fn(array $f) => ($f['user_overridable'] ?? false) && !($f['hidden'] ?? false)
+                fn (array $f) => ($f['user_overridable'] ?? false) && !($f['hidden'] ?? false)
             )
         );
     }

@@ -15,7 +15,7 @@ class ValidatesAgainstOptionsTest extends TestCase
 
     private function makeType(array $settings = []): object
     {
-        return new class($settings) {
+        return new class ($settings) {
             use ValidatesAgainstOptions;
 
             public function __construct(private array $settings)

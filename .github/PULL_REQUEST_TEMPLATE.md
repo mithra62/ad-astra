@@ -14,7 +14,7 @@ Fixes #
 ## Checklist
 
 - [ ] `php artisan test` passes locally
-- [ ] `vendor/bin/pint --preset psr12 --dirty` has been run
+- [ ] `vendor/bin/pint --dirty` has been run
 - [ ] Tests were added or updated for the behavior being changed
 - [ ] Any new or changed database structure includes a migration
 - [ ] `CHANGELOG.md` has been updated, if this is user-facing

@@ -183,6 +183,6 @@ class CategoryRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repo = new CategoryRepository;
+        $this->repo = new CategoryRepository();
     }
 }

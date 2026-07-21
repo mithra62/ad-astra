@@ -14,14 +14,14 @@ class GroupTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $model = new Group;
+        $model = new Group();
 
         $this->assertEquals(['field_layout_id', 'name', 'handle', 'description', 'sort_order'], $model->getFillable());
     }
 
     public function test_uses_category_groups_table(): void
     {
-        $this->assertEquals('category_groups', (new Group)->getTable());
+        $this->assertEquals('category_groups', (new Group())->getTable());
     }
 
     public function test_casts_sort_order_to_integer(): void

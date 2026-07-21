@@ -14,7 +14,7 @@ class StatusTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $model = new Status;
+        $model = new Status();
 
         $this->assertEquals(
             ['status_group_id', 'name', 'handle', 'color', 'is_default', 'is_public', 'sort_order'],

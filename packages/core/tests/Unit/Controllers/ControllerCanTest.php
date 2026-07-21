@@ -49,7 +49,7 @@ class ControllerCanTest extends TestCase
     public function test_returns_true_when_gate_allows_via_closure(): void
     {
         $user = User::factory()->create();
-        Gate::define('always-true', fn() => true);
+        Gate::define('always-true', fn () => true);
 
         $this->actingAs($user);
 
@@ -60,7 +60,7 @@ class ControllerCanTest extends TestCase
     {
         parent::setUp();
 
-        $this->controller = new class extends Controller {
+        $this->controller = new class () extends Controller {
             public function check(string $permission): bool
             {
                 return $this->can($permission);

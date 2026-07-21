@@ -594,7 +594,7 @@ class FileUploadTest extends TestCase
         DB::disableQueryLog();
 
         $libraryLookups = collect($log)->filter(
-            fn($q) => str_contains($q['query'], 'media_libraries') && str_contains($q['query'], 'handle')
+            fn ($q) => str_contains($q['query'], 'media_libraries') && str_contains($q['query'], 'handle')
         );
 
         $this->assertSame(

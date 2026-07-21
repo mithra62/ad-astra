@@ -126,8 +126,9 @@ trait HasMedia
 
         if (!array_key_exists($key, $this->firstMediaCache)) {
             $this->firstMediaCache[$key] = $this->directMedia()
-                ->when($libraryHandle, fn($q) => $q->whereHas(
-                    'library', fn($lq) => $lq->where('handle', $libraryHandle)
+                ->when($libraryHandle, fn ($q) => $q->whereHas(
+                    'library',
+                    fn ($lq) => $lq->where('handle', $libraryHandle)
                 ))
                 ->first();
         }

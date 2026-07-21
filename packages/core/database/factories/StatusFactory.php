@@ -26,14 +26,14 @@ class StatusFactory extends Factory
 
     public function default(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_default' => true,
         ]);
     }
 
     public function public(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_public' => true,
         ]);
     }

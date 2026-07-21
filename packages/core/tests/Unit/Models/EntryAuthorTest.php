@@ -20,7 +20,7 @@ class EntryAuthorTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $model = new EntryAuthor;
+        $model = new EntryAuthor();
 
         $this->assertEquals(['user_id', 'display_name', 'status'], $model->getFillable());
     }

@@ -282,8 +282,11 @@ class HasMediaTest extends TestCase
         // Each ->get() runs at least one mediables query; the fields lookup
         // should only appear once total (between the two calls).
         $queriesDuringSecondCall = $queryCountAfterSecond - $queryCountAfterFirst;
-        $this->assertSame(1, $queriesDuringSecondCall,
-            'Second mediaForField() call should only run the mediables query, not the fields lookup.');
+        $this->assertSame(
+            1,
+            $queriesDuringSecondCall,
+            'Second mediaForField() call should only run the mediables query, not the fields lookup.'
+        );
     }
 
     public function test_media_for_field_caches_different_handles_independently(): void
@@ -303,11 +306,14 @@ class HasMediaTest extends TestCase
         DB::disableQueryLog();
 
         $fieldQueries = collect($log)->filter(
-            fn($q) => str_contains($q['query'], 'fields') && str_contains($q['query'], 'handle')
+            fn ($q) => str_contains($q['query'], 'fields') && str_contains($q['query'], 'handle')
         );
 
-        $this->assertSame(2, $fieldQueries->count(),
-            'Each unique handle should produce exactly one fields lookup.');
+        $this->assertSame(
+            2,
+            $fieldQueries->count(),
+            'Each unique handle should produce exactly one fields lookup.'
+        );
     }
 
     // -------------------------------------------------------------------------

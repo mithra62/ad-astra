@@ -40,11 +40,11 @@ class EditMediaRequestTest extends TestCase
             'PUT'
         );
 
-        $route = new Route(['PUT'], 'admin/media/{media_item}/edit', ['uses' => fn() => null]);
+        $route = new Route(['PUT'], 'admin/media/{media_item}/edit', ['uses' => fn () => null]);
         $route->bind($httpRequest);
 
         $request = EditMediaRequest::createFrom($httpRequest);
-        $request->setRouteResolver(fn() => $route);
+        $request->setRouteResolver(fn () => $route);
 
         return $request;
     }

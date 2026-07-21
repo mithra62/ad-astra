@@ -15,7 +15,7 @@ class OauthTokenTest extends TestCase
 
     public function test_uses_user_oauth_tokens_table(): void
     {
-        $this->assertEquals('user_oauth_tokens', (new OauthToken)->getTable());
+        $this->assertEquals('user_oauth_tokens', (new OauthToken())->getTable());
     }
 
     public function test_casts_scopes_to_array(): void

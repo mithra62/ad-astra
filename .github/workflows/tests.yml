@@ -89,4 +89,4 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Check code style
-        run: vendor/bin/pint --preset psr12 --test
+        run: vendor/bin/pint --test

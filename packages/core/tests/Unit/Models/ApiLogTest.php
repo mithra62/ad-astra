@@ -14,7 +14,7 @@ class ApiLogTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $model = new ApiLog;
+        $model = new ApiLog();
 
         $this->assertEquals(
             [
@@ -32,7 +32,7 @@ class ApiLogTest extends TestCase
 
     public function test_uses_api_logs_table(): void
     {
-        $this->assertEquals('api_logs', (new ApiLog)->getTable());
+        $this->assertEquals('api_logs', (new ApiLog())->getTable());
     }
 
     public function test_user_relationship_is_belongs_to(): void

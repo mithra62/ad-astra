@@ -40,7 +40,7 @@ class SettingFormRequestTest extends TestCase
      */
     private function makeSubject(): object
     {
-        return new class extends SettingFormRequest {
+        return new class () extends SettingFormRequest {
             public function authorize(): bool
             {
                 return true;
@@ -224,7 +224,7 @@ class SettingFormRequestTest extends TestCase
      */
     private function makeNormaliseSubject(array $postData): object
     {
-        return (new class($postData) extends SettingFormRequest {
+        return (new class ($postData) extends SettingFormRequest {
             public function __construct(private array $postData)
             {
                 parent::__construct(

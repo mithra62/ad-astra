@@ -160,6 +160,6 @@ class MediaRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repo = new MediaRepository;
+        $this->repo = new MediaRepository();
     }
 }

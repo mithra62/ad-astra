@@ -20,7 +20,7 @@ class EntryGroupTest extends TestCase
     {
         $this->assertEquals(
             ['field_layout_id', 'status_group_id', 'name', 'handle', 'description', 'sort_order'],
-            (new EntryGroup)->getFillable()
+            (new EntryGroup())->getFillable()
         );
     }
 

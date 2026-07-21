@@ -215,7 +215,7 @@ class ImagickTransformationDriverTest extends TestCase
 
         Queue::assertPushed(
             ProcessTransformation::class,
-            fn($job) => $job->transformationId === $t->id
+            fn ($job) => $job->transformationId === $t->id
         );
     }
 

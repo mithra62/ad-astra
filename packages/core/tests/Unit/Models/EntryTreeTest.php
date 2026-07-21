@@ -20,7 +20,7 @@ class EntryTreeTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $model = new EntryTree;
+        $model = new EntryTree();
 
         $this->assertEquals(
             ['entry_id', 'parent_id', 'handle', 'uri', 'depth', 'sort_order', 'redirect_url', 'redirect_status', 'template', 'is_home'],
@@ -64,7 +64,7 @@ class EntryTreeTest extends TestCase
 
     public function test_entry_relationship_is_belongs_to(): void
     {
-        $node = new EntryTree;
+        $node = new EntryTree();
 
         $this->assertInstanceOf(BelongsTo::class, $node->entry());
     }
@@ -85,7 +85,7 @@ class EntryTreeTest extends TestCase
 
     public function test_parent_relationship_is_belongs_to_self(): void
     {
-        $node = new EntryTree;
+        $node = new EntryTree();
 
         $this->assertInstanceOf(BelongsTo::class, $node->parent());
     }
@@ -131,7 +131,7 @@ class EntryTreeTest extends TestCase
 
     public function test_children_relationship_is_has_many(): void
     {
-        $node = new EntryTree;
+        $node = new EntryTree();
 
         $this->assertInstanceOf(HasMany::class, $node->children());
     }
@@ -313,7 +313,7 @@ class EntryTreeTest extends TestCase
 
     public function test_get_url_attribute_returns_slash_for_root_uri(): void
     {
-        $node = new EntryTree;
+        $node = new EntryTree();
         $node->uri = '/';
 
         $this->assertEquals('/', $node->url);
@@ -321,7 +321,7 @@ class EntryTreeTest extends TestCase
 
     public function test_get_url_attribute_prepends_slash_for_non_root_uri(): void
     {
-        $node = new EntryTree;
+        $node = new EntryTree();
         $node->uri = 'blog/post';
 
         $this->assertEquals('/blog/post', $node->url);
@@ -329,7 +329,7 @@ class EntryTreeTest extends TestCase
 
     public function test_get_url_attribute_prepends_slash_for_single_segment_uri(): void
     {
-        $node = new EntryTree;
+        $node = new EntryTree();
         $node->uri = 'about';
 
         $this->assertEquals('/about', $node->url);

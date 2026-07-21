@@ -602,12 +602,12 @@ class UserService
 
     public function getTotalByRole(string $role): int
     {
-        return User::whereHas('roles', fn($q) => $q->where('name', $role))->count();
+        return User::whereHas('roles', fn ($q) => $q->where('name', $role))->count();
     }
 
     public function getTotal(array $where = []): int
     {
-        if($where) {
+        if ($where) {
             return User::where($where)->count();
         }
 

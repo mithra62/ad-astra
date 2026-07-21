@@ -2,7 +2,7 @@
 
 namespace AdAstra\Rules\FieldLayout\Tab;
 
-use AdAstra\Models\FieldLayout\Tab AS TabModel;
+use AdAstra\Models\FieldLayout\Tab as TabModel;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 

@@ -56,7 +56,7 @@ class Money extends AbstractField
     {
         return [
             'currency' => array_map(
-                fn($c) => ['value' => $c['code'], 'label' => "{$c['code']} — {$c['name']}"],
+                fn ($c) => ['value' => $c['code'], 'label' => "{$c['code']} — {$c['name']}"],
                 Currencies::all(),
             ),
         ];

@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Storage;
 
 class PurgeDeletedMedia implements ShouldQueue
 {
-    use Dispatchable, Queueable;
+    use Dispatchable;
+    use Queueable;
 
     public function __construct(protected int $graceDays = 30)
     {

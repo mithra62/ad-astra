@@ -28,7 +28,6 @@ class DeleteAccountTokenRequest extends FormRequest
      * @return string[]
      */
     public function messages(): array
-
     {
         return [
             'confirm_removal.required' => 'You must confirm removal of the token.',

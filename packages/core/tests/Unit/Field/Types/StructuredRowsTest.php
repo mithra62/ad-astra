@@ -128,7 +128,7 @@ class StructuredRowsTest extends TestCase
         $type = $this->make(['columns' => $this->columns()]);
 
         // Row only has 'heading', missing 'body'
-        $params = ['value' => [['heading' => 'Hello']], 'field' => new class {
+        $params = ['value' => [['heading' => 'Hello']], 'field' => new class () {
             public string $handle = 'test';
             public string $label = 'Test';
             public ?string $instructions = null;

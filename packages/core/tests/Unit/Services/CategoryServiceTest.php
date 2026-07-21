@@ -573,7 +573,7 @@ class CategoryServiceTest extends TestCase
         $result = $this->service->flat($groupA);
 
         $this->assertCount(2, $result);
-        $result->each(fn($c) => $this->assertEquals($groupA->id, $c->group_id));
+        $result->each(fn ($c) => $this->assertEquals($groupA->id, $c->group_id));
     }
 
     public function test_flat_orders_by_sort_order_then_name(): void
@@ -692,19 +692,23 @@ class CategoryServiceTest extends TestCase
         // they select a single column from categories by primary key.
         $walkQueries = array_values(array_filter(
             $log,
-            fn($q) => str_contains(strtolower($q['query']), 'parent_id')
+            fn ($q) => str_contains(strtolower($q['query']), 'parent_id')
                 && str_contains(strtolower($q['query']), 'categories'),
         ));
 
         // Exactly 3 steps: c → b → a → (parent_id === root → return true).
-        $this->assertCount(3, $walkQueries,
+        $this->assertCount(
+            3,
+            $walkQueries,
             'Expected exactly 3 ancestor-walk queries for a 3-level chain before the cycle is found.'
         );
 
         // Each query must read "parent_id" specifically — not "select *".
         foreach ($walkQueries as $q) {
             $sql = strtolower($q['query']);
-            $this->assertStringNotContainsString('select *', $sql,
+            $this->assertStringNotContainsString(
+                'select *',
+                $sql,
                 'Ancestor walk must not use SELECT * — it should read only the parent_id column.'
             );
         }

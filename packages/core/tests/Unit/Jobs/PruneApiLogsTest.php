@@ -17,7 +17,7 @@ class PruneApiLogsTest extends TestCase
     {
         $log = $this->apiLog(daysAgo: 30); // inside the 90-day window
 
-        (new PruneApiLogs)->handle();
+        (new PruneApiLogs())->handle();
 
         $this->assertDatabaseHas('api_logs', ['id' => $log->id]);
     }
@@ -41,7 +41,7 @@ class PruneApiLogsTest extends TestCase
     {
         $log = $this->apiLog(daysAgo: 91); // past the 90-day window
 
-        (new PruneApiLogs)->handle();
+        (new PruneApiLogs())->handle();
 
         $this->assertDatabaseMissing('api_logs', ['id' => $log->id]);
     }
@@ -50,7 +50,7 @@ class PruneApiLogsTest extends TestCase
     {
         $log = $this->apiLog(daysAgo: 90);
 
-        (new PruneApiLogs)->handle();
+        (new PruneApiLogs())->handle();
 
         $this->assertDatabaseHas('api_logs', ['id' => $log->id]);
     }
@@ -60,7 +60,7 @@ class PruneApiLogsTest extends TestCase
         $old = $this->apiLog(daysAgo: 91);
         $recent = $this->apiLog(daysAgo: 10);
 
-        (new PruneApiLogs)->handle();
+        (new PruneApiLogs())->handle();
 
         $this->assertDatabaseMissing('api_logs', ['id' => $old->id]);
         $this->assertDatabaseHas('api_logs', ['id' => $recent->id]);
@@ -74,7 +74,7 @@ class PruneApiLogsTest extends TestCase
     {
         Queue::fake();
 
-        (new PruneApiLogs)->handle();
+        (new PruneApiLogs())->handle();
 
         Queue::assertNothingPushed();
     }

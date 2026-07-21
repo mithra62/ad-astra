@@ -23,8 +23,7 @@ readonly class MoneyRangeRule implements ValidationRule
         private ?string $min,
         private ?string $max,
         private string  $currency,
-    )
-    {
+    ) {
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void

@@ -17,8 +17,7 @@ final class TimeValue
         public readonly int $hours,
         public readonly int $minutes,
         public readonly int $seconds = 0,
-    )
-    {
+    ) {
         if ($this->hours < 0 || $this->hours > 23) {
             throw new InvalidArgumentException("Hours out of range: {$this->hours}.");
         }

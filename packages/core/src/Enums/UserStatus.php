@@ -4,17 +4,17 @@ namespace AdAstra\Enums;
 
 class UserStatus
 {
-    const ACTIVE = 'active';
-    const INACTIVE = 'inactive';
-    const PENDING = 'pending';
-    const SUSPENDED = 'suspended';
-    const BANNED = 'banned';
+    public const ACTIVE = 'active';
+    public const INACTIVE = 'inactive';
+    public const PENDING = 'pending';
+    public const SUSPENDED = 'suspended';
+    public const BANNED = 'banned';
 
     /**
      * All valid status values.
      * Use with Rule::in(UserStatus::ALL).
      */
-    const ALL = [
+    public const ALL = [
         self::ACTIVE,
         self::INACTIVE,
         self::PENDING,
@@ -26,7 +26,7 @@ class UserStatus
      * Values permitted at user creation time.
      * 'suspended' and 'banned' are post-creation actions only.
      */
-    const CREATION_ALLOWED = [
+    public const CREATION_ALLOWED = [
         self::ACTIVE,
         self::INACTIVE,
         self::PENDING,

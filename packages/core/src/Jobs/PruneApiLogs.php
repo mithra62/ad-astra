@@ -24,6 +24,6 @@ class PruneApiLogs implements ShouldQueue
      */
     public function handle(): void
     {
-        (new ApiLog)->pruneAll();
+        (new ApiLog())->pruneAll();
     }
 }

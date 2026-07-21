@@ -16,14 +16,14 @@ class TypeTest extends TestCase
 
     public function test_has_correct_fillable_attributes(): void
     {
-        $model = new Type;
+        $model = new Type();
 
         $this->assertEquals(['name', 'object', 'settings'], $model->getFillable());
     }
 
     public function test_uses_field_types_table(): void
     {
-        $this->assertEquals('field_types', (new Type)->getTable());
+        $this->assertEquals('field_types', (new Type())->getTable());
     }
 
     public function test_casts_settings_to_array(): void

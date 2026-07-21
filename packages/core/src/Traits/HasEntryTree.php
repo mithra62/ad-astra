@@ -63,7 +63,7 @@ trait HasEntryTree
         }
 
         return $this->entryTree->children
-            ->map(fn(EntryTree $node) => $node->entry)
+            ->map(fn (EntryTree $node) => $node->entry)
             ->filter()
             ->values();
     }

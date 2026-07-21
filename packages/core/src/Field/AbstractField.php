@@ -137,14 +137,14 @@ abstract class AbstractField
     public function settingsDefaults(): array
     {
         return collect($this->settings_form)
-            ->map(fn($def) => $def['default'] ?? null)
+            ->map(fn ($def) => $def['default'] ?? null)
             ->all();
     }
 
     public function settingsRules(): array
     {
         return collect($this->settings_form)
-            ->mapWithKeys(fn($def, $key) => [
+            ->mapWithKeys(fn ($def, $key) => [
                 "settings.{$key}" => $def['rules'] ?? 'nullable',
             ])
             ->all();

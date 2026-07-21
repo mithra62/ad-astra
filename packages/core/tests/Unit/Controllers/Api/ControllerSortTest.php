@@ -134,7 +134,7 @@ class ControllerSortTest extends TestCase
     {
         parent::setUp();
 
-        $this->controller = new class extends Controller {
+        $this->controller = new class () extends Controller {
             public function sort(Request $request, array $allowed = ['id', 'created_at', 'updated_at']): string
             {
                 return parent::sort($request, $allowed);

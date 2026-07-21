@@ -226,7 +226,7 @@ class EntryTypeActionsTest extends TestCase
         $service = $this->mock(EntryTypeService::class);
         $service->shouldReceive('create')
             ->once()
-            ->with(Mockery::on(fn($data) => ($data['entry_group_id'] ?? null) === $group->id
+            ->with(Mockery::on(fn ($data) => ($data['entry_group_id'] ?? null) === $group->id
                 && ($data['name'] ?? null) === 'Blog Post'
                 && ($data['handle'] ?? null) === 'blog-post'))
             ->andReturn($type);
@@ -243,7 +243,7 @@ class EntryTypeActionsTest extends TestCase
         $service = $this->mock(EntryTypeService::class);
         $service->shouldReceive('create')
             ->once()
-            ->with(Mockery::on(fn($data) => is_int($data['entry_group_id'] ?? null)))
+            ->with(Mockery::on(fn ($data) => is_int($data['entry_group_id'] ?? null)))
             ->andReturn($type);
 
         app(CreateNewEntryType::class)->create((string)$group->id, ['name' => 'Test', 'handle' => 'test']);
@@ -256,7 +256,7 @@ class EntryTypeActionsTest extends TestCase
         $service = $this->mock(EntryTypeService::class);
         $service->shouldReceive('create')
             ->once()
-            ->with(Mockery::on(fn($data) => ($data['entry_group_id'] ?? null) === $group->id))
+            ->with(Mockery::on(fn ($data) => ($data['entry_group_id'] ?? null) === $group->id))
             ->andReturn($type);
 
         app(CreateNewEntryType::class)->create((string)$group->id, ['name' => 'Test', 'handle' => 'test']);

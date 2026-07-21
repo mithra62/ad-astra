@@ -17,7 +17,7 @@ class EntryRelationshipTest extends TestCase
     {
         $this->assertEquals(
             ['entry_id', 'related_entry_id', 'field_id', 'sort_order'],
-            (new EntryRelationship)->getFillable()
+            (new EntryRelationship())->getFillable()
         );
     }
 

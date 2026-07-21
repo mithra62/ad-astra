@@ -130,7 +130,7 @@ class EntrySeeder extends Seeder
 
         foreach ($relationships as $key => $relatedKeys) {
             $relatedIds = array_map(
-                fn(string $k) => $posts[$k]->id,
+                fn (string $k) => $posts[$k]->id,
                 $relatedKeys
             );
 

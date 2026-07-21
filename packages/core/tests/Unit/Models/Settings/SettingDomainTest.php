@@ -18,13 +18,13 @@ class SettingDomainTest extends TestCase
     {
         $this->assertEquals(
             ['name', 'handle', 'description', 'icon', 'sort_order'],
-            (new SettingDomain)->getFillable()
+            (new SettingDomain())->getFillable()
         );
     }
 
     public function test_uses_correct_table(): void
     {
-        $this->assertEquals('setting_domains', (new SettingDomain)->getTable());
+        $this->assertEquals('setting_domains', (new SettingDomain())->getTable());
     }
 
     // -------------------------------------------------------------------------
@@ -64,7 +64,7 @@ class SettingDomainTest extends TestCase
 
     public function test_config_fields_returns_empty_array_for_unknown_domain(): void
     {
-        $domain = new SettingDomain;
+        $domain = new SettingDomain();
         $domain->handle = 'nonexistent_handle_xyz';
 
         $this->assertSame([], $domain->configFields());
@@ -80,7 +80,7 @@ class SettingDomainTest extends TestCase
             ],
         ]]);
 
-        $domain = new SettingDomain;
+        $domain = new SettingDomain();
         $domain->handle = 'sdt1';
 
         $fields = $domain->configFields();
@@ -105,7 +105,7 @@ class SettingDomainTest extends TestCase
             ],
         ]]);
 
-        $domain = new SettingDomain;
+        $domain = new SettingDomain();
         $domain->handle = 'sdt2';
 
         $overridable = $domain->overridableConfigFields();
@@ -124,7 +124,7 @@ class SettingDomainTest extends TestCase
             ],
         ]]);
 
-        $domain = new SettingDomain;
+        $domain = new SettingDomain();
         $domain->handle = 'sdt3';
 
         $this->assertSame([], $domain->overridableConfigFields());

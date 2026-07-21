@@ -12,7 +12,7 @@ class RoleTest extends TestCase
 
     public function test_can_delete_returns_false_for_id_1(): void
     {
-        $role = new Role;
+        $role = new Role();
         $role->id = 1;
 
         $this->assertFalse($role->canDelete());
@@ -20,7 +20,7 @@ class RoleTest extends TestCase
 
     public function test_can_delete_returns_false_for_id_2(): void
     {
-        $role = new Role;
+        $role = new Role();
         $role->id = 2;
 
         $this->assertFalse($role->canDelete());
@@ -28,7 +28,7 @@ class RoleTest extends TestCase
 
     public function test_can_delete_returns_false_for_id_3(): void
     {
-        $role = new Role;
+        $role = new Role();
         $role->id = 3;
 
         $this->assertFalse($role->canDelete());
@@ -36,7 +36,7 @@ class RoleTest extends TestCase
 
     public function test_can_delete_returns_true_for_id_4(): void
     {
-        $role = new Role;
+        $role = new Role();
         $role->id = 4;
 
         $this->assertTrue($role->canDelete());
@@ -45,7 +45,7 @@ class RoleTest extends TestCase
     public function test_can_delete_returns_true_for_any_non_locked_id(): void
     {
         foreach ([5, 10, 100, 999] as $id) {
-            $role = new Role;
+            $role = new Role();
             $role->id = $id;
 
             $this->assertTrue($role->canDelete(), "Expected canDelete to return true for id={$id}");
