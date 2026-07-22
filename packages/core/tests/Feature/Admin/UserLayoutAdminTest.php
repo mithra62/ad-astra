@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Admin;
 
+use AdAstra\Models\FieldLayout;
 use AdAstra\Models\User;
+use AdAstra\Settings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -44,5 +46,31 @@ class UserLayoutAdminTest extends TestCase
         $this->actingAs($this->admin)
             ->get(route('users.layouts.show'))
             ->assertNotFound();
+    }
+
+    public function test_show_returns_404_when_configured_layout_no_longer_exists(): void
+    {
+        $layout = FieldLayout::factory()->create();
+        app(Settings::class)->set('users', 'user_field_layout_id', $layout->id);
+        $layout->delete();
+
+        $this->actingAs($this->admin)
+            ->get(route('users.layouts.show'))
+            ->assertNotFound();
+    }
+
+    public function test_show_renders_the_configured_user_field_layout(): void
+    {
+        $layout = FieldLayout::factory()->create(['name' => 'Member Profile Layout']);
+        app(Settings::class)->set('users', 'user_field_layout_id', $layout->id);
+
+        $response = $this->actingAs($this->admin)->get(route('users.layouts.show'));
+
+        $response->assertOk();
+        $this->assertSame($layout->id, $response->viewData('layout')->id);
+        // sidebarData() feeds the layout picker in the sidebar
+        $this->assertTrue(
+            $response->viewData('layouts')->contains('id', $layout->id)
+        );
     }
 }

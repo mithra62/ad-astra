@@ -3,6 +3,7 @@
 namespace Tests\Unit\Field\Types;
 
 use AdAstra\Field\Types\Users;
+use AdAstra\Models\Role;
 use AdAstra\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
@@ -144,5 +145,131 @@ class UsersTest extends TestCase
 
         $result = $this->make()->value($ids);
         $this->assertEquals($ids, $result->pluck('id')->all());
+    }
+
+    // -------------------------------------------------------------------------
+    // validate() — role restriction
+    // -------------------------------------------------------------------------
+
+    public function test_validate_accepts_users_holding_a_required_role(): void
+    {
+        $role = Role::factory()->create();
+        $user = User::factory()->create();
+        $user->assignRole($role);
+
+        $type = $this->make(['roles' => [$role->id]]);
+
+        $this->assertTrue($type->validate([$user->id]));
+    }
+
+    public function test_validate_rejects_users_missing_the_required_role(): void
+    {
+        $role = Role::factory()->create();
+        $user = User::factory()->create(); // no role assigned
+
+        $type = $this->make(['roles' => [$role->id]]);
+        $result = $type->validate([$user->id]);
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('required role', $result);
+    }
+
+    public function test_validate_rejects_mixed_selection_when_any_user_lacks_the_role(): void
+    {
+        $role = Role::factory()->create();
+        $withRole = User::factory()->create();
+        $withRole->assignRole($role);
+        $without = User::factory()->create();
+
+        $type = $this->make(['roles' => [$role->id]]);
+
+        $this->assertIsString($type->validate([$withRole->id, $without->id]));
+    }
+
+    // -------------------------------------------------------------------------
+    // settingsFormOptions()
+    // -------------------------------------------------------------------------
+
+    public function test_settings_form_options_lists_roles_ordered_by_name(): void
+    {
+        $zulu = Role::factory()->create(['name' => 'zulu']);
+        $alpha = Role::factory()->create(['name' => 'alpha']);
+
+        $options = $this->make()->settingsFormOptions();
+
+        $this->assertSame(
+            [
+                ['value' => $alpha->id, 'label' => 'alpha'],
+                ['value' => $zulu->id, 'label' => 'zulu'],
+            ],
+            $options['roles']
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // render()
+    // -------------------------------------------------------------------------
+
+    private function renderParams(array $overrides = []): array
+    {
+        return array_merge([
+            'field' => ['handle' => 'team'],
+            'id' => 'field_team',
+            'value' => null,
+        ], $overrides);
+    }
+
+    public function test_render_defaults_to_a_multi_select_listing_all_users(): void
+    {
+        $user = User::factory()->create(['name' => 'Selectable Person']);
+
+        $html = $this->make()->render($this->renderParams());
+
+        $this->assertStringContainsString('<select', $html);
+        $this->assertStringContainsString('fields[team][]', $html);
+        $this->assertStringContainsString('Selectable Person', $html);
+    }
+
+    public function test_render_limits_available_users_to_the_configured_roles(): void
+    {
+        $role = Role::factory()->create();
+        $editor = User::factory()->create(['name' => 'Only Editor']);
+        $editor->assignRole($role);
+        User::factory()->create(['name' => 'Excluded Person']);
+
+        $html = $this->make(['roles' => [$role->id]])->render($this->renderParams());
+
+        $this->assertStringContainsString('Only Editor', $html);
+        $this->assertStringNotContainsString('Excluded Person', $html);
+    }
+
+    public function test_render_marks_stored_array_value_as_selected(): void
+    {
+        $user = User::factory()->create();
+
+        $html = $this->make()->render($this->renderParams(['value' => [$user->id]]));
+
+        $this->assertStringContainsString('selected', $html);
+    }
+
+    public function test_render_accepts_a_resolved_user_collection_as_value(): void
+    {
+        $user = User::factory()->create();
+        $type = $this->make(['display' => 'checkboxes']);
+
+        $html = $type->render($this->renderParams(['value' => $type->value([$user->id])]));
+
+        $this->assertStringContainsString('type="checkbox"', $html);
+        $this->assertStringContainsString('checked', $html);
+    }
+
+    public function test_render_checkbox_display_uses_checkbox_inputs(): void
+    {
+        User::factory()->create();
+
+        $html = $this->make(['display' => 'checkboxes'])->render($this->renderParams());
+
+        $this->assertStringContainsString('type="checkbox"', $html);
+        $this->assertStringNotContainsString('<select', $html);
     }
 }
