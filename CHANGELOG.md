@@ -3,7 +3,7 @@
 ### Version 0.0.3 (Alpha 3)
 Release --
 
-- ADDED: Blueprint layer for reuse on objects and implemented within the Entry Field layer (#71) 
+- ADDED: Blueprint layer for reuse on objects and implemented within the Field layer (#71) 
 
 ### Version 0.0.2 (Alpha 2)
 Release July 17, 2026
