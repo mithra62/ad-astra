@@ -13,6 +13,9 @@
 {% if def.type == 'text' %}
     {{ f.input(input_name, def.label, value, 'text', def.instructions|default('')) }}
 
+{% elseif def.type == 'date' %}
+    {{ f.input(input_name, def.label, value, 'date', def.instructions|default('')) }}
+
 {% elseif def.type == 'number' %}
     {{ f.input(input_name, def.label, value, 'number', def.instructions|default('')) }}
 
@@ -50,5 +53,6 @@
 
 {% elseif def.type == 'structured_rows_columns' %}
     {{ include('admin::blueprint/_blueprint_structured_rows_columns', {handle: handle, def: def, value: value, name_prefix: name_prefix}) }}
+
 
 {% endif %}

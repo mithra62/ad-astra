@@ -16,14 +16,14 @@ class Date extends AbstractField
 
     protected array $settings_form = [
         'min_date' => [
-            'type' => 'text',
+            'type' => 'date',
             'label' => 'Min Date',
             'instructions' => 'Earliest allowed date (YYYY-MM-DD).',
             'default' => null,
             'rules' => 'nullable|date'
         ],
         'max_date' => [
-            'type' => 'text',
+            'type' => 'date',
             'label' => 'Max Date',
             'instructions' => 'Latest allowed date (YYYY-MM-DD).',
             'default' => null,
