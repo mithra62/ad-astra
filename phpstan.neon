@@ -9,5 +9,4 @@ parameters:
         - packages/core/routes/
     universalObjectCratesClasses:
         - Illuminate\Http\Resources\Json\JsonResource
-    # Level 9 is the highest level for Larastan
     level: 5
