@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use OpenApi\Attributes as OA;
 
+/**
+ * @mixin \AdAstra\Models\Category\Group
+ */
 #[OA\Schema(
     schema: 'CategoryGroup',
     title: 'Category Group',
