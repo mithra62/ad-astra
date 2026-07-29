@@ -7,6 +7,8 @@ parameters:
         - packages/core/config/
         - packages/core/database/
         - packages/core/routes/
+    databaseMigrationsPath:
+        - packages/core/database/migrations
     universalObjectCratesClasses:
         - Illuminate\Http\Resources\Json\JsonResource
-    level: 5
+    level: 1
