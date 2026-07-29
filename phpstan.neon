@@ -9,4 +9,4 @@ parameters:
         - packages/core/routes/
     databaseMigrationsPath:
         - packages/core/database/migrations
-    level: 1
+    level: 2

@@ -40,6 +40,9 @@ class ApiLog extends Model
      */
     protected $table = 'api_logs';
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
