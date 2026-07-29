@@ -57,6 +57,9 @@ class Entry extends Model
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
+    /**
+     * @return BelongsToMany<EntryAuthor, $this>
+     */
     public function authors(): BelongsToMany
     {
         return $this->belongsToMany(EntryAuthor::class, 'entry_author_entry')

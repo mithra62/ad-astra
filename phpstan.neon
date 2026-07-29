@@ -9,6 +9,4 @@ parameters:
         - packages/core/routes/
     databaseMigrationsPath:
         - packages/core/database/migrations
-    universalObjectCratesClasses:
-        - Illuminate\Http\Resources\Json\JsonResource
     level: 1
