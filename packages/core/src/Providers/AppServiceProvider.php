@@ -170,8 +170,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Settings::class, fn () => new Settings());
         $this->app->alias(Settings::class, 'settings');
 
-        $this->app->singleton('api', function ($app) {
-            return new Api($app);
+        $this->app->singleton('api', function () {
+            return new Api();
         });
 
         $this->app->singleton('files-service', function ($app) {

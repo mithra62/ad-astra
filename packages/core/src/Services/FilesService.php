@@ -2,7 +2,7 @@
 
 namespace AdAstra\Services;
 
-class FilesService
+class FilesService extends AbstractService
 {
     protected array $mime_map = [
         'all' => '*/*',

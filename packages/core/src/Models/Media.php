@@ -17,6 +17,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @phpstan-consistent-constructor
+ */
 class Media extends Model
 {
     use HasFactory;
