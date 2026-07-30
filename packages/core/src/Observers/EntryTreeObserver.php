@@ -16,7 +16,7 @@ class EntryTreeObserver
      *
      * @var array<int, int[]>
      */
-    private static array $pendingReroot = [];
+    protected static array $pendingReroot = [];
 
     public function __construct(private readonly EntryTreeService $treeService)
     {

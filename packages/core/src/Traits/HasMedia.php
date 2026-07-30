@@ -20,7 +20,7 @@ trait HasMedia
      *
      * @var array<string, int|null>
      */
-    private static array $fieldHandleCache = [];
+    protected static array $fieldHandleCache = [];
     /**
      * Per-instance cache for firstMedia() results.
      *
