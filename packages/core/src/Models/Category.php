@@ -91,7 +91,7 @@ class Category extends Model
 
     /**
      * @param Builder $query
-     * @return Builder<Category, $this>
+     * @return Builder
      */
     public function scopeRoots(Builder $query): Builder
     {
@@ -101,7 +101,7 @@ class Category extends Model
     /**
      * @param Builder $query
      * @param int|Group $group
-     * @return Builder<Category, $this>
+     * @return Builder
      */
     public function scopeInGroup(Builder $query, int|Group $group): Builder
     {

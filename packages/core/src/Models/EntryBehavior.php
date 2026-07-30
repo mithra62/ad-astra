@@ -17,6 +17,9 @@ class EntryBehavior extends Model
 
     protected $fillable = ['name', 'handle', 'class', 'description'];
 
+    /**
+     * @return HasMany<EntryType, $this>
+     */
     public function entryTypes(): HasMany
     {
         return $this->hasMany(EntryType::class);

@@ -9,17 +9,13 @@ use Illuminate\Support\Collection;
 trait Fieldable
 {
     /**
-     * @return MorphMany
+     * @return MorphMany<FieldValue, $this>
      */
     public function fieldValues(): MorphMany
     {
         return $this->morphMany(FieldValue::class, 'fieldable');
     }
 
-    /**
-     * @param string $handle
-     * @return mixed
-     */
     public function field(string $handle): mixed
     {
         return $this->fieldValues
