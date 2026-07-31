@@ -27,10 +27,8 @@ class FieldService extends AbstractService
     {
         $fields = FieldType::orderBy('name')->get();
         $return = [];
-        if ($fields) {
-            foreach ($fields as $field) {
-                $return[$field->id] = $field->instance();
-            }
+        foreach ($fields as $field) {
+            $return[$field->id] = $field->instance();
         }
 
         return collect($return);

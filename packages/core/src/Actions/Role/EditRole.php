@@ -11,9 +11,7 @@ class EditRole extends AbstractAction
     {
         $role->update($input);
         if (!empty($input['permissions']) && is_array($input['permissions'])) {
-            if (count($input['permissions']) >= 1) {
-                $role->syncPermissions($input['permissions']);
-            }
+            $role->syncPermissions($input['permissions']);
         }
     }
 }

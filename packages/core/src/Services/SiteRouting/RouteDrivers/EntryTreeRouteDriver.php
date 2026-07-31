@@ -48,7 +48,7 @@ class EntryTreeRouteDriver implements RouteDriverInterface
         $entry = $entry_service->find($node->entry->id);
 
         $template = $node->template
-            ?? $entry->entryType?->default_template
+            ?? $entry->entryType->default_template
             ?? 'entries.show';
 
         return new RouteResult(

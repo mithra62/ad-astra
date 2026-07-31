@@ -94,7 +94,7 @@ class EntryRepository
 
             if (!$status) {
                 throw new InvalidArgumentException(
-                    "Status [{$handle}] does not belong to EntryGroup [{$entry->entryGroup?->handle}]."
+                    "Status [{$handle}] does not belong to EntryGroup [{$entry->entryGroup->handle}]."
                 );
             }
 
@@ -123,7 +123,7 @@ class EntryRepository
 
             if (!$default) {
                 throw new RuntimeException(
-                    "StatusGroup for EntryGroup [{$entry->entryGroup?->handle}] has no default status configured."
+                    "StatusGroup for EntryGroup [{$entry->entryGroup->handle}] has no default status configured."
                 );
             }
 

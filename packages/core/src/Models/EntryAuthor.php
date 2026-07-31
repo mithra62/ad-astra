@@ -59,7 +59,7 @@ class EntryAuthor extends Model
     public function getDisplayNameAttribute(): string
     {
         return $this->attributes['display_name']
-            ?? $this->user?->name
+            ?? $this->user->name
             ?? '';
     }
 }

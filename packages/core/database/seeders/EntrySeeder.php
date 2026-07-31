@@ -103,7 +103,7 @@ class EntrySeeder extends Seeder
 
         $created = [];
         foreach ($definitions as $key => $data) {
-            $data['handle'] ??= $key;
+            $data['handle'] = $key;
             $created[$key] = Content::create('blog_post', $data);
         }
 
@@ -191,7 +191,7 @@ class EntrySeeder extends Seeder
         ];
 
         foreach ($products as $product) {
-            $product['handle'] ??= Str::slug($product['title']);
+            $product['handle'] = Str::slug($product['title']);
             Content::create('product', $product);
         }
     }

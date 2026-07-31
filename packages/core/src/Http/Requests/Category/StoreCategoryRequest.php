@@ -19,7 +19,7 @@ class StoreCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        $schema = CategoryGroup::resolvedFields($this->route()->parameter('group_id'));
+        $schema = CategoryGroup::resolvedFields($this->routeId('group_id'));
         return array_merge(
             [
                 'name' => [
@@ -36,7 +36,7 @@ class StoreCategoryRequest extends FormRequest
                 'parent_id' => [
                     'nullable',
                     'integer',
-                    Rule::exists('categories', 'id')->where('group_id', $this->route()->parameter('group_id')),
+                    Rule::exists('categories', 'id')->where('group_id', $this->routeId('group_id')),
                 ],
             ],
             $this->schemaFieldRules($schema)
@@ -45,7 +45,7 @@ class StoreCategoryRequest extends FormRequest
 
     public function messages(): array
     {
-        $schema = CategoryGroup::resolvedFields($this->route()->parameter('group_id'));
+        $schema = CategoryGroup::resolvedFields($this->routeId('group_id'));
         return $this->schemaFieldMessages($schema);
     }
 
@@ -54,7 +54,7 @@ class StoreCategoryRequest extends FormRequest
      */
     public function attributes(): array
     {
-        $schema = CategoryGroup::resolvedFields($this->route()->parameter('group_id'));
+        $schema = CategoryGroup::resolvedFields($this->routeId('group_id'));
         return $this->schemaFieldAttributes($schema);
     }
 }

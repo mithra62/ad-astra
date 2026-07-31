@@ -28,7 +28,7 @@ class TemplateRouteDriver implements RouteDriverInterface
             return $this->resolveHome();
         }
 
-        $group = $segments[0] ?? null;
+        $group = $segments[0];
         $second = $segments[1] ?? null;
 
         if (!$group || !$this->isAllowed($group, $second)) {

@@ -187,7 +187,7 @@ class Field extends Controller
         $form = $this->buildSettingsForm($instance);
 
         // Resolve current values from saved field settings (edit) or flashed old() input
-        $currentValues = $field?->settings ?? [];
+        $currentValues = $field->settings ?? [];
         $currentValues = old('settings', $currentValues);
 
         // For Slider's 'default' slider-widget: inject the sibling min/max/step/suffix
