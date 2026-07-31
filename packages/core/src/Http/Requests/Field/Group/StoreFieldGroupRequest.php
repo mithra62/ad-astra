@@ -14,7 +14,7 @@ class StoreFieldGroupRequest extends FormRequest
     }
 
     /**
-     * @return string[]
+     * @return array<string, mixed>
      */
     public function rules(): array
     {

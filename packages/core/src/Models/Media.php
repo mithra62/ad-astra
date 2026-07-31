@@ -75,6 +75,9 @@ class Media extends Model
      *
      * @see HasStatus::scopePublic
      * @see Entry::scopePublished
+     *
+     * @param EloquentBuilder<Media> $query
+     * @return EloquentBuilder<Media>
      */
     public function scopePublished(EloquentBuilder $query): EloquentBuilder
     {

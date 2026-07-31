@@ -3,7 +3,6 @@
 namespace AdAstra\Http\Controllers\Admin;
 
 use AdAstra\Http\Controllers\Controller as DefaultController;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 
 abstract class Controller extends DefaultController
@@ -17,9 +16,12 @@ abstract class Controller extends DefaultController
     }
 
     /**
+     * A path is always supplied, so this never returns the view Factory (which
+     * the view() helper only yields for a no-argument call).
+     *
      * @param string $path
-     * @param array $data
-     * @return Factory|View
+     * @param array<string, mixed> $data
+     * @return View
      */
     protected function view(string $path, array $data = [])
     {

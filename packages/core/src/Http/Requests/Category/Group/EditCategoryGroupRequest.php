@@ -13,7 +13,7 @@ class EditCategoryGroupRequest extends StoreCategoryGroupRequest
     }
 
     /**
-     * @return string[]
+     * @return array<string, mixed>
      */
     public function rules(): array
     {

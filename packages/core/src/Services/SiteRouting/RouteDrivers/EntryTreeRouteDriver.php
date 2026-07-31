@@ -2,9 +2,11 @@
 
 namespace AdAstra\Services\SiteRouting\RouteDrivers;
 
+use AdAstra\Models\Entry;
 use AdAstra\Models\EntryTree;
 use AdAstra\Services\SiteRouting\RouteResult;
 use AdAstra\Services\EntryService;
+use Illuminate\Database\Eloquent\Builder;
 
 class EntryTreeRouteDriver implements RouteDriverInterface
 {
@@ -18,7 +20,10 @@ class EntryTreeRouteDriver implements RouteDriverInterface
                 'children.entry.entryType',
             ])
             ->where('uri', $uri)
-            ->whereHas('entry', function ($query) {
+            // whereHas() names the relation as a string, so the closure's builder
+            // cannot be inferred from EntryTree::entry() — annotate it explicitly.
+            ->whereHas('entry', function (Builder $query): void {
+                /** @var Builder<Entry> $query */
                 $query->published(); //we only want published entries for tree pages
             })
             ->first();

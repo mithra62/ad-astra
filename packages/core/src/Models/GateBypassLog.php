@@ -22,7 +22,7 @@ class GateBypassLog extends Model
     protected $table = 'gate_bypass_logs';
 
     /**
-     * @var string[]
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -39,7 +39,7 @@ class GateBypassLog extends Model
     ];
 
     /**
-     * @var string[]
+     * @var array<string, string>
      */
     protected $casts = [
         'context' => 'array',
