@@ -7,8 +7,8 @@ use AdAstra\Actions\Role\EditRole;
 use AdAstra\Http\Requests\Role\DeleteRoleRequest;
 use AdAstra\Http\Requests\Role\EditRoleRequest;
 use AdAstra\Http\Requests\Role\StoreRoleRequest;
+use AdAstra\Models\Permission;
 use AdAstra\Models\Role as RoleModel;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
 class Role extends Controller
