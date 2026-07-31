@@ -4,8 +4,8 @@ namespace AdAstra\Doctor\Checks\EntrySystem;
 
 use AdAstra\Doctor\AbstractDoctorCheck;
 use AdAstra\EntryTypes\AbstractEntryType;
+use AdAstra\EntryTypes\EntryBehaviorRegistry;
 use AdAstra\Models\EntryBehavior;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 class BehaviorClassReferencesCheck extends AbstractDoctorCheck
 {
@@ -23,12 +23,12 @@ class BehaviorClassReferencesCheck extends AbstractDoctorCheck
         $behaviors = EntryBehavior::all();
 
         foreach ($behaviors as $behavior) {
-            $class = Relation::getMorphedModel($behavior->class);
+            $class = EntryBehaviorRegistry::resolve($behavior->class);
 
             if ($class === null) {
                 $broken++;
                 yield $this->fail(
-                    "EntryBehavior [{$behavior->handle}] → morph key [{$behavior->class}] is not registered in the morphMap",
+                    "EntryBehavior [{$behavior->handle}] → morph key [{$behavior->class}] is not registered in the behavior registry",
                 );
                 continue;
             }

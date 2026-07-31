@@ -34,6 +34,7 @@ use AdAstra\Doctor\Checks\Storage\StorageWritableCheck;
 use AdAstra\Doctor\Checks\Templates\EntryTemplatesCheck;
 use AdAstra\Doctor\DoctorRunner;
 use AdAstra\EntryTypes\BlogPostEntryType;
+use AdAstra\EntryTypes\EntryBehaviorRegistry;
 use AdAstra\EntryTypes\EventEntryType;
 use AdAstra\EntryTypes\GeneralEntryType;
 use AdAstra\EntryTypes\JobListingEntryType;
@@ -229,8 +230,12 @@ class AppServiceProvider extends ServiceProvider
             'media' => Media::class,
             'media_library' => MediaLibrary::class,
             'user' => User::class,
+        ]);
 
-            // Entry behavior concrete classes, keyed by behavior handle
+        // Entry behavior concrete classes, keyed by behavior handle. These are
+        // AbstractEntryType subclasses, not Eloquent models, so they live in
+        // their own registry rather than Relation::morphMap().
+        EntryBehaviorRegistry::register([
             'behavior.general' => GeneralEntryType::class,
             'behavior.blog-post' => BlogPostEntryType::class,
             'behavior.product' => ProductEntryType::class,

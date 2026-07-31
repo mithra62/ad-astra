@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use AdAstra\EntryTypes\BlogPostEntryType;
+use AdAstra\EntryTypes\EntryBehaviorRegistry;
 use AdAstra\EntryTypes\EventEntryType;
 use AdAstra\EntryTypes\JobListingEntryType;
 use AdAstra\EntryTypes\ProductEntryType;
@@ -21,7 +22,6 @@ use AdAstra\Models\Status;
 use AdAstra\Models\StatusGroup;
 use AdAstra\Models\User;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -127,7 +127,7 @@ class EntryTypeHooksTest extends TestCase
         $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
 
         $morphKey = 'behavior.test-' . uniqid();
-        Relation::morphMap([$morphKey => $class]);
+        EntryBehaviorRegistry::register([$morphKey => $class]);
 
         $behavior = EntryBehavior::create([
             'name' => 'Test',
