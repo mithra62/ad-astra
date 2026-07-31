@@ -188,21 +188,33 @@ class User extends Authenticatable
             ->first();
     }
 
+    /**
+     * @return HasMany<OauthToken, $this>
+     */
     public function oauthTokens(): HasMany
     {
         return $this->hasMany(OauthToken::class);
     }
 
+    /**
+     * @return HasOne<OauthToken, $this>
+     */
     public function oauthToken(): HasOne
     {
         return $this->hasOne(OauthToken::class)->latestOfMany();
     }
 
+    /**
+     * @return HasOne<EntryAuthor, $this>
+     */
     public function entryAuthor(): HasOne
     {
         return $this->hasOne(EntryAuthor::class);
     }
 
+    /**
+     * @return HasMany<UserStatusLog, $this>
+     */
     public function statusLogs(): HasMany
     {
         return $this->hasMany(UserStatusLog::class)->orderByDesc('created_at');

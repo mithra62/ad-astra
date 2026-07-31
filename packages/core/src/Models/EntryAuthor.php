@@ -18,11 +18,17 @@ class EntryAuthor extends Model
         'status',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsToMany<Entry, $this>
+     */
     public function entries(): BelongsToMany
     {
         return $this->belongsToMany(Entry::class, 'entry_author_entry')

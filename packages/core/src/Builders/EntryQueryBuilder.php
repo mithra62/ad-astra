@@ -13,6 +13,7 @@ use InvalidArgumentException;
 
 class EntryQueryBuilder
 {
+    /** @var Builder<Entry> */
     private Builder $query;
 
     public function __construct()

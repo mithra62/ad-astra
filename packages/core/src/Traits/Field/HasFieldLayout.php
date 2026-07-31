@@ -14,6 +14,9 @@ trait HasFieldLayout
             ->findOrFail($id);
     }
 
+    /**
+     * @return BelongsTo<FieldLayout, $this>
+     */
     public function fieldLayout(): BelongsTo
     {
         return $this->belongsTo(FieldLayout::class);

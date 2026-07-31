@@ -31,6 +31,9 @@ class SettingValue extends Model
         'value_json' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

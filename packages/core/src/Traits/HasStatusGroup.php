@@ -17,11 +17,17 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  */
 trait HasStatusGroup
 {
+    /**
+     * @return BelongsTo<StatusGroup, $this>
+     */
     public function statusGroup(): BelongsTo
     {
         return $this->belongsTo(StatusGroup::class);
     }
 
+    /**
+     * @return HasManyThrough<Status, StatusGroup, $this>
+     */
     public function statuses(): HasManyThrough
     {
         return $this->hasManyThrough(Status::class, StatusGroup::class, 'id', 'status_group_id', 'status_group_id', 'id');

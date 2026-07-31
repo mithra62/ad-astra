@@ -18,6 +18,9 @@ class Login extends Controller
     public function handleProviderCallback(Request $request, string $provider)
     {
         try {
+            // Socialite's contract only declares the get*() accessors; the token
+            // properties read below live on the concrete Two\User implementation.
+            /** @var \Laravel\Socialite\Two\User $socialUser */
             $socialUser = Socialite::driver($provider)->user();
         } catch (InvalidStateException $e) {
             return redirect()->route('login')

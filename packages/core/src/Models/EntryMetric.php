@@ -24,6 +24,9 @@ class EntryMetric extends Model
         'recorded_date' => 'date',
     ];
 
+    /**
+     * @return BelongsTo<Entry, $this>
+     */
     public function entry(): BelongsTo
     {
         return $this->belongsTo(Entry::class);

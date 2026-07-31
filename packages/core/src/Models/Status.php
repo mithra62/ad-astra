@@ -27,6 +27,9 @@ class Status extends Model
         'sort_order' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<StatusGroup, $this>
+     */
     public function group(): BelongsTo
     {
         return $this->belongsTo(StatusGroup::class, 'status_group_id');

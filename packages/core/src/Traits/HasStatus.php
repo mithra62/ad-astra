@@ -76,6 +76,9 @@ trait HasStatus
         StatusSyncRegistry::register(static::class);
     }
 
+    /**
+     * @return BelongsTo<Status, $this>
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(Status::class);

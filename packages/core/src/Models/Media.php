@@ -50,6 +50,9 @@ class Media extends Model
         'status_is_public' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<Media\Library, $this>
+     */
     public function library(): BelongsTo
     {
         return $this->belongsTo(Media\Library::class, 'library_id');
@@ -78,6 +81,9 @@ class Media extends Model
         return $query->public();
     }
 
+    /**
+     * @return HasMany<Media\Transformation, $this>
+     */
     public function transformations(): HasMany
     {
         return $this->hasMany(Media\Transformation::class);

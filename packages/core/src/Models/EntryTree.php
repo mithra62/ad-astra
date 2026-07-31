@@ -49,16 +49,25 @@ class EntryTree extends Model
         return Str::slug($handle);
     }
 
+    /**
+     * @return BelongsTo<Entry, $this>
+     */
     public function entry(): BelongsTo
     {
         return $this->belongsTo(Entry::class);
     }
 
+    /**
+     * @return BelongsTo<EntryTree, $this>
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
     }
 
+    /**
+     * @return HasMany<EntryTree, $this>
+     */
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id')

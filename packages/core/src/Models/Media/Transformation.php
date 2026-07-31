@@ -36,6 +36,9 @@ class Transformation extends Model
         'height' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<Media, $this>
+     */
     public function media(): BelongsTo
     {
         return $this->belongsTo(Media::class);

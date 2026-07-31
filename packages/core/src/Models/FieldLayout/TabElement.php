@@ -31,11 +31,17 @@ class TabElement extends Model
         'sort_order' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<Tab, $this>
+     */
     public function tab(): BelongsTo
     {
         return $this->belongsTo(Tab::class, 'field_layout_tab_id');
     }
 
+    /**
+     * @return BelongsTo<Field, $this>
+     */
     public function field(): BelongsTo
     {
         return $this->belongsTo(Field::class);

@@ -50,6 +50,13 @@ class OauthToken extends Model
         'last_used_at' => 'datetime',
     ];
 
+    /**
+     * Deliberately left without a generic @return. The related class comes from
+     * config('auth.providers.users.model') at runtime, so PHPStan infers
+     * BelongsTo<Model, $this>; declaring the concrete User instead produces a
+     * return.type mismatch here while fixing nothing downstream, because no
+     * caller traverses this relation. Revisit if that changes.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(config('auth.providers.users.model'));
