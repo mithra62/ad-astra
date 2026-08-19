@@ -32,11 +32,17 @@ class Category extends Model
         'sort_order' => 'integer',
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     */
     public function categorizable()
     {
         return $this->morphTo();
     }
 
+    /**
+     * @return BelongsTo<Group, $this>
+     */
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class, 'group_id');
@@ -52,11 +58,18 @@ class Category extends Model
         return $this->group?->fieldLayout?->fields() ?? collect();
     }
 
+    /**
+     * @return BelongsTo<Category, $this>
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
     }
 
+    /**
+     * @param int $maxDepth
+     * @return HasMany<Category, $this>
+     */
     public function childrenRecursive(int $maxDepth = PHP_INT_MAX): HasMany
     {
         if ($maxDepth <= 0) {
@@ -66,6 +79,9 @@ class Category extends Model
         return $this->children()->with('childrenRecursive');
     }
 
+    /**
+     * @return HasMany<Category, $this>
+     */
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id')
@@ -73,11 +89,20 @@ class Category extends Model
             ->orderBy('name');
     }
 
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
     public function scopeRoots(Builder $query): Builder
     {
         return $query->whereNull('parent_id');
     }
 
+    /**
+     * @param Builder $query
+     * @param int|Group $group
+     * @return Builder
+     */
     public function scopeInGroup(Builder $query, int|Group $group): Builder
     {
         $groupId = $group instanceof Group ? $group->getKey() : $group;

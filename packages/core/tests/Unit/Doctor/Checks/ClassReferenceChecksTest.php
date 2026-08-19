@@ -37,7 +37,7 @@ class ClassReferenceChecksTest extends TestCase
         $results = iterator_to_array((new BehaviorClassReferencesCheck())->run(), false);
 
         $this->assertSame(DoctorStatus::Fail, $results[0]->status);
-        $this->assertStringContainsString('not registered in the morphMap', $results[0]->message);
+        $this->assertStringContainsString('not registered in the behavior registry', $results[0]->message);
     }
 
     public function test_seeded_field_types_pass(): void

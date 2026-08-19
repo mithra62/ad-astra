@@ -47,7 +47,7 @@ trait HasMediaItems
         // Resolved outside the transaction — this is a read-only lookup on the
         // library's status group. Will be null on ungoverned libraries or when
         // the group has no status flagged is_default.
-        $defaultStatus = method_exists($this, 'defaultStatus') ? $this->defaultStatus() : null;
+        $defaultStatus = $this->defaultStatus();
 
         try {
             return DB::transaction(function () use ($file, $disk, $fileName, $path, $attributes, $defaultStatus) {

@@ -26,9 +26,37 @@ class TimeFormatRuleTest extends TestCase
         $this->assertNull($this->runRule(new TimeFormatRule(), '9:30'));
     }
 
-    public function test_accepts_hh_mm_ss(): void
+    public function test_rejects_seconds_when_include_seconds_is_off(): void
     {
-        $this->assertNull($this->runRule(new TimeFormatRule(), '23:59:59'));
+        // Default is includeSeconds: false, which the field setting describes as
+        // "stored values include a seconds component" being OFF.
+        $error = $this->runRule(new TimeFormatRule(), '23:59:59');
+        $this->assertNotNull($error);
+        $this->assertStringContainsString('must not include seconds', $error);
+    }
+
+    public function test_accepts_hh_mm_ss_when_include_seconds_is_on(): void
+    {
+        $this->assertNull($this->runRule(new TimeFormatRule(includeSeconds: true), '23:59:59'));
+    }
+
+    public function test_requires_seconds_when_include_seconds_is_on(): void
+    {
+        $error = $this->runRule(new TimeFormatRule(includeSeconds: true), '09:30');
+        $this->assertNotNull($error);
+        $this->assertStringContainsString('must include seconds', $error);
+    }
+
+    public function test_range_comparison_is_precision_safe(): void
+    {
+        // A seconds-bearing value must still compare correctly against a
+        // min/max the admin typed without seconds.
+        $rule = new TimeFormatRule(includeSeconds: true, minTime: '09:00', maxTime: '17:00');
+
+        $this->assertNull($this->runRule($rule, '09:00:00'));
+        $this->assertNull($this->runRule($rule, '17:00:00'));
+        $this->assertNotNull($this->runRule($rule, '08:59:59'));
+        $this->assertNotNull($this->runRule($rule, '17:00:01'));
     }
 
     public function test_accepts_null_and_empty(): void

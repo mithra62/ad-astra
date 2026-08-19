@@ -26,16 +26,26 @@ class Group extends Model
 
     protected $casts = ['sort_order' => 'integer'];
 
+    /**
+     * @return HasMany<Category, $this>
+     */
     public function rootCategories(): HasMany
     {
         return $this->categories()->whereNull('parent_id');
     }
 
+    /**
+     * @return HasMany<Category, $this>
+     */
     public function categories(): HasMany
     {
         return $this->hasMany(Category::class, 'group_id');
     }
 
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
     public function scopeOrdered(Builder $query): Builder
     {
         return $query->orderBy('sort_order')->orderBy('name');

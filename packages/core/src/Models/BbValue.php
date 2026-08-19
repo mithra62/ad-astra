@@ -10,7 +10,7 @@ class BbValue extends Model
     use HasFactory;
 
     /**
-     * @var string[]
+     * @var list<string>
      */
     protected $fillable = [
         'field_value',

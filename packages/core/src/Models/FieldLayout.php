@@ -19,21 +19,33 @@ class FieldLayout extends Model
         'handle',
     ];
 
+    /**
+     * @return HasMany<Tab, $this>
+     */
     public function tabs(): HasMany
     {
         return $this->hasMany(Tab::class)->orderBy('sort_order');
     }
 
+    /**
+     * @return HasMany<EntryGroup, $this>
+     */
     public function entryGroups(): HasMany
     {
         return $this->hasMany(EntryGroup::class);
     }
 
+    /**
+     * @return HasMany<EntryType, $this>
+     */
     public function entryTypes(): HasMany
     {
         return $this->hasMany(EntryType::class);
     }
 
+    /**
+     * @return Collection
+     */
     public function fields(): Collection
     {
         $this->loadMissing('tabs.elements.field');
@@ -43,6 +55,9 @@ class FieldLayout extends Model
         );
     }
 
+    /**
+     * @return Collection
+     */
     public function availableFields(): Collection
     {
         $this->loadMissing('fieldGroups.fields');

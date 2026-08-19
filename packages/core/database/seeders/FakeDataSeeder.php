@@ -486,7 +486,7 @@ class FakeDataSeeder extends Seeder
         foreach ($entryTypes as $type) {
             $ids = [];
 
-            foreach ($type->entryGroup?->categoryGroups ?? [] as $catGroup) {
+            foreach ($type->entryGroup->categoryGroups ?? [] as $catGroup) {
                 $ids = array_merge($ids, $categoryIdsByGroup->get($catGroup->id, []));
             }
 
@@ -502,7 +502,7 @@ class FakeDataSeeder extends Seeder
      */
     private function pickStatus(EntryGroup $entryGroup): string
     {
-        $statuses = $entryGroup->statusGroup?->statuses ?? collect();
+        $statuses = $entryGroup->statusGroup->statuses ?? collect();
 
         $pool = [];
         foreach ($statuses as $status) {

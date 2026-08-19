@@ -4,6 +4,7 @@
 Release --
 
 - ADDED: Blueprint layer for reuse on objects and implemented within the Field layer (#71) 
+- UPDATED: Code docblocks for PHPStan to hit level 5 (#81)
 
 ### Version 0.0.2 (Alpha 2)
 Release July 17, 2026

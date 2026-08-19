@@ -4,9 +4,9 @@ namespace Tests\Unit\Models;
 
 use AdAstra\EntryTypes\AbstractEntryType;
 use AdAstra\EntryTypes\BlogPostEntryType;
+use AdAstra\EntryTypes\EntryBehaviorRegistry;
 use AdAstra\Models\EntryBehavior;
 use AdAstra\Models\EntryType;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use stdClass;
@@ -53,14 +53,14 @@ class EntryBehaviorTest extends TestCase
         $entryType = EntryType::factory()->create(['entry_behavior_id' => $behavior->id]);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageMatches('/not registered in the morphMap/');
+        $this->expectExceptionMessageMatches('/not registered in the behavior registry/');
 
         $behavior->instance($entryType);
     }
 
     public function test_instance_throws_runtime_exception_for_nonexistent_class(): void
     {
-        Relation::morphMap(['behavior.fake-missing' => 'AdAstra\\Nonexistent\\Behavior']);
+        EntryBehaviorRegistry::register(['behavior.fake-missing' => 'AdAstra\\Nonexistent\\Behavior']);
 
         $behavior = EntryBehavior::factory()->create(['class' => 'behavior.fake-missing']);
         $entryType = EntryType::factory()->create(['entry_behavior_id' => $behavior->id]);
@@ -73,7 +73,7 @@ class EntryBehaviorTest extends TestCase
 
     public function test_instance_throws_runtime_exception_for_class_not_extending_abstract_entry_type(): void
     {
-        Relation::morphMap(['behavior.fake-stdclass' => stdClass::class]);
+        EntryBehaviorRegistry::register(['behavior.fake-stdclass' => stdClass::class]);
 
         $behavior = EntryBehavior::factory()->create(['class' => 'behavior.fake-stdclass']);
         $entryType = EntryType::factory()->create(['entry_behavior_id' => $behavior->id]);

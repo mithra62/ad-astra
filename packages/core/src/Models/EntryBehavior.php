@@ -3,10 +3,10 @@
 namespace AdAstra\Models;
 
 use AdAstra\EntryTypes\AbstractEntryType;
+use AdAstra\EntryTypes\EntryBehaviorRegistry;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use RuntimeException;
 
 class EntryBehavior extends Model
@@ -17,6 +17,9 @@ class EntryBehavior extends Model
 
     protected $fillable = ['name', 'handle', 'class', 'description'];
 
+    /**
+     * @return HasMany<EntryType, $this>
+     */
     public function entryTypes(): HasMany
     {
         return $this->hasMany(EntryType::class);
@@ -24,10 +27,10 @@ class EntryBehavior extends Model
 
     public function instance(EntryType $record): AbstractEntryType
     {
-        $class = Relation::getMorphedModel($this->class);
+        $class = EntryBehaviorRegistry::resolve($this->class);
 
         if ($class === null) {
-            throw new RuntimeException("EntryBehavior morph key [{$this->class}] is not registered in the morphMap.");
+            throw new RuntimeException("EntryBehavior morph key [{$this->class}] is not registered in the behavior registry.");
         }
 
         if (!class_exists($class)) {

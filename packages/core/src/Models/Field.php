@@ -33,16 +33,25 @@ class Field extends Model
     // fieldType is needed on virtually every Field access; always load it.
     protected $with = ['fieldType'];
 
+    /**
+     * @return BelongsTo<Type, $this>
+     */
     public function fieldType(): BelongsTo
     {
         return $this->belongsTo(Type::class, 'field_type_id');
     }
 
+    /**
+     * @return HasMany<FieldValue, $this>
+     */
     public function fieldValues(): HasMany
     {
         return $this->hasMany(FieldValue::class);
     }
 
+    /**
+     * @return MorphToMany<Group, $this>
+     */
     public function groups(): MorphToMany
     {
         return $this->morphedByMany(Group::class, 'fieldable')

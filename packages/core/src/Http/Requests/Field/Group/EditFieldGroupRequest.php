@@ -13,7 +13,7 @@ class EditFieldGroupRequest extends StoreFieldGroupRequest
     }
 
     /**
-     * @return string[]
+     * @return array<string, mixed>
      */
     public function rules(): array
     {

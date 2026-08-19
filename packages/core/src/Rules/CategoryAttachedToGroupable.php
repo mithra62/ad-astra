@@ -3,6 +3,8 @@
 namespace AdAstra\Rules;
 
 use AdAstra\Models\Category;
+use AdAstra\Models\EntryGroup;
+use AdAstra\Models\Media\Library as MediaLibrary;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 readonly class CategoryAttachedToGroupable implements ValidationRule
 {
     /**
-     * @param Model $groupable Must use the HasCategoryGroups trait (e.g. EntryGroup, Media\Library).
+     * Must use the HasCategoryGroups trait. Traits are not types, so the
+     * consumers are listed explicitly — add to the union when a third model
+     * adopts the trait.
+     *
+     * @param EntryGroup|MediaLibrary $groupable
      */
     public function __construct(private Model $groupable)
     {

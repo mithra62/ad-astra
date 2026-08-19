@@ -33,11 +33,17 @@ class FieldValue extends Model
         'value_json' => 'array',
     ];
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function fieldable(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * @return BelongsTo<Field, $this>
+     */
     public function field(): BelongsTo
     {
         return $this->belongsTo(Field::class);

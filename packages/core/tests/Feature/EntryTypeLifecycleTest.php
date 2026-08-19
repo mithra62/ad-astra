@@ -9,8 +9,8 @@ use AdAstra\Models\EntryType;
 use AdAstra\Models\Status;
 use AdAstra\Models\StatusGroup;
 use AdAstra\Models\User;
+use AdAstra\EntryTypes\EntryBehaviorRegistry;
 use AdAstra\Services\EntryService;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Stubs\SpyEntryType;
 use Tests\TestCase;
@@ -185,7 +185,7 @@ class EntryTypeLifecycleTest extends TestCase
         $group = EntryGroup::factory()->create(['status_group_id' => $statusGroup->id]);
 
         $morphKey = 'behavior.spy-' . uniqid();
-        Relation::morphMap([$morphKey => SpyEntryType::class]);
+        EntryBehaviorRegistry::register([$morphKey => SpyEntryType::class]);
 
         $behavior = EntryBehavior::create([
             'name' => 'Spy',

@@ -31,11 +31,17 @@ class UserStatusLog extends Model
         'created_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function actor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'changed_by_user_id');

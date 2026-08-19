@@ -20,7 +20,7 @@ class StoreEntryRequest extends FormRequest
     {
         $group = EntryGroup::query()
             ->with('statusGroup')
-            ->findOrFail($this->route()->parameter('group_id'));
+            ->findOrFail($this->routeId('group_id'));
         $groupSchema = EntryGroup::resolvedFields($group->id);
         $typeSchema = $this->resolveEntryTypeSchema($group->id);
 
@@ -30,7 +30,7 @@ class StoreEntryRequest extends FormRequest
                     'required',
                     'string',
                     Rule::exists('entry_types', 'handle')->where(
-                        fn ($q) => $q->where('entry_group_id', $this->route()->parameter('group_id'))
+                        fn ($q) => $q->where('entry_group_id', $this->routeId('group_id'))
                     ),
                 ],
                 'title' => [
@@ -139,8 +139,8 @@ class StoreEntryRequest extends FormRequest
 
     public function messages(): array
     {
-        $groupSchema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
-        $typeSchema = $this->resolveEntryTypeSchema($this->route()->parameter('group_id'));
+        $groupSchema = EntryGroup::resolvedFields($this->routeId('group_id'));
+        $typeSchema = $this->resolveEntryTypeSchema($this->routeId('group_id'));
 
         return array_merge(
             $this->schemaFieldMessages($groupSchema),
@@ -150,8 +150,8 @@ class StoreEntryRequest extends FormRequest
 
     public function attributes(): array
     {
-        $groupSchema = EntryGroup::resolvedFields($this->route()->parameter('group_id'));
-        $typeSchema = $this->resolveEntryTypeSchema($this->route()->parameter('group_id'));
+        $groupSchema = EntryGroup::resolvedFields($this->routeId('group_id'));
+        $typeSchema = $this->resolveEntryTypeSchema($this->routeId('group_id'));
 
         return array_merge(
             $this->schemaFieldAttributes($groupSchema),

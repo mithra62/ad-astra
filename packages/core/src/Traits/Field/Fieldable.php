@@ -8,6 +8,9 @@ use Illuminate\Support\Collection;
 
 trait Fieldable
 {
+    /**
+     * @return MorphMany<FieldValue, $this>
+     */
     public function fieldValues(): MorphMany
     {
         return $this->morphMany(FieldValue::class, 'fieldable');

@@ -33,16 +33,25 @@ class EntryType extends Model
         'allowed_parent_types' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<EntryGroup, $this>
+     */
     public function entryGroup(): BelongsTo
     {
         return $this->belongsTo(EntryGroup::class);
     }
 
+    /**
+     * @return BelongsTo<EntryBehavior, $this>
+     */
     public function entryBehavior(): BelongsTo
     {
         return $this->belongsTo(EntryBehavior::class);
     }
 
+    /**
+     * @return HasMany<Entry, $this>
+     */
     public function entries(): HasMany
     {
         return $this->hasMany(Entry::class);

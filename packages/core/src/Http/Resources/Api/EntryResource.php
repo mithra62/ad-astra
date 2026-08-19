@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use OpenApi\Attributes as OA;
 
+/**
+ * @mixin \AdAstra\Models\Entry
+ */
 #[OA\Schema(
     schema: 'Entry',
     title: 'Entry',

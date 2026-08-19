@@ -25,11 +25,17 @@ class Tab extends Model
         'sort_order' => 'integer'
     ];
 
+    /**
+     * @return BelongsTo<FieldLayout, $this>
+     */
     public function layout(): BelongsTo
     {
         return $this->belongsTo(FieldLayout::class, 'field_layout_id');
     }
 
+    /**
+     * @return HasMany<TabElement, $this>
+     */
     public function elements(): HasMany
     {
         return $this->hasMany(TabElement::class, 'field_layout_tab_id')

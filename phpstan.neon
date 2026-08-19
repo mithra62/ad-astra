@@ -9,6 +9,17 @@ parameters:
         - packages/core/routes/
     databaseMigrationsPath:
         - packages/core/database/migrations
-    universalObjectCratesClasses:
-        - Illuminate\Http\Resources\Json\JsonResource
-    level: 1
+    level: 5
+    ignoreErrors:
+        # Faker's Generator dispatches through dynamic providers, and optional()
+        # returns a runtime proxy, so neither is statically resolvable. Scoped to
+        # this one seeder so it cannot mask anything elsewhere.
+        #   catchPhrase() / stateAbbr()  -> method.notFound
+        #   optional(0.60)->...?->format() -> nullsafe.neverNull (the ?-> is REQUIRED;
+        #   optional() returns null ~40% of the time and this is a method call)
+        -
+            identifier: method.notFound
+            path: packages/core/database/seeders/FakeDataSeeder.php
+        -
+            identifier: nullsafe.neverNull
+            path: packages/core/database/seeders/FakeDataSeeder.php

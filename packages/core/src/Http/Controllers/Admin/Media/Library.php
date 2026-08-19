@@ -151,14 +151,17 @@ class Library extends Controller
 
         $media = app(UploadMedia::class)->upload($request, $library);
 
+        // upload() returns a Media or throws — it never returns null, so there
+        // is no failure branch to take here. See the tracked task on making
+        // storage failures return a 422 / failure redirect instead of a 500.
         if ($request->expectsJson()) {
-            return $media
-                ? response()->json(['id' => $media->id, 'name' => $media->original_name, 'url' => $media->url()])
-                : response()->json(['error' => trans('media.upload_failed')], 422);
+            return response()->json([
+                'id' => $media->id,
+                'name' => $media->original_name,
+                'url' => $media->url(),
+            ]);
         }
 
-        return $media
-            ? redirect()->route('media.show', $media)->with('success', trans('media.uploaded'))
-            : redirect()->route('media.libraries.show', $library)->with('failure', trans('media.upload_failed'));
+        return redirect()->route('media.show', $media)->with('success', trans('media.uploaded'));
     }
 }

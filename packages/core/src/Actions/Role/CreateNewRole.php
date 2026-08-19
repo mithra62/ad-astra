@@ -3,7 +3,7 @@
 namespace AdAstra\Actions\Role;
 
 use AdAstra\Actions\AbstractAction;
-use Spatie\Permission\Models\Role as RoleModel;
+use AdAstra\Models\Role as RoleModel;
 
 class CreateNewRole extends AbstractAction
 {

@@ -17,6 +17,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @phpstan-consistent-constructor
+ */
 class Media extends Model
 {
     use HasFactory;
@@ -47,6 +50,9 @@ class Media extends Model
         'status_is_public' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<Media\Library, $this>
+     */
     public function library(): BelongsTo
     {
         return $this->belongsTo(Media\Library::class, 'library_id');
@@ -69,12 +75,18 @@ class Media extends Model
      *
      * @see HasStatus::scopePublic
      * @see Entry::scopePublished
+     *
+     * @param EloquentBuilder<Media> $query
+     * @return EloquentBuilder<Media>
      */
     public function scopePublished(EloquentBuilder $query): EloquentBuilder
     {
         return $query->public();
     }
 
+    /**
+     * @return HasMany<Media\Transformation, $this>
+     */
     public function transformations(): HasMany
     {
         return $this->hasMany(Media\Transformation::class);

@@ -38,9 +38,23 @@ readonly class TimeFormatRule implements ValidationRule
             return;
         }
 
+        // The field's include_seconds toggle decides whether a seconds
+        // component belongs in the stored value, so enforce it both ways.
+        $hasSeconds = substr_count($canonical, ':') === 2;
+
+        if ($this->includeSeconds && !$hasSeconds) {
+            $fail("The :attribute must include seconds (HH:MM:SS).");
+            return;
+        }
+
+        if (!$this->includeSeconds && $hasSeconds) {
+            $fail("The :attribute must not include seconds (HH:MM).");
+            return;
+        }
+
         if ($this->minTime !== null) {
             $min = $this->canonicalize($this->minTime);
-            if ($min !== null && strcmp($canonical, $min) < 0) {
+            if ($min !== null && strcmp($this->forCompare($canonical), $this->forCompare($min)) < 0) {
                 $fail("The :attribute must be at or after {$min}.");
                 return;
             }
@@ -48,10 +62,23 @@ readonly class TimeFormatRule implements ValidationRule
 
         if ($this->maxTime !== null) {
             $max = $this->canonicalize($this->maxTime);
-            if ($max !== null && strcmp($canonical, $max) > 0) {
+            if ($max !== null && strcmp($this->forCompare($canonical), $this->forCompare($max)) > 0) {
                 $fail("The :attribute must be at or before {$max}.");
             }
         }
+    }
+
+    /**
+     * Pad a canonical time to HH:MM:SS so range comparisons are precision-safe.
+     *
+     * Without this, a value of "17:00:00" would compare greater than a maxTime
+     * of "17:00" under strcmp, because the longer string wins on prefix. That
+     * only became reachable once includeSeconds started forcing a seconds
+     * component onto values while min/max stay as the admin typed them.
+     */
+    private function forCompare(string $canonical): string
+    {
+        return substr_count($canonical, ':') === 2 ? $canonical : $canonical . ':00';
     }
 
     /**

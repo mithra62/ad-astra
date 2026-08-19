@@ -8,6 +8,20 @@ use Illuminate\Foundation\Http\FormRequest as LaravelFormRequest;
 
 class FormRequest extends LaravelFormRequest
 {
+    /**
+     * Read a numeric route parameter as an int.
+     *
+     * Route parameters come back as object|string|null. Callers here feed them
+     * straight into findOrFail(), so a missing or non-numeric value returns 0
+     * and produces the same ModelNotFoundException (404) it always has.
+     */
+    protected function routeId(string $key): int
+    {
+        $value = $this->route()?->parameter($key);
+
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
     public function schemaFieldAttributes(?Model $schema): array
     {
         $layout = $this->layoutFrom($schema);

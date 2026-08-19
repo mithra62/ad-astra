@@ -15,6 +15,13 @@ class TransformationDriverCheck extends AbstractDoctorCheck
     {
         // Resolve the actual container binding rather than re-testing
         // extension_loaded() — this also honors host-app rebinding.
+        //
+        // The @var is deliberate: the binding is a closure with three
+        // conditional returns (imagick → gd → null) and larastan collapses
+        // app() to the first of them, which would make the check below look
+        // impossible. This widens the type back to what the container can
+        // actually hand back.
+        /** @var TransformationDriverInterface $driver */
         $driver = app(TransformationDriverInterface::class);
 
         if ($driver instanceof NullTransformationDriver) {

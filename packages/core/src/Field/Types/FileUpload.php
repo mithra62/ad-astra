@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 class FileUpload extends AbstractField implements SyncsToMediables
 {
     /** @var array<string, int|null> */
-    private static array $libraryHandleCache = [];
+    protected static array $libraryHandleCache = [];
     protected string $handle = 'file_upload';
     protected string $name = 'File Upload';
     protected array $settings_form = [

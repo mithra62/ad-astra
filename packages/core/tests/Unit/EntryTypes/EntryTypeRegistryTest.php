@@ -3,12 +3,12 @@
 namespace Tests\Unit\EntryTypes;
 
 use AdAstra\EntryTypes\AbstractEntryType;
+use AdAstra\EntryTypes\EntryBehaviorRegistry;
 use AdAstra\EntryTypes\EntryTypeRegistry;
 use AdAstra\EntryTypes\GeneralEntryType;
 use AdAstra\Models\EntryBehavior;
 use AdAstra\Models\EntryType;
 use Database\Seeders\EntryBehaviorSeeder;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use stdClass;
@@ -39,7 +39,7 @@ class EntryTypeRegistryTest extends TestCase
         $this->expectExceptionMessageMatches('/must extend AbstractEntryType/');
 
         $morphKey = 'behavior.bad-' . uniqid();
-        Relation::morphMap([$morphKey => stdClass::class]);
+        EntryBehaviorRegistry::register([$morphKey => stdClass::class]);
 
         $badBehavior = EntryBehavior::create([
             'name' => 'Bad',

@@ -2,6 +2,7 @@
 
 namespace AdAstra\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
@@ -13,7 +14,7 @@ class ApiLog extends Model
     use Prunable;
 
     /**
-     * @var string[]
+     * @var list<string>
      */
     protected $fillable = [
         'request_route',
@@ -26,7 +27,7 @@ class ApiLog extends Model
     ];
 
     /**
-     * @var string[]
+     * @var array<string, string>
      */
     protected $casts = [
         'request_payload' => 'array',
@@ -40,13 +41,16 @@ class ApiLog extends Model
      */
     protected $table = 'api_logs';
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
     /**
-     * @return ApiLog
+     * @return Builder<ApiLog>
      */
     public function prunable()
     {

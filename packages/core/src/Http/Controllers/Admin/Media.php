@@ -8,9 +8,9 @@ use AdAstra\Http\Requests\Media\DeleteMediaRequest;
 use AdAstra\Http\Requests\Media\EditMediaRequest;
 use AdAstra\Models\Media as MediaModel;
 use AdAstra\Models\Media\Library as LibraryModel;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
 class Media extends Controller

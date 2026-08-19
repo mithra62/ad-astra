@@ -20,7 +20,7 @@ trait HasMedia
      *
      * @var array<string, int|null>
      */
-    private static array $fieldHandleCache = [];
+    protected static array $fieldHandleCache = [];
     /**
      * Per-instance cache for firstMedia() results.
      *
@@ -37,6 +37,8 @@ trait HasMedia
      * Pass int ID in batch contexts; pass string handle in single-model contexts.
      * Handle→ID lookups are cached in a static array keyed by handle string,
      * so repeated calls with the same handle only hit the DB once per process.
+     *
+     * @return MorphToMany<Media, $this>
      */
     public function mediaForField(string|int $field): MorphToMany
     {
@@ -69,7 +71,11 @@ trait HasMedia
         $this->firstMediaCache = [];
     }
 
-    /** Media attached directly (field_id = 0 sentinel). */
+    /**
+     * Media attached directly (field_id = 0 sentinel).
+     *
+     * @return MorphToMany<Media, $this>
+     */
     public function directMedia(): MorphToMany
     {
         return $this->morphToMany(Media::class, 'mediable', 'mediables')
@@ -86,7 +92,11 @@ trait HasMedia
         $this->firstMediaCache = [];
     }
 
-    /** All media attached to this model via any method. */
+    /**
+     * All media attached to this model via any method.
+     *
+     * @return MorphToMany<Media, $this>
+     */
     public function media(): MorphToMany
     {
         return $this->morphToMany(Media::class, 'mediable', 'mediables')

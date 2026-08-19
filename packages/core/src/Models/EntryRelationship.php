@@ -17,16 +17,25 @@ class EntryRelationship extends Model
         'sort_order',
     ];
 
+    /**
+     * @return BelongsTo<Entry, $this>
+     */
     public function entry(): BelongsTo
     {
         return $this->belongsTo(Entry::class);
     }
 
+    /**
+     * @return BelongsTo<Entry, $this>
+     */
     public function relatedEntry(): BelongsTo
     {
         return $this->belongsTo(Entry::class, 'related_entry_id');
     }
 
+    /**
+     * @return BelongsTo<Field, $this>
+     */
     public function field(): BelongsTo
     {
         return $this->belongsTo(Field::class);

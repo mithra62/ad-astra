@@ -22,7 +22,7 @@ class GateBypassLog extends Model
     protected $table = 'gate_bypass_logs';
 
     /**
-     * @var string[]
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -39,7 +39,7 @@ class GateBypassLog extends Model
     ];
 
     /**
-     * @var string[]
+     * @var array<string, string>
      */
     protected $casts = [
         'context' => 'array',
@@ -47,11 +47,17 @@ class GateBypassLog extends Model
         'created_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function subject(): MorphTo
     {
         return $this->morphTo('subject');

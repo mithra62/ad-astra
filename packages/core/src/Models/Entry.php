@@ -17,6 +17,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 
+/**
+ * @phpstan-consistent-constructor
+ */
 class Entry extends Model
 {
     use Fieldable;
@@ -42,21 +45,33 @@ class Entry extends Model
         'status_is_public' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<EntryGroup, $this>
+     */
     public function entryGroup(): BelongsTo
     {
         return $this->belongsTo(EntryGroup::class);
     }
 
+    /**
+     * @return BelongsTo<EntryType, $this>
+     */
     public function entryType(): BelongsTo
     {
         return $this->belongsTo(EntryType::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
+    /**
+     * @return BelongsToMany<EntryAuthor, $this>
+     */
     public function authors(): BelongsToMany
     {
         return $this->belongsToMany(EntryAuthor::class, 'entry_author_entry')
@@ -65,6 +80,9 @@ class Entry extends Model
             ->withTimestamps();
     }
 
+    /**
+     * @return HasMany<EntryRelationship, $this>
+     */
     public function entryRelationships(): HasMany
     {
         return $this->hasMany(EntryRelationship::class)->orderBy('sort_order');
@@ -102,6 +120,9 @@ class Entry extends Model
         return $related->isNotEmpty() ? $related->values() : null;
     }
 
+    /**
+     * @return FieldLayout|null
+     */
     public function getFieldLayout(): ?FieldLayout
     {
         $typeLayout = $this->entryType?->fieldLayout;
@@ -124,6 +145,10 @@ class Entry extends Model
         return $this->getFieldLayout()?->fields() ?? collect();
     }
 
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status_is_public', true)
@@ -131,6 +156,11 @@ class Entry extends Model
             ->where('published_at', '<=', now());
     }
 
+    /**
+     * @param Builder $query
+     * @param string|int|EntryGroup $group
+     * @return Builder
+     */
     public function scopeInGroup(Builder $query, string|int|EntryGroup $group): Builder
     {
         if ($group instanceof EntryGroup) {
@@ -144,6 +174,11 @@ class Entry extends Model
         return $query->where('entry_group_id', $group);
     }
 
+    /**
+     * @param Builder $query
+     * @param string|int|EntryType $type
+     * @return Builder
+     */
     public function scopeOfType(Builder $query, string|int|EntryType $type): Builder
     {
         if ($type instanceof EntryType) {
@@ -157,6 +192,9 @@ class Entry extends Model
         return $query->where('entry_type_id', $type);
     }
 
+    /**
+     * @return HasOne<EntryTree, $this>
+     */
     public function entryTree(): HasOne
     {
         return $this->hasOne(EntryTree::class);
@@ -174,6 +212,9 @@ class Entry extends Model
             ->sum('value');
     }
 
+    /**
+     * @return HasMany<EntryMetric, $this>
+     */
     public function metrics(): HasMany
     {
         return $this->hasMany(EntryMetric::class);

@@ -22,21 +22,33 @@ class StatusGroup extends Model
         'sort_order' => 'integer'
     ];
 
+    /**
+     * @return HasMany<Status, $this>
+     */
     public function statuses(): HasMany
     {
         return $this->hasMany(Status::class)->orderBy('sort_order');
     }
 
+    /**
+     * @return HasMany<EntryGroup, $this>
+     */
     public function entryGroups(): HasMany
     {
         return $this->hasMany(EntryGroup::class);
     }
 
+    /**
+     * @return HasMany<Media\Library, $this>
+     */
     public function mediaLibraries(): HasMany
     {
         return $this->hasMany(Media\Library::class);
     }
 
+    /**
+     * @return HasOne<Status, $this>
+     */
     public function defaultStatus(): HasOne
     {
         return $this->hasOne(Status::class)->where('is_default', true);

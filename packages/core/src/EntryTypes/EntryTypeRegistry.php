@@ -9,9 +9,6 @@ class EntryTypeRegistry
     /** @var array<string, AbstractEntryType> */
     private array $handleCache = [];
 
-    /** @var array<int, AbstractEntryType> */
-    private array $idCache = [];
-
     public function resolveByHandle(string $handle): AbstractEntryType
     {
         if (!isset($this->handleCache[$handle])) {
@@ -19,9 +16,7 @@ class EntryTypeRegistry
                 ->with(['entryGroup', 'entryBehavior', 'fieldLayout.tabs.elements.field.fieldType'])
                 ->firstOrFail();
 
-            $instance = $this->instantiate($record);
-            $this->handleCache[$handle] = $instance;
-            $this->idCache[$record->getKey()] = $instance;
+            $this->handleCache[$handle] = $this->instantiate($record);
         }
 
         return $this->handleCache[$handle];
@@ -43,9 +38,7 @@ class EntryTypeRegistry
         $handle = $record->handle;
 
         if (!isset($this->handleCache[$handle])) {
-            $instance = $this->instantiate($record);
-            $this->handleCache[$handle] = $instance;
-            $this->idCache[$record->getKey()] = $instance;
+            $this->handleCache[$handle] = $this->instantiate($record);
         }
 
         return $this->handleCache[$handle];

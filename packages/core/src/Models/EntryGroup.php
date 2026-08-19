@@ -30,16 +30,26 @@ class EntryGroup extends Model
         'sort_order' => 'integer'
     ];
 
+    /**
+     * @return HasMany<EntryType, $this>
+     */
     public function entryTypes(): HasMany
     {
         return $this->hasMany(EntryType::class)->orderBy('sort_order');
     }
 
+    /**
+     * @return HasMany<Entry, $this>
+     */
     public function entries(): HasMany
     {
         return $this->hasMany(Entry::class);
     }
 
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
     public function scopeOrdered(Builder $query): Builder
     {
         return $query->orderBy('sort_order')->orderBy('name');

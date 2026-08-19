@@ -76,11 +76,9 @@ class Entry extends Controller
 
     public function edit(string $id)
     {
+        // Entries::get() throws ModelNotFoundException on a bad id, which
+        // Laravel already renders as a 404 — no explicit guard needed.
         $entry = Entries::get((int)$id);
-
-        if (!$entry) {
-            abort(404);
-        }
 
         $entry->loadMissing([
             'entryGroup.entryTypes',

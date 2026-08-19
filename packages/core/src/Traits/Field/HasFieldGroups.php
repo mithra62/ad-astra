@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 trait HasFieldGroups
 {
+    /**
+     * @return MorphToMany<FieldGroup, $this>
+     */
     public function fieldGroups(): MorphToMany
     {
         return $this->morphToMany(FieldGroup::class, 'field_groupable', 'field_groupables', null, 'group_id')

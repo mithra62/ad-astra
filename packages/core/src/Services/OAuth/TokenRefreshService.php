@@ -84,7 +84,7 @@ class TokenRefreshService
         ], $cfg['extra'] ?? []);
 
         // Some providers support/require scope on refresh. If you stored scopes, you can pass them.
-        if (!empty($token->scopes) && is_array($token->scopes)) {
+        if (!empty($token->scopes)) {
             // Many providers want space-delimited scopes
             $payload['scope'] = implode(' ', $token->scopes);
         }
