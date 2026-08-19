@@ -5,6 +5,9 @@ namespace AdAstra\Providers;
 use AdAstra\Console\Commands\DoctorCommand;
 use AdAstra\Console\Commands\RefreshTokens;
 use AdAstra\Console\Commands\ValidateClassReferences;
+use AdAstra\Console\Commands\SystemProvidersCommand;
+use AdAstra\Console\Commands\SystemConfigCommand;
+use AdAstra\Console\Commands\SystemInspectCommand;
 use AdAstra\Doctor\Checks\Assets\ViteManifestCheck;
 use AdAstra\Doctor\Checks\Cache\CacheRoundtripCheck;
 use AdAstra\Doctor\Checks\Database\ConnectionCheck;
@@ -288,6 +291,9 @@ class AppServiceProvider extends ServiceProvider
                 DoctorCommand::class,
                 RefreshTokens::class,
                 ValidateClassReferences::class,
+                SystemProvidersCommand::class,
+                SystemInspectCommand::class,
+                SystemConfigCommand::class,
             ]);
         }
 
